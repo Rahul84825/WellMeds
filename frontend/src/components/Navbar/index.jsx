@@ -43,6 +43,12 @@ const Navbar = () => {
     };
   }, []);
 
+  // Close dropdowns when location changes
+  useEffect(() => {
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [location]);
+
   // Set up menu items list
   const dropdownItems = [];
   if (user) {
@@ -255,7 +261,7 @@ const Navbar = () => {
                       const isLink = item.type === "link";
                       const Comp = isLink ? Link : "button";
                       const compProps = isLink
-                        ? { to: item.to, onClick: () => setProfileDropdownOpen(false) }
+                        ? { to: item.to }
                         : { onClick: item.onClick, type: "button" };
 
                       return (
@@ -321,21 +327,18 @@ const Navbar = () => {
           <div className="flex flex-col gap-sm">
             <Link
               to="/products"
-              onClick={() => setMobileMenuOpen(false)}
               className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
             >
               Shop All Products
             </Link>
             <Link
               to="/about"
-              onClick={() => setMobileMenuOpen(false)}
               className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
             >
               About Us
             </Link>
             <Link
               to="/contact"
-              onClick={() => setMobileMenuOpen(false)}
               className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
             >
               Contact Us
@@ -344,21 +347,18 @@ const Navbar = () => {
               <>
                 <Link
                   to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
                   className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
                 >
                   My Profile
                 </Link>
                 <Link
                   to="/orders"
-                  onClick={() => setMobileMenuOpen(false)}
                   className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
                 >
                   Order History
                 </Link>
                 <Link
                   to="/wishlist"
-                  onClick={() => setMobileMenuOpen(false)}
                   className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-on-surface hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block"
                 >
                   My Wishlist
@@ -366,7 +366,6 @@ const Navbar = () => {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
                     className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-primary dark:text-primary-fixed-dim hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block font-bold"
                   >
                     Go to Admin Dashboard
