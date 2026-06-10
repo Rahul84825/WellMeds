@@ -52,10 +52,6 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  if (isAdmin) {
-    return <Navigate to="/admin" replace />;
-  }
-
   return children;
 };
 
