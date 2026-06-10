@@ -6,6 +6,7 @@ import { useCart } from "../../context/CartContext";
 const Navbar = () => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
+  console.log("[Storefront Navbar] User State:", user, "isAdmin:", isAdmin);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);

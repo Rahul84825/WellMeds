@@ -304,22 +304,24 @@ export const api = {
   // --- Authentication ---
   async loginUser(email, password) {
     await delay(600);
+    const normalizedEmail = (email || "").trim().toLowerCase();
     // Simple mock logic: admin@medishop.com goes to admin dashboard
-    if (email === "admin@medishop.com" && password === "admin123") {
-      const adminUser = { email, name: "System Administrator", role: "admin" };
+    if (normalizedEmail === "admin@medishop.com" && password === "admin123") {
+      const adminUser = { email: normalizedEmail, name: "System Administrator", role: "admin" };
       sessionStorage.setItem("medishop_user", JSON.stringify(adminUser));
       return adminUser;
     }
     
     // Default mock buyer user
-    const clientUser = { email, name: email.split("@")[0], role: "client" };
+    const clientUser = { email: normalizedEmail, name: normalizedEmail.split("@")[0], role: "client" };
     sessionStorage.setItem("medishop_user", JSON.stringify(clientUser));
     return clientUser;
   },
 
   async registerUser(name, email, password) {
     await delay(600);
-    const clientUser = { email, name, role: "client" };
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    const clientUser = { email: normalizedEmail, name, role: "client" };
     sessionStorage.setItem("medishop_user", JSON.stringify(clientUser));
     return clientUser;
   },
