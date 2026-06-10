@@ -58,7 +58,7 @@ const Navbar = () => {
         id: "admin-dashboard",
         type: "link",
         to: "/admin",
-        label: "Admin Dashboard",
+        label: "Admin Panel",
         icon: "admin_panel_settings",
         className: "font-bold text-primary dark:text-primary-fixed-dim bg-primary/5 dark:bg-primary-fixed-dim/5 border-l-4 border-primary dark:border-primary-fixed-dim hover:bg-primary/10 dark:hover:bg-primary-fixed-dim/10 focus-visible:bg-primary/10 dark:focus-visible:bg-primary-fixed-dim/10"
       });
@@ -221,7 +221,7 @@ const Navbar = () => {
           {/* User Profile / Login */}
           <div className="relative" ref={dropdownRef}>
             {user ? (
-              <div className="flex items-center gap-sm">
+              <div className="relative flex items-center gap-sm">
                 <button
                   id="profile-menu-button"
                   aria-haspopup="true"
@@ -251,7 +251,7 @@ const Navbar = () => {
                     role="menu"
                     aria-label="User Profile Menu"
                     onKeyDown={handleKeyDown}
-                    className="absolute right-0 mt-2 w-48 bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline rounded-lg shadow-xl py-2 z-50 animate-[slide-up_0.15s_ease-out]"
+                    className="absolute right-0 top-full mt-2 w-48 bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline rounded-lg shadow-xl py-2 z-[999] animate-[slide-up_0.15s_ease-out]"
                   >
                     <div className="px-md py-sm border-b border-outline-variant dark:border-outline mb-1">
                       <p className="text-label-md font-bold text-on-surface truncate">{user.name}</p>
@@ -369,7 +369,7 @@ const Navbar = () => {
                     to="/admin"
                     className="px-md py-3 min-h-[44px] flex items-center font-label-md text-label-md text-primary dark:text-primary-fixed-dim hover:bg-surface-container focus-visible:bg-surface-container focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-lg block font-bold"
                   >
-                    Go to Admin Dashboard
+                    Go to Admin Panel
                   </Link>
                 )}
                 <button
