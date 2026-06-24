@@ -25,7 +25,7 @@ export default {
         "tertiary-container": "#4f5f75",
         "primary-container": "#185fa5",
         "on-tertiary": "#ffffff",
-        "primary": "#004782",
+        "primary": "#038076",
         "on-background": "#191c1e",
         "on-primary": "#ffffff",
         "background": "#f7f9fb",

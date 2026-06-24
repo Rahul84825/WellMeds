@@ -1,17 +1,41 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Cart/Wishlist sync callbacks
+  const [onLoginCallbacks] = useState([]);
+  const [onLogoutCallbacks] = useState([]);
+
+  const registerLoginCallback = useCallback((fn) => {
+    onLoginCallbacks.push(fn);
+    return () => {
+      const idx = onLoginCallbacks.indexOf(fn);
+      if (idx > -1) onLoginCallbacks.splice(idx, 1);
+    };
+  }, [onLoginCallbacks]);
+
+  const registerLogoutCallback = useCallback((fn) => {
+    onLogoutCallbacks.push(fn);
+    return () => {
+      const idx = onLogoutCallbacks.indexOf(fn);
+      if (idx > -1) onLogoutCallbacks.splice(idx, 1);
+    };
+  }, [onLogoutCallbacks]);
+
+  // Session check on mount
   useEffect(() => {
     const checkUserSession = async () => {
       try {
         const currentUser = await api.getCurrentUser();
         setUser(currentUser);
+        if (currentUser) {
+          onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
+        }
       } catch (err) {
         console.error("Failed to load user session", err);
       } finally {
@@ -19,25 +43,16 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checkUserSession();
-  }, []);
+  }, []); // eslint-disable-line
 
-  const login = async (email, password) => {
+  const loginWithGoogle = async (credential) => {
     setLoading(true);
     try {
-      const loggedUser = await api.loginUser(email, password);
+      const loggedUser = await api.loginWithGoogle(credential);
       setUser(loggedUser);
+      // Fire post-login callbacks (cart sync, wishlist sync)
+      onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
       return loggedUser;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (name, email, password) => {
-    setLoading(true);
-    try {
-      const registeredUser = await api.registerUser(name, email, password);
-      setUser(registeredUser);
-      return registeredUser;
     } finally {
       setLoading(false);
     }
@@ -47,14 +62,32 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await api.logoutUser();
+      onLogoutCallbacks.forEach((fn) => fn());
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
+  const updateProfile = async (profileData) => {
+    const updatedUser = await api.updateProfile(profileData);
+    setUser((prev) => ({ ...prev, ...updatedUser }));
+    return updatedUser;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin: user?.role === "admin" }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        loginWithGoogle,
+        logout,
+        updateProfile,
+        isAdmin: user?.role === "admin",
+        registerLoginCallback,
+        registerLogoutCallback,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

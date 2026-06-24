@@ -1,83 +1,43 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter } from "react-router-dom";
 
 // Context Providers
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
-import { WishlistProvider } from "./context/WishlistContext";
+import { CartProvider, useCart } from "./context/CartContext";
+import { WishlistProvider, useWishlist } from "./context/WishlistContext";
 
-// Layouts
-import MainLayout from "./layouts/MainLayout";
-import AdminLayout from "./layouts/AdminLayout";
+// Routes
+import AppRoutes from "./routes/AppRoutes";
 
-// Client Pages
-import Home from "./pages/Home";
-import Products from "./pages/Products";
-import ProductDetails from "./pages/ProductDetails";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import Wishlist from "./pages/Wishlist";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
-import Orders from "./pages/Orders";
+/**
+ * SyncBridge — registers cart/wishlist sync callbacks with AuthContext
+ * so they fire automatically after login/logout.
+ * Must be rendered inside all three providers.
+ */
+const SyncBridge = () => {
+  const { registerLoginCallback, registerLogoutCallback } = useAuth();
+  const { syncCartForUser, saveCartToLocalOnLogout } = useCart();
+  const { syncWishlistForUser } = useWishlist();
 
-// Admin Pages
-import Dashboard from "./pages/Admin/Dashboard";
-import ManageProducts from "./pages/Admin/ManageProducts";
-import AddNewProduct from "./pages/Admin/AddNewProduct";
-import ManageOrders from "./pages/Admin/ManageOrders";
-import ProductCategories from "./pages/Admin/ProductCategories";
+  useEffect(() => {
+    const unsubCart = registerLoginCallback(syncCartForUser);
+    const unsubWishlist = registerLoginCallback(syncWishlistForUser);
+    const unsubCartLogout = registerLogoutCallback(saveCartToLocalOnLogout);
 
-// Loader
-import Loader from "./components/Loader";
+    return () => {
+      unsubCart();
+      unsubWishlist();
+      unsubCartLogout();
+    };
+  }, [
+    registerLoginCallback,
+    registerLogoutCallback,
+    syncCartForUser,
+    syncWishlistForUser,
+    saveCartToLocalOnLogout,
+  ]);
 
-// Protected Route for Regular Users
-const ProtectedRoute = ({ children }) => {
-  const { user, isAdmin, loading } = useAuth();
-  const location = useLocation();
-
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <Loader size="lg" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
-  }
-
-  return children;
-};
-
-// Protected Route for Administrators
-const AdminRoute = ({ children }) => {
-  const { user, isAdmin, loading } = useAuth();
-  const location = useLocation();
-
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <Loader size="lg" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
-  }
-
-  if (!isAdmin) {
-    alert("Access Denied: Administrative privileges required.");
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
+  return null;
 };
 
 function App() {
@@ -86,60 +46,8 @@ function App() {
       <CartProvider>
         <WishlistProvider>
           <BrowserRouter>
-            <Routes>
-              {/* Client Portal Routes */}
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<Home />} />
-                <Route path="products" element={<Products />} />
-                <Route path="product/:id" element={<ProductDetails />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="checkout" element={<Checkout />} />
-                <Route path="order-success" element={<OrderSuccess />} />
-                <Route path="wishlist" element={<Wishlist />} />
-                <Route path="about" element={<About />} />
-                <Route path="contact" element={<Contact />} />
-                <Route path="login" element={<Login isAdminDefault={false} />} />
-                <Route path="admin/login" element={<Login isAdminDefault={true} />} />
-                <Route path="register" element={<Register />} />
-                
-                {/* Protected Patient Pages */}
-                <Route
-                  path="profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="orders"
-                  element={
-                    <ProtectedRoute>
-                      <Orders />
-                    </ProtectedRoute>
-                  }
-                />
-              </Route>
-
-              {/* Admin Portal Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="products" element={<ManageProducts />} />
-                <Route path="products/new" element={<AddNewProduct />} />
-                <Route path="orders" element={<ManageOrders />} />
-                <Route path="categories" element={<ProductCategories />} />
-              </Route>
-
-              {/* Fallback Catch-All */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <SyncBridge />
+            <AppRoutes />
           </BrowserRouter>
         </WishlistProvider>
       </CartProvider>

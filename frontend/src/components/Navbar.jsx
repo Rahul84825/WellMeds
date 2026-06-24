@@ -1,0 +1,732 @@
+import React, { useState, useRef, useEffect } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  User,
+  Percent,
+  LogOut,
+  LayoutDashboard,
+  Heart,
+  History,
+  ChevronDown,
+  FileText,
+  Package
+} from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../hooks/useCart";
+import Modal from "./Modal";
+import PrescriptionUpload from "./PrescriptionUpload";
+import logoImg from "../assets/logos/logo.png";
+
+// ──────────────────────────────────────────────────────────────────────────
+// NAV CONFIG — this entire shape is what an admin API should return.
+// Replace NAV_CONFIG with a fetch() result and nothing else in this file
+// needs to change. See useNavConfig() below for the swap point.
+//
+// type NavItem = {
+//   id: string;                 // stable key, also used by admin to reorder
+//   label: string;
+//   type: "link" | "dropdown";
+//   to?: string;                 // required when type === "link"
+//   badge?: { text: string; color: string } | null;
+//   children?: { id: string; label: string; to: string }[]; // for dropdown
+//   order: number;               // admin-controlled sort order
+//   enabled: boolean;             // admin can hide without deleting
+// };
+// ──────────────────────────────────────────────────────────────────────────
+const NAV_CONFIG = [
+  {
+    id: "super-speciality",
+    label: "Super Speciality",
+    type: "dropdown",
+    order: 1,
+    enabled: true,
+    badge: null,
+    children: [
+      { id: "by-condition", label: "By Condition", to: "/products?filter=condition" },
+      { id: "by-speciality", label: "By Super Speciality", to: "/products?filter=speciality" },
+      { id: "by-molecule", label: "By Molecules", to: "/products?filter=molecule" },
+      { id: "all-medicines", label: "All Medicines", to: "/products" },
+      { id: "wellness", label: "Wellness", to: "/products?category=Personal%20Care" },
+    ],
+  },
+  {
+    id: "imported-medicines",
+    label: "Imported Medicines",
+    type: "link",
+    to: "/products?filter=imported",
+    order: 2,
+    enabled: true,
+    badge: null,
+  },
+  {
+    id: "patient-assistance",
+    label: "Patient Assistance Program",
+    type: "link",
+    to: "/about",
+    order: 3,
+    enabled: true,
+    badge: null,
+  },
+  {
+    id: "library",
+    label: "Library",
+    type: "dropdown",
+    order: 4,
+    enabled: true,
+    badge: null,
+    children: [
+      { id: "lib-articles", label: "Health Articles", to: "/library/articles" },
+      { id: "lib-guides", label: "Dosage Guides", to: "/library/guides" },
+      { id: "lib-faq", label: "FAQs", to: "/library/faq" },
+    ],
+  },
+  {
+    id: "partnerships",
+    label: "Partnerships",
+    type: "dropdown",
+    order: 5,
+    enabled: true,
+    badge: { text: "New", color: "#038076" },
+    children: [
+      { id: "partner-pharmacy", label: "Pharmacy Partners", to: "/partnerships/pharmacy" },
+      { id: "partner-clinics", label: "Clinic Network", to: "/partnerships/clinics" },
+      { id: "partner-apply", label: "Become a Partner", to: "/partnerships/apply" },
+    ],
+  },
+];
+
+// ──────────────────────────────────────────────────────────────────────────
+// useNavConfig — the single swap point for backend integration.
+//
+// TODAY:    returns the static NAV_CONFIG above, sorted + filtered.
+// TOMORROW: replace the body with a fetch to your admin API, e.g.
+//
+//   const [items, setItems] = useState([]);
+//   useEffect(() => {
+//     fetch("/api/admin/nav-menu")
+//       .then((r) => r.json())
+//       .then((data) => setItems(data.items));
+//   }, []);
+//   return items.filter(i => i.enabled).sort((a,b) => a.order - b.order);
+//
+// Every consumer of this hook (NavMenu, mobile menu, admin preview, etc.)
+// automatically reflects admin changes once this hook is backed by the API.
+// ──────────────────────────────────────────────────────────────────────────
+const useNavConfig = () => {
+  const [items] = useState(NAV_CONFIG);
+  return items
+    .filter((item) => item.enabled)
+    .sort((a, b) => a.order - b.order);
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// Badge
+// ──────────────────────────────────────────────────────────────────────────
+const NavBadge = ({ badge }) => {
+  if (!badge) return null;
+  return (
+    <span
+      style={{ backgroundColor: badge.color }}
+      className="select-none rounded-[6px] px-[6px] py-[2px] text-[10px]
+                 font-bold uppercase leading-none tracking-wide text-white"
+    >
+      {badge.text}
+    </span>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// DropdownMenu — generic, driven entirely by `items` prop
+// ──────────────────────────────────────────────────────────────────────────
+const DropdownMenu = ({ isOpen, onClose, items, activeIndex, setActiveIndex }) => {
+  const menuRef = useRef(null);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") { onClose(); return; }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % items.length);
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => (i - 1 + items.length) % items.length);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && activeIndex >= 0 && menuRef.current) {
+      const el = menuRef.current.querySelectorAll("a")[activeIndex];
+      el?.focus();
+    }
+  }, [activeIndex, isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      ref={menuRef}
+      role="menu"
+      onKeyDown={handleKeyDown}
+      className="absolute left-0 top-full z-50 mt-2 min-w-[220px] rounded-xl
+                 border border-gray-100 bg-white py-2 shadow-lg
+                 animate-in fade-in slide-in-from-top-1 duration-150"
+    >
+      {items.map((child, idx) => (
+        <Link
+          key={child.id}
+          to={child.to}
+          role="menuitem"
+          tabIndex={idx === activeIndex ? 0 : -1}
+          className="block px-4 py-2.5 text-[14px] font-medium text-gray-700
+                     transition-colors duration-150 hover:bg-gray-50
+                     hover:text-[#004782] focus:bg-gray-50 focus:text-[#004782]
+                     focus:outline-none"
+        >
+          {child.label}
+        </Link>
+      ))}
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// DropdownNavItem — wraps a single dropdown-type nav entry
+// ──────────────────────────────────────────────────────────────────────────
+const DropdownNavItem = ({ item }) => {
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const timeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+      setActiveIndex(-1);
+    }, 150);
+  };
+
+  const handleToggleClick = (e) => {
+    e.preventDefault();
+    setOpen((prev) => {
+      const next = !prev;
+      setActiveIndex(next ? 0 : -1);
+      return next;
+    });
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown" && !open) {
+      e.preventDefault();
+      setOpen(true);
+      setActiveIndex(0);
+    }
+  };
+
+  useEffect(() => () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  }, []);
+
+  return (
+    <div
+      className="relative flex h-full items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        onClick={handleToggleClick}
+        onKeyDown={handleKeyDown}
+        aria-haspopup="true"
+        aria-expanded={open}
+        className="flex items-center gap-2 text-[18px] font-medium text-gray-900
+                   tracking-normal py-3 px-2 leading-none
+                    transition-colors duration-200 hover:text-[#004782]
+                    focus:text-[#004782] focus:outline-none"
+      >
+        <span>{item.label}</span>
+        <NavBadge badge={item.badge} />
+        <ChevronDown
+          className={`h-[16px] w-[16px] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <DropdownMenu
+        isOpen={open}
+        onClose={() => { setOpen(false); setActiveIndex(-1); }}
+        items={item.children || []}
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+      />
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// LinkNavItem — wraps a single link-type nav entry
+// ──────────────────────────────────────────────────────────────────────────
+const LinkNavItem = ({ item }) => (
+  <Link
+    to={item.to}
+    className="flex items-center gap-2 text-[18px] font-medium text-gray-900
+               tracking-normal py-3 px-2 leading-none
+                transition-colors duration-200 hover:text-[#004782]
+                focus:text-[#004782] focus:outline-none"
+  >
+    <span>{item.label}</span>
+    <NavBadge badge={item.badge} />
+  </Link>
+);
+
+// ──────────────────────────────────────────────────────────────────────────
+// NavMenu — top-level component, fully data-driven
+// ──────────────────────────────────────────────────────────────────────────
+const NavMenu = () => {
+  const items = useNavConfig();
+
+  return (
+    <div className="flex h-full items-center justify-center gap-10 lg:gap-12 xl:gap-14">
+      {items.map((item) =>
+        item.type === "dropdown" ? (
+          <DropdownNavItem key={item.id} item={item} />
+        ) : (
+          <LinkNavItem key={item.id} item={item} />
+        )
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// Sub-Component: NavActions
+// ==========================================
+const NavActions = () => {
+  const { user, logout, isAdmin } = useAuth();
+  const { cartCount } = useCart();
+  const navigate = useNavigate();
+
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const dropdownRef = useRef(null);
+  const menuItemsRefs = useRef([]);
+
+  const handleLogout = async () => {
+    await logout();
+    setProfileDropdownOpen(false);
+    navigate("/");
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const dropdownItems = [];
+  if (user) {
+    if (isAdmin) {
+      dropdownItems.push({
+        id: "admin-dashboard",
+        type: "link",
+        to: "/admin",
+        label: "Admin Dashboard",
+        icon: LayoutDashboard,
+        className: "font-bold text-[#004782] bg-[#f2f6fa] border-l-4 border-[#004782] hover:bg-blue-50"
+      });
+      dropdownItems.push({
+        id: "admin-products",
+        type: "link",
+        to: "/admin/products",
+        label: "Products",
+        icon: Package,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+      dropdownItems.push({
+        id: "admin-orders",
+        type: "link",
+        to: "/admin/orders",
+        label: "Orders",
+        icon: History,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+      dropdownItems.push({
+        id: "admin-prescriptions",
+        type: "link",
+        to: "/admin/prescriptions",
+        label: "Prescriptions",
+        icon: FileText,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+    } else {
+      dropdownItems.push({
+        id: "my-profile",
+        type: "link",
+        to: "/profile",
+        label: "Profile",
+        icon: User,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+      dropdownItems.push({
+        id: "order-history",
+        type: "link",
+        to: "/orders",
+        label: "Orders",
+        icon: History,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+      dropdownItems.push({
+        id: "my-prescriptions",
+        type: "link",
+        to: "/upload-prescription",
+        label: "Prescriptions",
+        icon: FileText,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+      dropdownItems.push({
+        id: "my-wishlist",
+        type: "link",
+        to: "/wishlist",
+        label: "Wishlist",
+        icon: Heart,
+        className: "text-gray-700 hover:bg-gray-50 font-medium"
+      });
+    }
+    dropdownItems.push({
+      id: "logout",
+      type: "button",
+      onClick: handleLogout,
+      label: "Logout",
+      icon: LogOut,
+      className: "text-red-600 hover:bg-red-50 font-medium"
+    });
+  }
+
+  useEffect(() => {
+    if (focusedIndex >= 0 && menuItemsRefs.current[focusedIndex]) {
+      menuItemsRefs.current[focusedIndex].focus();
+    }
+  }, [focusedIndex]);
+
+  useEffect(() => {
+    if (!profileDropdownOpen) {
+      setFocusedIndex(-1);
+    }
+  }, [profileDropdownOpen]);
+
+  const handleKeyDown = (e) => {
+    if (!profileDropdownOpen) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        setProfileDropdownOpen(true);
+        setFocusedIndex(0);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    const totalItems = dropdownItems.length;
+    if (totalItems === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev + 1) % totalItems);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev - 1 + totalItems) % totalItems);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setProfileDropdownOpen(false);
+      const buttonEl = document.getElementById("user-profile-menu-button");
+      if (buttonEl) buttonEl.focus();
+    }
+  };
+
+  const handleUploadSuccess = (data) => {
+    alert(`Prescription "${data.fileName}" uploaded successfully!`);
+    setUploadModalOpen(false);
+  };
+
+  return (
+    <div className="flex items-center gap-[12px]">
+      <button
+        onClick={() => navigate("/upload-prescription")}
+        className="w-[84px] h-[44px] bg-[#004782] hover:bg-[#086b53] text-white rounded-[12px] font-medium text-[16px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none"
+        aria-label="Upload Prescription"
+      >
+        <span>Upload</span>
+      </button>
+
+      <button
+        className="w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        aria-label="Discounts & Offers"
+      >
+        <Percent className="w-5 h-5 text-gray-700" />
+      </button>
+
+      <Link
+        to="/cart"
+        className="relative w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        aria-label={`Shopping Cart with ${cartCount} items`}
+      >
+        <ShoppingCart className="w-5 h-5" />
+        {cartCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse border border-white">
+            {cartCount}
+          </span>
+        )}
+      </Link>
+
+      <div className="relative" ref={dropdownRef}>
+        {user ? (
+          <button
+            id="user-profile-menu-button"
+            aria-haspopup="true"
+            aria-expanded={profileDropdownOpen}
+            aria-controls="user-profile-menu"
+            aria-label="User profile menu"
+            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+            onKeyDown={handleKeyDown}
+            className="h-[48px] px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 cursor-pointer"
+          >
+            <User className="w-5 h-5 text-gray-500" />
+            <span className="max-w-[80px] truncate text-sm font-medium">
+              {user.name}
+            </span>
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="w-[120px] h-[48px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 font-medium cursor-pointer"
+          >
+            <User className="w-5 h-5 text-gray-500" />
+            <span>Login</span>
+          </Link>
+        )}
+
+        {profileDropdownOpen && user && (
+          <div
+            id="user-profile-menu"
+            role="menu"
+            aria-label="User Profile Options"
+            className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50 animate-[slide-up_0.15s_ease-out]"
+          >
+            <div className="px-4 py-2 border-b border-gray-100 mb-1">
+              <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
+              <p className="text-xs text-gray-500 truncate">{user.email || user.phone || ""}</p>
+            </div>
+
+            {dropdownItems.map((item, index) => {
+              const isLink = item.type === "link";
+              const Comp = isLink ? Link : "button";
+              const compProps = isLink ? { to: item.to } : { onClick: item.onClick, type: "button" };
+
+              return (
+                <React.Fragment key={item.id}>
+                  {isAdmin && item.id === "admin-products" && (
+                    <hr className="border-gray-100 my-1" />
+                  )}
+                  {item.id === "logout" && (
+                    <hr className="border-gray-100 my-1" />
+                  )}
+                  <Comp
+                    ref={(el) => (menuItemsRefs.current[index] = el)}
+                    role="menuitem"
+                    {...compProps}
+                    className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none w-full text-left"
+                  >
+                    <item.icon className="w-4 h-4 text-gray-500" />
+                    <span className={item.className}>{item.label}</span>
+                  </Comp>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <Modal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        title="Upload Prescription"
+        maxWidth="max-w-lg"
+      >
+        <div className="p-1">
+          <p className="text-sm text-gray-500 mb-4 leading-relaxed text-left">
+            Upload your doctor's prescription here. A pharmacist will review the order details and follow up with you.
+          </p>
+          <PrescriptionUpload
+            onUploadSuccess={handleUploadSuccess}
+            onClose={() => setUploadModalOpen(false)}
+          />
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+// ==========================================
+// Main Component: Navbar
+// ==========================================
+const Navbar = () => {
+  const { user, logout, isAdmin } = useAuth();
+  const { cartCount } = useCart();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
+      {/* Desktop & Mobile Navbar Container */}
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 xl:px-12 flex flex-col">
+        
+        {/* Row 1: Logo & Action Buttons */}
+        <div className="h-[70px] lg:h-[80px] flex items-center justify-between">
+          {/* Left Side: Brand Logo */}
+          <NavLink
+            to="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center group rounded-xl p-1 text-left h-[54px] overflow-hidden"
+          >
+            <img 
+              src={logoImg} 
+              alt="Logo" 
+              className="h-[200px] w-[200px] object-contain -my-[73px] group-hover:scale-105 transition-transform duration-200" 
+            />
+          </NavLink>
+
+          {/* Right Side Actions (Desktop) */}
+          <div className="hidden lg:block">
+            <NavActions />
+          </div>
+
+          {/* Hamburger Menu Toggle (Mobile) */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all"
+            aria-label="Toggle Mobile Menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Row 2: Centered Navigation Menu (Desktop Only) */}
+        <div className="hidden lg:flex h-[50px] items-center justify-center border-t border-gray-50">
+          <NavMenu />
+        </div>
+
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg animate-[slide-down_0.25s_ease-out]">
+          <div className="p-6 space-y-6">
+            {/* Primary Action buttons */}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 h-12 rounded-xl border border-gray-200 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 font-medium"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span>Cart ({cartCount})</span>
+              </Link>
+
+              {user ? (
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 h-12 rounded-xl border border-gray-200 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 font-medium"
+                >
+                  <User className="w-5 h-5" />
+                  <span className="truncate">{user.name}</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 h-12 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-700 font-medium"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Menu Links */}
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">Categories & Services</span>
+
+              <Link
+                to="/products"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
+              >
+                Super Speciality Medicines
+              </Link>
+              <Link
+                to="/products?filter=imported"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
+              >
+                Imported Medicines
+              </Link>
+              <Link
+                to="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
+              >
+                Patient Assistance Program
+              </Link>
+              <Link
+                to="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
+              >
+                Library
+              </Link>
+              <Link
+                to="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
+              >
+                Partnerships
+              </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 rounded-xl font-bold text-[#004782] hover:bg-blue-50"
+                >
+                  Go to Admin Panel
+                </Link>
+              )}
+            </div>
+
+            {/* Log Out button if user is authenticated */}
+            {user && (
+              <button
+                onClick={async () => {
+                  await logout();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full h-12 border border-red-200 text-red-600 rounded-xl flex items-center justify-center font-medium hover:bg-red-50"
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;

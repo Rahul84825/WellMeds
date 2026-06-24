@@ -1,0 +1,109 @@
+import mongoose from "mongoose";
+
+const orderItemSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+});
+
+const orderSchema = new mongoose.Schema(
+  {
+    orderId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    customer: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    items: [orderItemSchema],
+    subtotal: {
+      type: Number,
+      required: true,
+    },
+    shipping: {
+      type: Number,
+      required: true,
+    },
+    tax: {
+      type: Number,
+      required: true,
+    },
+    total: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: [
+        "Pending",
+        "Processing",
+        "Prescription Review",
+        "Approved",
+        "Packed",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+      ],
+      default: "Pending",
+    },
+    rxUploaded: {
+      type: Boolean,
+      default: false,
+    },
+    rxFile: {
+      type: String,
+      default: null,
+    },
+    shippingAddress: {
+      type: String,
+      required: true,
+    },
+    paymentMethod: {
+      type: String,
+      default: "Card",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+// Map virtual id to orderId
+orderSchema.virtual("id").get(function () {
+  return this.orderId;
+});
+
+export const Order = mongoose.model("Order", orderSchema);

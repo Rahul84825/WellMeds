@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -17,7 +17,8 @@ const AdminLayout = () => {
     { to: "/admin/products", label: "Products", icon: "inventory_2" },
     { to: "/admin/products/new", label: "Add Product", icon: "add_box" },
     { to: "/admin/orders", label: "Orders", icon: "shopping_bag" },
-    { to: "/admin/categories", label: "Categories", icon: "category" }
+    { to: "/admin/categories", label: "Categories", icon: "category" },
+    { to: "/admin/prescriptions", label: "Prescriptions", icon: "prescriptions" }
   ];
 
   return (
@@ -86,15 +87,19 @@ const AdminLayout = () => {
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-sm focus:outline-none"
               >
-                <div className="h-8 w-8 rounded-full bg-primary-container dark:bg-surface-container-highest border border-outline-variant overflow-hidden">
-                  <img
-                    alt="Admin Avatar"
-                    className="w-full h-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU-rD_DhET0glsjROzxuQOJ4UxSl3ZjzvTW6BCqF1Ytd-zayFaACSoBY12NKbSSijmeu85DOsRPGhyS0iGfGxYQEJcpP-vuC6A-H-Z5GYd-bWI64XWotJEqpBd6RBoR21x86HFUIIyvuIdDiYUwgICJfkUp1kco9-ANVkx19Tdp7dj_ydLhxULRmMYlUjicJF7hS1gPiQLpHyEGcexE1asXkDGFlCcZczPRo__wmeDOQ7Y_gpO3HIHr-74NcuBa6Xe579pjnf_dq8I"
-                  />
+                <div className="h-8 w-8 rounded-full bg-primary-container dark:bg-surface-container-highest border border-outline-variant overflow-hidden flex items-center justify-center">
+                  {user?.avatar ? (
+                    <img
+                      alt="Admin Avatar"
+                      className="w-full h-full object-cover"
+                      src={user.avatar}
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px] text-primary">account_circle</span>
+                  )}
                 </div>
                 <span className="hidden sm:inline font-label-md text-label-md text-on-surface font-semibold">
-                  Admin
+                  {user?.name || "Admin"}
                 </span>
                 <span className="material-symbols-outlined text-outline text-[18px]">
                   {profileDropdownOpen ? "expand_less" : "expand_more"}
@@ -104,8 +109,8 @@ const AdminLayout = () => {
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline rounded-lg shadow-xl py-2 z-50 animate-[slide-up_0.15s_ease-out]">
                   <div className="px-md py-sm border-b border-outline-variant dark:border-outline">
-                    <p className="text-label-md font-bold text-on-surface truncate">Admin User</p>
-                    <p className="text-body-sm text-on-surface-variant truncate">admin@medishop.com</p>
+                    <p className="text-label-md font-bold text-on-surface truncate">{user?.name || "Admin User"}</p>
+                    <p className="text-body-sm text-on-surface-variant truncate">{user?.email || "admin@medishop.com"}</p>
                   </div>
                   <button
                     onClick={handleLogout}
