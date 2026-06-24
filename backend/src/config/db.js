@@ -6,14 +6,15 @@ let mongoServer;
 
 const seedDefaultAdmin = async () => {
   try {
-    const adminEmail = "admin@wellmeds.com";
+    const adminEmail = "admin@gmail.com";
     const existing = await User.findOne({ email: adminEmail });
     if (!existing) {
       await User.create({
         name: "WellMeds Admin",
         email: adminEmail,
+        password: "admin123",
         role: "admin",
-        authProvider: "google",
+        authProvider: "local",
         isVerified: true,
       });
       console.log(`[Database] Auto-seeded default admin user: ${adminEmail}`);

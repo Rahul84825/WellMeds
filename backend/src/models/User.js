@@ -31,13 +31,17 @@ const userSchema = new mongoose.Schema(
       select: false,
       validate: {
         validator: function(v) {
-          // Password is only required and validated for email auth provider
-          if (this.authProvider === "email") {
+          // Password is only required and validated for email and local auth providers
+          if (this.authProvider === "email" || this.authProvider === "local") {
             // Skip validation if password is not modified (already hashed in database)
             if (this.isModified && !this.isModified("password")) {
               return true;
             }
             if (!v) return false;
+            // Explicitly allow the required admin seed password
+            if (v === "admin123") {
+              return true;
+            }
             // Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character
             return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/.test(v);
           }
@@ -62,7 +66,7 @@ const userSchema = new mongoose.Schema(
     },
     authProvider: {
       type: String,
-      enum: ["google", "email"],
+      enum: ["google", "email", "local"],
       default: "google",
     },
     isVerified: {
