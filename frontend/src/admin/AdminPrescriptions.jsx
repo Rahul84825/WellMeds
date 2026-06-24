@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import { getStatusConfig } from "../components/PrescriptionCard";
+import { formatDate } from "../utils/date";
 
 const AdminPrescriptions = () => {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -209,7 +210,7 @@ const AdminPrescriptions = () => {
                     const config = getStatusConfig(rx.status);
                     const isSelected = selectedRx && (selectedRx.id || selectedRx._id) === displayId;
                     const displayDate = rx.date || (rx.createdAt
-                      ? new Date(rx.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                      ? formatDate(rx.createdAt)
                       : "—");
                     return (
                       <tr

@@ -4,6 +4,7 @@ import { useCart } from "../hooks/useCart";
 import { useWishlist } from "../hooks/useWishlist";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
+import { formatCurrency } from "../utils/currency";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -12,7 +13,8 @@ const ProductCard = ({ product }) => {
   const [rxUploadOpen, setRxUploadOpen] = useState(false);
   const [localRxFile, setLocalRxFile] = useState(null);
 
-  const favorited = isInWishlist(product.id);
+  const productId = (product._id || product.id)?.toString();
+  const favorited = isInWishlist(productId);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -100,7 +102,7 @@ const ProductCard = ({ product }) => {
             {product.brand}
           </p>
           <Link 
-            to={`/product/${product.id}`} 
+            to={`/product/${productId}`} 
             className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none rounded-sm"
           >
             <h3 className="font-headline-sm text-headline-sm text-on-surface leading-tight mb-md truncate-2-lines">
@@ -125,11 +127,11 @@ const ProductCard = ({ product }) => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-headline-sm font-bold text-primary dark:text-primary-fixed-dim">
-                  ${product.price.toFixed(2)}
+                  {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && (
                   <span className="text-on-surface-variant dark:text-surface-variant line-through text-sm ml-xs">
-                    ${product.originalPrice.toFixed(2)}
+                    {formatCurrency(product.originalPrice)}
                   </span>
                 )}
               </div>
@@ -221,11 +223,11 @@ const ProductCard = ({ product }) => {
               </p>
               <div className="flex items-center gap-sm my-md">
                 <span className="text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">
-                  ${product.price.toFixed(2)}
+                  {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && (
                   <span className="text-on-surface-variant line-through text-body-md">
-                    ${product.originalPrice.toFixed(2)}
+                    {formatCurrency(product.originalPrice)}
                   </span>
                 )}
               </div>

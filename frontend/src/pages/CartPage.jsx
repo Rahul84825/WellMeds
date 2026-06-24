@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
+import { formatCurrency } from "../utils/currency";
 
 const Cart = () => {
   const {
@@ -133,10 +134,10 @@ const Cart = () => {
 
                     <div className="text-right min-w-[80px]">
                       <p className="font-label-md text-label-md text-primary dark:text-primary-fixed-dim font-bold">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatCurrency(item.price * item.quantity)}
                       </p>
                       <p className="text-body-sm text-on-surface-variant text-[11px]">
-                        ${item.price.toFixed(2)} each
+                        {formatCurrency(item.price)} each
                       </p>
                     </div>
 
@@ -203,29 +204,29 @@ const Cart = () => {
             <div className="space-y-sm text-body-sm text-on-surface-variant dark:text-surface-variant">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="text-on-surface font-semibold">${subtotal.toFixed(2)}</span>
+                <span className="text-on-surface font-semibold">{formatCurrency(subtotal)}</span>
               </div>
               {couponApplied && (
                 <div className="flex justify-between text-secondary">
                   <span>Coupon Discount (20%)</span>
-                  <span className="font-bold">-${couponDiscount.toFixed(2)}</span>
+                  <span className="font-bold">-{formatCurrency(couponDiscount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span className="text-on-surface font-semibold">
-                  {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "FREE" : formatCurrency(shipping)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Sales Tax (8.25%)</span>
-                <span className="text-on-surface font-semibold">${tax.toFixed(2)}</span>
+                <span>GST (12%)</span>
+                <span className="text-on-surface font-semibold">{formatCurrency(tax)}</span>
               </div>
             </div>
 
             <div className="border-t border-outline-variant dark:border-outline/40 pt-md flex justify-between font-bold text-headline-sm text-on-surface">
               <span>Total Price</span>
-              <span className="text-primary dark:text-primary-fixed-dim">${finalTotal.toFixed(2)}</span>
+              <span className="text-primary dark:text-primary-fixed-dim">{formatCurrency(finalTotal)}</span>
             </div>
 
             {/* Warning Message for Rx items */}

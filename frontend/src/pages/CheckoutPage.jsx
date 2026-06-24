@@ -6,6 +6,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import Modal from "../components/Modal";
+import { formatCurrency } from "../utils/currency";
 
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
@@ -18,8 +19,8 @@ const Checkout = () => {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
+  const [pincode, setPincode] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
 
   // Card details
   const [cardNumber, setCardNumber] = useState("");
@@ -111,7 +112,7 @@ const Checkout = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    if (!address || !city || !state || !zip || !fullName || !email) {
+    if (!address || !city || !state || !pincode || !fullName || !email) {
       alert("Please fill in all shipping details.");
       return;
     }
@@ -155,7 +156,7 @@ const Checkout = () => {
         requiresRx,
         rxUploaded: requiresRx ? rxAttachedCheck : false,
         rxFile: rxFileName || cartItems.find((i) => i.rxFile)?.rxFile || null,
-        shippingAddress: `${address}, ${city}, ${state} ${zip}`,
+        shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
         paymentMethod,
       };
 
@@ -266,24 +267,35 @@ const Checkout = () => {
               </div>
               <div className="space-y-xs">
                 <label className="block text-label-sm font-semibold text-on-surface">State</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
-                  placeholder="State"
-                />
+                >
+                  <option value="">Select State</option>
+                  {[
+                    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+                    "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
+                    "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra",
+                    "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+                    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+                    "Uttar Pradesh", "Uttarakhand", "West Bengal",
+                    "Delhi", "Chandigarh", "Puducherry"
+                  ].map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div className="space-y-xs">
-                <label className="block text-label-sm font-semibold text-on-surface">ZIP Code</label>
+                <label className="block text-label-sm font-semibold text-on-surface">Pincode</label>
                 <input
                   type="text"
                   required
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
-                  placeholder="ZIP"
+                  placeholder="6-digit Pincode"
+                  maxLength={6}
+                  pattern="[0-9]{6}"
                 />
               </div>
             </div>
@@ -370,7 +382,7 @@ const Checkout = () => {
             <div className="flex flex-col sm:flex-row gap-md">
               <label
                 className={`flex-1 p-md border rounded-xl flex items-center justify-between cursor-pointer transition-all ${
-                  paymentMethod === "credit-card"
+                  paymentMethod === "upi"
                     ? "border-primary bg-primary-container/10 font-bold"
                     : "border-outline-variant hover:bg-surface-container-low"
                 }`}
@@ -379,12 +391,33 @@ const Checkout = () => {
                   <input
                     type="radio"
                     name="payment"
-                    value="credit-card"
-                    checked={paymentMethod === "credit-card"}
-                    onChange={() => setPaymentMethod("credit-card")}
+                    value="upi"
+                    checked={paymentMethod === "upi"}
+                    onChange={() => setPaymentMethod("upi")}
                     className="text-primary focus:ring-primary h-4 w-4"
                   />
-                  <span className="font-body-sm text-on-surface text-sm">Credit / Debit Card</span>
+                  <span className="font-body-sm text-on-surface text-sm">UPI (PhonePe / GPay / Paytm)</span>
+                </div>
+                <span className="material-symbols-outlined text-outline">account_balance_wallet</span>
+              </label>
+
+              <label
+                className={`flex-1 p-md border rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                  paymentMethod === "card"
+                    ? "border-primary bg-primary-container/10 font-bold"
+                    : "border-outline-variant hover:bg-surface-container-low"
+                }`}
+              >
+                <div className="flex items-center gap-sm">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="card"
+                    checked={paymentMethod === "card"}
+                    onChange={() => setPaymentMethod("card")}
+                    className="text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <span className="font-body-sm text-on-surface text-sm">Debit / Credit Card</span>
                 </div>
                 <span className="material-symbols-outlined text-outline">credit_card</span>
               </label>
@@ -411,8 +444,8 @@ const Checkout = () => {
               </label>
             </div>
 
-            {/* Credit Card Input Forms */}
-            {paymentMethod === "credit-card" && (
+            {/* Card Input Details */}
+            {paymentMethod === "card" && (
               <div className="space-y-sm bg-surface-container-low/50 p-md rounded-xl border border-outline-variant/50 animate-[slide-down_0.2s_ease-out]">
                 <div className="space-y-xs">
                   <label className="block text-label-sm font-semibold text-on-surface">Card Number</label>
@@ -465,7 +498,7 @@ const Checkout = () => {
             <div className="max-h-56 overflow-y-auto custom-scrollbar divide-y divide-outline-variant/40 pr-2">
               {cartItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={(item._id || item.id)?.toString()}
                   className="py-sm flex items-center justify-between gap-sm text-body-sm text-on-surface-variant dark:text-surface-variant"
                 >
                   <div className="truncate pr-sm">
@@ -473,7 +506,7 @@ const Checkout = () => {
                     <span>{item.name}</span>
                   </div>
                   <span className="font-semibold text-on-surface">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -483,30 +516,30 @@ const Checkout = () => {
             <div className="border-t border-outline-variant dark:border-outline/40 pt-md space-y-sm text-body-sm text-on-surface-variant dark:text-surface-variant">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="text-on-surface font-semibold">${subtotal.toFixed(2)}</span>
+                <span className="text-on-surface font-semibold">{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping</span>
+                <span>Shipping {subtotal >= 499 && subtotal > 0 ? "(Free above ₹499)" : ""}</span>
                 <span className="text-on-surface font-semibold">
-                  {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "FREE" : formatCurrency(shipping)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Tax (8.25%)</span>
-                <span className="text-on-surface font-semibold">${tax.toFixed(2)}</span>
+                <span>GST (12%)</span>
+                <span className="text-on-surface font-semibold">{formatCurrency(tax)}</span>
               </div>
 
               {/* Coupon discount row */}
               {couponApplied && discountAmount > 0 && (
                 <div className="flex justify-between text-secondary font-semibold">
                   <span>Coupon ({couponApplied.code})</span>
-                  <span>-${discountAmount.toFixed(2)}</span>
+                  <span>-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
 
               <div className="flex justify-between border-t border-outline-variant dark:border-outline/40 pt-md font-bold text-headline-sm text-on-surface">
                 <span>Total Price</span>
-                <span className="text-primary dark:text-primary-fixed-dim">${finalTotal.toFixed(2)}</span>
+                <span className="text-primary dark:text-primary-fixed-dim">{formatCurrency(finalTotal)}</span>
               </div>
             </div>
 

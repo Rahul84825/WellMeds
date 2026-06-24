@@ -198,8 +198,10 @@ export const CartProvider = ({ children }) => {
   // ─────────────────────────────────────────────────────
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping = subtotal === 0 ? 0 : subtotal >= 75 ? 0 : 5.99;
-  const tax = subtotal * 0.0825; // 8.25% Sales Tax
+  // Indian shipping: free above ₹499, else ₹49 flat fee
+  const shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
+  // GST 12%
+  const tax = subtotal * 0.12;
   const total = subtotal + shipping + tax;
   const requiresRx = cartItems.some((item) => item.requiresRx);
 

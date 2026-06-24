@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { formatCurrency } from "../utils/currency";
 
 const ManageProducts = () => {
   const navigate = useNavigate();
@@ -203,7 +204,7 @@ const ManageProducts = () => {
                     </div>
                   </td>
                   <td className="p-md font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant">{p.category}</td>
-                  <td className="p-md font-body-sm text-body-sm font-semibold">${p.price.toFixed(2)}</td>
+                  <td className="p-md font-body-sm text-body-sm font-semibold">{formatCurrency(p.price)}</td>
                   <td className="p-md">
                     <div className="flex items-center gap-xs">
                       <div className={`w-2 h-2 rounded-full ${

@@ -96,7 +96,7 @@ const HomePage = () => {
           </div>
           <div className="flex overflow-x-auto pb-md gap-md no-scrollbar snap-x custom-scrollbar">
             {categories.map((cat) => (
-              <CategoryCard key={cat.id} category={cat} />
+              <CategoryCard key={(cat._id || cat.id)?.toString()} category={cat} />
             ))}
           </div>
         </div>
@@ -113,7 +113,7 @@ const HomePage = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
           {featuredProducts.map((prod) => (
-            <ProductCard key={prod.id} product={prod} />
+            <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
           ))}
         </div>
       </section>

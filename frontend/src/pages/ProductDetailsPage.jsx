@@ -7,6 +7,7 @@ import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import PrescriptionUpload from "../components/PrescriptionUpload";
+import { formatCurrency } from "../utils/currency";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -148,11 +149,11 @@ const ProductDetails = () => {
 
             <div className="flex items-center gap-md">
               <span className="text-headline-lg md:text-4xl font-bold text-primary dark:text-primary-fixed-dim">
-                ${product.price.toFixed(2)}
+                {formatCurrency(product.price)}
               </span>
               {product.originalPrice && (
                 <span className="text-on-surface-variant dark:text-surface-variant line-through text-body-lg">
-                  ${product.originalPrice.toFixed(2)}
+                  {formatCurrency(product.originalPrice)}
                 </span>
               )}
             </div>

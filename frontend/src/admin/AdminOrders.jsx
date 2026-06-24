@@ -2,20 +2,8 @@ import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
-
-// Format ISO date string → "Jun 23, 2026"
-const formatDate = (isoString) => {
-  if (!isoString) return "—";
-  try {
-    return new Date(isoString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return isoString;
-  }
-};
+import { formatCurrency } from "../utils/currency";
+import { formatDate } from "../utils/date";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -131,7 +119,7 @@ const ManageOrders = () => {
                         ))}
                       </div>
                     </td>
-                    <td className="p-md font-semibold text-on-surface">${order.total.toFixed(2)}</td>
+                    <td className="p-md font-semibold text-on-surface">{formatCurrency(order.total)}</td>
                     <td className="p-md">
                       {order.rxUploaded ? (
                         <div className="space-y-xs">

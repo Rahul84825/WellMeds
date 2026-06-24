@@ -1,5 +1,7 @@
 import React from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
+import { formatCurrency } from "../utils/currency";
+import { formatDate } from "../utils/date";
 
 const OrderSuccess = () => {
   const location = useLocation();
@@ -43,9 +45,9 @@ const OrderSuccess = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-md text-body-sm text-on-surface-variant dark:text-surface-variant">
             <p>Customer Name: <span className="font-bold text-on-surface">{order.customer}</span></p>
-            <p>Order Date: <span className="font-bold text-on-surface">{order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—"}</span></p>
+            <p>Order Date: <span className="font-bold text-on-surface">{formatDate(order.createdAt)}</span></p>
             <p>Shipping Address: <span className="font-bold text-on-surface">{order.shippingAddress}</span></p>
-            <p>Payment Method: <span className="font-bold text-on-surface uppercase">{order.paymentMethod === "cod" ? "Cash on Delivery" : "Credit Card"}</span></p>
+            <p>Payment Method: <span className="font-bold text-on-surface uppercase">{order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod === "upi" ? "UPI" : "Card Payment"}</span></p>
           </div>
 
           {order.rxUploaded && (
@@ -70,7 +72,7 @@ const OrderSuccess = () => {
                     <span className="font-bold text-on-surface mr-sm">{item.quantity}x</span>
                     <span>{item.name}</span>
                   </div>
-                  <span className="font-semibold text-on-surface">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-semibold text-on-surface">{formatCurrency(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
@@ -78,7 +80,7 @@ const OrderSuccess = () => {
 
           <div className="border-t border-outline-variant/60 pt-md flex justify-between font-bold text-headline-sm text-on-surface">
             <span>Total Paid</span>
-            <span>${order.total.toFixed(2)}</span>
+            <span>{formatCurrency(order.total)}</span>
           </div>
         </div>
 

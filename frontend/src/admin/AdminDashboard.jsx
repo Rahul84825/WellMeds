@@ -2,20 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-
-// Format ISO date string → "Jun 23, 2026"
-const formatDate = (isoString) => {
-  if (!isoString) return "—";
-  try {
-    return new Date(isoString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return isoString;
-  }
-};
+import { formatCurrency } from "../utils/currency";
+import { formatDate } from "../utils/date";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -100,7 +88,7 @@ const Dashboard = () => {
               Total Revenue
             </p>
             <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              ${stats.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(stats.totalSales)}
             </h4>
           </div>
         </div>
@@ -255,7 +243,7 @@ const Dashboard = () => {
                     <p className="font-semibold text-on-surface">{order.customer}</p>
                     <p className="text-[11px] opacity-75 truncate max-w-[120px]">{order.email}</p>
                   </td>
-                  <td className="p-md font-semibold text-on-surface">${order.total.toFixed(2)}</td>
+                  <td className="p-md font-semibold text-on-surface">{formatCurrency(order.total)}</td>
                   <td className="p-md">
                     {order.rxUploaded ? (
                       <span className="inline-flex items-center gap-xs px-sm py-0.5 bg-secondary-container/30 text-on-secondary-container rounded text-xs font-semibold">

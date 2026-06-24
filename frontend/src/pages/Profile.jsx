@@ -5,12 +5,13 @@ import Modal from "../components/Modal";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { formatDate } from "../utils/date";
 
-// Format ISO date → "Jun 2026"
+// Format ISO date → "June 2026" (member since)
 const formatMemberSince = (isoString) => {
   if (!isoString) return "—";
   try {
-    return new Date(isoString).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    return new Date(isoString).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
   } catch {
     return isoString;
   }
@@ -217,7 +218,7 @@ const Profile = () => {
                   prescriptions.map((rx) => {
                     const { badge: badgeClass, dot: dotClass } = getRxStatusStyle(rx.status);
                     const displayDate = rx.date || (rx.createdAt
-                      ? new Date(rx.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                      ? formatDate(rx.createdAt)
                       : "—");
                     return (
                       <tr key={rx.id || rx._id} className="hover:bg-surface-container-low/30 transition-colors">

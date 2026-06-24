@@ -10,9 +10,8 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter States
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [priceRange, setPriceRange] = useState(100); // Max $100 default limit
+  const [priceRange, setPriceRange] = useState(2000); // Max ₹2000 default limit
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [stockStatus, setStockStatus] = useState("all"); // 'all', 'in', 'out'
   const [minRating, setMinRating] = useState(0);
@@ -93,7 +92,7 @@ const Products = () => {
   const clearAllFilters = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
-    setPriceRange(100);
+    setPriceRange(2000);
     setStockStatus("all");
     setMinRating(0);
     setSortBy("popularity");
@@ -234,14 +233,14 @@ const Products = () => {
           {/* Price Range Filter */}
           <div className="pt-lg border-t border-outline-variant dark:border-outline/40">
             <h4 className="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant uppercase tracking-wider mb-lg font-semibold">
-              Max Price: ${priceRange}
+              Max Price: ₹{priceRange.toLocaleString("en-IN")}
             </h4>
             <div className="px-2">
               <input
                 type="range"
-                min="5"
-                max="100"
-                step="5"
+                min="50"
+                max="2000"
+                step="50"
                 value={priceRange}
                 onChange={(e) => {
                   setPriceRange(parseInt(e.target.value));
@@ -250,8 +249,8 @@ const Products = () => {
                 className="w-full h-1 bg-surface-container-high dark:bg-surface-container rounded-lg appearance-none cursor-pointer accent-primary"
               />
               <div className="flex justify-between mt-md text-label-sm text-on-surface-variant dark:text-surface-variant">
-                <span>$5</span>
-                <span>$100+</span>
+                <span>₹50</span>
+                <span>₹2000+</span>
               </div>
             </div>
           </div>
@@ -400,7 +399,7 @@ const Products = () => {
           {paginatedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-lg">
               {paginatedProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
+                <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
               ))}
             </div>
           ) : (

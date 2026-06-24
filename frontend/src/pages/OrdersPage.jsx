@@ -2,20 +2,8 @@ import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/Loader";
-
-// Format ISO date string → "Jun 23, 2026"
-const formatDate = (isoString) => {
-  if (!isoString) return "—";
-  try {
-    return new Date(isoString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return isoString;
-  }
-};
+import { formatCurrency } from "../utils/currency";
+import { formatDate } from "../utils/date";
 
 // Status badge colour helper
 const getStatusStyle = (status) => {
@@ -149,7 +137,7 @@ const Orders = () => {
                         <span>{item.name}</span>
                       </div>
                       <span className="font-semibold text-on-surface">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatCurrency(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -167,27 +155,27 @@ const Orders = () => {
                       <div className="text-xs text-on-surface-variant space-y-0.5 mb-xs">
                         <div className="flex justify-end gap-sm">
                           <span>Subtotal</span>
-                          <span className="font-medium text-on-surface">${order.subtotal.toFixed(2)}</span>
+                          <span className="font-medium text-on-surface">{formatCurrency(order.subtotal)}</span>
                         </div>
                         {order.shipping != null && (
                           <div className="flex justify-end gap-sm">
                             <span>Shipping</span>
                             <span className="font-medium text-on-surface">
-                              {order.shipping === 0 ? "FREE" : `$${order.shipping.toFixed(2)}`}
+                              {order.shipping === 0 ? "FREE" : formatCurrency(order.shipping)}
                             </span>
                           </div>
                         )}
                         {order.tax != null && (
                           <div className="flex justify-end gap-sm">
-                            <span>Tax</span>
-                            <span className="font-medium text-on-surface">${order.tax.toFixed(2)}</span>
+                            <span>GST</span>
+                            <span className="font-medium text-on-surface">{formatCurrency(order.tax)}</span>
                           </div>
                         )}
                       </div>
                     )}
                     <span className="text-body-sm text-on-surface-variant dark:text-surface-variant mr-sm">Grand Total:</span>
                     <span className="text-headline-sm font-bold text-primary dark:text-primary-fixed-dim">
-                      ${(order.total || 0).toFixed(2)}
+                      {formatCurrency(order.total || 0)}
                     </span>
                   </div>
                 </div>

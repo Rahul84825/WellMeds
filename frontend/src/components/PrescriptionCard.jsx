@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "../utils/date";
 
 const STATUS_CONFIG = {
   "Pending Review": {
@@ -58,11 +59,7 @@ const PrescriptionCard = ({ prescription, onDelete, onPreview }) => {
   const config = getStatusConfig(prescription.status);
   const displayId = prescription.id || prescription._id;
   const displayDate = prescription.date || (prescription.createdAt
-    ? new Date(prescription.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+    ? formatDate(prescription.createdAt)
     : "—");
 
   const isPDF = prescription.fileType === "application/pdf" || prescription.name?.toLowerCase().endsWith(".pdf");
