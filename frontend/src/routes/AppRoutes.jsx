@@ -24,6 +24,9 @@ import Register from "../pages/Register";
 import ProfilePage from "../pages/Profile";
 import OrdersPage from "../pages/OrdersPage";
 import UploadPrescriptionPage from "../pages/UploadPrescriptionPage";
+import VerifyEmail from "../pages/VerifyEmail";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -49,6 +52,9 @@ const AppRoutes = () => {
         <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="verify-email" element={<VerifyEmail />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         
         {/* Protected Patient Pages */}
         <Route

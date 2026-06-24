@@ -10,6 +10,31 @@ export const authService = {
     return data.user;
   },
 
+  async registerUser(name, email, password) {
+    return await apiInstance.post("/auth/register", { name, email, password });
+  },
+
+  async loginUser(email, password) {
+    const data = await apiInstance.post("/auth/login", { email, password });
+    if (data.success && data.token) {
+      localStorage.setItem("medishop_token", data.token);
+      sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
+    }
+    return data.user;
+  },
+
+  async verifyEmail(token) {
+    return await apiInstance.post("/auth/verify-email", { token });
+  },
+
+  async forgotPassword(email) {
+    return await apiInstance.post("/auth/forgot-password", { email });
+  },
+
+  async resetPassword(token, password) {
+    return await apiInstance.post("/auth/reset-password", { token, password });
+  },
+
   async getCurrentUser() {
     try {
       const data = await apiInstance.get("/auth/me");

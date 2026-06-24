@@ -58,6 +58,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginUser = async (email, password) => {
+    setLoading(true);
+    try {
+      const loggedUser = await api.loginUser(email, password);
+      setUser(loggedUser);
+      // Fire post-login callbacks (cart sync, wishlist sync)
+      onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
+      return loggedUser;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerUser = async (name, email, password) => {
+    setLoading(true);
+    try {
+      const response = await api.registerUser(name, email, password);
+      return response;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -81,6 +104,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         loginWithGoogle,
+        loginUser,
+        registerUser,
         logout,
         updateProfile,
         isAdmin: user?.role === "admin",
