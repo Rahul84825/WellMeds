@@ -35,6 +35,9 @@ import AddNewProduct from "../admin/AdminAddNewProduct";
 import ManageOrders from "../admin/AdminOrders";
 import ProductCategories from "../admin/AdminCategories";
 import AdminPrescriptions from "../admin/AdminPrescriptions";
+import AdminCoupons from "../admin/AdminCoupons";
+import AdminUsers from "../admin/AdminUsers";
+import AdminSettings from "../admin/AdminSettings";
 
 const AppRoutes = () => {
   return (
@@ -95,9 +98,13 @@ const AppRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="products" element={<ManageProducts />} />
         <Route path="products/new" element={<AddNewProduct />} />
+        <Route path="products/:id/edit" element={<AddNewProduct />} />
         <Route path="orders" element={<ManageOrders />} />
         <Route path="categories" element={<ProductCategories />} />
         <Route path="prescriptions" element={<AdminPrescriptions />} />
+        <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
 
       {/* Fallback Catch-All */}

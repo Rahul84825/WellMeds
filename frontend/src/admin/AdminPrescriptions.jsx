@@ -1,9 +1,66 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import Modal from "../components/Modal";
-import { getStatusConfig } from "../components/PrescriptionCard";
 import { formatDate } from "../utils/date";
+import { 
+  FileText, 
+  Search, 
+  Filter, 
+  Check, 
+  X, 
+  Clock, 
+  AlertTriangle, 
+  FileWarning, 
+  ExternalLink,
+  ZoomIn,
+  ShieldCheck,
+  User,
+  Mail,
+  Calendar,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
+
+const getStatusConfigLocal = (status) => {
+  switch (status) {
+    case "Pending Review":
+      return {
+        badge: "bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400",
+        dot: "bg-amber-500",
+        label: "Pending Review"
+      };
+    case "Under Verification":
+      return {
+        badge: "bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400",
+        dot: "bg-blue-500",
+        label: "Verifying"
+      };
+    case "Approved":
+      return {
+        badge: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400",
+        dot: "bg-emerald-500",
+        label: "Approved"
+      };
+    case "Rejected":
+      return {
+        badge: "bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400",
+        dot: "bg-red-500",
+        label: "Rejected"
+      };
+    case "Expired":
+      return {
+        badge: "bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400",
+        dot: "bg-slate-400",
+        label: "Expired"
+      };
+    default:
+      return {
+        badge: "bg-slate-50 text-slate-600",
+        dot: "bg-slate-400",
+        label: status || "Unknown"
+      };
+  }
+};
 
 const AdminPrescriptions = () => {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -22,10 +79,9 @@ const AdminPrescriptions = () => {
   const fetchAllPrescriptions = async () => {
     setLoading(true);
     try {
-      // Using the backend getAllPrescriptions endpoint
       const data = await api.getAllPrescriptions();
       setPrescriptions(data);
-      if (data.length > 0 && !selectedRx) {
+      if (data.length > 0) {
         setSelectedRx(data[0]);
         setAdminNotes(data[0].adminNotes || "");
       }
@@ -45,7 +101,7 @@ const AdminPrescriptions = () => {
     setAdminNotes(rx.adminNotes || "");
   };
 
-  // Status transition handlers
+  // Decision actions
   const handleApprove = async () => {
     if (!selectedRx) return;
     setIsSubmitting(true);
@@ -53,7 +109,6 @@ const AdminPrescriptions = () => {
       const updatedRx = await api.approvePrescription(selectedRx.id || selectedRx._id, adminNotes);
       alert(`Prescription for ${updatedRx.user?.name || "Patient"} approved successfully.`);
       
-      // Update local state
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
@@ -69,7 +124,7 @@ const AdminPrescriptions = () => {
   const handleReject = async () => {
     if (!selectedRx) return;
     if (!adminNotes.trim()) {
-      alert("Please provide pharmacist/admin review notes explaining the rejection reason.");
+      alert("Please provide pharmacist notes explaining the rejection reason.");
       return;
     }
     setIsSubmitting(true);
@@ -77,7 +132,6 @@ const AdminPrescriptions = () => {
       const updatedRx = await api.rejectPrescription(selectedRx.id || selectedRx._id, adminNotes);
       alert(`Prescription for ${updatedRx.user?.name || "Patient"} rejected.`);
       
-      // Update local state
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
@@ -108,24 +162,24 @@ const AdminPrescriptions = () => {
     }
   };
 
-  // Filtered prescriptions list
-  const filteredPrescriptions = prescriptions.filter((rx) => {
-    // 1. Search text match (user name, email, or filename)
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      const matchName = rx.user?.name?.toLowerCase().includes(query);
-      const matchEmail = rx.user?.email?.toLowerCase().includes(query);
-      const matchFileName = rx.name?.toLowerCase().includes(query);
-      if (!matchName && !matchEmail && !matchFileName) return false;
-    }
+  // Filter list
+  const filteredPrescriptions = useMemo(() => {
+    return prescriptions.filter((rx) => {
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchName = rx.user?.name?.toLowerCase().includes(query);
+        const matchEmail = rx.user?.email?.toLowerCase().includes(query);
+        const matchFileName = rx.name?.toLowerCase().includes(query);
+        if (!matchName && !matchEmail && !matchFileName) return false;
+      }
 
-    // 2. Status match
-    if (statusFilter !== "all") {
-      if (rx.status !== statusFilter) return false;
-    }
+      if (statusFilter !== "all" && rx.status !== statusFilter) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [prescriptions, searchQuery, statusFilter]);
 
   if (loading) {
     return (
@@ -135,106 +189,102 @@ const AdminPrescriptions = () => {
     );
   }
 
-  const activeConfig = selectedRx ? getStatusConfig(selectedRx.status) : null;
+  const activeConfig = selectedRx ? getStatusConfigLocal(selectedRx.status) : null;
   const isPDFSelected = selectedRx?.fileType === "application/pdf" || selectedRx?.name?.toLowerCase().endsWith(".pdf");
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      {/* Page Header */}
-      <div className="flex items-center gap-md mb-lg">
-        <h1 className="font-headline-md text-headline-md font-bold text-on-surface">Prescription Dispensing</h1>
-        <span className="bg-surface-container-high dark:bg-surface-container text-on-surface-variant dark:text-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">
-          {prescriptions.length} Total Uploads
+      
+      {/* Title */}
+      <div className="flex items-center gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
+        <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
+          <FileText className="text-[#004782]" />
+          Prescription Verification
+        </h1>
+        <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-sm py-0.5 rounded-full text-[10px] font-bold">
+          {prescriptions.length} Uploads
         </span>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-md bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant dark:border-outline/40">
-        <div className="flex flex-wrap items-center gap-sm flex-grow">
-          {/* Search bar */}
-          <div className="relative flex-grow max-w-md">
-            <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
-            <input
-              type="text"
-              placeholder="Search by patient name, email, or file..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-xl pr-md py-sm bg-surface-container-low dark:bg-surface-container border border-outline-variant rounded-lg font-body-sm text-sm text-on-surface w-full focus:ring-1 focus:ring-primary"
-            />
-          </div>
+      {/* Filter Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm transition-all duration-300">
+        <div className="relative max-w-md w-full">
+          <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search by patient name, email, or filename..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
+          />
+        </div>
 
-          {/* Status Filter */}
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none pl-md pr-xl py-sm bg-surface-container-low dark:bg-surface-container border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface focus:ring-primary dark:bg-inverse-surface"
-            >
-              <option value="all">All Statuses</option>
-              <option value="Pending Review">Pending Review</option>
-              <option value="Under Verification">Under Verification</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Expired">Expired</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-sm">
+          <Filter size={16} className="text-slate-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white rounded-xl text-xs outline-none text-slate-600 dark:text-zinc-300"
+          >
+            <option value="all">All Statuses</option>
+            <option value="Pending Review">Pending Review</option>
+            <option value="Under Verification">Under Verification</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Expired">Expired</option>
+          </select>
         </div>
       </div>
 
-      {/* Main Grid Layout: Left (List of Uploads), Right (Preview & Review Details) */}
+      {/* Split Dashboard View */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg items-start">
-        {/* Left Column: Table List (60% approx) */}
-        <div className="lg:col-span-2 bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-sm border border-outline-variant dark:border-outline/40 overflow-hidden">
+        
+        {/* Left Column: Uploads List Table */}
+        <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-surface-container-low dark:bg-surface-container-high border-b border-outline-variant dark:border-outline/40">
-                <tr className="text-label-sm text-on-surface-variant uppercase tracking-wider text-xs">
-                  <th className="p-md">Prescription ID</th>
-                  <th className="p-md">Patient Details</th>
-                  <th className="p-md">Date Uploaded</th>
+              <thead>
+                <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="p-md">Patient</th>
+                  <th className="p-md">Uploaded Date</th>
                   <th className="p-md">Status</th>
-                  <th className="p-md text-right">Action</th>
+                  <th className="p-md text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant dark:divide-outline/40 text-body-sm text-on-surface-variant dark:text-surface-variant">
+              <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs text-slate-600 dark:text-zinc-300">
                 {filteredPrescriptions.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="p-xxl text-center">
-                      <span className="material-symbols-outlined text-4xl text-outline mb-xs">inventory_2</span>
-                      <p className="font-semibold text-on-surface">No Prescriptions Found</p>
+                    <td colSpan="4" className="p-lg text-center text-slate-400 font-semibold">
+                      No prescriptions match the filter selections.
                     </td>
                   </tr>
                 ) : (
                   filteredPrescriptions.map((rx) => {
                     const displayId = rx.id || rx._id;
-                    const config = getStatusConfig(rx.status);
+                    const config = getStatusConfigLocal(rx.status);
                     const isSelected = selectedRx && (selectedRx.id || selectedRx._id) === displayId;
-                    const displayDate = rx.date || (rx.createdAt
-                      ? formatDate(rx.createdAt)
-                      : "—");
                     return (
                       <tr
                         key={displayId}
                         onClick={() => handleSelectRx(rx)}
-                        className={`cursor-pointer transition-colors ${
+                        className={`cursor-pointer transition-all ${
                           isSelected
-                            ? "bg-[#004782]/5 border-l-4 border-[#004782]"
-                            : "hover:bg-surface-container-low/30"
+                            ? "bg-[#004782]/5 dark:bg-[#004782]/10 border-l-4 border-[#004782]"
+                            : "hover:bg-slate-50/50 dark:hover:bg-zinc-800/10"
                         }`}
                       >
-                        <td className="p-md font-bold text-on-surface font-mono text-xs">{displayId?.substring(0, 8)}...</td>
                         <td className="p-md">
-                          <p className="font-semibold text-on-surface">{rx.user?.name || "Unknown Patient"}</p>
-                          <p className="text-[11px] opacity-75">{rx.user?.email || "—"}</p>
+                          <p className="font-bold text-slate-800 dark:text-zinc-100">{rx.user?.name || "Unknown Patient"}</p>
+                          <p className="text-[10px] text-slate-400 truncate max-w-[160px]">{rx.user?.email || "—"}</p>
                         </td>
-                        <td className="p-md">{displayDate}</td>
+                        <td className="p-md">{rx.createdAt ? formatDate(rx.createdAt) : "—"}</td>
                         <td className="p-md">
-                          <span className={`inline-flex items-center gap-xs px-sm py-0.5 rounded-full text-xs font-semibold ${config.badge}`}>
+                          <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-lg text-[10px] font-bold ${config.badge}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>
                             {config.label}
                           </span>
                         </td>
-                        <td className="p-md text-right font-semibold text-primary">Review →</td>
+                        <td className="p-md text-right font-bold text-[#004782] dark:text-[#a4c9ff]">Verify &rarr;</td>
                       </tr>
                     );
                   })
@@ -244,132 +294,140 @@ const AdminPrescriptions = () => {
           </div>
         </div>
 
-        {/* Right Column: Review Details & Document Preview */}
+        {/* Right Column: Prescription Inspector Panel */}
         {selectedRx ? (
-          <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/60 dark:border-outline/40 rounded-xl p-lg shadow-sm space-y-md text-left">
-            <div className="flex justify-between items-start pb-sm border-b border-outline-variant/60">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-left">
+            <div className="flex justify-between items-start pb-xs border-b border-slate-100 dark:border-zinc-800">
               <div>
-                <h3 className="font-label-md text-label-md font-bold text-on-surface">Review Prescription</h3>
-                <p className="text-xs text-on-surface-variant font-mono mt-0.5">ID: {selectedRx.id || selectedRx._id}</p>
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Prescription Sheet</h3>
+                <p className="text-[10px] text-slate-400 font-mono mt-xs">ID: {selectedRx.id || selectedRx._id}</p>
               </div>
-              <span className={`inline-flex items-center gap-xs px-sm py-0.5 rounded-full text-xs font-semibold ${activeConfig.badge}`}>
+              <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-lg text-[10px] font-bold ${activeConfig.badge}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${activeConfig.dot}`}></span>
                 {activeConfig.label}
               </span>
             </div>
 
-            {/* Document Preview Window */}
-            <div className="border border-outline-variant/60 rounded-xl bg-surface-container-low overflow-hidden aspect-video flex flex-col items-center justify-center relative group">
+            {/* Document Preview Box */}
+            <div className="border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-950 overflow-hidden aspect-video flex flex-col items-center justify-center relative group select-none">
               {isPDFSelected ? (
                 <div className="flex flex-col items-center justify-center p-md">
-                  <span className="material-symbols-outlined text-error text-5xl mb-sm">picture_as_pdf</span>
-                  <p className="font-bold text-sm text-on-surface">{selectedRx.name}</p>
+                  <FileWarning className="text-red-500 h-10 w-10 mb-xs" />
+                  <p className="font-bold text-xs text-slate-700 dark:text-zinc-300 truncate max-w-[200px]">{selectedRx.name}</p>
                   <a
                     href={selectedRx.fileUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-md inline-flex items-center gap-xs px-md py-sm bg-primary text-white rounded-lg text-xs font-bold hover:opacity-90"
+                    className="mt-sm inline-flex items-center gap-xs px-md py-1.5 bg-[#004782] text-white rounded-xl text-[10px] font-bold hover:opacity-90 transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                    <ExternalLink size={12} />
                     Open PDF in New Tab
                   </a>
                 </div>
               ) : (
                 <>
                   <img
-                    alt="Prescription Document"
+                    alt="Uploaded Prescription Sheet"
                     className="w-full h-full object-contain"
                     src={selectedRx.fileUrl}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
                     <a
                       href={selectedRx.fileUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-xs px-md py-sm bg-white text-on-surface rounded-lg text-xs font-bold shadow"
+                      className="inline-flex items-center gap-xs px-md py-1.5 bg-white text-slate-800 rounded-xl text-[10px] font-bold shadow hover:scale-102 transition-all cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[16px]">zoom_in</span>
-                      View Full Size
+                      <ZoomIn size={12} />
+                      Open Full Image
                     </a>
                   </div>
                 </>
               )}
             </div>
 
-            {/* Patient Info */}
-            <div className="bg-surface-container-low p-sm rounded-lg text-body-sm text-on-surface-variant space-y-1">
-              <p>Patient Name: <span className="font-bold text-on-surface">{selectedRx.user?.name || "—"}</span></p>
-              <p>Patient Email: <span className="font-bold text-on-surface">{selectedRx.user?.email || "—"}</span></p>
+            {/* Patient Credentials */}
+            <div className="bg-slate-50 dark:bg-zinc-950 p-sm rounded-xl border border-slate-100 dark:border-zinc-800 text-xs text-slate-600 dark:text-zinc-300 space-y-xs">
+              <div className="flex items-center gap-xs">
+                <User size={14} className="text-slate-400" />
+                <span>Patient: <strong className="text-slate-800 dark:text-zinc-100">{selectedRx.user?.name || "Unknown"}</strong></span>
+              </div>
+              <div className="flex items-center gap-xs">
+                <Mail size={14} className="text-slate-400" />
+                <span>Email: <strong className="text-slate-800 dark:text-zinc-100">{selectedRx.user?.email || "—"}</strong></span>
+              </div>
             </div>
 
             {/* Doctor Checklist verification block */}
-            <div className="space-y-sm p-sm border border-outline-variant rounded-lg bg-surface-container-low/50">
-              <h4 className="font-label-sm text-label-sm font-bold text-on-surface flex items-center gap-xs">
-                <span className="material-symbols-outlined text-secondary text-[20px]">assignment_turned_in</span>
+            <div className="space-y-sm p-sm border border-amber-200/50 rounded-xl bg-amber-500/[0.03] text-xs">
+              <h4 className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-xs">
+                <ShieldCheck size={16} />
                 Physician Verification Checklist
               </h4>
-              <ul className="text-body-sm text-on-surface-variant space-y-xs list-disc pl-md text-[12px]">
-                <li>Doctor Full Name & Stamp present.</li>
-                <li>Certified Registration Number readable.</li>
+              <ul className="text-slate-500 dark:text-zinc-400 space-y-xs list-disc pl-md text-[11px] leading-snug">
+                <li>Doctor Full Name, Seal, and Sign readable.</li>
+                <li>Registration Number present.</li>
                 <li>Patient Full Name matches account record.</li>
-                <li>Prescribed medication names and strengths are legible.</li>
+                <li>Prescribed supplements match order items.</li>
               </ul>
             </div>
 
-            {/* Review Notes Area */}
+            {/* Remarks Notes */}
             <div className="space-y-xs">
-              <label className="block text-xs font-bold text-on-surface uppercase tracking-wide">Review Notes / Remarks</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pharmacist Remarks / Notes</label>
               <textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Enter approval details or reason for rejection..."
+                placeholder="Enter verification notes or explanation for rejection..."
                 rows={3}
-                className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary"
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
               />
             </div>
 
-            {/* Decision Action buttons */}
-            <div className="space-y-sm pt-sm border-t border-outline-variant/60">
+            {/* Decision Actions */}
+            <div className="space-y-sm pt-sm border-t border-slate-100 dark:border-zinc-800">
               <div className="flex gap-sm">
                 <button
                   onClick={handleReject}
                   disabled={isSubmitting}
-                  className="flex-1 bg-error text-white font-bold py-sm rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-xs"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px]">cancel</span>
+                  <X size={14} />
                   Reject Rx
                 </button>
                 <button
                   onClick={handleApprove}
                   disabled={isSubmitting}
-                  className="flex-1 bg-secondary text-white font-bold py-sm rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-xs"
+                  className="flex-1 bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px]">verified</span>
+                  <Check size={14} />
                   Approve Rx
                 </button>
               </div>
               
-              <div className="flex gap-sm pt-xs">
+              <div className="flex gap-sm pt-xs text-[10px]">
                 <button
                   onClick={() => handleGenericStatusUpdate("Under Verification")}
                   disabled={isSubmitting}
-                  className="flex-1 border border-outline-variant text-on-surface py-xs rounded-lg text-xs font-semibold hover:bg-surface-container-low transition-all"
+                  className="flex-1 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-200 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 font-bold transition-all select-none cursor-pointer"
                 >
-                  Mark Under Verification
+                  Verify
                 </button>
                 <button
                   onClick={() => handleGenericStatusUpdate("Expired")}
                   disabled={isSubmitting}
-                  className="flex-1 border border-outline-variant text-on-surface py-xs rounded-lg text-xs font-semibold hover:bg-surface-container-low transition-all"
+                  className="flex-1 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-200 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 font-bold transition-all select-none cursor-pointer"
                 >
-                  Mark Expired
+                  Expire
                 </button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-center py-xl bg-surface-container-low/30 rounded-xl border border-dashed border-outline-variant">
-            <p className="text-on-surface-variant">Select a prescription to begin review.</p>
+          <div className="text-center py-xl bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 flex flex-col items-center justify-center p-lg">
+            <AlertCircle className="text-slate-300 mb-xs" size={24} />
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">No Prescription Selected</p>
+            <p className="text-[11px] text-slate-400 mt-xs">Select a prescription upload item from the left table list to inspect it.</p>
           </div>
         )}
       </div>

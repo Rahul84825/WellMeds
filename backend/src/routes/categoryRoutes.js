@@ -1,5 +1,10 @@
 import express from "express";
-import { getCategories, createCategory, deleteCategory } from "../controllers/categoryController.js";
+import { 
+  getCategories, 
+  createCategory, 
+  deleteCategory,
+  updateCategory 
+} from "../controllers/categoryController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 
@@ -10,6 +15,7 @@ router.route("/")
   .post(protect, admin, createCategory);
 
 router.route("/:id")
+  .put(protect, admin, updateCategory)
   .delete(protect, admin, deleteCategory);
 
 export default router;

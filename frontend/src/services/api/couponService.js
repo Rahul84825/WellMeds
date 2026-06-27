@@ -2,30 +2,68 @@ import apiInstance from "./api";
 
 export const couponService = {
   /**
-   * Apply a coupon code at checkout.
-   * @param {string} code - coupon code (e.g. "SAVE10")
-   * @param {number} subtotal - current cart subtotal (to validate minOrderValue)
-   * @returns {{ success, coupon: { code, discountType, discountAmount } }}
+   * Validate a coupon code at checkout (backend calculation).
+   * @param {string} code
+   * @param {number} subtotal
+   * @returns {{ success, message, coupon: { code, discountType, discountValue }, discountAmount, finalAmount }}
+   */
+  async validateCoupon(code, subtotal) {
+    const data = await apiInstance.post("/coupons/validate", { code, subtotal });
+    return data; // { success, message, coupon, discountAmount, finalAmount }
+  },
+
+  /**
+   * Apply coupon fallback.
    */
   async applyCoupon(code, subtotal) {
-    const data = await apiInstance.post("/coupons/apply", { code, subtotal });
-    return data; // { success, message, coupon }
+    return this.validateCoupon(code, subtotal);
+  },
+
+  /**
+   * Get all active, non-expired coupons (customer).
+   */
+  async getCoupons() {
+    const data = await apiInstance.get("/coupons");
+    return data.coupons || [];
+  },
+
+  /**
+   * Get all coupons with analytics (admin only).
+   */
+  async adminGetCoupons() {
+    const data = await apiInstance.get("/admin/coupons");
+    return data.coupons || [];
   },
 
   /**
    * Create a new coupon (admin only).
-   * @param {{ code, discountType, discountAmount, minOrderValue, expiryDate }} couponData
    */
-  async createCoupon(couponData) {
-    const data = await apiInstance.post("/coupons", couponData);
+  async adminCreateCoupon(couponData) {
+    const data = await apiInstance.post("/admin/coupons", couponData);
+    return data.coupon;
+  },
+
+  /**
+   * Update an existing coupon (admin only).
+   */
+  async adminUpdateCoupon(id, couponData) {
+    const data = await apiInstance.put(`/admin/coupons/${id}`, couponData);
     return data.coupon;
   },
 
   /**
    * Delete a coupon by ID (admin only).
    */
-  async deleteCoupon(id) {
-    const data = await apiInstance.delete(`/coupons/${id}`);
+  async adminDeleteCoupon(id) {
+    const data = await apiInstance.delete(`/admin/coupons/${id}`);
     return data.success;
   },
+  
+  // Legacy backups
+  async createCoupon(couponData) {
+    return this.adminCreateCoupon(couponData);
+  },
+  async deleteCoupon(id) {
+    return this.adminDeleteCoupon(id);
+  }
 };

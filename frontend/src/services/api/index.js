@@ -33,6 +33,16 @@ const adminService = {
     const data = await apiInstance.put(`/admin/users/${id}/role`, { role });
     return data.user;
   },
+  async uploadImage(file) {
+    const formData = new FormData();
+    formData.append("image", file);
+    const data = await apiInstance.post("/admin/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+    return data.url;
+  }
 };
 
 export const api = {

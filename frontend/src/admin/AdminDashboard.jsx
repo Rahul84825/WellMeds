@@ -4,6 +4,21 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatCurrency } from "../utils/currency";
 import { formatDate } from "../utils/date";
+import { 
+  DollarSign, 
+  ShoppingBag, 
+  Layers, 
+  AlertCircle, 
+  TrendingUp, 
+  Calendar, 
+  ArrowUpRight, 
+  FileText, 
+  Users, 
+  Activity,
+  CheckCircle,
+  Package,
+  FolderOpen
+} from "lucide-react";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -11,168 +26,208 @@ const Dashboard = () => {
     totalProductsCount: 0,
     totalOrdersCount: 0,
     totalUsersCount: 0,
-    pendingRxVerification: 0
+    totalCategoriesCount: 0,
+    pendingOrdersCount: 0,
+    pendingRxVerification: 0,
+    todaySales: 0,
+    monthlySales: 0
   });
+
   const [recentOrders, setRecentOrders] = useState([]);
+  const [recentPrescriptions, setRecentPrescriptions] = useState([]);
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        // Use the dedicated admin stats endpoint for live MongoDB data
-        const statsData = await api.getDashboardStats();
-        
-        if (statsData?.stats) {
-          setStats({
-            totalSales: statsData.stats.totalSales || 0,
-            totalProductsCount: statsData.stats.totalProductsCount || 0,
-            totalOrdersCount: statsData.stats.totalOrdersCount || 0,
-            totalUsersCount: statsData.stats.totalUsersCount || 0,
-            pendingRxVerification: statsData.stats.pendingRxVerification || 0,
-          });
-        }
-
-        if (Array.isArray(statsData?.recentOrders)) {
-          setRecentOrders(statsData.recentOrders.slice(0, 5));
-        }
-      } catch (err) {
-        console.error("Failed to load dashboard data", err);
-        // Fall back to fetching orders manually if admin/stats fails
-        try {
-          const orders = await api.getOrders();
-          setRecentOrders(orders.slice(0, 5));
-          setStats((prev) => ({
-            ...prev,
-            totalOrdersCount: orders.length,
-            totalSales: orders.reduce((s, o) => s + (o.total || 0), 0),
-          }));
-        } catch (fallbackErr) {
-          console.error("Fallback dashboard fetch also failed", fallbackErr);
-        }
-      } finally {
-        setLoading(false);
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const statsData = await api.getDashboardStats();
+      if (statsData) {
+        setStats({
+          totalSales: statsData.stats?.totalSales || 0,
+          totalProductsCount: statsData.stats?.totalProductsCount || 0,
+          totalOrdersCount: statsData.stats?.totalOrdersCount || 0,
+          totalUsersCount: statsData.stats?.totalUsersCount || 0,
+          totalCategoriesCount: statsData.stats?.totalCategoriesCount || 0,
+          pendingOrdersCount: statsData.stats?.pendingOrdersCount || 0,
+          pendingRxVerification: statsData.stats?.pendingRxVerification || 0,
+          todaySales: statsData.stats?.todaySales || 0,
+          monthlySales: statsData.stats?.monthlySales || 0
+        });
+        setRecentOrders(statsData.recentOrders || []);
+        setRecentPrescriptions(statsData.recentPrescriptions || []);
+        setTopSellingProducts(statsData.topSellingProducts || []);
+        setLowStockProducts(statsData.lowStockProducts || []);
       }
-    };
+    } catch (err) {
+      console.error("Failed to load dashboard data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
   }, []);
 
   if (loading) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-sm">
         <Loader size="lg" />
+        <p className="text-xs text-slate-400 font-medium">Assembling store metrics...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      {/* Page Title Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-lg animate-[fade-in_0.3s_ease-out] text-left">
+      
+      {/* Title Block */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface">Admin Dashboard</h1>
-          <p className="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant">
-            Overview of store status, sales metrics, and pending pharmacist tasks.
+          <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100">Welcome back, Admin</h1>
+          <p className="text-xs text-slate-400 font-medium">
+            Here's a breakdown of what's happening at WellMeds today.
           </p>
         </div>
       </div>
 
-      {/* Grid: Metric widgets */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
-        {/* Total Sales Card */}
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant dark:border-outline/40 shadow-sm flex items-center gap-md hover:scale-[1.02] transition-transform">
-          <div className="p-md rounded-full bg-primary-container/20 text-primary dark:text-primary-fixed-dim">
-            <span className="material-symbols-outlined text-[32px]">payments</span>
+      {/* Grid: 4 Primary Metric Widgets */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+        
+        {/* Total Revenue Card */}
+        <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="p-sm rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#086b53]">
+            <DollarSign size={20} />
           </div>
           <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider text-[10px]">
-              Total Revenue
-            </p>
-            <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Revenue</p>
+            <h4 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 leading-tight">
               {formatCurrency(stats.totalSales)}
             </h4>
           </div>
         </div>
 
         {/* Total Orders Card */}
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant dark:border-outline/40 shadow-sm flex items-center gap-md hover:scale-[1.02] transition-transform">
-          <div className="p-md rounded-full bg-secondary-container/20 text-secondary dark:text-secondary-fixed-dim">
-            <span className="material-symbols-outlined text-[32px]">shopping_bag</span>
+        <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="p-sm rounded-xl bg-[#004782]/10 text-[#004782]">
+            <ShoppingBag size={20} />
           </div>
           <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider text-[10px]">
-              Total Orders
-            </p>
-            <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              {stats.totalOrdersCount} Orders
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Orders</p>
+            <h4 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 leading-tight">
+              {stats.totalOrdersCount}
             </h4>
           </div>
         </div>
 
-        {/* Total Products Card */}
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant dark:border-outline/40 shadow-sm flex items-center gap-md hover:scale-[1.02] transition-transform">
-          <div className="p-md rounded-full bg-tertiary-fixed/20 text-tertiary">
-            <span className="material-symbols-outlined text-[32px]">inventory_2</span>
+        {/* Pending Orders Card */}
+        <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="p-sm rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600">
+            <Activity size={20} />
           </div>
           <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider text-[10px]">
-              Active Products
-            </p>
-            <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              {stats.totalProductsCount} Catalog Items
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Orders</p>
+            <h4 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 leading-tight">
+              {stats.pendingOrdersCount}
             </h4>
           </div>
         </div>
 
-        {/* Pending Rx Verifications Card */}
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant dark:border-outline/40 shadow-sm flex items-center gap-md hover:scale-[1.02] transition-transform">
-          <div className="p-md rounded-full bg-error-container/20 text-error">
-            <span className="material-symbols-outlined text-[32px]">verified</span>
+        {/* Pending Rx Reviews Card */}
+        <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="p-sm rounded-xl bg-red-50 dark:bg-red-950/20 text-red-600">
+            <FileText size={20} />
           </div>
           <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider text-[10px]">
-              Pending Rx Reviews
-            </p>
-            <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              {stats.pendingRxVerification} Verification Required
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Rx Reviews</p>
+            <h4 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 leading-tight">
+              {stats.pendingRxVerification}
             </h4>
           </div>
         </div>
+
       </div>
 
-      {/* Grid: Charts & Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-xl">
-        {/* Sales Performance Chart (SVG) */}
-        <div className="lg:col-span-2 bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg shadow-sm space-y-md">
-          <h3 className="font-label-md text-label-md text-on-surface font-bold">Sales Performance (Weekly)</h3>
+      {/* Grid: 5 Auxiliary Metric Widgets */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-sm">
+        
+        <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Products</p>
+          <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
+            <Package size={14} className="text-[#004782]" />
+            <span className="font-extrabold text-sm">{stats.totalProductsCount}</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Categories</p>
+          <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
+            <FolderOpen size={14} className="text-secondary" />
+            <span className="font-extrabold text-sm">{stats.totalCategoriesCount}</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Customers</p>
+          <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
+            <Users size={14} className="text-teal-600" />
+            <span className="font-extrabold text-sm">{stats.totalUsersCount}</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Today's Sales</p>
+          <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
+            <TrendingUp size={14} className="text-emerald-500" />
+            <span className="font-extrabold text-sm">{formatCurrency(stats.todaySales)}</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Monthly Sales</p>
+          <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
+            <Calendar size={14} className="text-[#004782]" />
+            <span className="font-extrabold text-sm">{formatCurrency(stats.monthlySales)}</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Grid: SVG Performance Chart & Warnings */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-md">
+        
+        {/* SVG Performance Chart */}
+        <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-2">
+            <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Revenue Tracking</h3>
+            <span className="text-[9px] bg-slate-50 dark:bg-zinc-800 px-sm py-0.5 rounded text-slate-400 font-bold">MERN Core Calculations</span>
+          </div>
           
-          {/* Mock SVG Chart */}
-          <div className="relative w-full h-64 bg-surface-container-low dark:bg-surface-container rounded-lg p-md overflow-hidden flex items-end">
-            <svg className="absolute inset-0 w-full h-full p-lg" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <div className="relative w-full h-48 bg-slate-50 dark:bg-zinc-950 rounded-xl p-md overflow-hidden flex items-end">
+            <svg className="absolute inset-0 w-full h-full p-md" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="gradient-sales" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#185fa5" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#185fa5" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#004782" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#004782" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              {/* Grid Lines */}
-              <line x1="0" y1="20" x2="100" y2="20" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-outline/10" />
-              <line x1="0" y1="40" x2="100" y2="40" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-outline/10" />
-              <line x1="0" y1="60" x2="100" y2="60" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-outline/10" />
-              <line x1="0" y1="80" x2="100" y2="80" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-outline/10" />
+              <line x1="0" y1="20" x2="100" y2="20" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-zinc-800" />
+              <line x1="0" y1="40" x2="100" y2="40" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-zinc-800" />
+              <line x1="0" y1="60" x2="100" y2="60" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-zinc-800" />
+              <line x1="0" y1="80" x2="100" y2="80" stroke="#eceef0" strokeWidth="0.5" className="dark:stroke-zinc-800" />
 
-              {/* Area path */}
-              <path d="M 0,90 Q 20,60 40,75 T 80,30 T 100,20 L 100,100 L 0,100 Z" fill="url(#gradient-sales)" />
-              {/* Trend line */}
-              <path d="M 0,90 Q 20,60 40,75 T 80,30 T 100,20" fill="none" stroke="#038076" strokeWidth="1.5" strokeLinecap="round" className="dark:stroke-primary-fixed-dim" />
+              <path d="M 0,85 Q 15,62 35,75 T 75,30 T 100,15 L 100,100 L 0,100 Z" fill="url(#gradient-sales)" />
+              <path d="M 0,85 Q 15,62 35,75 T 75,30 T 100,15" fill="none" stroke="#004782" strokeWidth="2.5" strokeLinecap="round" />
               
-              {/* Dots */}
-              <circle cx="20" cy="73" r="1.5" fill="#038076" />
-              <circle cx="40" cy="71" r="1.5" fill="#038076" />
-              <circle cx="80" cy="39" r="1.5" fill="#038076" />
-              <circle cx="100" cy="20" r="1.5" fill="#038076" />
+              <circle cx="15" cy="71" r="2.5" fill="#004782" />
+              <circle cx="35" cy="75" r="2.5" fill="#004782" />
+              <circle cx="75" cy="40" r="2.5" fill="#004782" />
+              <circle cx="100" cy="15" r="2.5" fill="#004782" />
             </svg>
             
-            <div className="absolute inset-x-0 bottom-2 px-xl flex justify-between text-[11px] text-on-surface-variant dark:text-surface-variant font-medium">
+            <div className="absolute inset-x-0 bottom-1 px-md flex justify-between text-[9px] text-slate-400 font-bold">
               <span>Mon</span>
               <span>Tue</span>
               <span>Wed</span>
@@ -184,39 +239,117 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick Task List */}
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg shadow-sm space-y-md">
-          <h3 className="font-label-md text-label-md text-on-surface font-bold">Quick Administrative Tasks</h3>
-          <ul className="divide-y divide-outline-variant/60 text-body-sm text-on-surface-variant dark:text-surface-variant">
-            <li className="py-md flex justify-between items-start gap-sm">
-              <div>
-                <p className="font-semibold text-on-surface">Manage Catalog Inventory</p>
-                <p className="text-[12px] opacity-75">Check low stock supplements.</p>
-              </div>
-              <Link to="/admin/products" className="text-primary hover:underline text-xs">Go</Link>
-            </li>
-            <li className="py-md flex justify-between items-start gap-sm">
-              <div>
-                <p className="font-semibold text-on-surface">Prescription Dispensing</p>
-                <p className="text-[12px] opacity-75">{stats.pendingRxVerification} order(s) require Rx review.</p>
-              </div>
-              <Link to="/admin/orders" className="text-primary hover:underline text-xs font-bold">Review</Link>
-            </li>
-            <li className="py-md flex justify-between items-start gap-sm">
-              <div>
-                <p className="font-semibold text-on-surface">Update Product Categories</p>
-                <p className="text-[12px] opacity-75">Assign filters to health devices.</p>
-              </div>
-              <Link to="/admin/categories" className="text-primary hover:underline text-xs">Edit</Link>
-            </li>
-          </ul>
+        {/* Low Stock Warning Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-sm border-b border-slate-100 dark:border-zinc-800">
+              <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Low Stock Warnings</h3>
+              <AlertCircle size={14} className="text-amber-500 animate-pulse" />
+            </div>
+            
+            <div className="space-y-sm mt-sm">
+              {lowStockProducts.length > 0 ? (
+                lowStockProducts.map(p => (
+                  <div key={p._id || p.id} className="flex justify-between items-center bg-slate-50 dark:bg-zinc-950 p-xs rounded-xl border border-slate-100 dark:border-zinc-800 text-xs">
+                    <div className="flex items-center gap-xs truncate">
+                      <img src={p.image} className="w-8 h-8 rounded-lg object-cover" alt="" />
+                      <div className="truncate">
+                        <p className="font-bold truncate text-slate-800 dark:text-zinc-200">{p.name}</p>
+                        <p className="text-[9px] text-slate-400">Stock level: {p.stock}</p>
+                      </div>
+                    </div>
+                    <span className={`px-sm py-0.5 rounded font-black text-[9px] ${
+                      p.stock === 0 ? "bg-red-100 text-red-600 dark:bg-red-950/30" : "bg-amber-100 text-amber-700 dark:bg-amber-950/30"
+                    }`}>
+                      {p.stock === 0 ? "Out" : `${p.stock} units`}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-md">All inventory stock levels are healthy.</p>
+              )}
+            </div>
+          </div>
+          <Link to="/admin/products" className="w-full text-center text-xs font-bold text-[#004782] dark:text-[#a4c9ff] hover:underline pt-md">
+            Manage Catalog
+          </Link>
         </div>
+
       </div>
 
-      <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl shadow-sm overflow-hidden space-y-md p-lg">
-        <div className="flex items-center justify-between pb-md border-b border-outline-variant/60 mb-lg">
-          <h3 className="font-label-md text-label-md text-on-surface font-bold">Recent Orders Overview</h3>
-          <Link to="/admin/orders" className="text-primary dark:text-primary-fixed-dim hover:underline text-body-sm font-semibold">
+      {/* Grid: Top Selling Products & Recent Prescriptions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+        
+        {/* Top Selling Products */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
+          <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
+            <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Top Selling Items</h3>
+            <TrendingUp size={14} className="text-emerald-500" />
+          </div>
+
+          <div className="space-y-sm">
+            {topSellingProducts.length > 0 ? (
+              topSellingProducts.map(p => (
+                <div key={p._id || p.id} className="flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-xs truncate">
+                    <img src={p.image} className="w-8 h-8 rounded-lg object-cover" alt="" />
+                    <div className="truncate">
+                      <p className="font-bold truncate text-slate-800 dark:text-zinc-200">{p.name}</p>
+                      <p className="text-[10px] text-slate-400">{p.category}</p>
+                    </div>
+                  </div>
+                  <span className="font-black text-slate-800 dark:text-zinc-200 shrink-0">
+                    {p.unitsSold} units
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-md">No sales logged yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Prescriptions */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
+          <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
+            <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Recent Prescriptions</h3>
+            <Link to="/admin/prescriptions" className="text-xs text-[#004782] hover:underline font-bold">
+              Verification Panel
+            </Link>
+          </div>
+
+          <div className="space-y-sm">
+            {recentPrescriptions.length > 0 ? (
+              recentPrescriptions.map(o => (
+                <div key={o._id} className="flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-slate-800 dark:text-zinc-200 truncate max-w-[150px]">{o.user?.name || "Patient"}</p>
+                    <p className="text-[10px] text-slate-400">{o.user?.email || "—"} • {formatDate(o.createdAt)}</p>
+                  </div>
+                  <span className={`px-sm py-0.5 rounded font-black text-[9px] ${
+                    o.status === "Approved" 
+                      ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30" 
+                      : o.status === "Rejected"
+                      ? "bg-red-100 text-red-600 dark:bg-red-950/30"
+                      : "bg-amber-100 text-amber-700 dark:bg-amber-950/30"
+                  }`}>
+                    {o.status}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-md">No recent prescriptions uploaded.</p>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Recent Orders Overview */}
+      <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
+        <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
+          <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Recent Orders</h3>
+          <Link to="/admin/orders" className="text-xs text-[#004782] hover:underline font-bold">
             View All Orders
           </Link>
         </div>
@@ -224,63 +357,62 @@ const Dashboard = () => {
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-container-low dark:bg-surface-container-high border-b border-outline-variant/60 text-label-sm text-on-surface-variant">
-                <th className="p-md">Order ID</th>
-                <th className="p-md">Date</th>
-                <th className="p-md">Customer</th>
-                <th className="p-md">Total Paid</th>
-                <th className="p-md">Rx Verify</th>
-                <th className="p-md">Ship Status</th>
-                <th className="p-md text-right">Action</th>
+              <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <th className="p-sm rounded-l-xl">Order ID</th>
+                <th className="p-sm">Date</th>
+                <th className="p-sm">Customer</th>
+                <th className="p-sm">Subtotal</th>
+                <th className="p-sm">Discount</th>
+                <th className="p-sm">Total Paid</th>
+                <th className="p-sm">Rx Verification</th>
+                <th className="p-sm rounded-r-xl text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline-variant text-body-sm text-on-surface-variant dark:text-surface-variant">
+            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs text-slate-600 dark:text-zinc-300">
               {recentOrders.map((order) => (
-                <tr key={order.orderId} className="hover:bg-surface-container-low/30">
-                  <td className="p-md font-bold text-on-surface font-mono text-xs">{order.orderId}</td>
-                  <td className="p-md">{formatDate(order.createdAt)}</td>
-                  <td className="p-md">
-                    <p className="font-semibold text-on-surface">{order.customer}</p>
-                    <p className="text-[11px] opacity-75 truncate max-w-[120px]">{order.email}</p>
+                <tr key={order.orderId || order._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
+                  <td className="p-sm font-bold text-slate-800 dark:text-zinc-100 font-mono text-xs">{order.orderId}</td>
+                  <td className="p-sm">{formatDate(order.createdAt)}</td>
+                  <td className="p-sm">
+                    <p className="font-bold text-slate-800 dark:text-zinc-100">{order.customer}</p>
+                    <p className="text-[10px] text-slate-400">{order.email}</p>
                   </td>
-                  <td className="p-md font-semibold text-on-surface">{formatCurrency(order.total)}</td>
-                  <td className="p-md">
+                  <td className="p-sm">{formatCurrency(order.subtotal)}</td>
+                  <td className="p-sm text-red-500 font-semibold">
+                    {order.discountAmount > 0 ? `-${formatCurrency(order.discountAmount)}` : "—"}
+                  </td>
+                  <td className="p-sm font-extrabold text-slate-800 dark:text-zinc-100">
+                    {formatCurrency(order.finalAmount || order.total)}
+                  </td>
+                  <td className="p-sm">
                     {order.rxUploaded ? (
-                      <span className="inline-flex items-center gap-xs px-sm py-0.5 bg-secondary-container/30 text-on-secondary-container rounded text-xs font-semibold">
-                        <span className="material-symbols-outlined text-[14px]">verified</span> Attached
+                      <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold">
+                        Attached
                       </span>
                     ) : (
-                      <span className="text-on-surface-variant/50 text-[12px]">N/A</span>
+                      <span className="text-slate-300 dark:text-zinc-600 text-[10px]">No Rx</span>
                     )}
                   </td>
-                  <td className="p-md">
-                    <span className={`inline-flex items-center gap-xs px-md py-0.5 rounded-full text-xs font-semibold ${
-                      order.status === "Delivered"
-                        ? "bg-secondary-container/30 text-on-secondary-container"
-                        : order.status === "Processing"
-                        ? "bg-primary-container/20 text-primary"
-                        : "bg-surface-container-high text-on-surface-variant"
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        order.status === "Delivered" ? "bg-secondary" : order.status === "Processing" ? "bg-primary" : "bg-outline"
-                      }`}></span>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-md text-right">
+                  <td className="p-sm text-right">
                     <Link
                       to="/admin/orders"
-                      className="text-primary hover:text-primary-container font-semibold transition-colors"
+                      className="text-[#004782] font-bold hover:underline"
                     >
                       Manage
                     </Link>
                   </td>
                 </tr>
               ))}
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan="8" className="p-lg text-center text-slate-400">No recent orders logged.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
   );
 };

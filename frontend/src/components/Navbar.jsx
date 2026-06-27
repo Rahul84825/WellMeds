@@ -12,7 +12,8 @@ import {
   History,
   ChevronDown,
   FileText,
-  Package
+  Package,
+  Search
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
@@ -580,6 +581,8 @@ const Navbar = () => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
@@ -624,107 +627,165 @@ const Navbar = () => {
 
       </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg animate-[slide-down_0.25s_ease-out]">
-          <div className="p-6 space-y-6">
-            {/* Primary Action buttons */}
-            <div className="flex items-center gap-3">
-              <Link
-                to="/cart"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 h-12 rounded-xl border border-gray-200 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 font-medium"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span>Cart ({cartCount})</span>
-              </Link>
+      {/* Mobile Drawer Menu Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/40 z-[200] transition-opacity duration-300 lg:hidden ${
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
 
-              {user ? (
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 h-12 rounded-xl border border-gray-200 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 font-medium"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="truncate">{user.name}</span>
-                </Link>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 h-12 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-700 font-medium"
-                >
-                  <User className="w-5 h-5" />
-                  <span>Login</span>
-                </Link>
-              )}
-            </div>
+      {/* Mobile Drawer Menu Container */}
+      <div 
+        className={`fixed top-0 bottom-0 left-0 w-[300px] max-w-[80vw] bg-white dark:bg-zinc-900 z-[201] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Drawer Header */}
+        <div className="h-16 flex items-center justify-between px-md border-b border-slate-100 dark:border-zinc-800 shrink-0">
+          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-xs font-bold text-[#004782]">
+            <span className="h-7 w-7 rounded bg-[#004782] text-white flex items-center justify-center text-sm font-black">W</span>
+            <span className="text-on-surface text-sm">WellMeds</span>
+          </Link>
+          <button 
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-full"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            {/* Menu Links */}
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">Categories & Services</span>
+        {/* Drawer Content */}
+        <div className="flex-1 overflow-y-auto p-md space-y-md text-left">
+          {/* Mobile Search input */}
+          <div className="relative">
+            <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search medicines..."
+              value={mobileSearchQuery}
+              onChange={(e) => setMobileSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && mobileSearchQuery.trim()) {
+                  setMobileMenuOpen(false);
+                  navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
+                }
+              }}
+              className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-800 rounded-xl border border-outline-variant/60 outline-none text-xs focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+            />
+          </div>
 
-              <Link
-                to="/products"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
-              >
-                Super Speciality Medicines
-              </Link>
-              <Link
-                to="/products?filter=imported"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
-              >
-                Imported Medicines
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
-              >
-                Patient Assistance Program
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
-              >
-                Library
-              </Link>
-              <Link
-                to="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-xl font-medium text-gray-800 hover:bg-gray-50 hover:text-[#004782]"
-              >
-                Partnerships
-              </Link>
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 rounded-xl font-bold text-[#004782] hover:bg-blue-50"
-                >
-                  Go to Admin Panel
-                </Link>
-              )}
-            </div>
+          {/* Quick Action Badges */}
+          <div className="grid grid-cols-2 gap-sm">
+            <Link
+              to="/cart"
+              onClick={() => setMobileMenuOpen(false)}
+              className="h-11 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center gap-xs text-xs text-on-surface font-semibold hover:bg-slate-50"
+            >
+              <ShoppingCart className="w-4 h-4 text-[#004782]" />
+              <span>Cart ({cartCount})</span>
+            </Link>
 
-            {/* Log Out button if user is authenticated */}
+            <Link
+              to="/wishlist"
+              onClick={() => setMobileMenuOpen(false)}
+              className="h-11 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center gap-xs text-xs text-on-surface font-semibold hover:bg-slate-50"
+            >
+              <Heart className="w-4 h-4 text-red-500" />
+              <span>Wishlist</span>
+            </Link>
+          </div>
+
+          {/* Menu Links */}
+          <div className="flex flex-col gap-xs pt-sm border-t border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-xs px-sm">Navigation</span>
+
+            {user ? (
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+              >
+                <User size={16} className="text-slate-400" />
+                <span>My Profile ({user.name})</span>
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+              >
+                <User size={16} className="text-slate-400" />
+                <span>Login / Register</span>
+              </Link>
+            )}
+
+            <Link
+              to="/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+            >
+              <Package size={16} className="text-slate-400" />
+              <span>All Medicines</span>
+            </Link>
+
+            <Link
+              to="/products?filter=imported"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+            >
+              <Percent size={16} className="text-slate-400" />
+              <span>Imported Medicines</span>
+            </Link>
+
+            <Link
+              to="/upload-prescription"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+            >
+              <FileText size={16} className="text-slate-400" />
+              <span>Upload Prescription</span>
+            </Link>
+
             {user && (
+              <Link
+                to="/orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+              >
+                <History size={16} className="text-slate-400" />
+                <span>Order History</span>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-sm py-sm rounded-xl text-xs text-[#004782] hover:bg-blue-50/50 flex items-center gap-sm font-extrabold"
+              >
+                <LayoutDashboard size={16} />
+                <span>Go to Admin Panel</span>
+              </Link>
+            )}
+          </div>
+
+          {/* Log Out button if authenticated */}
+          {user && (
+            <div className="pt-sm border-t border-slate-100 dark:border-zinc-800">
               <button
                 onClick={async () => {
                   await logout();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full h-12 border border-red-200 text-red-600 rounded-xl flex items-center justify-center font-medium hover:bg-red-50"
+                className="w-full h-11 border border-red-100 text-red-600 rounded-xl flex items-center justify-center font-bold text-xs hover:bg-red-50"
               >
                 Logout
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </nav>
   );
 };

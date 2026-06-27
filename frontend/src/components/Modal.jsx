@@ -20,7 +20,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md", showCl
       <div className="absolute inset-0" onClick={onClose} />
       
       {/* Modal Box */}
-      <div className={`relative bg-surface-container-lowest dark:bg-inverse-surface w-full ${maxWidth} rounded-xl shadow-2xl border border-outline-variant dark:border-outline p-lg z-10 animate-[slide-up_0.3s_ease-out] flex flex-col max-h-[90vh]`}>
+      <div className={`relative bg-surface-container-lowest dark:bg-inverse-surface w-full ${maxWidth} rounded-t-3xl sm:rounded-2xl shadow-2xl border-t sm:border border-outline-variant dark:border-outline p-lg z-10 animate-[slide-up_0.3s_ease-out] flex flex-col max-h-[92vh] sm:max-h-[90vh] absolute bottom-0 sm:relative`}>
         <div className="flex items-center justify-between border-b border-outline-variant pb-md mb-md">
           <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">{title}</h3>
           {showCloseButton && (

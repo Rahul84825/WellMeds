@@ -1,5 +1,7 @@
 import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
+import { Coupon } from "../models/Coupon.js";
+import { CouponUsage } from "../models/CouponUsage.js";
 import { sendOrderStatusEmail } from "../services/emailService.js";
 
 export const placeOrder = async (req, res, next) => {
@@ -7,6 +9,65 @@ export const placeOrder = async (req, res, next) => {
 
   try {
     const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
+    let couponObj = null;
+    let discountAmount = 0;
+
+    // Validate Coupon if couponCode is provided
+    if (orderData.couponCode) {
+      couponObj = await Coupon.findOne({ code: orderData.couponCode.toUpperCase() });
+      if (!couponObj) {
+        return res.status(404).json({ success: false, message: "Invalid coupon code" });
+      }
+
+      if (couponObj.status !== "Active" || !couponObj.isActive) {
+        return res.status(400).json({ success: false, message: "This coupon is inactive" });
+      }
+
+      const now = new Date();
+      if (couponObj.startDate && couponObj.startDate > now) {
+        return res.status(400).json({ success: false, message: "This coupon is not active yet" });
+      }
+
+      if (couponObj.expiryDate && couponObj.expiryDate < now) {
+        return res.status(400).json({ success: false, message: "This coupon has expired" });
+      }
+
+      const minOrder = couponObj.minimumOrder || couponObj.minOrderValue || 0;
+      if (orderData.subtotal < minOrder) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Minimum order value of ₹${minOrder} is required for this coupon` 
+        });
+      }
+
+      // Check global limit
+      if (couponObj.usageLimit !== null && couponObj.usedCount >= couponObj.usageLimit) {
+        return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
+      }
+
+      // Check per-user limit
+      const userUsageCount = await CouponUsage.countDocuments({ coupon: couponObj._id, user: req.user._id });
+      if (userUsageCount >= couponObj.perUserLimit) {
+        return res.status(400).json({ success: false, message: "You have already used this coupon" });
+      }
+
+      // Calculate discount amount
+      const discountVal = couponObj.discountValue || couponObj.discountAmount || 0;
+      if (couponObj.discountType === "percentage") {
+        discountAmount = (orderData.subtotal * discountVal) / 100;
+        if (couponObj.maximumDiscount > 0) {
+          discountAmount = Math.min(discountAmount, couponObj.maximumDiscount);
+        }
+      } else {
+        discountAmount = Math.min(discountVal, orderData.subtotal);
+      }
+    }
+
+    // Recalculate final totals
+    const subtotal = parseFloat(orderData.subtotal);
+    const shipping = parseFloat(orderData.shipping);
+    const tax = parseFloat(orderData.tax);
+    const finalAmount = Math.max(0, subtotal - discountAmount + shipping + tax);
 
     // Validate stock and adjust inventory levels
     for (const item of orderData.items) {
@@ -32,8 +93,26 @@ export const placeOrder = async (req, res, next) => {
         quantity: item.quantity,
         price: item.price,
       })),
+      coupon: couponObj ? couponObj._id : null,
+      couponCode: couponObj ? couponObj.code : null,
+      discountAmount,
+      total: finalAmount, // matches legacy 'total' field
+      finalAmount, // matches new extended 'finalAmount' field
       status: orderData.requiresRx ? "Prescription Review" : "Processing",
     });
+
+    // Record Coupon Usage and increment count
+    if (couponObj) {
+      await CouponUsage.create({
+        coupon: couponObj._id,
+        user: req.user._id,
+        order: order._id,
+        discountAmount: discountAmount,
+      });
+
+      couponObj.usedCount += 1;
+      await couponObj.save();
+    }
 
     // Deduct stock levels
     for (const item of orderData.items) {
