@@ -69,3 +69,25 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* WhatsApp floating button pulse-glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 28px rgba(37, 211, 102, 0.7);
+  }
+}
+
+/* WhatsApp tooltip slide-in animation */
+@keyframes wa-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import FloatingWhatsApp from "../components/FloatingWhatsApp";
 
 const MainLayout = () => {
   return (
@@ -11,6 +12,8 @@ const MainLayout = () => {
         <Outlet />
       </main>
       <Footer />
+      {/* Global floating WhatsApp support button — customer pages only */}
+      <FloatingWhatsApp />
     </div>
   );
 };

@@ -587,7 +587,7 @@ const Navbar = () => {
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
       {/* Desktop & Mobile Navbar Container */}
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 xl:px-12 flex flex-col">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col">
         
         {/* Row 1: Logo & Action Buttons */}
         <div className="h-[70px] lg:h-[80px] flex items-center justify-between">

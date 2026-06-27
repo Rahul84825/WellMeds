@@ -49,7 +49,7 @@ const WhyChooseWellMeds = () => {
   ];
 
   return (
-    <section className="py-20 bg-slate-50/50 dark:bg-zinc-950 transition-colors duration-300">
+    <section className="py-16 bg-slate-50/50 dark:bg-zinc-950 transition-colors duration-300">
       <div className="max-w-max-width mx-auto px-margin-desktop">
         
         {/* Section Header */}

@@ -63,7 +63,7 @@ export default {
         "full": "9999px"
       },
       spacing: {
-        "max-width": "1280px",
+        "max-width": "1440px",
         "base": "4px",
         "margin-desktop": "48px",
         "xxl": "64px",

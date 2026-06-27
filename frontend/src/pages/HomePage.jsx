@@ -8,7 +8,6 @@ import TrustStatsBar from "../components/TrustStatsBar";
 import PrescriptionCTA from "../components/PrescriptionCTA";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
-import FloatingConsultButton from "../components/FloatingConsultButton";
 import ConsultationModal from "../components/ConsultationModal";
 
 const HomePage = () => {
@@ -42,9 +41,6 @@ const HomePage = () => {
 
       {/* Customer Testimonials & Reviews */}
       <TestimonialsSection />
-
-      {/* Floating Pharmacist Consultation Call-To-Action */}
-      <FloatingConsultButton onClick={() => setConsultModalOpen(true)} />
 
       {/* Pharmacist Consultation Details Form Modal */}
       <ConsultationModal

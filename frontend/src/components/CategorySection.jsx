@@ -9,7 +9,7 @@ export const CategorySection = () => {
 
   if (loading) {
     return (
-      <section className="py-xl bg-surface-container-lowest dark:bg-surface-container-high transition-colors duration-300">
+      <section className="py-16 bg-surface-container-lowest dark:bg-surface-container-high transition-colors duration-300">
         <div className="max-w-max-width mx-auto px-margin-desktop py-lg flex justify-center items-center">
           <Loader size="md" />
         </div>
@@ -22,7 +22,7 @@ export const CategorySection = () => {
   }
 
   return (
-    <section className="py-xl bg-surface-container-lowest dark:bg-surface-container-high transition-colors duration-300">
+    <section className="py-16 bg-surface-container-lowest dark:bg-surface-container-high transition-colors duration-300">
       <div className="max-w-max-width mx-auto px-margin-desktop">
         <div className="flex items-center justify-between mb-lg">
           <h2 className="font-headline-sm text-headline-sm text-on-surface">Shop by Category</h2>

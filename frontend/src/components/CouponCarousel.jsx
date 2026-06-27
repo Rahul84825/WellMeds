@@ -171,7 +171,7 @@ const CouponCarousel = () => {
   // Rendering empty state
   if (coupons.length === 0) {
     return (
-      <section className="py-xxl bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300">
+      <section className="py-16 bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300">
         <div className="max-w-max-width mx-auto px-margin-desktop text-center">
           <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/30 dark:border-outline/20 p-xl rounded-2xl max-w-md mx-auto shadow-xs space-y-md">
             <p className="text-on-surface-variant dark:text-surface-variant font-body-md font-bold">
@@ -194,7 +194,7 @@ const CouponCarousel = () => {
 
   return (
     <section 
-      className="py-xl bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300 relative overflow-hidden"
+      className="py-16 bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300 relative overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
