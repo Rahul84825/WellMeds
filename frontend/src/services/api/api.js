@@ -10,7 +10,7 @@ export const apiInstance = axios.create({
   },
 });
 
-// Request Interceptor: Attach bearer token
+// Request Interceptor: Attach bearer token from localStorage
 apiInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("medishop_token");
@@ -22,39 +22,66 @@ apiInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Auto-refresh tokens on 401
+// Response Interceptor: Auto-refresh access token on 401, with guards
 apiInstance.interceptors.response.use(
   (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if error is 401 and request hasn't been retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const response = await axios.post(
-          `${API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const { token } = response.data;
-        
-        localStorage.setItem("medishop_token", token);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        
-        return apiInstance(originalRequest);
-      } catch (refreshError) {
-        // Clear session on refresh failure
-        localStorage.removeItem("medishop_token");
-        sessionStorage.removeItem("medishop_user");
-        // Only redirect if not already on login page
-        if (!window.location.pathname.includes("/login")) {
-          window.location.href = "/login";
-        }
-        return Promise.reject(refreshError);
-      }
+    // Guard 1: Only attempt refresh on 401 errors
+    if (error.response?.status !== 401) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    // Guard 2: Skip refresh if the caller opted out (e.g. initial session bootstrap)
+    // This prevents guest users from triggering a pointless /auth/refresh call
+    if (originalRequest.skipAuthRetry) {
+      return Promise.reject(error);
+    }
+
+    // Guard 3: Skip refresh if the failing request IS the refresh endpoint itself
+    // This prevents infinite retry loops
+    const isRefreshEndpoint =
+      originalRequest.url?.includes("/auth/refresh") ||
+      originalRequest.url?.includes("/auth/me");
+    if (isRefreshEndpoint) {
+      return Promise.reject(error);
+    }
+
+    // Guard 4: Only retry once per request
+    if (originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      // Attempt to get a new access token using the HttpOnly refresh cookie
+      const response = await axios.post(
+        `${API_URL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+      const { token } = response.data;
+
+      // Persist new access token and retry the original request
+      localStorage.setItem("medishop_token", token);
+      originalRequest.headers.Authorization = `Bearer ${token}`;
+
+      return apiInstance(originalRequest);
+    } catch (refreshError) {
+      // Refresh failed — clear local session state
+      localStorage.removeItem("medishop_token");
+      sessionStorage.removeItem("medishop_user");
+
+      // Only redirect to login if not already there
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+
+      return Promise.reject(refreshError);
+    }
   }
 );
+
 export default apiInstance;

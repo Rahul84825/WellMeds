@@ -157,7 +157,8 @@ export const refresh = async (req, res, next) => {
   let token = req.cookies.refreshToken || req.body.refreshToken;
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Refresh token is missing" });
+    // Return a neutral message — never expose internal token architecture to clients
+    return res.status(401).json({ success: false, message: "Session expired. Please log in again." });
   }
 
   try {

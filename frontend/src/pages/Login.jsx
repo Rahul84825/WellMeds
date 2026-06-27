@@ -3,6 +3,38 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
+/**
+ * Converts raw backend/axios error messages into clean, user-facing strings.
+ * Internal messages like "Refresh token is missing" must NEVER be shown to users.
+ */
+const sanitiseAuthError = (err) => {
+  const raw = err?.response?.data?.message || "";
+
+  // Suppress any token / refresh / authorization internal messages
+  const internalPatterns = [
+    /refresh token/i,
+    /not authorized/i,
+    /token (is )?missing/i,
+    /token verification/i,
+    /jwt/i,
+    /session expired/i,
+  ];
+  if (internalPatterns.some((p) => p.test(raw))) {
+    return "Something went wrong. Please try again.";
+  }
+
+  // Map known backend messages to friendly copy
+  if (/invalid email or password/i.test(raw)) return "Invalid email or password.";
+  if (/not verified/i.test(raw) || /verify your email/i.test(raw))
+    return "Your email address is not verified. Please check your inbox for the verification link.";
+  if (/locked/i.test(raw)) return raw; // Account lockout message is already user-friendly
+  if (/network error/i.test(err?.message) || err?.code === "ERR_NETWORK")
+    return "Unable to connect to the server. Please check your internet connection.";
+
+  // Return the backend message if it looks safe, else a generic fallback
+  return raw || "Authentication failed. Please try again.";
+};
+
 const Login = () => {
   const { loginWithGoogle, loginUser, user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -97,11 +129,8 @@ const Login = () => {
         }
       }, 800);
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.message || 
-        "Google Authentication failed. Please check your account and try again."
-      );
+      console.warn("Google login error:", err?.response?.data?.message || err?.message);
+      setError(sanitiseAuthError(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -130,11 +159,8 @@ const Login = () => {
         }
       }, 800);
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.message || 
-        "Authentication failed. Please check your credentials and try again."
-      );
+      console.warn("Email login error:", err?.response?.data?.message || err?.message);
+      setError(sanitiseAuthError(err));
     } finally {
       setIsSubmitting(false);
     }

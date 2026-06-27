@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [onLogoutCallbacks]);
 
-  // Session check on mount
+  // Session check on mount — silently handles guest state (no session = normal)
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -37,7 +37,9 @@ export const AuthProvider = ({ children }) => {
           onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
         }
       } catch (err) {
-        console.error("Failed to load user session", err);
+        // This catch is a safety net — getCurrentUser() already handles all
+        // errors internally and returns null. Log at debug level only.
+        console.debug("Auth session bootstrap completed (no session):", err?.message);
       } finally {
         setLoading(false);
       }

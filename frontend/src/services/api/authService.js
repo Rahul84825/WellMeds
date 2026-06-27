@@ -37,14 +37,26 @@ export const authService = {
 
   async getCurrentUser() {
     try {
-      const data = await apiInstance.get("/auth/me");
+      // skipAuthRetry: true — tells the interceptor NOT to call /auth/refresh
+      // if this request returns 401. A guest user with no session is completely
+      // normal; we simply return null without triggering the refresh chain.
+      const data = await apiInstance.get("/auth/me", {
+        skipAuthRetry: true,
+      });
       if (data.success && data.user) {
         sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
         return data.user;
       }
       return null;
     } catch (error) {
-      console.warn("Session check failed, clearing local state:", error.message);
+      // 401 = no session (expected for guests) — clear any stale local state
+      if (error.response?.status === 401) {
+        localStorage.removeItem("medishop_token");
+        sessionStorage.removeItem("medishop_user");
+        return null;
+      }
+      // Network or server error — log for debugging but don't surface to user
+      console.warn("Session check failed:", error.message);
       localStorage.removeItem("medishop_token");
       sessionStorage.removeItem("medishop_user");
       return null;
