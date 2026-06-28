@@ -124,15 +124,95 @@ export const INITIAL_PRODUCTS = [
     sku: "VIT-HG-C1"
   },
   {
-    name: "Bayer Aspirin 81mg",
+    name: "Aspirin 81mg",
     category: "First Aid",
-    brand: "HealthGuard",
+    brand: "Bayer",
     price: 8.99,
+    originalPrice: 12.99,
     stock: 1240,
     requiresRx: false,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDmdI2es6gtor3mmlZYv6ijKCJm7nWkKqxA5k93v85U8yen4BHpCjaJMyFKscUUkrblH0Muv9pUNGcCF2eVBg71t6LLDjaga_3ZPtEDBwmXPa3VRyImdaYQl9CUWE1eTt0-fQ9746pPQEwLkFCMU2abb2D8ZjgoKjGOd-qQdMXltIs-mPsHvEcHqy5S1ZQ3139cn_VUTsf3cCgX72se4D_Gag4c3hzFx-aM-nJb-aNduMiRmPRTppVj5eFg9pTZUnQvNPgJ-sl55R-C",
-    description: "Low-dose pain reliever and heart health support tablets. Relieves minor aches and pains temporarily.",
-    sku: "FA-HG-ASP"
+    description: "Aspirin 81mg is a low-dose antiplatelet medicine used to reduce the risk of heart attack and stroke in people with cardiovascular disease. It helps prevent blood clots by reducing platelet aggregation.",
+    sku: "FA-BY-ASP",
+    medicalSections: [
+      {
+        title: "Overview",
+        content: "Aspirin 81mg is a low-dose antiplatelet medicine used to reduce the risk of heart attack and stroke in people with cardiovascular disease. It helps prevent blood clots by reducing platelet aggregation."
+      },
+      {
+        title: "Uses",
+        content: "Low-dose aspirin is clinically indicated for the prevention of cardiovascular events in high-risk patients. It is primarily used for the prevention of recurrent heart attacks, prevention of recurrent ischemic stroke, and management of stable or unstable angina."
+      },
+      {
+        title: "How It Works",
+        content: "Aspirin works by irreversibly inhibiting the cyclooxygenase-1 (COX-1) enzyme in platelets. This prevents the synthesis of thromboxane A2, a powerful promoter of platelet aggregation and blood clotting, thereby reducing the likelihood of arterial blockages."
+      }
+    ],
+    composition: [
+      { ingredient: "Aspirin", strength: "81 mg", purpose: "Antiplatelet Agent" }
+    ],
+    benefits: [
+      { title: "Helps prevent blood clot formation", description: "Reduces the risk of arterial blockages and blood clots in high-risk cardiovascular patients." },
+      { title: "Reduces cardiovascular risk", description: "Lowers the incidence of secondary heart attacks and ischemic strokes." },
+      { title: "Doctor-recommended low-dose therapy", description: "Provides the optimal clinical dosage for daily antiplatelet therapy under medical supervision." },
+      { title: "Suitable for long-term use", description: "Enteric coating helps protect the stomach lining during long-term daily administration." }
+    ],
+    usageInstructions: [
+      "Take once daily or as prescribed by your physician.",
+      "Swallow the tablet whole with a full glass of water.",
+      "Preferably take after meals to minimize gastric discomfort.",
+      "Do not crush, chew, or break enteric-coated tablets unless instructed."
+    ],
+    storageInstructions: [
+      "Store below 25°C in a dry place.",
+      "Protect from direct moisture and humidity.",
+      "Keep out of reach of children and pets."
+    ],
+    warnings: [
+      "Do not take if you have a history of bleeding disorders or aspirin allergies.",
+      "Use with extreme caution if you have active stomach ulcers or gastritis.",
+      "Discontinue use and consult a physician if you notice unusual bruising or bleeding.",
+      "Inform your surgeon or dentist about daily aspirin therapy before any procedure."
+    ],
+    sideEffects: [
+      "Mild stomach irritation or heartburn",
+      "Nausea or dyspepsia",
+      "Increased bleeding tendency (e.g. nosebleeds, easy bruising)"
+    ],
+    safetyCards: [
+      { icon: "Pregnancy", title: "Pregnancy", status: "Consult Doctor", description: "Use during pregnancy only under strict medical supervision, especially in the third trimester." },
+      { icon: "Breastfeeding", title: "Breastfeeding", status: "Consult Doctor", description: "Aspirin passes into breast milk. Consult your doctor before using while nursing." },
+      { icon: "Alcohol", title: "Alcohol", status: "Avoid", description: "Avoid alcohol as it increases the risk of stomach irritation and gastrointestinal bleeding." },
+      { icon: "Driving", title: "Driving", status: "Generally Safe", description: "Does not affect alertness or motor skills." },
+      { icon: "Kidney", title: "Kidney", status: "Use With Caution", description: "May affect renal function. Monitor closely if you have pre-existing kidney disease." },
+      { icon: "Liver", title: "Liver", status: "Consult Doctor", description: "Use with caution in patients with severe hepatic impairment." },
+      { icon: "Children", title: "Children", status: "Not Recommended", description: "Do not give to children or teenagers due to the risk of Reye's syndrome." },
+      { icon: "Elderly", title: "Elderly", status: "Use With Caution", description: "Higher risk of gastrointestinal bleeding. Regular monitoring is advised." }
+    ],
+    faqs: [
+      { question: "What is Aspirin 81mg used for?", answer: "Aspirin 81mg is a low-dose antiplatelet medicine used to reduce the risk of heart attack and stroke in people with cardiovascular disease." },
+      { question: "Can I take it every day?", answer: "Yes, low-dose aspirin is typically prescribed for daily use. However, you should only start daily aspirin therapy under the guidance of a doctor." },
+      { question: "Can it be taken after food?", answer: "Yes, taking aspirin after food or with milk is highly recommended to protect your stomach lining and reduce heartburn." },
+      { question: "Can it be taken with blood pressure medicines?", answer: "Generally yes, but some blood pressure medications (like ACE inhibitors) can interact. Always inform your doctor of all medicines you are taking." },
+      { question: "What happens if I miss a dose?", answer: "Take the missed dose as soon as you remember. If it is almost time for your next dose, skip the missed dose and resume your regular schedule. Do not double the dose." },
+      { question: "Can pregnant women take Aspirin?", answer: "Pregnant women should only take aspirin if specifically prescribed by their obstetrician, often to prevent preeclampsia. Otherwise, avoid it." },
+      { question: "Is Aspirin safe for elderly patients?", answer: "Yes, but elderly patients are at a higher risk for stomach irritation and bleeding. Close medical monitoring is recommended." },
+      { question: "When should I consult my doctor?", answer: "Consult your doctor immediately if you experience severe stomach pain, black or tarry stools, coughing up blood, or any signs of an allergic reaction." }
+    ],
+    specifications: [
+      { label: "Manufacturer", value: "Bayer Healthcare" },
+      { label: "Country of Origin", value: "Germany" },
+      { label: "Dosage Form", value: "Enteric Coated Tablets" },
+      { label: "Package Quantity", value: "100 Tablets" },
+      { label: "Storage Temperature", value: "Below 25°C" }
+    ],
+    seo: {
+      metaTitle: "Buy Bayer Aspirin 81mg Low-Dose Tablets | WellMeds",
+      metaDescription: "Order Bayer Aspirin 81mg low-dose heart health tablets online. Authentic antiplatelet medicine, fast delivery, and licensed pharmacist verification.",
+      keywords: "aspirin 81mg, low dose aspirin, bayer aspirin, antiplatelet, heart health",
+      canonicalUrl: "",
+      ogImage: ""
+    }
   },
   {
     name: "CeraVe Moisturizer",
@@ -153,7 +233,9 @@ export const INITIAL_COUPONS = [
     code: "MEDISAVE20",
     discountType: "percentage",
     discountAmount: 20,
+    discountValue: 20,
     minOrderValue: 50,
+    minimumOrder: 50,
     expiryDate: new Date("2028-12-31"),
     isActive: true,
   },
@@ -161,7 +243,9 @@ export const INITIAL_COUPONS = [
     code: "FREE10",
     discountType: "fixed",
     discountAmount: 10,
+    discountValue: 10,
     minOrderValue: 30,
+    minimumOrder: 30,
     expiryDate: new Date("2028-12-31"),
     isActive: true,
   }

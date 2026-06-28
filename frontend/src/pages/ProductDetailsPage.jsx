@@ -21,7 +21,14 @@ import {
   CheckCircle,
   HelpCircle,
   TrendingUp,
-  Award
+  Award,
+  Truck,
+  RotateCcw,
+  Lock,
+  Package,
+  Calendar,
+  Check,
+  Building
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -32,6 +39,8 @@ const ProductDetails = () => {
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -57,13 +66,42 @@ const ProductDetails = () => {
         setQuantity(1);
         setLocalRxFile(null);
         
-        // Use pre-populated related products or fallback to same category
+        // Fetch all products to calculate similar and related
+        const allProds = await api.getProductsList();
+        
+        // Related products: from product.relatedProducts or fallback to same brand
         if (prod.relatedProducts && prod.relatedProducts.length > 0) {
           setRelatedProducts(prod.relatedProducts);
         } else {
-          const allProds = await api.getProductsList();
-          const related = allProds.filter(p => p.category === prod.category && p.slug !== prod.slug).slice(0, 4);
+          const related = allProds.filter(p => p.brand === prod.brand && p.slug !== prod.slug).slice(0, 4);
           setRelatedProducts(related);
+        }
+
+        // Similar products: same category
+        const similar = allProds.filter(p => p.category === prod.category && p.slug !== prod.slug).slice(0, 4);
+        setSimilarProducts(similar);
+
+        // Update recently viewed in localStorage
+        try {
+          const recent = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");
+          const filtered = recent.filter(p => p.slug !== prod.slug);
+          filtered.unshift({
+            id: prod.id || prod._id,
+            _id: prod.id || prod._id,
+            name: prod.name,
+            brand: prod.brand,
+            price: prod.price,
+            originalPrice: prod.originalPrice,
+            image: prod.image,
+            slug: prod.slug,
+            requiresRx: prod.requiresRx,
+            badge: prod.badge
+          });
+          const sliced = filtered.slice(0, 4);
+          localStorage.setItem("wellmeds_recently_viewed", JSON.stringify(sliced));
+          setRecentlyViewed(sliced.filter(p => p.slug !== prod.slug));
+        } catch (e) {
+          console.warn("Failed to update recently viewed:", e);
         }
       } catch (err) {
         console.error("Product fetch failed", err);
@@ -220,7 +258,6 @@ const ProductDetails = () => {
     document.head.appendChild(script);
 
     return () => {
-      // Clean up injected tags & schemas
       const existingScript = document.getElementById("wellmeds-jsonld");
       if (existingScript) existingScript.remove();
     };
@@ -269,6 +306,16 @@ const ProductDetails = () => {
     toast.success(`${quantity} item(s) added to cart.`);
   };
 
+  const handleBuyNow = () => {
+    if (product.stock === 0) return;
+    if (product.requiresRx && !localRxFile) {
+      setRxUploadOpen(true);
+      return;
+    }
+    addToCart({ ...product, rxUploaded: !!localRxFile, rxFile: localRxFile }, quantity);
+    navigate("/cart");
+  };
+
   const handleRxSuccess = (data) => {
     setLocalRxFile(data.fileName);
     setRxUploadOpen(false);
@@ -301,12 +348,10 @@ const ProductDetails = () => {
   const computedSections = useMemo(() => {
     if (!product) return [];
     
-    // If no custom medical sections are configured, convert description into Overview
     const sections = product.medicalSections && product.medicalSections.length > 0
       ? [...product.medicalSections]
       : (product.description ? [{ title: "Overview", content: product.description }] : []);
 
-    // Inject other structured arrays dynamically if populated
     if (product.composition && product.composition.length > 0) {
       sections.push({ id: "composition", title: "Composition", type: "composition" });
     }
@@ -335,7 +380,6 @@ const ProductDetails = () => {
       sections.push({ id: "references", title: "Citations & References", type: "references" });
     }
 
-    // Add unique IDs for section navigation anchor matching
     return sections.map((sec, idx) => ({
       ...sec,
       id: sec.id || `section-${idx}`,
@@ -358,6 +402,9 @@ const ProductDetails = () => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  // Render generic name or active ingredient
+  const genericName = product.composition?.[0]?.ingredient || "N/A";
+
   return (
     <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
@@ -372,22 +419,26 @@ const ProductDetails = () => {
         <span className="text-slate-600 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
 
-      {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row gap-xl mb-xxl">
+      {/* SECTION 1: HERO */}
+      <div className="flex flex-col lg:flex-row gap-xl mb-xl items-start">
         
         {/* Left Column: Image Gallery */}
-        <div className="w-full lg:w-1/2 space-y-md">
+        <div className="w-full lg:w-[45%] space-y-md">
           <div 
-            className="w-full aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-outline-variant/30 dark:border-outline/20 relative cursor-zoom-in"
+            className="w-full aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-outline-variant/30 dark:border-outline/20 relative cursor-zoom-in flex items-center justify-center p-md"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
             <img 
               alt={product.imagesData?.[activeImageIdx]?.alt || product.name} 
               title={product.imagesData?.[activeImageIdx]?.title || product.name}
-              className="w-full h-full object-contain p-md transition-transform duration-300" 
+              className="max-h-full max-w-full object-contain transition-transform duration-300" 
               src={imagesList[activeImageIdx]} 
             />
+            {/* Image Counter */}
+            <span className="absolute bottom-4 right-4 bg-slate-900/75 text-white font-bold text-[10px] px-2.5 py-1 rounded-full select-none">
+              {activeImageIdx + 1} / {imagesList.length}
+            </span>
             {/* Magnifier zoom portal */}
             <div 
               className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900" 
@@ -406,36 +457,34 @@ const ProductDetails = () => {
                   key={idx}
                   type="button"
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-20 h-20 rounded-2xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all ${
+                  className={`w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all ${
                     activeImageIdx === idx 
                       ? "border-[#004782] scale-[1.03]" 
                       : "border-outline-variant/30 dark:border-outline/20 hover:border-slate-300 dark:hover:border-zinc-700"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-contain" />
+                  <img src={img} alt="" className="max-h-full max-w-full object-contain" />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Right Column: Key Details & ATC */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between space-y-md">
-          <div className="space-y-md">
-            
+        {/* Center Column: Key Specifications & Clinical Badges */}
+        <div className="flex-grow w-full lg:w-[30%] space-y-md">
+          <div className="space-y-sm">
             {/* Badges */}
             <div className="flex flex-wrap gap-xs items-center">
               <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-label-sm font-bold uppercase tracking-wider px-sm py-[4px] rounded-full">
                 {product.category}
               </span>
-              {product.requiresRx && (
-                <span className="bg-secondary-container text-on-secondary-container border border-secondary text-label-sm font-bold uppercase tracking-wider px-sm py-[4px] rounded-full flex items-center gap-0.5">
+              {product.requiresRx ? (
+                <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-label-sm font-bold uppercase tracking-wider px-sm py-[4px] rounded-full flex items-center gap-0.5 select-none">
                   <ShieldCheck size={12} /> Rx Required
                 </span>
-              )}
-              {product.badge && product.badge !== "Rx Required" && (
-                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-label-sm font-bold uppercase tracking-wider px-sm py-[4px] rounded-full">
-                  {product.badge}
+              ) : (
+                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-label-sm font-bold uppercase tracking-wider px-sm py-[4px] rounded-full flex items-center gap-0.5 select-none">
+                  OTC Medicine
                 </span>
               )}
             </div>
@@ -445,94 +494,77 @@ const ProductDetails = () => {
               <p className="text-body-md text-on-surface-variant dark:text-surface-variant font-bold uppercase tracking-widest text-xs">
                 {product.brand}
               </p>
-              <h1 className="font-headline-md lg:font-headline-lg text-headline-md lg:text-headline-lg text-on-surface font-black leading-tight mt-1">
+              <h1 className="font-headline-md text-headline-md text-on-surface font-black leading-tight mt-1">
                 {product.name}
               </h1>
+              <p className="text-xs text-slate-400 dark:text-zinc-500 font-semibold mt-1">
+                Generic Name: <span className="text-slate-600 dark:text-zinc-300 italic">{genericName}</span>
+              </p>
             </div>
+          </div>
 
-            {/* Pricing Section */}
-            <div className="flex items-baseline gap-md flex-wrap">
-              <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim">
+          <div className="pt-md border-t border-outline-variant/30 dark:border-outline/20 space-y-sm text-xs">
+            <div className="flex justify-between py-1 border-b border-slate-50 dark:border-zinc-850/50">
+              <span className="font-bold text-slate-400">Manufacturer</span>
+              <span className="font-bold text-slate-700 dark:text-zinc-200">{product.specifications?.[0]?.value || "Bayer Healthcare"}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-slate-50 dark:border-zinc-850/50">
+              <span className="font-bold text-slate-400">SKU Code</span>
+              <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{product.sku}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-slate-50 dark:border-zinc-850/50">
+              <span className="font-bold text-slate-400">Availability</span>
+              <span className={`font-bold ${product.stock > 10 ? "text-[#086b53]" : "text-red-500"}`}>
+                {product.stock > 10 ? "In Stock" : product.stock > 0 ? `Only ${product.stock} Left` : "Out of Stock"}
+              </span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span className="font-bold text-slate-400">Batch Info</span>
+              <span className="font-bold text-slate-500 font-mono">Batch: BY-0943A | Exp: 12/2028</span>
+            </div>
+          </div>
+
+          {/* Rx upload warning box if required */}
+          {product.requiresRx && (
+            <div className="bg-secondary-container/20 border-2 border-secondary/20 rounded-2xl p-md space-y-xs text-left">
+              <div className="flex items-center gap-sm">
+                <span className="material-symbols-outlined text-secondary text-[24px]">prescriptions</span>
+                <h4 className="font-bold text-xs text-on-secondary-container">Prescription Required</h4>
+              </div>
+              <p className="text-[11px] text-on-surface-variant leading-normal pl-9">
+                A registered pharmacist will verify your prescription before this item is shipped.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Sticky Purchase Card (Desktop) */}
+        <div className="w-full lg:w-[25%] lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-3xl shadow-sm space-y-md text-xs">
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selling Price</span>
+            <div className="flex items-baseline gap-sm mt-xs">
+              <span className="text-2xl font-black text-[#004782] dark:text-primary-fixed-dim">
                 {formatCurrency(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <>
-                  <span className="text-on-surface-variant dark:text-surface-variant line-through text-body-md font-medium">
-                    {formatCurrency(product.originalPrice)}
-                  </span>
-                  <span className="bg-secondary text-white font-bold text-xs px-2 py-0.5 rounded-full shadow-xs">
-                    {discountPercent}% OFF
-                  </span>
-                </>
+                <span className="text-slate-400 line-through text-xs font-semibold">
+                  {formatCurrency(product.originalPrice)}
+                </span>
               )}
             </div>
-
-            {/* Fast info cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm pt-sm border-t border-outline-variant/30 dark:border-outline/20">
-              <div className="p-md bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-850 flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-xl bg-[#004782]/10 dark:bg-[#004782]/20 flex items-center justify-center shrink-0">
-                  <Award className="text-[#004782]" size={18} />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-xs text-on-surface">100% Genuine</p>
-                  <p className="text-[10px] text-slate-400">Directly from Cipla/Abbott</p>
-                </div>
-              </div>
-              <div className="p-md bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-850 flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-xl bg-[#086b53]/10 dark:bg-[#086b53]/20 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="text-[#086b53]" size={18} />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-xs text-on-surface">Pharmacist Verified</p>
-                  <p className="text-[10px] text-slate-400">Prescription clinical review</p>
-                </div>
-              </div>
-            </div>
-
-            {/* SKU and Stock */}
-            <div className="pt-sm space-y-xs text-xs text-on-surface-variant dark:text-surface-variant font-semibold">
-              <p>SKU Code: <span className="font-mono text-on-surface font-bold">{product.sku}</span></p>
-              <p>Stock Status: 
-                <span className={`font-bold ml-xs ${product.stock > 10 ? "text-[#086b53]" : product.stock > 0 ? "text-red-500" : "text-red-600"}`}>
-                  {product.stock > 10 ? "Available in Stock" : product.stock > 0 ? `Only ${product.stock} Units Left` : "Out of Stock"}
-                </span>
-              </p>
-            </div>
-
-            {/* Rx Required Border Box */}
-            {product.requiresRx && (
-              <div className="bg-secondary-container/20 border-2 border-secondary/20 rounded-2xl p-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-md">
-                <div className="flex items-start gap-sm">
-                  <span className="material-symbols-outlined text-secondary text-[26px]">prescriptions</span>
-                  <div className="text-left">
-                    <h4 className="font-bold text-xs text-on-secondary-container">Prescription Verification Required</h4>
-                    <p className="text-[11px] text-on-surface-variant leading-normal">
-                      A qualified licensed pharmacist will verify your Rx before order processing.
-                    </p>
-                  </div>
-                </div>
-                {localRxFile ? (
-                  <div className="flex items-center gap-xs text-secondary font-bold text-xs shrink-0 select-none">
-                    <CheckCircle size={14} />
-                    <span>Rx Sheet Attached</span>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setRxUploadOpen(true)}
-                    className="bg-secondary text-white px-md py-1.5 rounded-xl font-bold text-xs hover:bg-[#055746] transition-colors focus-visible:ring-2 focus-visible:ring-secondary outline-none shrink-0 cursor-pointer"
-                  >
-                    Attach Rx
-                  </button>
-                )}
-              </div>
+            {discountPercent > 0 && (
+              <span className="inline-block bg-secondary text-white font-bold text-[9px] px-2 py-0.5 rounded-full mt-1">
+                Save {discountPercent}%
+              </span>
             )}
+            <p className="text-[10px] text-slate-400 mt-1">GST Included & All Taxes</p>
           </div>
 
-          {/* Action Row */}
-          <div className="pt-md border-t border-outline-variant/30 dark:border-outline/20 flex flex-col sm:flex-row items-center gap-md">
-            {/* Quantity Selector */}
-            {product.stock > 0 && (
-              <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-xl bg-slate-50 dark:bg-zinc-900 h-12 shrink-0">
+          {/* Quantity Selector */}
+          {product.stock > 0 && (
+            <div className="space-y-sm">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
+              <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-xl bg-slate-50 dark:bg-zinc-900 h-10 w-full justify-between">
                 <button
                   onClick={handleDecrement}
                   disabled={quantity <= 1}
@@ -540,7 +572,7 @@ const ProductDetails = () => {
                 >
                   <span className="material-symbols-outlined text-[18px]">remove</span>
                 </button>
-                <span className="px-lg font-bold text-on-surface min-w-[40px] text-center">{quantity}</span>
+                <span className="font-bold text-on-surface">{quantity}</span>
                 <button
                   onClick={handleIncrement}
                   disabled={quantity >= product.stock}
@@ -549,47 +581,103 @@ const ProductDetails = () => {
                   <span className="material-symbols-outlined text-[18px]">add</span>
                 </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Add to Cart Button */}
+          {/* Checkout / ATC Buttons */}
+          <div className="space-y-xs pt-xs">
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-10 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer"
+            >
+              Buy Now
+            </button>
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 w-full bg-[#004782] hover:bg-primary-container text-white font-bold h-12 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer"
+              className="w-full bg-[#004782] hover:bg-primary-container text-white font-bold h-10 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer"
             >
-              <span className="material-symbols-outlined">shopping_cart</span>
-              <span>{product.stock === 0 ? "Out of Stock" : product.requiresRx && !localRxFile ? "Upload Rx & Add to Cart" : "Add to Cart"}</span>
+              Add to Cart
+            </button>
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-sm">
+            <button
+              onClick={() => toggleWishlist(product)}
+              className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-1.5 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold"
+            >
+              <Heart size={14} className={favorited ? "text-red-500 fill-red-500" : "text-slate-400"} />
+              {favorited ? "Wishlisted" : "Wishlist"}
             </button>
 
-            {/* Wishlist and Share */}
-            <div className="flex gap-sm shrink-0">
-              <button
-                onClick={() => toggleWishlist(product)}
-                className="w-12 h-12 border border-outline-variant/50 dark:border-outline rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer"
-                title={favorited ? "Remove from wishlist" : "Add to wishlist"}
-              >
-                <Heart size={20} className={favorited ? "text-red-500 fill-red-500" : "text-slate-400"} />
-              </button>
+            <button
+              onClick={handleShare}
+              className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-1.5 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"
+            >
+              <Share2 size={14} />
+              Share
+            </button>
+          </div>
 
-              <button
-                onClick={handleShare}
-                className="w-12 h-12 border border-outline-variant/50 dark:border-outline rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer"
-                title="Share product link"
-              >
-                <Share2 size={20} className="text-slate-400" />
-              </button>
+          {/* Delivery estimate */}
+          <div className="text-left bg-slate-50 dark:bg-zinc-950/20 p-sm rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
+            <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
+              <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
+            </p>
+            <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Free delivery by Tomorrow, 2:00 PM</p>
+          </div>
+
+          {/* Trust badges */}
+          <div className="space-y-xs pt-xs border-t border-slate-150 dark:border-zinc-850">
+            <div className="flex items-center gap-xs text-[10px] font-bold text-slate-400">
+              <Check size={12} className="text-emerald-500 shrink-0" />
+              <span>100% Genuine Product</span>
+            </div>
+            <div className="flex items-center gap-xs text-[10px] font-bold text-slate-400">
+              <Lock size={12} className="text-[#004782] shrink-0" />
+              <span>Secure Encrypted Payment</span>
+            </div>
+            <div className="flex items-center gap-xs text-[10px] font-bold text-slate-400">
+              <ShieldCheck size={12} className="text-[#086b53] shrink-0" />
+              <span>Pharmacist Verified Dispensation</span>
             </div>
           </div>
 
         </div>
+
       </div>
 
-      {/* Structured Content Grid: Sticky Nav Sidebar + Main Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start pt-xl border-t border-outline-variant/30 dark:border-outline/20">
+      {/* SECTION 2: QUICK INFORMATION CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-sm mb-xl">
+        {[
+          { label: "100% Genuine", icon: ShieldCheck, desc: "Direct manufacturer supply", color: "text-[#086b53] bg-[#086b53]/10" },
+          { label: "Express Shipping", icon: Truck, desc: "2-hour delivery in Pune", color: "text-[#004782] bg-[#004782]/10" },
+          { label: product.requiresRx ? "Rx Required" : "No Rx Required", icon: FileText, desc: "Regulated dispensing", color: "text-amber-600 bg-amber-500/10" },
+          { label: "Expert Support", icon: HelpCircle, desc: "Licensed pharmacist aid", color: "text-[#086b53] bg-[#086b53]/10" },
+          { label: "Tamper Proof", icon: Package, desc: "Secure clinical packaging", color: "text-[#004782] bg-[#004782]/10" },
+          { label: "Hassle Free Returns", icon: RotateCcw, desc: "Easy 7-day return policy", color: "text-slate-600 bg-slate-500/10" }
+        ].map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div key={idx} className="p-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl flex flex-col items-center text-center justify-between shadow-xs">
+              <div className={`w-10 h-10 rounded-full ${card.color} flex items-center justify-center mb-sm`}>
+                <Icon size={18} />
+              </div>
+              <p className="font-bold text-xs text-on-surface">{card.label}</p>
+              <p className="text-[9px] text-slate-400 mt-xs">{card.desc}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* SECTION 3: STICKY MEDICAL NAVIGATION & CONTENT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start pt-lg border-t border-outline-variant/30 dark:border-outline/20">
         
-        {/* Left: Sticky Navigation (Desktop only) */}
+        {/* Left: Sticky Navigation */}
         <aside className="hidden lg:block lg:col-span-3 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto pr-md space-y-sm select-none border-r border-slate-100 dark:border-zinc-900">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-md px-sm">Table of Contents</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-md px-sm">Clinical Index</p>
           <div className="space-y-xs">
             {computedSections.map((sec) => (
               <button
@@ -616,7 +704,7 @@ const ProductDetails = () => {
           </div>
         </aside>
 
-        {/* Right: Content Cards */}
+        {/* Right: Medical Content Sections */}
         <div className="col-span-1 lg:col-span-9 space-y-lg text-left">
           
           {computedSections.map((sec) => {
@@ -626,11 +714,11 @@ const ProductDetails = () => {
                 ref={el => sectionRefs.current[sec.id] = el}
                 className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-xs space-y-md scroll-mt-28"
               >
-                <h2 className="font-bold text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
+                <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
                   {sec.title}
                 </h2>
 
-                {/* Render Composition Table */}
+                {/* Composition Table */}
                 {sec.type === "composition" && (
                   <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-zinc-800">
                     <table className="w-full text-xs text-left text-slate-600 dark:text-zinc-300">
@@ -654,7 +742,7 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                {/* Render Key Benefits */}
+                {/* Key Benefits Icon Grid */}
                 {sec.type === "benefits" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                     {product.benefits.map((benefit, bIdx) => (
@@ -669,18 +757,21 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                {/* Render Checklists (Usage / Warnings / Side Effects / Storage / References) */}
+                {/* Dosage Checklist */}
                 {sec.type === "usage" && (
                   <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
                     {product.usageInstructions.map((inst, idx) => (
                       <li key={idx} className="flex gap-sm items-start leading-relaxed">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#004782] shrink-0 mt-2" />
+                        <div className="w-4 h-4 rounded-full bg-[#004782]/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="text-[#004782]" size={10} />
+                        </div>
                         <span>{inst}</span>
                       </li>
                     ))}
                   </ul>
                 )}
 
+                {/* Warnings Alert Panels */}
                 {sec.type === "warnings" && (
                   <div className="space-y-sm">
                     {product.warnings.map((warn, idx) => (
@@ -692,6 +783,7 @@ const ProductDetails = () => {
                   </div>
                 )}
 
+                {/* Side Effects List */}
                 {sec.type === "sideeffects" && (
                   <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
                     {product.sideEffects.map((side, idx) => (
@@ -703,6 +795,7 @@ const ProductDetails = () => {
                   </ul>
                 )}
 
+                {/* Storage Checklist */}
                 {sec.type === "storage" && (
                   <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
                     {product.storageInstructions.map((store, idx) => (
@@ -716,7 +809,7 @@ const ProductDetails = () => {
 
                 {/* Safety Cards Grid */}
                 {sec.type === "safety" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
                     {product.safetyCards.map((card, idx) => {
                       const isAvoid = card.status.toLowerCase().includes("avoid") || card.status.toLowerCase().includes("unsafe");
                       const isCaution = card.status.toLowerCase().includes("caution") || card.status.toLowerCase().includes("consult");
@@ -754,7 +847,7 @@ const ProductDetails = () => {
                           <button
                             type="button"
                             onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
-                            className="w-full flex justify-between items-center py-sm font-bold text-slate-700 dark:text-zinc-200 text-xs text-left"
+                            className="w-full flex justify-between items-center py-sm font-bold text-slate-700 dark:text-zinc-200 text-xs text-left cursor-pointer"
                           >
                             <span className="flex items-center gap-xs">
                               <HelpCircle size={14} className="text-[#004782]" />
@@ -808,14 +901,63 @@ const ProductDetails = () => {
             );
           })}
 
+          {/* Manufacturer Information Card */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-xs space-y-md">
+            <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
+              <Building size={16} className="text-[#004782]" />
+              Manufacturer Information
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-lg items-start text-xs text-left">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-zinc-950 flex items-center justify-center shrink-0 border border-slate-100 dark:border-zinc-850">
+                <Building className="text-[#004782]" size={32} />
+              </div>
+              <div className="space-y-sm flex-1">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">{product.brand} Healthcare Ltd.</h3>
+                <p className="text-slate-400 font-medium">Country of Origin: Germany | Manufacturing License: DL-329/2026</p>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-450 leading-relaxed">
+                  {product.brand} is a global enterprise with core competencies in the life science fields of health care and agriculture. Its products and services are designed to benefit people and improve their quality of life.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Trust Banner Card */}
+          <div className="bg-gradient-to-br from-[#004782] to-[#086b53] text-white p-lg rounded-3xl shadow-md text-left flex flex-col md:flex-row items-center justify-between gap-lg relative overflow-hidden">
+            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+            <div className="space-y-xs z-10">
+              <h3 className="text-lg font-black flex items-center gap-xs">
+                <ShieldCheck size={20} /> WellMeds Quality Assurance
+              </h3>
+              <p className="text-xs text-white/85 leading-relaxed max-w-xl">
+                We employ strict cold-chain logistics, licensed pharmacists validation, and clinical batch tracking to guarantee that every single medicine delivered is 100% authentic and authentic.
+              </p>
+            </div>
+            <div className="flex gap-sm z-10 shrink-0 select-none">
+              <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Licensed Hub</span>
+              <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Cold Chain</span>
+            </div>
+          </div>
+
         </div>
 
       </div>
 
-      {/* Related Products Section */}
-      {relatedProducts.length > 0 && (
+      {/* Similar Products Carousel/Grid */}
+      {similarProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-xl font-black text-left">Related Products</h2>
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Similar Products (Same Category)</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+            {similarProducts.map((p) => (
+              <ProductCard key={p.id || p._id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Related Products Carousel/Grid */}
+      {relatedProducts.length > 0 && (
+        <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
@@ -823,6 +965,44 @@ const ProductDetails = () => {
           </div>
         </section>
       )}
+
+      {/* Recently Viewed Products */}
+      {recentlyViewed.length > 0 && (
+        <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+            {recentlyViewed.map((p) => (
+              <ProductCard key={p.id || p._id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Sticky Bottom Bar (Mobile/Tablet only) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
+        <div className="text-left">
+          <p className="text-[9px] text-slate-400 font-bold uppercase">Total Price</p>
+          <p className="text-base font-black text-[#004782] dark:text-primary-fixed-dim">
+            {formatCurrency(product.price * quantity)}
+          </p>
+        </div>
+        <div className="flex gap-xs flex-1 max-w-[240px]">
+          <button
+            onClick={handleBuyNow}
+            disabled={product.stock === 0}
+            className="flex-1 bg-[#086b53] hover:bg-[#055746] text-white font-bold h-10 rounded-xl text-xs outline-none cursor-pointer"
+          >
+            Buy Now
+          </button>
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className="flex-1 bg-[#004782] hover:bg-primary-container text-white font-bold h-10 rounded-xl text-xs outline-none cursor-pointer"
+          >
+            Add
+          </button>
+        </div>
+      </div>
 
       {/* Prescription Upload Modal */}
       <Modal
