@@ -38,6 +38,33 @@ const categorySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    seoTitle: {
+      type: String,
+      default: "",
+    },
+    seoDescription: {
+      type: String,
+      default: "",
+    },
+    seoKeywords: {
+      type: String,
+      default: "",
+    },
+    banner: {
+      type: String,
+      default: "",
+    },
+    introduction: {
+      type: String,
+      default: "",
+    },
+    faqs: {
+      type: [{
+        question: { type: String, required: true },
+        answer: { type: String, required: true }
+      }],
+      default: [],
+    },
   },
   {
     timestamps: true,

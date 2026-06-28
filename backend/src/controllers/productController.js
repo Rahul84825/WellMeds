@@ -51,11 +51,6 @@ export const getProducts = async (req, res, next) => {
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
-    // 5. Rating filter
-    if (rating) {
-      query.rating = { $gte: Number(rating) };
-    }
-
     // 6. Stock status
     if (stockStatus === "in") {
       query.stock = { $gt: 0 };
@@ -80,9 +75,8 @@ export const getProducts = async (req, res, next) => {
     if (sort) {
       if (sort === "price-asc") sortOptions = { price: 1 };
       else if (sort === "price-desc") sortOptions = { price: -1 };
-      else if (sort === "rating") sortOptions = { rating: -1 };
       else if (sort === "newest") sortOptions = { createdAt: -1 };
-      else if (sort === "popularity") sortOptions = { reviewsCount: -1 };
+      else if (sort === "popularity") sortOptions = { createdAt: -1 }; // fallback since reviewsCount is gone
       else if (sort === "alpha-asc") sortOptions = { name: 1 };
       else if (sort === "alpha-desc") sortOptions = { name: -1 };
     }
@@ -160,7 +154,14 @@ export const getProduct = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const product = await Product.findById(id);
+    let product;
+    const mongoose = (await import("mongoose")).default;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id).populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+    } else {
+      product = await Product.findOne({ slug: id }).populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+    }
+
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }

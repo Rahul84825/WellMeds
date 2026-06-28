@@ -1,6 +1,5 @@
 import React from "react";
 import { 
-  Star, 
   Users, 
   IndianRupee, 
   ShieldCheck, 
@@ -10,12 +9,12 @@ import {
 const TrustStatsBar = () => {
   const stats = [
     {
-      id: "rating",
-      icon: Star,
-      iconColor: "text-yellow-500 fill-yellow-500",
-      value: "4.8★",
-      label: "Google Rating",
-      caption: "Trusted by hundreds of satisfied customers",
+      id: "pharmacists",
+      icon: ShieldCheck,
+      iconColor: "text-[#004782] dark:text-[#a4c9ff]",
+      value: "Verified",
+      label: "Licensed Pharmacists",
+      caption: "All prescriptions verified by certified experts",
     },
     {
       id: "patients",

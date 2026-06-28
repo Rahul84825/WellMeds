@@ -89,15 +89,15 @@ const WhyChooseWellMeds = () => {
                 </p>
               </div>
 
-              {/* Google Reviews Badge */}
-              <div className="mt-10 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 flex items-center gap-5 relative z-10">
+              {/* Trust Badge */}
+              <div className="mt-10 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 flex items-center gap-5 relative z-10 select-none">
                 <div className="text-4xl font-extrabold text-white flex items-center gap-0.5 tracking-tight">
-                  4.8<span className="text-yellow-400">★</span>
+                  100%
                 </div>
                 <div className="h-10 w-px bg-white/20"></div>
                 <div className="text-left">
-                  <p className="text-sm font-bold text-white uppercase tracking-wider">Google Rating</p>
-                  <p className="text-sm text-white/80 font-medium">1000+ Verified Patient Reviews</p>
+                  <p className="text-sm font-bold text-white uppercase tracking-wider">Genuine Meds</p>
+                  <p className="text-sm text-white/80 font-medium">Sourced Directly from Manufacturers</p>
                 </div>
               </div>
 

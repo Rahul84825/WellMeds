@@ -92,8 +92,8 @@ const Cart = () => {
                         {item.brand}
                       </p>
                       <Link
-                        to={`/product/${item.id}`}
-                        className="font-label-md text-label-md text-on-surface hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-bold block"
+                        to={`/products/${item.slug || item.id}`}
+                        className="font-bold text-slate-800 dark:text-zinc-100 hover:text-primary transition-colors text-sm sm:text-base block truncate max-w-[200px] sm:max-w-xs"
                       >
                         {item.name}
                       </Link>

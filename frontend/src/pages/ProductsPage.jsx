@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
@@ -21,6 +21,10 @@ import {
 const ProductsPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categorySlug, brandSlug } = useParams();
+  
+  // SEO Header State
+  const [seoHeader, setSeoHeader] = useState(null);
   
   // Dynamic data from backend
   const [products, setProducts] = useState([]);
@@ -37,7 +41,6 @@ const ProductsPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState(2000);
-  const [minRating, setMinRating] = useState(0);
   const [stockStatus, setStockStatus] = useState("all"); // 'all', 'in', 'out'
   const [requiresRx, setRequiresRx] = useState("all"); // 'all', 'true', 'false'
   const [hasDiscount, setHasDiscount] = useState("all"); // 'all', 'true'
@@ -79,13 +82,126 @@ const ProductsPage = () => {
     fetchMetadata();
   }, []);
 
-  // Sync category from URL parameter
+  // Sync category from URL parameter or slug
   const categoryParam = searchParams.get("category");
   useEffect(() => {
     if (categoryParam) {
       setSelectedCategories([categoryParam]);
     }
   }, [categoryParam]);
+
+  // Sync category or brand from URL slug
+  useEffect(() => {
+    if (categories.length > 0 && categorySlug) {
+      const matchedCat = categories.find(c => c.slug === categorySlug);
+      if (matchedCat) {
+        setSelectedCategories([matchedCat.name]);
+        setSeoHeader({
+          title: matchedCat.name,
+          banner: matchedCat.banner || matchedCat.image,
+          introduction: matchedCat.introduction || matchedCat.description,
+          faqs: matchedCat.faqs || [],
+          seoTitle: matchedCat.seoTitle,
+          seoDescription: matchedCat.seoDescription,
+          seoKeywords: matchedCat.seoKeywords
+        });
+      }
+    }
+  }, [categorySlug, categories]);
+
+  useEffect(() => {
+    if (brands.length > 0 && brandSlug) {
+      const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+      const matchedBrand = brands.find(b => slugify(b) === brandSlug);
+      if (matchedBrand) {
+        setSelectedBrands([matchedBrand]);
+        setSeoHeader({
+          title: `${matchedBrand} Medicines`,
+          introduction: `Explore a wide range of authentic healthcare products and medicines manufactured by ${matchedBrand}.`,
+          seoTitle: `${matchedBrand} Medicines Catalog | WellMeds`,
+          seoDescription: `Shop authentic ${matchedBrand} medicines online at WellMeds. Licensed pharmacist review and fast delivery.`
+        });
+      }
+    }
+  }, [brandSlug, brands]);
+
+  // Inject List Schema & Meta Tags
+  useEffect(() => {
+    if (!seoHeader) return;
+
+    document.title = seoHeader.seoTitle || `${seoHeader.title} | WellMeds`;
+
+    let metaDesc = document.querySelector("meta[name='description']");
+    if (!metaDesc) {
+      metaDesc = document.createElement("meta");
+      metaDesc.setAttribute("name", "description");
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute("content", seoHeader.seoDescription || `Buy ${seoHeader.title} online at WellMeds.`);
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "@id": `${window.location.href}#webpage`,
+          "name": seoHeader.title,
+          "description": seoHeader.seoDescription || seoHeader.introduction,
+          "url": window.location.href
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": `${window.location.href}#breadcrumb`,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": window.location.origin
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Products",
+              "item": `${window.location.origin}/products`
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": seoHeader.title,
+              "item": window.location.href
+            }
+          ]
+        }
+      ]
+    };
+
+    if (seoHeader.faqs && seoHeader.faqs.length > 0) {
+      jsonLd["@graph"].push({
+        "@type": "FAQPage",
+        "@id": `${window.location.href}#faq`,
+        "mainEntity": seoHeader.faqs.map(f => ({
+          "@type": "Question",
+          "name": f.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": f.answer
+          }
+        }))
+      });
+    }
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify(jsonLd);
+    script.id = "wellmeds-list-jsonld";
+    document.head.appendChild(script);
+
+    return () => {
+      const existingScript = document.getElementById("wellmeds-list-jsonld");
+      if (existingScript) existingScript.remove();
+    };
+  }, [seoHeader]);
 
   // Debounce search input
   useEffect(() => {
@@ -106,7 +222,6 @@ const ProductsPage = () => {
         categories: selectedCategories.length > 0 ? selectedCategories.join(",") : undefined,
         brands: selectedBrands.length > 0 ? selectedBrands.join(",") : undefined,
         maxPrice: priceRange < 2000 ? priceRange : undefined,
-        rating: minRating > 0 ? minRating : undefined,
         stockStatus: stockStatus !== "all" ? stockStatus : undefined,
         requiresRx: requiresRx !== "all" ? requiresRx : undefined,
         hasDiscount: hasDiscount !== "all" ? "true" : undefined,
@@ -121,7 +236,7 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, selectedCategories, selectedBrands, priceRange, minRating, stockStatus, requiresRx, hasDiscount, sortBy]);
+  }, [currentPage, debouncedSearch, selectedCategories, selectedBrands, priceRange, stockStatus, requiresRx, hasDiscount, sortBy]);
 
   useEffect(() => {
     fetchProducts();
@@ -130,7 +245,7 @@ const ProductsPage = () => {
   // Reset page to 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, selectedCategories, selectedBrands, priceRange, minRating, stockStatus, requiresRx, hasDiscount, sortBy]);
+  }, [debouncedSearch, selectedCategories, selectedBrands, priceRange, stockStatus, requiresRx, hasDiscount, sortBy]);
 
   // Toggle handlers
   const handleCategoryToggle = (catName) => {
@@ -159,7 +274,6 @@ const ProductsPage = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
     setPriceRange(2000);
-    setMinRating(0);
     setStockStatus("all");
     setRequiresRx("all");
     setHasDiscount("all");
@@ -193,9 +307,6 @@ const ProductsPage = () => {
     if (priceRange < 2000) {
       chips.push({ id: "price", label: `Under ₹${priceRange}`, type: "price" });
     }
-    if (minRating > 0) {
-      chips.push({ id: "rating", label: `${minRating}★ & Up`, type: "rating" });
-    }
     if (stockStatus !== "all") {
       chips.push({ id: "stock", label: stockStatus === "in" ? "In Stock" : "Out of Stock", type: "stock" });
     }
@@ -212,7 +323,6 @@ const ProductsPage = () => {
     if (chip.type === "category") handleCategoryToggle(chip.value);
     if (chip.type === "brand") handleBrandToggle(chip.value);
     if (chip.type === "price") setPriceRange(2000);
-    if (chip.type === "rating") setMinRating(0);
     if (chip.type === "stock") setStockStatus("all");
     if (chip.type === "rx") setRequiresRx("all");
     if (chip.type === "discount") setHasDiscount("all");
@@ -452,55 +562,6 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* Ratings Accordion */}
-      <div className="border-b border-slate-100 dark:border-zinc-850 pb-md">
-        <button
-          onClick={() => togglePanel("rating")}
-          className="w-full flex justify-between items-center py-xs font-bold text-slate-700 dark:text-zinc-200"
-        >
-          <span>CUSTOMER RATINGS</span>
-          {expandedPanels.rating ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-        {expandedPanels.rating && (
-          <div className="mt-sm space-y-xs animate-[fade-in_0.2s_ease-out] px-xs">
-            {[4, 3, 2].map((stars) => (
-              <button
-                key={stars}
-                onClick={() => setMinRating(stars)}
-                className={`w-full flex items-center gap-sm py-1.5 px-2 rounded-xl transition-all ${
-                  minRating === stars 
-                    ? "bg-[#004782]/10 text-primary dark:text-[#a4c9ff] font-bold" 
-                    : "hover:bg-slate-50 dark:hover:bg-zinc-850 text-slate-600 dark:text-zinc-350"
-                }`}
-              >
-                <div className="flex text-yellow-500">
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      className="material-symbols-outlined text-[15px]"
-                      style={{ fontVariationSettings: i < stars ? "'FILL' 1" : "'FILL' 0" }}
-                    >
-                      star
-                    </span>
-                  ))}
-                </div>
-                <span>& Up</span>
-              </button>
-            ))}
-            <button
-              onClick={() => setMinRating(0)}
-              className={`w-full text-left py-1.5 px-2 rounded-xl transition-all font-bold ${
-                minRating === 0
-                  ? "bg-[#004782]/10 text-primary dark:text-[#a4c9ff]"
-                  : "hover:bg-slate-50 dark:hover:bg-zinc-850 text-slate-600 dark:text-zinc-350"
-              }`}
-            >
-              All Ratings
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Discount Accordion */}
       <div className="pb-md">
         <button
@@ -557,14 +618,41 @@ const ProductsPage = () => {
             </>
           )}
         </nav>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-md">
-          <div>
-            <h1 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100 tracking-tight">
-              Clinical Drug Catalog
-            </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Secure prescription verification, authentic formulations, and express doorstep delivery.
-            </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
+          <div className="w-full">
+            {seoHeader ? (
+              <div className="space-y-sm">
+                {seoHeader.banner && (
+                  <div className="w-full h-40 md:h-48 rounded-3xl overflow-hidden border border-outline-variant/30 dark:border-outline/20 mb-md relative">
+                    <img src={seoHeader.banner} alt={seoHeader.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-lg">
+                      <h1 className="font-extrabold text-3xl md:text-4xl text-white tracking-tight">
+                        {seoHeader.title}
+                      </h1>
+                    </div>
+                  </div>
+                )}
+                {!seoHeader.banner && (
+                  <h1 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100 tracking-tight">
+                    {seoHeader.title}
+                  </h1>
+                )}
+                {seoHeader.introduction && (
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed max-w-4xl">
+                    {seoHeader.introduction}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <h1 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100 tracking-tight">
+                  Clinical Drug Catalog
+                </h1>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Secure prescription verification, authentic formulations, and express doorstep delivery.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -640,7 +728,6 @@ const ProductsPage = () => {
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
                   <option value="discount">Highest Discount</option>
-                  <option value="rating">Best Rated</option>
                   <option value="alpha-asc">Name: A–Z</option>
                   <option value="alpha-desc">Name: Z–A</option>
                 </select>
@@ -815,6 +902,31 @@ const ProductsPage = () => {
               >
                 <span>Next &rarr;</span>
               </button>
+            </div>
+          )}
+
+          {/* Category/Brand FAQs */}
+          {seoHeader && seoHeader.faqs && seoHeader.faqs.length > 0 && (
+            <div className="mt-xxl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-xs space-y-md text-left">
+              <h3 className="font-bold text-base text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                Frequently Asked Questions about {seoHeader.title}
+              </h3>
+              <div className="space-y-xs divide-y divide-slate-100 dark:divide-zinc-850">
+                {seoHeader.faqs.map((faq, idx) => (
+                  <details key={idx} className="group pt-sm first:pt-0">
+                    <summary className="flex justify-between items-center py-sm font-bold text-slate-700 dark:text-zinc-200 text-xs cursor-pointer list-none">
+                      <span className="flex items-center gap-xs">
+                        <HelpCircle size={14} className="text-[#004782]" />
+                        {faq.question}
+                      </span>
+                      <ChevronDown size={14} className="group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <div className="pb-sm px-md text-[11px] text-slate-400 leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </details>
+                ))}
+              </div>
             </div>
           )}
 

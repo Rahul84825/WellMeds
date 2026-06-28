@@ -28,19 +28,9 @@ const productSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: [0, "Price cannot be negative"],
     },
-    originalPrice: {
+        originalPrice: {
       type: Number,
       min: [0, "Original price cannot be negative"],
-    },
-    rating: {
-      type: Number,
-      default: 5.0,
-      min: 0,
-      max: 5,
-    },
-    reviewsCount: {
-      type: Number,
-      default: 0,
     },
     stock: {
       type: Number,
@@ -72,6 +62,91 @@ const productSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: [true, "SKU is required"],
+    },
+    medicalSections: {
+      type: [{
+        title: { type: String, required: true },
+        content: { type: String, required: true }
+      }],
+      default: []
+    },
+    composition: {
+      type: [{
+        ingredient: { type: String, required: true },
+        strength: { type: String, required: true },
+        purpose: { type: String, required: true }
+      }],
+      default: []
+    },
+    benefits: {
+      type: [{
+        title: { type: String, required: true },
+        description: { type: String }
+      }],
+      default: []
+    },
+    usageInstructions: {
+      type: [String],
+      default: []
+    },
+    storageInstructions: {
+      type: [String],
+      default: []
+    },
+    warnings: {
+      type: [String],
+      default: []
+    },
+    sideEffects: {
+      type: [String],
+      default: []
+    },
+    safetyCards: {
+      type: [{
+        icon: { type: String },
+        title: { type: String, required: true },
+        status: { type: String, required: true },
+        description: { type: String }
+      }],
+      default: []
+    },
+    faqs: {
+      type: [{
+        question: { type: String, required: true },
+        answer: { type: String, required: true }
+      }],
+      default: []
+    },
+    specifications: {
+      type: [{
+        label: { type: String, required: true },
+        value: { type: String, required: true }
+      }],
+      default: []
+    },
+    seo: {
+      metaTitle: { type: String },
+      metaDescription: { type: String },
+      keywords: { type: String },
+      canonicalUrl: { type: String },
+      ogImage: { type: String }
+    },
+    relatedProducts: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+      default: []
+    },
+    references: {
+      type: [String],
+      default: []
+    },
+    imagesData: {
+      type: [{
+        url: { type: String, required: true },
+        alt: { type: String },
+        title: { type: String },
+        caption: { type: String }
+      }],
+      default: []
     },
   },
   {

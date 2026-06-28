@@ -331,7 +331,7 @@ const ManageProducts = () => {
                         <Edit size={14} />
                       </button>
                       <button
-                        onClick={() => navigate(`/product/${p.id || p._id}`)}
+                        onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
                         className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg"
                         title="View details on site"
                       >

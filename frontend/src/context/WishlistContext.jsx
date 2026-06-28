@@ -37,8 +37,6 @@ export const WishlistProvider = ({ children }) => {
     stock: product.stock,
     requiresRx: product.requiresRx || false,
     badge: product.badge || "",
-    rating: product.rating,
-    reviewsCount: product.reviewsCount,
   });
 
   // Sync wishlist from backend on login

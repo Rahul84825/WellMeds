@@ -65,12 +65,10 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Badges */}
-          {product.badge && (
+          {product.badge && product.badge !== "Top Rated" && (
             <span className={`absolute top-2 left-2 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm ${
               product.badge === "Rx Required" 
                 ? "bg-secondary-container text-on-secondary-container border border-secondary"
-                : product.badge === "Top Rated"
-                ? "bg-secondary text-white"
                 : "bg-primary text-white"
             }`}>
               {product.badge}
@@ -102,7 +100,7 @@ const ProductCard = ({ product }) => {
             {product.brand}
           </p>
           <Link 
-            to={`/product/${productId}`} 
+            to={`/products/${product.slug || productId}`} 
             className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none rounded-sm"
           >
             <h3 className="font-headline-sm text-headline-sm text-on-surface leading-tight mb-md truncate-2-lines">
@@ -111,18 +109,6 @@ const ProductCard = ({ product }) => {
           </Link>
 
           <div className="mt-auto">
-            {/* Rating */}
-            {product.rating && (
-              <div className="flex items-center gap-1 mb-2">
-                <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  star
-                </span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant">
-                  {product.rating} ({product.reviewsCount})
-                </span>
-              </div>
-            )}
-
             {/* Price & Action */}
             <div className="flex items-center justify-between">
               <div>
@@ -210,14 +196,6 @@ const ProductCard = ({ product }) => {
               <h2 className="font-headline-md text-headline-md font-bold text-on-surface mt-xs">
                 {product.name}
               </h2>
-              <div className="flex items-center gap-xs my-sm">
-                <span className="material-symbols-outlined text-yellow-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  star
-                </span>
-                <span className="font-label-md text-label-md text-on-surface">
-                  {product.rating} ({product.reviewsCount} reviews)
-                </span>
-              </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant my-md leading-relaxed">
                 {product.description}
               </p>
