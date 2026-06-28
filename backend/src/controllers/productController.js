@@ -21,22 +21,30 @@ export const getProducts = async (req, res, next) => {
   try {
     const query = {};
 
-    // 1. Search query match
+    // 1. Search query match (exclude category since it's now ObjectId reference)
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { brand: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
     }
 
-    // 2. Category filter matching
+    // 2. Category filter - now requires ObjectId
     if (categories) {
-      query.category = { $in: categories.split(",") };
+      // Convert category names to ObjectIds
+      const categoryNames = categories.split(",");
+      const categoryDocs = await Category.find({ slug: { $in: categoryNames } }).select("_id");
+      const categoryIds = categoryDocs.map(c => c._id);
+      if (categoryIds.length > 0) {
+        query.category = { $in: categoryIds };
+      }
     } else if (req.query.category) {
-      // fallback for single category param
-      query.category = req.query.category;
+      // Single category - lookup by slug or name
+      const categoryDoc = await Category.findOne({ $or: [{ slug: req.query.category }, { name: req.query.category }] }).select("_id");
+      if (categoryDoc) {
+        query.category = categoryDoc._id;
+      }
     }
 
     // 3. Brand filter matching
@@ -120,6 +128,7 @@ export const getProducts = async (req, res, next) => {
       }));
     } else {
       products = await Product.find(query)
+        .populate("category", "name slug")
         .sort(sortOptions)
         .skip(skipNum)
         .limit(limitNum);
@@ -157,9 +166,13 @@ export const getProduct = async (req, res, next) => {
     let product;
     const mongoose = (await import("mongoose")).default;
     if (mongoose.Types.ObjectId.isValid(id)) {
-      product = await Product.findById(id).populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+      product = await Product.findById(id)
+        .populate("category", "name slug")
+        .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     } else {
-      product = await Product.findOne({ slug: id }).populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+      product = await Product.findOne({ slug: id })
+        .populate("category", "name slug")
+        .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     }
 
     if (!product) {
@@ -189,11 +202,13 @@ export const createProduct = async (req, res, next) => {
       badge,
     });
 
-    // Increment category product count
-    await Category.findOneAndUpdate(
-      { name: product.category },
-      { $inc: { count: 1 } }
-    );
+    // Increment category product count (category is now ObjectId)
+    if (product.category) {
+      await Category.findByIdAndUpdate(
+        product.category,
+        { $inc: { count: 1 } }
+      );
+    }
 
     res.status(201).json({ success: true, product });
   } catch (error) {
@@ -230,10 +245,14 @@ export const updateProduct = async (req, res, next) => {
       runValidators: true,
     });
 
-    // Sync counts if category changed
-    if (updateData.category && updateData.category !== product.category) {
-      await Category.findOneAndUpdate({ name: product.category }, { $inc: { count: -1 } });
-      await Category.findOneAndUpdate({ name: updateData.category }, { $inc: { count: 1 } });
+    // Sync counts if category changed (compare ObjectIds)
+    if (updateData.category && updateData.category.toString() !== product.category.toString()) {
+      // Decrement old category
+      if (product.category) {
+        await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
+      }
+      // Increment new category
+      await Category.findByIdAndUpdate(updateData.category, { $inc: { count: 1 } });
     }
 
     res.status(200).json({ success: true, product: updatedProduct });
@@ -253,11 +272,10 @@ export const deleteProduct = async (req, res, next) => {
 
     await product.deleteOne();
 
-    // Decrement category count
-    await Category.findOneAndUpdate(
-      { name: product.category },
-      { $inc: { count: -1 } }
-    );
+    // Decrement category count (category is now ObjectId)
+    if (product.category) {
+      await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
+    }
 
     res.status(200).json({ success: true, message: "Product deleted successfully" });
   } catch (error) {

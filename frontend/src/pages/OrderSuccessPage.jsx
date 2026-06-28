@@ -15,7 +15,7 @@ const OrderSuccess = () => {
         <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">No order details found</h2>
         <Link to="/products" className="text-primary hover:underline mt-md inline-block">Continue Shopping</Link>
       </div>
-    );
+    );``
   }
 
   return (

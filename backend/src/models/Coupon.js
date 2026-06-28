@@ -22,20 +22,13 @@ const couponSchema = new mongoose.Schema(
       enum: ["percentage", "fixed"],
       default: "percentage",
     },
-    discountAmount: {
-      type: Number,
-      min: [0, "Discount amount cannot be negative"],
-    },
+    // CANONICAL FIELD: Use this for discount amount
     discountValue: {
       type: Number,
       required: [true, "Discount value is required"],
       min: [0, "Discount value cannot be negative"],
     },
-    minOrderValue: {
-      type: Number,
-      default: 0,
-      min: [0, "Min order value cannot be negative"],
-    },
+    // CANONICAL FIELD: Use this for minimum order requirement
     minimumOrder: {
       type: Number,
       default: 0,
@@ -58,10 +51,7 @@ const couponSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    // CANONICAL FIELD: Use this for active status
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -105,27 +95,16 @@ couponSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
-// Pre-save hook to synchronize legacy fields (discountAmount, minOrderValue, isActive)
-// with the new extended schema fields (discountValue, minimumOrder, status)
+// Pre-save hook to ensure required fields are set
 couponSchema.pre("save", function (next) {
-  if (this.discountValue === undefined && this.discountAmount !== undefined) {
-    this.discountValue = this.discountAmount;
-  } else if (this.discountAmount === undefined && this.discountValue !== undefined) {
-    this.discountAmount = this.discountValue;
+  // Ensure discountValue is set (canonical field)
+  if (!this.discountValue && this.discountValue !== 0) {
+    throw new Error("Discount value is required");
   }
 
-  if (this.minimumOrder === undefined && this.minOrderValue !== undefined) {
-    this.minimumOrder = this.minOrderValue;
-  } else if (this.minOrderValue === undefined && this.minimumOrder !== undefined) {
-    this.minOrderValue = this.minimumOrder;
-  }
-
-  if (this.status === "Active") {
-    this.isActive = true;
-  } else if (this.status === "Inactive") {
-    this.isActive = false;
-  } else {
-    this.status = this.isActive ? "Active" : "Inactive";
+  // Ensure status is set properly
+  if (!this.status) {
+    this.status = "Active";
   }
 
   next();

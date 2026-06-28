@@ -13,10 +13,12 @@ const productSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    // UPDATED: category is now an ObjectId reference to Category document
+    // This enables proper relational queries and .populate() support
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
       required: [true, "Category is required"],
-      trim: true,
     },
     brand: {
       type: String,

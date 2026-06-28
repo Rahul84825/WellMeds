@@ -21,7 +21,9 @@ export const toggleWishlist = async (req, res, next) => {
       wishlist = await Wishlist.create({ user: req.user._id, products: [] });
     }
 
-    const prodIndex = wishlist.products.indexOf(productId);
+    // Use findIndex with proper ObjectId comparison instead of indexOf
+    const prodIndex = wishlist.products.findIndex((id) => id.toString() === productId.toString());
+    
     if (prodIndex > -1) {
       // Remove product
       wishlist.products.splice(prodIndex, 1);

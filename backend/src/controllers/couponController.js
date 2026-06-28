@@ -17,7 +17,8 @@ export const validateCouponCode = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Invalid coupon code" });
     }
 
-    if (coupon.status !== "Active" || !coupon.isActive) {
+    // Use canonical status field only
+    if (coupon.status !== "Active") {
       return res.status(400).json({ success: false, message: "This coupon is inactive" });
     }
 
@@ -30,7 +31,8 @@ export const validateCouponCode = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "This coupon has expired" });
     }
 
-    const minOrder = coupon.minimumOrder || coupon.minOrderValue || 0;
+    // Use canonical minimumOrder field only
+    const minOrder = coupon.minimumOrder || 0;
     if (subtotal < minOrder) {
       return res.status(400).json({ 
         success: false, 
@@ -49,8 +51,8 @@ export const validateCouponCode = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "You have already used this coupon" });
     }
 
-    // Calculate discount
-    const discountVal = coupon.discountValue || coupon.discountAmount || 0;
+    // Calculate discount using canonical discountValue field
+    const discountVal = coupon.discountValue;
     let discount = 0;
     if (coupon.discountType === "percentage") {
       discount = (subtotal * discountVal) / 100;

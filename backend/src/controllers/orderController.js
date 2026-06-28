@@ -19,7 +19,8 @@ export const placeOrder = async (req, res, next) => {
         return res.status(404).json({ success: false, message: "Invalid coupon code" });
       }
 
-      if (couponObj.status !== "Active" || !couponObj.isActive) {
+      // Use canonical status field only
+      if (couponObj.status !== "Active") {
         return res.status(400).json({ success: false, message: "This coupon is inactive" });
       }
 
@@ -32,7 +33,8 @@ export const placeOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "This coupon has expired" });
       }
 
-      const minOrder = couponObj.minimumOrder || couponObj.minOrderValue || 0;
+      // Use canonical minimumOrder field only
+      const minOrder = couponObj.minimumOrder || 0;
       if (orderData.subtotal < minOrder) {
         return res.status(400).json({ 
           success: false, 
@@ -51,8 +53,8 @@ export const placeOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "You have already used this coupon" });
       }
 
-      // Calculate discount amount
-      const discountVal = couponObj.discountValue || couponObj.discountAmount || 0;
+      // Calculate discount amount using canonical discountValue field
+      const discountVal = couponObj.discountValue;
       if (couponObj.discountType === "percentage") {
         discountAmount = (orderData.subtotal * discountVal) / 100;
         if (couponObj.maximumDiscount > 0) {
@@ -70,6 +72,8 @@ export const placeOrder = async (req, res, next) => {
     const finalAmount = Math.max(0, subtotal - discountAmount + shipping + tax);
 
     // Validate stock and adjust inventory levels
+    // Also check if any product requires Rx
+    let orderRequiresRx = false;
     for (const item of orderData.items) {
       const product = await Product.findById(item.product || item.id);
       if (!product) {
@@ -78,9 +82,13 @@ export const placeOrder = async (req, res, next) => {
       if (product.stock < item.quantity) {
         return res.status(400).json({ success: false, message: `Insufficient stock for product ${item.name}` });
       }
+      // Check if this product requires prescription
+      if (product.requiresRx) {
+        orderRequiresRx = true;
+      }
     }
 
-    // Create the order
+    // Create the order with backend-computed requiresRx status
     const order = await Order.create({
       ...orderData,
       orderId,
@@ -98,7 +106,7 @@ export const placeOrder = async (req, res, next) => {
       discountAmount,
       total: finalAmount, // matches legacy 'total' field
       finalAmount, // matches new extended 'finalAmount' field
-      status: orderData.requiresRx ? "Prescription Review" : "Processing",
+      status: orderRequiresRx ? "Prescription Review" : "Processing",
     });
 
     // Record Coupon Usage and increment count
