@@ -18,14 +18,14 @@ const HomePage = () => {
       {/* Hero Banner */}
       <Hero />
 
+      {/* Active Coupons Carousel */}
+      <CouponCarousel />
+
       {/* Shop by Category strip */}
       <CategorySection />
 
       {/* Featured Best Sellers Grid */}
       <FeaturedProductsSection />
-
-      {/* Active Coupons Carousel */}
-      <CouponCarousel />
 
       {/* Brand Value Propositions */}
       <WhyChooseWellMeds />
