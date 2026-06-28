@@ -135,15 +135,10 @@ const Checkout = () => {
         toast.info("Verifying prescription status, please wait...");
         return;
       }
-      if (!hasApprovedRx) {
-        toast.error("Prescription Approval Required");
+      if (!hasApprovedRx && !rxAttachedCheck) {
+        setRxModalOpen(true);
         return;
       }
-    }
-
-    if (requiresRx && !rxAttachedCheck) {
-      setRxModalOpen(true);
-      return;
     }
 
     setIsSubmitting(true);

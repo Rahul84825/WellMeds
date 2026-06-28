@@ -82,20 +82,19 @@ const ProductsPage = () => {
     fetchMetadata();
   }, []);
 
-  // Sync category from URL parameter or slug
+  // Sync category from URL parameter or route slug
   const categoryParam = searchParams.get("category");
   useEffect(() => {
-    if (categoryParam) {
-      setSelectedCategories([categoryParam]);
-    }
-  }, [categoryParam]);
-
-  // Sync category or brand from URL slug
-  useEffect(() => {
-    if (categories.length > 0 && categorySlug) {
-      const matchedCat = categories.find(c => c.slug === categorySlug);
+    const activeSlug = categorySlug || categoryParam;
+    if (categories.length > 0 && activeSlug) {
+      const matchedCat = categories.find(
+        (c) =>
+          c.slug === activeSlug ||
+          c.name.toLowerCase() === activeSlug.toLowerCase() ||
+          c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "") === activeSlug.toLowerCase()
+      );
       if (matchedCat) {
-        setSelectedCategories([matchedCat.name]);
+        setSelectedCategories([matchedCat.slug]);
         setSeoHeader({
           title: matchedCat.name,
           banner: matchedCat.banner || matchedCat.image,
@@ -105,9 +104,18 @@ const ProductsPage = () => {
           seoDescription: matchedCat.seoDescription,
           seoKeywords: matchedCat.seoKeywords
         });
+      } else {
+        setSelectedCategories(["non-existent-category-slug-to-force-empty-state"]);
+        setSeoHeader({
+          title: "No Products Found",
+          introduction: "The requested category does not exist."
+        });
       }
+    } else if (categories.length > 0) {
+      setSelectedCategories([]);
+      setSeoHeader(null);
     }
-  }, [categorySlug, categories]);
+  }, [categorySlug, categoryParam, categories]);
 
   useEffect(() => {
     if (brands.length > 0 && brandSlug) {
@@ -248,9 +256,9 @@ const ProductsPage = () => {
   }, [debouncedSearch, selectedCategories, selectedBrands, priceRange, stockStatus, requiresRx, hasDiscount, sortBy]);
 
   // Toggle handlers
-  const handleCategoryToggle = (catName) => {
+  const handleCategoryToggle = (catSlug) => {
     setSelectedCategories(prev => {
-      const updated = prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName];
+      const updated = prev.includes(catSlug) ? prev.filter(c => c !== catSlug) : [...prev, catSlug];
       if (updated.length === 1) {
         setSearchParams({ category: updated[0] });
       } else {
@@ -280,6 +288,9 @@ const ProductsPage = () => {
     setSearchVal("");
     setSortBy("popularity");
     setSearchParams({});
+    if (categorySlug || brandSlug) {
+      navigate("/products");
+    }
   };
 
   // Filtered lists for sidebar search
@@ -298,8 +309,10 @@ const ProductsPage = () => {
   // Active filter chips computation
   const activeChips = useMemo(() => {
     const chips = [];
-    selectedCategories.forEach(cat => {
-      chips.push({ id: `cat-${cat}`, label: cat, type: "category", value: cat });
+    selectedCategories.forEach(slug => {
+      const catObj = categories.find(c => c.slug === slug);
+      const label = catObj ? catObj.name : slug;
+      chips.push({ id: `cat-${slug}`, label, type: "category", value: slug });
     });
     selectedBrands.forEach(brand => {
       chips.push({ id: `brand-${brand}`, label: brand, type: "brand", value: brand });
@@ -317,7 +330,7 @@ const ProductsPage = () => {
       chips.push({ id: "discount", label: "Discounted", type: "discount" });
     }
     return chips;
-  }, [selectedCategories, selectedBrands, priceRange, minRating, stockStatus, requiresRx, hasDiscount]);
+  }, [selectedCategories, selectedBrands, priceRange, stockStatus, requiresRx, hasDiscount, categories]);
 
   const handleRemoveChip = (chip) => {
     if (chip.type === "category") handleCategoryToggle(chip.value);
@@ -377,8 +390,8 @@ const ProductsPage = () => {
                 <label key={cat.id || cat._id} className="flex items-center gap-sm cursor-pointer py-0.5 group">
                   <input
                     type="checkbox"
-                    checked={selectedCategories.includes(cat.name)}
-                    onChange={() => handleCategoryToggle(cat.name)}
+                    checked={selectedCategories.includes(cat.slug)}
+                    onChange={() => handleCategoryToggle(cat.slug)}
                     className="rounded border-slate-300 dark:border-zinc-700 text-[#004782] focus:ring-primary h-3.5 w-3.5"
                   />
                   <span className="text-slate-600 dark:text-zinc-300 group-hover:text-primary transition-colors">
@@ -611,10 +624,12 @@ const ProductsPage = () => {
           <span className="cursor-pointer hover:text-[#004782] transition-colors" onClick={() => navigate("/")}>Home</span>
           <span className="material-symbols-outlined text-[12px] text-slate-300">chevron_right</span>
           <span className="text-[#004782] dark:text-[#a4c9ff]">Shop</span>
-          {categoryParam && (
+          {(categorySlug || categoryParam) && (
             <>
               <span className="material-symbols-outlined text-[12px] text-slate-300">chevron_right</span>
-              <span className="text-slate-600 dark:text-zinc-200">{categoryParam}</span>
+              <span className="text-slate-600 dark:text-zinc-200">
+                {seoHeader?.title || categorySlug || categoryParam}
+              </span>
             </>
           )}
         </nav>

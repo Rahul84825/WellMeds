@@ -32,18 +32,36 @@ export const getProducts = async (req, res, next) => {
 
     // 2. Category filter - now requires ObjectId
     if (categories) {
-      // Convert category names to ObjectIds
+      // Convert category names/slugs to ObjectIds
       const categoryNames = categories.split(",");
-      const categoryDocs = await Category.find({ slug: { $in: categoryNames } }).select("_id");
+      const categoryDocs = await Category.find({
+        $or: [
+          { slug: { $in: categoryNames } },
+          { name: { $in: categoryNames } }
+        ]
+      }).select("_id");
       const categoryIds = categoryDocs.map(c => c._id);
       if (categoryIds.length > 0) {
         query.category = { $in: categoryIds };
+      } else {
+        // Force empty state by querying a non-existent ObjectId
+        const mongoose = (await import("mongoose")).default;
+        query.category = { $in: [new mongoose.Types.ObjectId()] };
       }
     } else if (req.query.category) {
       // Single category - lookup by slug or name
-      const categoryDoc = await Category.findOne({ $or: [{ slug: req.query.category }, { name: req.query.category }] }).select("_id");
+      const categoryDoc = await Category.findOne({
+        $or: [
+          { slug: req.query.category },
+          { name: req.query.category }
+        ]
+      }).select("_id");
       if (categoryDoc) {
         query.category = categoryDoc._id;
+      } else {
+        // Force empty state by querying a non-existent ObjectId
+        const mongoose = (await import("mongoose")).default;
+        query.category = new mongoose.Types.ObjectId();
       }
     }
 

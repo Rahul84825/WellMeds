@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { formatCurrency } from "../utils/currency";
+import { api } from "../services/api";
 
 import { toast } from "sonner";
 
@@ -24,13 +25,22 @@ const Cart = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
 
-  const handleApplyCoupon = (e) => {
+  const handleApplyCoupon = async (e) => {
     e.preventDefault();
-    if (couponCode.trim().toUpperCase() === "MEDISTART20") {
-      setCouponApplied(true);
-      setCouponDiscount(subtotal * 0.20); // 20% discount
-    } else {
-      toast.error("Invalid coupon code. Try MEDISTART20!");
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    try {
+      const res = await api.validateCoupon(code, subtotal);
+      if (res.success) {
+        setCouponApplied(true);
+        setCouponDiscount(res.discountAmount || 0);
+        toast.success(res.message || "Coupon applied successfully!");
+      } else {
+        toast.error(res.message || "Invalid coupon code.");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to validate coupon.";
+      toast.error(msg);
     }
   };
 
@@ -210,7 +220,7 @@ const Cart = () => {
               </div>
               {couponApplied && (
                 <div className="flex justify-between text-secondary">
-                  <span>Coupon Discount (20%)</span>
+                  <span>Coupon Discount</span>
                   <span className="font-bold">-{formatCurrency(couponDiscount)}</span>
                 </div>
               )}

@@ -103,7 +103,11 @@ const ProductDetails = () => {
         }
 
         // Similar products: same category
-        const similar = allProds.filter(p => p.category === prod.category && p.slug !== prod.slug).slice(0, 4);
+        const prodCatId = prod.category?._id || prod.category;
+        const similar = allProds.filter(p => {
+          const pCatId = p.category?._id || p.category;
+          return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
+        }).slice(0, 4);
         setSimilarProducts(similar);
 
         // Update recently viewed in localStorage
@@ -259,8 +263,8 @@ const ProductDetails = () => {
             {
               "@type": "ListItem",
               "position": 3,
-              "name": product.category,
-              "item": `${window.location.origin}/products?category=${encodeURIComponent(product.category)}`
+              "name": product.category?.name || product.category,
+              "item": `${window.location.origin}/category/${product.category?.slug || product.category}`
             },
             {
               "@type": "ListItem",
@@ -460,7 +464,7 @@ const ProductDetails = () => {
   const genericName = product.composition?.[0]?.ingredient || "N/A";
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-[1550px] mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
       {/* Breadcrumbs */}
       <nav className="mb-lg text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">
@@ -468,7 +472,7 @@ const ProductDetails = () => {
         <span>/</span>
         <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Products</Link>
         <span>/</span>
-        <Link to={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">{product.category}</Link>
+        <Link to={`/category/${product.category?.slug || product.category}`} className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">{product.category?.name || product.category}</Link>
         <span>/</span>
         <span className="text-slate-600 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
@@ -477,7 +481,7 @@ const ProductDetails = () => {
       <div className="flex flex-col lg:flex-row gap-xl mb-xl items-start">
         
         {/* Left Column: Image Gallery */}
-        <div className="w-full lg:w-[45%] space-y-md">
+        <div className="w-full lg:w-[48%] space-y-md">
           <div 
             className="w-full aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-outline-variant/30 dark:border-outline/20 relative cursor-zoom-in flex items-center justify-center p-md shadow-md group/gallery"
             onMouseMove={handleMouseMove}
@@ -546,12 +550,12 @@ const ProductDetails = () => {
         </div>
 
         {/* Center Column: Key Specifications & Clinical Badges */}
-        <div className="flex-grow w-full lg:w-[30%] space-y-md">
+        <div className="flex-grow w-full lg:w-[28%] space-y-md">
           <div className="space-y-sm">
             {/* Badges */}
             <div className="flex flex-wrap gap-xs items-center">
               <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full border border-primary/10 shadow-xs">
-                {product.category}
+                {product.category?.name || product.category}
               </span>
               {product.requiresRx ? (
                 <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full flex items-center gap-1 shadow-xs select-none">
@@ -623,7 +627,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Right Column: Sticky Purchase Card (Desktop) */}
-        <div className="w-full lg:w-[25%] lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-md space-y-lg text-xs">
+        <div className="w-full lg:w-[24%] lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 p-lg rounded-3xl shadow-lg space-y-lg text-xs">
           
           {/* Price Panel */}
           <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850/60">
@@ -754,7 +758,7 @@ const ProductDetails = () => {
           { label: "Prescription", value: product.requiresRx ? "Rx Required" : "OTC Item", icon: FileText, color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30" },
           { label: "Delivery", value: "Next-Day", icon: Truck, color: "text-[#086b53] bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30" },
           { label: "Storage", value: product.specifications?.find(s => s.label.toLowerCase().includes("store") || s.label.toLowerCase().includes("temp"))?.value || "Below 30°C", icon: Thermometer, color: "text-[#004782] bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/30" },
-          { label: "Category", value: product.category, icon: Tag, color: "text-purple-600 bg-purple-50 dark:bg-purple-950/20 border-purple-100 dark:border-purple-900/30" },
+          { label: "Category", value: product.category?.name || product.category, icon: Tag, color: "text-purple-600 bg-purple-50 dark:bg-purple-950/20 border-purple-100 dark:border-purple-900/30" },
           { label: "Shelf Life", value: "24 Months", icon: Hourglass, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900/30" },
           { label: "Manufacturer", value: product.brand, icon: Building, color: "text-slate-600 bg-slate-50 dark:bg-zinc-850 border-slate-200 dark:border-zinc-800" }
         ].map((item, idx) => {
