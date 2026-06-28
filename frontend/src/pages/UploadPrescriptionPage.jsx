@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import PrescriptionCard from "../components/PrescriptionCard";
+import { toast } from "sonner";
 import PrescriptionTimeline from "../components/PrescriptionTimeline";
 import Modal from "../components/Modal";
 import { 
@@ -169,19 +170,25 @@ const UploadPrescriptionPage = () => {
     }
   };
 
-  const handleDeleteRx = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
-      try {
-        await api.deletePrescription(id);
-        setSavedPrescriptions((prev) => prev.filter((rx) => (rx.id || rx._id) !== id));
-        if (uploadedRxRecord && (uploadedRxRecord.id || uploadedRxRecord._id) === id) {
-          setUploadedRxRecord(null);
+  const handleDeleteRx = (id, name) => {
+    toast.warning(`Are you sure you want to delete "${name}"?`, {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await api.deletePrescription(id);
+            setSavedPrescriptions((prev) => prev.filter((rx) => (rx.id || rx._id) !== id));
+            if (uploadedRxRecord && (uploadedRxRecord.id || uploadedRxRecord._id) === id) {
+              setUploadedRxRecord(null);
+            }
+            toast.success(`"${name}" deleted successfully.`);
+          } catch (err) {
+            console.error("Failed to delete prescription", err);
+            toast.error("Failed to delete prescription.");
+          }
         }
-      } catch (err) {
-        console.error("Failed to delete prescription", err);
-        alert("Failed to delete prescription.");
       }
-    }
+    });
   };
 
   const handleSaveAddress = () => {
@@ -191,10 +198,10 @@ const UploadPrescriptionPage = () => {
 
   const handleContinue = () => {
     if (savedPrescriptions.length === 0 && !uploadedRxRecord) {
-      alert("Please upload at least one prescription before continuing.");
+      toast.warning("Please upload at least one prescription before continuing.");
       return;
     }
-    alert(`Order proceeding with method: ${orderMethod === "upload-and-order" ? "Upload & Order" : orderMethod === "callback" ? "Pharmacist Callback" : "Assistance Required"} for ${duration} days.`);
+    toast.success(`Order proceeding with method: ${orderMethod === "upload-and-order" ? "Upload & Order" : orderMethod === "callback" ? "Pharmacist Callback" : "Assistance Required"} for ${duration} days.`);
     navigate("/checkout");
   };
 

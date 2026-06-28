@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 import { 
   ArrowLeft, 
   Upload, 
@@ -71,7 +72,7 @@ const AddNewProduct = () => {
           }
         } catch (err) {
           console.error("Failed to load product data", err);
-          alert("Failed to load product details.");
+          toast.error("Failed to load product details.");
         } finally {
           setLoading(false);
         }
@@ -95,7 +96,7 @@ const AddNewProduct = () => {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.size > 10 * 1024 * 1024) {
-          alert(`File "${file.name}" exceeds 10MB limit.`);
+          toast.warning(`File "${file.name}" exceeds 10MB limit.`);
           continue;
         }
 
@@ -115,7 +116,7 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error("Image upload failed", err);
-      alert("Failed to upload image. Please verify local environment.");
+      toast.error("Failed to upload image. Please verify local environment.");
     } finally {
       setUploadProgress(null);
     }
@@ -133,7 +134,7 @@ const AddNewProduct = () => {
       const uploadedUrls = [];
       for (const file of files) {
         if (file.size > 10 * 1024 * 1024) {
-          alert(`File "${file.name}" exceeds 10MB limit.`);
+          toast.warning(`File "${file.name}" exceeds 10MB limit.`);
           continue;
         }
         const secureUrl = await api.uploadImage(file);
@@ -144,7 +145,7 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to drop and upload image.");
+      toast.error("Failed to drop and upload image.");
     } finally {
       setUploadProgress(null);
     }
@@ -184,13 +185,13 @@ const AddNewProduct = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!name || !brand || !price || !stock) {
-      alert("Please fill in all required fields.");
+      toast.warning("Please fill in all required fields.");
       return;
     }
 
     const primaryImageUrl = images[primaryImageIdx] || "";
     if (!primaryImageUrl) {
-      alert("Please upload at least one image.");
+      toast.warning("Please upload at least one image.");
       return;
     }
 
@@ -212,15 +213,15 @@ const AddNewProduct = () => {
     try {
       if (isEditMode) {
         await api.updateProduct(id, productData);
-        alert("Product updated successfully!");
+        toast.success("Product updated successfully!");
       } else {
         await api.createProduct(productData);
-        alert("Product added successfully!");
+        toast.success("Product added successfully!");
       }
       navigate("/admin/products");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to save product.");
+      toast.error(err.response?.data?.message || "Failed to save product.");
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 import { formatDate } from "../utils/date";
 import { 
   FileText, 
@@ -107,7 +108,7 @@ const AdminPrescriptions = () => {
     setIsSubmitting(true);
     try {
       const updatedRx = await api.approvePrescription(selectedRx.id || selectedRx._id, adminNotes);
-      alert(`Prescription for ${updatedRx.user?.name || "Patient"} approved successfully.`);
+      toast.success(`Prescription for ${updatedRx.user?.name || "Patient"} approved successfully.`);
       
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
@@ -115,7 +116,7 @@ const AdminPrescriptions = () => {
       setSelectedRx({ ...selectedRx, ...updatedRx });
     } catch (err) {
       console.error("Failed to approve prescription", err);
-      alert("Failed to approve prescription.");
+      toast.error("Failed to approve prescription.");
     } finally {
       setIsSubmitting(false);
     }
@@ -124,13 +125,13 @@ const AdminPrescriptions = () => {
   const handleReject = async () => {
     if (!selectedRx) return;
     if (!adminNotes.trim()) {
-      alert("Please provide pharmacist notes explaining the rejection reason.");
+      toast.warning("Please provide pharmacist notes explaining the rejection reason.");
       return;
     }
     setIsSubmitting(true);
     try {
       const updatedRx = await api.rejectPrescription(selectedRx.id || selectedRx._id, adminNotes);
-      alert(`Prescription for ${updatedRx.user?.name || "Patient"} rejected.`);
+      toast.info(`Prescription for ${updatedRx.user?.name || "Patient"} rejected.`);
       
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
@@ -138,7 +139,7 @@ const AdminPrescriptions = () => {
       setSelectedRx({ ...selectedRx, ...updatedRx });
     } catch (err) {
       console.error("Failed to reject prescription", err);
-      alert("Failed to reject prescription.");
+      toast.error("Failed to reject prescription.");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,14 +150,14 @@ const AdminPrescriptions = () => {
     setIsSubmitting(true);
     try {
       const updatedRx = await api.updatePrescriptionStatus(selectedRx.id || selectedRx._id, status, adminNotes);
-      alert(`Prescription status updated to ${status}.`);
+      toast.success(`Prescription status updated to ${status}.`);
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
       setSelectedRx({ ...selectedRx, ...updatedRx });
     } catch (err) {
       console.error("Failed to update prescription status", err);
-      alert("Failed to update status.");
+      toast.error("Failed to update status.");
     } finally {
       setIsSubmitting(false);
     }

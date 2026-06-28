@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { WishlistProvider, useWishlist } from "./context/WishlistContext";
 
+import { Toaster } from "sonner";
+
 // Routes
 import AppRoutes from "./routes/AppRoutes";
 
@@ -46,6 +48,7 @@ function App() {
       <CartProvider>
         <WishlistProvider>
           <BrowserRouter>
+            <Toaster position="top-right" richColors closeButton />
             <SyncBridge />
             <AppRoutes />
           </BrowserRouter>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "sonner";
 import { 
   Settings, 
   User, 
@@ -43,7 +44,7 @@ const AdminSettings = () => {
     setSavingSection("profile");
     setTimeout(() => {
       setSavingSection(null);
-      alert("Admin profile updated successfully!");
+      toast.success("Admin profile updated successfully!");
     }, 800);
   };
 
@@ -52,7 +53,7 @@ const AdminSettings = () => {
     setSavingSection("store");
     setTimeout(() => {
       setSavingSection(null);
-      alert("Store operating parameters saved!");
+      toast.success("Store operating parameters saved!");
     }, 800);
   };
 
@@ -60,7 +61,7 @@ const AdminSettings = () => {
     setSavingSection("notify");
     setTimeout(() => {
       setSavingSection(null);
-      alert("Alert preferences updated!");
+      toast.success("Alert preferences updated!");
     }, 600);
   };
 

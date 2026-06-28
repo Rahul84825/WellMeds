@@ -3,34 +3,76 @@ import { Category } from "../models/Category.js";
 import slugify from "slugify";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, brand, filter, sort, limit, page } = req.query;
+  const {
+    search,
+    categories,
+    brands,
+    minPrice,
+    maxPrice,
+    rating,
+    stockStatus,
+    requiresRx,
+    hasDiscount,
+    sort,
+    limit,
+    page
+  } = req.query;
 
   try {
     const query = {};
 
-    // Search query match
+    // 1. Search query match
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { brand: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
     }
 
-    // Category filter matching
-    if (category) {
-      query.category = category;
+    // 2. Category filter matching
+    if (categories) {
+      query.category = { $in: categories.split(",") };
+    } else if (req.query.category) {
+      // fallback for single category param
+      query.category = req.query.category;
     }
 
-    // Custom UI filter mapping
-    if (filter) {
-      if (filter === "imported") {
-        // Mock filter: map to specific brands or criteria
-        query.brand = { $in: ["HealthGuard", "BioCare Tech"] };
-      } else if (filter === "condition" || filter === "speciality" || filter === "molecule") {
-        // Prescription medicines are mapped to super speciality filtering
-        query.category = "Prescription";
-      }
+    // 3. Brand filter matching
+    if (brands) {
+      query.brand = { $in: brands.split(",") };
+    }
+
+    // 4. Price range
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // 5. Rating filter
+    if (rating) {
+      query.rating = { $gte: Number(rating) };
+    }
+
+    // 6. Stock status
+    if (stockStatus === "in") {
+      query.stock = { $gt: 0 };
+    } else if (stockStatus === "out") {
+      query.stock = 0;
+    }
+
+    // 7. Prescription requirement
+    if (requiresRx === "true") {
+      query.requiresRx = true;
+    } else if (requiresRx === "false") {
+      query.requiresRx = false;
+    }
+
+    // 8. Has discount
+    if (hasDiscount === "true") {
+      query.$expr = { $gt: [{ $ifNull: ["$originalPrice", 0] }, "$price"] };
     }
 
     // Sorting options setup
@@ -39,18 +81,55 @@ export const getProducts = async (req, res, next) => {
       if (sort === "price-asc") sortOptions = { price: 1 };
       else if (sort === "price-desc") sortOptions = { price: -1 };
       else if (sort === "rating") sortOptions = { rating: -1 };
+      else if (sort === "newest") sortOptions = { createdAt: -1 };
+      else if (sort === "popularity") sortOptions = { reviewsCount: -1 };
+      else if (sort === "alpha-asc") sortOptions = { name: 1 };
+      else if (sort === "alpha-desc") sortOptions = { name: -1 };
     }
 
     // Pagination
     const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 12;
+    const limitNum = parseInt(limit) || 28;
     const skipNum = (pageNum - 1) * limitNum;
 
     const total = await Product.countDocuments(query);
-    const products = await Product.find(query)
-      .sort(sortOptions)
-      .skip(skipNum)
-      .limit(limitNum);
+    let products;
+
+    if (sort === "discount") {
+      products = await Product.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            discountPercent: {
+              $cond: {
+                if: { $gt: [{ $ifNull: ["$originalPrice", 0] }, 0] },
+                then: {
+                  $multiply: [
+                    { $divide: [{ $subtract: ["$originalPrice", "$price"] }, "$originalPrice"] },
+                    100
+                  ]
+                },
+                else: 0
+              }
+            }
+          }
+        },
+        { $sort: { discountPercent: -1 } },
+        { $skip: skipNum },
+        { $limit: limitNum }
+      ]);
+
+      // Map id virtual for aggregate output
+      products = products.map(p => ({
+        ...p,
+        id: p._id.toString()
+      }));
+    } else {
+      products = await Product.find(query)
+        .sort(sortOptions)
+        .skip(skipNum)
+        .limit(limitNum);
+    }
 
     res.status(200).json({
       success: true,
@@ -59,6 +138,18 @@ export const getProducts = async (req, res, next) => {
       page: pageNum,
       pages: Math.ceil(total / limitNum),
       products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductBrands = async (req, res, next) => {
+  try {
+    const brands = await Product.distinct("brand");
+    res.status(200).json({
+      success: true,
+      brands: brands.filter(Boolean),
     });
   } catch (error) {
     next(error);

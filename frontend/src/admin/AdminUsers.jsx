@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 import { 
   Users, 
   Search, 
@@ -37,16 +38,21 @@ const AdminUsers = () => {
   }, []);
 
   const handleRoleChange = async (userId, newRole, name) => {
-    if (window.confirm(`Are you sure you want to change role of "${name}" to "${newRole}"?`)) {
-      try {
-        await api.updateUserRole(userId, newRole);
-        setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
-        alert("Role updated successfully.");
-      } catch (err) {
-        console.error("Failed to change role", err);
-        alert("Failed to update user role.");
+    toast.warning(`Are you sure you want to change role of "${name}" to "${newRole}"?`, {
+      action: {
+        label: "Confirm",
+        onClick: async () => {
+          try {
+            await api.updateUserRole(userId, newRole);
+            setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+            toast.success("Role updated successfully.");
+          } catch (err) {
+            console.error("Failed to change role", err);
+            toast.error("Failed to update user role.");
+          }
+        }
       }
-    }
+    });
   };
 
   // Filtered list

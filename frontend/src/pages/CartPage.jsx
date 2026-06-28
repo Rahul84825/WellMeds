@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { formatCurrency } from "../utils/currency";
 
+import { toast } from "sonner";
+
 const Cart = () => {
   const {
     cartItems,
@@ -28,7 +30,7 @@ const Cart = () => {
       setCouponApplied(true);
       setCouponDiscount(subtotal * 0.20); // 20% discount
     } else {
-      alert("Invalid coupon code. Try MEDISTART20!");
+      toast.error("Invalid coupon code. Try MEDISTART20!");
     }
   };
 

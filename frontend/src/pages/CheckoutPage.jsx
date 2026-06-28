@@ -7,6 +7,7 @@ import Loader from "../components/Loader";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import Modal from "../components/Modal";
 import { formatCurrency } from "../utils/currency";
+import { toast } from "sonner";
 
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
@@ -125,17 +126,17 @@ const Checkout = () => {
     e.preventDefault();
 
     if (!address || !city || !state || !pincode || !fullName || !email) {
-      alert("Please fill in all shipping details.");
+      toast.warning("Please fill in all shipping details.");
       return;
     }
 
     if (requiresRx) {
       if (loadingRxCheck) {
-        alert("Verifying prescription status, please wait...");
+        toast.info("Verifying prescription status, please wait...");
         return;
       }
       if (!hasApprovedRx) {
-        alert("Prescription Approval Required");
+        toast.error("Prescription Approval Required");
         return;
       }
     }
@@ -182,7 +183,7 @@ const Checkout = () => {
     } catch (err) {
       console.error("Failed to place order", err);
       const msg = err?.response?.data?.message || "Something went wrong placing your order. Please try again.";
-      alert(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

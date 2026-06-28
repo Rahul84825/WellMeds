@@ -20,6 +20,7 @@ import { useCart } from "../hooks/useCart";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
+import { toast } from "sonner";
 
 // ──────────────────────────────────────────────────────────────────────────
 // NAV CONFIG — this entire shape is what an admin API should return.
@@ -452,7 +453,7 @@ const NavActions = () => {
   };
 
   const handleUploadSuccess = (data) => {
-    alert(`Prescription "${data.fileName}" uploaded successfully!`);
+    toast.success(`Prescription "${data.fileName}" uploaded successfully!`);
     setUploadModalOpen(false);
   };
 

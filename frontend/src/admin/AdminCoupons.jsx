@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { 
   Tag, 
@@ -100,7 +101,7 @@ const AdminCoupons = () => {
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
     if (!code || !discountValue || !expiryDate) {
-      alert("Please fill in code, discount value, and expiry date.");
+      toast.warning("Please fill in code, discount value, and expiry date.");
       return;
     }
 
@@ -127,16 +128,16 @@ const AdminCoupons = () => {
     try {
       if (editingCoupon) {
         await api.adminUpdateCoupon(editingCoupon.id, payload);
-        alert("Coupon updated successfully.");
+        toast.success("Coupon updated successfully.");
       } else {
         await api.adminCreateCoupon(payload);
-        alert("Coupon created successfully.");
+        toast.success("Coupon created successfully.");
       }
       setFormOpen(false);
       fetchCoupons();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to save coupon.");
+      toast.error(err.response?.data?.message || "Failed to save coupon.");
     } finally {
       setSaving(false);
     }
@@ -152,7 +153,7 @@ const AdminCoupons = () => {
       setCoupons(prev => prev.map(c => c.id === coupon.id ? { ...c, status: newStatus, isActive: newStatus === "Active" } : c));
     } catch (err) {
       console.error("Failed to toggle status", err);
-      alert("Failed to toggle coupon status.");
+      toast.error("Failed to toggle coupon status.");
     }
   };
 
@@ -171,11 +172,11 @@ const AdminCoupons = () => {
 
     try {
       await api.adminCreateCoupon(payload);
-      alert(`Coupon duplicated as: ${duplicatedCode}`);
+      toast.success(`Coupon duplicated as: ${duplicatedCode}`);
       fetchCoupons();
     } catch (err) {
       console.error("Failed to duplicate coupon", err);
-      alert("Failed to duplicate coupon.");
+      toast.error("Failed to duplicate coupon.");
     }
   };
 
@@ -184,7 +185,7 @@ const AdminCoupons = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     try {
       await api.adminUpdateCoupon(coupon.id, { expiryDate: yesterday });
-      alert("Coupon marked as expired.");
+      toast.info("Coupon marked as expired.");
       fetchCoupons();
     } catch (err) {
       console.error("Failed to expire coupon", err);
@@ -192,16 +193,21 @@ const AdminCoupons = () => {
   };
 
   const handleDelete = async (id, code) => {
-    if (window.confirm(`Delete coupon "${code}"? This will permanently remove its record.`)) {
-      try {
-        await api.adminDeleteCoupon(id);
-        setCoupons(prev => prev.filter(c => c.id !== id));
-        alert("Coupon deleted successfully.");
-      } catch (err) {
-        console.error("Failed to delete coupon", err);
-        alert("Failed to delete coupon.");
+    toast.warning(`Delete coupon "${code}"? This will permanently remove its record.`, {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await api.adminDeleteCoupon(id);
+            setCoupons(prev => prev.filter(c => c.id !== id));
+            toast.success("Coupon deleted successfully.");
+          } catch (err) {
+            console.error("Failed to delete coupon", err);
+            toast.error("Failed to delete coupon.");
+          }
+        }
       }
-    }
+    });
   };
 
   if (loading) {

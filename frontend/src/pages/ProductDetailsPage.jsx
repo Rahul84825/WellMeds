@@ -9,6 +9,8 @@ import Modal from "../components/Modal";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import { formatCurrency } from "../utils/currency";
 
+import { toast } from "sonner";
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,14 +69,14 @@ const ProductDetails = () => {
     }
     
     addToCart({ ...product, rxUploaded: !!localRxFile, rxFile: localRxFile }, quantity);
-    alert(`${quantity} item(s) added to cart.`);
+    toast.success(`${quantity} item(s) added to cart.`);
   };
 
   const handleRxSuccess = (data) => {
     setLocalRxFile(data.fileName);
     setRxUploadOpen(false);
     addToCart({ ...product, rxUploaded: true, rxFile: data.fileName }, quantity);
-    alert(`${quantity} prescription item(s) added to cart.`);
+    toast.success(`${quantity} prescription item(s) added to cart.`);
   };
 
   if (loading) {

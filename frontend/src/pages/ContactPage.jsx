@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { toast } from "sonner";
+
 const Contact = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,7 +15,7 @@ const Contact = () => {
     
     setSubmitted(true);
     setTimeout(() => {
-      alert("Thank you for contacting MediShop! Our support agents will reach out to you shortly.");
+      toast.success("Thank you for contacting MediShop! Our support agents will reach out to you shortly.");
       setName("");
       setEmail("");
       setSubject("Support");

@@ -3,6 +3,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
+import { toast } from "sonner";
+
 const AdminRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
@@ -20,7 +22,7 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!isAdmin) {
-    alert("Access Denied: Administrative privileges required.");
+    toast.error("Access Denied: Administrative privileges required.");
     return <Navigate to="/" replace />;
   }
 

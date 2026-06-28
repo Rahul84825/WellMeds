@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { formatDate } from "../utils/date";
 import { 
@@ -67,7 +68,7 @@ const ManageOrders = () => {
       }
     } catch (err) {
       console.error("Failed to update status", err);
-      alert("Failed to update order status.");
+      toast.error("Failed to update order status.");
     }
   };
 

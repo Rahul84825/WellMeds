@@ -16,6 +16,11 @@ export const productService = {
     };
   },
 
+  async getBrands() {
+    const data = await apiInstance.get("/products/brands");
+    return data.brands || [];
+  },
+
   /**
    * Convenience helper — returns just the products array.
    * Used by admin pages that don't need pagination.
