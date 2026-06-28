@@ -9,7 +9,7 @@ const seedAdmin = async () => {
     // Connect to database (connectDB handles in-memory fallback if Atlas is blocked)
     await connectDB();
 
-    const adminEmail = "admin@gmail.com";
+    const adminEmail = "activegamer789@gmail.com";
     const existingAdmin = await User.findOne({ email: adminEmail });
 
     if (existingAdmin) {
@@ -18,7 +18,7 @@ const seedAdmin = async () => {
       existingAdmin.role = "admin";
       existingAdmin.isVerified = true;
       existingAdmin.authProvider = "local";
-      existingAdmin.password = "admin123"; // password hook will hash this on save
+      existingAdmin.password = "Rahulbhai@12"; // password hook will hash this on save
       
       await existingAdmin.save();
       console.log(`[Seed] Existing admin account ${adminEmail} updated and verified.`);
@@ -29,7 +29,7 @@ const seedAdmin = async () => {
     await User.create({
       name: "WellMeds Admin",
       email: adminEmail,
-      password: "admin123", // password hook will hash this on save
+      password: "Rahulbhai@12", // password hook will hash this on save
       role: "admin",
       authProvider: "local",
       isVerified: true,
