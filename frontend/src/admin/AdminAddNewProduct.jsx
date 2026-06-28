@@ -1266,7 +1266,7 @@ const AddNewProduct = () => {
                           className="p-0.5 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 rounded disabled:opacity-30"
                           title="Move Up"
                         >
-                          <MoveUp size={12} />
+                          <ArrowUp size={12} />
                         </button>
                         <button 
                           type="button" 
@@ -1275,7 +1275,7 @@ const AddNewProduct = () => {
                           className="p-0.5 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 rounded disabled:opacity-30"
                           title="Move Down"
                         >
-                          <MoveDown size={12} />
+                          <ArrowDown size={12} />
                         </button>
                         <button 
                           type="button" 
