@@ -58,7 +58,7 @@ const NAV_CONFIG = [
     id: "imported-medicines",
     label: "Imported Medicines",
     type: "link",
-    to: "/products?filter=imported",
+    to: "/imported-medicines",
     order: 2,
     enabled: true,
     badge: null,
@@ -67,7 +67,7 @@ const NAV_CONFIG = [
     id: "patient-assistance",
     label: "Patient Assistance Program",
     type: "link",
-    to: "/about",
+    to: "/patient-assistance-program",
     order: 3,
     enabled: true,
     badge: null,
@@ -610,15 +610,29 @@ const Navbar = () => {
             <NavActions />
           </div>
 
-          {/* Hamburger Menu Toggle (Mobile) */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all"
-            aria-label="Toggle Mobile Menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Right Side Actions (Mobile/Tablet) */}
+          <div className="flex items-center gap-xs lg:hidden">
+            <Link
+              to="/cart"
+              className="relative w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+              aria-label={`Shopping Cart with ${cartCount} items`}
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse border border-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all"
+              aria-label="Toggle Mobile Menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Row 2: Centered Navigation Menu (Desktop Only) */}

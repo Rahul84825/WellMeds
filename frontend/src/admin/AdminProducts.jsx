@@ -262,7 +262,8 @@ const ManageProducts = () => {
 
       {/* Products Table */}
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -355,6 +356,82 @@ const ManageProducts = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
+          {paginatedProducts.map((p) => (
+            <div key={p.id || p._id} className="p-md space-y-sm text-xs">
+              <div className="flex gap-md">
+                <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
+                  <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+                </div>
+                <div className="space-y-xs truncate flex-grow">
+                  <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">SKU: {p.sku || "N/A"} • {p.category}</p>
+                  <p className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm">{formatCurrency(p.price)}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-xs items-center justify-between pt-xs">
+                <div className="flex flex-wrap gap-xs items-center">
+                  <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold ${
+                    p.stock > 10 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : p.stock > 0 ? "bg-amber-50 text-amber-600 dark:bg-amber-950/20" : "bg-red-50 text-red-600 dark:bg-red-950/20"
+                  }`}>
+                    {p.stock} Units
+                  </span>
+
+                  {p.requiresRx ? (
+                    <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-[9px] font-bold uppercase">
+                      Rx
+                    </span>
+                  ) : (
+                    <span className="inline-flex px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[9px] font-bold uppercase">
+                      OTC
+                    </span>
+                  )}
+
+                  {p.stock > 0 ? (
+                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold">
+                      Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[9px] font-bold">
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-sm">
+                  <button
+                    onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
+                    className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                    title="Edit Details"
+                  >
+                    <Edit size={14} />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
+                    className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                    title="View details on site"
+                  >
+                    <Eye size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id || p._id, p.name)}
+                    className="p-sm text-red-600 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                    title="Delete Product"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {filteredProducts.length === 0 && (
+            <p className="p-lg text-center text-slate-455">No items match the chosen filters.</p>
+          )}
         </div>
 
         {/* Pagination footer */}

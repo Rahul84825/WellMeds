@@ -279,7 +279,8 @@ const AdminCoupons = () => {
 
       {/* Coupons Table Listing */}
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -368,7 +369,7 @@ const AdminCoupons = () => {
                         )}
                         <button
                           onClick={() => handleDelete(coupon.id, coupon.code)}
-                          className="p-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg"
+                          className="p-sm text-red-650 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg"
                           title="Permanently Delete"
                         >
                           <Trash2 size={14} />
@@ -386,7 +387,105 @@ const AdminCoupons = () => {
             </tbody>
           </table>
         </div>
-      </div>
+
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
+          {coupons.map((coupon) => {
+            const isExpired = new Date(coupon.expiryDate) < new Date();
+            return (
+              <div key={coupon.id} className="p-md space-y-sm text-xs">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-xs">
+                    <span className="font-black text-xs font-mono bg-slate-100 dark:bg-zinc-800 text-[#004782] dark:text-[#a4c9ff] px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 w-fit">
+                      {coupon.code}
+                    </span>
+                    <p className="text-[10px] text-slate-405 font-medium truncate max-w-[180px]" title={coupon.name}>
+                      {coupon.name || "No name"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-slate-800 dark:text-zinc-100 text-sm">
+                      {coupon.discountType === "percentage" ? `${coupon.discountValue}% Off` : `₹${coupon.discountValue} Off`}
+                    </p>
+                    {coupon.freeDelivery && <span className="text-[9px] text-emerald-555 font-extrabold">+ Free Delivery</span>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-xs pt-xs border-t border-slate-50 dark:border-zinc-850 text-[10px] text-slate-500 dark:text-zinc-400">
+                  <div>
+                    <span className="font-bold">Uses: </span>
+                    <span>{coupon.analytics?.totalUses || coupon.usedCount} / {coupon.usageLimit === null ? "∞" : coupon.usageLimit}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold">Min Order: </span>
+                    <span>₹{coupon.minimumOrder || coupon.minOrderValue}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold">Expiry: </span>
+                    <span className={isExpired ? "text-red-500 font-bold" : ""}>{new Date(coupon.expiryDate).toLocaleDateString()}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold">Revenue: </span>
+                    <span className="font-bold text-slate-750 dark:text-zinc-300">{formatCurrency(coupon.analytics?.revenueGenerated || 0)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-xs">
+                  <div className="flex items-center gap-xs">
+                    <span className="text-[10px] text-slate-400 font-bold">Status:</span>
+                    <button 
+                      onClick={() => handleToggleStatus(coupon)}
+                      className="p-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
+                      title={coupon.status === "Active" ? "Deactivate Offer" : "Activate Offer"}
+                    >
+                      {coupon.status === "Active" ? (
+                        <ToggleRight className="text-[#086b53] h-6 w-6" />
+                      ) : (
+                        <ToggleLeft className="text-slate-300 dark:text-zinc-700 h-6 w-6" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-sm">
+                    <button
+                      onClick={() => openEditForm(coupon)}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Edit Settings"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDuplicate(coupon)}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Duplicate Code"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    {!isExpired && (
+                      <button
+                        onClick={() => handleExpire(coupon)}
+                        className="p-sm text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                        title="Force Expire Now"
+                      >
+                        <Clock size={14} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(coupon.id, coupon.code)}
+                      className="p-sm text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Permanently Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {coupons.length === 0 && (
+            <p className="p-lg text-center text-slate-455">No promo coupons registered. Click 'Create Coupon' to begin!</p>
+          )}
+        </div></div>
 
       {/* modal create/edit popup */}
       {formOpen && (

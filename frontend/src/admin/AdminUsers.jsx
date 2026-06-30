@@ -117,7 +117,8 @@ const AdminUsers = () => {
 
       {/* Users Table */}
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -184,6 +185,59 @@ const AdminUsers = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
+          {filteredUsers.map((u) => (
+            <div key={u._id} className="p-md space-y-sm text-xs">
+              <div className="flex items-center gap-sm">
+                <div className="h-10 w-10 rounded-full bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center font-bold shrink-0">
+                  {u.name?.slice(0, 2).toUpperCase() || "US"}
+                </div>
+                <div className="truncate">
+                  <span className="font-bold text-slate-800 dark:text-zinc-100 text-sm">{u.name}</span>
+                  <p className="text-[10px] text-slate-405 font-mono truncate">ID: {u._id}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-xs pt-xs border-t border-slate-50 dark:border-zinc-850/60 text-slate-500 dark:text-zinc-400">
+                <div className="flex items-center gap-xs">
+                  <Mail size={12} className="text-slate-400 shrink-0" />
+                  <span className="truncate">{u.email}</span>
+                </div>
+                <div className="flex items-center gap-xs">
+                  <Calendar size={12} className="text-slate-400 shrink-0" />
+                  <span>Joined: {new Date(u.createdAt || Date.now()).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-xs">
+                <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                  u.role === "admin" 
+                    ? "bg-red-100 text-red-600 dark:bg-red-955/30 dark:text-red-400" 
+                    : "bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300"
+                }`}>
+                  {u.role === "admin" ? "Admin" : "Customer"}
+                </span>
+
+                <div className="flex items-center gap-xs">
+                  <UserCog size={12} className="text-slate-400" />
+                  <select
+                    value={u.role}
+                    onChange={(e) => handleRoleChange(u._id, e.target.value, u.name)}
+                    className="p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-[11px] outline-none text-slate-600 dark:text-zinc-300 focus:border-primary font-bold cursor-pointer min-h-[36px]"
+                  >
+                    <option value="customer">Customer</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
+          {filteredUsers.length === 0 && (
+            <p className="p-lg text-center text-slate-455">No registered users match your query.</p>
+          )}
         </div>
       </div>
     </div>

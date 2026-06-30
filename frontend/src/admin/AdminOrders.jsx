@@ -184,7 +184,8 @@ const ManageOrders = () => {
 
       {/* Orders Table */}
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -297,6 +298,105 @@ const ManageOrders = () => {
           </table>
         </div>
 
+        {/* Mobile Card View */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/85">
+          {paginatedOrders.map((o) => {
+            const paidVal = o.finalAmount || o.total;
+            return (
+              <div key={o.orderId} className="p-md space-y-sm text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold font-mono text-slate-800 dark:text-zinc-100">{o.orderId}</span>
+                  <span className="text-slate-450 dark:text-zinc-500 text-[10px]">{formatDate(o.createdAt)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center pt-xs border-t border-slate-100 dark:border-zinc-800/60">
+                  <div>
+                    <p className="font-bold text-slate-800 dark:text-zinc-100">{o.customer}</p>
+                    <p className="text-[10px] text-slate-400">{o.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-extrabold text-slate-800 dark:text-zinc-100">{formatCurrency(paidVal)}</p>
+                    {o.discountAmount > 0 && (
+                      <p className="text-[9px] text-red-500 font-bold">-{formatCurrency(o.discountAmount)} Off</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-xs items-center">
+                  <span className={`inline-flex px-2 py-0.5 rounded-lg text-[9px] font-bold ${
+                    o.paymentStatus === "Paid" 
+                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400" 
+                      : o.paymentStatus === "Failed"
+                      ? "bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400"
+                      : "bg-slate-100 text-slate-500 dark:bg-zinc-800"
+                  }`}>
+                    {o.paymentStatus || "Pending"}
+                  </span>
+
+                  {o.rxUploaded ? (
+                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 rounded-lg text-[9px] font-bold">
+                      Rx Attached
+                    </span>
+                  ) : (
+                    <span className="text-slate-405 text-[9px] bg-slate-50 dark:bg-zinc-950 px-2 py-0.5 rounded-lg border border-slate-100 dark:border-zinc-800">OTC Free</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-xs">
+                  <select
+                    value={o.status}
+                    onChange={(e) => handleStatusChange(o.orderId, e.target.value)}
+                    className={`text-xs font-bold rounded-lg border border-slate-200 dark:border-zinc-800 py-1.5 pl-2 pr-6 cursor-pointer dark:bg-zinc-950 outline-none ${
+                      o.status === "Delivered"
+                        ? "bg-emerald-50 text-[#086b53] border-emerald-200"
+                        : o.status === "Processing" || o.status === "Approved"
+                        ? "bg-[#004782]/5 text-[#004782] border-blue-200"
+                        : o.status === "Cancelled"
+                        ? "bg-red-50 text-red-600 border-red-200"
+                        : "bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Prescription Review">Prescription Review</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Packed">Packed</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+
+                  <div className="flex items-center gap-sm">
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(o);
+                        setDetailModalOpen(true);
+                      }}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="View Timeline"
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(o);
+                        setInvoiceModalOpen(true);
+                      }}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Generate Invoice"
+                    >
+                      <Printer size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {filteredOrders.length === 0 && (
+            <p className="p-lg text-center text-slate-455">No customer orders match the criteria.</p>
+          )}
+        </div>
+
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="bg-slate-50 dark:bg-zinc-950 px-md py-sm border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-xs font-semibold text-slate-400 select-none">
@@ -324,8 +424,8 @@ const ManageOrders = () => {
 
       {/* Invoice modal popup */}
       {selectedOrder && invoiceModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] print:p-0 print:border-none print:shadow-none">
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] print:p-0 print:border-none print:shadow-none max-h-[90vh] overflow-y-auto custom-scrollbar">
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-xs print:hidden">
@@ -442,8 +542,8 @@ const ManageOrders = () => {
 
       {/* Details Timeline Modal */}
       {selectedOrder && detailModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-lg rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out]">
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-lg rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] max-h-[90vh] overflow-y-auto custom-scrollbar">
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-xs">

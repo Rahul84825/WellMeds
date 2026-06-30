@@ -44,13 +44,13 @@ const ProductCard = ({ product }) => {
 
   return (
     <>
-      <div className="product-card-hover group relative bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant dark:border-outline/40 p-sm flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <div className="product-card-hover group relative bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant dark:border-outline/40 p-sm flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
         
         {/* Product Image Panel */}
-        <div className="relative overflow-hidden rounded-lg aspect-square bg-surface-container dark:bg-surface-container-high">
+        <div className="relative overflow-hidden rounded-lg aspect-square bg-white dark:bg-zinc-950">
           <img
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-contain p-2 bg-white dark:bg-zinc-950 transition-transform duration-500 group-hover:scale-105"
             src={product.image}
           />
           

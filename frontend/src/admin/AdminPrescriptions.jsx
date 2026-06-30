@@ -242,7 +242,8 @@ const AdminPrescriptions = () => {
         
         {/* Left Column: Uploads List Table */}
         <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
+          {/* Desktop View: Table */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -292,6 +293,47 @@ const AdminPrescriptions = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile View: Cards */}
+          <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
+            {filteredPrescriptions.length === 0 ? (
+              <p className="p-lg text-center text-slate-400 font-semibold">
+                No prescriptions match the filter selections.
+              </p>
+            ) : (
+              filteredPrescriptions.map((rx) => {
+                const displayId = rx.id || rx._id;
+                const config = getStatusConfigLocal(rx.status);
+                const isSelected = selectedRx && (selectedRx.id || selectedRx._id) === displayId;
+                return (
+                  <div
+                    key={displayId}
+                    onClick={() => handleSelectRx(rx)}
+                    className={`p-md space-y-sm text-xs cursor-pointer transition-all ${
+                      isSelected
+                        ? "bg-[#004782]/5 dark:bg-[#004782]/10 border-l-4 border-[#004782]"
+                        : "hover:bg-slate-50/50 dark:hover:bg-zinc-800/10"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-zinc-100 text-sm">{rx.user?.name || "Unknown Patient"}</p>
+                        <p className="text-[10px] text-slate-400">{rx.user?.email || "—"}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-lg text-[9px] font-bold ${config.badge}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>
+                        {config.label}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-xs">
+                      <span className="text-slate-450 dark:text-zinc-500 text-[10px]">Uploaded: {rx.createdAt ? formatDate(rx.createdAt) : "—"}</span>
+                      <span className="font-bold text-[#004782] dark:text-[#a4c9ff]">Verify &rarr;</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

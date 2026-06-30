@@ -354,7 +354,8 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -410,6 +411,50 @@ const Dashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden space-y-sm">
+          {recentOrders.map((order) => (
+            <div key={order.orderId || order._id} className="bg-slate-50 dark:bg-zinc-950/40 p-md rounded-2xl border border-slate-100 dark:border-zinc-800/80 space-y-sm text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-bold font-mono text-slate-800 dark:text-zinc-100">{order.orderId}</span>
+                <span className="text-slate-450 dark:text-zinc-500 text-[10px]">{formatDate(order.createdAt)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-xs border-t border-slate-100 dark:border-zinc-800/60">
+                <div>
+                  <p className="font-bold text-slate-800 dark:text-zinc-100">{order.customer}</p>
+                  <p className="text-[10px] text-slate-400">{order.email}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-extrabold text-slate-800 dark:text-zinc-100">{formatCurrency(order.finalAmount || order.total)}</p>
+                  {order.discountAmount > 0 && (
+                    <p className="text-[9px] text-red-550 font-semibold">-{formatCurrency(order.discountAmount)}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-xs">
+                <div>
+                  {order.rxUploaded ? (
+                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold">
+                      Rx Attached
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 text-[10px]">No Rx</span>
+                  )}
+                </div>
+                <Link
+                  to="/admin/orders"
+                  className="text-[#004782] dark:text-[#a4c9ff] font-bold hover:underline py-1.5 px-3.5 bg-[#004782]/5 dark:bg-[#a4c9ff]/5 rounded-xl min-h-[40px] flex items-center justify-center cursor-pointer select-none"
+                >
+                  Manage
+                </Link>
+              </div>
+            </div>
+          ))}
+          {recentOrders.length === 0 && (
+            <p className="p-lg text-center text-slate-455">No recent orders logged.</p>
+          )}
         </div>
       </div>
 

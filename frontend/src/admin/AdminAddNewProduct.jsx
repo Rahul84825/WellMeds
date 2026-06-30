@@ -509,7 +509,7 @@ const AddNewProduct = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-md">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
                 <div className="space-y-xs">
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SKU Number</label>
                   <input
@@ -1213,7 +1213,7 @@ const AddNewProduct = () => {
             <p className="font-semibold text-slate-700 dark:text-zinc-300">Drag & Drop Images here</p>
             <p className="text-[10px] text-slate-400 mt-xs mb-sm">Supports PNG, JPG, JPEG, WEBP up to 10MB</p>
             
-            <label className="bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer">
+            <label className="bg-[#004782] text-white px-lg py-3 rounded-xl font-bold text-xs hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer min-h-[48px] inline-flex items-center justify-center">
               Choose Files
               <input
                 type="file"
@@ -1251,7 +1251,7 @@ const AddNewProduct = () => {
                       : "border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/20"
                   }`}
                 >
-                  <img src={url} className="w-16 h-16 rounded-lg object-cover border border-slate-200 dark:border-zinc-800" alt="" />
+                  <img src={url} className="w-20 h-20 rounded-lg object-cover border border-slate-200 dark:border-zinc-800 shrink-0" alt="" />
                   
                   <div className="flex-1 flex flex-col justify-between py-xs truncate">
                     <div className="flex justify-between items-center gap-xs truncate">

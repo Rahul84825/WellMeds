@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Hero from "../components/HeroBanner";
+import PromoCarousel from "../components/home/PromoCarousel";
 import CategorySection from "../components/CategorySection";
 import FeaturedProductsSection from "../components/FeaturedProductsSection";
 import CouponCarousel from "../components/CouponCarousel";
@@ -17,6 +18,9 @@ const HomePage = () => {
     <div className="animate-[fade-in_0.3s_ease-out]">
       {/* Hero Banner */}
       <Hero />
+
+      {/* NEW Promotional Carousel */}
+      <PromoCarousel />
 
       {/* Active Coupons Carousel */}
       <CouponCarousel />

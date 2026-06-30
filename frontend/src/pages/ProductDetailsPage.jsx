@@ -1087,7 +1087,7 @@ const ProductDetails = () => {
       {similarProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Similar Products (Same Category)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md md:gap-lg">
             {similarProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
             ))}
@@ -1099,7 +1099,7 @@ const ProductDetails = () => {
       {relatedProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md md:gap-lg">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
             ))}
@@ -1111,9 +1111,9 @@ const ProductDetails = () => {
       {recentlyViewed.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
-          <div className="flex gap-lg overflow-x-auto pb-md scroll-smooth snap-x snap-mandatory scrollbar-none">
+          <div className="flex gap-sm md:gap-lg overflow-x-auto pb-md scroll-smooth snap-x snap-mandatory scrollbar-none">
             {recentlyViewed.map((p) => (
-              <div key={p.id || p._id} className="snap-start shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]">
+              <div key={p.id || p._id} className="snap-start shrink-0 w-[calc(50%-6px)] md:w-[calc(33.33%-8px)] lg:w-[calc(25%-18px)]">
                 <ProductCard product={p} />
               </div>
             ))}

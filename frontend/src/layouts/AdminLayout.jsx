@@ -148,8 +148,8 @@ const AdminLayout = () => {
       )}
 
       <aside 
-        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-md -translate-x-full md:translate-x-0 ${
-          collapsed ? "w-20 md:w-20" : "translate-x-0 w-64 md:w-64"
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-md ${
+          collapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
         }`}
       >
         {/* Sidebar Header */}
@@ -183,6 +183,11 @@ const AdminLayout = () => {
                 key={item.to}
                 to={item.to}
                 end={item.end}
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setCollapsed(true);
+                  }
+                }}
                 className={({ isActive }) =>
                   `flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm transition-all duration-200 group relative ${
                     isActive
@@ -207,6 +212,11 @@ const AdminLayout = () => {
           <div className="pt-md my-md border-t border-slate-200 dark:border-zinc-800">
             <Link
               to="/"
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  setCollapsed(true);
+                }
+              }}
               className="flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100 group relative"
             >
               <Globe size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -266,15 +276,15 @@ const AdminLayout = () => {
           </div>
 
           {/* Header Middle: Global Search */}
-          <div className="relative max-w-md w-full mx-md">
+          <div className="relative max-w-xs md:max-w-md w-full mx-xs md:mx-md">
             <div className="relative">
-              <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={14} />
               <input
                 type="text"
-                placeholder="Global Search (products, orders, coupons)..."
+                placeholder="Global Search..."
                 value={searchQuery}
                 onChange={(e) => handleGlobalSearch(e.target.value)}
-                className="w-full pl-xl pr-xl py-sm bg-slate-100 dark:bg-zinc-800/60 border border-transparent hover:border-slate-300 dark:hover:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#004782] dark:focus:border-[#004782] rounded-xl text-xs text-slate-700 dark:text-zinc-200 focus:ring-1 focus:ring-[#004782] outline-none transition-all"
+                className="w-full pl-lg pr-lg py-1.5 md:py-sm bg-slate-100 dark:bg-zinc-800/60 border border-transparent hover:border-slate-300 dark:hover:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#004782] dark:focus:border-[#004782] rounded-xl text-[11px] md:text-xs text-slate-700 dark:text-zinc-200 focus:ring-1 focus:ring-[#004782] outline-none transition-all"
               />
               {searchQuery && (
                 <button 
@@ -341,7 +351,7 @@ const AdminLayout = () => {
                                 <p className="font-semibold text-slate-800 dark:text-zinc-200 font-mono text-[11px]">{o.orderId}</p>
                                 <p className="text-[10px] text-slate-400">{o.customer}</p>
                               </div>
-                              <span className="text-[10px] font-bold text-primary dark:text-[#a4c9ff]">₹{o.total}</span>
+                               <span className="text-[10px] font-bold text-primary dark:text-[#a4c9ff]">₹{o.total}</span>
                             </Link>
                           ))}
                         </div>
@@ -423,7 +433,7 @@ const AdminLayout = () => {
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-sm w-72 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl py-sm z-50 animate-[slide-up_0.15s_ease-out] text-left">
+                <div className="absolute right-0 mt-sm w-72 max-w-[calc(100vw-32px)] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl py-sm z-50 animate-[slide-up_0.15s_ease-out] text-left">
                   <div className="px-md py-sm border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
                     <span className="font-bold text-xs text-slate-800 dark:text-zinc-200">System Notifications</span>
                     {pendingRxCount > 0 && (

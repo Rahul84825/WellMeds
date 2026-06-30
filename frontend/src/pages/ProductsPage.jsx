@@ -806,7 +806,7 @@ const ProductsPage = () => {
             </div>
           ) : products.length > 0 ? (
             viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-sm md:gap-md">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
