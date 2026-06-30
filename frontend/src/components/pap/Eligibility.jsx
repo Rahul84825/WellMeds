@@ -1,40 +1,20 @@
 import React from "react";
 import { ShieldAlert, Sparkles, Heart, Activity, ShieldCheck, HelpCircle } from "lucide-react";
 
-const eligibilityCategories = [
-  {
-    title: "Oncology & Cancer Patients",
-    desc: "Patients prescribed high-value chemotherapy, immunotherapy, or targeted kinase inhibitors.",
-    icon: ShieldAlert
-  },
-  {
-    title: "Rare Diseases & Orphan Drugs",
-    desc: "Families dealing with rare genetic disorders requiring specialized enzyme therapies.",
-    icon: Sparkles
-  },
-  {
-    title: "Organ Transplant Recipients",
-    desc: "Patients requiring lifelong anti-rejection immunosuppressive therapies.",
-    icon: Heart
-  },
-  {
-    title: "Chronic Lifelong Therapies",
-    desc: "Management of severe rheumatoid arthritis, psoriasis, or advanced cardiovascular conditions.",
-    icon: Activity
-  },
-  {
-    title: "Pediatric Care Support",
-    desc: "Subsidized growth hormones, specialized nutrition, and pediatric critical care medications.",
-    icon: ShieldCheck
-  },
-  {
-    title: "Low & Middle-Income Families",
-    desc: "Patients without adequate health insurance coverage or those who have exhausted their limits.",
-    icon: HelpCircle
-  }
+const defaultEligibility = [
+  { title: "Oncology & Cancer Patients", desc: "Patients prescribed high-value chemotherapy, immunotherapy, or targeted kinase inhibitors." },
+  { title: "Rare Diseases & Orphan Drugs", desc: "Families dealing with rare genetic disorders requiring specialized enzyme therapies." },
+  { title: "Organ Transplant Recipients", desc: "Patients requiring lifelong anti-rejection immunosuppressive therapies." },
+  { title: "Chronic Lifelong Therapies", desc: "Management of severe rheumatoid arthritis, psoriasis, or advanced cardiovascular conditions." },
+  { title: "Pediatric Care Support", desc: "Subsidized growth hormones, specialized nutrition, and pediatric critical care medications." },
+  { title: "Low & Middle-Income Families", desc: "Patients without adequate health insurance coverage or those who have exhausted their limits." }
 ];
 
-const Eligibility = () => {
+const icons = [ShieldAlert, Sparkles, Heart, Activity, ShieldCheck, HelpCircle];
+
+const Eligibility = ({ eligibilityData }) => {
+  const list = eligibilityData || defaultEligibility;
+
   return (
     <section className="py-16 px-6 sm:px-12 lg:px-24 bg-white dark:bg-zinc-900">
       <div className="max-w-[1440px] mx-auto text-center space-y-12">
@@ -42,14 +22,14 @@ const Eligibility = () => {
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-100">
             Who Qualifies for Patient Assistance Programs?
           </h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
+          <p className="text-sm text-slate-550 dark:text-zinc-400 max-w-xl mx-auto font-medium">
             PAP criteria are set by the manufacturing pharmaceutical companies, focusing on clinical need and financial support.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-          {eligibilityCategories.map((item, idx) => {
-            const IconComp = item.icon;
+          {list.map((item, idx) => {
+            const IconComp = icons[idx % icons.length];
             return (
               <div 
                 key={idx}
@@ -62,7 +42,7 @@ const Eligibility = () => {
                   <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-100">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-550 dark:text-zinc-400 leading-relaxed font-medium">
                     {item.desc}
                   </p>
                 </div>

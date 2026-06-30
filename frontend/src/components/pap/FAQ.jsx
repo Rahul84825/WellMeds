@@ -1,27 +1,16 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const faqs = [
-  {
-    question: "Who qualifies for the Patient Assistance Program?",
-    answer: "Eligibility is primarily based on two criteria: clinical need (having a valid prescription for a covered specialty medication from a certified specialist) and financial assessment (demonstrating that the cost of therapy exceeds your household's disposable income or insurance limits)."
-  },
-  {
-    question: "Is the Patient Assistance Program free?",
-    answer: "Yes, applying through WellMeds is completely free. We do not charge any coordination or facilitation fees. The cost of the medication itself is either fully subsidized (free) or partially subsidized (co-pay support) depending on the specific program guidelines set by the manufacturer."
-  },
-  {
-    question: "How long does the PAP approval take?",
-    answer: "Once we compile your complete document dossier and submit it to the manufacturer's program desk, approval typically takes between 3 to 7 business days. We assign a dedicated caseworker to follow up daily and expedite the process."
-  },
-  {
-    question: "Can anyone apply for PAP?",
-    answer: "Any patient who has been prescribed a specialty medication that has an active PAP run by its manufacturer can apply. Our caseworkers will help you evaluate if you meet the specific income and clinical criteria before submitting the official paperwork."
-  }
+const defaultFaqs = [
+  { question: "Who qualifies for the Patient Assistance Program?", answer: "Eligibility is primarily based on two criteria: clinical need (having a valid prescription for a covered specialty medication from a certified specialist) and financial assessment." },
+  { question: "Is the Patient Assistance Program free?", answer: "Yes, applying through WellMeds is completely free. We do not charge any coordination or facilitation fees." },
+  { question: "How long does the PAP approval take?", answer: "Once we compile your complete document dossier and submit it, approval typically takes between 3 to 7 business days." },
+  { question: "Can anyone apply for PAP?", answer: "Any patient who has been prescribed a specialty medication that has an active PAP run by its manufacturer can apply." }
 ];
 
-const FAQ = () => {
+const FAQ = ({ faqsData }) => {
   const [openIdx, setOpenIdx] = useState(null);
+  const list = faqsData || defaultFaqs;
 
   const toggle = (idx) => {
     setOpenIdx(openIdx === idx ? null : idx);
@@ -34,13 +23,13 @@ const FAQ = () => {
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-100">
             Frequently Asked Questions (PAP)
           </h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
+          <p className="text-sm text-slate-555 dark:text-zinc-400 font-medium">
             Understand how patient assistance programs work and how you can benefit.
           </p>
         </div>
 
         <div className="space-y-sm">
-          {faqs.map((faq, idx) => {
+          {list.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div 

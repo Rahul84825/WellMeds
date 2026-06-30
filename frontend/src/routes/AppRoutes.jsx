@@ -29,6 +29,8 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
 import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
+import AdminCmsImported from "../admin/AdminCmsImported";
+import AdminCmsPap from "../admin/AdminCmsPap";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -111,6 +113,8 @@ const AppRoutes = () => {
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="cms/imported" element={<AdminCmsImported />} />
+        <Route path="cms/pap" element={<AdminCmsPap />} />
       </Route>
 
       {/* Fallback Catch-All */}

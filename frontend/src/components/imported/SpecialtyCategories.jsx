@@ -1,17 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, Brain, Heart, Syringe, Activity, Sparkles, HelpCircle } from "lucide-react";
+import { Shield, Brain, Heart, Syringe, Activity, Sparkles } from "lucide-react";
 
-const specialties = [
-  { name: "Cancer Medicines", query: "Oncology", icon: Shield, desc: "Chemotherapy & targeted therapies" },
-  { name: "Rare Disease Medicines", query: "Orphan Drugs", icon: Sparkles, desc: "Orphan drugs & genetic therapies" },
-  { name: "Transplant Medicines", query: "Immunosuppressants", icon: Heart, desc: "Anti-rejection immunosuppressants" },
-  { name: "Neurology", query: "Neurology", icon: Brain, desc: "Sclerosis & neurodegenerative care" },
-  { name: "Immunology", query: "Immunology", icon: Activity, desc: "Autoimmune & biological therapies" },
-  { name: "Vaccines & Biologics", query: "Biologics", icon: Syringe, desc: "Specialty vaccines & monoclonal antibodies" }
+const defaultSpecialties = [
+  { name: "Cancer Medicines", query: "Oncology", desc: "Chemotherapy & targeted therapies" },
+  { name: "Rare Disease Medicines", query: "Orphan Drugs", desc: "Orphan drugs & genetic therapies" },
+  { name: "Transplant Medicines", query: "Immunosuppressants", desc: "Anti-rejection immunosuppressants" },
+  { name: "Neurology", query: "Neurology", desc: "Sclerosis & neurodegenerative care" },
+  { name: "Immunology", query: "Immunology", desc: "Autoimmune & biological therapies" },
+  { name: "Vaccines & Biologics", query: "Biologics", desc: "Specialty vaccines & monoclonal antibodies" }
 ];
 
-const SpecialtyCategories = () => {
+const icons = [Shield, Sparkles, Heart, Brain, Activity, Syringe];
+
+const SpecialtyCategories = ({ categoriesData }) => {
+  const list = categoriesData || defaultSpecialties;
+
   return (
     <section className="py-16 px-6 sm:px-12 lg:px-24 bg-white dark:bg-zinc-900">
       <div className="max-w-[1440px] mx-auto text-center space-y-12">
@@ -19,14 +23,14 @@ const SpecialtyCategories = () => {
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-100">
             Import Sourcing Specialties
           </h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
+          <p className="text-sm text-slate-550 dark:text-zinc-400 max-w-xl mx-auto font-medium">
             We specialize in importing high-value, temperature-sensitive therapeutic drugs.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-          {specialties.map((spec, idx) => {
-            const IconComp = spec.icon;
+          {list.map((spec, idx) => {
+            const IconComp = icons[idx % icons.length];
             return (
               <Link
                 key={idx}
@@ -40,7 +44,7 @@ const SpecialtyCategories = () => {
                   <h3 className="font-extrabold text-sm sm:text-base text-slate-800 dark:text-zinc-100 group-hover:text-[#004782] dark:group-hover:text-blue-400 transition-colors truncate">
                     {spec.name}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 leading-normal font-medium line-clamp-2">
+                  <p className="text-xs text-slate-550 dark:text-zinc-400 leading-normal font-medium line-clamp-2">
                     {spec.desc}
                   </p>
                 </div>

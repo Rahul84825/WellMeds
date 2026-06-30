@@ -1,31 +1,17 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const faqs = [
-  {
-    question: "How long does the import process take?",
-    answer: "Typically, procurement and customs clearance take between 7 to 14 business days. For critical emergency cases, we can fast-track flight bookings and clearances to deliver within 5 to 7 days."
-  },
-  {
-    question: "Do I need a prescription to order imported medicines?",
-    answer: "Yes. Under Indian drug regulations (CDSCO guidelines), importing medicines for personal use requires a valid prescription from a registered medical practitioner (usually a specialist, like an oncologist or immunologist), along with a patient-named import permit (Form 12A)."
-  },
-  {
-    question: "Are these imported medicines genuine?",
-    answer: "Absolutely. We source all medications directly from the brand manufacturers or their licensed international distributors. Every shipment is accompanied by a Certificate of Analysis (CoA), original invoices, and customs bill of entry."
-  },
-  {
-    question: "Can imported medicines be returned or cancelled?",
-    answer: "Since these are specialty items procured specifically for an individual patient under a personal import permit, they cannot be returned or cancelled once the international procurement cycle has commenced."
-  },
-  {
-    question: "Is GST and customs duty included in the quoted price?",
-    answer: "Yes, our quoted prices are fully inclusive of basic customs duties, IGST, handling fees, and doorstep delivery charges. There are no hidden costs."
-  }
+const defaultFaqs = [
+  { question: "How long does the import process take?", answer: "Typically, procurement and customs clearance take between 7 to 14 business days. For critical emergency cases, we can deliver within 5 to 7 days." },
+  { question: "Do I need a prescription to order imported medicines?", answer: "Yes. Under Indian drug regulations, importing medicines for personal use requires a valid prescription from a registered specialist along with a patient-named import permit." },
+  { question: "Are these imported medicines genuine?", answer: "Absolutely. We source all medications directly from the brand manufacturers or their licensed international distributors." },
+  { question: "Can imported medicines be returned or cancelled?", answer: "Since these are specialty items procured specifically for an individual patient under a personal import permit, they cannot be returned or cancelled." },
+  { question: "Is GST and customs duty included in the quoted price?", answer: "Yes, our quoted prices are fully inclusive of basic customs duties, IGST, handling fees, and doorstep delivery charges." }
 ];
 
-const FAQ = () => {
+const FAQ = ({ faqsData }) => {
   const [openIdx, setOpenIdx] = useState(null);
+  const list = faqsData || defaultFaqs;
 
   const toggle = (idx) => {
     setOpenIdx(openIdx === idx ? null : idx);
@@ -38,13 +24,13 @@ const FAQ = () => {
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-100">
             Frequently Asked Questions
           </h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
+          <p className="text-sm text-slate-555 dark:text-zinc-400 font-medium">
             Find answers to common questions about global medicine procurement.
           </p>
         </div>
 
         <div className="space-y-sm">
-          {faqs.map((faq, idx) => {
+          {list.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div 

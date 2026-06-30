@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import Hero from "../components/pap/Hero";
 import Timeline from "../components/pap/Timeline";
 import Eligibility from "../components/pap/Eligibility";
@@ -7,82 +8,69 @@ import Programs from "../components/pap/Programs";
 import Stats from "../components/pap/Stats";
 import ApplicationForm from "../components/pap/ApplicationForm";
 import FAQ from "../components/pap/FAQ";
+import Loader from "../components/Loader";
 
 const PatientAssistanceProgramPage = () => {
+  const [pageData, setPageData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState("");
 
   useEffect(() => {
-    // Scroll to top on load
     window.scrollTo(0, 0);
 
-    // Set Document SEO Metadata
-    document.title = "Patient Assistance Program India - Subsidized Cancer Medicines | WellMeds";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Apply for Patient Assistance Programs (PAP) in India. Access subsidized or free oncology, transplant, and chronic care medicines with dedicated caseworker assistance."
-      );
-    }
-
-    // Inject JSON-LD Schema
-    const breadcrumbSchema = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": window.location.origin
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Patient Assistance Program",
-          "item": window.location.href
-        }
-      ]
-    };
-
-    const faqSchema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Who qualifies for the Patient Assistance Program?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Eligibility is primarily based on clinical need (having a valid prescription for a covered specialty medication from a certified specialist) and financial assessment (demonstrating that the cost of therapy exceeds your household's disposable income)."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is the Patient Assistance Program free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, applying through WellMeds is completely free. We do not charge any coordination or facilitation fees. The cost of the medication itself is either fully subsidized or partially subsidized."
+    const fetchPageData = async () => {
+      try {
+        const response = await axios.get("/api/cms/pap");
+        if (response.data.success) {
+          setPageData(response.data.data);
+          
+          // Dynamic SEO
+          const seo = response.data.data.seo;
+          document.title = seo.title || "Patient Assistance Program India - Subsidized Cancer Medicines | WellMeds";
+          const metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc) {
+            metaDesc.setAttribute("content", seo.description || "Apply for Patient Assistance Programs (PAP) in India.");
           }
         }
-      ]
+      } catch (err) {
+        console.error("Failed to load CMS page data", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const script1 = document.createElement("script");
-    script1.type = "application/ld+json";
-    script1.text = JSON.stringify(breadcrumbSchema);
-    document.head.appendChild(script1);
-
-    const script2 = document.createElement("script");
-    script2.type = "application/ld+json";
-    script2.text = JSON.stringify(faqSchema);
-    document.head.appendChild(script2);
-
-    return () => {
-      document.head.removeChild(script1);
-      document.head.removeChild(script2);
-    };
+    fetchPageData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-white dark:bg-zinc-900">
+        <Loader size="lg" />
+      </div>
+    );
+  }
+
+  // Fallback default values if backend failed to provide data
+  const data = pageData || {
+    hero: {
+      label: "PATIENT SUPPORT",
+      heading: "Making Life-Saving Medicines Affordable",
+      description: "WellMeds helps eligible patients reduce the financial burden of long-term treatments through verified Patient Assistance Programs offered by pharmaceutical companies.",
+      buttonPrimary: "Check Eligibility",
+      buttonSecondary: "Talk to Pharmacist",
+      imageUrl: ""
+    },
+    whatIsPap: {
+      title: "Understanding Patient Assistance Programs (PAP)",
+      desc: "Patient Assistance Programs are corporate social responsibility and patient-access initiatives run by global pharmaceutical companies. These programs are designed to help patients who cannot afford the full cost of high-value specialty medications.",
+      points: [
+        "Access to premium FDA-approved medications at a fraction of their retail price.",
+        "Continuity of long-term treatments without financial interruptions.",
+        "Full assistance with dossier compilation and manufacturer coordination by WellMeds.",
+        "Safe dispensing and delivery via validated cold-chain shipping."
+      ]
+    }
+  };
 
   const handleApplyClick = (programName) => {
     setSelectedProgram(programName);
@@ -90,12 +78,7 @@ const PatientAssistanceProgramPage = () => {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleCheckEligibilityClick = () => {
-    const el = document.getElementById("pap-application-form");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleTalkPharmacistClick = () => {
+  const handleScrollToForm = () => {
     const el = document.getElementById("pap-application-form");
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
@@ -111,9 +94,11 @@ const PatientAssistanceProgramPage = () => {
         </div>
       </div>
 
+      {/* Hero */}
       <Hero 
-        onCheckEligibilityClick={handleCheckEligibilityClick} 
-        onTalkPharmacistClick={handleTalkPharmacistClick} 
+        heroData={data.hero}
+        onCheckEligibilityClick={handleScrollToForm} 
+        onTalkPharmacistClick={handleScrollToForm} 
       />
 
       {/* What is PAP: Two Column Section */}
@@ -121,13 +106,10 @@ const PatientAssistanceProgramPage = () => {
         <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-850 dark:text-zinc-100 leading-tight">
-              Understanding Patient Assistance Programs (PAP)
+              {data.whatIsPap.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed font-medium">
-              Patient Assistance Programs are corporate social responsibility and patient-access initiatives run by global pharmaceutical companies (like Roche, AstraZeneca, Novartis, and Pfizer). These programs are designed to help patients who cannot afford the full cost of high-value specialty medications.
-            </p>
-            <p className="text-xs sm:text-sm text-[#086b53] dark:text-emerald-400 font-bold">
-              Through these programs, manufacturers provide medicines either free of charge or at heavily subsidized co-payment rates to qualifying individuals.
+            <p className="text-xs sm:text-sm text-slate-650 dark:text-zinc-300 leading-relaxed font-medium">
+              {data.whatIsPap.desc}
             </p>
           </div>
           <div className="bg-slate-50 dark:bg-zinc-950/40 border border-slate-150 dark:border-zinc-800/80 p-lg rounded-2xl space-y-md">
@@ -135,21 +117,31 @@ const PatientAssistanceProgramPage = () => {
               How Patients Benefit
             </h3>
             <ul className="space-y-sm text-xs text-slate-550 dark:text-zinc-400 font-medium list-disc pl-md">
-              <li>Access to premium FDA-approved medications at a fraction of their retail price.</li>
-              <li>Continuity of long-term treatments (like oncology cycles) without financial interruptions.</li>
-              <li>Full assistance with dossier compilation and manufacturer coordination by WellMeds.</li>
-              <li>Safe dispensing and delivery via validated cold-chain shipping.</li>
+              {data.whatIsPap.points && data.whatIsPap.points.map((pt, pIdx) => (
+                <li key={pIdx}>{pt}</li>
+              ))}
             </ul>
           </div>
         </div>
       </section>
 
-      <Timeline />
-      <Eligibility />
-      <Programs onApplyClick={handleApplyClick} />
-      <Stats />
+      {/* How It Works */}
+      <Timeline timelineData={data.timeline} />
+
+      {/* Eligibility */}
+      <Eligibility eligibilityData={data.eligibility} />
+
+      {/* Available Programs */}
+      <Programs programsData={data.programs} onApplyClick={handleApplyClick} />
+
+      {/* Trust Stats */}
+      <Stats statsData={data.stats} />
+
+      {/* Apply Now Form */}
       <ApplicationForm selectedProgram={selectedProgram} />
-      <FAQ />
+
+      {/* FAQ */}
+      <FAQ faqsData={data.faqs} />
     </div>
   );
 };
