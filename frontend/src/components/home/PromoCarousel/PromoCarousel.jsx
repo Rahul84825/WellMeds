@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, MessageCircle, Globe, ShieldCheck, HelpCircle, Activity, FileText, Truck, ArrowRight, DollarSign, Clock, MapPin, Star } from "lucide-react";
 import { formatCurrency } from "../../../utils/currency";
+import PromoNavigation from "./PromoNavigation";
 
 const promoSlides = [
   {
