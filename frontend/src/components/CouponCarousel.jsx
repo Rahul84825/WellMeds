@@ -194,12 +194,12 @@ const CouponCarousel = () => {
 
   return (
     <section 
-      className="py-16 bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300 relative overflow-hidden"
+      className="py-5 md:py-16 bg-surface-container/20 dark:bg-surface-container-high/10 transition-colors duration-300 relative overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-max-width mx-auto relative px-12 sm:px-16">
-   
+    
         {/* Carousel Window */}
         <div className="relative overflow-hidden w-full py-2">
           <div 
@@ -221,7 +221,7 @@ const CouponCarousel = () => {
               const copyButtonClass = isEven 
                 ? "bg-[#004782] hover:bg-[#003866] text-white" 
                 : "bg-[#086b53] hover:bg-[#054d3c] text-white";
-
+ 
               return (
                 <div 
                   key={coupon._id || coupon.id}
@@ -229,17 +229,17 @@ const CouponCarousel = () => {
                   style={{ width: `${100 / visibleCount}%` }}
                 >
                   {/* Coupon Ticket Card */}
-                  <div className={`relative border p-lg rounded-2xl shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-1 flex flex-col justify-between h-[300px] overflow-hidden ${cardBgClass}`}>
+                  <div className={`relative border p-4 md:p-lg rounded-2xl shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-1 flex flex-col justify-between h-[280px] md:h-[300px] overflow-hidden ${cardBgClass}`}>
                     
                     {/* Left Notch */}
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3.5 h-7 bg-surface-container dark:bg-surface-container-high rounded-r-full -translate-x-[1px] border border-outline-variant/30 dark:border-outline/20 border-l-0"></div>
                     {/* Right Notch */}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-7 bg-surface-container dark:bg-surface-container-high rounded-l-full translate-x-[1px] border border-outline-variant/30 dark:border-outline/20 border-r-0"></div>
-
+ 
                     {/* Top Content */}
                     <div>
                       <div className="flex justify-between items-start mb-sm">
-                        <span className="font-extrabold text-2xl tracking-tight leading-none uppercase">
+                        <span className="font-extrabold text-lg md:text-2xl tracking-tight leading-none uppercase">
                           {coupon.discountType === "percentage" 
                             ? `${coupon.discountAmount}% OFF` 
                             : `₹${coupon.discountAmount} OFF`}
@@ -250,9 +250,9 @@ const CouponCarousel = () => {
                           </span>
                         )}
                       </div>
-
+ 
                       {/* Dynamic Subtitle */}
-                      <p className="text-on-surface-variant dark:text-surface-variant font-body-sm leading-relaxed mb-md">
+                      <p className="text-on-surface-variant dark:text-surface-variant text-[13px] md:text-sm leading-relaxed mb-md">
                         {coupon.discountType === "percentage" 
                           ? `Get a flat ${coupon.discountAmount}% discount on prescription medicines and healthcare items.` 
                           : `Get a flat discount of ₹${coupon.discountAmount} off on purchase of eligible medical supplies.`}
@@ -263,19 +263,19 @@ const CouponCarousel = () => {
                         {coupon.code}
                       </div>
                     </div>
-
+ 
                     {/* Bottom Content */}
-                    <div className="space-y-md">
+                    <div className="space-y-sm md:space-y-md">
                       <div className="flex justify-between items-center text-[11px] text-on-surface-variant/80 dark:text-surface-variant/80 font-medium">
                         <span>Expires: {formatDate(coupon.expiryDate)}</span>
                         <span className="font-semibold text-secondary">Verified Offer</span>
                       </div>
-
+ 
                       {/* Action Buttons */}
                       <div className="flex gap-sm">
                         <button
                           onClick={() => handleCopyCode(coupon.code)}
-                          className={`flex-1 py-2 rounded-xl text-label-sm font-bold shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-xs cursor-pointer select-none ${copyButtonClass}`}
+                          className={`flex-1 h-[45px] md:py-2 rounded-xl text-label-sm font-bold shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-xs cursor-pointer select-none ${copyButtonClass}`}
                         >
                           {copiedCode === coupon.code ? (
                             <>
@@ -292,7 +292,7 @@ const CouponCarousel = () => {
                         
                         <Link
                           to="/products"
-                          className="px-md py-2 border border-outline-variant dark:border-outline/40 hover:bg-surface-container text-on-surface rounded-xl text-label-sm font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-xs select-none"
+                          className="px-md h-[45px] md:py-2 border border-outline-variant dark:border-outline/40 hover:bg-surface-container text-on-surface rounded-xl text-label-sm font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-xs select-none"
                         >
                           <ShoppingBag className="w-4 h-4" />
                           <span>Shop</span>

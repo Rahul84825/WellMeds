@@ -67,7 +67,7 @@ const ProductCard = ({ product }) => {
           
           {/* Badges */}
           {product.badge && product.badge !== "Top Rated" && (
-            <span className={`absolute top-2 left-2 text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm ${
+            <span className={`absolute top-2 left-2 text-[11px] md:text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm ${
               product.badge === "Rx Required" 
                 ? "bg-secondary-container text-on-secondary-container border border-secondary"
                 : "bg-primary text-white"
@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
 
           {/* Discount Badge */}
           {product.originalPrice && (
-            <span className="absolute top-2 right-2 bg-error text-white text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm">
+            <span className="absolute top-2 right-2 bg-error text-white text-[11px] md:text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm">
               {calculateDiscount()}
             </span>
           )}
@@ -86,36 +86,36 @@ const ProductCard = ({ product }) => {
           {/* Wishlist Heart Icon Toggle */}
           <button
             onClick={() => toggleWishlist(product)}
-            className="absolute bottom-2 right-2 w-8 h-8 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/75 shadow-md hover:bg-white dark:hover:bg-black text-on-surface-variant hover:text-error active:scale-90 transition-all z-10 focus-visible:ring-2 focus-visible:ring-primary outline-none"
+            className="absolute bottom-2 right-2 w-7.5 h-7.5 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/75 shadow-md hover:bg-white dark:hover:bg-black text-on-surface-variant hover:text-error active:scale-90 transition-all z-10 focus-visible:ring-2 focus-visible:ring-primary outline-none"
             title={favorited ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <span className={`material-symbols-outlined text-[16px] md:text-[20px] ${favorited ? "text-error" : ""}`} style={{ fontVariationSettings: favorited ? "'FILL' 1" : "'FILL' 0" }}>
+            <span className={`material-symbols-outlined text-[14px] md:text-[20px] ${favorited ? "text-error" : ""}`} style={{ fontVariationSettings: favorited ? "'FILL' 1" : "'FILL' 0" }}>
               favorite
             </span>
           </button>
         </div>
 
         {/* Product Details Panel */}
-        <div className="pt-2 md:pt-md pb-xs md:pb-sm px-1 md:px-2 flex-1 flex flex-col justify-between">
+        <div className="pt-1.5 md:pt-md pb-xs md:pb-sm px-1 md:px-2 flex-1 flex flex-col justify-between">
           <div className="text-left">
-            <p className="text-[9px] md:text-label-sm text-on-surface-variant dark:text-surface-variant mb-1 md:mb-xs truncate uppercase tracking-wider font-semibold">
+            <p className="text-[11px] md:text-label-sm text-on-surface-variant dark:text-surface-variant mb-1 md:mb-xs truncate uppercase tracking-wider font-semibold">
               {product.brand}
             </p>
             <Link 
               to={`/products/${product.slug || productId}`} 
               className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none rounded-sm"
             >
-              <h3 className="font-headline-sm text-xs sm:text-sm md:text-headline-sm text-on-surface leading-tight mb-2 md:mb-md line-clamp-2 h-8 md:h-10 overflow-hidden">
+              <h3 className="font-headline-sm text-[13px] sm:text-sm md:text-headline-sm text-on-surface leading-tight mb-1 md:mb-md line-clamp-2 h-8 md:h-10 overflow-hidden">
                 {product.name}
               </h3>
             </Link>
           </div>
 
-          <div className="mt-2">
+          <div className="mt-1.5 md:mt-2">
             {/* Price & Action */}
             <div className="flex items-center justify-between gap-1">
               <div className="text-left min-w-0 flex-1">
-                <span className="text-xs sm:text-sm md:text-headline-sm font-bold md:font-black text-primary dark:text-primary-fixed-dim block sm:inline">
+                <span className="text-[14px] sm:text-sm md:text-headline-sm font-bold md:font-black text-primary dark:text-primary-fixed-dim block sm:inline">
                   {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && (
@@ -132,14 +132,14 @@ const ProductCard = ({ product }) => {
               ) : product.requiresRx ? (
                 <button
                   onClick={handleAddToCart}
-                  className={`flex items-center justify-center gap-1.5 w-9 h-9 md:w-auto md:h-11 md:px-md md:py-2 text-white rounded-lg transition-colors shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 outline-none shrink-0 ${
+                  className={`flex items-center justify-center gap-1.5 w-8.5 h-8.5 md:w-auto md:h-11 md:px-md md:py-2 text-white rounded-lg transition-colors shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 outline-none shrink-0 ${
                     localRxFile 
                       ? "bg-secondary hover:bg-on-secondary-container focus-visible:ring-secondary" 
                       : "bg-primary hover:bg-primary-container focus-visible:ring-primary"
                   }`}
                   title={localRxFile ? "Rx Uploaded" : "Upload Rx"}
                 >
-                  <span className="material-symbols-outlined text-[16px] md:text-[18px]">
+                  <span className="material-symbols-outlined text-[15px] md:text-[18px]">
                     {localRxFile ? "verified" : "prescriptions"}
                   </span>
                   <span className="font-label-md text-label-md hidden md:inline">
@@ -149,10 +149,10 @@ const ProductCard = ({ product }) => {
               ) : (
                 <button
                   onClick={handleAddToCart}
-                  className="w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-secondary text-white rounded-lg hover:bg-on-secondary-container transition-colors shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 outline-none shrink-0"
+                  className="w-8.5 h-8.5 md:w-11 md:h-11 flex items-center justify-center bg-secondary text-white rounded-lg hover:bg-on-secondary-container transition-colors shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 outline-none shrink-0"
                   title="Add to Cart"
                 >
-                  <span className="material-symbols-outlined text-[18px] md:text-[20px]">add_shopping_cart</span>
+                  <span className="material-symbols-outlined text-[16px] md:text-[20px]">add_shopping_cart</span>
                 </button>
               )}
             </div>
