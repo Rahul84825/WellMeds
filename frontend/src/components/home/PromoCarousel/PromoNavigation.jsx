@@ -7,14 +7,14 @@ const PromoNavigation = ({ total, current, onPrev, onNext, onDotClick }) => {
       {/* Navigation Arrows */}
       <button
         onClick={onPrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/35 backdrop-blur-md border border-white/20 dark:border-zinc-800/80 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-105 active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-white/50"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/35 backdrop-blur-md border border-white/20 dark:border-zinc-800/80 text-white hidden md:flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-105 active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-white/50"
         aria-label="Previous Slide"
       >
         <ChevronLeft size={20} />
       </button>
       <button
         onClick={onNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/35 backdrop-blur-md border border-white/20 dark:border-zinc-800/80 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-105 active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-white/50"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/35 backdrop-blur-md border border-white/20 dark:border-zinc-800/80 text-white hidden md:flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-105 active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-white/50"
         aria-label="Next Slide"
       >
         <ChevronRight size={20} />

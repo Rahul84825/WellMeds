@@ -300,17 +300,19 @@ const PromoCarousel = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="relative max-w-[1500px] mx-auto my-md h-[580px] md:h-[450px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#004782] to-[#086b53] shadow-xl group focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 outline-none transition-all duration-300"
+      className="relative max-w-[1400px] mx-auto my-md min-h-[520px] sm:min-h-[480px] md:min-h-[430px] lg:min-h-[450px] h-auto rounded-3xl overflow-hidden bg-gradient-to-br from-[#004782] to-[#086b53] shadow-xl group focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 outline-none transition-all duration-300 flex flex-col justify-center"
     >
       {/* Slides */}
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full flex flex-col">
         {promoSlides.map((slide, idx) => {
           const isActive = idx === currentSlide;
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 w-full h-full flex items-center px-6 sm:px-12 lg:px-16 transition-opacity duration-700 ease-in-out ${
-                isActive ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
+              className={`w-full transition-all duration-700 ease-in-out bg-gradient-to-br ${slide.bgGradient || "from-[#004782] to-[#086b53]"} ${
+                isActive
+                  ? "relative opacity-100 z-10 pointer-events-auto flex flex-col md:flex-row items-center px-6 sm:px-12 lg:px-16 py-8 md:py-0 min-h-[480px] md:min-h-[430px]"
+                  : "absolute inset-0 opacity-0 pointer-events-none h-0 overflow-hidden"
               }`}
             >
               {/* Floating Background Blobs */}
@@ -320,28 +322,28 @@ const PromoCarousel = () => {
               <div className="max-w-[1440px] mx-auto w-full flex flex-col md:flex-row gap-lg items-center justify-between z-10 text-white">
                 {/* Left: Content */}
                 <div className={`w-full md:w-[50%] space-y-md text-left ${isActive ? "animate-slide-in-left" : ""}`}>
-                  <h2 className="font-headline-lg text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
+                  <h2 className="font-headline-lg text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black leading-tight bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
                     {slide.title}
                   </h2>
-                  <p className="font-body-md text-xs sm:text-sm text-white/80 leading-relaxed font-medium line-clamp-3">
+                  <p className="font-body-md text-xs sm:text-sm lg:text-base text-white/80 leading-relaxed font-medium line-clamp-3">
                     {slide.subtitle}
                   </p>
 
-                  <div className="flex flex-col sm:flex-row gap-sm pt-xs">
+                  <div className="flex flex-col sm:flex-row gap-sm pt-xs w-full">
                     {slide.id === "life-saving-medicines" ? (
                       <>
                         <a
                           href="https://wa.me/917420909445?text=Hello%20WellMeds,%20I%20need%20help%20finding%20a%20medicine."
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="h-10 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none"
+                          className="h-11 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none w-full sm:w-auto"
                         >
                           <MessageCircle size={14} />
                           WhatsApp Sourcing Desk
                         </a>
                         <Link
                           to="/products"
-                          className="h-10 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none"
+                          className="h-11 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none w-full sm:w-auto"
                         >
                           Browse Catalog
                         </Link>
@@ -350,7 +352,7 @@ const PromoCarousel = () => {
                       <>
                         <Link
                           to="/upload-prescription"
-                          className="h-10 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none"
+                          className="h-11 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none w-full sm:w-auto"
                         >
                           Upload Rx Sheet
                         </Link>
@@ -358,7 +360,7 @@ const PromoCarousel = () => {
                           href="https://wa.me/917420909445?text=Hello%20WellMeds,%20I%20want%20to%20upload%20my%20prescription."
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="h-10 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none"
+                          className="h-11 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none w-full sm:w-auto"
                         >
                           Send via WhatsApp
                         </a>
@@ -367,13 +369,13 @@ const PromoCarousel = () => {
                       <>
                         <Link
                           to="/products"
-                          className="h-10 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none"
+                          className="h-11 px-lg bg-[#038076] hover:bg-[#038076]/90 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all shadow cursor-pointer select-none w-full sm:w-auto"
                         >
                           Explore Therapies
                         </Link>
                         <Link
                           to="/contact"
-                          className="h-10 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none"
+                          className="h-11 px-lg border border-white/20 hover:bg-white/10 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer select-none w-full sm:w-auto"
                         >
                           Contact Support
                         </Link>
@@ -383,7 +385,7 @@ const PromoCarousel = () => {
                 </div>
 
                 {/* Right: Unique Slides Layout */}
-                <div className={`w-full md:w-[45%] mt-md md:mt-0 ${isActive ? "animate-slide-in-right" : ""}`}>
+                <div className={`w-full md:w-[45%] mt-lg md:mt-0 ${isActive ? "animate-slide-in-right" : ""}`}>
                   {renderRightColumn(slide.id)}
                 </div>
               </div>
@@ -393,13 +395,15 @@ const PromoCarousel = () => {
       </div>
 
       {/* Navigation Layer */}
-      <PromoNavigation
-        total={totalSlides}
-        current={currentSlide}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        onDotClick={(idx) => setCurrentSlide(idx)}
-      />
+      <div className="pb-sm md:pb-0">
+        <PromoNavigation
+          total={totalSlides}
+          current={currentSlide}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          onDotClick={(idx) => setCurrentSlide(idx)}
+        />
+      </div>
     </section>
   );
 };

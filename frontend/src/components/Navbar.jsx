@@ -591,19 +591,21 @@ const Navbar = () => {
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col">
         
         {/* Row 1: Logo & Action Buttons */}
-        <div className="h-[70px] lg:h-[80px] flex items-center justify-between">
-          {/* Left Side: Brand Logo */}
-          <NavLink
-            to="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center group rounded-xl p-1 text-left h-[54px] overflow-hidden"
-          >
-            <img 
-              src={logoImg} 
-              alt="Logo" 
-              className="h-[200px] w-[200px] object-contain -my-[73px] group-hover:scale-105 transition-transform duration-200" 
-            />
-          </NavLink>
+        <div className="h-[72px] lg:h-[80px] flex items-center justify-between relative">
+          {/* Left/Centered Brand Logo */}
+          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-10 flex items-center">
+            <NavLink
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center group rounded-xl p-1 text-left h-[42px] lg:h-[44px] overflow-hidden"
+            >
+              <img 
+                src={logoImg} 
+                alt="Logo" 
+                className="h-[180px] w-[180px] -my-[69px] lg:h-[200px] lg:w-[200px] lg:-my-[73px] object-contain group-hover:scale-105 transition-transform duration-200" 
+              />
+            </NavLink>
+          </div>
 
           {/* Right Side Actions (Desktop) */}
           <div className="hidden lg:block">
@@ -611,26 +613,26 @@ const Navbar = () => {
           </div>
 
           {/* Right Side Actions (Mobile/Tablet) */}
-          <div className="flex items-center gap-xs lg:hidden">
+          <div className="flex items-center gap-2 lg:hidden ml-auto z-10">
             <Link
               to="/cart"
-              className="relative w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+              className="relative w-[42px] h-[42px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
               aria-label={`Shopping Cart with ${cartCount} items`}
             >
-              <ShoppingCart className="w-5 h-5 text-gray-700" />
+              <ShoppingCart className="w-[18px] h-[18px] text-gray-700" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse border border-white">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center animate-pulse border border-white">
                   {cartCount}
                 </span>
               )}
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all"
+              className="w-[42px] h-[42px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
               aria-label="Toggle Mobile Menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
