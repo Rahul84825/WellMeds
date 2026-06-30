@@ -17,9 +17,6 @@ import couponRoutes from "./src/routes/couponRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import wishlistRoutes from "./src/routes/wishlistRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
-import importRequestRoutes from "./src/routes/importRequestRoutes.js";
-import papRoutes from "./src/routes/papRoutes.js";
-import cmsRoutes from "./src/routes/cmsRoutes.js";
 
 const app = express();
 
@@ -68,9 +65,6 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/import-requests", importRequestRoutes);
-app.use("/api/pap", papRoutes);
-app.use("/api/cms", cmsRoutes);
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

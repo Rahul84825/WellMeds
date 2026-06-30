@@ -27,10 +27,6 @@ import UploadPrescriptionPage from "../pages/UploadPrescriptionPage";
 import VerifyEmail from "../pages/VerifyEmail";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
-import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
-import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
-import AdminCmsImported from "../admin/AdminCmsImported";
-import AdminCmsPap from "../admin/AdminCmsPap";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -59,8 +55,8 @@ const AppRoutes = () => {
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
-        <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
-        <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
+        <Route path="imported-medicines" element={<Navigate to="/products" replace />} />
+        <Route path="patient-assistance-program" element={<Navigate to="/" replace />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="verify-email" element={<VerifyEmail />} />
@@ -113,8 +109,8 @@ const AppRoutes = () => {
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="settings" element={<AdminSettings />} />
-        <Route path="cms/imported" element={<AdminCmsImported />} />
-        <Route path="cms/pap" element={<AdminCmsPap />} />
+        <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
+        <Route path="cms/pap" element={<Navigate to="/admin" replace />} />
       </Route>
 
       {/* Fallback Catch-All */}

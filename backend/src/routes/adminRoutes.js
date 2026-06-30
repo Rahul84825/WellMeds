@@ -39,13 +39,4 @@ router.post("/coupons", protect, admin, adminCreateCoupon);
 router.put("/coupons/:id", protect, admin, adminUpdateCoupon);
 router.delete("/coupons/:id", protect, admin, adminDeleteCoupon);
 
-// Imported Medicines & PAP management (admin only)
-import { getImportRequests, updateImportRequest } from "../controllers/importRequestController.js";
-import { getPAPApplications, updatePAPApplication } from "../controllers/papController.js";
-
-router.get("/import-requests", protect, admin, getImportRequests);
-router.put("/import-requests/:id", protect, admin, updateImportRequest);
-router.get("/pap-applications", protect, admin, getPAPApplications);
-router.put("/pap-applications/:id", protect, admin, updatePAPApplication);
-
 export default router;

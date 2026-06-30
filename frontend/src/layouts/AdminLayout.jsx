@@ -79,10 +79,6 @@ const AdminLayout = () => {
     { to: "/admin/settings", label: "Settings", icon: Settings }
   ];
 
-  const cmsItems = [
-    { to: "/admin/cms/imported", label: "Imported Medicines", icon: Globe },
-    { to: "/admin/cms/pap", label: "Patient Assistance", icon: FileText }
-  ];
 
   // Perform search across products, orders, categories, coupons, and users
   const handleGlobalSearch = async (val) => {
@@ -205,47 +201,6 @@ const AdminLayout = () => {
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 
                 {/* Collapsed Tooltip */}
-                {collapsed && (
-                  <span className="absolute left-full ml-md px-sm py-xs bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
-                    {item.label}
-                  </span>
-                )}
-              </NavLink>
-            );
-          })}
-
-          {/* Content Management Group */}
-          <div className="pt-md my-xs border-t border-slate-200 dark:border-zinc-800">
-            {!collapsed ? (
-              <p className="px-md text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-xs">
-                Content Management
-              </p>
-            ) : (
-              <div className="h-px bg-slate-200 dark:bg-zinc-800 my-xs" />
-            )}
-          </div>
-
-          {cmsItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => {
-                  if (window.innerWidth < 768) {
-                    setCollapsed(true);
-                  }
-                }}
-                className={({ isActive }) =>
-                  `flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm transition-all duration-200 group relative ${
-                    isActive
-                      ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]"
-                      : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100"
-                  }`
-                }
-              >
-                <Icon size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
                   <span className="absolute left-full ml-md px-sm py-xs bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
                     {item.label}
