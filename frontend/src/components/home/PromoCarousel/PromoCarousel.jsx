@@ -125,13 +125,13 @@ const PromoCarousel = () => {
         return (
           <div className="w-full flex gap-md items-center justify-center relative">
             {/* Medicine Card 1 */}
-            <div className="w-full sm:w-[210px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur rounded-2xl border border-white/20 p-md shadow-xl animate-float text-left space-y-xs">
+            <div className="w-full max-w-[220px] mx-auto bg-white/95 dark:bg-zinc-900/95 backdrop-blur rounded-2xl border border-white/20 p-md shadow-xl animate-float text-left space-y-xs">
               <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded">Natco Pharma</span>
               <h4 className="font-black text-xs text-slate-800 dark:text-zinc-100 truncate">Sorafenat 200mg</h4>
-              <p className="text-[9px] text-slate-400 truncate">Sorafenib Tosylate</p>
+              <p className="text-[9px] text-slate-450 truncate">Sorafenib Tosylate</p>
               <div className="flex justify-between items-end pt-xs border-t border-slate-100 dark:border-zinc-800/60 mt-xs">
                 <div>
-                  <span className="text-[10px] text-slate-450 line-through block">₹8,900</span>
+                  <span className="text-[10px] text-slate-400 line-through block">₹8,900</span>
                   <span className="text-xs font-black text-slate-800 dark:text-zinc-100">₹3,450</span>
                 </div>
                 <span className="bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">61% OFF</span>
@@ -141,10 +141,10 @@ const PromoCarousel = () => {
             <div className="w-full sm:w-[210px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur rounded-2xl border border-white/20 p-md shadow-xl animate-float [animation-delay:1.5s] text-left space-y-xs hidden sm:block">
               <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded">Cipla Oncology</span>
               <h4 className="font-black text-xs text-slate-800 dark:text-zinc-100 truncate">Gefticip 250mg</h4>
-              <p className="text-[9px] text-slate-400 truncate">Gefitinib IP</p>
+              <p className="text-[9px] text-slate-450 truncate">Gefitinib IP</p>
               <div className="flex justify-between items-end pt-xs border-t border-slate-100 dark:border-zinc-800/60 mt-xs">
                 <div>
-                  <span className="text-[10px] text-slate-450 line-through block">₹7,200</span>
+                  <span className="text-[10px] text-slate-400 line-through block">₹7,200</span>
                   <span className="text-xs font-black text-slate-800 dark:text-zinc-100">₹2,890</span>
                 </div>
                 <span className="bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">60% OFF</span>
@@ -156,7 +156,7 @@ const PromoCarousel = () => {
         return (
           <div className="w-full flex flex-col sm:flex-row gap-sm items-stretch justify-center text-left">
             {/* Stats Grid */}
-            <div className="flex-1 grid grid-cols-2 gap-sm">
+            <div className="hidden sm:grid flex-1 grid-cols-2 gap-sm">
               <div className="bg-white/10 dark:bg-black/25 backdrop-blur border border-white/15 p-sm rounded-xl flex flex-col justify-center items-center text-center">
                 <span className="text-xl font-black text-white">4.9 ★</span>
                 <span className="text-[9px] text-white/80 font-bold">Google Rating</span>
@@ -171,11 +171,11 @@ const PromoCarousel = () => {
               </div>
             </div>
             {/* Testimonial Quote */}
-            <div className="flex-1 bg-white/95 dark:bg-zinc-900/95 backdrop-blur border border-white/20 p-md rounded-2xl shadow-lg flex flex-col justify-between">
+            <div className="w-full max-w-[280px] sm:max-w-none mx-auto bg-white/95 dark:bg-zinc-900/95 backdrop-blur border border-white/20 p-md rounded-2xl shadow-lg flex flex-col justify-between min-h-[130px]">
               <div className="flex gap-xs text-amber-500">
                 <Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" />
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-zinc-300 italic font-medium leading-relaxed">
+              <p className="text-[11px] text-slate-600 dark:text-zinc-300 italic font-medium leading-relaxed my-xs">
                 "Saved over ₹15,000 monthly on my mother's oncology prescriptions. The cold-chain packing was extremely professional."
               </p>
               <span className="text-[9px] font-black text-[#004782] dark:text-blue-400 uppercase tracking-wider">— Mrs. Iyer, Pune</span>
@@ -185,7 +185,7 @@ const PromoCarousel = () => {
       case "exclusive-savings":
         return (
           <div className="w-full flex items-center justify-center">
-            <div className="w-full max-w-[340px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur border border-white/20 p-md rounded-2xl shadow-xl space-y-md text-left text-slate-800 dark:text-zinc-100">
+            <div className="w-full max-w-[280px] sm:max-w-[340px] mx-auto bg-white/95 dark:bg-zinc-900/95 backdrop-blur border border-white/20 p-md rounded-2xl shadow-xl space-y-md text-left text-slate-800 dark:text-zinc-100">
               <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-xs">
                 <h4 className="font-black text-xs flex items-center gap-xs text-[#086b53] dark:text-emerald-400">
                   <DollarSign size={14} />
@@ -197,7 +197,7 @@ const PromoCarousel = () => {
               <div className="space-y-xs">
                 <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-400">
                   <span>Monthly Medicine Cost</span>
-                  <span className="font-black text-slate-750 dark:text-zinc-200">{formatCurrency(calcCost)}</span>
+                  <span className="font-black text-slate-700 dark:text-zinc-200">{formatCurrency(calcCost)}</span>
                 </div>
                 <input
                   type="range"
@@ -212,7 +212,7 @@ const PromoCarousel = () => {
 
               <div className="grid grid-cols-2 gap-sm pt-xs border-t border-slate-100 dark:border-zinc-800/60 text-center">
                 <div className="bg-slate-50 dark:bg-zinc-950 p-sm rounded-lg">
-                  <span className="text-[9px] text-slate-450 dark:text-zinc-400 font-bold block">WellMeds Price</span>
+                  <span className="text-[9px] text-slate-400 dark:text-zinc-400 font-bold block">WellMeds Price</span>
                   <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(calcCost * 0.15)}</span>
                 </div>
                 <div className="bg-emerald-500/10 p-sm rounded-lg border border-emerald-500/20">
@@ -226,7 +226,7 @@ const PromoCarousel = () => {
       case "prescription-upload":
         return (
           <div className="w-full flex items-center justify-center">
-            <div className="w-full max-w-[340px] bg-white/10 dark:bg-black/25 backdrop-blur border border-white/15 p-md rounded-2xl shadow-lg space-y-md text-left text-white">
+            <div className="w-full max-w-[280px] sm:max-w-[340px] mx-auto bg-white/10 dark:bg-black/25 backdrop-blur border border-white/15 p-md rounded-2xl shadow-lg space-y-md text-left text-white">
               <h4 className="font-bold text-xs flex items-center gap-xs border-b border-white/10 pb-xs">
                 <FileText size={14} />
                 Quick Verification Checklist
@@ -251,7 +251,7 @@ const PromoCarousel = () => {
       case "three-hour-delivery":
         return (
           <div className="w-full flex items-center justify-center">
-            <div className="w-full max-w-[340px] bg-white/10 dark:bg-black/25 backdrop-blur border border-white/15 p-md rounded-2xl shadow-lg space-y-md text-left text-white">
+            <div className="w-full max-w-[280px] sm:max-w-[340px] mx-auto bg-white/10 dark:bg-black/25 backdrop-blur border border-white/15 p-md rounded-2xl shadow-lg space-y-md text-left text-white">
               <div className="flex justify-between items-center border-b border-white/10 pb-xs">
                 <h4 className="font-bold text-xs flex items-center gap-xs">
                   <Truck size={14} className="animate-bounce" />

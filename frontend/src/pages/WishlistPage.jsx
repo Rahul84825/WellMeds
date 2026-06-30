@@ -30,7 +30,7 @@ const Wishlist = () => {
     <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       <h1 className="font-headline-lg text-headline-lg text-on-surface mb-xl font-bold">My Wishlist</h1>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-[10px] md:gap-md">
         {wishlistItems.map((prod) => (
           <ProductCard key={prod.id} product={prod} />
         ))}
