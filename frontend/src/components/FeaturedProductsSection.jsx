@@ -28,7 +28,7 @@ export const FeaturedProductsSection = () => {
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
         </Link>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-[10px] md:gap-md">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-6">
         {featuredProducts.map((prod) => (
           <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
         ))}

@@ -1087,7 +1087,7 @@ const ProductDetails = () => {
       {similarProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Similar Products (Same Category)</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-[10px] md:gap-md">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
             {similarProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
             ))}
@@ -1099,7 +1099,7 @@ const ProductDetails = () => {
       {relatedProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-[10px] md:gap-md">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
             ))}

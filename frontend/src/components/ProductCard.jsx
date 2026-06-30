@@ -44,13 +44,13 @@ const ProductCard = ({ product }) => {
 
   return (
     <>
-      <div className="product-card-hover group relative bg-surface-container-lowest dark:bg-inverse-surface rounded-2xl border border-outline-variant dark:border-outline/40 p-3 md:p-sm flex flex-col h-full transition-all duration-300 md:hover:shadow-lg md:hover:-translate-y-1">
+      <div className="product-card-hover group relative bg-surface-container-lowest dark:bg-inverse-surface rounded-2xl md:rounded-xl border border-outline-variant dark:border-outline/40 p-3 md:p-sm flex flex-col h-full transition-all duration-300 md:hover:shadow-lg md:hover:-translate-y-1">
         
         {/* Product Image Panel */}
-        <div className="relative overflow-hidden rounded-xl aspect-square bg-white dark:bg-zinc-950 flex-shrink-0">
+        <div className="relative overflow-hidden rounded-xl md:rounded-lg aspect-square bg-white dark:bg-zinc-950 flex-shrink-0">
           <img
             alt={product.name}
-            className="w-full h-full object-contain p-2 bg-white dark:bg-zinc-950 transition-transform duration-500 md:group-hover:scale-105"
+            className="w-full h-full object-contain p-1 md:p-2 bg-white dark:bg-zinc-950 transition-transform duration-500 md:group-hover:scale-105"
             src={product.image}
             loading="lazy"
           />
@@ -98,14 +98,14 @@ const ProductCard = ({ product }) => {
         {/* Product Details Panel */}
         <div className="pt-2 md:pt-md pb-xs md:pb-sm px-1 md:px-2 flex-1 flex flex-col justify-between">
           <div className="text-left">
-            <p className="text-[9px] md:text-label-sm text-on-surface-variant dark:text-surface-variant mb-1 truncate uppercase tracking-wider font-semibold">
+            <p className="text-[9px] md:text-label-sm text-on-surface-variant dark:text-surface-variant mb-1 md:mb-xs truncate uppercase tracking-wider font-semibold">
               {product.brand}
             </p>
             <Link 
               to={`/products/${product.slug || productId}`} 
               className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none rounded-sm"
             >
-              <h3 className="font-headline-sm text-xs sm:text-sm md:text-headline-sm text-on-surface leading-tight mb-2 line-clamp-2 h-8 md:h-10 overflow-hidden">
+              <h3 className="font-headline-sm text-xs sm:text-sm md:text-headline-sm text-on-surface leading-tight mb-2 md:mb-md line-clamp-2 h-8 md:h-10 overflow-hidden">
                 {product.name}
               </h3>
             </Link>
@@ -115,7 +115,7 @@ const ProductCard = ({ product }) => {
             {/* Price & Action */}
             <div className="flex items-center justify-between gap-1">
               <div className="text-left min-w-0 flex-1">
-                <span className="text-xs sm:text-sm md:text-headline-sm font-black text-primary dark:text-primary-fixed-dim block sm:inline">
+                <span className="text-xs sm:text-sm md:text-headline-sm font-bold md:font-black text-primary dark:text-primary-fixed-dim block sm:inline">
                   {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && (
