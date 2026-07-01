@@ -3,25 +3,11 @@ import { Category } from "../models/Category.js";
 import slugify from "slugify";
 
 export const getProducts = async (req, res, next) => {
-  const {
-    search,
-    categories,
-    brands,
-    minPrice,
-    maxPrice,
-    rating,
-    stockStatus,
-    requiresRx,
-    hasDiscount,
-    sort,
-    limit,
-    page
-  } = req.query;
+  const { search, page, limit } = req.query;
 
   try {
     const query = {};
 
-    // 1. Search query match (exclude category since it's now ObjectId reference)
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -30,127 +16,15 @@ export const getProducts = async (req, res, next) => {
       ];
     }
 
-    // 2. Category filter - now requires ObjectId
-    if (categories) {
-      // Convert category names/slugs to ObjectIds
-      const categoryNames = categories.split(",");
-      const categoryDocs = await Category.find({
-        $or: [
-          { slug: { $in: categoryNames } },
-          { name: { $in: categoryNames } }
-        ]
-      }).select("_id");
-      const categoryIds = categoryDocs.map(c => c._id);
-      if (categoryIds.length > 0) {
-        query.category = { $in: categoryIds };
-      } else {
-        // Force empty state by querying a non-existent ObjectId
-        const mongoose = (await import("mongoose")).default;
-        query.category = { $in: [new mongoose.Types.ObjectId()] };
-      }
-    } else if (req.query.category) {
-      // Single category - lookup by slug or name
-      const categoryDoc = await Category.findOne({
-        $or: [
-          { slug: req.query.category },
-          { name: req.query.category }
-        ]
-      }).select("_id");
-      if (categoryDoc) {
-        query.category = categoryDoc._id;
-      } else {
-        // Force empty state by querying a non-existent ObjectId
-        const mongoose = (await import("mongoose")).default;
-        query.category = new mongoose.Types.ObjectId();
-      }
-    }
-
-    // 3. Brand filter matching
-    if (brands) {
-      query.brand = { $in: brands.split(",") };
-    }
-
-    // 4. Price range
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
-    }
-
-    // 6. Stock status
-    if (stockStatus === "in") {
-      query.stock = { $gt: 0 };
-    } else if (stockStatus === "out") {
-      query.stock = 0;
-    }
-
-    // 7. Prescription requirement
-    if (requiresRx === "true") {
-      query.requiresRx = true;
-    } else if (requiresRx === "false") {
-      query.requiresRx = false;
-    }
-
-    // 8. Has discount
-    if (hasDiscount === "true") {
-      query.$expr = { $gt: [{ $ifNull: ["$originalPrice", 0] }, "$price"] };
-    }
-
-    // Sorting options setup
-    let sortOptions = { createdAt: -1 };
-    if (sort) {
-      if (sort === "price-asc") sortOptions = { price: 1 };
-      else if (sort === "price-desc") sortOptions = { price: -1 };
-      else if (sort === "newest") sortOptions = { createdAt: -1 };
-      else if (sort === "popularity") sortOptions = { createdAt: -1 }; // fallback since reviewsCount is gone
-      else if (sort === "alpha-asc") sortOptions = { name: 1 };
-      else if (sort === "alpha-desc") sortOptions = { name: -1 };
-    }
-
-    // Pagination
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 28;
     const skipNum = (pageNum - 1) * limitNum;
 
     const total = await Product.countDocuments(query);
-    let products;
-
-    if (sort === "discount") {
-      products = await Product.aggregate([
-        { $match: query },
-        {
-          $addFields: {
-            discountPercent: {
-              $cond: {
-                if: { $gt: [{ $ifNull: ["$originalPrice", 0] }, 0] },
-                then: {
-                  $multiply: [
-                    { $divide: [{ $subtract: ["$originalPrice", "$price"] }, "$originalPrice"] },
-                    100
-                  ]
-                },
-                else: 0
-              }
-            }
-          }
-        },
-        { $sort: { discountPercent: -1 } },
-        { $skip: skipNum },
-        { $limit: limitNum }
-      ]);
-
-      // Map id virtual for aggregate output
-      products = products.map(p => ({
-        ...p,
-        id: p._id.toString()
-      }));
-    } else {
-      products = await Product.find(query)
-        .populate("category", "name slug")
-        .sort(sortOptions)
-        .skip(skipNum)
-        .limit(limitNum);
-    }
+    const products = await Product.find(query)
+      .populate("category", "name slug")
+      .skip(skipNum)
+      .limit(limitNum);
 
     res.status(200).json({
       success: true,
@@ -159,18 +33,6 @@ export const getProducts = async (req, res, next) => {
       page: pageNum,
       pages: Math.ceil(total / limitNum),
       products,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getProductBrands = async (req, res, next) => {
-  try {
-    const brands = await Product.distinct("brand");
-    res.status(200).json({
-      success: true,
-      brands: brands.filter(Boolean),
     });
   } catch (error) {
     next(error);

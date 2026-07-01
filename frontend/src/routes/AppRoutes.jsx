@@ -46,8 +46,8 @@ const AppRoutes = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="category/:categorySlug" element={<ProductsPage />} />
-        <Route path="brands/:brandSlug" element={<ProductsPage />} />
+        <Route path="category/:categorySlug" element={<Navigate to="/products" replace />} />
+        <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
         <Route path="products/:slug" element={<ProductDetailsPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />

@@ -7,7 +7,13 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}) {
-    const data = await apiInstance.get("/products", { params });
+    const { search, page, limit } = params;
+    const cleanParams = {};
+    if (search) cleanParams.search = search;
+    if (page) cleanParams.page = page;
+    if (limit) cleanParams.limit = limit;
+
+    const data = await apiInstance.get("/products", { params: cleanParams });
     return {
       products: data.products || [],
       total: data.total || 0,
@@ -16,17 +22,12 @@ export const productService = {
     };
   },
 
-  async getBrands() {
-    const data = await apiInstance.get("/products/brands");
-    return data.brands || [];
-  },
-
   /**
    * Convenience helper — returns just the products array.
    * Used by admin pages that don't need pagination.
    */
   async getProductsList(params = {}) {
-    const { products } = await productService.getProducts(params);
+    const { products } = await productService.getProducts({ limit: 1000, ...params });
     return products;
   },
 

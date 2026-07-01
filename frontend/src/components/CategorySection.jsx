@@ -7,6 +7,11 @@ import Loader from "./Loader";
 export const CategorySection = () => {
   const { categories, loading, error } = useCategories();
 
+  // Only show categories that are marked Active by the admin
+  const activeCategories = categories.filter(
+    (cat) => cat.isActive !== false && cat.status !== "Inactive"
+  );
+
   if (loading) {
     return (
       <section className="py-16 bg-surface-container-lowest dark:bg-surface-container-high transition-colors duration-300">
@@ -17,7 +22,7 @@ export const CategorySection = () => {
     );
   }
 
-  if (error || categories.length === 0) {
+  if (error || activeCategories.length === 0) {
     return null;
   }
 
@@ -31,7 +36,7 @@ export const CategorySection = () => {
           </Link>
         </div>
         <div className="flex overflow-x-auto pb-md gap-md no-scrollbar snap-x custom-scrollbar">
-          {categories.map((cat) => (
+          {activeCategories.map((cat) => (
             <CategoryCard key={(cat._id || cat.id)?.toString()} category={cat} />
           ))}
         </div>
@@ -41,3 +46,4 @@ export const CategorySection = () => {
 };
 
 export default CategorySection;
+

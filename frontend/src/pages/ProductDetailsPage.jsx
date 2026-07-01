@@ -263,12 +263,6 @@ const ProductDetails = () => {
             {
               "@type": "ListItem",
               "position": 3,
-              "name": product.category?.name || product.category,
-              "item": `${window.location.origin}/category/${product.category?.slug || product.category}`
-            },
-            {
-              "@type": "ListItem",
-              "position": 4,
               "name": product.name,
               "item": window.location.href
             }
@@ -472,7 +466,7 @@ const ProductDetails = () => {
         <span>/</span>
         <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Products</Link>
         <span>/</span>
-        <Link to={`/category/${product.category?.slug || product.category}`} className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">{product.category?.name || product.category}</Link>
+        <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">{product.category?.name || product.category}</Link>
         <span>/</span>
         <span className="text-slate-600 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
