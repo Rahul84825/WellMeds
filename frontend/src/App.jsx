@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
+import ScrollToTop from "./components/ScrollToTop";
 
 /**
  * SyncBridge — registers cart/wishlist sync callbacks with AuthContext
@@ -49,6 +50,7 @@ function App() {
         <WishlistProvider>
           <BrowserRouter>
             <Toaster position="top-right" richColors closeButton />
+            <ScrollToTop />
             <SyncBridge />
             <AppRoutes />
           </BrowserRouter>
