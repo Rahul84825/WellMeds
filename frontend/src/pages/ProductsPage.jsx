@@ -25,13 +25,18 @@ const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 28;
 
+  // Category filter from URL (?category=...)
+  const categoryParam = searchParams.get("category") || "";
+
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") || "");
 
   // SEO setup
   useEffect(() => {
-    document.title = "Clinical Drug Catalog | WellMeds";
+    document.title = categoryParam
+      ? `${categoryParam} | WellMeds`
+      : "Clinical Drug Catalog | WellMeds";
     let metaDesc = document.querySelector("meta[name='description']");
     if (!metaDesc) {
       metaDesc = document.createElement("meta");
@@ -39,21 +44,20 @@ const ProductsPage = () => {
       document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute("content", "Shop authentic prescription medicines and healthcare products online at WellMeds.");
-  }, []);
+  }, [categoryParam]);
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchVal);
-      // Sync search param to URL
-      if (searchVal.trim()) {
-        setSearchParams({ search: searchVal });
-      } else {
-        setSearchParams({});
-      }
+      // Sync search param to URL, preserve category
+      const newParams = {};
+      if (searchVal.trim()) newParams.search = searchVal;
+      if (categoryParam) newParams.category = categoryParam;
+      setSearchParams(Object.keys(newParams).length ? newParams : {});
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchVal, setSearchParams]);
+  }, [searchVal, setSearchParams, categoryParam]);
 
   // Fetch Products
   const fetchProducts = useCallback(async () => {
@@ -62,7 +66,8 @@ const ProductsPage = () => {
       const data = await api.getProducts({
         page: currentPage,
         limit,
-        search: debouncedSearch || undefined
+        search: debouncedSearch || undefined,
+        category: categoryParam || undefined,
       });
       setProducts(data.products || []);
       setTotalProducts(data.total || 0);
@@ -71,16 +76,16 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch]);
+  }, [currentPage, debouncedSearch, categoryParam]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Reset to page 1 when search query changes
+  // Reset to page 1 when search query or category changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, categoryParam]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -116,31 +121,68 @@ const ProductsPage = () => {
         <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">
           <span className="cursor-pointer hover:text-[#038076] transition-colors" onClick={() => navigate("/")}>Home</span>
           <span className="text-slate-300">/</span>
-          <span className="text-[#038076] dark:text-[#a4c9ff]">Products</span>
+          <span
+            className="cursor-pointer hover:text-[#038076] transition-colors"
+            onClick={() => navigate("/products")}
+          >
+            Products
+          </span>
+          {categoryParam && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-[#038076] dark:text-[#a4c9ff]">{categoryParam}</span>
+            </>
+          )}
         </nav>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
           <div>
             <h1 className="font-extrabold text-3xl md:text-4xl text-slate-800 dark:text-zinc-100 tracking-tight">
-              All Products
+              {categoryParam ? categoryParam : "All Products"}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Secure prescription verification, authentic formulations, and express doorstep delivery.
+              {categoryParam
+                ? `Showing all products in the "${categoryParam}" category.`
+                : "Secure prescription verification, authentic formulations, and express doorstep delivery."}
             </p>
           </div>
+          {categoryParam && (
+            <button
+              onClick={() => navigate("/products")}
+              className="inline-flex items-center gap-xs text-[11px] font-bold text-[#038076] border border-[#038076]/30 bg-[#038076]/5 hover:bg-[#038076]/10 px-md py-xs rounded-full transition-all select-none"
+            >
+              <X size={12} />
+              Clear Category Filter
+            </button>
+          )}
         </div>
       </div>
 
       {/* Toolbar: Search & Count */}
       <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md mb-md">
-        <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
-          {totalProducts > 0 ? (
-            <>
-              Showing <span className="font-extrabold text-slate-800 dark:text-zinc-100">{showingStart}–{showingEnd}</span> of <span className="font-extrabold text-slate-800 dark:text-zinc-100">{totalProducts}</span> Products
-            </>
-          ) : (
-            "0 Products Found"
+        <div className="flex items-center gap-sm flex-wrap">
+          <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
+            {totalProducts > 0 ? (
+              <>
+                Showing <span className="font-extrabold text-slate-800 dark:text-zinc-100">{showingStart}–{showingEnd}</span> of <span className="font-extrabold text-slate-800 dark:text-zinc-100">{totalProducts}</span> Products
+              </>
+            ) : (
+              "0 Products Found"
+            )}
+          </p>
+          {/* Active category filter chip */}
+          {categoryParam && (
+            <span className="inline-flex items-center gap-xs text-[10px] font-bold text-[#038076] bg-[#038076]/8 border border-[#038076]/25 px-sm py-0.5 rounded-full">
+              {categoryParam}
+              <button
+                onClick={() => navigate("/products")}
+                className="hover:text-red-500 transition-colors"
+                aria-label="Clear category filter"
+              >
+                <X size={11} />
+              </button>
+            </span>
           )}
-        </p>
+        </div>
         
         {/* Search Input */}
         <div className="relative w-full sm:w-80">

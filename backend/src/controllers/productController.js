@@ -3,7 +3,7 @@ import { Category } from "../models/Category.js";
 import slugify from "slugify";
 
 export const getProducts = async (req, res, next) => {
-  const { search, page, limit } = req.query;
+  const { search, category, page, limit } = req.query;
 
   try {
     const query = {};
@@ -14,6 +14,26 @@ export const getProducts = async (req, res, next) => {
         { brand: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
+    }
+
+    // Filter by category name (case-insensitive lookup → ObjectId filter)
+    if (category && category.trim()) {
+      const matchedCategory = await Category.findOne({
+        name: { $regex: `^${category.trim()}$`, $options: "i" },
+      });
+      if (matchedCategory) {
+        query.category = matchedCategory._id;
+      } else {
+        // No matching category — return empty result set immediately
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: 1,
+          pages: 1,
+          products: [],
+        });
+      }
     }
 
     const pageNum = parseInt(page) || 1;
