@@ -13,7 +13,9 @@ import {
   ChevronDown,
   FileText,
   Package,
-  Search
+  Search,
+  Globe,
+  Handshake
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
@@ -53,6 +55,24 @@ const NAV_CONFIG = [
       { id: "all-medicines", label: "All Medicines", to: "/products" },
       { id: "wellness", label: "Wellness", to: "/products" },
     ],
+  },
+  {
+    id: "imported-medicines",
+    label: "Imported Medicines",
+    type: "link",
+    to: "/imported-medicines",
+    order: 2,
+    enabled: true,
+    badge: null,
+  },
+  {
+    id: "patient-assistance",
+    label: "Patient Assistance Program",
+    type: "link",
+    to: "/patient-assistance-program",
+    order: 3,
+    enabled: true,
+    badge: null,
   },
   {
     id: "library",
@@ -729,12 +749,21 @@ const Navbar = () => {
             </Link>
 
             <Link
-              to="/products?filter=imported"
+              to="/imported-medicines"
               onClick={() => setMobileMenuOpen(false)}
               className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
             >
-              <Percent size={16} className="text-slate-400" />
+              <Globe size={16} className="text-slate-400" />
               <span>Imported Medicines</span>
+            </Link>
+
+            <Link
+              to="/patient-assistance-program"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+            >
+              <Handshake size={16} className="text-slate-400" />
+              <span>Patient Assistance Program</span>
             </Link>
 
             <Link
