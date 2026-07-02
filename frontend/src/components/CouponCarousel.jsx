@@ -22,142 +22,96 @@ import { api } from "../services/api";
 ───────────────────────────────────────────────────────────────────────── */
 const THEMES = [
   {
-    // Mint / Teal
-    cardBg: "linear-gradient(145deg, #f0faf8 0%, #e2f7f3 60%, #d4f0ea 100%)",
+    // Soft Mint
+    cardBg: "linear-gradient(135deg, #f0faf8 0%, #e2f7f3 100%)",
+    cardBgForNotch: "#e2f7f3",
     cardBorder: "#b4e4d8",
-    cardShadow: "rgba(14, 159, 126, 0.12)",
-    eyebrowBg: "rgba(14, 159, 126, 0.12)",
+    cardShadow: "rgba(11, 122, 98, 0.06)",
+    eyebrowBg: "#e2f7f3",
     eyebrowText: "#0b7a62",
-    heroGradient: "linear-gradient(135deg, #059669, #0891b2)",
-    minBadgeBg: "rgba(14, 159, 126, 0.10)",
+    heroColor: "#0b7a62",
+    minBadgeBg: "rgba(14, 159, 126, 0.08)",
     minBadgeText: "#0b7a62",
-    minBadgeBorder: "rgba(14, 159, 126, 0.25)",
-    pillBg: "rgba(14, 159, 126, 0.08)",
-    pillBorder: "rgba(14, 159, 126, 0.30)",
+    minBadgeBorder: "rgba(14, 159, 126, 0.20)",
+    pillBg: "rgba(14, 159, 126, 0.04)",
+    pillBorder: "rgba(14, 159, 126, 0.25)",
     pillText: "#0b7a62",
-    pillHoverBg: "rgba(14, 159, 126, 0.14)",
-    primaryBtn: "linear-gradient(135deg, #059669, #0891b2)",
-    primaryBtnShadow: "rgba(14, 159, 126, 0.30)",
-    shopBtnBorder: "#059669",
-    shopBtnText: "#059669",
-    deco1: "rgba(14, 159, 126, 0.08)",
-    deco2: "rgba(8, 145, 178, 0.06)",
-    expiryText: "#52796f",
+    pillHoverBg: "rgba(14, 159, 126, 0.08)",
+    primaryBtn: "#0b7a62",
+    primaryBtnHover: "#085c4a",
+    shopBtnBorder: "#0b7a62",
+    shopBtnText: "#0b7a62",
+    decoColor: "#0b7a62",
+    expiryText: "#475569",
   },
   {
-    // Blue / Indigo
-    cardBg: "linear-gradient(145deg, #eff6ff 0%, #dbeafe 60%, #c7d2fe 100%)",
-    cardBorder: "#93c5fd",
-    cardShadow: "rgba(37, 99, 235, 0.12)",
-    eyebrowBg: "rgba(37, 99, 235, 0.10)",
-    eyebrowText: "#1d4ed8",
-    heroGradient: "linear-gradient(135deg, #2563eb, #7c3aed)",
+    // Soft Blue
+    cardBg: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+    cardBgForNotch: "#dbeafe",
+    cardBorder: "#bfdbfe",
+    cardShadow: "rgba(37, 99, 235, 0.06)",
+    eyebrowBg: "#dbeafe",
+    eyebrowText: "#1e40af",
+    heroColor: "#1e40af",
     minBadgeBg: "rgba(37, 99, 235, 0.08)",
-    minBadgeText: "#1d4ed8",
-    minBadgeBorder: "rgba(37, 99, 235, 0.22)",
-    pillBg: "rgba(37, 99, 235, 0.07)",
-    pillBorder: "rgba(37, 99, 235, 0.28)",
-    pillText: "#1d4ed8",
-    pillHoverBg: "rgba(37, 99, 235, 0.13)",
-    primaryBtn: "linear-gradient(135deg, #2563eb, #7c3aed)",
-    primaryBtnShadow: "rgba(37, 99, 235, 0.30)",
+    minBadgeText: "#1e40af",
+    minBadgeBorder: "rgba(37, 99, 235, 0.20)",
+    pillBg: "rgba(37, 99, 235, 0.04)",
+    pillBorder: "rgba(37, 99, 235, 0.25)",
+    pillText: "#1e40af",
+    pillHoverBg: "rgba(37, 99, 235, 0.08)",
+    primaryBtn: "#2563eb",
+    primaryBtnHover: "#1d4ed8",
     shopBtnBorder: "#2563eb",
     shopBtnText: "#2563eb",
-    deco1: "rgba(37, 99, 235, 0.07)",
-    deco2: "rgba(124, 58, 237, 0.05)",
-    expiryText: "#3b5bdb",
+    decoColor: "#2563eb",
+    expiryText: "#475569",
   },
   {
-    // Peach / Coral
-    cardBg: "linear-gradient(145deg, #fff7ed 0%, #fed7aa 55%, #fecaca 100%)",
-    cardBorder: "#fdba74",
-    cardShadow: "rgba(234, 88, 12, 0.12)",
-    eyebrowBg: "rgba(234, 88, 12, 0.10)",
+    // Soft Peach
+    cardBg: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+    cardBgForNotch: "#ffedd5",
+    cardBorder: "#fed7aa",
+    cardShadow: "rgba(234, 88, 12, 0.06)",
+    eyebrowBg: "#ffedd5",
     eyebrowText: "#c2410c",
-    heroGradient: "linear-gradient(135deg, #ea580c, #dc2626)",
+    heroColor: "#c2410c",
     minBadgeBg: "rgba(234, 88, 12, 0.08)",
     minBadgeText: "#c2410c",
-    minBadgeBorder: "rgba(234, 88, 12, 0.22)",
-    pillBg: "rgba(234, 88, 12, 0.07)",
-    pillBorder: "rgba(234, 88, 12, 0.28)",
+    minBadgeBorder: "rgba(234, 88, 12, 0.20)",
+    pillBg: "rgba(234, 88, 12, 0.04)",
+    pillBorder: "rgba(234, 88, 12, 0.25)",
     pillText: "#c2410c",
-    pillHoverBg: "rgba(234, 88, 12, 0.13)",
-    primaryBtn: "linear-gradient(135deg, #ea580c, #dc2626)",
-    primaryBtnShadow: "rgba(234, 88, 12, 0.30)",
+    pillHoverBg: "rgba(234, 88, 12, 0.08)",
+    primaryBtn: "#ea580c",
+    primaryBtnHover: "#c2410c",
     shopBtnBorder: "#ea580c",
     shopBtnText: "#ea580c",
-    deco1: "rgba(234, 88, 12, 0.07)",
-    deco2: "rgba(220, 38, 38, 0.05)",
-    expiryText: "#9a3412",
+    decoColor: "#ea580c",
+    expiryText: "#475569",
   },
   {
-    // Purple / Violet
-    cardBg: "linear-gradient(145deg, #faf5ff 0%, #ede9fe 60%, #ddd6fe 100%)",
-    cardBorder: "#c4b5fd",
-    cardShadow: "rgba(124, 58, 237, 0.12)",
-    eyebrowBg: "rgba(124, 58, 237, 0.10)",
-    eyebrowText: "#6d28d9",
-    heroGradient: "linear-gradient(135deg, #7c3aed, #db2777)",
+    // Soft Lavender
+    cardBg: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
+    cardBgForNotch: "#f3e8ff",
+    cardBorder: "#e9d5ff",
+    cardShadow: "rgba(124, 58, 237, 0.06)",
+    eyebrowBg: "#f3e8ff",
+    eyebrowText: "#6b21a8",
+    heroColor: "#6b21a8",
     minBadgeBg: "rgba(124, 58, 237, 0.08)",
-    minBadgeText: "#6d28d9",
-    minBadgeBorder: "rgba(124, 58, 237, 0.22)",
-    pillBg: "rgba(124, 58, 237, 0.07)",
-    pillBorder: "rgba(124, 58, 237, 0.28)",
-    pillText: "#6d28d9",
-    pillHoverBg: "rgba(124, 58, 237, 0.13)",
-    primaryBtn: "linear-gradient(135deg, #7c3aed, #db2777)",
-    primaryBtnShadow: "rgba(124, 58, 237, 0.30)",
+    minBadgeText: "#6b21a8",
+    minBadgeBorder: "rgba(124, 58, 237, 0.20)",
+    pillBg: "rgba(124, 58, 237, 0.04)",
+    pillBorder: "rgba(124, 58, 237, 0.25)",
+    pillText: "#6b21a8",
+    pillHoverBg: "rgba(124, 58, 237, 0.08)",
+    primaryBtn: "#7c3aed",
+    primaryBtnHover: "#6b21a8",
     shopBtnBorder: "#7c3aed",
     shopBtnText: "#7c3aed",
-    deco1: "rgba(124, 58, 237, 0.07)",
-    deco2: "rgba(219, 39, 119, 0.05)",
-    expiryText: "#5b21b6",
-  },
-  {
-    // Sky / Aqua
-    cardBg: "linear-gradient(145deg, #f0f9ff 0%, #bae6fd 60%, #a5f3fc 100%)",
-    cardBorder: "#7dd3fc",
-    cardShadow: "rgba(2, 132, 199, 0.12)",
-    eyebrowBg: "rgba(2, 132, 199, 0.10)",
-    eyebrowText: "#0369a1",
-    heroGradient: "linear-gradient(135deg, #0284c7, #0891b2)",
-    minBadgeBg: "rgba(2, 132, 199, 0.08)",
-    minBadgeText: "#0369a1",
-    minBadgeBorder: "rgba(2, 132, 199, 0.22)",
-    pillBg: "rgba(2, 132, 199, 0.07)",
-    pillBorder: "rgba(2, 132, 199, 0.28)",
-    pillText: "#0369a1",
-    pillHoverBg: "rgba(2, 132, 199, 0.13)",
-    primaryBtn: "linear-gradient(135deg, #0284c7, #0891b2)",
-    primaryBtnShadow: "rgba(2, 132, 199, 0.30)",
-    shopBtnBorder: "#0284c7",
-    shopBtnText: "#0284c7",
-    deco1: "rgba(2, 132, 199, 0.07)",
-    deco2: "rgba(8, 145, 178, 0.05)",
-    expiryText: "#075985",
-  },
-  {
-    // Emerald / Green
-    cardBg: "linear-gradient(145deg, #f0fdf4 0%, #bbf7d0 60%, #a7f3d0 100%)",
-    cardBorder: "#6ee7b7",
-    cardShadow: "rgba(16, 185, 129, 0.12)",
-    eyebrowBg: "rgba(16, 185, 129, 0.10)",
-    eyebrowText: "#065f46",
-    heroGradient: "linear-gradient(135deg, #10b981, #059669)",
-    minBadgeBg: "rgba(16, 185, 129, 0.08)",
-    minBadgeText: "#065f46",
-    minBadgeBorder: "rgba(16, 185, 129, 0.22)",
-    pillBg: "rgba(16, 185, 129, 0.07)",
-    pillBorder: "rgba(16, 185, 129, 0.28)",
-    pillText: "#065f46",
-    pillHoverBg: "rgba(16, 185, 129, 0.13)",
-    primaryBtn: "linear-gradient(135deg, #10b981, #059669)",
-    primaryBtnShadow: "rgba(16, 185, 129, 0.30)",
-    shopBtnBorder: "#10b981",
-    shopBtnText: "#065f46",
-    deco1: "rgba(16, 185, 129, 0.07)",
-    deco2: "rgba(5, 150, 105, 0.05)",
-    expiryText: "#064e3b",
+    decoColor: "#7c3aed",
+    expiryText: "#475569",
   },
 ];
 
@@ -171,55 +125,63 @@ const OFFER_BADGES = [
   "SEASONAL DEAL",
 ];
 
-/* ─── Decorative SVG shapes (very low opacity, per-card) ─────────────── */
-const DecoCircles = ({ theme }) => (
-  <svg
-    aria-hidden="true"
-    width="220"
-    height="220"
-    viewBox="0 0 220 220"
-    fill="none"
-    style={{
-      position: "absolute",
-      top: "-40px",
-      right: "-40px",
-      pointerEvents: "none",
-      zIndex: 0,
-      opacity: 0.9,
-    }}
-  >
-    <circle cx="160" cy="60" r="90" fill={theme.deco1} />
-    <circle cx="180" cy="30" r="50" fill={theme.deco2} />
-    <circle cx="120" cy="100" r="30" fill={theme.deco1} />
-    {/* Medical cross watermark */}
-    <g opacity="0.35" fill={theme.pillBorder}>
-      <rect x="74" y="60" width="12" height="40" rx="3" />
-      <rect x="60" y="74" width="40" height="12" rx="3" />
-    </g>
-  </svg>
-);
+/* ─── Decorative SVGs (subtle medical watermarks) ─────────────────────── */
+const MedicalWatermark = ({ theme }) => (
+  <>
+    {/* Top Right: Elegant Cross + Leaf */}
+    <svg
+      aria-hidden="true"
+      width="160"
+      height="160"
+      viewBox="0 0 100 100"
+      style={{
+        position: "absolute",
+        top: "-15px",
+        right: "-15px",
+        pointerEvents: "none",
+        zIndex: 0,
+        opacity: 0.05,
+      }}
+    >
+      <rect x="42" y="10" width="16" height="48" rx="4" fill={theme.decoColor} />
+      <rect x="26" y="26" width="48" height="16" rx="4" fill={theme.decoColor} />
+      <path
+        d="M75,55 C85,55 90,65 90,75 C80,75 75,70 75,55 Z"
+        fill={theme.decoColor}
+      />
+      <path
+        d="M82,72 C88,68 93,72 95,80 C87,80 83,76 82,72 Z"
+        fill={theme.decoColor}
+      />
+    </svg>
 
-const DecoBottomLeft = ({ theme }) => (
-  <svg
-    aria-hidden="true"
-    width="130"
-    height="130"
-    viewBox="0 0 130 130"
-    fill="none"
-    style={{
-      position: "absolute",
-      bottom: "-20px",
-      left: "-20px",
-      pointerEvents: "none",
-      zIndex: 0,
-      opacity: 0.7,
-    }}
-  >
-    <circle cx="30" cy="100" r="65" fill={theme.deco2} />
-    {/* Capsule pill illustration */}
-    <rect x="20" y="58" width="40" height="18" rx="9" fill={theme.deco1} />
-    <rect x="20" y="58" width="20" height="18" rx="9" fill={theme.pillBorder} opacity="0.4" />
-  </svg>
+    {/* Bottom Left: Capsule + Subtle grid patterns */}
+    <svg
+      aria-hidden="true"
+      width="140"
+      height="140"
+      viewBox="0 0 100 100"
+      style={{
+        position: "absolute",
+        bottom: "-15px",
+        left: "-15px",
+        pointerEvents: "none",
+        zIndex: 0,
+        opacity: 0.04,
+      }}
+    >
+      <g transform="translate(15, 50) rotate(-45)">
+        <rect x="0" y="0" width="44" height="20" rx="10" stroke={theme.decoColor} strokeWidth="4" fill="none" />
+        <path d="M22,0 L22,20" stroke={theme.decoColor} strokeWidth="4" />
+        <rect x="2" y="2" width="18" height="16" rx="8" fill={theme.decoColor} opacity="0.3" />
+      </g>
+      <circle cx="80" cy="20" r="2" fill={theme.decoColor} />
+      <circle cx="90" cy="20" r="2" fill={theme.decoColor} />
+      <circle cx="80" cy="30" r="2" fill={theme.decoColor} />
+      <circle cx="90" cy="30" r="2" fill={theme.decoColor} />
+      <circle cx="85" cy="25" r="3" fill={theme.decoColor} />
+    </svg>
+  </>
 );
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -229,7 +191,7 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
   const theme = THEMES[index % THEMES.length];
   const badge = OFFER_BADGES[index % OFFER_BADGES.length];
 
-  // Prefer discountValue (canonical) with fallback to discountAmount (legacy alias)
+  // Prefer discountValue with fallback to discountAmount
   const discountVal = coupon.discountValue ?? coupon.discountAmount ?? 0;
   const minOrder = coupon.minimumOrder ?? coupon.minOrderValue ?? 0;
 
@@ -258,25 +220,24 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
     });
   };
 
-  /* Card hover: managed via inline refs to avoid React re-renders */
   const cardRef = useRef(null);
   const pillRef = useRef(null);
 
   const handleCardMouseEnter = () => {
     if (!cardRef.current) return;
-    cardRef.current.style.transform = "translateY(-6px)";
-    cardRef.current.style.boxShadow = `0 24px 60px ${theme.cardShadow}, 0 6px 20px rgba(0,0,0,0.07)`;
+    cardRef.current.style.transform = "translateY(-4px)";
+    cardRef.current.style.boxShadow = `0 12px 30px ${theme.cardShadow}, 0 4px 12px rgba(0,0,0,0.03)`;
   };
   const handleCardMouseLeave = () => {
     if (!cardRef.current) return;
     cardRef.current.style.transform = "translateY(0)";
-    cardRef.current.style.boxShadow = `0 6px 28px ${theme.cardShadow}, 0 2px 8px rgba(0,0,0,0.05)`;
+    cardRef.current.style.boxShadow = `0 4px 16px ${theme.cardShadow}`;
   };
 
   const handlePillMouseEnter = () => {
     if (!pillRef.current) return;
     pillRef.current.style.background = theme.pillHoverBg;
-    pillRef.current.style.transform = "scale(1.02)";
+    pillRef.current.style.transform = "scale(1.01)";
   };
   const handlePillMouseLeave = () => {
     if (!pillRef.current) return;
@@ -292,9 +253,9 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
       style={{
         background: theme.cardBg,
         border: `1.5px solid ${theme.cardBorder}`,
-        borderRadius: "28px",
-        padding: "28px",
-        boxShadow: `0 6px 28px ${theme.cardShadow}, 0 2px 8px rgba(0,0,0,0.05)`,
+        borderRadius: "24px",
+        padding: "24px",
+        boxShadow: `0 4px 16px ${theme.cardShadow}`,
         display: "flex",
         flexDirection: "column",
         gap: "16px",
@@ -302,17 +263,16 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
         minHeight: "270px",
         position: "relative",
         overflow: "hidden",
-        transition: "transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 280ms ease",
+        transition: "transform 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms ease",
         cursor: "default",
       }}
       onMouseEnter={handleCardMouseEnter}
       onMouseLeave={handleCardMouseLeave}
     >
       {/* ── Decorative BG Shapes ───────────────────────────────── */}
-      <DecoCircles theme={theme} />
-      <DecoBottomLeft theme={theme} />
+      <MedicalWatermark theme={theme} />
 
-      {/* ── Row 1: Badge + Min Order ───────────────────────────── */}
+      {/* ── Top Row: Badge + Min Order ─────────────────────────── */}
       <div
         style={{
           display: "flex",
@@ -322,7 +282,6 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
           zIndex: 1,
         }}
       >
-        {/* Offer badge eyebrow */}
         <span
           style={{
             display: "inline-flex",
@@ -330,12 +289,12 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
             gap: "5px",
             fontSize: "9px",
             fontWeight: 800,
-            letterSpacing: "0.12em",
+            letterSpacing: "0.1em",
             textTransform: "uppercase",
             background: theme.eyebrowBg,
             color: theme.eyebrowText,
-            padding: "5px 10px",
-            borderRadius: "999px",
+            padding: "4px 8px",
+            borderRadius: "6px",
             border: `1px solid ${theme.cardBorder}`,
           }}
         >
@@ -343,17 +302,16 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
           {badge}
         </span>
 
-        {/* Minimum order badge */}
         {minOrder > 0 && (
           <span
             style={{
-              fontSize: "10px",
+              fontSize: "9px",
               fontWeight: 700,
               background: theme.minBadgeBg,
               color: theme.minBadgeText,
               border: `1px solid ${theme.minBadgeBorder}`,
-              padding: "4px 10px",
-              borderRadius: "999px",
+              padding: "4px 8px",
+              borderRadius: "6px",
             }}
           >
             MIN ₹{minOrder}
@@ -361,30 +319,26 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
         )}
       </div>
 
-      {/* ── Row 2: Hero Discount Text ─────────────────────────── */}
-      <div style={{ position: "relative", zIndex: 1 }}>
+      {/* ── Center: Hero Offer, Description, Coupon ────────────── */}
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
         <p
           style={{
-            fontSize: "clamp(38px, 5vw, 52px)",
-            fontWeight: 900,
-            lineHeight: 1,
+            fontSize: "clamp(30px, 4vw, 38px)",
+            fontWeight: 800,
+            lineHeight: 1.1,
             margin: 0,
-            letterSpacing: "-0.03em",
-            background: theme.heroGradient,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
+            letterSpacing: "-0.02em",
+            color: theme.heroColor,
           }}
         >
           {heroText}
         </p>
 
-        {/* Description */}
         <p
           style={{
             fontSize: "13px",
-            color: "#374151",
-            marginTop: "8px",
+            color: "#475569",
+            margin: 0,
             lineHeight: 1.5,
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -395,205 +349,227 @@ const OfferCard = ({ coupon, index, copiedCode, onCopy }) => {
         >
           {description}
         </p>
-      </div>
 
-      {/* ── Row 3: Premium Coupon Pill ────────────────────────── */}
-      <div
-        ref={pillRef}
-        role="button"
-        tabIndex={0}
-        aria-label={`Copy coupon code ${coupon.code}`}
-        onClick={() => onCopy(coupon.code)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onCopy(coupon.code)}
-        onMouseEnter={handlePillMouseEnter}
-        onMouseLeave={handlePillMouseLeave}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: theme.pillBg,
-          border: `1.5px dashed ${theme.pillBorder}`,
-          borderRadius: "14px",
-          padding: "12px 16px",
-          cursor: "pointer",
-          transition: "all 220ms ease",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "'Courier New', 'Roboto Mono', monospace",
-            fontSize: "15px",
-            fontWeight: 800,
-            letterSpacing: "0.12em",
-            color: theme.pillText,
-            userSelect: "all",
-          }}
-        >
-          {coupon.code}
-        </span>
-
-        <span
+        {/* Premium Perforated Coupon Pill */}
+        <div
+          ref={pillRef}
+          role="button"
+          tabIndex={0}
+          aria-label={`Copy coupon code ${coupon.code}`}
+          onClick={() => onCopy(coupon.code)}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onCopy(coupon.code)}
+          onMouseEnter={handlePillMouseEnter}
+          onMouseLeave={handlePillMouseLeave}
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "5px",
-            fontSize: "11px",
-            fontWeight: 700,
-            color: theme.pillText,
-            opacity: 0.85,
+            justifyContent: "space-between",
+            background: theme.pillBg,
+            border: `1.5px dashed ${theme.pillBorder}`,
+            borderRadius: "10px",
+            padding: "10px 14px",
+            cursor: "pointer",
+            transition: "all 200ms ease",
+            position: "relative",
+            overflow: "visible",
+            marginTop: "4px",
           }}
         >
-          {isCopied ? (
-            <>
-              <Check size={14} />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy size={13} />
-              TAP TO COPY
-            </>
-          )}
-        </span>
+          {/* Perforated coupon notches */}
+          <div
+            style={{
+              position: "absolute",
+              left: "-9px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "16px",
+              height: "16px",
+              borderRadius: "50%",
+              background: theme.cardBgForNotch,
+              borderRight: `1.5px solid ${theme.cardBorder}`,
+              zIndex: 2,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: "-9px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "16px",
+              height: "16px",
+              borderRadius: "50%",
+              background: theme.cardBgForNotch,
+              borderLeft: `1.5px solid ${theme.cardBorder}`,
+              zIndex: 2,
+            }}
+          />
+
+          <span
+            style={{
+              fontFamily: "'Courier New', 'Roboto Mono', monospace",
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              color: theme.pillText,
+              userSelect: "all",
+            }}
+          >
+            {coupon.code}
+          </span>
+
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "10px",
+              fontWeight: 700,
+              color: theme.pillText,
+              opacity: 0.85,
+            }}
+          >
+            {isCopied ? (
+              <>
+                <Check size={12} />
+                COPIED
+              </>
+            ) : (
+              <>
+                <Copy size={11} />
+                COPY CODE
+              </>
+            )}
+          </span>
+        </div>
       </div>
 
-      {/* ── Row 4: Expiry + Verified ──────────────────────────── */}
+      {/* ── Bottom: Expiry, Verified, Buttons ──────────────────── */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Expiry */}
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-            fontSize: "11px",
-            color: theme.expiryText,
-            fontWeight: 500,
-          }}
-        >
-          <Calendar size={12} />
-          Expires {formatDate(coupon.expiryDate)}
-        </span>
-
-        {/* Verified badge */}
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "4px",
-            fontSize: "10px",
-            fontWeight: 700,
-            color: "#065f46",
-            background: "rgba(16, 185, 129, 0.10)",
-            border: "1px solid rgba(16, 185, 129, 0.25)",
-            padding: "3px 9px",
-            borderRadius: "999px",
-          }}
-        >
-          <Check size={10} />
-          Verified by WellMeds
-        </span>
-      </div>
-
-      {/* ── Row 5: CTA Buttons ────────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
+          flexDirection: "column",
+          gap: "12px",
           position: "relative",
           zIndex: 1,
           marginTop: "auto",
         }}
       >
-        {/* Primary: Copy Code */}
-        <button
-          onClick={() => onCopy(coupon.code)}
-          aria-label={`Copy coupon code ${coupon.code}`}
+        <div
           style={{
-            flex: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            gap: "7px",
-            padding: "13px 16px",
-            background: isCopied
-              ? "linear-gradient(135deg, #10b981, #059669)"
-              : theme.primaryBtn,
-            color: "#ffffff",
-            borderRadius: "14px",
-            border: "none",
-            fontSize: "13px",
-            fontWeight: 700,
-            cursor: "pointer",
-            boxShadow: `0 4px 18px ${theme.primaryBtnShadow}`,
-            transition: "all 220ms ease",
-            transform: isCopied ? "scale(0.98)" : "scale(1)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = "0.90";
-            e.currentTarget.style.transform = "scale(1.02)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = "1";
-            e.currentTarget.style.transform = isCopied ? "scale(0.98)" : "scale(1)";
+            justifyContent: "space-between",
           }}
         >
-          {isCopied ? (
-            <>
-              <Check size={15} />
-              Code Copied!
-            </>
-          ) : (
-            <>
-              <Copy size={14} />
-              Copy Code
-            </>
-          )}
-        </button>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "11px",
+              color: theme.expiryText,
+              fontWeight: 500,
+            }}
+          >
+            <Calendar size={11} />
+            Exp. {formatDate(coupon.expiryDate)}
+          </span>
 
-        {/* Secondary: Shop Now */}
-        <Link
-          to="/products"
-          aria-label="Browse products to use this offer"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-            padding: "13px 18px",
-            background: "transparent",
-            color: theme.shopBtnText,
-            border: `1.5px solid ${theme.shopBtnBorder}`,
-            borderRadius: "14px",
-            fontSize: "13px",
-            fontWeight: 700,
-            textDecoration: "none",
-            transition: "all 220ms ease",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = theme.pillHoverBg;
-            e.currentTarget.style.transform = "scale(1.02)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.transform = "scale(1)";
-          }}
-        >
-          <ShoppingBag size={14} />
-          Shop
-          <ArrowRight size={13} />
-        </Link>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "3px",
+              fontSize: "10px",
+              fontWeight: 600,
+              color: "#0b7a62",
+              background: "rgba(14, 159, 126, 0.08)",
+              border: "1px solid rgba(14, 159, 126, 0.15)",
+              padding: "2px 6px",
+              borderRadius: "4px",
+            }}
+          >
+            <Check size={9} />
+            Verified
+          </span>
+        </div>
+
+        {/* Buttons Row */}
+        <div style={{ display: "flex", gap: "8px" }}>
+          {/* Primary: Copy Code */}
+          <button
+            onClick={() => onCopy(coupon.code)}
+            aria-label={`Copy coupon code ${coupon.code}`}
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "11px 14px",
+              background: isCopied ? "#10b981" : theme.primaryBtn,
+              color: "#ffffff",
+              borderRadius: "10px",
+              border: "none",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background 200ms ease, transform 150ms ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isCopied ? "#059669" : theme.primaryBtnHover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = isCopied ? "#10b981" : theme.primaryBtn;
+            }}
+          >
+            {isCopied ? (
+              <>
+                <Check size={14} />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy size={13} />
+                Copy Code
+              </>
+            )}
+          </button>
+
+          {/* Secondary: Shop Now (Outline) */}
+          <Link
+            to="/products"
+            aria-label="Browse products to use this offer"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              padding: "11px 16px",
+              background: "transparent",
+              color: theme.shopBtnText,
+              border: `1.5px solid ${theme.shopBtnBorder}`,
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: 600,
+              textDecoration: "none",
+              transition: "all 200ms ease",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = theme.pillHoverBg;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <ShoppingBag size={13} />
+            Shop
+            <ArrowRight size={12} />
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -730,7 +706,11 @@ const CouponCarousel = () => {
 
   // Copy code handler (preserved from original)
   const handleCopyCode = (code) => {
-    navigator.clipboard.writeText(code);
+    try {
+      navigator.clipboard.writeText(code);
+    } catch (err) {
+      console.warn("Clipboard access failed:", err);
+    }
     setCopiedCode(code);
     setToastMessage(`Coupon code "${code}" copied successfully!`);
     setTimeout(() => {

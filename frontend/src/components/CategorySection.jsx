@@ -327,6 +327,7 @@ const CategorySection = () => {
               <div
                 key={(cat._id || cat.id)?.toString()}
                 role="listitem"
+                className="category-card-wrapper"
                 style={{ scrollSnapAlign: "start", flexShrink: 0 }}
               >
                 <CategoryCard category={cat} index={idx} />
@@ -387,6 +388,13 @@ const CategorySection = () => {
         button:focus-visible {
           outline: 3px solid #038076;
           outline-offset: 3px;
+        }
+
+        @media (max-width: 640px) {
+          .category-card-wrapper {
+            width: calc((100% - 14px) / 2) !important;
+            min-width: calc((100% - 14px) / 2) !important;
+          }
         }
       `}</style>
     </section>

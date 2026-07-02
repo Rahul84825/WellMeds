@@ -49,7 +49,6 @@ const NAV_CONFIG = [
     enabled: true,
     badge: null,
     children: [
-      { id: "by-condition", label: "By Condition", to: "/products" },
       { id: "by-speciality", label: "By Super Speciality", to: "/products" },
       { id: "by-molecule", label: "By Molecules", to: "/products" },
       { id: "all-medicines", label: "All Medicines", to: "/products" },
