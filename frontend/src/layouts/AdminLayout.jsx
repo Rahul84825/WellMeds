@@ -19,7 +19,8 @@ import {
   FileCheck2,
   Calendar,
   X,
-  FileText
+  FileText,
+  HeartPulse
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -72,6 +73,7 @@ const AdminLayout = () => {
     { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: ShoppingBag },
     { to: "/admin/categories", label: "Categories", icon: FolderOpen },
+    { to: "/admin/specialities", label: "Specialities", icon: HeartPulse },
     { to: "/admin/orders", label: "Orders", icon: ClipboardList },
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },

@@ -5,6 +5,7 @@ import { orderService } from "./orderService";
 import { prescriptionService } from "./prescriptionService";
 import { cartService } from "./cartService";
 import { couponService } from "./couponService";
+import { specialityService } from "./specialityService";
 
 // Wishlist service (inline)
 import apiInstance from "./api";
@@ -55,5 +56,6 @@ export const api = {
   ...couponService,
   ...wishlistService,
   ...adminService,
+  ...specialityService,
 };
 export default api;

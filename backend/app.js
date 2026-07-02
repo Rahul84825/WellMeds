@@ -17,8 +17,10 @@ import couponRoutes from "./src/routes/couponRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import wishlistRoutes from "./src/routes/wishlistRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
+import specialityRoutes from "./src/routes/specialityRoutes.js";
 
 const app = express();
+
 
 // Security Middlewares
 app.use(helmet({
@@ -65,6 +67,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/specialities", specialityRoutes);
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

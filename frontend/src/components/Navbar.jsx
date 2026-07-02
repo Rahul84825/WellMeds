@@ -23,6 +23,7 @@ import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
 import { toast } from "sonner";
+import { api } from "../services/api";
 
 // ──────────────────────────────────────────────────────────────────────────
 // NAV CONFIG — this entire shape is what an admin API should return.
@@ -119,7 +120,40 @@ const NAV_CONFIG = [
 // automatically reflects admin changes once this hook is backed by the API.
 // ──────────────────────────────────────────────────────────────────────────
 const useNavConfig = () => {
-  const [items] = useState(NAV_CONFIG);
+  const [specialities, setSpecialities] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchSpecialities = async () => {
+      try {
+        const data = await api.getSpecialities();
+        if (active) {
+          setSpecialities(data);
+        }
+      } catch (err) {
+        console.error("Failed to load specialities in navbar", err);
+      }
+    };
+    fetchSpecialities();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const items = NAV_CONFIG.map((item) => {
+    if (item.id === "super-speciality") {
+      return {
+        ...item,
+        children: specialities.map((s) => ({
+          id: s.id || s._id,
+          label: s.name,
+          to: `/speciality/${s.slug}`,
+        })),
+      };
+    }
+    return item;
+  });
+
   return items
     .filter((item) => item.enabled)
     .sort((a, b) => a.order - b.order);

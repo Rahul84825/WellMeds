@@ -1,9 +1,10 @@
 import { Product } from "../models/Product.js";
 import { Category } from "../models/Category.js";
+import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
 import slugify from "slugify";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, page, limit } = req.query;
+  const { search, category, speciality, page, limit } = req.query;
 
   try {
     const query = {};
@@ -25,6 +26,26 @@ export const getProducts = async (req, res, next) => {
         query.category = matchedCategory._id;
       } else {
         // No matching category — return empty result set immediately
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: 1,
+          pages: 1,
+          products: [],
+        });
+      }
+    }
+
+    // Filter by speciality slug
+    if (speciality && speciality.trim()) {
+      const matchedSpeciality = await MedicalSpeciality.findOne({
+        slug: speciality.trim(),
+      });
+      if (matchedSpeciality) {
+        query.specialities = matchedSpeciality._id;
+      } else {
+        // No matching speciality — return empty result set immediately
         return res.status(200).json({
           success: true,
           count: 0,
@@ -68,10 +89,12 @@ export const getProduct = async (req, res, next) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       product = await Product.findById(id)
         .populate("category", "name slug")
+        .populate("specialities", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     } else {
       product = await Product.findOne({ slug: id })
         .populate("category", "name slug")
+        .populate("specialities", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     }
 

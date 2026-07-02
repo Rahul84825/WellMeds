@@ -7,10 +7,11 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}) {
-    const { search, category, page, limit } = params;
+    const { search, category, speciality, page, limit } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
+    if (speciality) cleanParams.speciality = speciality;
     if (page) cleanParams.page = page;
     if (limit) cleanParams.limit = limit;
 

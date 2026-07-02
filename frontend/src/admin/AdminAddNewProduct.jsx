@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
@@ -9,22 +9,16 @@ import {
   Trash2, 
   Plus, 
   Check, 
-  X, 
   Sparkles, 
   PackageCheck, 
   RefreshCw,
-  ChevronDown,
-  ChevronUp,
   Copy,
   ArrowUp,
   ArrowDown,
-  Eye,
   Settings,
   AlertTriangle,
-  Heart,
   Bookmark,
   BookOpen,
-  HelpCircle,
   FileText
 } from "lucide-react";
 
@@ -47,6 +41,8 @@ const AddNewProduct = () => {
   const [stock, setStock] = useState("");
   const [requiresRx, setRequiresRx] = useState(false);
   const [description, setDescription] = useState("");
+  const [allSpecialities, setAllSpecialities] = useState([]);
+  const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   
   // Images
   const [images, setImages] = useState([]);
@@ -120,6 +116,10 @@ const AddNewProduct = () => {
               setCanonicalUrl(product.seo.canonicalUrl || "");
               setOgImage(product.seo.ogImage || "");
             }
+
+            if (product.specialities) {
+              setSelectedSpecialities(product.specialities.map(s => s._id || s.id || s));
+            }
           }
         } catch (err) {
           console.error("Failed to load product data", err);
@@ -131,6 +131,18 @@ const AddNewProduct = () => {
       fetchProductData();
     }
   }, [id, isEditMode]);
+
+  useEffect(() => {
+    const fetchSpecialities = async () => {
+      try {
+        const list = await api.getSpecialities();
+        setAllSpecialities(list);
+      } catch (err) {
+        console.error("Failed to fetch specialities in product form", err);
+      }
+    };
+    fetchSpecialities();
+  }, []);
 
   const allCategories = ["Prescription", "Vitamins", "Medical Devices", "First Aid", "Personal Care", "Supplements"];
 
@@ -364,6 +376,7 @@ const AddNewProduct = () => {
       image: primaryImageUrl,
       images: images,
       description: description.trim(),
+      specialities: selectedSpecialities,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -506,6 +519,42 @@ const AddNewProduct = () => {
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                     placeholder="e.g. Cipla"
                   />
+                </div>
+              </div>
+
+              <div className="space-y-xs pt-xs">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Associated Specialities (Select Multiple)
+                </label>
+                <div className="flex flex-wrap gap-xs pt-xs">
+                  {allSpecialities.map((spec) => {
+                    const specId = spec._id || spec.id;
+                    const isSelected = selectedSpecialities.includes(specId);
+                    return (
+                      <button
+                        type="button"
+                        key={specId}
+                        onClick={() => {
+                          setSelectedSpecialities(prev => 
+                            prev.includes(specId)
+                              ? prev.filter(id => id !== specId)
+                              : [...prev, specId]
+                          );
+                        }}
+                        className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${
+                          isSelected
+                            ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
+                            : "bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
+                        }`}
+                      >
+                        {isSelected && <Check size={10} />}
+                        {spec.name}
+                      </button>
+                    );
+                  })}
+                  {allSpecialities.length === 0 && (
+                    <span className="text-[10px] text-slate-400 italic">No active specialities configured in the system.</span>
+                  )}
                 </div>
               </div>
 

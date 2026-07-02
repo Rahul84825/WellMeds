@@ -133,6 +133,10 @@ const productSchema = new mongoose.Schema(
       canonicalUrl: { type: String },
       ogImage: { type: String }
     },
+    specialities: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "MedicalSpeciality" }],
+      default: []
+    },
     relatedProducts: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
       default: []

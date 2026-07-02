@@ -29,6 +29,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
 import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
+import SpecialityPage from "../pages/SpecialityPage";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -36,6 +37,7 @@ import ManageProducts from "../admin/AdminProducts";
 import AddNewProduct from "../admin/AdminAddNewProduct";
 import ManageOrders from "../admin/AdminOrders";
 import ProductCategories from "../admin/AdminCategories";
+import AdminSpecialities from "../admin/AdminSpecialities";
 import AdminPrescriptions from "../admin/AdminPrescriptions";
 import AdminCoupons from "../admin/AdminCoupons";
 import AdminUsers from "../admin/AdminUsers";
@@ -51,6 +53,7 @@ const AppRoutes = () => {
         <Route path="category/:categorySlug" element={<Navigate to="/products" replace />} />
         <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
         <Route path="products/:slug" element={<ProductDetailsPage />} />
+        <Route path="speciality/:slug" element={<SpecialityPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-success" element={<OrderSuccessPage />} />
@@ -107,6 +110,7 @@ const AppRoutes = () => {
         <Route path="products/:id/edit" element={<AddNewProduct />} />
         <Route path="orders" element={<ManageOrders />} />
         <Route path="categories" element={<ProductCategories />} />
+        <Route path="specialities" element={<AdminSpecialities />} />
         <Route path="prescriptions" element={<AdminPrescriptions />} />
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="users" element={<AdminUsers />} />
