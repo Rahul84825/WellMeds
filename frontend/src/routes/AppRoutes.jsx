@@ -30,6 +30,9 @@ import ResetPassword from "../pages/ResetPassword";
 import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
 import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
 import SpecialityPage from "../pages/SpecialityPage";
+import SuperSpecialityPage from "../pages/SuperSpecialityPage";
+import MoleculesComingSoonPage from "../pages/MoleculesComingSoonPage";
+import WellnessPage from "../pages/WellnessPage";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -54,6 +57,9 @@ const AppRoutes = () => {
         <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
         <Route path="products/:slug" element={<ProductDetailsPage />} />
         <Route path="speciality/:slug" element={<SpecialityPage />} />
+        <Route path="super-speciality" element={<SuperSpecialityPage />} />
+        <Route path="molecules" element={<MoleculesComingSoonPage />} />
+        <Route path="wellness" element={<WellnessPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-success" element={<OrderSuccessPage />} />

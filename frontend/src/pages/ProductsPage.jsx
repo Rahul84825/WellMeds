@@ -68,6 +68,7 @@ const ProductsPage = () => {
         limit,
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
+        productType: "medicine",
       });
       setProducts(data.products || []);
       setTotalProducts(data.total || 0);

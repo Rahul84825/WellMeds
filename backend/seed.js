@@ -46,18 +46,22 @@ const seedDB = async () => {
     console.log(`Admin account created: ${adminEmail} / ${adminPassword}`);
 
     console.log("Seeding categories...");
+    const categoryMap = {};
     for (const cat of INITIAL_CATEGORIES) {
-      await Category.create({
+      const createdCat = await Category.create({
         ...cat,
         slug: slugify(cat.name, { lower: true })
       });
+      categoryMap[cat.name] = createdCat._id;
     }
     console.log("Categories seeded.");
 
     console.log("Seeding products...");
     for (const prod of INITIAL_PRODUCTS) {
+      const categoryId = categoryMap[prod.category];
       await Product.create({
         ...prod,
+        category: categoryId,
         slug: slugify(prod.name, { lower: true })
       });
     }

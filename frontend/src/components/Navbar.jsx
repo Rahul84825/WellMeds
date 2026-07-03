@@ -50,10 +50,10 @@ const NAV_CONFIG = [
     enabled: true,
     badge: null,
     children: [
-      { id: "by-speciality", label: "By Super Speciality", to: "/products" },
-      { id: "by-molecule", label: "By Molecules", to: "/products" },
+      { id: "by-speciality", label: "By Super Speciality", to: "/super-speciality" },
+      { id: "by-molecule", label: "By Molecules", to: "/molecules" },
       { id: "all-medicines", label: "All Medicines", to: "/products" },
-      { id: "wellness", label: "Wellness", to: "/products" },
+      { id: "wellness", label: "Wellness", to: "/wellness" },
     ],
   },
   {
@@ -104,57 +104,9 @@ const NAV_CONFIG = [
 
 // ──────────────────────────────────────────────────────────────────────────
 // useNavConfig — the single swap point for backend integration.
-//
-// TODAY:    returns the static NAV_CONFIG above, sorted + filtered.
-// TOMORROW: replace the body with a fetch to your admin API, e.g.
-//
-//   const [items, setItems] = useState([]);
-//   useEffect(() => {
-//     fetch("/api/admin/nav-menu")
-//       .then((r) => r.json())
-//       .then((data) => setItems(data.items));
-//   }, []);
-//   return items.filter(i => i.enabled).sort((a,b) => a.order - b.order);
-//
-// Every consumer of this hook (NavMenu, mobile menu, admin preview, etc.)
-// automatically reflects admin changes once this hook is backed by the API.
 // ──────────────────────────────────────────────────────────────────────────
 const useNavConfig = () => {
-  const [specialities, setSpecialities] = useState([]);
-
-  useEffect(() => {
-    let active = true;
-    const fetchSpecialities = async () => {
-      try {
-        const data = await api.getSpecialities();
-        if (active) {
-          setSpecialities(data);
-        }
-      } catch (err) {
-        console.error("Failed to load specialities in navbar", err);
-      }
-    };
-    fetchSpecialities();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const items = NAV_CONFIG.map((item) => {
-    if (item.id === "super-speciality") {
-      return {
-        ...item,
-        children: specialities.map((s) => ({
-          id: s.id || s._id,
-          label: s.name,
-          to: `/speciality/${s.slug}`,
-        })),
-      };
-    }
-    return item;
-  });
-
-  return items
+  return NAV_CONFIG
     .filter((item) => item.enabled)
     .sort((a, b) => a.order - b.order);
 };

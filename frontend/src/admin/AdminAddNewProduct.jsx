@@ -43,6 +43,7 @@ const AddNewProduct = () => {
   const [description, setDescription] = useState("");
   const [allSpecialities, setAllSpecialities] = useState([]);
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
+  const [productType, setProductType] = useState("medicine");
   
   // Images
   const [images, setImages] = useState([]);
@@ -78,7 +79,8 @@ const AddNewProduct = () => {
           const product = await api.getProduct(id);
           if (product) {
             setName(product.name || "");
-            setCategory(product.category || "Vitamins");
+            setCategory(product.category?.name || product.category?._id || product.category || "Vitamins");
+            setProductType(product.productType || "medicine");
             setBrand(product.brand || "");
             setSku(product.sku || "");
             setPrice(product.price || "");
@@ -366,7 +368,8 @@ const AddNewProduct = () => {
 
     const productData = {
       name: name.trim(),
-      category,
+      category: typeof category === "object" ? (category?.name || category?._id) : category,
+      productType,
       brand: brand.trim(),
       sku: sku.trim() || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
       price: parseFloat(price),
@@ -496,7 +499,7 @@ const AddNewProduct = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
                 <div className="space-y-xs">
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
                   <select
@@ -507,6 +510,17 @@ const AddNewProduct = () => {
                     {allCategories.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
+                  </select>
+                </div>
+                <div className="space-y-xs">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Type</label>
+                  <select
+                    value={productType}
+                    onChange={(e) => setProductType(e.target.value)}
+                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
+                  >
+                    <option value="medicine">Medicine</option>
+                    <option value="wellness">Wellness</option>
                   </select>
                 </div>
                 <div className="space-y-xs">

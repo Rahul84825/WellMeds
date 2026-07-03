@@ -2,9 +2,10 @@ import { Product } from "../models/Product.js";
 import { Category } from "../models/Category.js";
 import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
 import slugify from "slugify";
+import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, page, limit } = req.query;
+  const { search, category, speciality, page, limit, productType } = req.query;
 
   try {
     const query = {};
@@ -55,6 +56,10 @@ export const getProducts = async (req, res, next) => {
           products: [],
         });
       }
+    }
+
+    if (productType) {
+      query.productType = productType;
     }
 
     const pageNum = parseInt(page) || 1;
@@ -119,8 +124,20 @@ export const createProduct = async (req, res, next) => {
     if (stock === 0) badge = "Out of Stock";
     else if (stock <= 10) badge = "Low Stock";
 
+    // Resolve Category string name to ObjectId if needed
+    let categoryId = productData.category;
+    if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
+      const matchedCategory = await Category.findOne({
+        name: { $regex: `^${categoryId.trim()}$`, $options: "i" },
+      });
+      if (matchedCategory) {
+        categoryId = matchedCategory._id;
+      }
+    }
+
     const product = await Product.create({
       ...productData,
+      category: categoryId,
       slug,
       badge,
     });
@@ -160,6 +177,16 @@ export const updateProduct = async (req, res, next) => {
       else if (stock <= 10) updateData.badge = "Low Stock";
       else if (product.badge === "Out of Stock" || product.badge === "Low Stock") {
         updateData.badge = ""; // Clear badge if stock is replenished
+      }
+    }
+
+    // Resolve Category string name to ObjectId if needed
+    if (updateData.category && !mongoose.Types.ObjectId.isValid(updateData.category)) {
+      const matchedCategory = await Category.findOne({
+        name: { $regex: `^${updateData.category.trim()}$`, $options: "i" },
+      });
+      if (matchedCategory) {
+        updateData.category = matchedCategory._id;
       }
     }
 

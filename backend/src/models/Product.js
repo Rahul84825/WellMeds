@@ -154,6 +154,11 @@ const productSchema = new mongoose.Schema(
       }],
       default: []
     },
+    productType: {
+      type: String,
+      enum: ["medicine", "wellness"],
+      default: "medicine",
+    },
   },
   {
     timestamps: true,
