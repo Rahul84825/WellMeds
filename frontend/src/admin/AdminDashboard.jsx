@@ -295,7 +295,7 @@ const Dashboard = () => {
                     <img src={p.image} className="w-8 h-8 rounded-lg object-cover" alt="" />
                     <div className="truncate">
                       <p className="font-bold truncate text-slate-800 dark:text-zinc-200">{p.name}</p>
-                      <p className="text-[10px] text-slate-400">{p.category}</p>
+                      <p className="text-[10px] text-slate-400">{typeof p.category === "object" ? p.category?.name : p.category}</p>
                     </div>
                   </div>
                   <span className="font-black text-slate-800 dark:text-zinc-200 shrink-0">

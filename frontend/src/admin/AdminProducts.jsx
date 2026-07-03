@@ -74,7 +74,11 @@ const ManageProducts = () => {
 
   // Extract all categories dynamically for filter options
   const categoriesList = useMemo(() => {
-    const cats = new Set(products.map(p => p.category).filter(Boolean));
+    const cats = new Set(
+      products
+        .map(p => typeof p.category === "object" ? p.category?.name : p.category)
+        .filter(Boolean)
+    );
     return ["All", ...Array.from(cats)];
   }, [products]);
 
@@ -94,7 +98,10 @@ const ManageProducts = () => {
 
     // 2. Category filtering
     if (categoryFilter !== "All") {
-      result = result.filter(p => p.category === categoryFilter);
+      result = result.filter(p => {
+        const catName = typeof p.category === "object" ? p.category?.name : p.category;
+        return catName === categoryFilter;
+      });
     }
 
     // 3. Stock warning filtering
@@ -290,7 +297,7 @@ const ManageProducts = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="p-md font-medium">{p.category}</td>
+                  <td className="p-md font-medium">{typeof p.category === "object" ? p.category?.name : p.category}</td>
                   <td className="p-md font-bold text-slate-800 dark:text-zinc-100">{formatCurrency(p.price)}</td>
                   <td className="p-md">
                     <div className="flex items-center gap-xs">
@@ -368,7 +375,7 @@ const ManageProducts = () => {
                 </div>
                 <div className="space-y-xs truncate flex-grow">
                   <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">SKU: {p.sku || "N/A"} • {p.category}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">SKU: {p.sku || "N/A"} • {typeof p.category === "object" ? p.category?.name : p.category}</p>
                   <p className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm">{formatCurrency(p.price)}</p>
                 </div>
               </div>
