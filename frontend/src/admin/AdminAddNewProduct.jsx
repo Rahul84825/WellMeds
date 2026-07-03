@@ -44,6 +44,10 @@ const AddNewProduct = () => {
   const [allSpecialities, setAllSpecialities] = useState([]);
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   const [productType, setProductType] = useState("medicine");
+  const [allMolecules, setAllMolecules] = useState([]);
+  const [selectedMolecules, setSelectedMolecules] = useState([]);
+  const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
+  const [moleculeDropdownOpen, setMoleculeDropdownOpen] = useState(false);
   
   // Images
   const [images, setImages] = useState([]);
@@ -122,6 +126,9 @@ const AddNewProduct = () => {
             if (product.specialities) {
               setSelectedSpecialities(product.specialities.map(s => s._id || s.id || s));
             }
+            if (product.molecules) {
+              setSelectedMolecules(product.molecules.map(m => m._id || m.id || m));
+            }
           }
         } catch (err) {
           console.error("Failed to load product data", err);
@@ -143,7 +150,16 @@ const AddNewProduct = () => {
         console.error("Failed to fetch specialities in product form", err);
       }
     };
+    const fetchMolecules = async () => {
+      try {
+        const list = await api.getMolecules();
+        setAllMolecules(list);
+      } catch (err) {
+        console.error("Failed to fetch molecules in product form", err);
+      }
+    };
     fetchSpecialities();
+    fetchMolecules();
   }, []);
 
   const allCategories = ["Prescription", "Vitamins", "Medical Devices", "First Aid", "Personal Care", "Supplements"];
@@ -380,6 +396,7 @@ const AddNewProduct = () => {
       images: images,
       description: description.trim(),
       specialities: selectedSpecialities,
+      molecules: selectedMolecules,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -568,6 +585,106 @@ const AddNewProduct = () => {
                   })}
                   {allSpecialities.length === 0 && (
                     <span className="text-[10px] text-slate-400 italic">No active specialities configured in the system.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Associated Molecules Searchable Multi-Select */}
+              <div className="space-y-xs pt-xs relative">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Associated Molecules (Search &amp; Select Multiple)
+                </label>
+                
+                {/* Selected Molecule Badges */}
+                <div className="flex flex-wrap gap-xs pb-xs">
+                  {selectedMolecules.map((molId) => {
+                    const molObj = allMolecules.find(m => (m.id || m._id) === molId);
+                    if (!molObj) return null;
+                    return (
+                      <span
+                        key={molId}
+                        className="inline-flex items-center gap-xs px-sm py-1 rounded-xl bg-[#038076]/10 border border-[#038076]/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-bold"
+                      >
+                        {molObj.name}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMolecules(prev => prev.filter(id => id !== molId))}
+                          className="hover:text-red-500 font-bold focus:outline-none"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {selectedMolecules.length === 0 && (
+                    <span className="text-[10px] text-slate-400 italic">No molecules selected.</span>
+                  )}
+                </div>
+
+                {/* Search Input for Dropdown */}
+                <div className="relative max-w-md">
+                  <input
+                    type="text"
+                    placeholder="Search molecules to add..."
+                    value={moleculeSearchQuery}
+                    onChange={(e) => {
+                      setMoleculeSearchQuery(e.target.value);
+                      setMoleculeDropdownOpen(true);
+                    }}
+                    onFocus={() => setMoleculeDropdownOpen(true)}
+                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                  />
+                  {moleculeDropdownOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => setMoleculeDropdownOpen(false)}
+                      />
+                      <div className="absolute left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-20 divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
+                        {allMolecules
+                          .filter(mol => {
+                            const query = moleculeSearchQuery.toLowerCase().trim();
+                            const matchesName = mol.name.toLowerCase().includes(query);
+                            const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
+                            return matchesName || matchesAlias;
+                          })
+                          .map((mol) => {
+                            const molId = mol.id || mol._id;
+                            const isSelected = selectedMolecules.includes(molId);
+                            return (
+                              <button
+                                key={molId}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedMolecules(prev => prev.filter(id => id !== molId));
+                                  } else {
+                                    setSelectedMolecules(prev => [...prev, molId]);
+                                  }
+                                  setMoleculeSearchQuery("");
+                                }}
+                                className="w-full text-left p-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-855 transition-colors"
+                              >
+                                <div>
+                                  <span className="font-bold text-slate-700 dark:text-zinc-200">{mol.name}</span>
+                                  {mol.aliases && mol.aliases.length > 0 && (
+                                    <span className="text-[10px] text-slate-400 ml-sm italic">({mol.aliases.join(", ")})</span>
+                                  )}
+                                </div>
+                                {isSelected && <span className="text-[#038076] font-extrabold font-mono">✓</span>}
+                              </button>
+                            );
+                          })}
+                        {allMolecules.filter(mol => {
+                          const query = moleculeSearchQuery.toLowerCase().trim();
+                          const matchesName = mol.name.toLowerCase().includes(query);
+                          const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
+                          return matchesName || matchesAlias;
+                        }).length === 0 && (
+                          <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

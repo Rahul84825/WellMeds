@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  FlaskConical
 } from "lucide-react";
 
 const ProductsPage = () => {
@@ -31,6 +32,25 @@ const ProductsPage = () => {
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") || "");
+
+  // Molecule search state
+  const [matchedMolecules, setMatchedMolecules] = useState([]);
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setMatchedMolecules([]);
+      return;
+    }
+    const fetchMolecules = async () => {
+      try {
+        const list = await api.getMolecules({ search: debouncedSearch });
+        setMatchedMolecules(list || []);
+      } catch (err) {
+        console.error("Failed to fetch matching molecules in search results", err);
+      }
+    };
+    fetchMolecules();
+  }, [debouncedSearch]);
 
   // SEO setup
   useEffect(() => {
@@ -205,6 +225,32 @@ const ProductsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Matching Molecules Widget */}
+      {!loading && matchedMolecules.length > 0 && (
+        <div className="bg-gradient-to-r from-[#038076]/5 to-[#004782]/5 border border-[#038076]/25 rounded-2xl p-md mb-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-sm animate-[fade-in_0.3s_ease-out]">
+          <div className="flex items-center gap-sm">
+            <div className="w-10 h-10 rounded-xl bg-[#038076]/10 text-[#038076] dark:text-[#84d6b9] flex items-center justify-center border border-[#038076]/15 shrink-0">
+              <FlaskConical size={20} />
+            </div>
+            <div className="text-left">
+              <h4 className="font-extrabold text-slate-800 dark:text-zinc-150 text-xs tracking-tight uppercase">Molecules Found</h4>
+              <p className="text-[11px] text-slate-400">Click a matching active ingredient to explore detailed clinical pages and brand comparison matrices.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-xs">
+            {matchedMolecules.map((mol) => (
+              <Link
+                key={mol.id || mol._id}
+                to={`/molecule/${mol.slug}`}
+                className="inline-flex items-center gap-xs px-md py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-650 dark:text-zinc-200 hover:border-[#038076]/30 hover:text-[#038076] transition-all font-bold text-xs select-none shadow-xs"
+              >
+                {mol.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Grid */}
       {loading ? (

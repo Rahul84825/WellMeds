@@ -18,6 +18,7 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import wishlistRoutes from "./src/routes/wishlistRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import specialityRoutes from "./src/routes/specialityRoutes.js";
+import moleculeRoutes from "./src/routes/moleculeRoutes.js";
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/specialities", specialityRoutes);
+app.use("/api/molecules", moleculeRoutes);
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

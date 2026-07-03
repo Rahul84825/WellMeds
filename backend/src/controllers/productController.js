@@ -1,11 +1,12 @@
 import { Product } from "../models/Product.js";
 import { Category } from "../models/Category.js";
 import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
+import { Molecule } from "../models/Molecule.js";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, page, limit, productType } = req.query;
+  const { search, category, speciality, molecule, page, limit, productType } = req.query;
 
   try {
     const query = {};
@@ -57,7 +58,29 @@ export const getProducts = async (req, res, next) => {
         });
       }
     }
+    // Filter by molecule slug or ID
+    if (molecule && molecule.trim()) {
+      const queryVal = molecule.trim();
+      let matchedMolecule;
+      if (mongoose.Types.ObjectId.isValid(queryVal)) {
+        matchedMolecule = await Molecule.findById(queryVal);
+      } else {
+        matchedMolecule = await Molecule.findOne({ slug: queryVal });
+      }
 
+      if (matchedMolecule) {
+        query.molecules = matchedMolecule._id;
+      } else {
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: 1,
+          pages: 1,
+          products: [],
+        });
+      }
+    }
     if (productType) {
       query.productType = productType;
     }
@@ -95,11 +118,13 @@ export const getProduct = async (req, res, next) => {
       product = await Product.findById(id)
         .populate("category", "name slug")
         .populate("specialities", "name slug")
+        .populate("molecules", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     } else {
       product = await Product.findOne({ slug: id })
         .populate("category", "name slug")
         .populate("specialities", "name slug")
+        .populate("molecules", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     }
 

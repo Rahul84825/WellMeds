@@ -20,7 +20,8 @@ import {
   Calendar,
   X,
   FileText,
-  HeartPulse
+  HeartPulse,
+  FlaskConical
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -74,6 +75,7 @@ const AdminLayout = () => {
     { to: "/admin/products", label: "Products", icon: ShoppingBag },
     { to: "/admin/categories", label: "Categories", icon: FolderOpen },
     { to: "/admin/specialities", label: "Specialities", icon: HeartPulse },
+    { to: "/admin/molecules", label: "Molecules", icon: FlaskConical },
     { to: "/admin/orders", label: "Orders", icon: ClipboardList },
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },

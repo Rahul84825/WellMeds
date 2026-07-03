@@ -154,6 +154,10 @@ const productSchema = new mongoose.Schema(
       }],
       default: []
     },
+    molecules: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Molecule" }],
+      default: []
+    },
     productType: {
       type: String,
       enum: ["medicine", "wellness"],
