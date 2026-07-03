@@ -11,15 +11,57 @@ export const placeOrder = async (req, res, next) => {
     const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
     let couponObj = null;
     let discountAmount = 0;
+    let subtotal = 0;
+    let orderRequiresRx = false;
+    const validatedItems = [];
 
-    // Validate Coupon if couponCode is provided
+    // 1. Validate items and calculate subtotal on the server using database prices
+    if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+      return res.status(400).json({ success: false, message: "Order items are required" });
+    }
+
+    for (const item of orderData.items) {
+      const product = await Product.findById(item.product || item.id);
+      if (!product) {
+        return res.status(404).json({ success: false, message: `Product not found` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ success: false, message: `Insufficient stock for product ${product.name}` });
+      }
+      if (product.requiresRx) {
+        orderRequiresRx = true;
+      }
+
+      const itemPrice = product.price;
+      const itemSubtotal = itemPrice * item.quantity;
+      subtotal += itemSubtotal;
+
+      validatedItems.push({
+        product: product._id,
+        name: product.name,
+        quantity: item.quantity,
+        price: itemPrice,
+      });
+    }
+
+    // 2. Validate prescription-only status
+    if (orderRequiresRx && (!orderData.rxFile || !orderData.rxUploaded)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "A prescription upload is required for prescription-only medicines." 
+      });
+    }
+
+    // 3. Calculate shipping on the server (free above ₹499, else ₹49 flat)
+    let shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
+
+    // 4. Validate and apply coupon using server calculated subtotal
     if (orderData.couponCode) {
       couponObj = await Coupon.findOne({ code: orderData.couponCode.toUpperCase() });
       if (!couponObj) {
         return res.status(404).json({ success: false, message: "Invalid coupon code" });
       }
 
-      // Use canonical status field only
       if (couponObj.status !== "Active") {
         return res.status(400).json({ success: false, message: "This coupon is inactive" });
       }
@@ -33,77 +75,58 @@ export const placeOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "This coupon has expired" });
       }
 
-      // Use canonical minimumOrder field only
       const minOrder = couponObj.minimumOrder || 0;
-      if (orderData.subtotal < minOrder) {
+      if (subtotal < minOrder) {
         return res.status(400).json({ 
           success: false, 
           message: `Minimum order value of ₹${minOrder} is required for this coupon` 
         });
       }
 
-      // Check global limit
       if (couponObj.usageLimit !== null && couponObj.usedCount >= couponObj.usageLimit) {
         return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
       }
 
-      // Check per-user limit
       const userUsageCount = await CouponUsage.countDocuments({ coupon: couponObj._id, user: req.user._id });
       if (userUsageCount >= couponObj.perUserLimit) {
         return res.status(400).json({ success: false, message: "You have already used this coupon" });
       }
 
-      // Calculate discount amount using canonical discountValue field
       const discountVal = couponObj.discountValue;
       if (couponObj.discountType === "percentage") {
-        discountAmount = (orderData.subtotal * discountVal) / 100;
+        discountAmount = (subtotal * discountVal) / 100;
         if (couponObj.maximumDiscount > 0) {
           discountAmount = Math.min(discountAmount, couponObj.maximumDiscount);
         }
       } else {
-        discountAmount = Math.min(discountVal, orderData.subtotal);
+        discountAmount = Math.min(discountVal, subtotal);
+      }
+
+      if (couponObj.freeDelivery) {
+        shipping = 0;
       }
     }
 
-    // Recalculate final totals
-    const subtotal = parseFloat(orderData.subtotal);
-    const shipping = parseFloat(orderData.shipping);
-    const tax = parseFloat(orderData.tax);
+    // 5. Calculate tax on the server (12% GST)
+    const tax = subtotal * 0.12;
+
+    // 6. Calculate final totals on the server
     const finalAmount = Math.max(0, subtotal - discountAmount + shipping + tax);
 
-    // Validate stock and adjust inventory levels
-    // Also check if any product requires Rx
-    let orderRequiresRx = false;
-    for (const item of orderData.items) {
-      const product = await Product.findById(item.product || item.id);
-      if (!product) {
-        return res.status(404).json({ success: false, message: `Product ${item.name} not found` });
-      }
-      if (product.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for product ${item.name}` });
-      }
-      // Check if this product requires prescription
-      if (product.requiresRx) {
-        orderRequiresRx = true;
-      }
-    }
-
-    // Create the order with backend-computed requiresRx status
+    // Create the order with backend-computed values
     const order = await Order.create({
       ...orderData,
       orderId,
       user: req.user._id,
       customer: req.user.name,
       email: req.user.email,
-      items: orderData.items.map((item) => ({
-        product: item.product || item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
+      items: validatedItems,
       coupon: couponObj ? couponObj._id : null,
       couponCode: couponObj ? couponObj.code : null,
       discountAmount,
+      subtotal,
+      shipping,
+      tax,
       total: finalAmount, // matches legacy 'total' field
       finalAmount, // matches new extended 'finalAmount' field
       status: orderRequiresRx ? "Prescription Review" : "Processing",
@@ -123,19 +146,19 @@ export const placeOrder = async (req, res, next) => {
     }
 
     // Deduct stock levels
-    for (const item of orderData.items) {
-      const productId = item.product || item.id;
-      const product = await Product.findById(productId);
-      
-      const newStock = Math.max(0, product.stock - item.quantity);
-      let badge = product.badge;
-      if (newStock === 0) badge = "Out of Stock";
-      else if (newStock <= 10) badge = "Low Stock";
+    for (const item of validatedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        const newStock = Math.max(0, product.stock - item.quantity);
+        let badge = product.badge;
+        if (newStock === 0) badge = "Out of Stock";
+        else if (newStock <= 10) badge = "Low Stock";
 
-      await Product.findByIdAndUpdate(productId, {
-        stock: newStock,
-        badge,
-      });
+        await Product.findByIdAndUpdate(item.product, {
+          stock: newStock,
+          badge,
+        });
+      }
     }
 
     // Send order confirmation email
@@ -205,8 +228,17 @@ export const cancelOrder = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
+    // BOLA Authorization Check: Only the order owner or admin can cancel the order
+    if (order.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Forbidden: You are not authorized to cancel this order" });
+    }
+
     if (order.status === "Cancelled") {
       return res.status(400).json({ success: false, message: "Order is already cancelled" });
+    }
+
+    if (order.status === "Delivered") {
+      return res.status(400).json({ success: false, message: "Delivered orders cannot be cancelled" });
     }
 
     order.status = "Cancelled";

@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { notFound } from "./src/middleware/notFoundMiddleware.js";
 import { errorHandler } from "./src/middleware/errorMiddleware.js";
 import { globalLimiter } from "./src/middleware/rateLimitMiddleware.js";
+import { preventMongoInjection, preventXSS } from "./src/middleware/securityMiddleware.js";
 
 // Routes Import
 import authRoutes from "./src/routes/authRoutes.js";
@@ -25,7 +26,32 @@ const app = express();
 
 // Security Middlewares
 app.use(helmet({
-  crossOriginResourcePolicy: false, // Allows loading local file uploads in frontend
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows loading local file uploads in frontend
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://apis.google.com"],
+      connectSrc: ["'self'", "https://oauth2.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://lh3.googleusercontent.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+  hidePoweredBy: true,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: {
+    action: "deny",
+  },
+  noSniff: true,
+  referrerPolicy: {
+    policy: "strict-origin-when-cross-origin",
+  },
 }));
 
 // Dynamic CORS configuration
@@ -50,6 +76,10 @@ app.use(globalLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
+
+// Input Validation & Sanitization Middlewares (Runs after body parsers)
+app.use(preventMongoInjection);
+app.use(preventXSS);
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));

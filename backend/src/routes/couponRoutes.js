@@ -8,6 +8,7 @@ import {
 } from "../controllers/couponController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
+import { couponLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
@@ -15,10 +16,10 @@ const router = express.Router();
 router.get("/", getCoupons);
 
 // POST /api/coupons/validate — validate coupon code (protect)
-router.post("/validate", protect, validateCouponCode);
+router.post("/validate", protect, couponLimiter, validateCouponCode);
 
 // POST /api/coupons/apply — apply coupon at checkout (any logged-in user)
-router.post("/apply", protect, applyCoupon);
+router.post("/apply", protect, couponLimiter, applyCoupon);
 
 // POST /api/coupons — create a new coupon (admin only)
 router.post("/", protect, admin, createCoupon);

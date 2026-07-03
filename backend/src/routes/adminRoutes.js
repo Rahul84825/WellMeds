@@ -14,12 +14,13 @@ import {
 } from "../controllers/couponController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
+import { uploadImage } from "../middleware/uploadMiddleware.js";
+import { uploadLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
 // Upload image (admin only)
-router.post("/upload", protect, admin, upload.single("image"), uploadAdminImage);
+router.post("/upload", protect, admin, uploadLimiter, uploadImage.single("image"), uploadAdminImage);
 
 // Dashboard stats
 router.get("/stats", protect, admin, getDashboardStats);

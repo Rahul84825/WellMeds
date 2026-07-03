@@ -11,7 +11,8 @@ import {
 } from "../controllers/prescriptionController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
+import { uploadPrescriptionFile } from "../middleware/uploadMiddleware.js";
+import { uploadLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ const router = express.Router();
 // ─────────────────────────────────────────────────────────
 
 // ── Patient: Upload ───────────────────────────────────────
-router.post("/upload", protect, upload.single("prescription"), uploadPrescription);
+router.post("/upload", protect, uploadLimiter, uploadPrescriptionFile.single("prescription"), uploadPrescription);
 
 // ── Patient: Get own prescriptions ───────────────────────
 router.get("/my", protect, getMyPrescriptions);
