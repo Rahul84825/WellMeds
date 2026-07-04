@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: [0, "Price cannot be negative"],
     },
-        originalPrice: {
+    originalPrice: {
       type: Number,
       min: [0, "Original price cannot be negative"],
     },
@@ -162,6 +162,20 @@ const productSchema = new mongoose.Schema(
       type: String,
       enum: ["medicine", "wellness"],
       default: "medicine",
+    },
+    isSurgical: {
+      type: Boolean,
+      default: false,
+    },
+    surgicalCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SurgicalCategory",
+      required: [
+        function () {
+          return this.isSurgical === true;
+        },
+        "Surgical Category is required if product is surgical",
+      ],
     },
   },
   {

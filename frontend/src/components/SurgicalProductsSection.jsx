@@ -1,59 +1,67 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 import { 
   Scissors, 
   Shield, 
   Bandage, 
   Syringe, 
   Bed, 
-  Stethoscope 
+  Stethoscope, 
+  Activity, 
+  Heart, 
+  Thermometer, 
+  Layers 
 } from "lucide-react";
 
+// Helper icon mapping utility
+const getSurgicalIcon = (iconName) => {
+  const mapping = {
+    scissors: Scissors,
+    shield: Shield,
+    bandage: Bandage,
+    syringe: Syringe,
+    bed: Bed,
+    stethoscope: Stethoscope,
+    activity: Activity,
+    heart: Heart,
+    thermometer: Thermometer,
+    layers: Layers,
+    wheelchair: Activity,
+    walking: Activity,
+    lungs: Activity,
+    bone: Activity,
+    band_aid: Bandage,
+  };
+  return mapping[String(iconName).toLowerCase()] || Activity;
+};
+
 const SurgicalProductsSection = () => {
-  const categories = [
-    {
-      id: "instruments",
-      title: "Surgical Instruments",
-      description: "Premium stainless steel surgical tools for hospital and clinical procedures.",
-      icon: Scissors,
-      iconBg: "bg-[#004782]/10 text-[#004782] dark:bg-[#004782]/20 dark:text-[#a4c9ff]",
-    },
-    {
-      id: "ppe",
-      title: "Gloves & PPE",
-      description: "Sterile medical gloves and protective equipment for clinical staff safety.",
-      icon: Shield,
-      iconBg: "bg-[#086b53]/10 text-[#086b53] dark:bg-[#086b53]/20 dark:text-[#84d6b9]",
-    },
-    {
-      id: "woundcare",
-      title: "Dressings & Wound Care",
-      description: "Sterile bandages, gauze, surgical tapes, and wound dressing kits.",
-      icon: Bandage,
-      iconBg: "bg-[#004782]/10 text-[#004782] dark:bg-[#004782]/20 dark:text-[#a4c9ff]",
-    },
-    {
-      id: "syringes",
-      title: "Syringes & Needles",
-      description: "Disposable medical-grade injections, IV supplies, and needles.",
-      icon: Syringe,
-      iconBg: "bg-[#086b53]/10 text-[#086b53] dark:bg-[#086b53]/20 dark:text-[#84d6b9]",
-    },
-    {
-      id: "supplies",
-      title: "Hospital Supplies",
-      description: "Underpads, patient apparel, bed accessories, and clinical consumables.",
-      icon: Bed,
-      iconBg: "bg-[#004782]/10 text-[#004782] dark:bg-[#004782]/20 dark:text-[#a4c9ff]",
-    },
-    {
-      id: "diagnostics",
-      title: "Diagnostic Equipment",
-      description: "Professional stethoscopes, monitors, and clinical diagnostic tools.",
-      icon: Stethoscope,
-      iconBg: "bg-[#086b53]/10 text-[#086b53] dark:bg-[#086b53]/20 dark:text-[#84d6b9]",
-    },
-  ];
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const fetchCats = async () => {
+      try {
+        const list = await api.getSurgicalCategories();
+        if (active) {
+          setCategories(list.slice(0, 6)); // Display top 6 categories
+        }
+      } catch (err) {
+        console.error("Failed to load surgical categories on home page", err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchCats();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <section className="py-5 md:py-20 bg-slate-50/50 dark:bg-zinc-950/40 border-y border-slate-100 dark:border-zinc-900 relative overflow-hidden transition-colors duration-300">
@@ -61,7 +69,7 @@ const SurgicalProductsSection = () => {
       {/* Background Pattern Grid */}
       <div className="absolute inset-0 medical-pattern opacity-30 pointer-events-none"></div>
  
-      <div className="max-w-max-width mx-auto px-margin-desktop relative z-10">
+      <div className="max-w-7xl mx-auto px-margin-desktop relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-xl items-center">
           
           {/* Left Column: 35% Width Marketing */}
@@ -82,7 +90,7 @@ const SurgicalProductsSection = () => {
             {/* Action CTA Button */}
             <div>
               <Link
-                to="/products"
+                to="/surgical/all"
                 className="inline-flex items-center justify-center bg-[#004782] hover:bg-[#003c70] text-white h-[45px] md:py-3.5 px-6 md:px-8 rounded-xl font-semibold text-sm md:text-base shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 select-none"
               >
                 Browse Catalogue
@@ -105,34 +113,54 @@ const SurgicalProductsSection = () => {
  
           {/* Right Column: 65% Width Grid Categories */}
           <div className="lg:col-span-8 w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-              {categories.map((cat) => {
-                const IconComponent = cat.icon;
-                return (
-                  <div
-                    key={cat.id}
-                    className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-4 md:p-7 rounded-2xl shadow-xs transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 hover:shadow-sm hover:border-[#004782]/20 flex items-start gap-4 md:gap-5 group"
-                  >
-                    {/* Icon Circle */}
-                    <div className={`w-9 h-9 md:w-13 md:h-13 min-w-[36px] md:min-w-[52px] rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${cat.iconBg}`}>
-                      <IconComponent className="w-5 h-5 md:w-6 md:h-6" />
-                    </div>
- 
-                    {/* Content */}
-                    <div className="space-y-1 md:space-y-1.5 text-left">
-                      <h4 className="text-[16px] md:text-base text-on-surface font-extrabold group-hover:text-[#004782] dark:group-hover:text-primary-fixed-dim transition-colors leading-snug">
-                        {cat.title}
-                      </h4>
-                      <p className="text-slate-500 dark:text-zinc-400 font-normal text-[13px] md:text-sm leading-relaxed line-clamp-2">
-                        {cat.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {loading ? (
+              <div className="min-h-[200px] flex items-center justify-center">
+                <span className="text-slate-400 text-xs font-semibold">Loading surgical categories...</span>
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-8 rounded-2xl text-center">
+                <p className="text-slate-400 text-xs font-semibold">No surgical categories available. Check back soon!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                {categories.map((cat) => {
+                  const IconComponent = getSurgicalIcon(cat.icon);
+                  const isThemeGreen = cat.displayOrder % 2 === 0;
+                  const iconBgClass = isThemeGreen
+                    ? "bg-[#086b53]/10 text-[#086b53] dark:bg-[#086b53]/20 dark:text-[#84d6b9]"
+                    : "bg-[#004782]/10 text-[#004782] dark:bg-[#004782]/20 dark:text-[#a4c9ff]";
+                  
+                  return (
+                    <Link
+                      key={cat.id || cat._id}
+                      to={`/surgical/${cat.slug}`}
+                      className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-4 md:p-7 rounded-2xl shadow-xs transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 hover:shadow-sm hover:border-[#004782]/20 flex items-start gap-4 md:gap-5 group"
+                    >
+                      {/* Icon Circle */}
+                      <div className={`w-9 h-9 md:w-13 md:h-13 min-w-[36px] md:min-w-[52px] rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${iconBgClass}`}>
+                        {cat.image ? (
+                          <img src={cat.image} className="w-full h-full object-cover rounded-lg" alt={cat.name} />
+                        ) : (
+                          <IconComponent className="w-5 h-5 md:w-6 md:h-6" />
+                        )}
+                      </div>
+  
+                      {/* Content */}
+                      <div className="space-y-1 md:space-y-1.5 text-left">
+                        <h4 className="text-[16px] md:text-base text-on-surface font-extrabold group-hover:text-[#004782] dark:group-hover:text-primary-fixed-dim transition-colors leading-snug">
+                          {cat.name}
+                        </h4>
+                        <p className="text-slate-500 dark:text-zinc-400 font-normal text-[13px] md:text-sm leading-relaxed line-clamp-2">
+                          {cat.description || `Explore authentic ${cat.name} products.`}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
-
+ 
         </div>
       </div>
     </section>

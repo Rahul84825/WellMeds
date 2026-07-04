@@ -20,6 +20,7 @@ import wishlistRoutes from "./src/routes/wishlistRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import specialityRoutes from "./src/routes/specialityRoutes.js";
 import moleculeRoutes from "./src/routes/moleculeRoutes.js";
+import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
 
 const app = express();
 
@@ -100,6 +101,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/specialities", specialityRoutes);
 app.use("/api/molecules", moleculeRoutes);
+app.use("/api/surgical-categories", surgicalCategoryRoutes);
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

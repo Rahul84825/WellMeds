@@ -7,7 +7,7 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}) {
-    const { search, category, speciality, page, limit, productType } = params;
+    const { search, category, speciality, page, limit, productType, isSurgical, surgicalCategory } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
@@ -15,6 +15,8 @@ export const productService = {
     if (page) cleanParams.page = page;
     if (limit) cleanParams.limit = limit;
     if (productType) cleanParams.productType = productType;
+    if (isSurgical) cleanParams.isSurgical = isSurgical;
+    if (surgicalCategory) cleanParams.surgicalCategory = surgicalCategory;
 
     const data = await apiInstance.get("/products", { params: cleanParams });
     return {

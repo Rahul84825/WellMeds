@@ -7,6 +7,7 @@ import { Category } from "./src/models/Category.js";
 import { Order } from "./src/models/Order.js";
 import { Coupon } from "./src/models/Coupon.js";
 import { Molecule } from "./src/models/Molecule.js";
+import { SurgicalCategory } from "./src/models/SurgicalCategory.js";
 import slugify from "slugify";
 import { INITIAL_CATEGORIES, INITIAL_PRODUCTS, INITIAL_COUPONS } from "./src/config/initialData.js";
 
@@ -32,6 +33,7 @@ const seedDB = async () => {
     await Order.deleteMany();
     await Coupon.deleteMany();
     await Molecule.deleteMany();
+    await SurgicalCategory.deleteMany();
 
     console.log("Creating default Admin user...");
     const adminEmail = "admin@gmail.com";
@@ -197,6 +199,20 @@ const seedDB = async () => {
       await Coupon.create(coupon);
     }
     console.log("Coupons seeded.");
+
+    console.log("Seeding default surgical categories...");
+    const defaultSurgCats = [
+      { name: "Wheelchairs", slug: "wheelchairs", description: "Manual and electric wheelchairs for mobility support.", icon: "wheelchair", displayOrder: 1, isActive: true },
+      { name: "Mobility Aids", slug: "mobility", description: "Walkers, canes, and crutches for assisting movement.", icon: "walking", displayOrder: 2, isActive: true },
+      { name: "Hospital Beds", slug: "hospital-beds", description: "Adjustable hospital beds and accessories.", icon: "bed", displayOrder: 3, isActive: true },
+      { name: "Respiratory Care", slug: "respiratory-care", description: "Oxygen concentrators, nebulizers, and CPAP machines.", icon: "lungs", displayOrder: 4, isActive: true },
+      { name: "Orthopedic Supports", slug: "orthopedic-supports", description: "Braces, splints, and traction equipment.", icon: "bone", displayOrder: 5, isActive: true },
+      { name: "Diagnostic Devices", slug: "diagnostic-devices", description: "Professional medical monitors and oximeters.", icon: "activity", displayOrder: 6, isActive: true }
+    ];
+    for (const cat of defaultSurgCats) {
+      await SurgicalCategory.create(cat);
+    }
+    console.log("Surgical categories seeded.");
 
     console.log("Database seeding completed successfully!");
     process.exit(0);

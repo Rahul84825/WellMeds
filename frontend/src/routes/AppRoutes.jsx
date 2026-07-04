@@ -34,6 +34,9 @@ import SuperSpecialityPage from "../pages/SuperSpecialityPage";
 import MoleculesPage from "../pages/MoleculesPage";
 import MoleculeDetailPage from "../pages/MoleculeDetailPage";
 import WellnessPage from "../pages/WellnessPage";
+import SurgicalLandingPage from "../pages/SurgicalLandingPage";
+import AllSurgicalProductsPage from "../pages/AllSurgicalProductsPage";
+import SurgicalCategoryPage from "../pages/SurgicalCategoryPage";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -41,6 +44,7 @@ import ManageProducts from "../admin/AdminProducts";
 import AddNewProduct from "../admin/AdminAddNewProduct";
 import ManageOrders from "../admin/AdminOrders";
 import ProductCategories from "../admin/AdminCategories";
+import AdminSurgicalCategories from "../admin/AdminSurgicalCategories";
 import AdminSpecialities from "../admin/AdminSpecialities";
 import AdminMolecules from "../admin/AdminMolecules";
 import AdminAddNewMolecule from "../admin/AdminAddNewMolecule";
@@ -64,6 +68,9 @@ const AppRoutes = () => {
         <Route path="molecules" element={<MoleculesPage />} />
         <Route path="molecule/:slug" element={<MoleculeDetailPage />} />
         <Route path="wellness" element={<WellnessPage />} />
+        <Route path="surgical" element={<SurgicalLandingPage />} />
+        <Route path="surgical/all" element={<AllSurgicalProductsPage />} />
+        <Route path="surgical/:categorySlug" element={<SurgicalCategoryPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-success" element={<OrderSuccessPage />} />
@@ -120,6 +127,7 @@ const AppRoutes = () => {
         <Route path="products/:id/edit" element={<AddNewProduct />} />
         <Route path="orders" element={<ManageOrders />} />
         <Route path="categories" element={<ProductCategories />} />
+        <Route path="surgical-categories" element={<AdminSurgicalCategories />} />
         <Route path="specialities" element={<AdminSpecialities />} />
         <Route path="molecules" element={<AdminMolecules />} />
         <Route path="molecules/new" element={<AdminAddNewMolecule />} />

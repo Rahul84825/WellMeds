@@ -87,28 +87,90 @@ const NAV_CONFIG = [
       { id: "lib-faq", label: "FAQs", to: "/library/faq" },
     ],
   },
-  {
-    id: "partnerships",
-    label: "Partnerships",
-    type: "dropdown",
-    order: 5,
-    enabled: true,
-    badge: { text: "New", color: "#038076" },
-    children: [
-      { id: "partner-pharmacy", label: "Pharmacy Partners", to: "/partnerships/pharmacy" },
-      { id: "partner-clinics", label: "Clinic Network", to: "/partnerships/clinics" },
-      { id: "partner-apply", label: "Become a Partner", to: "/partnerships/apply" },
-    ],
-  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
 // useNavConfig — the single swap point for backend integration.
 // ──────────────────────────────────────────────────────────────────────────
 const useNavConfig = () => {
-  return NAV_CONFIG
-    .filter((item) => item.enabled)
-    .sort((a, b) => a.order - b.order);
+  const [navConfig, setNavConfig] = useState(() => {
+    return NAV_CONFIG.filter((item) => item.enabled);
+  });
+
+  useEffect(() => {
+    let active = true;
+    const fetchSurgicalCategories = async () => {
+      try {
+        const categories = await api.getSurgicalCategories();
+        if (!active) return;
+
+        let surgicalChildren = [];
+        if (categories && categories.length > 0) {
+          surgicalChildren = categories.map(cat => ({
+            id: `surg-${cat.slug}`,
+            label: cat.name,
+            to: `/surgical/${cat.slug}`
+          }));
+          surgicalChildren.push({
+            id: "surg-view-all",
+            label: "View All Surgical Products",
+            to: "/surgical/all"
+          });
+        } else {
+          surgicalChildren = [
+            {
+              id: "surg-browse",
+              label: "Browse Surgical Products",
+              to: "/surgical/all"
+            }
+          ];
+        }
+
+        const surgicalItem = {
+          id: "surgical",
+          label: "Surgical",
+          type: "dropdown",
+          order: 5,
+          enabled: true,
+          badge: null,
+          children: surgicalChildren
+        };
+
+        const filteredConfig = NAV_CONFIG.filter((item) => item.enabled);
+        const finalConfig = [...filteredConfig, surgicalItem].sort((a, b) => a.order - b.order);
+        setNavConfig(finalConfig);
+      } catch (err) {
+        console.error("Failed to load surgical categories for navbar", err);
+        if (active) {
+          const fallbackSurgical = {
+            id: "surgical",
+            label: "Surgical",
+            type: "dropdown",
+            order: 5,
+            enabled: true,
+            badge: null,
+            children: [
+              {
+                id: "surg-browse",
+                label: "Browse Surgical Products",
+                to: "/surgical/all"
+              }
+            ]
+          };
+          const filteredConfig = NAV_CONFIG.filter((item) => item.enabled);
+          const finalConfig = [...filteredConfig, fallbackSurgical].sort((a, b) => a.order - b.order);
+          setNavConfig(finalConfig);
+        }
+      }
+    };
+
+    fetchSurgicalCategories();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return navConfig;
 };
 
 // ──────────────────────────────────────────────────────────────────────────

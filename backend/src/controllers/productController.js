@@ -2,11 +2,12 @@ import { Product } from "../models/Product.js";
 import { Category } from "../models/Category.js";
 import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
 import { Molecule } from "../models/Molecule.js";
+import { SurgicalCategory } from "../models/SurgicalCategory.js";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, molecule, page, limit, productType } = req.query;
+  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory } = req.query;
 
   try {
     const query = {};
@@ -85,6 +86,30 @@ export const getProducts = async (req, res, next) => {
       query.productType = productType;
     }
 
+    if (isSurgical !== undefined) {
+      query.isSurgical = isSurgical === "true";
+    }
+
+    if (surgicalCategory && surgicalCategory.trim()) {
+      if (mongoose.Types.ObjectId.isValid(surgicalCategory)) {
+        query.surgicalCategory = surgicalCategory;
+      } else {
+        const matchedSurgCategory = await SurgicalCategory.findOne({ slug: surgicalCategory.trim() });
+        if (matchedSurgCategory) {
+          query.surgicalCategory = matchedSurgCategory._id;
+        } else {
+          return res.status(200).json({
+            success: true,
+            count: 0,
+            total: 0,
+            page: 1,
+            pages: 1,
+            products: [],
+          });
+        }
+      }
+    }
+
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 28;
     const skipNum = (pageNum - 1) * limitNum;
@@ -92,6 +117,7 @@ export const getProducts = async (req, res, next) => {
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
       .populate("category", "name slug")
+      .populate("surgicalCategory", "name slug")
       .skip(skipNum)
       .limit(limitNum);
 
@@ -117,12 +143,14 @@ export const getProduct = async (req, res, next) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       product = await Product.findById(id)
         .populate("category", "name slug")
+        .populate("surgicalCategory", "name slug")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
     } else {
       product = await Product.findOne({ slug: id })
         .populate("category", "name slug")
+        .populate("surgicalCategory", "name slug")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
         .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");

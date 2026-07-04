@@ -44,6 +44,9 @@ const AddNewProduct = () => {
   const [allSpecialities, setAllSpecialities] = useState([]);
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   const [productType, setProductType] = useState("medicine");
+  const [isSurgical, setIsSurgical] = useState(false);
+  const [surgicalCategory, setSurgicalCategory] = useState("");
+  const [allSurgicalCategories, setAllSurgicalCategories] = useState([]);
   const [allMolecules, setAllMolecules] = useState([]);
   const [selectedMolecules, setSelectedMolecules] = useState([]);
   const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
@@ -129,6 +132,8 @@ const AddNewProduct = () => {
             if (product.molecules) {
               setSelectedMolecules(product.molecules.map(m => m._id || m.id || m));
             }
+            setIsSurgical(product.isSurgical || false);
+            setSurgicalCategory(product.surgicalCategory?._id || product.surgicalCategory || "");
           }
         } catch (err) {
           console.error("Failed to load product data", err);
@@ -158,8 +163,17 @@ const AddNewProduct = () => {
         console.error("Failed to fetch molecules in product form", err);
       }
     };
+    const fetchSurgicalCategories = async () => {
+      try {
+        const list = await api.getSurgicalCategories();
+        setAllSurgicalCategories(list);
+      } catch (err) {
+        console.error("Failed to fetch surgical categories in product form", err);
+      }
+    };
     fetchSpecialities();
     fetchMolecules();
+    fetchSurgicalCategories();
   }, []);
 
   const allCategories = ["Prescription", "Vitamins", "Medical Devices", "First Aid", "Personal Care", "Supplements"];
@@ -397,6 +411,8 @@ const AddNewProduct = () => {
       description: description.trim(),
       specialities: selectedSpecialities,
       molecules: selectedMolecules,
+      isSurgical,
+      surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -551,6 +567,45 @@ const AddNewProduct = () => {
                     placeholder="e.g. Cipla"
                   />
                 </div>
+              </div>
+
+              {/* Surgical Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md pt-xs">
+                <div className="space-y-xs">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Is Surgical Product?</label>
+                  <select
+                    value={isSurgical ? "true" : "false"}
+                    onChange={(e) => {
+                      const val = e.target.value === "true";
+                      setIsSurgical(val);
+                      if (!val) setSurgicalCategory("");
+                    }}
+                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
+                  >
+                    <option value="false">No (Default)</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </div>
+
+                {isSurgical && (
+                  <div className="space-y-xs animate-[fade-in_0.2s_ease-out]">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Surgical Category *</label>
+                    <select
+                      required={isSurgical}
+                      value={surgicalCategory}
+                      onChange={(e) => setSurgicalCategory(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
+                    >
+                      <option value="">Select Surgical Category</option>
+                      {allSurgicalCategories.map((cat) => {
+                        const idVal = cat.id || cat._id;
+                        return (
+                          <option key={idVal} value={idVal}>{cat.name}</option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-xs pt-xs">

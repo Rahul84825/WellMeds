@@ -4,6 +4,7 @@ import { User } from "../models/User.js";
 import { Category } from "../models/Category.js";
 import { Product } from "../models/Product.js";
 import { Coupon } from "../models/Coupon.js";
+import { SurgicalCategory } from "../models/SurgicalCategory.js";
 import slugify from "slugify";
 import { INITIAL_CATEGORIES, INITIAL_PRODUCTS, INITIAL_COUPONS } from "./initialData.js";
 
@@ -60,6 +61,22 @@ const seedAllDefaultData = async () => {
         await Coupon.create(coupon);
       }
       console.log("[Database] Coupons auto-seeded successfully.");
+    // 5. Auto-seed surgical categories if empty
+    const surgicalCategoryCount = await SurgicalCategory.countDocuments();
+    if (surgicalCategoryCount === 0) {
+      console.log("[Database] Database has no surgical categories. Auto-seeding default surgical categories...");
+      const defaultSurgCats = [
+        { name: "Wheelchairs", slug: "wheelchairs", description: "Manual and electric wheelchairs for mobility support.", icon: "wheelchair", displayOrder: 1, isActive: true },
+        { name: "Mobility Aids", slug: "mobility", description: "Walkers, canes, and crutches for assisting movement.", icon: "walking", displayOrder: 2, isActive: true },
+        { name: "Hospital Beds", slug: "hospital-beds", description: "Adjustable hospital beds and accessories.", icon: "bed", displayOrder: 3, isActive: true },
+        { name: "Respiratory Care", slug: "respiratory-care", description: "Oxygen concentrators, nebulizers, and CPAP machines.", icon: "lungs", displayOrder: 4, isActive: true },
+        { name: "Orthopedic Supports", slug: "orthopedic-supports", description: "Braces, splints, and traction equipment.", icon: "bone", displayOrder: 5, isActive: true },
+        { name: "Diagnostic Devices", slug: "diagnostic-devices", description: "Professional medical monitors and oximeters.", icon: "activity", displayOrder: 6, isActive: true }
+      ];
+      for (const cat of defaultSurgCats) {
+        await SurgicalCategory.create(cat);
+      }
+      console.log("[Database] Surgical categories auto-seeded successfully.");
     }
   } catch (err) {
     console.warn(`[Database] Auto-seeding default data failed: ${err.message}`);
