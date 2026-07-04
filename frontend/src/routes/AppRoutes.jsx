@@ -67,6 +67,7 @@ const AppRoutes = () => {
         <Route path="super-speciality" element={<SuperSpecialityPage />} />
         <Route path="molecules" element={<MoleculesPage />} />
         <Route path="molecule/:slug" element={<MoleculeDetailPage />} />
+        <Route path="molecules/:slug" element={<MoleculeDetailPage />} />
         <Route path="wellness" element={<WellnessPage />} />
         <Route path="surgical" element={<SurgicalLandingPage />} />
         <Route path="surgical/all" element={<AllSurgicalProductsPage />} />

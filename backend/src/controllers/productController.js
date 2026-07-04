@@ -118,6 +118,7 @@ export const getProducts = async (req, res, next) => {
     const products = await Product.find(query)
       .populate("category", "name slug")
       .populate("surgicalCategory", "name slug")
+      .populate("molecules", "name slug")
       .skip(skipNum)
       .limit(limitNum);
 
@@ -146,14 +147,22 @@ export const getProduct = async (req, res, next) => {
         .populate("surgicalCategory", "name slug")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
-        .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+        .populate({
+          path: "relatedProducts",
+          select: "name price originalPrice image slug requiresRx badge molecules",
+          populate: { path: "molecules", select: "name slug" }
+        });
     } else {
       product = await Product.findOne({ slug: id })
         .populate("category", "name slug")
         .populate("surgicalCategory", "name slug")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
-        .populate("relatedProducts", "name price originalPrice image slug requiresRx badge");
+        .populate({
+          path: "relatedProducts",
+          select: "name price originalPrice image slug requiresRx badge molecules",
+          populate: { path: "molecules", select: "name slug" }
+        });
     }
 
     if (!product) {
