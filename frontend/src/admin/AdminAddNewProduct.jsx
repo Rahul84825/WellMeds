@@ -40,6 +40,8 @@ const AddNewProduct = () => {
   const [originalPrice, setOriginalPrice] = useState("");
   const [stock, setStock] = useState("");
   const [requiresRx, setRequiresRx] = useState(false);
+  const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
+  const [isColdChain, setIsColdChain] = useState(false);
   const [description, setDescription] = useState("");
   const [allSpecialities, setAllSpecialities] = useState([]);
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
@@ -94,6 +96,8 @@ const AddNewProduct = () => {
             setOriginalPrice(product.originalPrice || "");
             setStock(product.stock || "");
             setRequiresRx(product.requiresRx || false);
+            setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
+            setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
             
             if (product.images && product.images.length > 0) {
@@ -405,7 +409,9 @@ const AddNewProduct = () => {
       price: parseFloat(price),
       originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
       stock: parseInt(stock),
-      requiresRx,
+      requiresRx: isPrescriptionRequired,
+      isPrescriptionRequired,
+      isColdChain,
       image: primaryImageUrl,
       images: images,
       description: description.trim(),
@@ -802,17 +808,36 @@ const AddNewProduct = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-sm pt-sm border-t border-slate-100 dark:border-zinc-800">
-                <input
-                  type="checkbox"
-                  id="requiresRx"
-                  checked={requiresRx}
-                  onChange={(e) => setRequiresRx(e.target.checked)}
-                  className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                />
-                <label htmlFor="requiresRx" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                  Requires Prescription upload for dispensing (Rx verified item)
-                </label>
+              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800 space-y-md">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Medical Information</h4>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                  <div className="flex items-center gap-sm">
+                    <input
+                      type="checkbox"
+                      id="isPrescriptionRequired"
+                      checked={isPrescriptionRequired}
+                      onChange={(e) => setIsPrescriptionRequired(e.target.checked)}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isPrescriptionRequired" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                      Prescription Required
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-sm">
+                    <input
+                      type="checkbox"
+                      id="isColdChain"
+                      checked={isColdChain}
+                      onChange={(e) => setIsColdChain(e.target.checked)}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isColdChain" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                      Temperature Controlled Product
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           )}

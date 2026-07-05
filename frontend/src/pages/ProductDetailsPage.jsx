@@ -746,29 +746,6 @@ const ProductDetails = () => {
 
       </div>
 
-      {/* SECTION 1.5: QUICK HIGHLIGHTS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-sm mb-xl">
-        {[
-          { label: "Prescription", value: product.requiresRx ? "Rx Required" : "OTC Item", icon: FileText, color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30" },
-          { label: "Delivery", value: "Next-Day", icon: Truck, color: "text-[#086b53] bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30" },
-          { label: "Storage", value: product.specifications?.find(s => s.label.toLowerCase().includes("store") || s.label.toLowerCase().includes("temp"))?.value || "Below 30°C", icon: Thermometer, color: "text-[#004782] bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/30" },
-          { label: "Category", value: product.category?.name || product.category, icon: Tag, color: "text-purple-600 bg-purple-50 dark:bg-purple-950/20 border-purple-100 dark:border-purple-900/30" },
-          { label: "Shelf Life", value: "24 Months", icon: Hourglass, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900/30" },
-          { label: "Manufacturer", value: product.brand, icon: Building, color: "text-slate-600 bg-slate-50 dark:bg-zinc-850 border-slate-200 dark:border-zinc-800" }
-        ].map((item, idx) => {
-          const Icon = item.icon;
-          return (
-            <div key={idx} className={`p-md rounded-2xl border flex flex-col items-start justify-between min-h-[90px] shadow-xs hover:shadow-md transition-shadow ${item.color}`}>
-              <div className="flex justify-between items-center w-full">
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-85">{item.label}</span>
-                <Icon size={16} className="opacity-90" />
-              </div>
-              <p className="font-extrabold text-xs mt-sm leading-tight">{item.value}</p>
-            </div>
-          );
-        })}
-      </div>
-
       {/* SECTION 2: QUICK INFORMATION CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-sm mb-xl">
         {[

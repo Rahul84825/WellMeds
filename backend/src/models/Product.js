@@ -44,6 +44,14 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isColdChain: {
+      type: Boolean,
+      default: false,
+    },
+    isPrescriptionRequired: {
+      type: Boolean,
+      default: false,
+    },
     badge: {
       type: String,
       default: "",

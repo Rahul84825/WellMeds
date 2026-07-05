@@ -149,7 +149,7 @@ export const getProduct = async (req, res, next) => {
         .populate("molecules", "name slug")
         .populate({
           path: "relatedProducts",
-          select: "name price originalPrice image slug requiresRx badge molecules",
+          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules",
           populate: { path: "molecules", select: "name slug" }
         });
     } else {
@@ -160,7 +160,7 @@ export const getProduct = async (req, res, next) => {
         .populate("molecules", "name slug")
         .populate({
           path: "relatedProducts",
-          select: "name price originalPrice image slug requiresRx badge molecules",
+          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules",
           populate: { path: "molecules", select: "name slug" }
         });
     }
