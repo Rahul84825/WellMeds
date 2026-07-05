@@ -638,7 +638,7 @@ const Navbar = () => {
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
       {/* Desktop & Mobile Navbar Container */}
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col">
-        
+
         {/* Row 1: Logo & Action Buttons */}
         <div className="h-[72px] lg:h-[80px] flex items-center justify-between relative">
           {/* Left/Centered Brand Logo */}
@@ -648,10 +648,12 @@ const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center group rounded-xl p-0.5 text-left h-[58px] md:h-[65px] lg:h-[76px]"
             >
-              <img 
-                src={logoImg} 
-                alt="Logo" 
-                className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-200" 
+
+              <img width="150"
+                height="230"
+                src={logoImg}
+                alt="Logo"
+                className="object-contain group-hover:scale-105 transition-transform duration-200"
               />
             </NavLink>
           </div>
@@ -694,33 +696,33 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Drawer Menu Backdrop */}
-      <div 
-        className={`fixed inset-0 bg-black/40 z-[200] transition-opacity duration-300 lg:hidden ${
-          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+      <div
+        className={`fixed inset-0 bg-black/40 z-[200] transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       {/* Mobile Drawer Menu Container */}
-      <div 
-        className={`fixed top-0 bottom-0 left-0 w-[300px] max-w-[80vw] bg-white dark:bg-zinc-900 z-[201] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+      <div
+        className={`fixed top-0 bottom-0 left-0 w-[300px] max-w-[80vw] bg-white dark:bg-zinc-900 z-[201] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Drawer Header */}
         <div className="h-16 flex items-center justify-between px-md border-b border-slate-100 dark:border-zinc-800 shrink-0">
-          <Link 
-            to="/" 
-            onClick={() => setMobileMenuOpen(false)} 
+          <Link
+            to="/"
+            onClick={() => setMobileMenuOpen(false)}
             className="flex items-center group h-12 w-auto"
           >
-            <img 
-              src={logoImg} 
-              alt="WellMeds Logo" 
-              className="h-full w-auto object-contain" 
+            <img
+              width="130"
+              height="220"
+              src={logoImg}
+              alt="WellMeds Logo"
+              className="object-contain"
             />
           </Link>
-          <button 
+          <button
             onClick={() => setMobileMenuOpen(false)}
             className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-full"
           >
@@ -733,8 +735,8 @@ const Navbar = () => {
           {/* Mobile Search input */}
           <div className="relative">
             <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search medicines..."
               value={mobileSearchQuery}
               onChange={(e) => setMobileSearchQuery(e.target.value)}
