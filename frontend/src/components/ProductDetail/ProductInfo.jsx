@@ -4,7 +4,7 @@ import { Share2, ShieldCheck } from "lucide-react";
 
 const ProductInfo = ({ product, handleShare }) => {
   return (
-    <div className="space-y-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-xs text-left animate-[fade-in_0.2s_ease-out]">
+    <div className="space-y-sm text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-between h-full">
       
       {/* Category and badges row */}
       <div className="flex flex-wrap gap-xs items-center justify-between">

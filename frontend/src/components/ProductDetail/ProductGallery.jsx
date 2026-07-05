@@ -29,7 +29,7 @@ const ProductGallery = ({
   };
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-3xl shadow-xs flex flex-col items-center select-none relative group/gallery-main">
+    <div className="w-full flex flex-col items-center select-none relative group/gallery-main">
       {/* Discount Badge */}
       {discountPercent > 0 && (
         <span className="absolute top-4 left-4 z-10 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs animate-bounce">
@@ -54,7 +54,7 @@ const ProductGallery = ({
         )}
         <img 
           alt={productName} 
-          className="w-auto h-auto max-w-[88%] max-h-[88%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
+          className="w-auto h-auto max-w-[85%] max-h-[85%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
           src={imagesList[activeImageIdx]}
           onLoad={() => setIsImageLoading(false)}
         />

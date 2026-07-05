@@ -474,26 +474,33 @@ const ProductDetails = () => {
 
         {/* CENTER CONTENT (48%) */}
         <div className="w-full lg:w-[48%] space-y-md order-1 lg:order-2">
-          {/* Product Header / Details */}
-          <ProductInfo product={product} handleShare={handleShare} />
+          {/* Combined Product Info & Image Gallery Card */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
+            {/* Left: Product Information (60%) */}
+            <div className="w-full lg:w-[60%] flex flex-col justify-between">
+              <ProductInfo product={product} handleShare={handleShare} />
+            </div>
 
-          {/* Large Image Gallery */}
-          <ProductGallery
-            imagesList={imagesList}
-            activeImageIdx={activeImageIdx}
-            setActiveImageIdx={setActiveImageIdx}
-            isImageLoading={isImageLoading}
-            setIsImageLoading={setIsImageLoading}
-            handleMouseMove={handleMouseMove}
-            handleMouseLeave={handleMouseLeave}
-            handleTouchStart={handleTouchStart}
-            handleTouchMove={handleTouchMove}
-            handleTouchEnd={handleTouchEnd}
-            setIsFullscreenOpen={setIsFullscreenOpen}
-            zoomStyle={zoomStyle}
-            discountPercent={discountPercent}
-            productName={product.name}
-          />
+            {/* Right: Product Image Gallery (40%) */}
+            <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
+              <ProductGallery
+                imagesList={imagesList}
+                activeImageIdx={activeImageIdx}
+                setActiveImageIdx={setActiveImageIdx}
+                isImageLoading={isImageLoading}
+                setIsImageLoading={setIsImageLoading}
+                handleMouseMove={handleMouseMove}
+                handleMouseLeave={handleMouseLeave}
+                handleTouchStart={handleTouchStart}
+                handleTouchMove={handleTouchMove}
+                handleTouchEnd={handleTouchEnd}
+                setIsFullscreenOpen={setIsFullscreenOpen}
+                zoomStyle={zoomStyle}
+                discountPercent={discountPercent}
+                productName={product.name}
+              />
+            </div>
+          </div>
 
           {/* Dispatch Banner / Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
