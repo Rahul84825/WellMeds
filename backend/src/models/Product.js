@@ -175,6 +175,42 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    manufacturer: {
+      type: String,
+      default: "",
+    },
+    importedCountry: {
+      type: String,
+      default: "",
+    },
+    strength: {
+      type: String,
+      default: "",
+    },
+    packSize: {
+      type: String,
+      default: "",
+    },
+    displayOrder: {
+      type: Number,
+      default: 0,
+    },
+    similarMedicinePriority: {
+      type: Number,
+      default: 0,
+    },
+    isImported: {
+      type: Boolean,
+      default: false,
+    },
+    medicineCategory: {
+      type: String,
+      default: "",
+    },
+    moleculeSlug: {
+      type: String,
+      default: "",
+    },
     surgicalCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SurgicalCategory",

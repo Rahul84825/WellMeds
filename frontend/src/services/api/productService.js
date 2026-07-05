@@ -54,5 +54,10 @@ export const productService = {
   async deleteProduct(id) {
     const data = await apiInstance.delete(`/products/${id}`);
     return data.success;
+  },
+
+  async getSimilarProducts(id) {
+    const data = await apiInstance.get(`/products/${id}/similar`);
+    return data.products || [];
   }
 };

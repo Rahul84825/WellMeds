@@ -178,7 +178,8 @@ export const createProduct = async (req, res, next) => {
   const productData = req.body;
 
   try {
-    const slug = slugify(productData.name, { lower: true });
+    let slug = productData.slug || slugify(productData.name, { lower: true });
+    slug = slugify(slug, { lower: true });
     
     // Auto badges based on inventory levels
     let badge = productData.badge || "";
@@ -197,11 +198,21 @@ export const createProduct = async (req, res, next) => {
       }
     }
 
+    // Set moleculeSlug automatically
+    let moleculeSlug = "";
+    if (productData.molecules && productData.molecules.length > 0) {
+      const mol = await Molecule.findById(productData.molecules[0]);
+      if (mol) {
+        moleculeSlug = mol.slug;
+      }
+    }
+
     const product = await Product.create({
       ...productData,
       category: categoryId,
       slug,
       badge,
+      moleculeSlug,
     });
 
     // Increment category product count (category is now ObjectId)
@@ -228,8 +239,22 @@ export const updateProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    if (updateData.name) {
+    if (updateData.slug && updateData.slug.trim()) {
+      updateData.slug = slugify(updateData.slug.trim(), { lower: true });
+    } else if (updateData.name) {
       updateData.slug = slugify(updateData.name, { lower: true });
+    }
+
+    // Set moleculeSlug automatically
+    if (updateData.molecules !== undefined) {
+      let moleculeSlug = "";
+      if (updateData.molecules && updateData.molecules.length > 0) {
+        const mol = await Molecule.findById(updateData.molecules[0]);
+        if (mol) {
+          moleculeSlug = mol.slug;
+        }
+      }
+      updateData.moleculeSlug = moleculeSlug;
     }
 
     // Auto update stock badges
@@ -290,6 +315,39 @@ export const deleteProduct = async (req, res, next) => {
     }
 
     res.status(200).json({ success: true, message: "Product deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSimilarProducts = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    let currentProduct;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      currentProduct = await Product.findById(id);
+    } else {
+      currentProduct = await Product.findOne({ slug: id });
+    }
+
+    if (!currentProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    if (!currentProduct.molecules || currentProduct.molecules.length === 0) {
+      return res.status(200).json({ success: true, products: [] });
+    }
+
+    const similar = await Product.find({
+      _id: { $ne: currentProduct._id },
+      molecules: { $in: currentProduct.molecules }
+    })
+    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules brand similarMedicinePriority displayOrder")
+    .populate("molecules", "name slug")
+    .sort({ similarMedicinePriority: -1, displayOrder: 1 })
+    .limit(3);
+
+    res.status(200).json({ success: true, products: similar });
   } catch (error) {
     next(error);
   }

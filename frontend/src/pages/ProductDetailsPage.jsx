@@ -88,24 +88,26 @@ const ProductDetails = () => {
         setQuantity(1);
         setLocalRxFile(null);
         
-        // Fetch all products to calculate similar and related
-        const allProds = await api.getProductsList();
-        
-        // Related products: from product.relatedProducts or fallback to same brand
+        // V2 Fetch Fallback Related Products dynamically from category instead of fetching all products
         if (prod.relatedProducts && prod.relatedProducts.length > 0) {
           setRelatedProducts(prod.relatedProducts);
-        } else {
-          const related = allProds.filter(p => p.brand === prod.brand && p.slug !== prod.slug).slice(0, 4);
+        } else if (prod.category) {
+          const categoryName = prod.category?.name || prod.category;
+          const catRes = await api.getProducts({ category: categoryName, limit: 5 });
+          const related = (catRes.products || []).filter(p => p.slug !== prod.slug).slice(0, 4);
           setRelatedProducts(related);
+        } else {
+          setRelatedProducts([]);
         }
 
-        // Similar products: same category
-        const prodCatId = prod.category?._id || prod.category;
-        const similar = allProds.filter(p => {
-          const pCatId = p.category?._id || p.category;
-          return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
-        }).slice(0, 4);
-        setSimilarProducts(similar);
+        // Fetch Similar Medicines asynchronously based on molecule
+        try {
+          const similar = await api.getSimilarProducts(prod._id || prod.id);
+          setSimilarProducts(similar);
+        } catch (e) {
+          console.error("Failed to load similar products:", e);
+          setSimilarProducts([]);
+        }
 
         // Update recently viewed in localStorage
         try {
@@ -467,139 +469,192 @@ const ProductDetails = () => {
         <span className="text-slate-600 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
 
-      {/* SECTION 1: HERO */}
-      <div className="flex flex-col lg:flex-row gap-xl mb-xl items-start">
+      {/* SECTION 1: HERO V2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl items-start">
         
-        {/* Left Column: Image Gallery */}
-        <div className="w-full lg:w-[48%] space-y-md">
-          <div 
-            className="w-full aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-outline-variant/30 dark:border-outline/20 relative cursor-zoom-in flex items-center justify-center p-md shadow-md group/gallery"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onClick={() => setIsFullscreenOpen(true)}
-          >
-            {isImageLoading && (
-              <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-950 animate-pulse flex items-center justify-center rounded-3xl z-10">
-                <Loader size="sm" />
+        {/* LEFT COLUMN: SIMILAR MEDICINES (25%) */}
+        {similarProducts && similarProducts.length > 0 ? (
+          <aside className="lg:col-span-3 space-y-md w-full lg:sticky lg:top-24 order-2 lg:order-1 animate-[fade-in_0.3s_ease-out]">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs">
+              <h3 className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-zinc-800 mb-md flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-[#038076]">science</span>
+                Similar Medicines
+              </h3>
+              
+              <div className="space-y-sm">
+                {similarProducts.slice(0, 3).map((item) => {
+                  const itemDisc = item.originalPrice && item.originalPrice > item.price
+                    ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
+                    : 0;
+                  return (
+                    <Link
+                      key={item.slug || item._id}
+                      to={`/products/${item.slug}`}
+                      className="flex gap-sm p-sm rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 transition-all border border-transparent hover:border-slate-100 dark:hover:border-zinc-850"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shrink-0 border border-slate-100 dark:border-zinc-800 flex items-center justify-center p-0.5">
+                        <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
+                        <div className="space-y-0.5">
+                          <p className="text-[9px] uppercase tracking-wider font-extrabold text-[#004782]/80 dark:text-[#a4c9ff]/80 truncate">
+                            {item.brand}
+                          </p>
+                          <h4 className="font-extrabold text-[11px] text-slate-800 dark:text-zinc-200 line-clamp-1 leading-tight group-hover:text-primary">
+                            {item.name}
+                          </h4>
+                        </div>
+                        <div className="flex items-baseline gap-xs flex-wrap">
+                          <span className="font-black text-xs text-slate-800 dark:text-zinc-200">
+                            {formatCurrency(item.price)}
+                          </span>
+                          {itemDisc > 0 && (
+                            <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400">
+                              {itemDisc}% Off
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            )}
-            <img 
-              alt={product.imagesData?.[activeImageIdx]?.alt || product.name} 
-              title={product.imagesData?.[activeImageIdx]?.title || product.name}
-              className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover/gallery:scale-[1.03]" 
-              src={imagesList[activeImageIdx]}
-              onLoad={() => setIsImageLoading(false)}
-            />
-            {/* Image Counter */}
-            <span className="absolute bottom-4 right-4 bg-slate-950/75 backdrop-blur-xs text-white font-bold text-[10px] px-3 py-1.5 rounded-full select-none">
-              {activeImageIdx + 1} / {imagesList.length}
-            </span>
-            {/* Fullscreen Button */}
-            <button
-              type="button"
-              className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black p-2 rounded-full shadow-md text-slate-700 dark:text-slate-300 transition-colors z-10"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFullscreenOpen(true);
-              }}
-            >
-              <Maximize2 size={16} />
-            </button>
-            {/* Magnifier zoom portal (hidden on mobile touch) */}
-            <div 
-              className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900 hidden md:block opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-350" 
-              style={{
-                ...zoomStyle,
-                backgroundSize: "220%"
-              }}
-            />
-          </div>
 
-          {/* Thumbnail strip */}
-          {imagesList.length > 1 && (
-            <div className="flex gap-sm overflow-x-auto pb-xs scrollbar-none snap-x snap-mandatory">
-              {imagesList.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActiveImageIdx(idx)}
-                  className={`w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all snap-start ${
-                    activeImageIdx === idx 
-                      ? "border-[#004782] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
-                      : "border-outline-variant/30 dark:border-outline/20 hover:border-slate-300 dark:hover:border-zinc-700"
-                  }`}
-                >
-                  <img src={img} alt="" className="max-h-full max-w-full object-contain" />
-                </button>
-              ))}
+              {product.molecules?.[0] && (
+                <div className="mt-md pt-sm border-t border-slate-100 dark:border-zinc-800">
+                  <Link
+                    to={`/molecules/${product.molecules[0].slug}`}
+                    className="text-[11px] font-black text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center justify-center gap-xs"
+                  >
+                    <span>View All Similar Medicines</span>
+                    <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                  </Link>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </aside>
+        ) : (
+          <div className="hidden lg:block lg:col-span-3" />
+        )}
 
-        {/* Center Column: Key Specifications & Clinical Badges */}
-        <div className="flex-grow w-full lg:w-[28%] space-y-md">
-          <div className="space-y-sm">
-            {/* Badges */}
+        {/* CENTER COLUMN: GALLERY & PRODUCT SUMMARY (50%) */}
+        <div className={`w-full ${similarProducts && similarProducts.length > 0 ? "lg:col-span-6" : "lg:col-span-9"} space-y-md order-1 lg:order-2`}>
+          
+          {/* Product Header */}
+          <div className="space-y-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs text-left animate-[fade-in_0.2s_ease-out]">
+            {/* Badges Stack */}
             <div className="flex flex-wrap gap-xs items-center">
-              <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full border border-primary/10 shadow-xs">
+              <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full border border-primary/10 shadow-xs">
                 {product.category?.name || product.category}
               </span>
               {product.requiresRx ? (
-                <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full flex items-center gap-1 shadow-xs select-none">
-                  <ShieldCheck size={13} /> Rx Required
+                <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+                  <ShieldCheck size={11} /> Rx Required
                 </span>
               ) : (
-                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
+                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
                   OTC Medicine
+                </span>
+              )}
+              {product.isColdChain && (
+                <span className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+                  <span className="material-symbols-outlined text-[13px] leading-none">ac_unit</span> Cold Chain
+                </span>
+              )}
+              {product.productType === "wellness" && (
+                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+                  <span className="material-symbols-outlined text-[13px] leading-none">eco</span> Wellness
+                </span>
+              )}
+              {product.isImported && (
+                <span className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+                  <span className="material-symbols-outlined text-[13px] leading-none">flight_land</span> Imported
                 </span>
               )}
             </div>
 
-            {/* Brand & Name */}
             <div>
-              <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-xs">
+              <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-[11px]">
                 {product.brand}
               </p>
-              <h1 className="font-headline-md text-2xl md:text-3xl text-on-surface font-black leading-tight mt-1">
+              <h1 className="font-headline-md text-xl md:text-2xl lg:text-3xl text-on-surface font-black leading-tight mt-1">
                 {product.name}
               </h1>
-              <p className="text-xs text-slate-400 dark:text-zinc-500 font-semibold mt-1">
-                Generic Name: <span className="text-slate-600 dark:text-zinc-300 italic">{genericName}</span>
-              </p>
+              {product.manufacturer && (
+                <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-semibold mt-1">
+                  Mfg by: <span className="text-slate-600 dark:text-zinc-300 font-bold">{product.manufacturer}</span>
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Compact Info Rows with Icons */}
-          <div className="pt-md border-t border-outline-variant/30 dark:border-outline/20 space-y-xs text-xs">
-            {[
-              { label: "Brand", value: product.brand, icon: Tag },
-              { label: "Manufacturer", value: product.specifications?.find(s => s.label.toLowerCase().includes("manufacturer") || s.label.toLowerCase().includes("mfg"))?.value || "Bayer Healthcare Ltd.", icon: Building },
-              { label: "Generic Name", value: genericName, icon: Dna },
-              { label: "SKU Code", value: product.sku || "N/A", icon: Barcode, isMono: true },
-              { label: "Batch Info", value: "BY-0943A", icon: Hash, isMono: true },
-              { label: "Expiry Date", value: "12/2028", icon: Calendar },
-              { label: "Availability", value: product.stock > 10 ? "In Stock" : product.stock > 0 ? `Only ${product.stock} Left` : "Out of Stock", icon: Activity, isStock: true }
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-zinc-850 last:border-b-0">
-                  <span className="font-bold text-slate-400 flex items-center gap-xs">
-                    <Icon size={14} className="text-slate-400" />
-                    {item.label}
-                  </span>
-                  <span className={`font-bold text-right pl-sm ${
-                    item.isStock 
-                      ? (product.stock > 10 ? "text-[#086b53] dark:text-emerald-400" : "text-red-500") 
-                      : (item.isMono ? "font-mono text-slate-700 dark:text-zinc-200" : "text-slate-700 dark:text-zinc-200")
-                  }`}>
-                    {item.value}
-                  </span>
+          {/* Premium Image Gallery */}
+          <div className="space-y-md">
+            <div 
+              className="w-full aspect-[4/3] sm:aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-slate-100 dark:border-zinc-800 relative cursor-zoom-in flex items-center justify-center p-md shadow-md group/gallery"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onClick={() => setIsFullscreenOpen(true)}
+            >
+              {isImageLoading && (
+                <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-950 animate-pulse flex items-center justify-center rounded-3xl z-10">
+                  <Loader size="sm" />
                 </div>
-              );
-            })}
+              )}
+              <img 
+                alt={product.imagesData?.[activeImageIdx]?.alt || product.name} 
+                title={product.imagesData?.[activeImageIdx]?.title || product.name}
+                className="max-h-[90%] max-w-[90%] object-contain transition-transform duration-500 group-hover/gallery:scale-[1.04]" 
+                src={imagesList[activeImageIdx]}
+                onLoad={() => setIsImageLoading(false)}
+              />
+              {/* Image Counter */}
+              <span className="absolute bottom-4 right-4 bg-slate-950/75 backdrop-blur-xs text-white font-bold text-[10px] px-3 py-1.5 rounded-full select-none">
+                {activeImageIdx + 1} / {imagesList.length}
+              </span>
+              {/* Fullscreen Button */}
+              <button
+                type="button"
+                className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black p-2 rounded-full shadow-md text-slate-700 dark:text-slate-300 transition-colors z-10 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFullscreenOpen(true);
+                }}
+              >
+                <Maximize2 size={16} />
+              </button>
+              {/* Magnifier zoom portal (hidden on mobile touch) */}
+              <div 
+                className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900 hidden md:block opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-350" 
+                style={{
+                  ...zoomStyle,
+                  backgroundSize: "220%"
+                }}
+              />
+            </div>
+
+            {/* Thumbnail strip */}
+            {imagesList.length > 1 && (
+              <div className="flex gap-sm overflow-x-auto pb-xs scrollbar-none snap-x snap-mandatory justify-center">
+                {imagesList.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    className={`w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all snap-start cursor-pointer ${
+                      activeImageIdx === idx 
+                        ? "border-[#004782] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
+                        : "border-slate-100 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
+                    }`}
+                  >
+                    <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Rx upload warning box if required */}
@@ -614,122 +669,193 @@ const ProductDetails = () => {
               </p>
             </div>
           )}
-        </div>
 
-        {/* Right Column: Sticky Purchase Card (Desktop) */}
-        <div className="w-full lg:w-[24%] lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 p-lg rounded-3xl shadow-lg space-y-lg text-xs">
-          
-          {/* Price Panel */}
-          <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850/60">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Price</span>
-            <div className="flex items-baseline gap-xs mt-xs flex-wrap">
-              <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim">
-                {formatCurrency(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-slate-400 line-through text-xs font-semibold">
-                  {formatCurrency(product.originalPrice)}
-                </span>
-              )}
-            </div>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <div className="flex flex-wrap gap-xs items-center mt-sm">
-                <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                  {discountPercent}% OFF
-                </span>
-                <span className="text-[10px] font-bold text-[#086b53] dark:text-emerald-400">
-                  Save {formatCurrency(product.originalPrice - product.price)}
-                </span>
-              </div>
-            )}
-            <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
-          </div>
-
-          {/* Quantity Selector */}
-          {product.stock > 0 && (
-            <div className="space-y-sm">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
-              <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-2xl bg-slate-50/50 dark:bg-zinc-905 h-11 w-full justify-between p-1">
-                <button
-                  type="button"
-                  onClick={handleDecrement}
-                  disabled={quantity <= 1}
-                  className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]">remove</span>
-                </button>
-                <span className="font-extrabold text-sm text-on-surface">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={handleIncrement}
-                  disabled={quantity >= product.stock}
-                  className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]">add</span>
-                </button>
+          {/* Salt Composition Section */}
+          {product.molecules && product.molecules.length > 0 && (
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs text-left">
+              <h3 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Salt Composition</h3>
+              <div className="flex flex-wrap gap-xs items-center">
+                {product.molecules.map((mol, idx) => (
+                  <Link
+                    key={mol.slug || idx}
+                    to={`/molecules/${mol.slug}`}
+                    className="inline-flex items-center gap-1.5 px-md py-2 rounded-xl bg-teal-500/10 hover:bg-teal-500/15 border border-teal-500/20 text-[#038076] dark:text-[#84d6b9] text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">science</span>
+                    {mol.name}
+                  </Link>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Checkout / ATC Buttons */}
-          <div className="space-y-sm pt-xs">
-            <button
-              onClick={handleBuyNow}
-              disabled={product.stock === 0}
-              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-2xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs shadow-sm"
-            >
-              Buy Now
-            </button>
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className="w-full border-2 border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]/50 hover:bg-[#004782]/5 font-bold h-11 rounded-2xl transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs"
-            >
-              Add to Cart
-            </button>
-          </div>
-
-          {/* Secondary Actions */}
-          <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-md">
-            <button
-              onClick={handleShare}
-              className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"
-            >
-              <Share2 size={14} />
-              Share
-            </button>
-          </div>
-
-          {/* Delivery estimate */}
-          <div className="text-left bg-slate-50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
-            <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
-              <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
-            </p>
-            <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Free delivery by Tomorrow, 2:00 PM</p>
-          </div>
-
-          {/* Trust badges */}
-          <div className="space-y-sm pt-md border-t border-slate-150 dark:border-zinc-850">
-            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                <Check size={12} className="text-emerald-500" />
-              </div>
-              <span>100% Genuine Product</span>
-            </div>
-            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-              <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                <Lock size={12} className="text-[#004782]" />
-              </div>
-              <span>Secure Encrypted Payment</span>
-            </div>
-            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-              <div className="w-5 h-5 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
-                <ShieldCheck size={12} className="text-[#086b53]" />
-              </div>
-              <span>Pharmacist Verified</span>
+          {/* Specifications */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs text-left space-y-sm">
+            <h3 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800 pb-2">Technical Specifications</h3>
+            <div className="grid grid-cols-2 gap-md text-xs">
+              {[
+                { label: "Manufacturer", value: product.manufacturer || "N/A" },
+                { label: "Strength", value: product.strength || "N/A" },
+                { label: "Pack Size", value: product.packSize || "N/A" },
+                { label: "Imported Country", value: product.isImported && product.importedCountry ? product.importedCountry : "N/A" },
+                { label: "Category Class", value: product.medicineCategory || "N/A" },
+                { label: "SKU Code", value: product.sku || "N/A", isMono: true },
+              ].map((item, idx) => (
+                <div key={idx} className="space-y-0.5 animate-[fade-in_0.2s_ease-out]">
+                  <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</span>
+                  <span className={`font-extrabold text-slate-700 dark:text-zinc-200 ${item.isMono ? "font-mono" : ""}`}>{item.value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
+          {/* Product Overview Summary */}
+          {product.description && (
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-xs text-left space-y-sm animate-[fade-in_0.2s_ease-out]">
+              <h3 className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Product Summary</h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: STICKY PURCHASE PANEL (25%) */}
+        <div className="lg:col-span-3 lg:sticky lg:top-24 w-full space-y-md order-3 animate-[fade-in_0.3s_ease-out]">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-850/60 p-lg rounded-3xl shadow-lg space-y-lg text-xs">
+            {/* Price Panel */}
+            <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850/60 text-left">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Purchase Price</span>
+              <div className="flex items-baseline gap-xs mt-xs flex-wrap">
+                <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim">
+                  {formatCurrency(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-slate-400 line-through text-xs font-semibold">
+                    {formatCurrency(product.originalPrice)}
+                  </span>
+                )}
+              </div>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <div className="flex flex-wrap gap-xs items-center mt-sm">
+                  <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                    {discountPercent}% OFF
+                  </span>
+                  <span className="text-[10px] font-bold text-[#086b53] dark:text-emerald-400">
+                    Save {formatCurrency(product.originalPrice - product.price)}
+                  </span>
+                </div>
+              )}
+              <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
+            </div>
+
+            {/* Pack Size / Specifications Indicator */}
+            {(product.packSize || product.strength) && (
+              <div className="flex justify-between items-center bg-slate-50/50 dark:bg-zinc-950/10 px-md py-sm rounded-xl border border-slate-100 dark:border-zinc-855 text-left">
+                {product.packSize && (
+                  <div>
+                    <span className="block text-[8px] font-extrabold uppercase text-slate-400 tracking-wider">Pack Size</span>
+                    <span className="font-bold text-xs text-slate-700 dark:text-zinc-200">{product.packSize}</span>
+                  </div>
+                )}
+                {product.strength && (
+                  <div className="text-right">
+                    <span className="block text-[8px] font-extrabold uppercase text-slate-400 tracking-wider">Strength</span>
+                    <span className="font-bold text-xs text-slate-700 dark:text-zinc-200">{product.strength}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            {product.stock > 0 ? (
+              <div className="space-y-sm text-left">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
+                <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-2xl bg-slate-50/50 dark:bg-zinc-905 h-11 w-full justify-between p-1">
+                  <button
+                    type="button"
+                    onClick={handleDecrement}
+                    disabled={quantity <= 1}
+                    className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+                  <span className="font-extrabold text-sm text-on-surface">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={handleIncrement}
+                    disabled={quantity >= product.stock}
+                    className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-sm bg-red-500/5 border border-red-500/10 text-red-500 font-bold rounded-xl text-center">
+                This item is currently Out of Stock
+              </div>
+            )}
+
+            {/* Checkout / ATC Buttons */}
+            <div className="space-y-sm pt-xs">
+              <button
+                onClick={handleBuyNow}
+                disabled={product.stock === 0}
+                className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-2xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs shadow-sm"
+              >
+                Buy Now
+              </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="w-full border-2 border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]/50 hover:bg-[#004782]/5 font-bold h-11 rounded-2xl transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs"
+              >
+                Add to Cart
+              </button>
+            </div>
+
+            {/* Secondary Actions */}
+            <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-md">
+              <button
+                onClick={handleShare}
+                className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"
+              >
+                <Share2 size={14} />
+                Share
+              </button>
+            </div>
+
+            {/* Delivery estimate */}
+            <div className="text-left bg-slate-50 dark:bg-zinc-955/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
+              <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
+                <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
+              </p>
+              <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Free delivery by Tomorrow, 2:00 PM</p>
+            </div>
+
+            {/* Trust badges */}
+            <div className="space-y-sm pt-md border-t border-slate-150 dark:border-zinc-850 text-left">
+              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Check size={12} className="text-emerald-500" />
+                </div>
+                <span>100% Genuine Product</span>
+              </div>
+              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+                <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <Lock size={12} className="text-[#004782]" />
+                </div>
+                <span>Secure Encrypted Payment</span>
+              </div>
+              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+                <div className="w-5 h-5 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={12} className="text-[#086b53]" />
+                </div>
+                <span>Pharmacist Verified</span>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

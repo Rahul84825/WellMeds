@@ -1,5 +1,5 @@
 import express from "express";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from "../controllers/productController.js";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 import { searchLimiter } from "../middleware/rateLimitMiddleware.js";
@@ -14,5 +14,8 @@ router.route("/:id")
   .get(getProduct)
   .put(protect, admin, updateProduct)
   .delete(protect, admin, deleteProduct);
+
+router.route("/:id/similar")
+  .get(getSimilarProducts);
 
 export default router;

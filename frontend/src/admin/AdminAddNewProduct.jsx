@@ -53,6 +53,17 @@ const AddNewProduct = () => {
   const [selectedMolecules, setSelectedMolecules] = useState([]);
   const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
   const [moleculeDropdownOpen, setMoleculeDropdownOpen] = useState(false);
+
+  // V2 Medical catalog fields state
+  const [manufacturer, setManufacturer] = useState("");
+  const [importedCountry, setImportedCountry] = useState("");
+  const [strength, setStrength] = useState("");
+  const [packSize, setPackSize] = useState("");
+  const [displayOrder, setDisplayOrder] = useState("");
+  const [similarMedicinePriority, setSimilarMedicinePriority] = useState("");
+  const [isImported, setIsImported] = useState(false);
+  const [slug, setSlug] = useState("");
+  const [medicineCategory, setMedicineCategory] = useState("");
   
   // Images
   const [images, setImages] = useState([]);
@@ -99,6 +110,17 @@ const AddNewProduct = () => {
             setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
             setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
+            
+            // V2 Fields
+            setManufacturer(product.manufacturer || "");
+            setImportedCountry(product.importedCountry || "");
+            setStrength(product.strength || "");
+            setPackSize(product.packSize || "");
+            setDisplayOrder(product.displayOrder !== undefined ? product.displayOrder : "");
+            setSimilarMedicinePriority(product.similarMedicinePriority !== undefined ? product.similarMedicinePriority : "");
+            setIsImported(product.isImported || false);
+            setSlug(product.slug || "");
+            setMedicineCategory(product.medicineCategory || "");
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -419,6 +441,17 @@ const AddNewProduct = () => {
       molecules: selectedMolecules,
       isSurgical,
       surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
+      
+      // V2 Fields
+      manufacturer: manufacturer.trim(),
+      importedCountry: importedCountry.trim(),
+      strength: strength.trim(),
+      packSize: packSize.trim(),
+      displayOrder: displayOrder !== "" ? parseInt(displayOrder) : 0,
+      similarMedicinePriority: similarMedicinePriority !== "" ? parseInt(similarMedicinePriority) : 0,
+      isImported,
+      slug: slug.trim() || undefined,
+      medicineCategory: medicineCategory.trim(),
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -808,34 +841,143 @@ const AddNewProduct = () => {
                 />
               </div>
 
-              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800 space-y-md">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Medical Information</h4>
+              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800 space-y-md animate-[fade-in_0.2s_ease-out]">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Medical Catalog Parameters</h4>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                  <div className="flex items-center gap-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manufacturer</label>
                     <input
-                      type="checkbox"
-                      id="isPrescriptionRequired"
-                      checked={isPrescriptionRequired}
-                      onChange={(e) => setIsPrescriptionRequired(e.target.checked)}
-                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      type="text"
+                      value={manufacturer}
+                      onChange={(e) => setManufacturer(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. Pfizer India Ltd."
                     />
-                    <label htmlFor="isPrescriptionRequired" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                      Prescription Required
-                    </label>
                   </div>
-
-                  <div className="flex items-center gap-sm">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Strength</label>
                     <input
-                      type="checkbox"
-                      id="isColdChain"
-                      checked={isColdChain}
-                      onChange={(e) => setIsColdChain(e.target.checked)}
-                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      type="text"
+                      value={strength}
+                      onChange={(e) => setStrength(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. 500 mg"
                     />
-                    <label htmlFor="isColdChain" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                      Temperature Controlled Product
-                    </label>
+                  </div>
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pack Size</label>
+                    <input
+                      type="text"
+                      value={packSize}
+                      onChange={(e) => setPackSize(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. 10 Tablets in 1 Strip"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Imported Country</label>
+                    <input
+                      type="text"
+                      value={importedCountry}
+                      onChange={(e) => setImportedCountry(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. United Kingdom"
+                    />
+                  </div>
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Medicine Category / Class</label>
+                    <input
+                      type="text"
+                      value={medicineCategory}
+                      onChange={(e) => setMedicineCategory(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. Analgesic"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-sm">
+                    <div className="space-y-xs">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Order</label>
+                      <input
+                        type="number"
+                        value={displayOrder}
+                        onChange={(e) => setDisplayOrder(e.target.value)}
+                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-xs">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Similar Priority</label>
+                      <input
+                        type="number"
+                        value={similarMedicinePriority}
+                        onChange={(e) => setSimilarMedicinePriority(e.target.value)}
+                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-zinc-955/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-800/80 space-y-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
+                    <div className="flex items-center gap-sm">
+                      <input
+                        type="checkbox"
+                        id="isPrescriptionRequired"
+                        checked={isPrescriptionRequired}
+                        onChange={(e) => {
+                          setIsPrescriptionRequired(e.target.checked);
+                          setRequiresRx(e.target.checked);
+                        }}
+                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      />
+                      <label htmlFor="isPrescriptionRequired" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                        Rx Required
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-sm">
+                      <input
+                        type="checkbox"
+                        id="isColdChain"
+                        checked={isColdChain}
+                        onChange={(e) => setIsColdChain(e.target.checked)}
+                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      />
+                      <label htmlFor="isColdChain" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                        Cold Chain
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-sm">
+                      <input
+                        type="checkbox"
+                        id="isWellnessToggle"
+                        checked={productType === "wellness"}
+                        onChange={(e) => setProductType(e.target.checked ? "wellness" : "medicine")}
+                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      />
+                      <label htmlFor="isWellnessToggle" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                        Wellness Product
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-sm">
+                      <input
+                        type="checkbox"
+                        id="isImportedToggle"
+                        checked={isImported}
+                        onChange={(e) => setIsImported(e.target.checked)}
+                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                      />
+                      <label htmlFor="isImportedToggle" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
+                        Imported Product
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1364,7 +1506,7 @@ const AddNewProduct = () => {
                   Search Engine Optimization (SEO)
                 </h3>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
                   <div className="space-y-xs">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Meta Title</label>
                     <input
@@ -1373,6 +1515,16 @@ const AddNewProduct = () => {
                       onChange={(e) => setMetaTitle(e.target.value)}
                       placeholder="e.g. Buy Dolo 650 Online | WellMeds"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
+                    />
+                  </div>
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">URL Custom Slug</label>
+                    <input
+                      type="text"
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      placeholder="e.g. dolo-650-paracetamol"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none font-mono"
                     />
                   </div>
                   <div className="space-y-xs">
