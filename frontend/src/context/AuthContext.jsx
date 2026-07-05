@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Cart/Wishlist sync callbacks
+  // Cart sync callbacks
   const [onLoginCallbacks] = useState([]);
   const [onLogoutCallbacks] = useState([]);
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const loggedUser = await api.loginWithGoogle(credential);
       setUser(loggedUser);
-      // Fire post-login callbacks (cart sync, wishlist sync)
+      // Fire post-login callbacks (cart sync)
       onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
       return loggedUser;
     } finally {
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const loggedUser = await api.loginUser(email, password);
       setUser(loggedUser);
-      // Fire post-login callbacks (cart sync, wishlist sync)
+      // Fire post-login callbacks (cart sync)
       onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
       return loggedUser;
     } finally {

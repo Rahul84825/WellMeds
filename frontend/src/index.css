@@ -42,11 +42,6 @@
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 
-/* Product Card overlays */
-.product-card-hover:hover .quick-view-overlay {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* Custom minimal scrollbar utility */
 .custom-scrollbar::-webkit-scrollbar {

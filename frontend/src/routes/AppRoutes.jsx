@@ -16,7 +16,6 @@ import ProductDetailsPage from "../pages/ProductDetailsPage";
 import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderSuccessPage from "../pages/OrderSuccessPage";
-import WishlistPage from "../pages/WishlistPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import Login from "../pages/Login";
@@ -75,7 +74,6 @@ const AppRoutes = () => {
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-success" element={<OrderSuccessPage />} />
-        <Route path="wishlist" element={<WishlistPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="imported-medicines" element={<ImportedMedicinesPage />} />

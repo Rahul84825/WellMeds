@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
-import { useWishlist } from "../hooks/useWishlist";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
 import { formatCurrency } from "../utils/currency";
@@ -10,15 +9,12 @@ import { toast } from "sonner";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  const { isInWishlist, toggleWishlist } = useWishlist();
-  const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [rxUploadOpen, setRxUploadOpen] = useState(false);
   const [localRxFile, setLocalRxFile] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null); // 'rx' | 'coldChain' | null
 
   const productId = (product._id || product.id)?.toString();
-  const favorited = isInWishlist(productId);
 
   React.useEffect(() => {
     if (!activeTooltip) return;
@@ -98,23 +94,13 @@ const ProductCard = ({ product }) => {
       >
         
         {/* Product Image Section (45-50% height) */}
-        <div className="relative overflow-hidden rounded-xl bg-white dark:bg-zinc-950 flex items-center justify-center shrink-0 h-[140px] sm:h-[160px] md:h-[180px] w-full">
+        <div className="relative overflow-hidden rounded-xl bg-white dark:bg-zinc-955 flex items-center justify-center shrink-0 h-[140px] sm:h-[160px] md:h-[180px] w-full">
           <img
             alt={product.name}
-            className="max-h-[85%] max-w-[85%] object-contain p-1 transition-transform duration-500 md:group-hover:scale-104"
+            className="max-h-[90%] max-w-[90%] object-contain p-1 transition-transform duration-500 md:group-hover:scale-104"
             src={product.image}
             loading="lazy"
           />
-          
-          {/* Quick View Button on Desktop Hover */}
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto z-10">
-            <button
-              onClick={() => setQuickViewOpen(true)}
-              className="bg-white hover:bg-primary hover:text-white text-slate-800 font-bold px-md py-2 text-xs rounded-xl shadow-md transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none cursor-pointer"
-            >
-              Quick View
-            </button>
-          </div>
           
           {/* Badges Stack (Vertical top-left) */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
@@ -139,78 +125,64 @@ const ProductCard = ({ product }) => {
             )}
           </div>
  
-          {/* Top Right Badges & Wishlist Overlay */}
-          <div className="absolute top-2 right-2 flex flex-col items-center gap-2 z-20">
-            {/* Wishlist Button */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWishlist(product);
-              }}
-              aria-label={favorited ? "Remove from wishlist" : "Add to wishlist"}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/90 dark:bg-zinc-800/90 border border-slate-100 dark:border-zinc-700 shadow-sm hover:bg-white dark:hover:bg-zinc-750 text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 hover:scale-110 active:scale-90 transition-all focus-visible:ring-2 focus-visible:ring-primary outline-none cursor-pointer"
-              title={favorited ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <span className={`material-symbols-outlined text-[18px] ${favorited ? "text-rose-600 dark:text-rose-500" : ""}`} style={{ fontVariationSettings: favorited ? "'FILL' 1" : "'FILL' 0" }}>
-                favorite
-              </span>
-            </button>
+          {/* Top Right Badges Overlay */}
+          {(isRx || isColdChain) && (
+            <div className="absolute top-2 right-2 flex flex-col items-center gap-2 z-20">
+              {/* Rx Badge */}
+              {isRx && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={toggleRxTooltip}
+                    onMouseEnter={() => setActiveTooltip("rx")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    className="w-9 h-9 rounded-full bg-rose-50 dark:bg-rose-955/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
+                  >
+                    <span className="font-extrabold text-[11px] tracking-tight">Rx</span>
+                  </button>
+                  {activeTooltip === "rx" && (
+                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
+                      <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-rose-400">
+                        <span className="material-symbols-outlined text-[15px]">verified</span>
+                        Prescription Required
+                      </div>
+                      <div className="text-[10px] leading-relaxed text-slate-300">
+                        A valid doctor's prescription is required before this medicine can be purchased.
+                      </div>
+                      <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* Rx Badge */}
-            {isRx && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleRxTooltip}
-                  onMouseEnter={() => setActiveTooltip("rx")}
-                  onMouseLeave={() => setActiveTooltip(null)}
-                  className="w-9 h-9 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
-                >
-                  <span className="font-extrabold text-[11px] tracking-tight">Rx</span>
-                </button>
-                {activeTooltip === "rx" && (
-                  <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
-                    <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-rose-400">
-                      <span className="material-symbols-outlined text-[15px]">verified</span>
-                      Prescription Required
+              {/* Cold Chain Badge */}
+              {isColdChain && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={toggleColdChainTooltip}
+                    onMouseEnter={() => setActiveTooltip("coldChain")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    className="w-9 h-9 rounded-full bg-sky-50 dark:bg-sky-955/40 border border-sky-200 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">ac_unit</span>
+                  </button>
+                  {activeTooltip === "coldChain" && (
+                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
+                      <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-sky-400">
+                        <span className="material-symbols-outlined text-[15px]">ac_unit</span>
+                        Temperature Controlled
+                      </div>
+                      <div className="text-[10px] leading-relaxed text-slate-300">
+                        This medicine is shipped using certified cold-chain logistics to maintain the required storage temperature throughout delivery.
+                      </div>
+                      <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
                     </div>
-                    <div className="text-[10px] leading-relaxed text-slate-300">
-                      A valid doctor's prescription is required before this medicine can be purchased.
-                    </div>
-                    <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Cold Chain Badge */}
-            {isColdChain && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleColdChainTooltip}
-                  onMouseEnter={() => setActiveTooltip("coldChain")}
-                  onMouseLeave={() => setActiveTooltip(null)}
-                  className="w-9 h-9 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
-                >
-                  <span className="material-symbols-outlined text-[18px]">ac_unit</span>
-                </button>
-                {activeTooltip === "coldChain" && (
-                  <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
-                    <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-sky-400">
-                      <span className="material-symbols-outlined text-[15px]">ac_unit</span>
-                      Temperature Controlled
-                    </div>
-                    <div className="text-[10px] leading-relaxed text-slate-300">
-                      This medicine is shipped using certified cold-chain logistics to maintain the required storage temperature throughout delivery.
-                    </div>
-                    <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
  
         {/* Product Details Section */}
@@ -306,7 +278,7 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
       </div>
-
+ 
       {/* Prescription Upload Modal */}
       <Modal
         isOpen={rxUploadOpen}
@@ -326,76 +298,6 @@ const ProductCard = ({ product }) => {
           onUploadSuccess={handleRxSuccess}
           onClose={() => setRxUploadOpen(false)}
         />
-      </Modal>
-
-      {/* Quick View Modal */}
-      <Modal
-        isOpen={quickViewOpen}
-        onClose={() => setQuickViewOpen(false)}
-        title="Product Quick View"
-        maxWidth="max-w-2xl"
-      >
-        <div className="flex flex-col md:flex-row gap-lg text-left">
-          <div className="w-full md:w-1/2 aspect-square rounded-lg overflow-hidden bg-surface-container">
-            <img alt={product.name} className="w-full h-full object-cover" src={product.image} />
-          </div>
-          <div className="w-full md:w-1/2 flex flex-col justify-between">
-            <div>
-              <p className="text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                {product.brand}
-              </p>
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mt-xs">
-                {product.name}
-              </h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant my-md leading-relaxed">
-                {product.description}
-              </p>
-              <div className="flex items-center gap-sm my-md">
-                <span className="text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">
-                  {formatCurrency(product.price)}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-on-surface-variant line-through text-body-md">
-                    {formatCurrency(product.originalPrice)}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-sm pt-md border-t border-outline-variant">
-              {isRx && (
-                <div className="flex items-center gap-xs text-secondary font-medium text-body-sm">
-                  <span className="material-symbols-outlined text-[18px]">verified</span>
-                  <span>Prescription Required</span>
-                </div>
-              )}
-              
-              <div className="flex gap-sm">
-                <button
-                  onClick={(e) => {
-                    handleAddToCart(e);
-                    setQuickViewOpen(false);
-                  }}
-                  disabled={product.stock === 0 || isAdding}
-                  className="flex-1 bg-secondary text-white py-2 min-h-[44px] flex items-center justify-center rounded-lg font-label-md text-label-md font-bold hover:bg-on-secondary-container transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 outline-none"
-                >
-                  {isAdding ? "Adding..." : product.stock === 0 ? "Out of Stock" : isRx ? "Upload Rx & Add" : "Add to Cart"}
-                </button>
-                <button
-                  onClick={() => {
-                    toggleWishlist(product);
-                  }}
-                  className="p-sm w-11 h-11 flex items-center justify-center border border-outline-variant rounded-lg hover:bg-surface-container transition-colors active:scale-95 focus-visible:ring-2 focus-visible:ring-primary outline-none"
-                  title={favorited ? "Remove from wishlist" : "Add to wishlist"}
-                >
-                  <span className={`material-symbols-outlined ${favorited ? "text-error" : "text-on-surface-variant"}`} style={{ fontVariationSettings: favorited ? "'FILL' 1" : "'FILL' 0" }}>
-                    favorite
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </Modal>
     </>
   );

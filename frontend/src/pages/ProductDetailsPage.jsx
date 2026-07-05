@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
-import { useWishlist } from "../hooks/useWishlist";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
@@ -13,7 +12,6 @@ import {
   ShieldCheck, 
   ChevronDown, 
   ChevronUp, 
-  Heart, 
   Share2, 
   FileText, 
   AlertTriangle,
@@ -47,7 +45,6 @@ const ProductDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -449,7 +446,6 @@ const ProductDetails = () => {
 
   if (!product) return null;
 
-  const favorited = isInWishlist(product.id || product._id);
   const discountPercent = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -695,14 +691,6 @@ const ProductDetails = () => {
 
           {/* Secondary Actions */}
           <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-md">
-            <button
-              onClick={() => toggleWishlist(product)}
-              className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold"
-            >
-              <Heart size={14} className={favorited ? "text-red-500 fill-red-500" : "text-slate-400"} />
-              {favorited ? "Wishlisted" : "Wishlist"}
-            </button>
-
             <button
               onClick={handleShare}
               className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"

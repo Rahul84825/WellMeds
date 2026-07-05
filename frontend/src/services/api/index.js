@@ -9,18 +9,7 @@ import { specialityService } from "./specialityService";
 import { moleculeService } from "./moleculeService";
 import { surgicalCategoryService } from "./surgicalCategoryService";
 
-// Wishlist service (inline)
 import apiInstance from "./api";
-const wishlistService = {
-  async getWishlist() {
-    const data = await apiInstance.get("/wishlist");
-    return data.products || [];
-  },
-  async toggleWishlist(productId) {
-    const data = await apiInstance.post("/wishlist/toggle", { productId });
-    return data.products || [];
-  },
-};
 
 // Admin service (inline) — maps to /api/admin/* routes
 const adminService = {
@@ -56,7 +45,6 @@ export const api = {
   ...prescriptionService,
   ...cartService,
   ...couponService,
-  ...wishlistService,
   ...adminService,
   ...specialityService,
   ...moleculeService,

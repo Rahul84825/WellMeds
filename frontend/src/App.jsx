@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 // Context Providers
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
-import { WishlistProvider, useWishlist } from "./context/WishlistContext";
 
 import { Toaster } from "sonner";
 
@@ -13,30 +12,26 @@ import AppRoutes from "./routes/AppRoutes";
 import ScrollToTop from "./components/ScrollToTop";
 
 /**
- * SyncBridge — registers cart/wishlist sync callbacks with AuthContext
+ * SyncBridge — registers cart sync callbacks with AuthContext
  * so they fire automatically after login/logout.
- * Must be rendered inside all three providers.
+ * Must be rendered inside both providers.
  */
 const SyncBridge = () => {
   const { registerLoginCallback, registerLogoutCallback } = useAuth();
   const { syncCartForUser, saveCartToLocalOnLogout } = useCart();
-  const { syncWishlistForUser } = useWishlist();
 
   useEffect(() => {
     const unsubCart = registerLoginCallback(syncCartForUser);
-    const unsubWishlist = registerLoginCallback(syncWishlistForUser);
     const unsubCartLogout = registerLogoutCallback(saveCartToLocalOnLogout);
 
     return () => {
       unsubCart();
-      unsubWishlist();
       unsubCartLogout();
     };
   }, [
     registerLoginCallback,
     registerLogoutCallback,
     syncCartForUser,
-    syncWishlistForUser,
     saveCartToLocalOnLogout,
   ]);
 
@@ -47,14 +42,12 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <WishlistProvider>
-          <BrowserRouter>
-            <Toaster position="top-right" richColors closeButton />
-            <ScrollToTop />
-            <SyncBridge />
-            <AppRoutes />
-          </BrowserRouter>
-        </WishlistProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" richColors closeButton />
+          <ScrollToTop />
+          <SyncBridge />
+          <AppRoutes />
+        </BrowserRouter>
       </CartProvider>
     </AuthProvider>
   );

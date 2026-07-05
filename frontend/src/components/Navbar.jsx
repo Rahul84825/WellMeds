@@ -8,7 +8,6 @@ import {
   Percent,
   LogOut,
   LayoutDashboard,
-  Heart,
   History,
   ChevronDown,
   FileText,
@@ -443,14 +442,6 @@ const NavActions = () => {
         icon: FileText,
         className: "text-gray-700 hover:bg-gray-50 font-medium"
       });
-      dropdownItems.push({
-        id: "my-wishlist",
-        type: "link",
-        to: "/wishlist",
-        label: "Wishlist",
-        icon: Heart,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
-      });
     }
     dropdownItems.push({
       id: "logout",
@@ -751,7 +742,7 @@ const Navbar = () => {
           </div>
 
           {/* Quick Action Badges */}
-          <div className="grid grid-cols-2 gap-sm">
+          <div className="grid grid-cols-1 gap-sm">
             <Link
               to="/cart"
               onClick={() => setMobileMenuOpen(false)}
@@ -759,15 +750,6 @@ const Navbar = () => {
             >
               <ShoppingCart className="w-4 h-4 text-[#004782]" />
               <span>Cart ({cartCount})</span>
-            </Link>
-
-            <Link
-              to="/wishlist"
-              onClick={() => setMobileMenuOpen(false)}
-              className="h-11 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center gap-xs text-xs text-on-surface font-semibold hover:bg-slate-50"
-            >
-              <Heart className="w-4 h-4 text-red-500" />
-              <span>Wishlist</span>
             </Link>
           </div>
 
