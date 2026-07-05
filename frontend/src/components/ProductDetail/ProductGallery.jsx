@@ -39,7 +39,7 @@ const ProductGallery = ({
 
       {/* Main Image Container */}
       <div 
-        className="w-full max-w-[580px] aspect-square rounded-2xl bg-white dark:bg-zinc-900 overflow-hidden relative cursor-zoom-in flex items-center justify-center p-md group/zoom"
+        className="w-full aspect-square rounded-2xl bg-white dark:bg-zinc-900 overflow-hidden relative cursor-zoom-in flex items-center justify-center p-[24px] group/zoom"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
@@ -48,13 +48,13 @@ const ProductGallery = ({
         onClick={() => setIsFullscreenOpen(true)}
       >
         {isImageLoading && (
-          <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-950 animate-pulse flex items-center justify-center rounded-2xl z-10">
+          <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-955 animate-pulse flex items-center justify-center rounded-2xl z-10">
             <Loader size="sm" />
           </div>
         )}
         <img 
           alt={productName} 
-          className="max-h-[94%] max-w-[94%] object-contain transition-transform duration-500 group-hover/zoom:scale-[1.05]" 
+          className="w-auto h-auto max-w-[88%] max-h-[88%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
           src={imagesList[activeImageIdx]}
           onLoad={() => setIsImageLoading(false)}
         />
