@@ -88,26 +88,24 @@ const ProductDetails = () => {
         setQuantity(1);
         setLocalRxFile(null);
         
-        // V2 Fetch Fallback Related Products dynamically from category instead of fetching all products
+        // Fetch all products to calculate similar and related
+        const allProds = await api.getProductsList();
+        
+        // Related products: from product.relatedProducts or fallback to same brand
         if (prod.relatedProducts && prod.relatedProducts.length > 0) {
           setRelatedProducts(prod.relatedProducts);
-        } else if (prod.category) {
-          const categoryName = prod.category?.name || prod.category;
-          const catRes = await api.getProducts({ category: categoryName, limit: 5 });
-          const related = (catRes.products || []).filter(p => p.slug !== prod.slug).slice(0, 4);
-          setRelatedProducts(related);
         } else {
-          setRelatedProducts([]);
+          const related = allProds.filter(p => p.brand === prod.brand && p.slug !== prod.slug).slice(0, 4);
+          setRelatedProducts(related);
         }
 
-        // Fetch Similar Medicines asynchronously based on molecule
-        try {
-          const similar = await api.getSimilarProducts(prod._id || prod.id);
-          setSimilarProducts(similar);
-        } catch (e) {
-          console.error("Failed to load similar products:", e);
-          setSimilarProducts([]);
-        }
+        // Similar products: same category
+        const prodCatId = prod.category?._id || prod.category;
+        const similar = allProds.filter(p => {
+          const pCatId = p.category?._id || p.category;
+          return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
+        }).slice(0, 4);
+        setSimilarProducts(similar);
 
         // Update recently viewed in localStorage
         try {
@@ -469,256 +467,139 @@ const ProductDetails = () => {
         <span className="text-slate-600 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
 
-      {/* 3-COLUMN LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-lg mb-xl items-start w-full">
+      {/* SECTION 1: HERO */}
+      <div className="flex flex-col lg:flex-row gap-xl mb-xl items-start">
         
-        {/* LEFT SIDEBAR (22%) */}
-        <aside className="w-full lg:w-[22%] shrink-0 lg:sticky lg:top-24 space-y-md order-2 lg:order-1 select-none">
-          {/* Similar Medicines Card */}
-          {similarProducts && similarProducts.length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs">
-              <h3 className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-zinc-800 mb-md flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#038076]">science</span>
-                Similar Medicines
-              </h3>
-              
-              <div className="space-y-sm">
-                {similarProducts.slice(0, 3).map((item) => {
-                  const itemDisc = item.originalPrice && item.originalPrice > item.price
-                    ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
-                    : 0;
-                  return (
-                    <Link
-                      key={item.slug || item._id}
-                      to={`/products/${item.slug}`}
-                      className="flex gap-sm p-sm rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 transition-all border border-transparent hover:border-slate-100 dark:hover:border-zinc-850"
-                    >
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shrink-0 border border-slate-100 dark:border-zinc-800 flex items-center justify-center p-0.5">
-                        <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
-                      </div>
-                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
-                        <div className="space-y-0.5">
-                          <p className="text-[9px] uppercase tracking-wider font-extrabold text-[#004782]/80 dark:text-[#a4c9ff]/80 truncate">
-                            {item.brand}
-                          </p>
-                          <h4 className="font-extrabold text-[11px] text-slate-800 dark:text-zinc-200 line-clamp-1 leading-tight group-hover:text-primary">
-                            {item.name}
-                          </h4>
-                        </div>
-                        <div className="flex items-baseline gap-xs flex-wrap">
-                          <span className="font-black text-xs text-slate-800 dark:text-zinc-200">
-                            {formatCurrency(item.price)}
-                          </span>
-                          {itemDisc > 0 && (
-                            <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400">
-                              {itemDisc}% Off
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+        {/* Left Column: Image Gallery */}
+        <div className="w-full lg:w-[48%] space-y-md">
+          <div 
+            className="w-full aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden border border-outline-variant/30 dark:border-outline/20 relative cursor-zoom-in flex items-center justify-center p-md shadow-md group/gallery"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onClick={() => setIsFullscreenOpen(true)}
+          >
+            {isImageLoading && (
+              <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-950 animate-pulse flex items-center justify-center rounded-3xl z-10">
+                <Loader size="sm" />
               </div>
+            )}
+            <img 
+              alt={product.imagesData?.[activeImageIdx]?.alt || product.name} 
+              title={product.imagesData?.[activeImageIdx]?.title || product.name}
+              className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover/gallery:scale-[1.03]" 
+              src={imagesList[activeImageIdx]}
+              onLoad={() => setIsImageLoading(false)}
+            />
+            {/* Image Counter */}
+            <span className="absolute bottom-4 right-4 bg-slate-950/75 backdrop-blur-xs text-white font-bold text-[10px] px-3 py-1.5 rounded-full select-none">
+              {activeImageIdx + 1} / {imagesList.length}
+            </span>
+            {/* Fullscreen Button */}
+            <button
+              type="button"
+              className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black p-2 rounded-full shadow-md text-slate-700 dark:text-slate-300 transition-colors z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFullscreenOpen(true);
+              }}
+            >
+              <Maximize2 size={16} />
+            </button>
+            {/* Magnifier zoom portal (hidden on mobile touch) */}
+            <div 
+              className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900 hidden md:block opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-350" 
+              style={{
+                ...zoomStyle,
+                backgroundSize: "220%"
+              }}
+            />
+          </div>
 
-              {product.molecules?.[0] && (
-                <div className="mt-md pt-sm border-t border-slate-100 dark:border-zinc-800">
-                  <Link
-                    to={`/molecules/${product.molecules[0].slug}`}
-                    className="text-[11px] font-black text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center justify-center gap-xs"
-                  >
-                    <span>View All Similar Medicines</span>
-                    <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
-                  </Link>
-                </div>
-              )}
+          {/* Thumbnail strip */}
+          {imagesList.length > 1 && (
+            <div className="flex gap-sm overflow-x-auto pb-xs scrollbar-none snap-x snap-mandatory">
+              {imagesList.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImageIdx(idx)}
+                  className={`w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all snap-start ${
+                    activeImageIdx === idx 
+                      ? "border-[#004782] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
+                      : "border-outline-variant/30 dark:border-outline/20 hover:border-slate-300 dark:hover:border-zinc-700"
+                  }`}
+                >
+                  <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                </button>
+              ))}
             </div>
           )}
+        </div>
 
-          {/* Table of Contents / Clinical Index Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs">
-            <h3 className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-zinc-800 mb-md flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px] text-primary">format_list_bulleted</span>
-              Clinical Index
-            </h3>
-            <div className="space-y-xs relative pl-sm border-l-2 border-slate-100 dark:border-zinc-800">
-              {computedSections.map((sec) => {
-                const isActive = activeSection === sec.id;
-                return (
-                  <button
-                    key={sec.id}
-                    type="button"
-                    onClick={() => {
-                      const target = sectionRefs.current[sec.id];
-                      if (target) {
-                        window.scrollTo({
-                          top: target.offsetTop - 120,
-                          behavior: "smooth"
-                        });
-                      }
-                    }}
-                    className={`w-full text-left py-2 px-sm rounded-lg text-xs font-bold transition-all relative block cursor-pointer ${
-                      isActive
-                        ? "bg-[#004782]/5 text-primary dark:text-[#a4c9ff]"
-                        : "text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-50/30 dark:hover:bg-zinc-900/30"
-                    }`}
-                  >
-                    {isActive && (
-                      <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-1 h-4 bg-[#004782] dark:bg-primary-fixed-dim rounded-r-full" />
-                    )}
-                    {sec.title}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </aside>
-
-        {/* CENTER CONTENT (48%) */}
-        <div className="w-full lg:w-[48%] space-y-md order-1 lg:order-2">
-          {/* Header section containing Product Title, Brand, Manufacturer */}
-          <div className="space-y-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-xs text-left animate-[fade-in_0.2s_ease-out]">
-            {/* Badges Stack */}
+        {/* Center Column: Key Specifications & Clinical Badges */}
+        <div className="flex-grow w-full lg:w-[28%] space-y-md">
+          <div className="space-y-sm">
+            {/* Badges */}
             <div className="flex flex-wrap gap-xs items-center">
-              <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full border border-primary/10 shadow-xs">
+              <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full border border-primary/10 shadow-xs">
                 {product.category?.name || product.category}
               </span>
               {product.requiresRx ? (
-                <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-                  <ShieldCheck size={11} /> Rx Required
+                <span className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full flex items-center gap-1 shadow-xs select-none">
+                  <ShieldCheck size={13} /> Rx Required
                 </span>
               ) : (
-                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
+                <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[10px] font-black uppercase tracking-wider px-md py-[5px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
                   OTC Medicine
-                </span>
-              )}
-              {product.isColdChain && (
-                <span className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-                  <span className="material-symbols-outlined text-[13px] leading-none">ac_unit</span> Cold Chain
-                </span>
-              )}
-              {product.productType === "wellness" && (
-                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-                  <span className="material-symbols-outlined text-[13px] leading-none">eco</span> Wellness
-                </span>
-              )}
-              {product.isImported && (
-                <span className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-                  <span className="material-symbols-outlined text-[13px] leading-none">flight_land</span> Imported
                 </span>
               )}
             </div>
 
+            {/* Brand & Name */}
             <div>
-              <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-[11px]">
+              <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-xs">
                 {product.brand}
               </p>
               <h1 className="font-headline-md text-2xl md:text-3xl text-on-surface font-black leading-tight mt-1">
                 {product.name}
               </h1>
-              {product.manufacturer && (
-                <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-semibold mt-1">
-                  Mfg by: <span className="text-slate-600 dark:text-zinc-300 font-bold">{product.manufacturer}</span>
-                </p>
-              )}
+              <p className="text-xs text-slate-400 dark:text-zinc-500 font-semibold mt-1">
+                Generic Name: <span className="text-slate-600 dark:text-zinc-300 italic">{genericName}</span>
+              </p>
             </div>
-            
-            {/* Salt Composition badge link */}
-            {product.molecules && product.molecules.length > 0 && (
-              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-sm">
-                <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Salt Composition</span>
-                <div className="flex flex-wrap gap-xs items-center">
-                  {product.molecules.map((mol, idx) => (
-                    <Link
-                      key={mol.slug || idx}
-                      to={`/molecules/${mol.slug}`}
-                      className="inline-flex items-center gap-1.5 px-md py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/15 border border-teal-500/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[13px]">science</span>
-                      {mol.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Large Image Gallery (Visual focus: 520px - 600px) */}
-          <div className="w-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-3xl shadow-sm flex flex-col items-center">
-            <div 
-              className="w-full max-w-[580px] aspect-square rounded-2xl bg-white dark:bg-zinc-900 overflow-hidden border border-slate-100 dark:border-zinc-850 relative cursor-zoom-in flex items-center justify-center p-md group/gallery"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onClick={() => setIsFullscreenOpen(true)}
-            >
-              {isImageLoading && (
-                <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-955 animate-pulse flex items-center justify-center rounded-2xl z-10">
-                  <Loader size="sm" />
+          {/* Compact Info Rows with Icons */}
+          <div className="pt-md border-t border-outline-variant/30 dark:border-outline/20 space-y-xs text-xs">
+            {[
+              { label: "Brand", value: product.brand, icon: Tag },
+              { label: "Manufacturer", value: product.specifications?.find(s => s.label.toLowerCase().includes("manufacturer") || s.label.toLowerCase().includes("mfg"))?.value || "Bayer Healthcare Ltd.", icon: Building },
+              { label: "Generic Name", value: genericName, icon: Dna },
+              { label: "SKU Code", value: product.sku || "N/A", icon: Barcode, isMono: true },
+              { label: "Batch Info", value: "BY-0943A", icon: Hash, isMono: true },
+              { label: "Expiry Date", value: "12/2028", icon: Calendar },
+              { label: "Availability", value: product.stock > 10 ? "In Stock" : product.stock > 0 ? `Only ${product.stock} Left` : "Out of Stock", icon: Activity, isStock: true }
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-zinc-850 last:border-b-0">
+                  <span className="font-bold text-slate-400 flex items-center gap-xs">
+                    <Icon size={14} className="text-slate-400" />
+                    {item.label}
+                  </span>
+                  <span className={`font-bold text-right pl-sm ${
+                    item.isStock 
+                      ? (product.stock > 10 ? "text-[#086b53] dark:text-emerald-400" : "text-red-500") 
+                      : (item.isMono ? "font-mono text-slate-700 dark:text-zinc-200" : "text-slate-700 dark:text-zinc-200")
+                  }`}>
+                    {item.value}
+                  </span>
                 </div>
-              )}
-              <img 
-                alt={product.imagesData?.[activeImageIdx]?.alt || product.name} 
-                title={product.imagesData?.[activeImageIdx]?.title || product.name}
-                className="max-h-[92%] max-w-[92%] object-contain transition-transform duration-500 group-hover/gallery:scale-[1.05]" 
-                src={imagesList[activeImageIdx]}
-                onLoad={() => setIsImageLoading(false)}
-              />
-              {/* Image Counter */}
-              <span className="absolute bottom-4 right-4 bg-slate-955/75 backdrop-blur-xs text-white font-bold text-[10px] px-3 py-1.5 rounded-full select-none">
-                {activeImageIdx + 1} / {imagesList.length}
-              </span>
-              {/* Fullscreen Button */}
-              <button
-                type="button"
-                className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black p-2 rounded-full shadow-md text-slate-700 dark:text-slate-300 transition-colors z-10 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFullscreenOpen(true);
-                }}
-              >
-                <Maximize2 size={16} />
-              </button>
-              {/* Magnifier zoom portal */}
-              <div 
-                className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900 hidden md:block opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-350" 
-                style={{
-                  ...zoomStyle,
-                  backgroundSize: "220%"
-                }}
-              />
-            </div>
-
-            {/* Thumbnail strip */}
-            {imagesList.length > 1 && (
-              <div className="flex gap-sm overflow-x-auto mt-md pb-xs scrollbar-none snap-x snap-mandatory justify-center w-full">
-                {imagesList.map((img, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setActiveImageIdx(idx)}
-                    className={`w-16 h-16 rounded-xl bg-white dark:bg-zinc-905 border-2 p-sm flex items-center justify-center shrink-0 transition-all snap-start cursor-pointer ${
-                      activeImageIdx === idx 
-                        ? "border-[#004782] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
-                        : "border-slate-100 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
-                    }`}
-                  >
-                    <img src={img} alt="" className="max-h-full max-w-full object-contain" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Dispatch Banner */}
-          <div className="bg-emerald-500/[0.04] border border-emerald-500/20 rounded-2xl p-md flex items-center gap-sm text-left">
-            <span className="material-symbols-outlined text-emerald-600 text-lg">local_shipping</span>
-            <div>
-              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-450">Guaranteed Dispatch</p>
-              <p className="text-[10px] text-slate-500 dark:text-zinc-400">All orders are dispatched from WHO-GMP certified pharmacies within 12 hours.</p>
-            </div>
+              );
+            })}
           </div>
 
           {/* Rx upload warning box if required */}
@@ -733,441 +614,431 @@ const ProductDetails = () => {
               </p>
             </div>
           )}
+        </div>
 
-          {/* Technical Specifications */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs text-left space-y-sm animate-[fade-in_0.2s_ease-out]">
-            <h3 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800 pb-2">Technical Specifications</h3>
-            <div className="grid grid-cols-2 gap-md text-xs">
-              {[
-                { label: "Manufacturer", value: product.manufacturer || "N/A" },
-                { label: "Strength", value: product.strength || "N/A" },
-                { label: "Pack Size", value: product.packSize || "N/A" },
-                { label: "Imported Country", value: product.isImported && product.importedCountry ? product.importedCountry : "N/A" },
-                { label: "Category Class", value: product.medicineCategory || "N/A" },
-                { label: "SKU Code", value: product.sku || "N/A", isMono: true },
-              ].map((item, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</span>
-                  <span className={`font-extrabold text-slate-700 dark:text-zinc-200 ${item.isMono ? "font-mono" : ""}`}>{item.value}</span>
-                </div>
-              ))}
+        {/* Right Column: Sticky Purchase Card (Desktop) */}
+        <div className="w-full lg:w-[24%] lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 p-lg rounded-3xl shadow-lg space-y-lg text-xs">
+          
+          {/* Price Panel */}
+          <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850/60">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Price</span>
+            <div className="flex items-baseline gap-xs mt-xs flex-wrap">
+              <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim">
+                {formatCurrency(product.price)}
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="text-slate-400 line-through text-xs font-semibold">
+                  {formatCurrency(product.originalPrice)}
+                </span>
+              )}
             </div>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <div className="flex flex-wrap gap-xs items-center mt-sm">
+                <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                  {discountPercent}% OFF
+                </span>
+                <span className="text-[10px] font-bold text-[#086b53] dark:text-emerald-400">
+                  Save {formatCurrency(product.originalPrice - product.price)}
+                </span>
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
           </div>
 
-          {/* Quick Information Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-xs">
-            {[
-              { label: "100% Genuine", icon: ShieldCheck, desc: "Direct manufacturer supply", color: "text-[#086b53] bg-[#086b53]/10" },
-              { label: "Express Shipping", icon: Truck, desc: "Next day delivery", color: "text-[#004782] bg-[#004782]/10" },
-              { label: product.requiresRx ? "Rx Verified" : "No Rx Required", icon: FileText, desc: "Clinical safety verified", color: "text-amber-600 bg-amber-500/10" },
-              { label: "Expert Support", icon: HelpCircle, desc: "Licensed pharmacist", color: "text-[#086b53] bg-[#086b53]/10" },
-              { label: "Tamper Proof", icon: Package, desc: "Sealed packaging", color: "text-[#004782] bg-[#004782]/10" },
-              { label: "Hassle Free Returns", icon: RotateCcw, desc: "Easy 7-day returns", color: "text-slate-600 bg-slate-500/10" }
-            ].map((card, idx) => {
-              const Icon = card.icon;
-              return (
-                <div key={idx} className="p-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-xl flex flex-col items-center text-center justify-between shadow-2xs hover:shadow-xs transition-all">
-                  <div className={`w-8 h-8 rounded-full ${card.color} flex items-center justify-center mb-xs`}>
-                    <Icon size={14} />
-                  </div>
-                  <p className="font-bold text-[10px] text-slate-800 dark:text-zinc-200 leading-tight">{card.label}</p>
-                  <p className="text-[8px] text-slate-400 mt-xs leading-none">{card.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Product Overview Summary */}
-          {product.description && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-3xl shadow-xs text-left space-y-sm">
-              <h3 className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Product Summary</h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-                {product.description}
-              </p>
+          {/* Quantity Selector */}
+          {product.stock > 0 && (
+            <div className="space-y-sm">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
+              <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-2xl bg-slate-50/50 dark:bg-zinc-905 h-11 w-full justify-between p-1">
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  disabled={quantity <= 1}
+                  className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">remove</span>
+                </button>
+                <span className="font-extrabold text-sm text-on-surface">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={handleIncrement}
+                  disabled={quantity >= product.stock}
+                  className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add</span>
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Existing Content Sections */}
-          <div className="space-y-lg">
-            {computedSections.map((sec) => {
-              return (
-                <div
-                  key={sec.id}
-                  ref={el => sectionRefs.current[sec.id] = el}
-                  className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md scroll-mt-28 transition-all hover:shadow-md"
-                >
-                  <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-                    {sec.title}
-                  </h2>
+          {/* Checkout / ATC Buttons */}
+          <div className="space-y-sm pt-xs">
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-2xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs shadow-sm"
+            >
+              Buy Now
+            </button>
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="w-full border-2 border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]/50 hover:bg-[#004782]/5 font-bold h-11 rounded-2xl transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs"
+            >
+              Add to Cart
+            </button>
+          </div>
 
-                  {/* Composition Table */}
-                  {sec.type === "composition" && (
-                    <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
-                      <table className="w-full text-xs text-left text-slate-600 dark:text-zinc-300">
-                        <thead className="bg-slate-50 dark:bg-zinc-955/40 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          <tr>
-                            <th className="px-lg py-md">Ingredient</th>
-                            <th className="px-lg py-md">Strength</th>
-                            <th className="px-lg py-md">Purpose</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
-                          {product.composition.map((row, rIdx) => (
-                            <tr key={rIdx} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
-                              <td className="px-lg py-md font-bold text-slate-700 dark:text-zinc-200">{row.ingredient}</td>
-                              <td className="px-lg py-md font-mono text-slate-500">{row.strength}</td>
-                              <td className="px-lg py-md text-slate-500">{row.purpose}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+          {/* Secondary Actions */}
+          <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-md">
+            <button
+              onClick={handleShare}
+              className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"
+            >
+              <Share2 size={14} />
+              Share
+            </button>
+          </div>
 
-                  {/* Key Benefits Icon Grid */}
-                  {sec.type === "benefits" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                      {product.benefits.map((benefit, bIdx) => (
-                        <div key={bIdx} className="p-md bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-sm items-start hover:shadow-xs transition-all">
-                          <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                            <CheckCircle className="text-[#086b53]" size={14} />
-                          </div>
-                          <div>
-                            <p className="font-bold text-xs text-slate-800 dark:text-zinc-200">{benefit.title}</p>
-                            {benefit.description && <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{benefit.description}</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+          {/* Delivery estimate */}
+          <div className="text-left bg-slate-50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
+            <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
+              <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
+            </p>
+            <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Free delivery by Tomorrow, 2:00 PM</p>
+          </div>
 
-                  {/* Dosage Checklist */}
-                  {sec.type === "usage" && (
-                    <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
-                      {product.usageInstructions.map((inst, idx) => (
-                        <li key={idx} className="flex gap-sm items-start leading-relaxed">
-                          <div className="w-4 h-4 rounded-full bg-[#004782]/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <Check className="text-[#004782]" size={10} />
-                          </div>
-                          <span>{inst}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Warnings Alert Panels */}
-                  {sec.type === "warnings" && (
-                    <div className="space-y-sm">
-                      {product.warnings.map((warn, idx) => (
-                        <div key={idx} className="p-md bg-red-500/[0.03] border border-red-500/10 rounded-2xl flex gap-sm items-start">
-                          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-                          <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">{warn}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Side Effects List */}
-                  {sec.type === "sideeffects" && (
-                    <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
-                      {product.sideEffects.map((side, idx) => (
-                        <li key={idx} className="flex gap-sm items-start leading-relaxed">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-2" />
-                          <span>{side}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Storage Checklist */}
-                  {sec.type === "storage" && (
-                    <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
-                      {product.storageInstructions.map((store, idx) => (
-                        <li key={idx} className="flex gap-sm items-start leading-relaxed">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#086b53] shrink-0 mt-2" />
-                          <span>{store}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Safety Cards Grid */}
-                  {sec.type === "safety" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                      {product.safetyCards.map((card, idx) => {
-                        const status = card.status.toLowerCase();
-                        
-                        let badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400";
-                        if (status.includes("avoid") || status.includes("unsafe") || status.includes("dangerous")) {
-                          badgeStyle = "bg-red-100 text-red-800 border-red-200/50 dark:bg-red-950/20 dark:text-red-400";
-                        } else if (status.includes("caution") || status.includes("moderate")) {
-                          badgeStyle = "bg-yellow-100 text-yellow-800 border-yellow-200/50 dark:bg-yellow-950/20 dark:text-yellow-400";
-                        } else if (status.includes("consult") || status.includes("doctor") || status.includes("physician")) {
-                          badgeStyle = "bg-orange-100 text-orange-800 border-orange-200/50 dark:bg-orange-950/20 dark:text-orange-455";
-                        }
-                        
-                        return (
-                          <div key={idx} className="p-md bg-slate-50/30 dark:bg-zinc-955/10 rounded-2xl border border-slate-100 dark:border-zinc-855 space-y-sm text-xs transition-all hover:shadow-xs text-left">
-                            <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-850/80">
-                              <span className="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-                                <Info size={14} className="text-[#004782]" />
-                                {card.title}
-                              </span>
-                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider ${badgeStyle}`}>
-                                {card.status}
-                              </span>
-                            </div>
-                            {card.description && <p className="text-[11px] text-slate-400 leading-relaxed text-left">{card.description}</p>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* FAQs Accordion */}
-                  {sec.type === "faqs" && (
-                    <div className="space-y-sm">
-                      {product.faqs.map((faq, idx) => {
-                        const isOpen = openFaqIdx === idx;
-                        return (
-                          <div key={idx} className="border border-slate-100 dark:border-zinc-800/80 rounded-2xl overflow-hidden transition-all bg-slate-50/30 dark:bg-zinc-955/5">
-                            <button
-                              type="button"
-                              onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
-                              className="w-full flex justify-between items-center p-md font-bold text-slate-700 dark:text-zinc-200 text-xs text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/40 transition-colors"
-                            >
-                              <span className="flex items-center gap-sm">
-                                <HelpCircle size={14} className="text-[#004782] shrink-0" />
-                                {faq.question}
-                              </span>
-                              <span className={`transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
-                                <ChevronDown size={14} />
-                              </span>
-                            </button>
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                              isOpen ? "max-h-60 border-t border-slate-100 dark:border-zinc-800/80 p-md opacity-100" : "max-h-0 p-0 opacity-0 pointer-events-none"
-                            }`}>
-                              <p className="text-[11px] text-slate-450 dark:text-zinc-400 leading-relaxed">
-                                {faq.answer}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Specifications List */}
-                  {sec.type === "specifications" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-                      {product.specifications.map((spec, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-100 dark:border-zinc-850 text-xs">
-                          <span className="font-bold text-slate-400">{spec.label}</span>
-                          <span className="font-bold text-slate-700 dark:text-zinc-200">{spec.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* References */}
-                  {sec.type === "references" && (
-                    <ul className="space-y-xs text-[11px] text-slate-450 italic">
-                      {product.references.map((ref, idx) => (
-                        <li key={idx} className="flex gap-sm items-start">
-                          <span>[{idx + 1}]</span>
-                          <span className="text-left">{ref}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Default Text Content for Custom Sections */}
-                  {!sec.type && (
-                    <p className="text-xs text-slate-650 dark:text-zinc-300 leading-relaxed whitespace-pre-line text-left font-medium">
-                      {sec.content}
-                    </p>
-                  )}
-
-                </div>
-              );
-            })}
-
-            {/* Manufacturer Information Card */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md">
-              <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-                <Building size={16} className="text-[#004782]" />
-                Manufacturer Information
-              </h2>
-              <div className="flex flex-col sm:flex-row gap-lg items-start text-xs text-left">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-zinc-950 flex items-center justify-center shrink-0 border border-slate-100 dark:border-zinc-850">
-                  <Building className="text-[#004782]" size={32} />
-                </div>
-                <div className="space-y-sm flex-1">
-                  <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">{product.brand} Healthcare Ltd.</h3>
-                  <p className="text-slate-400 font-medium">Country of Origin: Germany | Manufacturing License: DL-329/2026</p>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-450 leading-relaxed">
-                    {product.brand} is a global enterprise with core competencies in the life science fields of health care and agriculture. Its products and services are designed to benefit people and improve their quality of life.
-                  </p>
-                </div>
+          {/* Trust badges */}
+          <div className="space-y-sm pt-md border-t border-slate-150 dark:border-zinc-850">
+            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Check size={12} className="text-emerald-500" />
               </div>
+              <span>100% Genuine Product</span>
             </div>
-
-            {/* Trust Banner Card */}
-            <div className="bg-gradient-to-br from-[#004782] to-[#086b53] text-white p-lg rounded-3xl shadow-md text-left flex flex-col md:flex-row items-center justify-between gap-lg relative overflow-hidden">
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-              <div className="space-y-xs z-10">
-                <h3 className="text-lg font-black flex items-center gap-xs">
-                  <ShieldCheck size={20} /> WellMeds Quality Assurance
-                </h3>
-                <p className="text-xs text-white/85 leading-relaxed max-w-xl">
-                  We employ strict cold-chain logistics, licensed pharmacists validation, and clinical batch tracking to guarantee that every single medicine delivered is 100% authentic and authentic.
-                </p>
+            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+              <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                <Lock size={12} className="text-[#004782]" />
               </div>
-              <div className="flex gap-sm z-10 shrink-0 select-none">
-                <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Licensed Hub</span>
-                <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Cold Chain</span>
+              <span>Secure Encrypted Payment</span>
+            </div>
+            <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
+              <div className="w-5 h-5 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                <ShieldCheck size={12} className="text-[#086b53]" />
               </div>
+              <span>Pharmacist Verified</span>
             </div>
           </div>
+
         </div>
 
-        {/* RIGHT COLUMN: STICKY PURCHASE PANEL (30%) */}
-        <aside className="w-full lg:w-[30%] lg:sticky lg:top-24 space-y-md order-3 max-w-[380px]">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-850/60 p-lg rounded-3xl shadow-lg space-y-lg text-xs">
-            {/* Price Panel */}
-            <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850/60 text-left">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Purchase Price</span>
-              <div className="flex items-baseline gap-xs mt-xs flex-wrap">
-                <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim">
-                  {formatCurrency(product.price)}
-                </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-slate-400 line-through text-xs font-semibold">
-                    {formatCurrency(product.originalPrice)}
-                  </span>
-                )}
-              </div>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <div className="flex flex-wrap gap-xs items-center mt-sm">
-                  <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                    {discountPercent}% OFF
-                  </span>
-                  <span className="text-[10px] font-bold text-[#086b53] dark:text-emerald-400">
-                    Save {formatCurrency(product.originalPrice - product.price)}
-                  </span>
-                </div>
-              )}
-              <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
-            </div>
+      </div>
 
-            {/* Pack Size / Specifications Indicator */}
-            {(product.packSize || product.strength) && (
-              <div className="flex justify-between items-center bg-slate-50/50 dark:bg-zinc-955/10 px-md py-sm rounded-xl border border-slate-100 dark:border-zinc-855 text-left">
-                {product.packSize && (
-                  <div>
-                    <span className="block text-[8px] font-extrabold uppercase text-slate-400 tracking-wider">Pack Size</span>
-                    <span className="font-bold text-xs text-slate-700 dark:text-zinc-200">{product.packSize}</span>
+      {/* SECTION 2: QUICK INFORMATION CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-sm mb-xl">
+        {[
+          { label: "100% Genuine", icon: ShieldCheck, desc: "Direct manufacturer supply", color: "text-[#086b53] bg-[#086b53]/10" },
+          { label: "Express Shipping", icon: Truck, desc: "Next day delivery guaranteed", color: "text-[#004782] bg-[#004782]/10" },
+          { label: product.requiresRx ? "Rx Verified" : "No Rx Required", icon: FileText, desc: "Clinical safety verified", color: "text-amber-600 bg-amber-500/10" },
+          { label: "Expert Support", icon: HelpCircle, desc: "Licensed pharmacist assistance", color: "text-[#086b53] bg-[#086b53]/10" },
+          { label: "Tamper Proof", icon: Package, desc: "Sealed clinical packaging", color: "text-[#004782] bg-[#004782]/10" },
+          { label: "Hassle Free Returns", icon: RotateCcw, desc: "Easy 7-day return policy", color: "text-slate-600 bg-slate-500/10" }
+        ].map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div key={idx} className="p-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl flex flex-col items-center text-center justify-between shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <div className={`w-10 h-10 rounded-full ${card.color} flex items-center justify-center mb-sm`}>
+                <Icon size={18} />
+              </div>
+              <p className="font-bold text-xs text-on-surface">{card.label}</p>
+              <p className="text-[9px] text-slate-400 mt-xs">{card.desc}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* SECTION 3: STICKY MEDICAL NAVIGATION & CONTENT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start pt-lg border-t border-outline-variant/30 dark:border-outline/20">
+        
+        {/* Left: Sticky Navigation */}
+        <aside className="hidden lg:block lg:col-span-3 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto pr-md space-y-sm select-none border-r border-slate-100 dark:border-zinc-900 scrollbar-none">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-md px-sm">Clinical Index</p>
+          <div className="space-y-xs relative pl-sm border-l-2 border-slate-100 dark:border-zinc-800">
+            {computedSections.map((sec) => {
+              const isActive = activeSection === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  type="button"
+                  onClick={() => {
+                    const target = sectionRefs.current[sec.id];
+                    if (target) {
+                      window.scrollTo({
+                        top: target.offsetTop - 120,
+                        behavior: "smooth"
+                      });
+                    }
+                  }}
+                  className={`w-full text-left py-2.5 px-md rounded-xl text-xs font-bold transition-all relative block ${
+                    isActive
+                      ? "bg-[#004782]/5 text-primary dark:text-[#a4c9ff]"
+                      : "text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-50/30 dark:hover:bg-zinc-900/30"
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#004782] dark:bg-primary-fixed-dim rounded-r-full" />
+                  )}
+                  {sec.title}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Right: Medical Content Sections */}
+        <div className="col-span-1 lg:col-span-9 space-y-lg text-left">
+          
+          {computedSections.map((sec) => {
+            return (
+              <div
+                key={sec.id}
+                ref={el => sectionRefs.current[sec.id] = el}
+                className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md scroll-mt-28 transition-all hover:shadow-md"
+              >
+                <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
+                  {sec.title}
+                </h2>
+
+                {/* Composition Table */}
+                {sec.type === "composition" && (
+                  <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
+                    <table className="w-full text-xs text-left text-slate-600 dark:text-zinc-300">
+                      <thead className="bg-slate-50 dark:bg-zinc-950/40 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <tr>
+                          <th className="px-lg py-md">Ingredient</th>
+                          <th className="px-lg py-md">Strength</th>
+                          <th className="px-lg py-md">Purpose</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
+                        {product.composition.map((row, rIdx) => (
+                          <tr key={rIdx} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
+                            <td className="px-lg py-md font-bold text-slate-700 dark:text-zinc-200">{row.ingredient}</td>
+                            <td className="px-lg py-md font-mono text-slate-500">{row.strength}</td>
+                            <td className="px-lg py-md text-slate-500">{row.purpose}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
-                {product.strength && (
-                  <div className="text-right">
-                    <span className="block text-[8px] font-extrabold uppercase text-slate-400 tracking-wider">Strength</span>
-                    <span className="font-bold text-xs text-slate-700 dark:text-zinc-200">{product.strength}</span>
+
+                {/* Key Benefits Icon Grid */}
+                {sec.type === "benefits" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                    {product.benefits.map((benefit, bIdx) => (
+                      <div key={bIdx} className="p-md bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-sm items-start hover:shadow-xs transition-all">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                          <CheckCircle className="text-[#086b53]" size={14} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-xs text-slate-800 dark:text-zinc-200">{benefit.title}</p>
+                          {benefit.description && <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{benefit.description}</p>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Quantity Selector */}
-            {product.stock > 0 ? (
-              <div className="space-y-sm text-left">
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
-                <div className="flex items-center border border-outline-variant/50 dark:border-outline rounded-2xl bg-slate-50/50 dark:bg-zinc-905 h-11 w-full justify-between p-1">
-                  <button
-                    type="button"
-                    onClick={handleDecrement}
-                    disabled={quantity <= 1}
-                    className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">remove</span>
-                  </button>
-                  <span className="font-extrabold text-sm text-on-surface">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={handleIncrement}
-                    disabled={quantity >= product.stock}
-                    className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">add</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-sm bg-red-500/5 border border-red-500/10 text-red-500 font-bold rounded-xl text-center">
-                This item is currently Out of Stock
-              </div>
-            )}
+                {/* Dosage Checklist */}
+                {sec.type === "usage" && (
+                  <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
+                    {product.usageInstructions.map((inst, idx) => (
+                      <li key={idx} className="flex gap-sm items-start leading-relaxed">
+                        <div className="w-4 h-4 rounded-full bg-[#004782]/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="text-[#004782]" size={10} />
+                        </div>
+                        <span>{inst}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            {/* Checkout / ATC Buttons */}
-            <div className="space-y-sm pt-xs">
-              <button
-                onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-2xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs shadow-sm"
-              >
-                Buy Now
-              </button>
-              <button
-                onClick={handleAddToCart}
-                disabled={product.stock === 0}
-                className="w-full border-2 border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]/50 hover:bg-[#004782]/5 font-bold h-11 rounded-2xl transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs"
-              >
-                Add to Cart
-              </button>
-            </div>
+                {/* Warnings Alert Panels */}
+                {sec.type === "warnings" && (
+                  <div className="space-y-sm">
+                    {product.warnings.map((warn, idx) => (
+                      <div key={idx} className="p-md bg-red-500/[0.03] border border-red-500/10 rounded-2xl flex gap-sm items-start">
+                        <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                        <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">{warn}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-            {/* Secondary Actions */}
-            <div className="flex gap-sm border-t border-slate-100 dark:border-zinc-850 pt-md">
-              <button
-                onClick={handleShare}
-                className="flex-1 border border-outline-variant/50 dark:border-outline rounded-xl py-2 flex items-center justify-center gap-xs hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-95 transition-all outline-none cursor-pointer text-[10px] font-bold text-slate-500"
-              >
-                <Share2 size={14} />
-                Share
-              </button>
-            </div>
+                {/* Side Effects List */}
+                {sec.type === "sideeffects" && (
+                  <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
+                    {product.sideEffects.map((side, idx) => (
+                      <li key={idx} className="flex gap-sm items-start leading-relaxed">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-2" />
+                        <span>{side}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            {/* Delivery estimate */}
-            <div className="text-left bg-slate-50 dark:bg-zinc-955/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
-              <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
-                <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
-              </p>
-              <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Free delivery by Tomorrow, 2:00 PM</p>
-            </div>
+                {/* Storage Checklist */}
+                {sec.type === "storage" && (
+                  <ul className="space-y-sm text-xs text-slate-600 dark:text-zinc-300 font-medium">
+                    {product.storageInstructions.map((store, idx) => (
+                      <li key={idx} className="flex gap-sm items-start leading-relaxed">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#086b53] shrink-0 mt-2" />
+                        <span>{store}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            {/* Trust badges */}
-            <div className="space-y-sm pt-md border-t border-slate-150 dark:border-zinc-850 text-left">
-              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Check size={12} className="text-emerald-500" />
-                </div>
-                <span>100% Genuine Product</span>
+                {/* Safety Cards Grid */}
+                {sec.type === "safety" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                    {product.safetyCards.map((card, idx) => {
+                      const status = card.status.toLowerCase();
+                      
+                      let badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400";
+                      if (status.includes("avoid") || status.includes("unsafe") || status.includes("dangerous")) {
+                        badgeStyle = "bg-red-100 text-red-800 border-red-200/50 dark:bg-red-950/20 dark:text-red-400";
+                      } else if (status.includes("caution") || status.includes("moderate")) {
+                        badgeStyle = "bg-yellow-100 text-yellow-800 border-yellow-200/50 dark:bg-yellow-950/20 dark:text-yellow-400";
+                      } else if (status.includes("consult") || status.includes("doctor") || status.includes("physician")) {
+                        badgeStyle = "bg-orange-100 text-orange-800 border-orange-200/50 dark:bg-orange-950/20 dark:text-orange-455";
+                      }
+                      
+                      return (
+                        <div key={idx} className="p-md bg-slate-50/30 dark:bg-zinc-950/10 rounded-2xl border border-slate-100 dark:border-zinc-850/80 space-y-sm text-xs transition-all hover:shadow-xs">
+                          <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-850/80">
+                            <span className="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
+                              <Info size={14} className="text-[#004782]" />
+                              {card.title}
+                            </span>
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider ${badgeStyle}`}>
+                              {card.status}
+                            </span>
+                          </div>
+                          {card.description && <p className="text-[11px] text-slate-400 leading-relaxed text-left">{card.description}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* FAQs Accordion */}
+                {sec.type === "faqs" && (
+                  <div className="space-y-sm">
+                    {product.faqs.map((faq, idx) => {
+                      const isOpen = openFaqIdx === idx;
+                      return (
+                        <div key={idx} className="border border-slate-100 dark:border-zinc-800/80 rounded-2xl overflow-hidden transition-all bg-slate-50/30 dark:bg-zinc-950/5">
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                            className="w-full flex justify-between items-center p-md font-bold text-slate-700 dark:text-zinc-200 text-xs text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/40 transition-colors"
+                          >
+                            <span className="flex items-center gap-sm">
+                              <HelpCircle size={14} className="text-[#004782] shrink-0" />
+                              {faq.question}
+                            </span>
+                            <span className={`transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
+                              <ChevronDown size={14} />
+                            </span>
+                          </button>
+                          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                            isOpen ? "max-h-60 border-t border-slate-100 dark:border-zinc-800/80 p-md opacity-100" : "max-h-0 p-0 opacity-0 pointer-events-none"
+                          }`}>
+                            <p className="text-[11px] text-slate-450 dark:text-zinc-400 leading-relaxed">
+                              {faq.answer}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Specifications List */}
+                {sec.type === "specifications" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+                    {product.specifications.map((spec, idx) => (
+                      <div key={idx} className="flex justify-between items-center p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-100 dark:border-zinc-850 text-xs">
+                        <span className="font-bold text-slate-400">{spec.label}</span>
+                        <span className="font-bold text-slate-700 dark:text-zinc-200">{spec.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* References */}
+                {sec.type === "references" && (
+                  <ul className="space-y-xs text-[11px] text-slate-450 italic">
+                    {product.references.map((ref, idx) => (
+                      <li key={idx} className="flex gap-sm items-start">
+                        <span>[{idx + 1}]</span>
+                        <span className="text-left">{ref}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Default Text Content for Custom Sections */}
+                {!sec.type && (
+                  <p className="text-xs text-slate-650 dark:text-zinc-300 leading-relaxed whitespace-pre-line text-left font-medium">
+                    {sec.content}
+                  </p>
+                )}
+
               </div>
-              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-                <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Lock size={12} className="text-[#004782]" />
-                </div>
-                <span>Secure Encrypted Payment</span>
+            );
+          })}
+
+          {/* Manufacturer Information Card */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md">
+            <h2 className="font-bold text-sm md:text-base text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
+              <Building size={16} className="text-[#004782]" />
+              Manufacturer Information
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-lg items-start text-xs text-left">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-zinc-950 flex items-center justify-center shrink-0 border border-slate-100 dark:border-zinc-850">
+                <Building className="text-[#004782]" size={32} />
               </div>
-              <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
-                <div className="w-5 h-5 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
-                  <ShieldCheck size={12} className="text-[#086b53]" />
-                </div>
-                <span>Pharmacist Verified</span>
+              <div className="space-y-sm flex-1">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">{product.brand} Healthcare Ltd.</h3>
+                <p className="text-slate-400 font-medium">Country of Origin: Germany | Manufacturing License: DL-329/2026</p>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-450 leading-relaxed">
+                  {product.brand} is a global enterprise with core competencies in the life science fields of health care and agriculture. Its products and services are designed to benefit people and improve their quality of life.
+                </p>
               </div>
             </div>
           </div>
-        </aside>
+
+          {/* Trust Banner Card */}
+          <div className="bg-gradient-to-br from-[#004782] to-[#086b53] text-white p-lg rounded-3xl shadow-md text-left flex flex-col md:flex-row items-center justify-between gap-lg relative overflow-hidden">
+            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+            <div className="space-y-xs z-10">
+              <h3 className="text-lg font-black flex items-center gap-xs">
+                <ShieldCheck size={20} /> WellMeds Quality Assurance
+              </h3>
+              <p className="text-xs text-white/85 leading-relaxed max-w-xl">
+                We employ strict cold-chain logistics, licensed pharmacists validation, and clinical batch tracking to guarantee that every single medicine delivered is 100% authentic and authentic.
+              </p>
+            </div>
+            <div className="flex gap-sm z-10 shrink-0 select-none">
+              <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Licensed Hub</span>
+              <span className="bg-white/10 border border-white/10 px-md py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider">Cold Chain</span>
+            </div>
+          </div>
+
+        </div>
 
       </div>
 
