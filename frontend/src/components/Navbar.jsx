@@ -646,7 +646,7 @@ const Navbar = () => {
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center group rounded-xl p-1 text-left h-12 md:h-14 lg:h-16"
+              className="flex items-center group rounded-xl p-0.5 text-left h-[58px] md:h-[65px] lg:h-[76px]"
             >
               <img 
                 src={logoImg} 
