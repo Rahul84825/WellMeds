@@ -646,12 +646,12 @@ const Navbar = () => {
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center group rounded-xl p-1 text-left h-[42px] lg:h-[44px] overflow-hidden"
+              className="flex items-center group rounded-xl p-1 text-left h-12 md:h-14 lg:h-16"
             >
               <img 
                 src={logoImg} 
                 alt="Logo" 
-                className="h-[180px] w-[180px] -my-[69px] lg:h-[200px] lg:w-[200px] lg:-my-[73px] object-contain group-hover:scale-105 transition-transform duration-200" 
+                className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-200" 
               />
             </NavLink>
           </div>
@@ -709,9 +709,16 @@ const Navbar = () => {
       >
         {/* Drawer Header */}
         <div className="h-16 flex items-center justify-between px-md border-b border-slate-100 dark:border-zinc-800 shrink-0">
-          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-xs font-bold text-[#004782]">
-            <span className="h-7 w-7 rounded bg-[#004782] text-white flex items-center justify-center text-sm font-black">W</span>
-            <span className="text-on-surface text-sm">WellMeds</span>
+          <Link 
+            to="/" 
+            onClick={() => setMobileMenuOpen(false)} 
+            className="flex items-center group h-12 w-auto"
+          >
+            <img 
+              src={logoImg} 
+              alt="WellMeds Logo" 
+              className="h-full w-auto object-contain" 
+            />
           </Link>
           <button 
             onClick={() => setMobileMenuOpen(false)}

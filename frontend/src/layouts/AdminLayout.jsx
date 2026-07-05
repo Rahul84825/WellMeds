@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import logoImg from "../assets/logos/logo.png";
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -162,13 +163,21 @@ const AdminLayout = () => {
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-md border-b border-slate-200 dark:border-zinc-800">
           {!collapsed ? (
-            <Link to="/" className="flex items-center gap-xs font-bold text-lg text-[#004782] dark:text-[#a4c9ff] tracking-tight hover:opacity-90">
-              <span className="h-7 w-7 rounded bg-[#004782] text-white flex items-center justify-center text-sm font-black">W</span>
-              <span>WellMeds Admin</span>
+            <Link to="/" className="flex items-center gap-2 h-12 w-auto hover:opacity-90 transition-opacity">
+              <img 
+                src={logoImg} 
+                alt="WellMeds Admin" 
+                className="h-full w-auto object-contain" 
+              />
+              <span className="font-bold text-lg text-[#004782] dark:text-[#a4c9ff] tracking-tight whitespace-nowrap">Admin</span>
             </Link>
           ) : (
-            <Link to="/" className="mx-auto h-8 w-8 rounded bg-[#004782] text-white flex items-center justify-center font-black">
-              W
+            <Link to="/" className="mx-auto h-10 w-10 hover:opacity-90 transition-opacity">
+              <img 
+                src={logoImg} 
+                alt="WellMeds" 
+                className="h-full w-full object-contain" 
+              />
             </Link>
           )}
           

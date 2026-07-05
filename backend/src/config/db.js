@@ -61,6 +61,7 @@ const seedAllDefaultData = async () => {
         await Coupon.create(coupon);
       }
       console.log("[Database] Coupons auto-seeded successfully.");
+    }
     // 5. Auto-seed surgical categories if empty
     const surgicalCategoryCount = await SurgicalCategory.countDocuments();
     if (surgicalCategoryCount === 0) {
