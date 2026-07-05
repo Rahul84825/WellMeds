@@ -64,6 +64,8 @@ const AddNewProduct = () => {
   const [isImported, setIsImported] = useState(false);
   const [slug, setSlug] = useState("");
   const [medicineCategory, setMedicineCategory] = useState("");
+  const [marketer, setMarketer] = useState("");
+  const [country, setCountry] = useState("");
   
   // Images
   const [images, setImages] = useState([]);
@@ -121,6 +123,8 @@ const AddNewProduct = () => {
             setIsImported(product.isImported || false);
             setSlug(product.slug || "");
             setMedicineCategory(product.medicineCategory || "");
+            setMarketer(product.marketer || "");
+            setCountry(product.country || "");
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -452,6 +456,8 @@ const AddNewProduct = () => {
       isImported,
       slug: slug.trim() || undefined,
       medicineCategory: medicineCategory.trim(),
+      marketer: marketer.trim(),
+      country: country.trim(),
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -898,7 +904,30 @@ const AddNewProduct = () => {
                       placeholder="e.g. Analgesic"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-sm">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Marketer</label>
+                    <input
+                      type="text"
+                      value={marketer}
+                      onChange={(e) => setMarketer(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. Abbott India"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Country of Origin</label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. India"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-sm col-span-2">
                     <div className="space-y-xs">
                       <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Order</label>
                       <input

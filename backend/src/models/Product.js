@@ -179,6 +179,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    marketer: {
+      type: String,
+      default: "",
+    },
+    country: {
+      type: String,
+      default: "",
+    },
     importedCountry: {
       type: String,
       default: "",
