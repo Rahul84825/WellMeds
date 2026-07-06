@@ -39,7 +39,13 @@ apiInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Guard 3: Skip refresh if the failing request IS the refresh endpoint itself
+    // Guard 3: Skip refresh/retry for OTP send/verify endpoints
+    const isOtpEndpoint = originalRequest.url?.includes("/auth/otp/");
+    if (isOtpEndpoint) {
+      return Promise.reject(error);
+    }
+
+    // Guard 4: Skip refresh if the failing request IS the refresh endpoint itself
     // This prevents infinite retry loops
     const isRefreshEndpoint = originalRequest.url?.includes("/auth/refresh");
     if (isRefreshEndpoint) {

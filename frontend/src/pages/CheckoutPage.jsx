@@ -734,6 +734,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
 
   const [otpDigits, setOtpDigits] = useState(Array(OTP_LEN).fill(""));
   const otpRefs = useRef([]);
+  const lastVerifiedOtpRef = useRef("");
 
   // 60s resend countdown
   const [resendCount, setResendCount] = useState(0);
@@ -746,6 +747,28 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
     }, 1000);
   };
   useEffect(() => () => clearInterval(resendTimer.current), []);
+
+  // 5m OTP expiry countdown
+  const [expiryCount, setExpiryCount] = useState(0);
+  const expiryTimer = useRef(null);
+  const startExpiry = () => {
+    setExpiryCount(5 * 60);
+    clearInterval(expiryTimer.current);
+    expiryTimer.current = setInterval(() => {
+      setExpiryCount((p) => { if (p <= 1) { clearInterval(expiryTimer.current); return 0; } return p - 1; });
+    }, 1000);
+  };
+  useEffect(() => () => clearInterval(expiryTimer.current), []);
+
+  // Handle client-side OTP expiration
+  useEffect(() => {
+    if (step === "otp" && expiryCount === 0) {
+      setOtpDigits(Array(OTP_LEN).fill(""));
+      lastVerifiedOtpRef.current = "";
+      setError("OTP has expired. Please request a new OTP.");
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    }
+  }, [expiryCount, step]);
 
   const [busy, setBusy] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -764,54 +787,71 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
       setIsExistingUser(!!r.isExistingUser);
       if (r.devOtp) setDevHint(r.devOtp);
       setOtpDigits(Array(OTP_LEN).fill(""));
+      lastVerifiedOtpRef.current = "";
       setStep("otp");
       startResend();
+      startExpiry();
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch (err) { setError(sanitiseMsg(err)); }
     finally { setBusy(false); }
   };
 
   const doVerify = useCallback(async (override) => {
+    if (verifying) return;
+
     const val = override || otpDigits.join("");
     if (val.length < OTP_LEN) { setError(`Please enter all ${OTP_LEN} digits.`); return; }
+
+    // Auto verification only happens once until OTP changes
+    if (val === lastVerifiedOtpRef.current) return;
+    lastVerifiedOtpRef.current = val;
+
+    console.log("[VERIFY] Started");
     setVerifying(true); setError("");
     try {
       const u = await verifyOtp(mobile.trim(), val, name.trim(), email.trim());
+      console.log("[VERIFY] Success");
       setWelcomeName(u?.name || "there");
       setWelcomeDone(true);
       // AuthContext now has user — parent component will re-render and show full checkout
     } catch (err) {
+      console.log("[VERIFY] Failed");
       setError(sanitiseMsg(err));
       setOtpDigits(Array(OTP_LEN).fill(""));
+      lastVerifiedOtpRef.current = "";
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } finally { setVerifying(false); }
-  }, [otpDigits, mobile, name, email, verifyOtp]);
+  }, [otpDigits, mobile, name, email, verifyOtp, verifying]);
 
   const doResend = async () => {
     if (resendCount > 0) return;
     setError(""); setDevHint(""); setOtpDigits(Array(OTP_LEN).fill(""));
+    lastVerifiedOtpRef.current = "";
     setBusy(true);
     try {
       const r = await sendOtp(mobile.trim(), name.trim(), email.trim());
       if (r.devOtp) setDevHint(r.devOtp);
       startResend();
+      startExpiry();
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch (err) { setError(sanitiseMsg(err)); }
     finally { setBusy(false); }
   };
 
   const oChange = (i, v) => {
+    lastVerifiedOtpRef.current = "";
     const d = v.replace(/\D/g, "").slice(-1);
     const next = [...otpDigits]; next[i] = d; setOtpDigits(next); setError("");
     if (d && i < OTP_LEN - 1) otpRefs.current[i + 1]?.focus();
     if (d && i === OTP_LEN - 1) {
       const full = [...next.slice(0, OTP_LEN - 1), d].join("");
-      if (full.length === OTP_LEN) doVerify(full);
+      if (full.length === OTP_LEN && !verifying) doVerify(full);
     }
   };
 
   const oKey = (i, e) => {
     if (e.key === "Backspace") {
+      lastVerifiedOtpRef.current = "";
       if (otpDigits[i]) { const n = [...otpDigits]; n[i] = ""; setOtpDigits(n); }
       else if (i > 0) otpRefs.current[i - 1]?.focus();
     } else if (e.key === "ArrowLeft" && i > 0) otpRefs.current[i - 1]?.focus();
@@ -820,6 +860,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
 
   const oPaste = (e) => {
     e.preventDefault();
+    lastVerifiedOtpRef.current = "";
     const p = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LEN);
     if (!p) return;
     const next = Array(OTP_LEN).fill("");
@@ -980,6 +1021,13 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                           <span className="material-symbols-outlined text-[14px]">refresh</span>{busy ? "Sending…" : "Resend OTP"}
                         </button>
                     }
+                    
+                    {expiryCount > 0 && (
+                      <p className="text-body-xs text-on-surface-variant/60" aria-live="off">
+                        OTP valid for <span className="font-mono">{`${Math.floor(expiryCount / 60)}:${(expiryCount % 60).toString().padStart(2, "0")}`}</span>
+                      </p>
+                    )}
+
                     <button type="button" onClick={() => { setStep("details"); setError(""); }} className="text-xs text-on-surface-variant hover:underline">← Change details</button>
                   </div>
                 </div>

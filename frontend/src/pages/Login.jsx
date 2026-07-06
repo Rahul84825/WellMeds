@@ -88,6 +88,7 @@ const Login = () => {
   // ── OTP state ─────────────────────────────────────────────────────────────
   const [otpDigits, setOtpDigits] = useState(Array(OTP_LENGTH).fill(""));
   const otpRefs = useRef([]);
+  const lastVerifiedOtpRef = useRef("");
 
   // ── Timers ────────────────────────────────────────────────────────────────
   const resend = useCountdown(RESEND_COOLDOWN_SECONDS);      // 60s cooldown
@@ -105,6 +106,16 @@ const Login = () => {
   useEffect(() => {
     if (user) navigate(isAdmin ? "/admin" : redirectUrl, { replace: true });
   }, [user, isAdmin, navigate, redirectUrl]);
+
+  // ── Handle client-side OTP expiration ─────────────────────────────────────
+  useEffect(() => {
+    if (step === STEP_OTP && expiry.count === 0) {
+      setOtpDigits(Array(OTP_LENGTH).fill(""));
+      lastVerifiedOtpRef.current = "";
+      setError("OTP has expired. Please request a new OTP.");
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    }
+  }, [expiry.count, step]);
 
   // ── Step 1: Mobile validation ─────────────────────────────────────────────
   const handleMobileSubmit = (e) => {
@@ -131,6 +142,7 @@ const Login = () => {
       if (result.devOtp) setDevOtpHint(result.devOtp);
 
       setOtpDigits(Array(OTP_LENGTH).fill(""));
+      lastVerifiedOtpRef.current = "";
       setStep(STEP_OTP);
 
       // Start both timers
@@ -148,6 +160,9 @@ const Login = () => {
 
   // ── OTP digit input handlers ──────────────────────────────────────────────
   const handleOtpChange = (index, value) => {
+    // Reset verify trigger on user edit so they can try verifying the same value again if desired
+    lastVerifiedOtpRef.current = "";
+
     const digit = value.replace(/\D/g, "").slice(-1);
     const next = [...otpDigits];
     next[index] = digit;
@@ -161,12 +176,13 @@ const Login = () => {
     // Auto-verify when last digit filled
     if (digit && index === OTP_LENGTH - 1) {
       const full = [...next.slice(0, OTP_LENGTH - 1), digit].join("");
-      if (full.length === OTP_LENGTH) handleVerifyOtp(full);
+      if (full.length === OTP_LENGTH && !isVerifying) handleVerifyOtp(full);
     }
   };
 
   const handleOtpKeyDown = (index, e) => {
     if (e.key === "Backspace") {
+      lastVerifiedOtpRef.current = "";
       if (otpDigits[index]) {
         const next = [...otpDigits]; next[index] = ""; setOtpDigits(next);
       } else if (index > 0) {
@@ -181,6 +197,7 @@ const Login = () => {
 
   const handleOtpPaste = (e) => {
     e.preventDefault();
+    lastVerifiedOtpRef.current = "";
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
     if (!pasted.length) return;
     const next = Array(OTP_LENGTH).fill("");
@@ -193,15 +210,23 @@ const Login = () => {
 
   // ── Verify OTP ────────────────────────────────────────────────────────────
   const handleVerifyOtp = async (otpOverride) => {
+    if (isVerifying) return;
+
     const otpValue = otpOverride || otpDigits.join("");
     if (otpValue.length < OTP_LENGTH) { setError(`Please enter all ${OTP_LENGTH} digits.`); return; }
 
+    // Auto verification only happens once until OTP changes
+    if (otpValue === lastVerifiedOtpRef.current) return;
+    lastVerifiedOtpRef.current = otpValue;
+
+    console.log("[VERIFY] Started");
     setIsVerifying(true);
     setError("");
     setSuccess("Verifying…");
 
     try {
       const loggedUser = await verifyOtp(mobile.trim(), otpValue, name.trim(), email.trim());
+      console.log("[VERIFY] Success");
 
       // Stop timers
       resend.stop();
@@ -215,10 +240,12 @@ const Login = () => {
         navigate(loggedUser?.role === "admin" ? "/admin" : redirectUrl, { replace: true });
       }, 1500);
     } catch (err) {
+      console.log("[VERIFY] Failed");
       setError(sanitiseError(err));
       setSuccess("");
       // Clear OTP on failure
       setOtpDigits(Array(OTP_LENGTH).fill(""));
+      lastVerifiedOtpRef.current = "";
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } finally {
       setIsVerifying(false);
