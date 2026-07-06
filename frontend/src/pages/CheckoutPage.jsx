@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, loading: authLoading, sendOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
   // Form states
@@ -199,6 +199,12 @@ const Checkout = () => {
         </Link>
       </div>
     );
+  }
+
+  // ── Guest Auth Gate ─────────────────────────────────────────────────────────
+  // Show inline OTP flow instead of redirecting — cart is never cleared.
+  if (!authLoading && !user) {
+    return <CheckoutAuthGate sendOtp={sendOtp} verifyOtp={verifyOtp} />;
   }
 
   return (
@@ -692,3 +698,297 @@ const Checkout = () => {
 };
 
 export default Checkout;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CheckoutAuthGate
+// Self-contained inline OTP flow shown when a guest navigates to /checkout.
+// Never redirects — after verification AuthContext updates and the full
+// checkout form renders automatically (component re-evaluates `user`).
+// Cart is never touched.
+// ─────────────────────────────────────────────────────────────────────────────
+const OTP_LEN = 6;
+const RESEND_CD = 60;
+
+const sanitiseMsg = (err) => {
+  const raw = (err?.response?.data?.message || err?.message || "").toLowerCase();
+  if (!raw) return "Something went wrong. Please try again.";
+  if (/too many|rate limit/i.test(raw)) return err?.response?.data?.message || "Too many OTP requests. Please wait before trying again.";
+  if (/expired/i.test(raw)) return "OTP has expired. Please request a new one.";
+  if (/incorrect|wrong|invalid.*otp/i.test(raw)) {
+    const rem = err?.response?.data?.remainingAttempts;
+    return rem !== undefined ? `Incorrect OTP. ${rem} attempt${rem !== 1 ? "s" : ""} remaining.` : "Incorrect OTP. Please try again.";
+  }
+  if (/maximum.*attempt|too many.*attempt/i.test(raw)) return "Too many incorrect attempts. Please request a new OTP.";
+  if (/valid.*mobile|valid.*number/i.test(raw)) return "Please enter a valid 10-digit mobile number.";
+  if (/network error/i.test(err?.message)) return "Unable to connect. Check your internet connection.";
+  const safe = err?.response?.data?.message || "";
+  return safe && safe.length < 120 ? safe : "Something went wrong. Please try again.";
+};
+
+const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
+  const [step, setStep] = useState("mobile"); // mobile | details | otp
+  const [mobile, setMobile] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isExistingUser, setIsExistingUser] = useState(false);
+
+  const [otpDigits, setOtpDigits] = useState(Array(OTP_LEN).fill(""));
+  const otpRefs = useRef([]);
+
+  // 60s resend countdown
+  const [resendCount, setResendCount] = useState(0);
+  const resendTimer = useRef(null);
+  const startResend = () => {
+    setResendCount(RESEND_CD);
+    clearInterval(resendTimer.current);
+    resendTimer.current = setInterval(() => {
+      setResendCount((p) => { if (p <= 1) { clearInterval(resendTimer.current); return 0; } return p - 1; });
+    }, 1000);
+  };
+  useEffect(() => () => clearInterval(resendTimer.current), []);
+
+  const [busy, setBusy] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState("");
+  const [devHint, setDevHint] = useState("");
+  const [welcomeDone, setWelcomeDone] = useState(false);
+  const [welcomeName, setWelcomeName] = useState("");
+
+  const doSendOtp = async (e) => {
+    e?.preventDefault();
+    setError("");
+    if (!isExistingUser && !name.trim()) { setError("Please enter your full name."); return; }
+    setBusy(true);
+    try {
+      const r = await sendOtp(mobile.trim(), name.trim(), email.trim());
+      setIsExistingUser(!!r.isExistingUser);
+      if (r.devOtp) setDevHint(r.devOtp);
+      setOtpDigits(Array(OTP_LEN).fill(""));
+      setStep("otp");
+      startResend();
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    } catch (err) { setError(sanitiseMsg(err)); }
+    finally { setBusy(false); }
+  };
+
+  const doVerify = useCallback(async (override) => {
+    const val = override || otpDigits.join("");
+    if (val.length < OTP_LEN) { setError(`Please enter all ${OTP_LEN} digits.`); return; }
+    setVerifying(true); setError("");
+    try {
+      const u = await verifyOtp(mobile.trim(), val, name.trim(), email.trim());
+      setWelcomeName(u?.name || "there");
+      setWelcomeDone(true);
+      // AuthContext now has user — parent component will re-render and show full checkout
+    } catch (err) {
+      setError(sanitiseMsg(err));
+      setOtpDigits(Array(OTP_LEN).fill(""));
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    } finally { setVerifying(false); }
+  }, [otpDigits, mobile, name, email, verifyOtp]);
+
+  const doResend = async () => {
+    if (resendCount > 0) return;
+    setError(""); setDevHint(""); setOtpDigits(Array(OTP_LEN).fill(""));
+    setBusy(true);
+    try {
+      const r = await sendOtp(mobile.trim(), name.trim(), email.trim());
+      if (r.devOtp) setDevHint(r.devOtp);
+      startResend();
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    } catch (err) { setError(sanitiseMsg(err)); }
+    finally { setBusy(false); }
+  };
+
+  const oChange = (i, v) => {
+    const d = v.replace(/\D/g, "").slice(-1);
+    const next = [...otpDigits]; next[i] = d; setOtpDigits(next); setError("");
+    if (d && i < OTP_LEN - 1) otpRefs.current[i + 1]?.focus();
+    if (d && i === OTP_LEN - 1) {
+      const full = [...next.slice(0, OTP_LEN - 1), d].join("");
+      if (full.length === OTP_LEN) doVerify(full);
+    }
+  };
+
+  const oKey = (i, e) => {
+    if (e.key === "Backspace") {
+      if (otpDigits[i]) { const n = [...otpDigits]; n[i] = ""; setOtpDigits(n); }
+      else if (i > 0) otpRefs.current[i - 1]?.focus();
+    } else if (e.key === "ArrowLeft" && i > 0) otpRefs.current[i - 1]?.focus();
+    else if (e.key === "ArrowRight" && i < OTP_LEN - 1) otpRefs.current[i + 1]?.focus();
+  };
+
+  const oPaste = (e) => {
+    e.preventDefault();
+    const p = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LEN);
+    if (!p) return;
+    const next = Array(OTP_LEN).fill("");
+    for (let i = 0; i < OTP_LEN; i++) next[i] = p[i] || "";
+    setOtpDigits(next);
+    otpRefs.current[Math.min(p.length, OTP_LEN - 1)]?.focus();
+    if (p.length === OTP_LEN) doVerify(p);
+  };
+
+  return (
+    <div className="max-w-max-width mx-auto px-margin-desktop py-xl text-left">
+      <div className="mb-xl">
+        <Link to="/cart" className="text-body-sm text-primary hover:underline flex items-center gap-xs">
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back to Cart
+        </Link>
+      </div>
+      <h1 className="font-headline-lg text-headline-lg text-on-surface mb-xl font-bold">Checkout</h1>
+
+      <div className="max-w-md mx-auto">
+        {/* Welcome flash */}
+        {welcomeDone ? (
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-xl shadow-lg text-center animate-in fade-in zoom-in-95 duration-300">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-md mx-auto">
+              <span className="material-symbols-outlined text-[40px]">waving_hand</span>
+            </div>
+            <h2 className="text-headline-sm font-bold text-on-surface mb-xs">Welcome, {welcomeName.split(" ")[0]}! 👋</h2>
+            <p className="text-body-sm text-on-surface-variant mb-md">Loading your checkout…</p>
+            <div className="flex justify-center">
+              <div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-primary/5 border-b border-outline-variant px-lg py-md flex items-center gap-md">
+              <div className="p-xs rounded-xl bg-primary/10 text-primary">
+                <span className="material-symbols-outlined text-[28px]">lock</span>
+              </div>
+              <div>
+                <h2 className="font-semibold text-on-surface text-body-md">Authentication Required</h2>
+                <p className="text-body-xs text-on-surface-variant">Continue with your mobile number to complete your order.</p>
+              </div>
+            </div>
+
+            <div className="p-lg space-y-md">
+              {/* Cart preview pill */}
+              <div className="flex items-center gap-xs text-body-xs text-on-surface-variant bg-surface-container rounded-lg px-md py-xs border border-outline-variant/50">
+                <span className="material-symbols-outlined text-[16px] text-primary">shopping_bag</span>
+                <span>Your cart is saved and will not be cleared.</span>
+              </div>
+
+              {error && (
+                <div role="alert" className="bg-error-container/20 border border-error/30 text-error p-sm rounded-lg text-body-sm flex items-start gap-xs animate-in fade-in duration-200">
+                  <span className="material-symbols-outlined text-[16px] mt-[1px] flex-shrink-0">error</span>
+                  <span>{error}</span>
+                </div>
+              )}
+              {devHint && (
+                <div className="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 p-sm rounded-lg text-body-xs flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-[14px]">bug_report</span>
+                  <span>Dev OTP: <strong className="font-mono tracking-[0.2em]">{devHint}</strong></span>
+                </div>
+              )}
+
+              {/* STEP: Mobile */}
+              {step === "mobile" && (
+                <form onSubmit={(e) => {
+                  e.preventDefault(); setError("");
+                  const c = mobile.trim().replace(/\D/g, "");
+                  if (!/^[6-9]\d{9}$/.test(c)) { setError("Please enter a valid 10-digit mobile number starting with 6–9."); return; }
+                  setStep("details");
+                }} className="space-y-md" noValidate>
+                  <div className="space-y-xs">
+                    <label htmlFor="gate-mobile" className="block text-sm font-semibold text-on-surface">Mobile Number</label>
+                    <div className="relative flex items-center">
+                      <div className="absolute left-0 flex items-center pl-md h-full pointer-events-none">
+                        <span className="text-on-surface-variant font-mono text-sm">+91</span>
+                        <div className="ml-sm w-px h-5 bg-outline-variant" />
+                      </div>
+                      <input id="gate-mobile" type="tel" inputMode="numeric" maxLength={10} autoFocus autoComplete="tel-national"
+                        value={mobile} onChange={(e) => { setMobile(e.target.value.replace(/\D/g, "").slice(0, 10)); setError(""); }}
+                        placeholder="9XXXXXXXXX" aria-label="10-digit mobile number"
+                        className="w-full pl-[72px] pr-md py-sm bg-surface-container border border-outline-variant rounded-xl text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all tracking-widest font-mono"
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={mobile.length < 10} className="w-full py-sm rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-primary text-sm font-bold shadow hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-xs">
+                    <span>Continue</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </button>
+                </form>
+              )}
+
+              {/* STEP: Details */}
+              {step === "details" && (
+                <form onSubmit={doSendOtp} className="space-y-md" noValidate>
+                  <div className="flex items-center gap-xs text-sm text-on-surface-variant bg-surface-container rounded-lg px-md py-xs border border-outline-variant/50">
+                    <span className="material-symbols-outlined text-[16px] text-primary">phone_iphone</span>
+                    <span className="font-mono tracking-wider">+91 {mobile}</span>
+                    <button type="button" onClick={() => { setStep("mobile"); setError(""); }} className="ml-auto text-primary text-xs font-bold hover:underline">Change</button>
+                  </div>
+                  <div className="space-y-xs">
+                    <label htmlFor="gate-name" className="block text-sm font-semibold text-on-surface">Full Name <span className="text-error">*</span></label>
+                    <input id="gate-name" type="text" autoFocus required autoComplete="name" value={name} onChange={(e) => { setName(e.target.value); setError(""); }} placeholder="Your full name"
+                      className="w-full px-md py-sm bg-surface-container border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  </div>
+                  <div className="space-y-xs">
+                    <label htmlFor="gate-email" className="block text-sm font-semibold text-on-surface">Email <span className="text-xs font-normal text-on-surface-variant">(optional)</span></label>
+                    <input id="gate-email" type="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} placeholder="you@example.com"
+                      className="w-full px-md py-sm bg-surface-container border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  </div>
+                  <button type="submit" disabled={busy} className="w-full py-sm rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-on-primary text-sm font-bold shadow hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-xs">
+                    {busy ? <><span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" /><span>Sending OTP…</span></> : <><span className="material-symbols-outlined text-[18px]">sms</span><span>Send OTP</span></>}
+                  </button>
+                </form>
+              )}
+
+              {/* STEP: OTP */}
+              {step === "otp" && (
+                <div className="space-y-md">
+                  <div className="flex items-center gap-xs text-sm text-on-surface-variant bg-surface-container rounded-lg px-md py-xs border border-outline-variant/50">
+                    <span className="material-symbols-outlined text-[16px] text-primary">phone_iphone</span>
+                    <span className="font-mono tracking-wider">+91 {mobile}</span>
+                  </div>
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-on-surface mb-sm text-center block">Enter the {OTP_LEN}-digit code</legend>
+                    <div className="flex gap-xs justify-center" onPaste={oPaste} role="group" aria-label="OTP entry">
+                      {otpDigits.map((d, i) => (
+                        <input key={i} id={`gate-otp-${i + 1}`} ref={(el) => (otpRefs.current[i] = el)}
+                          type="text" inputMode="numeric" pattern="[0-9]*" maxLength={1} value={d}
+                          autoComplete={i === 0 ? "one-time-code" : "off"}
+                          aria-label={`OTP digit ${i + 1} of ${OTP_LEN}`}
+                          onChange={(e) => oChange(i, e.target.value)} onKeyDown={(e) => oKey(i, e)} disabled={verifying}
+                          className={`w-10 h-12 text-center text-lg font-bold font-mono rounded-xl border-2 bg-surface-container text-on-surface transition-all focus:outline-none focus:ring-2 disabled:opacity-60 ${d ? "border-primary bg-primary/5 focus:ring-primary/30" : "border-outline-variant focus:border-primary focus:ring-primary/20"}`}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  {!verifying && (
+                    <button type="button" onClick={() => doVerify()} disabled={otpDigits.join("").length < OTP_LEN}
+                      className="w-full py-sm rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-primary text-sm font-bold shadow hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-xs">
+                      <span className="material-symbols-outlined text-[18px]">verified</span><span>Verify & Continue</span>
+                    </button>
+                  )}
+                  {verifying && (
+                    <div className="flex items-center justify-center gap-sm py-xs" role="status">
+                      <div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <span className="text-sm text-on-surface-variant">Verifying…</span>
+                    </div>
+                  )}
+
+                  <div className="text-center space-y-xs">
+                    {resendCount > 0
+                      ? <p className="text-xs text-on-surface-variant">Resend OTP in <strong className="font-mono">{`0:${resendCount.toString().padStart(2, "0")}`}</strong></p>
+                      : <button type="button" onClick={doResend} disabled={busy} className="text-primary text-xs font-bold hover:underline disabled:opacity-50 flex items-center gap-xs mx-auto">
+                          <span className="material-symbols-outlined text-[14px]">refresh</span>{busy ? "Sending…" : "Resend OTP"}
+                        </button>
+                    }
+                    <button type="button" onClick={() => { setStep("details"); setError(""); }} className="text-xs text-on-surface-variant hover:underline">← Change details</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+

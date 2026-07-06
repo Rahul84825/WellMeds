@@ -3,11 +3,11 @@ import { generateToken } from "../utils/generateToken.js";
 import { generateRefreshToken } from "../utils/generateRefreshToken.js";
 import jwt from "jsonwebtoken";
 
-// Cookie options helper
+// ─── Cookie Options ──────────────────────────────────────────────────────────
 const getCookieOptions = (expireString) => {
   const isProduction = process.env.NODE_ENV === "production";
 
-  let maxAge = 7 * 24 * 60 * 60 * 1000; // Default 7 days
+  let maxAge = 30 * 24 * 60 * 60 * 1000; // Default 30 days
   if (expireString && expireString.endsWith("d")) {
     const days = parseInt(expireString.slice(0, -1));
     if (!isNaN(days)) maxAge = days * 24 * 60 * 60 * 1000;
@@ -24,12 +24,29 @@ const getCookieOptions = (expireString) => {
   };
 };
 
+// ─── Security Logger ─────────────────────────────────────────────────────────
+const maskMobile = (mobile) => {
+  if (!mobile) return "unknown";
+  const s = String(mobile);
+  return s.length >= 4 ? `XXXXXX${s.slice(-4)}` : "XXXX";
+};
+
+const secLog = (tag, data = {}) => {
+  const ts = new Date().toISOString();
+  const parts = Object.entries(data)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(" ");
+  console.log(`[${ts}] [AUTH]${tag} ${parts}`);
+};
+
+// ─── Logout ──────────────────────────────────────────────────────────────────
 export const logout = async (req, res, next) => {
   try {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
 
     if (req.user) {
+      secLog("[LOGOUT]", { userId: req.user._id });
       req.user.refreshToken = "";
       await req.user.save();
     }
@@ -40,8 +57,9 @@ export const logout = async (req, res, next) => {
   }
 };
 
+// ─── Refresh (Sliding Window) ─────────────────────────────────────────────────
 export const refresh = async (req, res, next) => {
-  let token = req.cookies.refreshToken || req.body.refreshToken;
+  const token = req.cookies.refreshToken || req.body.refreshToken;
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Session expired. Please log in again." });
@@ -55,19 +73,31 @@ export const refresh = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Invalid or expired refresh token" });
     }
 
+    // Issue new access + refresh tokens (sliding window — extends session on activity)
     const newAccessToken = generateToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    // Persist rotated refresh token
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    secLog("[TOKEN_REFRESH]", { userId: user._id });
+
+    // Update both cookies
     res.cookie("accessToken", newAccessToken, getCookieOptions(process.env.JWT_EXPIRE));
+    res.cookie("refreshToken", newRefreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE));
 
     res.status(200).json({
       success: true,
       token: newAccessToken,
     });
   } catch (error) {
-    console.error("Refresh token validation failed:", error.message);
+    console.error("[AUTH][TOKEN_REFRESH][FAIL]", error.message);
     res.status(401).json({ success: false, message: "Session expired, please log in again" });
   }
 };
 
+// ─── Get Profile ──────────────────────────────────────────────────────────────
 export const getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -94,6 +124,7 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
+// ─── Update Profile ────────────────────────────────────────────────────────────
 export const updateProfile = async (req, res, next) => {
   const { name, email, avatar, address, gender, dob } = req.body;
 
@@ -111,6 +142,8 @@ export const updateProfile = async (req, res, next) => {
     if (dob !== undefined) user.dob = dob;
 
     await user.save();
+
+    secLog("[PROFILE_UPDATE]", { userId: user._id });
 
     res.status(200).json({
       success: true,
