@@ -1,334 +1,532 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import Loader from "../components/Loader";
 
-/**
- * Converts raw backend/axios error messages into clean, user-facing strings.
- * Internal messages like "Refresh token is missing" must NEVER be shown to users.
- */
-const sanitiseAuthError = (err) => {
-  const raw = err?.response?.data?.message || "";
+// ─── OTP Input Length ──────────────────────────────────────────────────────
+const OTP_LENGTH = 6;
+const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
 
-  // Suppress any token / refresh / authorization internal messages
-  const internalPatterns = [
-    /refresh token/i,
-    /not authorized/i,
-    /token (is )?missing/i,
-    /token verification/i,
-    /jwt/i,
-    /session expired/i,
-  ];
-  if (internalPatterns.some((p) => p.test(raw))) {
-    return "Something went wrong. Please try again.";
-  }
-
-  // Map known backend messages to friendly copy
-  if (/invalid email or password/i.test(raw)) return "Invalid email or password.";
-  if (/not verified/i.test(raw) || /verify your email/i.test(raw))
-    return "Your email address is not verified. Please check your inbox for the verification link.";
-  if (/locked/i.test(raw)) return raw; // Account lockout message is already user-friendly
-  if (/network error/i.test(err?.message) || err?.code === "ERR_NETWORK")
-    return "Unable to connect to the server. Please check your internet connection.";
-
-  // Return the backend message if it looks safe, else a generic fallback
-  return raw || "Authentication failed. Please try again.";
-};
+// ─── Step Constants ────────────────────────────────────────────────────────
+const STEP_MOBILE = "mobile";
+const STEP_DETAILS = "details";
+const STEP_OTP = "otp";
 
 const Login = () => {
-  const { loginWithGoogle, loginUser, user, isAdmin } = useAuth();
+  const { sendOtp, verifyOtp, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Form States
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  // UI States
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
   const redirectUrl = location.state?.from || "/";
 
-  // Automatic redirect if already authenticated
+  // ── Flow state ─────────────────────────────────────────────────────────────
+  const [step, setStep] = useState(STEP_MOBILE);
+  const [mobile, setMobile] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isExistingUser, setIsExistingUser] = useState(false);
+
+  // ── OTP state ──────────────────────────────────────────────────────────────
+  const [otpDigits, setOtpDigits] = useState(Array(OTP_LENGTH).fill(""));
+  const otpRefs = useRef([]);
+
+  // ── Countdown timer ────────────────────────────────────────────────────────
+  const [countdown, setCountdown] = useState(OTP_EXPIRY_SECONDS);
+  const [canResend, setCanResend] = useState(false);
+  const countdownRef = useRef(null);
+
+  // ── UI state ───────────────────────────────────────────────────────────────
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [devOtpHint, setDevOtpHint] = useState("");
+
+  // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      if (isAdmin) {
-        navigate("/admin");
-      } else {
-        navigate(redirectUrl);
-      }
+      navigate(isAdmin ? "/admin" : redirectUrl, { replace: true });
     }
   }, [user, isAdmin, navigate, redirectUrl]);
 
-  // Google Sign-In script dynamic loader and initializer
-  useEffect(() => {
-    const scriptId = "google-jssdk";
-    let script = document.getElementById(scriptId);
-
-    const initializeGoogleButton = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028710325492-mockid.apps.googleusercontent.com",
-          callback: handleGoogleCallback,
-          auto_select: false,
-        });
-
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-button"),
-          {
-            theme: "outline",
-            size: "large",
-            width: 320,
-            text: "continue_with",
-            shape: "pill",
-          }
-        );
-      }
-    };
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        initializeGoogleButton();
-      };
-      document.head.appendChild(script);
-    } else {
-      if (window.google) {
-        initializeGoogleButton();
-      } else {
-        script.onload = () => {
-          initializeGoogleButton();
-        };
-      }
-    }
-  }, []); // eslint-disable-line
-
-  const handleGoogleCallback = async (response) => {
-    const credential = response.credential;
-    if (!credential) return;
-
-    setIsSubmitting(true);
-    setError("");
-    setSuccessMessage("");
-
-    try {
-      const loggedUser = await loginWithGoogle(credential);
-      setSuccessMessage("Sign-in successful! Redirecting...");
-      
-      setTimeout(() => {
-        if (loggedUser.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate(redirectUrl);
+  // ── Countdown timer control ────────────────────────────────────────────────
+  const startCountdown = useCallback(() => {
+    setCountdown(OTP_EXPIRY_SECONDS);
+    setCanResend(false);
+    clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          setCanResend(true);
+          return 0;
         }
-      }, 800);
-    } catch (err) {
-      console.warn("Google login error:", err?.response?.data?.message || err?.message);
-      setError(sanitiseAuthError(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => () => clearInterval(countdownRef.current), []);
+
+  const formatCountdown = (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   };
 
-  const handleEmailLogin = async (e) => {
+  // ── Step 1: Validate mobile number ─────────────────────────────────────────
+  const handleMobileSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please enter both email and password.");
+    setError("");
+    const cleaned = mobile.trim().replace(/\s/g, "");
+    if (!/^[6-9]\d{9}$/.test(cleaned)) {
+      setError("Please enter a valid 10-digit Indian mobile number (starting with 6-9).");
+      return;
+    }
+    setStep(STEP_DETAILS);
+  };
+
+  // ── Step 2 → 3: Send OTP ─────────────────────────────────────────────────
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!isExistingUser && !name.trim()) {
+      setError("Please enter your full name.");
       return;
     }
 
     setIsSubmitting(true);
-    setError("");
-    setSuccessMessage("");
-
     try {
-      const loggedUser = await loginUser(email, password);
-      setSuccessMessage("Sign-in successful! Redirecting...");
-      
-      setTimeout(() => {
-        if (loggedUser.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate(redirectUrl);
-        }
-      }, 800);
+      const result = await sendOtp(mobile.trim(), name.trim(), email.trim());
+      setIsExistingUser(result.isExistingUser || false);
+
+      // Dev hint: if backend returns devOtp in development
+      if (result.devOtp) {
+        setDevOtpHint(result.devOtp);
+      }
+
+      setOtpDigits(Array(OTP_LENGTH).fill(""));
+      setStep(STEP_OTP);
+      startCountdown();
+
+      // Auto-focus first OTP box after render
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+
+      setSuccess(`OTP sent to +91 ${mobile.trim()}`);
     } catch (err) {
-      console.warn("Email login error:", err?.response?.data?.message || err?.message);
-      setError(sanitiseAuthError(err));
+      const msg = err?.response?.data?.message || "Failed to send OTP. Please try again.";
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // ── OTP digit input handlers ───────────────────────────────────────────────
+  const handleOtpChange = (index, value) => {
+    // Accept only digits
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newDigits = [...otpDigits];
+    newDigits[index] = digit;
+    setOtpDigits(newDigits);
+    setError("");
+
+    // Auto-advance to next box
+    if (digit && index < OTP_LENGTH - 1) {
+      otpRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-verify when all digits entered
+    if (digit && index === OTP_LENGTH - 1) {
+      const fullOtp = [...newDigits.slice(0, OTP_LENGTH - 1), digit].join("");
+      if (fullOtp.length === OTP_LENGTH) {
+        handleVerifyOtp(fullOtp);
+      }
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace") {
+      if (otpDigits[index]) {
+        const newDigits = [...otpDigits];
+        newDigits[index] = "";
+        setOtpDigits(newDigits);
+      } else if (index > 0) {
+        otpRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < OTP_LENGTH - 1) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  // Paste support: paste 6 digits into the grid
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    if (pasted.length > 0) {
+      const newDigits = [...otpDigits];
+      for (let i = 0; i < OTP_LENGTH; i++) {
+        newDigits[i] = pasted[i] || "";
+      }
+      setOtpDigits(newDigits);
+      const nextIndex = Math.min(pasted.length, OTP_LENGTH - 1);
+      otpRefs.current[nextIndex]?.focus();
+
+      if (pasted.length === OTP_LENGTH) {
+        handleVerifyOtp(pasted);
+      }
+    }
+  };
+
+  // ── Step 3: Verify OTP ────────────────────────────────────────────────────
+  const handleVerifyOtp = async (otpOverride) => {
+    const otpValue = otpOverride || otpDigits.join("");
+    if (otpValue.length < OTP_LENGTH) {
+      setError(`Please enter all ${OTP_LENGTH} digits.`);
+      return;
+    }
+
+    setIsVerifying(true);
+    setError("");
+    setSuccess("Verifying…");
+
+    try {
+      const loggedUser = await verifyOtp(mobile.trim(), otpValue, name.trim(), email.trim());
+      setSuccess("Verified! Redirecting…");
+      clearInterval(countdownRef.current);
+
+      setTimeout(() => {
+        navigate(loggedUser?.role === "admin" ? "/admin" : redirectUrl, { replace: true });
+      }, 800);
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Incorrect OTP. Please try again.";
+      setError(msg);
+      setSuccess("");
+      // Clear OTP boxes on failure and refocus first
+      setOtpDigits(Array(OTP_LENGTH).fill(""));
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // ── Resend OTP ─────────────────────────────────────────────────────────────
+  const handleResend = async () => {
+    if (!canResend) return;
+    setError("");
+    setSuccess("");
+    setDevOtpHint("");
+    setOtpDigits(Array(OTP_LENGTH).fill(""));
+    setIsSubmitting(true);
+
+    try {
+      const result = await sendOtp(mobile.trim(), name.trim(), email.trim());
+      if (result.devOtp) setDevOtpHint(result.devOtp);
+      startCountdown();
+      setSuccess("New OTP sent!");
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Failed to resend OTP.";
+      setError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-xl px-margin-desktop bg-surface transition-colors duration-300">
-      <div className="absolute inset-0 medical-pattern"></div>
-      
-      <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-left">
-        
-        {/* Brand Header */}
-        <div className="text-center space-y-sm mb-lg">
-          <div className="inline-flex p-sm rounded-full bg-primary/10 text-primary mb-xs">
-            <span className="material-symbols-outlined text-[32px]">local_hospital</span>
-          </div>
-          <h2 className="font-headline-lg text-headline-lg text-primary font-bold">
-            Sign In to WellMeds
-          </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Access your patient profile, prescriptions, and pharmacy dashboard.
-          </p>
-        </div>
+    <div className="min-h-[80vh] flex items-center justify-center py-xl px-margin-desktop bg-surface transition-colors duration-300 relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 medical-pattern pointer-events-none" />
 
-        {/* Status Messages */}
-        {error && (
-          <div className="bg-error-container/20 border border-error/30 text-error p-md rounded-lg text-body-sm flex items-start gap-xs mb-md">
-            <span className="material-symbols-outlined text-[18px] mt-[2px] flex-shrink-0">error</span>
-            <span>{error}</span>
-          </div>
-        )}
+      {/* Glowing accent blobs */}
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
 
-        {successMessage && (
-          <div className="bg-primary-container/10 border border-primary/30 text-primary p-md rounded-lg text-body-sm flex items-center gap-xs mb-md">
-            <span className="material-symbols-outlined text-[18px] flex-shrink-0">check_circle</span>
-            <span>{successMessage}</span>
-          </div>
-        )}
+      <div className="relative w-full max-w-md">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-2xl text-left animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-        {/* Auth Forms */}
-        <div className="space-y-md">
-          {isSubmitting ? (
-            <div className="flex flex-col items-center justify-center py-xl gap-sm">
-              <Loader size="lg" />
-              <p className="text-body-sm text-on-surface-variant font-medium">Verifying credentials...</p>
+          {/* ── Brand Header ─────────────────────────────────────────────────── */}
+          <div className="text-center space-y-xs mb-lg">
+            <div className="inline-flex p-sm rounded-2xl bg-primary/10 text-primary mb-xs">
+              <span className="material-symbols-outlined text-[36px]">local_hospital</span>
             </div>
-          ) : (
-            <>
-              {/* Google Sign-In */}
-              <div className="flex justify-center py-xs">
-                <div id="google-signin-button" className="min-h-[44px]"></div>
+            <h1 className="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">
+              {step === STEP_OTP ? "Verify Your Number" : "Welcome to WellMeds"}
+            </h1>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              {step === STEP_MOBILE && "Enter your mobile number to continue"}
+              {step === STEP_DETAILS && "Just a few more details to get you started"}
+              {step === STEP_OTP && `We sent a code to +91 ${mobile}`}
+            </p>
+          </div>
+
+          {/* ── Progress Dots ─────────────────────────────────────────────────── */}
+          <div className="flex items-center justify-center gap-sm mb-lg">
+            {[STEP_MOBILE, STEP_DETAILS, STEP_OTP].map((s, i) => (
+              <React.Fragment key={s}>
+                <div
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    step === s
+                      ? "w-6 bg-primary"
+                      : i < [STEP_MOBILE, STEP_DETAILS, STEP_OTP].indexOf(step)
+                      ? "bg-primary/60"
+                      : "bg-outline-variant"
+                  }`}
+                />
+                {i < 2 && <div className="w-6 h-px bg-outline-variant/50" />}
+              </React.Fragment>
+            ))}
+          </div>
+
+          {/* ── Status Messages ───────────────────────────────────────────────── */}
+          {error && (
+            <div className="bg-error-container/20 border border-error/30 text-error p-sm rounded-lg text-body-sm flex items-start gap-xs mb-md animate-in fade-in duration-200">
+              <span className="material-symbols-outlined text-[18px] mt-[1px] flex-shrink-0">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+          {success && !error && (
+            <div className="bg-primary-container/10 border border-primary/20 text-primary p-sm rounded-lg text-body-sm flex items-center gap-xs mb-md animate-in fade-in duration-200">
+              <span className="material-symbols-outlined text-[18px] flex-shrink-0">check_circle</span>
+              <span>{success}</span>
+            </div>
+          )}
+
+          {/* ── Dev OTP Hint (development only) ──────────────────────────────── */}
+          {devOtpHint && (
+            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 p-sm rounded-lg text-body-sm flex items-center gap-xs mb-md">
+              <span className="material-symbols-outlined text-[18px] flex-shrink-0">bug_report</span>
+              <span>Dev OTP: <strong className="font-mono tracking-widest">{devOtpHint}</strong></span>
+            </div>
+          )}
+
+          {/* ════════════════════════════════════════════════════════════════════
+              STEP 1 — Mobile Number
+          ══════════════════════════════════════════════════════════════════════ */}
+          {step === STEP_MOBILE && (
+            <form onSubmit={handleMobileSubmit} className="space-y-md" noValidate>
+              <div className="space-y-xs">
+                <label htmlFor="mobile" className="block font-body-sm text-sm font-semibold text-on-surface">
+                  Mobile Number
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-0 flex items-center pl-md h-full pointer-events-none">
+                    <span className="text-on-surface-variant font-body-sm text-sm font-medium">+91</span>
+                    <div className="ml-sm w-px h-5 bg-outline-variant" />
+                  </div>
+                  <input
+                    id="mobile"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    required
+                    value={mobile}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      setMobile(val);
+                      setError("");
+                    }}
+                    placeholder="9XXXXXXXXX"
+                    className="w-full pl-[72px] pr-md py-sm bg-surface-container border border-outline-variant rounded-xl text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 tracking-widest font-mono"
+                    autoFocus
+                  />
+                </div>
+                <p className="text-body-xs text-on-surface-variant/70">
+                  We'll send a one-time verification code to this number.
+                </p>
               </div>
 
-              {/* Divider */}
-              <div className="relative flex py-xs items-center">
-                <div className="flex-grow border-t border-outline-variant/30"></div>
-                <span className="flex-shrink mx-md text-on-surface-variant font-body-sm text-[11px] font-bold uppercase tracking-wider">
-                  or continue with email
-                </span>
-                <div className="flex-grow border-t border-outline-variant/30"></div>
+              <button
+                id="btn-continue-mobile"
+                type="submit"
+                disabled={mobile.length < 10}
+                className="w-full py-sm px-lg rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-xs"
+              >
+                <span>Continue</span>
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </form>
+          )}
+
+          {/* ════════════════════════════════════════════════════════════════════
+              STEP 2 — Name & Email (for new or all users)
+          ══════════════════════════════════════════════════════════════════════ */}
+          {step === STEP_DETAILS && (
+            <form onSubmit={handleSendOtp} className="space-y-md" noValidate>
+              {/* Prefilled mobile (read-only) */}
+              <div className="flex items-center gap-xs text-body-sm text-on-surface-variant bg-surface-container rounded-xl px-md py-sm border border-outline-variant/50">
+                <span className="material-symbols-outlined text-[18px] text-primary">phone_iphone</span>
+                <span className="font-mono tracking-wider text-on-surface">+91 {mobile}</span>
+                <button
+                  type="button"
+                  onClick={() => { setStep(STEP_MOBILE); setError(""); setSuccess(""); }}
+                  className="ml-auto text-primary text-body-xs font-bold hover:underline"
+                >
+                  Change
+                </button>
               </div>
 
-              {/* Email/Password Form */}
-              <form onSubmit={handleEmailLogin} className="space-y-md">
-                <div className="space-y-xs">
-                  <label htmlFor="email" className="block font-body-sm text-sm font-bold text-on-surface">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-md top-[50%] -translate-y-[50%] material-symbols-outlined text-on-surface-variant text-[20px]">
-                      mail
-                    </span>
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="yourname@gmail.com"
-                      className="w-full pl-xl pr-md py-sm bg-surface-container border border-outline-variant rounded-lg text-body-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
-                  </div>
+              <div className="space-y-xs">
+                <label htmlFor="name" className="block font-body-sm text-sm font-semibold text-on-surface">
+                  Full Name <span className="text-error">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]">person</span>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => { setName(e.target.value); setError(""); }}
+                    placeholder="Your full name"
+                    required={!isExistingUser}
+                    className="w-full pl-xl pr-md py-sm bg-surface-container border border-outline-variant rounded-xl text-body-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                    autoFocus
+                  />
                 </div>
+              </div>
 
-                <div className="space-y-xs">
-                  <div className="flex justify-between items-center">
-                    <label htmlFor="password" className="block font-body-sm text-sm font-bold text-on-surface">
-                      Password
-                    </label>
-                    <Link
-                      to="/forgot-password"
-                      className="font-body-sm text-xs font-bold text-primary hover:underline"
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <span className="absolute left-md top-[50%] -translate-y-[50%] material-symbols-outlined text-on-surface-variant text-[20px]">
-                      lock
-                    </span>
-                    <input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-xl pr-md py-sm bg-surface-container border border-outline-variant rounded-lg text-body-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
-                  </div>
+              <div className="space-y-xs">
+                <label htmlFor="email" className="block font-body-sm text-sm font-semibold text-on-surface">
+                  Email Address <span className="text-on-surface-variant/60 text-xs font-normal">(optional)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]">mail</span>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    placeholder="you@example.com"
+                    className="w-full pl-xl pr-md py-sm bg-surface-container border border-outline-variant rounded-xl text-body-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                  />
                 </div>
+              </div>
+
+              <button
+                id="btn-send-otp"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-sm px-lg rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-xs"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" />
+                    <span>Sending OTP…</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]">sms</span>
+                    <span>Send OTP</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* ════════════════════════════════════════════════════════════════════
+              STEP 3 — OTP Entry
+          ══════════════════════════════════════════════════════════════════════ */}
+          {step === STEP_OTP && (
+            <div className="space-y-lg">
+              {/* Prefilled mobile (read-only) */}
+              <div className="flex items-center gap-xs text-body-sm text-on-surface-variant bg-surface-container rounded-xl px-md py-sm border border-outline-variant/50">
+                <span className="material-symbols-outlined text-[18px] text-primary">phone_iphone</span>
+                <span className="font-mono tracking-wider text-on-surface">+91 {mobile}</span>
+              </div>
+
+              {/* 6-digit OTP grid */}
+              <div>
+                <p className="text-body-sm font-semibold text-on-surface mb-md text-center">
+                  Enter the {OTP_LENGTH}-digit code
+                </p>
+                <div
+                  className="flex gap-xs justify-center"
+                  onPaste={handleOtpPaste}
+                >
+                  {otpDigits.map((digit, i) => (
+                    <input
+                      key={i}
+                      id={`otp-${i}`}
+                      ref={(el) => (otpRefs.current[i] = el)}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      disabled={isVerifying}
+                      className={`w-11 h-14 text-center text-xl font-bold font-mono rounded-xl border-2 bg-surface-container text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 ${
+                        digit
+                          ? "border-primary bg-primary/5 focus:ring-primary/30"
+                          : "border-outline-variant focus:border-primary focus:ring-primary/20"
+                      } ${isVerifying ? "opacity-60 cursor-not-allowed" : ""}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Verify button (manual trigger) */}
+              {!isVerifying && (
+                <button
+                  id="btn-verify-otp"
+                  type="button"
+                  onClick={() => handleVerifyOtp()}
+                  disabled={otpDigits.join("").length < OTP_LENGTH || isVerifying}
+                  className="w-full py-sm px-lg rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-xs"
+                >
+                  <span className="material-symbols-outlined text-[18px]">verified</span>
+                  <span>Verify OTP</span>
+                </button>
+              )}
+
+              {/* Auto-verifying spinner */}
+              {isVerifying && (
+                <div className="flex flex-col items-center justify-center gap-sm py-sm">
+                  <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                  <p className="text-body-sm text-on-surface-variant font-medium">Verifying…</p>
+                </div>
+              )}
+
+              {/* Countdown + Resend */}
+              <div className="text-center space-y-xs">
+                {!canResend ? (
+                  <div className="flex items-center justify-center gap-xs text-body-sm text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[16px]">timer</span>
+                    <span>Resend OTP in <strong className="font-mono text-on-surface">{formatCountdown(countdown)}</strong></span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={isSubmitting}
+                    className="text-primary text-body-sm font-bold hover:underline disabled:opacity-50 flex items-center gap-xs mx-auto"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">refresh</span>
+                    {isSubmitting ? "Sending…" : "Resend OTP"}
+                  </button>
+                )}
 
                 <button
-                  type="submit"
-                  className="w-full py-sm px-lg rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-xs"
+                  type="button"
+                  onClick={() => { setStep(STEP_DETAILS); setError(""); setSuccess(""); setDevOtpHint(""); }}
+                  className="text-on-surface-variant text-body-xs hover:text-on-surface hover:underline transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]">login</span>
-                  <span>Sign In</span>
+                  ← Change details
                 </button>
-              </form>
-
-              {/* Create Account Link */}
-              <div className="text-center text-body-sm text-on-surface-variant mt-sm">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-primary hover:underline font-bold">
-                  Create Account
-                </Link>
               </div>
-            </>
+            </div>
           )}
-        </div>
 
-        {/* Developer Sandbox Section */}
-        {import.meta.env.DEV && (
-          <div className="mt-md pt-md border-t border-outline-variant/40 space-y-sm">
-            <div className="flex items-center gap-xs text-body-xs font-bold text-primary uppercase tracking-wider">
-              <span className="material-symbols-outlined text-[16px]">bug_report</span>
-              Developer Sandbox Access
-            </div>
-            <p className="text-[11px] text-on-surface-variant leading-relaxed">
-              Use these quick-connect buttons to bypass Google OAuth and test roles in the development environment.
-            </p>
-            <div className="flex flex-wrap gap-xs">
-              <button
-                type="button"
-                onClick={() => handleGoogleCallback({ credential: "mock_admin_token" })}
-                className="flex-1 min-w-[120px] py-sm px-md rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-body-xs font-bold transition-all duration-200 border border-primary/20 flex items-center justify-center gap-xs hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span className="material-symbols-outlined text-[14px]">admin_panel_settings</span>
-                Admin Bypass
-              </button>
-              <button
-                type="button"
-                onClick={() => handleGoogleCallback({ credential: "mock_customer_token" })}
-                className="flex-1 min-w-[120px] py-sm px-md rounded-lg bg-secondary/10 hover:bg-secondary/20 text-secondary text-body-xs font-bold transition-all duration-200 border border-secondary/20 flex items-center justify-center gap-xs hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span className="material-symbols-outlined text-[14px]">person</span>
-                Customer Bypass
-              </button>
-            </div>
+          {/* ── Footer ───────────────────────────────────────────────────────── */}
+          <div className="mt-lg pt-md border-t border-outline-variant/20 text-center text-body-xs text-on-surface-variant leading-relaxed">
+            By continuing, you agree to our{" "}
+            <a href="#" className="text-primary hover:underline">Terms of Service</a>
+            {" "}and{" "}
+            <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
           </div>
-        )}
-
-        {/* Footer info */}
-        <div className="mt-xl text-center text-body-xs text-on-surface-variant leading-relaxed border-t border-outline-variant/20 pt-sm">
-          By signing in, you agree to our{" "}
-          <a href="#" className="text-primary hover:underline">Terms of Service</a> and{" "}
-          <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
         </div>
       </div>
     </div>

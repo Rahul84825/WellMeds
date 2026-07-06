@@ -1,12 +1,36 @@
 import rateLimit from "express-rate-limit";
 
-// Limit sensitive auth routes to 20 requests per 15 minutes
+// Limit overall auth routes
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   message: {
     success: false,
-    message: "Too many authentication requests from this IP, please try again after 15 minutes"
+    message: "Too many authentication requests from this IP, please try again after 15 minutes",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// OTP Send: max 5 per hour per IP (matches OTP_RESEND_LIMIT)
+export const otpSendLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // 10 at IP level (per-mobile limit is enforced in controller)
+  message: {
+    success: false,
+    message: "Too many OTP requests from this IP. Please try again after 1 hour.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// OTP Verify: max 15 attempts per 15 minutes per IP
+export const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: {
+    success: false,
+    message: "Too many OTP verification attempts. Please try again after 15 minutes.",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -18,7 +42,7 @@ export const globalLimiter = rateLimit({
   max: 200,
   message: {
     success: false,
-    message: "Too many requests, please slow down"
+    message: "Too many requests, please slow down",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -30,31 +54,31 @@ export const uploadLimiter = rateLimit({
   max: 10,
   message: {
     success: false,
-    message: "Too many file upload requests from this IP, please try again after 10 minutes"
+    message: "Too many file upload requests from this IP, please try again after 10 minutes",
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Limit coupon validation/application to 15 attempts per 10 minutes to prevent code brute-forcing
+// Limit coupon validation/application to 15 attempts per 10 minutes
 export const couponLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 15,
   message: {
     success: false,
-    message: "Too many coupon validation attempts, please try again after 10 minutes"
+    message: "Too many coupon validation attempts, please try again after 10 minutes",
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Limit heavy catalog searches to 60 queries per minute to prevent search DDoS
+// Limit heavy catalog searches to 60 queries per minute
 export const searchLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 60,
   message: {
     success: false,
-    message: "Too many search requests, please slow down"
+    message: "Too many search requests, please slow down",
   },
   standardHeaders: true,
   legacyHeaders: false,

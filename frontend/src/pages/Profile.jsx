@@ -42,8 +42,7 @@ const Profile = () => {
   // Edit profile state
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editCurrentPw, setEditCurrentPw] = useState("");
-  const [editNewPw, setEditNewPw] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -72,8 +71,7 @@ const Profile = () => {
 
   const handleOpenEdit = () => {
     setEditName(user?.name || "");
-    setEditCurrentPw("");
-    setEditNewPw("");
+    setEditEmail(user?.email || "");
     setSaveError("");
     setSaveSuccess(false);
     setEditOpen(true);
@@ -87,8 +85,7 @@ const Profile = () => {
     try {
       await updateProfile({
         name: editName,
-        currentPassword: editCurrentPw || undefined,
-        newPassword: editNewPw || undefined,
+        email: editEmail || undefined,
       });
       setSaveSuccess(true);
       setTimeout(() => { setEditOpen(false); setSaveSuccess(false); }, 1200);
@@ -135,6 +132,12 @@ const Profile = () => {
           </div>
 
           <div className="pt-md border-t border-outline-variant/60 space-y-sm text-body-sm text-on-surface-variant dark:text-surface-variant">
+            {user?.mobile && (
+              <p className="flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[16px] text-outline">phone_iphone</span>
+                <span className="font-mono tracking-wider">+91 {user.mobile}</span>
+              </p>
+            )}
             <p className="flex items-center gap-xs">
               <span className="material-symbols-outlined text-[16px] text-outline">mail</span>
               <span className="truncate">{user?.email || "—"}</span>
@@ -284,23 +287,27 @@ const Profile = () => {
             />
           </div>
 
-          <div className="pt-md border-t border-outline-variant/60 space-y-xs">
-            <p className="text-label-sm font-semibold text-on-surface">Change Password <span className="font-normal text-on-surface-variant">(optional)</span></p>
+          <div className="space-y-xs">
+            <label className="block text-label-sm font-semibold text-on-surface">Email Address <span className="font-normal text-on-surface-variant">(optional)</span></label>
             <input
-              type="password"
-              placeholder="Current password"
-              value={editCurrentPw}
-              onChange={(e) => setEditCurrentPw(e.target.value)}
-              className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary"
-            />
-            <input
-              type="password"
-              placeholder="New password (min 6 chars)"
-              value={editNewPw}
-              onChange={(e) => setEditNewPw(e.target.value)}
+              type="email"
+              placeholder="you@example.com"
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
               className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary"
             />
           </div>
+
+          {user?.mobile && (
+            <div className="space-y-xs">
+              <label className="block text-label-sm font-semibold text-on-surface">Mobile Number</label>
+              <div className="flex items-center gap-xs p-sm bg-surface-container border border-outline-variant/50 rounded-lg text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[16px]">phone_iphone</span>
+                <span className="font-mono tracking-wider">+91 {user.mobile}</span>
+                <span className="ml-auto text-xs text-on-surface-variant/60">(Contact support to change)</span>
+              </div>
+            </div>
+          )}
 
           {saveError && (
             <div className="bg-error-container/20 text-error border border-error/30 rounded-lg p-sm text-sm flex items-center gap-xs">

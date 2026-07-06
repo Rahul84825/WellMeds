@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [onLogoutCallbacks]);
 
-  // Session check on mount — silently handles guest state (no session = normal)
+  // Session check on mount — silently handles guest state
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -37,8 +37,6 @@ export const AuthProvider = ({ children }) => {
           onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
         }
       } catch (err) {
-        // This catch is a safety net — getCurrentUser() already handles all
-        // errors internally and returns null. Log at debug level only.
         console.debug("Auth session bootstrap completed (no session):", err?.message);
       } finally {
         setLoading(false);
@@ -47,37 +45,26 @@ export const AuthProvider = ({ children }) => {
     checkUserSession();
   }, []); // eslint-disable-line
 
-  const loginWithGoogle = async (credential) => {
-    setLoading(true);
-    try {
-      const loggedUser = await api.loginWithGoogle(credential);
-      setUser(loggedUser);
-      // Fire post-login callbacks (cart sync)
-      onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
-      return loggedUser;
-    } finally {
-      setLoading(false);
-    }
+  /**
+   * Step 1 of OTP flow — request OTP send.
+   * Returns { success, isExistingUser, devOtp? }
+   */
+  const sendOtp = async (mobile, name = "", email = "") => {
+    return await api.sendOtp(mobile, name, email);
   };
 
-  const loginUser = async (email, password) => {
+  /**
+   * Step 2 of OTP flow — verify OTP and auto-login.
+   * Sets user in context on success.
+   * Returns the user object.
+   */
+  const verifyOtp = async (mobile, otp, name = "", email = "") => {
     setLoading(true);
     try {
-      const loggedUser = await api.loginUser(email, password);
+      const loggedUser = await api.verifyOtp(mobile, otp, name, email);
       setUser(loggedUser);
-      // Fire post-login callbacks (cart sync)
       onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
       return loggedUser;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const registerUser = async (name, email, password) => {
-    setLoading(true);
-    try {
-      const response = await api.registerUser(name, email, password);
-      return response;
     } finally {
       setLoading(false);
     }
@@ -105,9 +92,8 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         loading,
-        loginWithGoogle,
-        loginUser,
-        registerUser,
+        sendOtp,
+        verifyOtp,
         logout,
         updateProfile,
         isAdmin: user?.role === "admin",

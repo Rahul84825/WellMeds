@@ -1,38 +1,28 @@
 import apiInstance from "./api";
 
 export const authService = {
-  async loginWithGoogle(credential) {
-    const data = await apiInstance.post("/auth/google", { credential });
+  /**
+   * Send OTP to the given mobile number.
+   * For new users, name and email are passed along (optional).
+   * Returns { success, isExistingUser, devOtp? }
+   */
+  async sendOtp(mobile, name = "", email = "") {
+    const data = await apiInstance.post("/auth/otp/send", { mobile, name, email });
+    return data;
+  },
+
+  /**
+   * Verify the OTP submitted by the user.
+   * On success, stores JWT and user session.
+   * Returns the user object.
+   */
+  async verifyOtp(mobile, otp, name = "", email = "") {
+    const data = await apiInstance.post("/auth/otp/verify", { mobile, otp, name, email });
     if (data.success && data.token) {
       localStorage.setItem("medishop_token", data.token);
       sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
     }
     return data.user;
-  },
-
-  async registerUser(name, email, password) {
-    return await apiInstance.post("/auth/register", { name, email, password });
-  },
-
-  async loginUser(email, password) {
-    const data = await apiInstance.post("/auth/login", { email, password });
-    if (data.success && data.token) {
-      localStorage.setItem("medishop_token", data.token);
-      sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
-    }
-    return data.user;
-  },
-
-  async verifyEmail(token) {
-    return await apiInstance.post("/auth/verify-email", { token });
-  },
-
-  async forgotPassword(email) {
-    return await apiInstance.post("/auth/forgot-password", { email });
-  },
-
-  async resetPassword(token, password) {
-    return await apiInstance.post("/auth/reset-password", { token, password });
   },
 
   async getCurrentUser() {
@@ -47,13 +37,11 @@ export const authService = {
       }
       return null;
     } catch (error) {
-      // 401 = no session (expected for guests) — clear any stale local state
       if (error.response?.status === 401) {
         localStorage.removeItem("medishop_token");
         sessionStorage.removeItem("medishop_user");
         return null;
       }
-      // Network or server error — log for debugging but don't surface to user
       console.warn("Session check failed:", error.message);
       localStorage.removeItem("medishop_token");
       sessionStorage.removeItem("medishop_user");

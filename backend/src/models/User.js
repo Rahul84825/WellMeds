@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,46 +9,27 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
       unique: true,
+      sparse: true, // Sparse: allows multiple documents without email (phone-auth users)
       trim: true,
       lowercase: true,
       match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"],
-      validate: {
-        validator: function(v) {
-          // Strictly restrict email authentication registration to @gmail.com domains
-          if (this.authProvider === "email") {
-            return /@gmail\.com$/i.test(v);
-          }
-          return true;
-        },
-        message: "Only Gmail addresses are allowed for email registration."
-      }
     },
+    // Mobile number for OTP authentication
+    mobile: {
+      type: String,
+      unique: true,
+      sparse: true, // Sparse: won't break existing users that don't have mobile
+      trim: true,
+      index: true,
+      match: [/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"],
+    },
+    // Password kept for backward compatibility with existing data — not used in new flow
     password: {
       type: String,
       select: false,
-      validate: {
-        validator: function(v) {
-          // Password is only required and validated for email and local auth providers
-          if (this.authProvider === "email" || this.authProvider === "local") {
-            // Skip validation if password is not modified (already hashed in database)
-            if (this.isModified && !this.isModified("password")) {
-              return true;
-            }
-            if (!v) return false;
-            // Explicitly allow the required admin seed password
-            if (v === "admin123") {
-              return true;
-            }
-            // Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character
-            return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/.test(v);
-          }
-          return true;
-        },
-        message: "Password must be at least 8 characters long and contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character (@$!%*?&#)."
-      }
     },
+    // Google OAuth fields — kept for backward compatibility with existing data
     googleId: {
       type: String,
       unique: true,
@@ -64,10 +44,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // Extended authProvider enum to include phone OTP
     authProvider: {
       type: String,
-      enum: ["google", "email", "local"],
-      default: "google",
+      enum: ["google", "email", "local", "phone"],
+      default: "phone",
     },
     isVerified: {
       type: Boolean,
@@ -80,12 +61,12 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
-    // Email Verification and Password Reset
+    // Legacy fields kept for backward compatibility — not populated in new OTP flow
     verificationToken: String,
     verificationTokenExpires: Date,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    // Brute Force Protection
+    // Brute force protection — repurposed for OTP rate limiting tracking
     loginAttempts: {
       type: Number,
       required: true,
@@ -97,26 +78,5 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-// Pre-save hook to hash password before saving
-userSchema.pre("save", async function (next) {
-  // Only hash password if it was modified (or is new)
-  if (!this.isModified("password")) {
-    return next();
-  }
-
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Compare password method
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
 
 export const User = mongoose.model("User", userSchema);

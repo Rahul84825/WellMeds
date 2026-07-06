@@ -19,13 +19,9 @@ import OrderSuccessPage from "../pages/OrderSuccessPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import Login from "../pages/Login";
-import Register from "../pages/Register";
 import ProfilePage from "../pages/Profile";
 import OrdersPage from "../pages/OrdersPage";
 import UploadPrescriptionPage from "../pages/UploadPrescriptionPage";
-import VerifyEmail from "../pages/VerifyEmail";
-import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
 import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
 import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
 import SpecialityPage from "../pages/SpecialityPage";
@@ -78,12 +74,16 @@ const AppRoutes = () => {
         <Route path="contact" element={<ContactPage />} />
         <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
         <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
+
+        {/* Primary auth route */}
         <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="verify-email" element={<VerifyEmail />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password" element={<ResetPassword />} />
-        
+
+        {/* Legacy auth routes → redirect to /login */}
+        <Route path="register" element={<Navigate to="/login" replace />} />
+        <Route path="verify-email" element={<Navigate to="/login" replace />} />
+        <Route path="forgot-password" element={<Navigate to="/login" replace />} />
+        <Route path="reset-password" element={<Navigate to="/login" replace />} />
+
         {/* Protected Patient Pages */}
         <Route
           path="profile"
