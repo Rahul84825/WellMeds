@@ -11,9 +11,12 @@ export const getCategories = async (req, res, next) => {
 };
 
 export const createCategory = async (req, res, next) => {
-  const { name, icon, description, image, status } = req.body;
+  const { name, image } = req.body;
 
   try {
+    if (!name) {
+      return res.status(400).json({ success: false, message: "Category name is required" });
+    }
     const slug = slugify(name, { lower: true });
     const categoryExists = await Category.findOne({ slug });
     
@@ -24,11 +27,11 @@ export const createCategory = async (req, res, next) => {
     const category = await Category.create({
       name,
       slug,
-      icon: icon || "category",
-      description: description || "",
       image: image || "",
-      status: status || "Active",
-      isActive: status !== "Inactive"
+      icon: "category",
+      description: "",
+      status: "Active",
+      isActive: true
     });
 
     res.status(201).json({ success: true, category });
@@ -39,7 +42,7 @@ export const createCategory = async (req, res, next) => {
 
 export const updateCategory = async (req, res, next) => {
   const { id } = req.params;
-  const updateData = req.body;
+  const { name, image, status } = req.body;
 
   try {
     const category = await Category.findById(id);
@@ -47,18 +50,18 @@ export const updateCategory = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Category not found" });
     }
 
-    if (updateData.name) {
-      category.name = updateData.name;
-      category.slug = slugify(updateData.name, { lower: true });
+    if (name !== undefined) {
+      category.name = name;
+      category.slug = slugify(name, { lower: true });
     }
 
-    if (updateData.icon !== undefined) category.icon = updateData.icon;
-    if (updateData.description !== undefined) category.description = updateData.description;
-    if (updateData.image !== undefined) category.image = updateData.image;
+    if (image !== undefined) {
+      category.image = image;
+    }
     
-    if (updateData.status !== undefined) {
-      category.status = updateData.status;
-      category.isActive = updateData.status === "Active";
+    if (status !== undefined) {
+      category.status = status;
+      category.isActive = status === "Active";
     }
 
     await category.save();

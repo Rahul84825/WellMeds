@@ -104,11 +104,7 @@ const ProductCategories = () => {
 
     const payload = {
       name: name.trim(),
-      icon,
-      description: description.trim(),
-      image,
-      status,
-      isActive: status === "Active"
+      image
     };
 
     setSaving(true);
@@ -202,23 +198,8 @@ const ProductCategories = () => {
               className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all"
             >
               <div>
-                {/* Header card with status/icon */}
-                <div className="flex items-center justify-between mb-sm">
-                  <span className="material-symbols-outlined text-[26px] text-primary dark:text-[#a4c9ff] bg-slate-50 dark:bg-zinc-950 p-xs rounded-xl border border-slate-100 dark:border-zinc-800">
-                    {c.icon || "category"}
-                  </span>
-                  
-                  <span className={`inline-flex px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${
-                    c.status === "Active" || c.isActive
-                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400"
-                      : "bg-slate-100 text-slate-400 dark:bg-zinc-800 dark:text-zinc-500"
-                  }`}>
-                    {c.status || "Active"}
-                  </span>
-                </div>
-
                 {/* Body details */}
-                <div className="flex gap-sm items-start mb-md">
+                <div className="flex gap-sm items-center mb-md">
                   <div className="w-16 h-16 bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
                     {c.image ? (
                       <img src={c.image} className="w-full h-full object-cover" alt="" />
@@ -229,9 +210,6 @@ const ProductCategories = () => {
                   <div className="space-y-xs truncate">
                     <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-100 truncate">{c.name}</h3>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{c.count || 0} catalog products</p>
-                    <p className="text-[11px] text-slate-400 leading-snug line-clamp-2" title={c.description}>
-                      {c.description || "No description provided. Add one to describe this product category."}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -283,7 +261,7 @@ const ProductCategories = () => {
 
       {/* Editor Modal popup */}
       {editorOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md">
+        <div className="fixed inset-0 w-screen h-screen bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-md">
           <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-lg rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out]">
             
             {/* Header */}
@@ -312,49 +290,6 @@ const ProductCategories = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Wellness Supplements"
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                />
-              </div>
-
-              {/* Icon & Status */}
-              <div className="grid grid-cols-2 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Icon Symbol</label>
-                  <select
-                    value={icon}
-                    onChange={(e) => setIcon(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                  >
-                    <option value="pill">Pill Capsule</option>
-                    <option value="medical_services">Medical Case</option>
-                    <option value="monitor_heart">Heart Rate</option>
-                    <option value="medical_information">First Aid Info</option>
-                    <option value="face">Skincare / Face</option>
-                    <option value="spa">Wellness / Spa</option>
-                    <option value="science">Lab / Science</option>
-                  </select>
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Default Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Section Description</label>
-                <textarea
-                  rows={2}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what medicines or healthcare supplies this section includes..."
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                 />
               </div>
