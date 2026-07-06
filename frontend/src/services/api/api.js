@@ -41,9 +41,7 @@ apiInstance.interceptors.response.use(
 
     // Guard 3: Skip refresh if the failing request IS the refresh endpoint itself
     // This prevents infinite retry loops
-    const isRefreshEndpoint =
-      originalRequest.url?.includes("/auth/refresh") ||
-      originalRequest.url?.includes("/auth/me");
+    const isRefreshEndpoint = originalRequest.url?.includes("/auth/refresh");
     if (isRefreshEndpoint) {
       return Promise.reject(error);
     }

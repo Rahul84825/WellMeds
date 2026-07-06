@@ -37,11 +37,9 @@ export const authService = {
 
   async getCurrentUser() {
     try {
-      // skipAuthRetry: true — tells the interceptor NOT to call /auth/refresh
-      // if this request returns 401. A guest user with no session is completely
-      // normal; we simply return null without triggering the refresh chain.
+      const hasToken = !!localStorage.getItem("medishop_token");
       const data = await apiInstance.get("/auth/me", {
-        skipAuthRetry: true,
+        skipAuthRetry: !hasToken,
       });
       if (data.success && data.user) {
         sessionStorage.setItem("medishop_user", JSON.stringify(data.user));

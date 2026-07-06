@@ -33,7 +33,7 @@ const AddNewProduct = () => {
 
   // --- Basic Info States ---
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("Vitamins");
+  const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
   const [sku, setSku] = useState("");
   const [price, setPrice] = useState("");
@@ -43,6 +43,7 @@ const AddNewProduct = () => {
   const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
   const [isColdChain, setIsColdChain] = useState(false);
   const [description, setDescription] = useState("");
+  const [allCategories, setAllCategories] = useState([]);
   const [allSpecialities, setAllSpecialities] = useState([]);
   const [selectedSpecialities, setSelectedSpecialities] = useState([]);
   const [productType, setProductType] = useState("medicine");
@@ -93,6 +94,13 @@ const AddNewProduct = () => {
   const [canonicalUrl, setCanonicalUrl] = useState("");
   const [ogImage, setOgImage] = useState("");
 
+  const getSelectedCategoryId = () => {
+    if (!category) return "";
+    if (typeof category === "object") return category?._id || category?.id || "";
+    const found = allCategories.find(c => c._id === category || c.id === category || c.name === category);
+    return found ? (found._id || found.id) : category;
+  };
+
   // Fetch product if in Edit Mode
   useEffect(() => {
     if (isEditMode) {
@@ -101,7 +109,7 @@ const AddNewProduct = () => {
           const product = await api.getProduct(id);
           if (product) {
             setName(product.name || "");
-            setCategory(product.category?.name || product.category?._id || product.category || "Vitamins");
+            setCategory(product.category?._id || product.category?.id || product.category?.name || product.category || "");
             setProductType(product.productType || "medicine");
             setBrand(product.brand || "");
             setSku(product.sku || "");
@@ -177,6 +185,24 @@ const AddNewProduct = () => {
   }, [id, isEditMode]);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const list = await api.getCategories();
+        const activeCategories = (list || []).filter(cat => cat.status === "Active" || cat.isActive === true);
+        activeCategories.sort((a, b) => {
+          if (a.displayOrder !== undefined && b.displayOrder !== undefined && a.displayOrder !== b.displayOrder) {
+            return a.displayOrder - b.displayOrder;
+          }
+          return a.name.localeCompare(b.name);
+        });
+        setAllCategories(activeCategories);
+        if (!isEditMode && activeCategories.length > 0) {
+          setCategory(activeCategories[0]._id || activeCategories[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories in product form", err);
+      }
+    };
     const fetchSpecialities = async () => {
       try {
         const list = await api.getSpecialities();
@@ -201,12 +227,11 @@ const AddNewProduct = () => {
         console.error("Failed to fetch surgical categories in product form", err);
       }
     };
+    fetchCategories();
     fetchSpecialities();
     fetchMolecules();
     fetchSurgicalCategories();
-  }, []);
-
-  const allCategories = ["Prescription", "Vitamins", "Medical Devices", "First Aid", "Personal Care", "Supplements"];
+  }, [isEditMode]);
 
   // Image Upload Action
   const handleImageFileChange = async (e, replaceIndex = null) => {
@@ -581,12 +606,12 @@ const AddNewProduct = () => {
                 <div className="space-y-xs">
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
                   <select
-                    value={category}
+                    value={getSelectedCategoryId()}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
                   >
                     {allCategories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>

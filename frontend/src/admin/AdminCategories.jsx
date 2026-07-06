@@ -137,7 +137,8 @@ const ProductCategories = () => {
         status: newStatus,
         isActive: newStatus === "Active"
       });
-      setCategories(prev => prev.map(c => (c.id === cat.id || c._id === cat._id) ? { ...c, status: newStatus, isActive: newStatus === "Active" } : c));
+      const targetId = cat._id || cat.id;
+      setCategories(prev => prev.map(c => (c._id === targetId || c.id === targetId) ? { ...c, status: newStatus, isActive: newStatus === "Active" } : c));
     } catch (err) {
       console.error("Failed to toggle status", err);
       toast.error("Failed to update status.");
