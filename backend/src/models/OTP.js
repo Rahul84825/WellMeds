@@ -18,6 +18,12 @@ const otpSchema = new mongoose.Schema(
       required: true,
       select: false, // Never expose hashed OTP in queries by default
     },
+    // Supporting otpHash alias for compatibility
+    otpHash: {
+      type: String,
+      required: true,
+      select: false,
+    },
     expiresAt: {
       type: Date,
       required: true,
@@ -33,6 +39,11 @@ const otpSchema = new mongoose.Schema(
       default: 1,
     },
     windowStart: {
+      type: Date,
+      default: Date.now,
+    },
+    // Supporting firstSendAt alias for compatibility
+    firstSendAt: {
       type: Date,
       default: Date.now,
     },

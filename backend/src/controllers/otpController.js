@@ -74,35 +74,8 @@ export const sendOtp = async (req, res, next) => {
     }
 
     const normalizedMobile = normalizeMobile(mobile);
-
-    // ── Per-phone rate limiting (fixed two-step approach) ─────────────────────
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    let existingOtp = await OTP.findOne({ mobile: normalizedMobile });
-
-    if (existingOtp) {
-      const windowExpired = existingOtp.windowStart < oneHourAgo;
-
-      if (windowExpired) {
-        // Reset window — delete old record, fresh start
-        await OTP.deleteOne({ _id: existingOtp._id });
-        existingOtp = null;
-        secLog("[RATE_WINDOW_RESET]", { mobile: maskMobile(normalizedMobile) });
-      } else if (existingOtp.sendCount >= otpConfig.resendLimitPerHour) {
-        const waitMs = 60 * 60 * 1000 - (Date.now() - existingOtp.windowStart.getTime());
-        const waitMinutes = Math.ceil(waitMs / 60000);
-        secLog("[RATE_LIMIT]", { mobile: maskMobile(normalizedMobile), sendCount: existingOtp.sendCount });
-        return res.status(429).json({
-          success: false,
-          message: `Too many OTP requests. Please try again after ${waitMinutes} minute(s).`,
-          retryAfterMinutes: waitMinutes,
-        });
-      }
-    }
-
-    // ── Check if existing user ────────────────────────────────────────────────
     const existingUser = await User.findOne({ mobile: normalizedMobile });
 
-    // ── Generate OTP ──────────────────────────────────────────────────────────
     const isDevBypass =
       process.env.NODE_ENV !== "production" &&
       process.env.ENABLE_DEV_OTP_BYPASS === "true";
@@ -111,30 +84,56 @@ export const sendOtp = async (req, res, next) => {
     const hashedOtpCode = hashOtp(otpCode, normalizedMobile);
     const expiresAt = new Date(Date.now() + otpConfig.expiryMinutes * 60 * 1000);
 
-    secLog("[SEND]", {
-      mobile: maskMobile(normalizedMobile),
-      isExistingUser: !!existingUser,
-      provider: otpConfig.provider,
-    });
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    let otpDoc = await OTP.findOne({ mobile: normalizedMobile });
 
-    // ── Upsert OTP record (correct two-step — avoids $inc upsert race) ────────
-    if (existingOtp) {
-      // Update existing record: reset hash/expiry/attempts, increment send counter
-      existingOtp.hashedOtp = hashedOtpCode;
-      existingOtp.expiresAt = expiresAt;
-      existingOtp.attempts = 0;
-      existingOtp.sendCount = existingOtp.sendCount + 1;
-      await existingOtp.save();
+    if (otpDoc) {
+      // 1. Check firstSendAt window (windowStart/firstSendAt)
+      // If the window has expired, reset window and start sendCount at 1
+      const firstSendTime = otpDoc.firstSendAt || otpDoc.windowStart || now;
+      const isWindowExpired = firstSendTime < oneHourAgo;
+
+      if (isWindowExpired) {
+        otpDoc.firstSendAt = now;
+        otpDoc.windowStart = now;
+        otpDoc.sendCount = 1;
+      } else {
+        // 2. Enforce max OTP/hour limit (e.g. 5 sends)
+        if (otpDoc.sendCount >= otpConfig.resendLimitPerHour) {
+          const waitMs = 60 * 60 * 1000 - (now.getTime() - firstSendTime.getTime());
+          const waitMinutes = Math.ceil(waitMs / 60000);
+          secLog("[RATE_LIMIT]", { mobile: maskMobile(normalizedMobile), sendCount: otpDoc.sendCount });
+          return res.status(429).json({
+            success: false,
+            message: `Too many OTP requests. Please try again after ${waitMinutes} minute(s).`,
+            retryAfterMinutes: waitMinutes,
+          });
+        }
+        // Increment sendCount normally
+        otpDoc.sendCount += 1;
+      }
+
+      // Reuse the same document, regenerate OTP hash, expiresAt, and reset attempts
+      otpDoc.hashedOtp = hashedOtpCode;
+      otpDoc.otpHash = hashedOtpCode;
+      otpDoc.expiresAt = expiresAt;
+      otpDoc.attempts = 0;
+      await otpDoc.save();
+      secLog("[RESEND]", { mobile: maskMobile(normalizedMobile), sendCount: otpDoc.sendCount });
     } else {
-      // Create new record with window start
+      // 3. Create a completely new OTP document
       await OTP.create({
         mobile: normalizedMobile,
         hashedOtp: hashedOtpCode,
+        otpHash: hashedOtpCode,
         expiresAt,
         attempts: 0,
         sendCount: 1,
-        windowStart: new Date(),
+        firstSendAt: now,
+        windowStart: now,
       });
+      secLog("[SEND]", { mobile: maskMobile(normalizedMobile), sendCount: 1 });
     }
 
     // ── Send SMS via provider ─────────────────────────────────────────────────
@@ -145,7 +144,6 @@ export const sendOtp = async (req, res, next) => {
       message: `OTP sent to +91 ${normalizedMobile}`,
       isExistingUser: !!existingUser,
       expiresInMinutes: otpConfig.expiryMinutes,
-      // Include OTP in response body ONLY in development for easy testing
       ...(process.env.NODE_ENV !== "production" && { devOtp: otpCode }),
     });
   } catch (error) {
@@ -178,7 +176,7 @@ export const verifyOtp = async (req, res, next) => {
     const normalizedMobile = normalizeMobile(mobile);
 
     // ── Fetch OTP record ──────────────────────────────────────────────────────
-    const otpRecord = await OTP.findOne({ mobile: normalizedMobile }).select("+hashedOtp");
+    const otpRecord = await OTP.findOne({ mobile: normalizedMobile }).select("+hashedOtp +otpHash");
 
     if (!otpRecord) {
       secLog("[VERIFY][NO_RECORD]", { mobile: maskMobile(normalizedMobile) });
@@ -211,7 +209,7 @@ export const verifyOtp = async (req, res, next) => {
     // ── Hash submitted OTP and compare ───────────────────────────────────────
     const submittedHash = hashOtp(String(otp), normalizedMobile);
 
-    if (submittedHash !== otpRecord.hashedOtp) {
+    if (submittedHash !== otpRecord.hashedOtp && submittedHash !== otpRecord.otpHash) {
       otpRecord.attempts += 1;
       const remainingAttempts = otpConfig.maxAttempts - otpRecord.attempts;
 
