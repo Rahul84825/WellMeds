@@ -64,11 +64,41 @@ const AdminAddNewMolecule = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const molList = await api.getMolecules();
+        let molList = [];
+        try {
+          const adminData = await api.adminGetMolecules({ limit: 1000 });
+          molList = adminData.molecules || [];
+        } catch (err) {
+          console.warn("Failed to load admin molecules list, trying public list...", err);
+          try {
+            molList = await api.getMolecules();
+          } catch (pubErr) {
+            console.error("Failed to load public molecules list too", pubErr);
+          }
+        }
+
         setAllMolecules(molList.filter((m) => m._id !== id && m.id !== id) || []);
 
         if (isEditMode) {
-          const mol = await api.getMolecule(id) || await api.getMolecules().then(list => list.find(m => m.id === id || m._id === id));
+          let mol = molList.find((m) => m._id === id || m.id === id || m.slug === id);
+
+          if (!mol) {
+            try {
+              mol = await api.getMolecule(id);
+            } catch (err) {
+              console.warn("getMolecule direct call failed, trying public list fallback...", err);
+            }
+          }
+
+          if (!mol) {
+            try {
+              const activeList = await api.getMolecules();
+              mol = activeList.find((m) => m._id === id || m.id === id || m.slug === id);
+            } catch (err) {
+              console.warn("getMolecules list fallback failed too", err);
+            }
+          }
+
           if (mol) {
             setName(mol.name || "");
             setSlug(mol.slug || "");

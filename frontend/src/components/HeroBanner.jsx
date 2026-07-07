@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Search, ChevronDown, Check } from "lucide-react";
-import heroImage from "../assets/banners/hero.png";
+import heroImage from "../assets/banners/hero.jpg";
 
 const Hero = () => {
   const navigate = useNavigate();
