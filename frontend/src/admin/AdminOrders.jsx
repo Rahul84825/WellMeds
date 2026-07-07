@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -423,23 +424,14 @@ const ManageOrders = () => {
       </div>
 
       {/* Invoice modal popup */}
-      {selectedOrder && invoiceModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md overflow-y-auto">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] print:p-0 print:border-none print:shadow-none max-h-[90vh] overflow-y-auto custom-scrollbar">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-xs print:hidden">
-              <h3 className="font-extrabold text-sm text-slate-400 uppercase tracking-wider">Generate Order Invoice</h3>
-              <button 
-                onClick={() => setInvoiceModalOpen(false)}
-                className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Print Area */}
-            <div className="space-y-md text-xs p-sm bg-slate-50 dark:bg-zinc-950/40 border border-slate-100 dark:border-zinc-800 rounded-2xl print:bg-transparent print:border-none">
+      <Modal
+        isOpen={!!(selectedOrder && invoiceModalOpen)}
+        onClose={() => setInvoiceModalOpen(false)}
+        title="Generate Order Invoice"
+        maxWidth="max-w-2xl"
+      >
+        {/* Print Area */}
+        <div className="space-y-md text-xs p-sm bg-slate-50 dark:bg-zinc-950/40 border border-slate-100 dark:border-zinc-800 rounded-2xl print:bg-transparent print:border-none pt-1">
               
               <div className="flex justify-between items-start border-b border-slate-200 dark:border-zinc-800 pb-sm">
                 <div>
@@ -536,25 +528,15 @@ const ManageOrders = () => {
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </Modal>
 
       {/* Details Timeline Modal */}
-      {selectedOrder && detailModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md overflow-y-auto">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-lg rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] max-h-[90vh] overflow-y-auto custom-scrollbar">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-xs">
-              <h3 className="font-extrabold text-sm text-slate-400 uppercase tracking-wider">Order Detail Card</h3>
-              <button 
-                onClick={() => setDetailModalOpen(false)}
-                className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Modal
+        isOpen={!!(selectedOrder && detailModalOpen)}
+        onClose={() => setDetailModalOpen(false)}
+        title="Order Detail Card"
+        maxWidth="max-w-lg"
+      >
 
             {/* Timeline */}
             <div className="space-y-sm text-xs">
@@ -646,17 +628,15 @@ const ManageOrders = () => {
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex justify-end pt-sm border-t border-slate-100 dark:border-zinc-800">
+            <div className="flex justify-end pt-md border-t border-slate-100 dark:border-zinc-800 mt-md">
               <button
                 onClick={() => setDetailModalOpen(false)}
-                className="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 text-slate-600 dark:text-zinc-200 font-bold px-lg py-sm rounded-xl text-xs transition-all cursor-pointer"
+                className="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 text-slate-650 dark:text-zinc-200 font-bold px-lg py-sm rounded-xl text-xs transition-all cursor-pointer"
               >
                 Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </Modal>
     </div>
   );
 };

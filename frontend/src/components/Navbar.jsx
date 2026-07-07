@@ -14,7 +14,8 @@ import {
   Package,
   Search,
   Globe,
-  Handshake
+  Handshake,
+  ArrowLeft
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
@@ -355,7 +356,7 @@ const NavMenu = () => {
 // ==========================================
 // Sub-Component: NavActions
 // ==========================================
-const NavActions = () => {
+const NavActions = ({ isShrunk }) => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
@@ -498,30 +499,43 @@ const NavActions = () => {
   };
 
   return (
-    <div className="flex items-center gap-[12px]">
+    <div className="flex items-center gap-[10px] lg:gap-[12px]">
       <button
         onClick={() => navigate("/upload-prescription")}
-        className="w-[84px] h-[38px] bg-[#004782] hover:bg-[#086b53] text-white rounded-[10px] font-medium text-[14px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none"
+        style={{
+          height: isShrunk ? "34px" : "38px",
+          width: isShrunk ? "80px" : "84px",
+          fontSize: isShrunk ? "13px" : "14px"
+        }}
+        className="bg-[#004782] hover:bg-[#086b53] text-white rounded-[10px] font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none shrink-0"
         aria-label="Upload Prescription"
       >
         <span>Upload</span>
       </button>
 
       <button
-        className="w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        style={{
+          width: isShrunk ? "34px" : "38px",
+          height: isShrunk ? "34px" : "38px"
+        }}
+        className="rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 shrink-0"
         aria-label="Discounts & Offers"
       >
-        <Percent className="w-[18px] h-[18px] text-gray-700" />
+        <Percent className="w-[16px] h-[16px] text-gray-700" />
       </button>
 
       <Link
         to="/cart"
-        className="relative w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        style={{
+          width: isShrunk ? "34px" : "38px",
+          height: isShrunk ? "34px" : "38px"
+        }}
+        className="relative rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 shrink-0"
         aria-label={`Shopping Cart with ${cartCount} items`}
       >
-        <ShoppingCart className="w-[18px] h-[18px]" />
+        <ShoppingCart className="w-[16px] h-[16px]" />
         {cartCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center animate-pulse border border-white">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-[16px] h-[16px] rounded-full flex items-center justify-center animate-pulse border border-white">
             {cartCount}
           </span>
         )}
@@ -537,19 +551,26 @@ const NavActions = () => {
             aria-label="User profile menu"
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
             onKeyDown={handleKeyDown}
-            className="h-[42px] px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 cursor-pointer"
+            style={{
+              height: isShrunk ? "36px" : "42px"
+            }}
+            className="px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 cursor-pointer shrink-0"
           >
-            <User className="w-[18px] h-[18px] text-gray-500" />
-            <span className="max-w-[80px] truncate text-sm font-medium">
+            <User className="w-[16px] h-[16px] text-gray-500" />
+            <span className="max-w-[80px] truncate text-xs font-medium">
               {user.name}
             </span>
           </button>
         ) : (
           <Link
             to="/login"
-            className="w-[110px] h-[42px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 font-medium cursor-pointer"
+            style={{
+              width: isShrunk ? "100px" : "110px",
+              height: isShrunk ? "36px" : "42px"
+            }}
+            className="border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 font-medium cursor-pointer shrink-0 text-xs"
           >
-            <User className="w-[18px] h-[18px] text-gray-500" />
+            <User className="w-[16px] h-[16px] text-gray-500" />
             <span>Login</span>
           </Link>
         )}
@@ -625,112 +646,250 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [desktopSearchQuery, setDesktopSearchQuery] = useState("");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showNavbarSearch, setShowNavbarSearch] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
+  const items = useNavConfig();
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          if (currentScrollY <= 100) {
-            setIsCollapsed(false);
-          } else if (currentScrollY > lastScrollY) {
-            // Scrolling down
-            setIsCollapsed(true);
+          if (currentScrollY > 200) {
+            setShowNavbarSearch(true);
           } else {
-            // Scrolling up
-            setIsCollapsed(false);
+            setShowNavbarSearch(false);
           }
-          lastScrollY = currentScrollY;
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
+    <nav 
+      style={{
+        backgroundColor: "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        transition: "height 300ms cubic-bezier(.22,.61,.36,1), padding 300ms cubic-bezier(.22,.61,.36,1)"
+      }}
+      className={`w-full border-b border-slate-150 sticky top-0 z-[100] flex-shrink-0 ${
+        showNavbarSearch ? "h-[68px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[88px] shadow-sm"
+      }`}
+    >
       {/* Desktop & Mobile Navbar Container */}
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-center">
 
         {/* Row 1: Logo & Action Buttons */}
-        <div className="h-[60px] lg:h-[68px] flex items-center justify-between gap-md relative">
+        <div 
+          style={{
+            height: showNavbarSearch ? "68px" : "56px",
+            transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
+          }}
+          className="flex items-center justify-between gap-md relative z-10 w-full"
+        >
           {/* Left/Centered Brand Logo */}
-          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-10 flex items-center shrink-0">
+          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-20 flex items-center shrink-0">
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center group rounded-xl p-0.5 text-left h-[50px] md:h-[56px] lg:h-[64px]"
+              className="flex items-center group transition-all duration-180 hover:scale-[1.03] select-none cursor-pointer"
             >
-              <img width="150"
-                height="230"
+              <img 
                 src={logoImg}
-                alt="Logo"
-                className="object-contain group-hover:scale-105 transition-transform duration-200"
+                alt="WellMeds Logo"
+                style={{
+                  height: showNavbarSearch ? "44px" : "54px",
+                  transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
+                }}
+                className="object-contain"
               />
             </NavLink>
           </div>
 
-          {/* Desktop Search Input (Smart Header Search) */}
-          <div className="hidden lg:block flex-1 max-w-[280px] xl:max-w-[360px] mx-md relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search medicines, manufacturers..."
-              value={desktopSearchQuery}
-              onChange={(e) => setDesktopSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && desktopSearchQuery.trim()) {
-                  navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
-                }
+          {/* Desktop Search & Browse Wrapper (Morphing Search) */}
+          <div className="hidden lg:flex items-center gap-md flex-grow justify-center max-w-[680px] mx-md relative z-10">
+            
+            {/* Mega Menu Toggle (Browse) */}
+            {showNavbarSearch && (
+              <div className="relative">
+                <button 
+                  onClick={() => setMegaMenuOpen(!megaMenuOpen)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer border border-slate-200 select-none shrink-0"
+                >
+                  <Menu size={14} />
+                  <span>Browse</span>
+                </button>
+                
+                {/* Mega Menu Dropdown Panel */}
+                {megaMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[105]" onClick={() => setMegaMenuOpen(false)} />
+                    <div className="absolute top-[48px] left-0 w-[240px] bg-white border border-slate-200 rounded-xl shadow-2xl p-sm z-[110] animate-modal-zoom-in text-left">
+                      <div className="flex flex-col gap-1">
+                        {items.map((item) => (
+                          <div key={item.id} className="relative group/mega">
+                            {item.type === "dropdown" ? (
+                              <>
+                                <div className="font-bold text-slate-700 text-xs px-2.5 py-1.5 uppercase tracking-wider text-[10px] text-slate-400 mt-2 first:mt-0">
+                                  {item.label}
+                                </div>
+                                {item.children?.map((child) => (
+                                  <Link
+                                    key={child.id}
+                                    to={child.to}
+                                    onClick={() => setMegaMenuOpen(false)}
+                                    className="block px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-[#004782] rounded-lg transition-colors"
+                                  >
+                                    {child.label}
+                                  </Link>
+                                ))}
+                              </>
+                            ) : (
+                              <Link
+                                key={item.id}
+                                to={item.to}
+                                onClick={() => setMegaMenuOpen(false)}
+                                className="block px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#004782] rounded-lg transition-colors"
+                              >
+                                {item.label}
+                              </Link>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Morphing Search Input */}
+            <div 
+              style={{
+                transition: "opacity 300ms cubic-bezier(.22,.61,.36,1), transform 300ms cubic-bezier(.22,.61,.36,1), width 300ms cubic-bezier(.22,.61,.36,1)",
+                transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
+                opacity: showNavbarSearch ? 1 : 0,
+                width: showNavbarSearch ? "480px" : "560px",
               }}
-              className="w-full pl-10 pr-4 py-1.5 bg-slate-50 border border-gray-200 focus:bg-white focus:border-[#004782] rounded-xl text-xs outline-none transition-all"
-            />
+              className={`hidden lg:flex items-center bg-slate-100/60 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/80 focus-within:bg-white focus-within:border-primary rounded-xl px-3 py-1.5 shadow-sm focus-within:shadow-md transition-all duration-300 ${
+                showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
+              }`}
+            >
+              <Search className="text-slate-400 mr-2 shrink-0" size={16} />
+              <input
+                type="text"
+                placeholder="Search medicines, molecules, manufacturers..."
+                value={desktopSearchQuery}
+                onChange={(e) => setDesktopSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && desktopSearchQuery.trim()) {
+                    navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
+                  }
+                }}
+                className="w-full bg-transparent border-none text-xs outline-none text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:ring-0 focus:outline-none p-0"
+              />
+              <button 
+                type="button" 
+                className="text-slate-400 hover:text-primary transition-colors ml-2 cursor-pointer focus:outline-none"
+                title="Voice Search (Coming Soon)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" className="bi bi-mic text-slate-400" viewBox="0 0 16 16">
+                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
+                </svg>
+              </button>
+            </div>
+
           </div>
 
           {/* Right Side Actions (Desktop) */}
           <div className="hidden lg:block shrink-0">
-            <NavActions />
+            <NavActions isShrunk={showNavbarSearch} />
           </div>
 
           {/* Right Side Actions (Mobile/Tablet) */}
           <div className="flex items-center gap-2 lg:hidden ml-auto z-10">
+            <button
+              onClick={() => setMobileSearchExpanded(true)}
+              className="w-[36px] h-[36px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
+              aria-label="Open Search"
+            >
+              <Search className="w-[16px] h-[16px]" />
+            </button>
             <Link
               to="/cart"
-              className="relative w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+              className="relative w-[36px] h-[36px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
               aria-label={`Shopping Cart with ${cartCount} items`}
             >
-              <ShoppingCart className="w-[18px] h-[18px] text-gray-700" />
+              <ShoppingCart className="w-[16px] h-[16px] text-gray-700" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center animate-pulse border border-white">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-[16px] h-[16px] rounded-full flex items-center justify-center animate-pulse border border-white">
                   {cartCount}
                 </span>
               )}
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
+              className="w-[36px] h-[36px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
               aria-label="Toggle Mobile Menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
+
+          {/* Mobile Full-width Expanded Search */}
+          {mobileSearchExpanded && (
+            <div className="flex items-center w-full gap-2 px-4 py-1.5 bg-white z-30 absolute inset-0">
+              <button 
+                onClick={() => setMobileSearchExpanded(false)}
+                className="p-1 text-slate-500 hover:text-slate-800"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search medicines..."
+                  value={mobileSearchQuery}
+                  onChange={(e) => setMobileSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && mobileSearchQuery.trim()) {
+                      navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
+                      setMobileSearchExpanded(false);
+                    }
+                  }}
+                  className="w-full pl-9 pr-4 py-1.5 bg-slate-100 border border-transparent focus:bg-white focus:border-primary rounded-xl text-xs outline-none transition-all"
+                  autoFocus
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Row 2: Centered Navigation Menu (Desktop Only) */}
-        <div className={`hidden lg:flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-50 ${
-          isCollapsed 
-            ? "h-0 opacity-0 pointer-events-none border-t-transparent" 
-            : "h-[40px] opacity-100"
-        }`}>
+        <div 
+          style={{
+            transition: "transform 300ms cubic-bezier(.22,.61,.36,1), opacity 300ms cubic-bezier(.22,.61,.36,1), height 300ms cubic-bezier(.22,.61,.36,1)",
+            transform: showNavbarSearch ? "translate3d(0, -100%, 0)" : "translate3d(0, 0, 0)",
+            opacity: showNavbarSearch ? 0 : 1,
+            height: showNavbarSearch ? "0px" : "32px"
+          }}
+          className={`hidden lg:flex items-center justify-center border-t border-gray-50 z-0 relative ${
+            showNavbarSearch ? "pointer-events-none overflow-hidden" : ""
+          }`}
+        >
           <NavMenu />
         </div>
 

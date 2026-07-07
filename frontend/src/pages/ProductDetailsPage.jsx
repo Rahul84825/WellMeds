@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
@@ -632,7 +633,7 @@ const ProductDetails = () => {
       </Modal>
 
       {/* Fullscreen Preview Modal */}
-      {isFullscreenOpen && (
+      {isFullscreenOpen && createPortal(
         <div 
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -655,7 +656,8 @@ const ProductDetails = () => {
             onClick={(e) => e.stopPropagation()}
             className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-scale-up cursor-default select-none"
           />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

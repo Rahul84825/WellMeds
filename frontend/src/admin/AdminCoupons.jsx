@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -488,25 +489,14 @@ const AdminCoupons = () => {
         </div></div>
 
       {/* modal create/edit popup */}
-      {formOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md overflow-y-auto">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-4xl rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] max-h-[90vh] overflow-y-auto custom-scrollbar">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-sm">
-              <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100">
-                {editingCoupon ? `Edit Coupon: ${editingCoupon.code}` : "Create New Coupon Offer"}
-              </h3>
-              <button 
-                onClick={() => setFormOpen(false)}
-                className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSaveCoupon} className="flex flex-col lg:flex-row gap-lg items-start">
+      <Modal
+        isOpen={formOpen}
+        onClose={() => setFormOpen(false)}
+        title={editingCoupon ? `Edit Coupon: ${editingCoupon?.code}` : "Create New Coupon Offer"}
+        maxWidth="max-w-4xl"
+      >
+        {/* Form */}
+        <form onSubmit={handleSaveCoupon} className="flex flex-col lg:flex-row gap-lg items-start pt-1">
               
               {/* Left Column: Form Fields */}
               <div className="flex-1 w-full space-y-md">
@@ -714,10 +704,8 @@ const AdminCoupons = () => {
                   </button>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };

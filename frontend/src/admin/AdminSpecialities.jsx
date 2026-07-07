@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -513,34 +514,15 @@ const AdminSpecialities = () => {
         </div>
       )}
 
-      {/* Create / Edit Modal (Drawer Layout) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)} />
-          
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-2xl bg-white dark:bg-zinc-900 shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-350">
-              
-              {/* Modal Header */}
-              <div className="px-lg py-md bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-                <div>
-                  <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-                    <Sparkles className="text-[#004782]" size={16} />
-                    {editingSpec ? `Modify Speciality: ${editingSpec.name}` : "Create Medical Speciality"}
-                  </h2>
-                  <p className="text-[10px] text-slate-400 mt-xs">Define Clinical metadata, SEO configuration, and repeatable contents.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Form Body Scrollable */}
-              <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-lg space-y-lg text-xs">
+      {/* Create / Edit Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingSpec ? `Modify Speciality: ${editingSpec?.name}` : "Create Medical Speciality"}
+        maxWidth="max-w-2xl"
+      >
+        {/* Form Body Scrollable */}
+        <form onSubmit={handleSave} className="space-y-lg text-xs pt-1">
                 
                 {/* Section 1: Basic Info */}
                 <div className="space-y-md">
@@ -764,30 +746,25 @@ const AdminSpecialities = () => {
                   </div>
                 </div>
 
-              </form>
-
-              {/* Modal Footer */}
-              <div className="px-lg py-md bg-slate-50 dark:bg-zinc-950 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-end gap-md">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300 font-bold px-lg py-sm rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  className="bg-[#004782] text-white px-xl py-sm rounded-xl font-bold hover:opacity-90 transition-all select-none"
-                >
-                  {editingSpec ? "Update Speciality" : "Publish Speciality"}
-                </button>
-              </div>
-
-            </div>
+          {/* Modal Footer / Actions */}
+          <div className="flex gap-sm pt-md border-t border-slate-100 dark:border-zinc-800 mt-md">
+            <button
+              type="submit"
+              className="flex-1 bg-[#004782] hover:bg-opacity-95 text-white font-bold py-sm rounded-xl transition-all active:scale-95 select-none cursor-pointer flex items-center justify-center gap-xs"
+            >
+              {editingSpec ? "Update Speciality" : "Publish Speciality"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="flex-1 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold py-sm rounded-xl transition-colors select-none"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
-      )}
+
+        </form>
+      </Modal>
 
     </div>
   );

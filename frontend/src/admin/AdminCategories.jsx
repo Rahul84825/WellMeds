@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -260,107 +261,93 @@ const ProductCategories = () => {
       </div>
 
       {/* Editor Modal popup */}
-      {editorOpen && (
-        <div className="fixed inset-0 w-screen h-screen bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-md">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-lg rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out]">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-sm">
-              <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-                <Sparkles className="text-primary" size={18} />
-                {editingCategory ? `Edit Category Settings` : "Create Product Category"}
-              </h3>
-              <button 
-                onClick={() => setEditorOpen(false)}
-                className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Form body */}
-            <form onSubmit={handleSaveCategory} className="space-y-md text-xs">
-              
-              {/* Category Name */}
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Wellness Supplements"
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                />
-              </div>
-
-              {/* Category Image upload */}
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category Illustration Image</label>
-                <div className="flex gap-sm items-center">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative group">
-                    {image ? (
-                      <>
-                        <img src={image} className="w-full h-full object-cover" alt="" />
-                        <button
-                          type="button"
-                          onClick={handleDeleteImage}
-                          className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <ImageIcon size={20} className="text-slate-300" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-grow flex flex-col gap-xs">
-                    {uploading ? (
-                      <div className="flex items-center gap-xs text-[10px] text-slate-400 animate-pulse font-bold">
-                        <RefreshCw size={12} className="animate-spin" />
-                        Uploading to Cloudinary...
-                      </div>
-                    ) : (
-                      <>
-                        <label className="bg-primary text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer w-fit">
-                          Choose Image
-                          <input
-                            type="file"
-                            accept="image/png, image/jpeg, image/jpg, image/webp"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                          />
-                        </label>
-                        <p className="text-[9px] text-slate-400">PNG, JPG, WEBP. Max 10MB.</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
-                <button
-                  type="submit"
-                  disabled={saving || uploading}
-                  className="flex-1 bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
-                >
-                  {saving ? "Saving..." : "Save Category"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditorOpen(false)}
-                  className="flex-1 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold py-sm rounded-xl transition-colors select-none"
-                >
-                  Cancel
-                </button>
-              </div>
-
-            </form>
+      <Modal
+        isOpen={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        title={editingCategory ? "Edit Category Settings" : "Create Product Category"}
+        maxWidth="max-w-lg"
+      >
+        {/* Form body */}
+        <form onSubmit={handleSaveCategory} className="space-y-md text-xs pt-1">
+          
+          {/* Category Name */}
+          <div className="space-y-xs">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category Name *</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Wellness Supplements"
+              className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+            />
           </div>
-        </div>
-      )}
+
+          {/* Category Image upload */}
+          <div className="space-y-xs">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category Illustration Image</label>
+            <div className="flex gap-sm items-center">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative group">
+                {image ? (
+                  <>
+                    <img src={image} className="w-full h-full object-cover" alt="" />
+                    <button
+                      type="button"
+                      onClick={handleDeleteImage}
+                      className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                ) : (
+                  <ImageIcon size={20} className="text-slate-300" />
+                )}
+              </div>
+              
+              <div className="flex-grow flex flex-col gap-xs">
+                {uploading ? (
+                  <div className="flex items-center gap-xs text-[10px] text-slate-400 animate-pulse font-bold">
+                    <RefreshCw size={12} className="animate-spin" />
+                    Uploading to Cloudinary...
+                  </div>
+                ) : (
+                  <>
+                    <label className="bg-primary text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer w-fit">
+                      Choose Image
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    <p className="text-[9px] text-slate-400">PNG, JPG, WEBP. Max 10MB.</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
+            <button
+              type="submit"
+              disabled={saving || uploading}
+              className="flex-1 bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
+            >
+              {saving ? "Saving..." : "Save Category"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditorOpen(false)}
+              className="flex-1 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold py-sm rounded-xl transition-colors select-none"
+            >
+              Cancel
+            </button>
+          </div>
+
+        </form>
+      </Modal>
     </div>
   );
 };

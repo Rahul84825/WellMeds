@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -422,26 +423,14 @@ const AdminSurgicalCategories = () => {
       )}
 
       {/* Editor Modal */}
-      {editorOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-md">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl p-lg flex flex-col gap-md text-left animate-[scale-up_0.15s_ease-out] max-h-[90vh] overflow-y-auto">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-sm">
-              <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-                <Sparkles className="text-[#004782]" size={18} />
-                {editingCategory ? `Edit Surgical Category` : "Create Surgical Category"}
-              </h3>
-              <button 
-                onClick={() => setEditorOpen(false)}
-                className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSaveCategory} className="space-y-md text-xs">
+      <Modal
+        isOpen={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        title={editingCategory ? "Edit Surgical Category" : "Create Surgical Category"}
+        maxWidth="max-w-2xl"
+      >
+        {/* Form */}
+        <form onSubmit={handleSaveCategory} className="space-y-md text-xs pt-1">
               
               {/* Name & Slug */}
               <div className="grid grid-cols-2 gap-md">
@@ -572,10 +561,8 @@ const AdminSurgicalCategories = () => {
                 </button>
               </div>
 
-            </form>
-          </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };
