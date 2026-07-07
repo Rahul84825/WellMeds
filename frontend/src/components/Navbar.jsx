@@ -540,9 +540,9 @@ const NavActions = ({ isShrunk }) => {
       <button
         onClick={() => navigate("/upload-prescription")}
         style={{
-          height: isShrunk ? "34px" : "38px",
-          width: isShrunk ? "80px" : "84px",
-          fontSize: isShrunk ? "13px" : "14px"
+          height: isShrunk ? "30px" : "34px",
+          width: isShrunk ? "72px" : "78px",
+          fontSize: isShrunk ? "11px" : "12px"
         }}
         className="bg-[#004782] hover:bg-[#086b53] text-white rounded-[10px] font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none shrink-0"
         aria-label="Upload Prescription"
@@ -552,8 +552,8 @@ const NavActions = ({ isShrunk }) => {
 
       <button
         style={{
-          width: isShrunk ? "34px" : "38px",
-          height: isShrunk ? "34px" : "38px"
+          width: isShrunk ? "30px" : "34px",
+          height: isShrunk ? "30px" : "34px"
         }}
         className="rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 shrink-0"
         aria-label="Discounts & Offers"
@@ -564,8 +564,8 @@ const NavActions = ({ isShrunk }) => {
       <Link
         to="/cart"
         style={{
-          width: isShrunk ? "34px" : "38px",
-          height: isShrunk ? "34px" : "38px"
+          width: isShrunk ? "30px" : "34px",
+          height: isShrunk ? "30px" : "34px"
         }}
         className="relative rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 shrink-0"
         aria-label={`Shopping Cart with ${cartCount} items`}
@@ -589,7 +589,7 @@ const NavActions = ({ isShrunk }) => {
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
             onKeyDown={handleKeyDown}
             style={{
-              height: isShrunk ? "36px" : "42px"
+              height: isShrunk ? "30px" : "34px"
             }}
             className="px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 cursor-pointer shrink-0"
           >
@@ -602,8 +602,8 @@ const NavActions = ({ isShrunk }) => {
           <Link
             to="/login"
             style={{
-              width: isShrunk ? "100px" : "110px",
-              height: isShrunk ? "36px" : "42px"
+              width: isShrunk ? "86px" : "96px",
+              height: isShrunk ? "30px" : "34px"
             }}
             className="border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-all duration-200 font-medium cursor-pointer shrink-0 text-xs"
           >
@@ -727,7 +727,7 @@ const Navbar = () => {
         transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
       }}
       className={`w-full border-b border-slate-150 sticky top-0 z-[100] flex-shrink-0 ${
-        showNavbarSearch ? "h-[106px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[118px] shadow-sm"
+        showNavbarSearch ? "h-[86px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[95px] shadow-sm"
       }`}
     >
       {/* Desktop & Mobile Navbar Container */}
@@ -736,7 +736,7 @@ const Navbar = () => {
         {/* Row 1: Logo, Location Selector, Search, & Actions */}
         <div 
           style={{
-            height: showNavbarSearch ? "72px" : "80px",
+            height: showNavbarSearch ? "58px" : "64px",
             transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
           }}
           className="flex items-center justify-between gap-[24px] relative z-30 w-full"
@@ -752,7 +752,7 @@ const Navbar = () => {
                 src={logoImg}
                 alt="WellMeds Logo"
                 style={{
-                  height: showNavbarSearch ? "54px" : "64px",
+                  height: showNavbarSearch ? "90px" : "120px",
                   transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
                 }}
                 className="object-contain"
@@ -920,7 +920,7 @@ const Navbar = () => {
         <div 
           style={{
             transition: "height 300ms cubic-bezier(.22,.61,.36,1)",
-            height: showNavbarSearch ? "34px" : "38px"
+            height: showNavbarSearch ? "28px" : "31px"
           }}
           className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full"
         >

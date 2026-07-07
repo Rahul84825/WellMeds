@@ -19,21 +19,21 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-visible bg-[#eaf5f2] min-h-[480px] flex items-center justify-center py-16 transition-colors duration-300 w-full border-t border-gray-100">
+    <section className="relative overflow-visible bg-[#eaf5f2] min-h-[760px] md:min-h-[820px] flex items-center justify-center py-20 md:py-24 transition-colors duration-300 w-full border-t border-gray-100">
       {/* Background Image containing stethoscope and clipboard */}
       <img
-  src={heroImage}
-  alt="Hero Background"
-  className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-  draggable={false}
-/>
+        src={heroImage}
+        alt="Hero Background"
+        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none p-8 md:p-14 opacity-90"
+        draggable={false}
+      />
 
       {/* Ambient Waves / Gradients */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/30 pointer-events-none"></div>
 
       {/* Content Overlay */}
       <div className="relative max-w-[1440px] w-full mx-auto px-6 lg:px-10 xl:px-16 flex flex-col items-center text-center z-10">
-        <h1 className="font-bold text-[36px] md:text-[48px] tracking-tight leading-tight text-center max-w-3xl mb-4">
+        <h1 className="font-bold text-[36px] md:text-[48px] tracking-tight leading-tight text-center max-w-3xl mb-8">
           <span className="text-[#1D2B5C] block">More Than a Pharmacy.</span>
           <span className="text-[#ffffff] block mt-1">Your Partner in Better Health.</span>
         </h1>
@@ -110,7 +110,7 @@ const Hero = () => {
         </div>
 
         {/* Bottom Badges */}
-        <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-gray-700 font-semibold select-none">
+        <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-gray-700 font-semibold select-none">
           <div className="flex items-center gap-2">
             <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white">
               <Check className="w-3.5 h-3.5 stroke-[3.5]" />
