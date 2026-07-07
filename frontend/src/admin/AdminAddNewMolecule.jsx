@@ -29,8 +29,6 @@ const AdminAddNewMolecule = () => {
   const [slug, setSlug] = useState("");
   const [aliases, setAliases] = useState(""); // comma-separated
   const [letter, setLetter] = useState("");
-  const [heroImage, setHeroImage] = useState("");
-  const [bannerImage, setBannerImage] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
@@ -104,8 +102,6 @@ const AdminAddNewMolecule = () => {
             setSlug(mol.slug || "");
             setLetter(mol.letter || "");
             setAliases(mol.aliases ? mol.aliases.join(", ") : "");
-            setHeroImage(mol.heroImage || "");
-            setBannerImage(mol.bannerImage || "");
             setShortDescription(mol.shortDescription || "");
             setDescription(mol.description || "");
             setIsFeatured(mol.isFeatured || false);
@@ -191,8 +187,6 @@ const AdminAddNewMolecule = () => {
       name: name.trim(),
       aliases: parsedAliases,
       letter: letter.trim() || name.trim().charAt(0).toUpperCase(),
-      heroImage: heroImage.trim(),
-      bannerImage: bannerImage.trim(),
       shortDescription: shortDescription.trim(),
       description: description.trim(),
       isFeatured,
@@ -355,28 +349,6 @@ const AdminAddNewMolecule = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hero Icon / Image URL</label>
-                <input
-                  type="text"
-                  value={heroImage}
-                  onChange={(e) => setHeroImage(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="https://example.com/image.png"
-                />
-              </div>
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Banner Background Image URL</label>
-                <input
-                  type="text"
-                  value={bannerImage}
-                  onChange={(e) => setBannerImage(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="https://example.com/banner.png"
-                />
-              </div>
-            </div>
 
             <div className="space-y-xs">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Description (Appears in catalog grid/headers) *</label>

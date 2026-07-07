@@ -18,14 +18,6 @@ const moleculeSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    heroImage: {
-      type: String,
-      default: "",
-    },
-    bannerImage: {
-      type: String,
-      default: "",
-    },
     description: {
       type: String,
       default: "",

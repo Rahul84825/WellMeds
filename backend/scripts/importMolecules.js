@@ -98,8 +98,6 @@ const run = async () => {
         isActive: true,
         isFeatured: false,
         aliases: [],
-        heroImage: "",
-        bannerImage: "",
         uses: "",
         benefits: "",
         howItWorks: "",

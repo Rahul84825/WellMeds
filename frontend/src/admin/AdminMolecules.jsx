@@ -157,7 +157,6 @@ const AdminMolecules = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-zinc-950 text-slate-450 border-b border-slate-100 dark:border-zinc-800 font-bold select-none uppercase tracking-wider">
-                  <th className="p-md text-center">Icon</th>
                   <th className="p-md">Name</th>
                   <th className="p-md">Slug</th>
                   <th className="p-md text-center">Letter</th>
@@ -170,15 +169,6 @@ const AdminMolecules = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 font-medium">
                 {molecules.map((mol) => (
                   <tr key={mol.id || mol._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-850/20 transition-all">
-                    <td className="p-md flex justify-center">
-                      <div className="w-9 h-9 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/80 flex items-center justify-center p-1.5 overflow-hidden text-[#038076]">
-                        {mol.heroImage ? (
-                          <img src={mol.heroImage} className="w-full h-full object-contain" alt={mol.name} />
-                        ) : (
-                          <FlaskConical size={16} />
-                        )}
-                      </div>
-                    </td>
                     <td className="p-md">
                       <div className="space-y-xs">
                         <span className="font-extrabold text-slate-800 dark:text-zinc-150 text-xs block">{mol.name}</span>
