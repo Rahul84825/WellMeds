@@ -224,10 +224,10 @@ const ProductTabs = ({
             <Building className="text-[#004782]" size={28} />
           </div>
           <div className="space-y-sm flex-1">
-            <h3 className="font-bold text-xs text-slate-850 dark:text-zinc-100">{product.brand} Healthcare Ltd.</h3>
-            <p className="text-slate-400 font-medium">Country of Origin: Germany | Manufacturing License: DL-329/2026</p>
+            <h3 className="font-bold text-xs text-slate-855 dark:text-zinc-100">{product.manufacturer || product.brand}</h3>
+            <p className="text-slate-400 font-medium">Manufacturing License Verified</p>
             <p className="text-[10px] text-slate-500 dark:text-zinc-450 leading-relaxed">
-              {product.brand} is a global enterprise with core competencies in the life science fields of health care and agriculture. Its products and services are designed to benefit people and improve their quality of life.
+              {product.manufacturer || product.brand} is a global enterprise with core competencies in the life science fields of health care. Its products and services are designed to benefit people and improve their quality of life.
             </p>
           </div>
         </div>

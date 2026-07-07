@@ -180,12 +180,31 @@ export const createProduct = async (req, res, next) => {
   try {
     let slug = productData.slug || slugify(productData.name, { lower: true });
     slug = slugify(slug, { lower: true });
+
+    // Handle missing SKU
+    if (!productData.sku || !productData.sku.trim()) {
+      productData.sku = `SKU-${slug.slice(0, 15)}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    }
+
+    // Map manufacturer to brand for compatibility
+    if (productData.manufacturer) {
+      productData.brand = productData.manufacturer;
+    } else if (productData.brand) {
+      productData.manufacturer = productData.brand;
+    }
+
+    // Handle In Stock Boolean Toggle
+    const inStock = productData.inStock !== undefined ? !!productData.inStock : true;
+    productData.inStock = inStock;
+    productData.stock = inStock ? 99 : 0;
     
     // Auto badges based on inventory levels
     let badge = productData.badge || "";
-    const stock = parseInt(productData.stock) || 0;
-    if (stock === 0) badge = "Out of Stock";
-    else if (stock <= 10) badge = "Low Stock";
+    if (!inStock) {
+      badge = "Out of Stock";
+    } else if (badge === "Out of Stock" || badge === "Low Stock") {
+      badge = "";
+    }
 
     // Resolve Category string name to ObjectId if needed
     let categoryId = productData.category;
@@ -245,6 +264,32 @@ export const updateProduct = async (req, res, next) => {
       updateData.slug = slugify(updateData.name, { lower: true });
     }
 
+    // Handle missing SKU (if somehow deleted/removed)
+    if (updateData.sku === "" || (updateData.sku && !updateData.sku.trim())) {
+      const tempSlug = updateData.slug || product.slug;
+      updateData.sku = `SKU-${tempSlug.slice(0, 15)}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    }
+
+    // Map manufacturer to brand for compatibility
+    if (updateData.manufacturer !== undefined) {
+      updateData.brand = updateData.manufacturer;
+    } else if (updateData.brand !== undefined) {
+      updateData.manufacturer = updateData.brand;
+    }
+
+    // Handle In Stock Boolean Toggle
+    if (updateData.inStock !== undefined) {
+      const inStock = !!updateData.inStock;
+      updateData.stock = inStock ? 99 : 0;
+      
+      // Auto badges based on inventory levels
+      if (!inStock) {
+        updateData.badge = "Out of Stock";
+      } else if (product.badge === "Out of Stock" || product.badge === "Low Stock" || updateData.badge === "Out of Stock" || updateData.badge === "Low Stock") {
+        updateData.badge = "";
+      }
+    }
+
     // Set moleculeSlug automatically
     if (updateData.molecules !== undefined) {
       let moleculeSlug = "";
@@ -255,16 +300,6 @@ export const updateProduct = async (req, res, next) => {
         }
       }
       updateData.moleculeSlug = moleculeSlug;
-    }
-
-    // Auto update stock badges
-    if (updateData.stock !== undefined) {
-      const stock = parseInt(updateData.stock) || 0;
-      if (stock === 0) updateData.badge = "Out of Stock";
-      else if (stock <= 10) updateData.badge = "Low Stock";
-      else if (product.badge === "Out of Stock" || product.badge === "Low Stock") {
-        updateData.badge = ""; // Clear badge if stock is replenished
-      }
     }
 
     // Resolve Category string name to ObjectId if needed

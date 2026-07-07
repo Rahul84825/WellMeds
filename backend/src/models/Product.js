@@ -22,7 +22,6 @@ const productSchema = new mongoose.Schema(
     },
     brand: {
       type: String,
-      required: [true, "Brand is required"],
       trim: true,
     },
     price: {
@@ -39,6 +38,10 @@ const productSchema = new mongoose.Schema(
       required: [true, "Stock is required"],
       min: [0, "Stock cannot be negative"],
       default: 0,
+    },
+    inStock: {
+      type: Boolean,
+      default: true,
     },
     requiresRx: {
       type: Boolean,
@@ -71,7 +74,6 @@ const productSchema = new mongoose.Schema(
     sku: {
       type: String,
       unique: true,
-      required: [true, "SKU is required"],
     },
     medicalSections: {
       type: [{

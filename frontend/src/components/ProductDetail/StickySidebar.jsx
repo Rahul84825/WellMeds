@@ -46,7 +46,7 @@ const StickySidebar = ({
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline mt-xs">
-                    <span className="text-[8px] text-slate-400 font-semibold truncate max-w-[65%]">{item.brand}</span>
+                    <span className="text-[8px] text-slate-400 font-semibold truncate max-w-[65%]">{item.manufacturer || item.brand}</span>
                     <span className="font-black text-[11px] text-slate-700 dark:text-zinc-200 shrink-0">
                       {formatCurrency(item.price)}
                     </span>

@@ -34,11 +34,10 @@ const AddNewProduct = () => {
   // --- Basic Info States ---
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
-  const [sku, setSku] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
-  const [stock, setStock] = useState("");
+  const [inStock, setInStock] = useState(true);
   const [requiresRx, setRequiresRx] = useState(false);
   const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
   const [isColdChain, setIsColdChain] = useState(false);
@@ -55,18 +54,10 @@ const AddNewProduct = () => {
   const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
   const [moleculeDropdownOpen, setMoleculeDropdownOpen] = useState(false);
 
-  // V2 Medical catalog fields state
-  const [manufacturer, setManufacturer] = useState("");
-  const [importedCountry, setImportedCountry] = useState("");
-  const [strength, setStrength] = useState("");
-  const [packSize, setPackSize] = useState("");
+  // V2 Display & custom routing states
   const [displayOrder, setDisplayOrder] = useState("");
-  const [similarMedicinePriority, setSimilarMedicinePriority] = useState("");
   const [isImported, setIsImported] = useState(false);
   const [slug, setSlug] = useState("");
-  const [medicineCategory, setMedicineCategory] = useState("");
-  const [marketer, setMarketer] = useState("");
-  const [country, setCountry] = useState("");
   
   // Images
   const [images, setImages] = useState([]);
@@ -111,28 +102,19 @@ const AddNewProduct = () => {
             setName(product.name || "");
             setCategory(product.category?._id || product.category?.id || product.category?.name || product.category || "");
             setProductType(product.productType || "medicine");
-            setBrand(product.brand || "");
-            setSku(product.sku || "");
             setPrice(product.price || "");
             setOriginalPrice(product.originalPrice || "");
-            setStock(product.stock || "");
+            setInStock(product.inStock !== undefined ? product.inStock : (product.stock > 0));
             setRequiresRx(product.requiresRx || false);
             setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
             setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
             
             // V2 Fields
-            setManufacturer(product.manufacturer || "");
-            setImportedCountry(product.importedCountry || "");
-            setStrength(product.strength || "");
-            setPackSize(product.packSize || "");
+            setManufacturer(product.manufacturer || product.brand || "");
             setDisplayOrder(product.displayOrder !== undefined ? product.displayOrder : "");
-            setSimilarMedicinePriority(product.similarMedicinePriority !== undefined ? product.similarMedicinePriority : "");
             setIsImported(product.isImported || false);
             setSlug(product.slug || "");
-            setMedicineCategory(product.medicineCategory || "");
-            setMarketer(product.marketer || "");
-            setCountry(product.country || "");
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -427,8 +409,8 @@ const AddNewProduct = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!name || !brand || !price || !stock) {
-      toast.warning("Please fill in all required fields.");
+    if (!name || !manufacturer || !price) {
+      toast.warning("Please fill in all required fields (Name, Manufacturer, Price).");
       return;
     }
 
@@ -455,11 +437,10 @@ const AddNewProduct = () => {
       name: name.trim(),
       category: typeof category === "object" ? (category?.name || category?._id) : category,
       productType,
-      brand: brand.trim(),
-      sku: sku.trim() || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+      brand: manufacturer.trim(), // for DB required validation
       price: parseFloat(price),
       originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
-      stock: parseInt(stock),
+      inStock,
       requiresRx: isPrescriptionRequired,
       isPrescriptionRequired,
       isColdChain,
@@ -473,16 +454,9 @@ const AddNewProduct = () => {
       
       // V2 Fields
       manufacturer: manufacturer.trim(),
-      importedCountry: importedCountry.trim(),
-      strength: strength.trim(),
-      packSize: packSize.trim(),
       displayOrder: displayOrder !== "" ? parseInt(displayOrder) : 0,
-      similarMedicinePriority: similarMedicinePriority !== "" ? parseInt(similarMedicinePriority) : 0,
       isImported,
       slug: slug.trim() || undefined,
-      medicineCategory: medicineCategory.trim(),
-      marketer: marketer.trim(),
-      country: country.trim(),
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -585,456 +559,398 @@ const AddNewProduct = () => {
           
           {/* TAB 1: BASIC INFO */}
           {activeTab === "basic" && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
-              <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
-                General Product Information
-              </h3>
+            <div className="space-y-lg w-full">
               
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="e.g. Paracetamol tablets 500mg"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
-                  <select
-                    value={getSelectedCategoryId()}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                  >
-                    {allCategories.map((cat) => (
-                      <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Type</label>
-                  <select
-                    value={productType}
-                    onChange={(e) => setProductType(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                  >
-                    <option value="medicine">Medicine</option>
-                    <option value="wellness">Wellness</option>
-                  </select>
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Brand Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="e.g. Cipla"
-                  />
-                </div>
-              </div>
-
-              {/* Surgical Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md pt-xs">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Is Surgical Product?</label>
-                  <select
-                    value={isSurgical ? "true" : "false"}
-                    onChange={(e) => {
-                      const val = e.target.value === "true";
-                      setIsSurgical(val);
-                      if (!val) setSurgicalCategory("");
-                    }}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                  >
-                    <option value="false">No (Default)</option>
-                    <option value="true">Yes</option>
-                  </select>
+              {/* Section 1: Basic Information */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                  Basic Information
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. Paracetamol tablets 500mg"
+                    />
+                  </div>
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">URL Custom Slug</label>
+                    <input
+                      type="text"
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      placeholder="e.g. paracetamol-500mg"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono"
+                    />
+                  </div>
                 </div>
 
-                {isSurgical && (
-                  <div className="space-y-xs animate-[fade-in_0.2s_ease-out]">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Surgical Category *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
                     <select
-                      required={isSurgical}
-                      value={surgicalCategory}
-                      onChange={(e) => setSurgicalCategory(e.target.value)}
+                      value={getSelectedCategoryId()}
+                      onChange={(e) => setCategory(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
                     >
-                      <option value="">Select Surgical Category</option>
-                      {allSurgicalCategories.map((cat) => {
-                        const idVal = cat.id || cat._id;
-                        return (
-                          <option key={idVal} value={idVal}>{cat.name}</option>
-                        );
-                      })}
+                      {allCategories.map((cat) => (
+                        <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
+                      ))}
                     </select>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-xs pt-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Associated Specialities (Select Multiple)
-                </label>
-                <div className="flex flex-wrap gap-xs pt-xs">
-                  {allSpecialities.map((spec) => {
-                    const specId = spec._id || spec.id;
-                    const isSelected = selectedSpecialities.includes(specId);
-                    return (
-                      <button
-                        type="button"
-                        key={specId}
-                        onClick={() => {
-                          setSelectedSpecialities(prev => 
-                            prev.includes(specId)
-                              ? prev.filter(id => id !== specId)
-                              : [...prev, specId]
-                          );
-                        }}
-                        className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${
-                          isSelected
-                            ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
-                            : "bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
-                        }`}
-                      >
-                        {isSelected && <Check size={10} />}
-                        {spec.name}
-                      </button>
-                    );
-                  })}
-                  {allSpecialities.length === 0 && (
-                    <span className="text-[10px] text-slate-400 italic">No active specialities configured in the system.</span>
-                  )}
+                  <div className="space-y-xs col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manufacturer *</label>
+                    <input
+                      type="text"
+                      required
+                      value={manufacturer}
+                      onChange={(e) => setManufacturer(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="e.g. Sun Pharma"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Associated Molecules Searchable Multi-Select */}
-              <div className="space-y-xs pt-xs relative">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Associated Molecules (Search &amp; Select Multiple)
-                </label>
-                
-                {/* Selected Molecule Badges */}
-                <div className="flex flex-wrap gap-xs pb-xs">
-                  {selectedMolecules.map((molId) => {
-                    const molObj = allMolecules.find(m => (m.id || m._id) === molId);
-                    if (!molObj) return null;
-                    return (
-                      <span
-                        key={molId}
-                        className="inline-flex items-center gap-xs px-sm py-1 rounded-xl bg-[#038076]/10 border border-[#038076]/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-bold"
-                      >
-                        {molObj.name}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMolecules(prev => prev.filter(id => id !== molId))}
-                          className="hover:text-red-500 font-bold focus:outline-none"
+                {/* Associated Molecules Searchable Multi-Select */}
+                <div className="space-y-xs pt-xs relative">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Associated Molecules (Search &amp; Select Multiple)
+                  </label>
+                  
+                  {/* Selected Molecule Badges */}
+                  <div className="flex flex-wrap gap-xs pb-xs">
+                    {selectedMolecules.map((molId) => {
+                      const molObj = allMolecules.find(m => (m.id || m._id) === molId);
+                      if (!molObj) return null;
+                      return (
+                        <span
+                          key={molId}
+                          className="inline-flex items-center gap-xs px-sm py-1 rounded-xl bg-[#038076]/10 border border-[#038076]/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-bold"
                         >
-                          &times;
-                        </button>
-                      </span>
-                    );
-                  })}
-                  {selectedMolecules.length === 0 && (
-                    <span className="text-[10px] text-slate-400 italic">No molecules selected.</span>
-                  )}
-                </div>
+                          {molObj.name}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMolecules(prev => prev.filter(id => id !== molId))}
+                            className="hover:text-red-500 font-bold focus:outline-none"
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      );
+                    })}
+                    {selectedMolecules.length === 0 && (
+                      <span className="text-[10px] text-slate-400 italic">No molecules selected.</span>
+                    )}
+                  </div>
 
-                {/* Search Input for Dropdown */}
-                <div className="relative max-w-md">
-                  <input
-                    type="text"
-                    placeholder="Search molecules to add..."
-                    value={moleculeSearchQuery}
-                    onChange={(e) => {
-                      setMoleculeSearchQuery(e.target.value);
-                      setMoleculeDropdownOpen(true);
-                    }}
-                    onFocus={() => setMoleculeDropdownOpen(true)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                  {moleculeDropdownOpen && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setMoleculeDropdownOpen(false)}
-                      />
-                      <div className="absolute left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-20 divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
-                        {allMolecules
-                          .filter(mol => {
+                  {/* Search Input for Dropdown */}
+                  <div className="relative max-w-md">
+                    <input
+                      type="text"
+                      placeholder="Search molecules to add..."
+                      value={moleculeSearchQuery}
+                      onChange={(e) => {
+                        setMoleculeSearchQuery(e.target.value);
+                        setMoleculeDropdownOpen(true);
+                      }}
+                      onFocus={() => setMoleculeDropdownOpen(true)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                    />
+                    {moleculeDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setMoleculeDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-20 divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
+                          {allMolecules
+                            .filter(mol => {
+                              const query = moleculeSearchQuery.toLowerCase().trim();
+                              const matchesName = mol.name.toLowerCase().includes(query);
+                              const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
+                              return matchesName || matchesAlias;
+                            })
+                            .map((mol) => {
+                              const molId = mol.id || mol._id;
+                              const isSelected = selectedMolecules.includes(molId);
+                              return (
+                                <button
+                                  key={molId}
+                                  type="button"
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      setSelectedMolecules(prev => prev.filter(id => id !== molId));
+                                    } else {
+                                      setSelectedMolecules(prev => [...prev, molId]);
+                                    }
+                                    setMoleculeSearchQuery("");
+                                  }}
+                                  className="w-full text-left p-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-855 transition-colors"
+                                >
+                                  <div>
+                                    <span className="font-bold text-slate-700 dark:text-zinc-200">{mol.name}</span>
+                                    {mol.aliases && mol.aliases.length > 0 && (
+                                      <span className="text-[10px] text-slate-400 ml-sm italic">({mol.aliases.join(", ")})</span>
+                                    )}
+                                  </div>
+                                  {isSelected && <span className="text-[#038076] font-extrabold font-mono">✓</span>}
+                                </button>
+                              );
+                            })}
+                          {allMolecules.filter(mol => {
                             const query = moleculeSearchQuery.toLowerCase().trim();
                             const matchesName = mol.name.toLowerCase().includes(query);
                             const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
                             return matchesName || matchesAlias;
-                          })
-                          .map((mol) => {
-                            const molId = mol.id || mol._id;
-                            const isSelected = selectedMolecules.includes(molId);
-                            return (
-                              <button
-                                key={molId}
-                                type="button"
-                                onClick={() => {
-                                  if (isSelected) {
-                                    setSelectedMolecules(prev => prev.filter(id => id !== molId));
-                                  } else {
-                                    setSelectedMolecules(prev => [...prev, molId]);
-                                  }
-                                  setMoleculeSearchQuery("");
-                                }}
-                                className="w-full text-left p-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-855 transition-colors"
-                              >
-                                <div>
-                                  <span className="font-bold text-slate-700 dark:text-zinc-200">{mol.name}</span>
-                                  {mol.aliases && mol.aliases.length > 0 && (
-                                    <span className="text-[10px] text-slate-400 ml-sm italic">({mol.aliases.join(", ")})</span>
-                                  )}
-                                </div>
-                                {isSelected && <span className="text-[#038076] font-extrabold font-mono">✓</span>}
-                              </button>
-                            );
-                          })}
-                        {allMolecules.filter(mol => {
-                          const query = moleculeSearchQuery.toLowerCase().trim();
-                          const matchesName = mol.name.toLowerCase().includes(query);
-                          const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
-                          return matchesName || matchesAlias;
-                        }).length === 0 && (
-                          <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
-                        )}
-                      </div>
-                    </>
+                          }).length === 0 && (
+                            <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-xs pt-xs">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Description</label>
+                  <textarea
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                    placeholder="Provide a quick summary. Will be converted to 'Overview' if no medical sections are created."
+                  />
+                </div>
+              </div>
+
+              {/* Section 2: Pricing */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                  Pricing Settings
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price / MRP (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={originalPrice}
+                      onChange={(e) => setOriginalPrice(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selling Price (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-xs bg-slate-50 dark:bg-zinc-950/20 p-sm rounded-xl border border-slate-200/50 dark:border-zinc-800 flex flex-col justify-center">
+                    <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Discount Calculator</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-450 mt-1">
+                      {price && originalPrice && parseFloat(originalPrice) > parseFloat(price)
+                        ? `${Math.round(((parseFloat(originalPrice) - parseFloat(price)) / parseFloat(originalPrice)) * 105) / 105}% Discount`
+                        : "No Discount Applied"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Inventory */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                  Inventory Settings
+                </h3>
+                <div className="flex items-center gap-md">
+                  <span className="font-semibold text-slate-700 dark:text-zinc-200">Stock Availability:</span>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={inStock}
+                      onChange={(e) => setInStock(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-205 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    <span className="ml-sm font-bold text-xs text-slate-700 dark:text-zinc-200">
+                      {inStock ? "IN STOCK" : "OUT OF STOCK"}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Section 4: Display Settings */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                  Display Settings
+                </h3>
+                <div className="max-w-xs space-y-xs">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Order</label>
+                  <input
+                    type="number"
+                    value={displayOrder}
+                    onChange={(e) => setDisplayOrder(e.target.value)}
+                    className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                    placeholder="0 (Lower shows first)"
+                  />
+                </div>
+              </div>
+
+              {/* Section 5: Prescription & Medical */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                  Prescription &amp; Medical Rules
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
+                  
+                  {/* Rx Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isPrescriptionRequired"
+                      checked={isPrescriptionRequired}
+                      onChange={(e) => {
+                        setIsPrescriptionRequired(e.target.checked);
+                        setRequiresRx(e.target.checked);
+                      }}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isPrescriptionRequired" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Rx Required
+                    </label>
+                  </div>
+
+                  {/* Cold Chain Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isColdChain"
+                      checked={isColdChain}
+                      onChange={(e) => setIsColdChain(e.target.checked)}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isColdChain" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Cold Chain Shipped
+                    </label>
+                  </div>
+
+                  {/* Imported Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isImportedToggle"
+                      checked={isImported}
+                      onChange={(e) => setIsImported(e.target.checked)}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isImportedToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Imported Medicine
+                    </label>
+                  </div>
+
+                  {/* Wellness Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isWellnessToggle"
+                      checked={productType === "wellness"}
+                      onChange={(e) => setProductType(e.target.checked ? "wellness" : "medicine")}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isWellnessToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Wellness Product
+                    </label>
+                  </div>
+
+                  {/* Surgical Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isSurgicalToggle"
+                      checked={isSurgical}
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setIsSurgical(val);
+                        if (!val) setSurgicalCategory("");
+                      }}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isSurgicalToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Surgical Product
+                    </label>
+                  </div>
+
+                  {/* Specialities Select */}
+                  <div className="flex flex-col gap-sm col-span-full pt-sm border-t border-slate-100 dark:border-zinc-800">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Associated Specialities (Select Multiple)
+                    </label>
+                    <div className="flex flex-wrap gap-xs">
+                      {allSpecialities.map((spec) => {
+                        const specId = spec._id || spec.id;
+                        const isSelected = selectedSpecialities.includes(specId);
+                        return (
+                          <button
+                            type="button"
+                            key={specId}
+                            onClick={() => {
+                              setSelectedSpecialities(prev => 
+                                prev.includes(specId)
+                                  ? prev.filter(id => id !== specId)
+                                  : [...prev, specId]
+                              );
+                            }}
+                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${
+                              isSelected
+                                ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
+                                : "bg-slate-50 dark:bg-zinc-955 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
+                            }`}
+                          >
+                            {isSelected && <Check size={10} />}
+                            {spec.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Surgical Category select box */}
+                  {isSurgical && (
+                    <div className="space-y-xs col-span-full pt-sm border-t border-slate-100 dark:border-zinc-800 animate-[fade-in_0.2s_ease-out]">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Surgical Category *</label>
+                      <select
+                        required={isSurgical}
+                        value={surgicalCategory}
+                        onChange={(e) => setSurgicalCategory(e.target.value)}
+                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
+                      >
+                        <option value="">Select Surgical Category</option>
+                        {allSurgicalCategories.map((cat) => {
+                          const idVal = cat.id || cat._id;
+                          return (
+                            <option key={idVal} value={idVal}>{cat.name}</option>
+                          );
+                        })}
+                      </select>
+                    </div>
                   )}
+
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SKU Number</label>
-                  <input
-                    type="text"
-                    value={sku}
-                    onChange={(e) => setSku(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono"
-                    placeholder="Auto-generated if blank"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price (₹) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price (₹)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={originalPrice}
-                    onChange={(e) => setOriginalPrice(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="Show original price for discount comparison"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Stock Count *</label>
-                  <input
-                    type="number"
-                    required
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Legacy / Short Description</label>
-                <textarea
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Provide a quick summary. Will be converted to 'Overview' if no medical sections are created."
-                />
-              </div>
-
-              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800 space-y-md animate-[fade-in_0.2s_ease-out]">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Medical Catalog Parameters</h4>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manufacturer</label>
-                    <input
-                      type="text"
-                      value={manufacturer}
-                      onChange={(e) => setManufacturer(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. Pfizer India Ltd."
-                    />
-                  </div>
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Strength</label>
-                    <input
-                      type="text"
-                      value={strength}
-                      onChange={(e) => setStrength(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. 500 mg"
-                    />
-                  </div>
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pack Size</label>
-                    <input
-                      type="text"
-                      value={packSize}
-                      onChange={(e) => setPackSize(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. 10 Tablets in 1 Strip"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Imported Country</label>
-                    <input
-                      type="text"
-                      value={importedCountry}
-                      onChange={(e) => setImportedCountry(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. United Kingdom"
-                    />
-                  </div>
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Medicine Category / Class</label>
-                    <input
-                      type="text"
-                      value={medicineCategory}
-                      onChange={(e) => setMedicineCategory(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. Analgesic"
-                    />
-                  </div>
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Marketer</label>
-                    <input
-                      type="text"
-                      value={marketer}
-                      onChange={(e) => setMarketer(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. Abbott India"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Country of Origin</label>
-                    <input
-                      type="text"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. India"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-sm col-span-2">
-                    <div className="space-y-xs">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Order</label>
-                      <input
-                        type="number"
-                        value={displayOrder}
-                        onChange={(e) => setDisplayOrder(e.target.value)}
-                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="space-y-xs">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Similar Priority</label>
-                      <input
-                        type="number"
-                        value={similarMedicinePriority}
-                        onChange={(e) => setSimilarMedicinePriority(e.target.value)}
-                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 dark:bg-zinc-955/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-800/80 space-y-sm">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-                    <div className="flex items-center gap-sm">
-                      <input
-                        type="checkbox"
-                        id="isPrescriptionRequired"
-                        checked={isPrescriptionRequired}
-                        onChange={(e) => {
-                          setIsPrescriptionRequired(e.target.checked);
-                          setRequiresRx(e.target.checked);
-                        }}
-                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                      />
-                      <label htmlFor="isPrescriptionRequired" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                        Rx Required
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-sm">
-                      <input
-                        type="checkbox"
-                        id="isColdChain"
-                        checked={isColdChain}
-                        onChange={(e) => setIsColdChain(e.target.checked)}
-                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                      />
-                      <label htmlFor="isColdChain" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                        Cold Chain
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-sm">
-                      <input
-                        type="checkbox"
-                        id="isWellnessToggle"
-                        checked={productType === "wellness"}
-                        onChange={(e) => setProductType(e.target.checked ? "wellness" : "medicine")}
-                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                      />
-                      <label htmlFor="isWellnessToggle" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                        Wellness Product
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-sm">
-                      <input
-                        type="checkbox"
-                        id="isImportedToggle"
-                        checked={isImported}
-                        onChange={(e) => setIsImported(e.target.checked)}
-                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                      />
-                      <label htmlFor="isImportedToggle" className="text-xs font-bold text-slate-700 dark:text-zinc-200 select-none">
-                        Imported Product
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

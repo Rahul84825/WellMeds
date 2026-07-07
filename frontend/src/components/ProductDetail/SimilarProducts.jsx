@@ -28,7 +28,7 @@ const SimilarProducts = ({ similarProducts, product }) => {
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
                 <div className="space-y-0.5">
                   <p className="text-[8px] uppercase tracking-wider font-extrabold text-[#004782]/80 dark:text-[#a4c9ff]/80 truncate">
-                    {item.brand}
+                    {item.manufacturer || item.brand}
                   </p>
                   <h4 className="font-extrabold text-[10px] text-slate-850 dark:text-zinc-200 line-clamp-1 leading-tight">
                     {item.name}

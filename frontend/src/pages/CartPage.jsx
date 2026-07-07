@@ -99,7 +99,7 @@ const Cart = () => {
                   <div className="flex-grow flex flex-col justify-between">
                     <div>
                       <p className="text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider font-semibold text-[10px]">
-                        {item.brand}
+                        {item.manufacturer || item.brand}
                       </p>
                       <Link
                         to={`/products/${item.slug || item.id}`}

@@ -295,7 +295,7 @@ const DropdownNavItem = ({ item }) => {
         aria-haspopup="true"
         aria-expanded={open}
         className="flex items-center gap-2 text-[18px] font-medium text-gray-900
-                   tracking-normal py-3 px-2 leading-none
+                   tracking-normal py-2 px-2 leading-none
                     transition-colors duration-200 hover:text-[#004782]
                     focus:text-[#004782] focus:outline-none"
       >
@@ -324,7 +324,7 @@ const LinkNavItem = ({ item }) => (
   <Link
     to={item.to}
     className="flex items-center gap-2 text-[18px] font-medium text-gray-900
-               tracking-normal py-3 px-2 leading-none
+               tracking-normal py-2 px-2 leading-none
                 transition-colors duration-200 hover:text-[#004782]
                 focus:text-[#004782] focus:outline-none"
   >
@@ -501,27 +501,27 @@ const NavActions = () => {
     <div className="flex items-center gap-[12px]">
       <button
         onClick={() => navigate("/upload-prescription")}
-        className="w-[84px] h-[44px] bg-[#004782] hover:bg-[#086b53] text-white rounded-[12px] font-medium text-[16px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none"
+        className="w-[84px] h-[38px] bg-[#004782] hover:bg-[#086b53] text-white rounded-[10px] font-medium text-[14px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none"
         aria-label="Upload Prescription"
       >
         <span>Upload</span>
       </button>
 
       <button
-        className="w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        className="w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
         aria-label="Discounts & Offers"
       >
-        <Percent className="w-5 h-5 text-gray-700" />
+        <Percent className="w-[18px] h-[18px] text-gray-700" />
       </button>
 
       <Link
         to="/cart"
-        className="relative w-[44px] h-[44px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
+        className="relative w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200"
         aria-label={`Shopping Cart with ${cartCount} items`}
       >
-        <ShoppingCart className="w-5 h-5" />
+        <ShoppingCart className="w-[18px] h-[18px]" />
         {cartCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse border border-white">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center animate-pulse border border-white">
             {cartCount}
           </span>
         )}
@@ -537,9 +537,9 @@ const NavActions = () => {
             aria-label="User profile menu"
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
             onKeyDown={handleKeyDown}
-            className="h-[48px] px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 cursor-pointer"
+            className="h-[42px] px-4 border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 cursor-pointer"
           >
-            <User className="w-5 h-5 text-gray-500" />
+            <User className="w-[18px] h-[18px] text-gray-500" />
             <span className="max-w-[80px] truncate text-sm font-medium">
               {user.name}
             </span>
@@ -547,9 +547,9 @@ const NavActions = () => {
         ) : (
           <Link
             to="/login"
-            className="w-[120px] h-[48px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 font-medium cursor-pointer"
+            className="w-[110px] h-[42px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 transition-colors duration-200 font-medium cursor-pointer"
           >
-            <User className="w-5 h-5 text-gray-500" />
+            <User className="w-[18px] h-[18px] text-gray-500" />
             <span>Login</span>
           </Link>
         )}
@@ -624,6 +624,36 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+  const [desktopSearchQuery, setDesktopSearchQuery] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          if (currentScrollY <= 100) {
+            setIsCollapsed(false);
+          } else if (currentScrollY > lastScrollY) {
+            // Scrolling down
+            setIsCollapsed(true);
+          } else {
+            // Scrolling up
+            setIsCollapsed(false);
+          }
+          lastScrollY = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm flex-shrink-0">
@@ -631,15 +661,14 @@ const Navbar = () => {
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col">
 
         {/* Row 1: Logo & Action Buttons */}
-        <div className="h-[72px] lg:h-[80px] flex items-center justify-between relative">
+        <div className="h-[60px] lg:h-[68px] flex items-center justify-between gap-md relative">
           {/* Left/Centered Brand Logo */}
-          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-10 flex items-center">
+          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-10 flex items-center shrink-0">
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center group rounded-xl p-0.5 text-left h-[58px] md:h-[65px] lg:h-[76px]"
+              className="flex items-center group rounded-xl p-0.5 text-left h-[50px] md:h-[56px] lg:h-[64px]"
             >
-
               <img width="150"
                 height="230"
                 src={logoImg}
@@ -649,8 +678,25 @@ const Navbar = () => {
             </NavLink>
           </div>
 
+          {/* Desktop Search Input (Smart Header Search) */}
+          <div className="hidden lg:block flex-1 max-w-[280px] xl:max-w-[360px] mx-md relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search medicines, manufacturers..."
+              value={desktopSearchQuery}
+              onChange={(e) => setDesktopSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && desktopSearchQuery.trim()) {
+                  navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
+                }
+              }}
+              className="w-full pl-10 pr-4 py-1.5 bg-slate-50 border border-gray-200 focus:bg-white focus:border-[#004782] rounded-xl text-xs outline-none transition-all"
+            />
+          </div>
+
           {/* Right Side Actions (Desktop) */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block shrink-0">
             <NavActions />
           </div>
 
@@ -658,7 +704,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2 lg:hidden ml-auto z-10">
             <Link
               to="/cart"
-              className="relative w-[42px] h-[42px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+              className="relative w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
               aria-label={`Shopping Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-[18px] h-[18px] text-gray-700" />
@@ -670,7 +716,7 @@ const Navbar = () => {
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-[42px] h-[42px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
+              className="w-[38px] h-[38px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-all cursor-pointer"
               aria-label="Toggle Mobile Menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -680,7 +726,11 @@ const Navbar = () => {
         </div>
 
         {/* Row 2: Centered Navigation Menu (Desktop Only) */}
-        <div className="hidden lg:flex h-[50px] items-center justify-center border-t border-gray-50">
+        <div className={`hidden lg:flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-50 ${
+          isCollapsed 
+            ? "h-0 opacity-0 pointer-events-none border-t-transparent" 
+            : "h-[40px] opacity-100"
+        }`}>
           <NavMenu />
         </div>
 

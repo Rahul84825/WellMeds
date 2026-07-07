@@ -14,7 +14,7 @@ const PromoCard = ({ medicine }) => {
         </div>
         <div className="space-y-xs min-w-0 flex-1">
           <span className="inline-block bg-[#004782]/5 text-[#004782] dark:bg-[#a4c9ff]/10 dark:text-[#a4c9ff] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-            {medicine.brand}
+            {medicine.manufacturer || medicine.brand}
           </span>
           <h4 className="font-extrabold text-slate-800 dark:text-zinc-100 text-xs sm:text-sm truncate">
             {medicine.name}

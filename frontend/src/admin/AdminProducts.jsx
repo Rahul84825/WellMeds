@@ -91,7 +91,7 @@ const ManageProducts = () => {
       const q = searchQuery.toLowerCase();
       result = result.filter(p => 
         p.name.toLowerCase().includes(q) || 
-        p.sku?.toLowerCase().includes(q) ||
+        p.manufacturer?.toLowerCase().includes(q) ||
         p.brand?.toLowerCase().includes(q)
       );
     }
@@ -106,9 +106,8 @@ const ManageProducts = () => {
 
     // 3. Stock warning filtering
     if (stockFilter !== "All") {
-      if (stockFilter === "instock") result = result.filter(p => p.stock > 10);
-      else if (stockFilter === "lowstock") result = result.filter(p => p.stock <= 10 && p.stock > 0);
-      else if (stockFilter === "out") result = result.filter(p => p.stock === 0);
+      if (stockFilter === "instock") result = result.filter(p => p.inStock !== false && p.stock > 0);
+      else if (stockFilter === "out") result = result.filter(p => p.inStock === false || p.stock === 0);
     }
 
     // 4. Prescription requirement filtering
@@ -129,9 +128,9 @@ const ManageProducts = () => {
         case "price-desc":
           return b.price - a.price;
         case "stock-asc":
-          return a.stock - b.stock;
+          return (a.inStock === b.inStock) ? 0 : a.inStock ? 1 : -1;
         case "stock-desc":
-          return b.stock - a.stock;
+          return (a.inStock === b.inStock) ? 0 : a.inStock ? -1 : 1;
         default:
           return 0;
       }
@@ -192,10 +191,10 @@ const ManageProducts = () => {
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
             type="text"
-            placeholder="Search by name, brand, SKU..."
+            placeholder="Search by name, manufacturer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
+            className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
           />
         </div>
 
@@ -220,10 +219,9 @@ const ManageProducts = () => {
             onChange={(e) => setStockFilter(e.target.value)}
             className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white rounded-xl text-xs outline-none text-slate-600 dark:text-zinc-300"
           >
-            <option value="All">All Stock Levels</option>
-            <option value="instock">In Stock (&gt;10)</option>
-            <option value="lowstock">Low Stock (≤10)</option>
-            <option value="out">Out of Stock (0)</option>
+            <option value="All">All Stock Statuses</option>
+            <option value="instock">In Stock</option>
+            <option value="out">Out of Stock</option>
           </select>
         </div>
 
@@ -277,85 +275,88 @@ const ManageProducts = () => {
                 <th className="p-md">Product</th>
                 <th className="p-md">Category</th>
                 <th className="p-md">Price</th>
-                <th className="p-md">Stock Count</th>
+                <th className="p-md">Stock Status</th>
                 <th className="p-md">Rx Verify</th>
                 <th className="p-md">Status</th>
                 <th className="p-md text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs text-slate-600 dark:text-zinc-300">
-              {paginatedProducts.map((p) => (
-                <tr key={p.id || p._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
-                  <td className="p-md">
-                    <div className="flex items-center gap-md">
-                      <div className="w-10 h-10 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
-                        <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+              {paginatedProducts.map((p) => {
+                const isItemInStock = p.inStock !== false && p.stock > 0;
+                return (
+                  <tr key={p.id || p._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
+                    <td className="p-md">
+                      <div className="flex items-center gap-md">
+                        <div className="w-10 h-10 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
+                          <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+                        </div>
+                        <div className="truncate max-w-[180px] sm:max-w-xs">
+                          <p className="font-bold text-slate-800 dark:text-zinc-100 truncate">{p.name}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">{p.manufacturer || p.brand}</p>
+                        </div>
                       </div>
-                      <div className="truncate max-w-[180px] sm:max-w-xs">
-                        <p className="font-bold text-slate-800 dark:text-zinc-100 truncate">{p.name}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">SKU: {p.sku || "N/A"}</p>
+                    </td>
+                    <td className="p-md font-medium">{typeof p.category === "object" ? p.category?.name : p.category}</td>
+                    <td className="p-md font-bold text-slate-800 dark:text-zinc-100">{formatCurrency(p.price)}</td>
+                    <td className="p-md">
+                      <div className="flex items-center gap-xs">
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          isItemInStock ? "bg-emerald-500" : "bg-red-500"
+                        }`}></span>
+                        <span className="font-semibold">{isItemInStock ? "In Stock" : "Out of Stock"}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-md font-medium">{typeof p.category === "object" ? p.category?.name : p.category}</td>
-                  <td className="p-md font-bold text-slate-800 dark:text-zinc-100">{formatCurrency(p.price)}</td>
-                  <td className="p-md">
-                    <div className="flex items-center gap-xs">
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        p.stock > 10 ? "bg-emerald-500" : p.stock > 0 ? "bg-amber-500" : "bg-red-500"
-                      }`}></span>
-                      <span className="font-semibold">{p.stock} Units</span>
-                    </div>
-                  </td>
-                  <td className="p-md">
-                    {p.requiresRx ? (
-                      <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">
-                        Rx Required
-                      </span>
-                    ) : (
-                      <span className="inline-flex px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">
-                        OTC Free
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-md">
-                    {p.stock > 0 ? (
-                      <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold">
-                        <CheckCircle size={10} /> Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold">
-                        <ShieldAlert size={10} /> Out of Stock
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-md text-right">
-                    <div className="flex items-center justify-end gap-xs">
-                      <button
-                        onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
-                        className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg"
-                        title="Edit Details"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
-                        className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg"
-                        title="View details on site"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id || p._id, p.name)}
-                        className="p-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg"
-                        title="Delete Product"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="p-md">
+                      {p.requiresRx ? (
+                        <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-955/20 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">
+                          Rx Required
+                        </span>
+                      ) : (
+                        <span className="inline-flex px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">
+                          OTC Free
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-md">
+                      {isItemInStock ? (
+                        <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold">
+                          <CheckCircle size={10} /> Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-red-50 dark:bg-red-955/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold">
+                          <ShieldAlert size={10} /> Out of Stock
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-md text-right">
+                      <div className="flex items-center justify-end gap-xs">
+                        <button
+                          onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg"
+                          title="Edit Details"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg"
+                          title="View details on site"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id || p._id, p.name)}
+                          className="p-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-955/20 rounded-lg"
+                          title="Delete Product"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {filteredProducts.length === 0 && (
                 <tr>
                   <td colSpan="7" className="p-lg text-center text-slate-400">No items match the chosen filters.</td>
@@ -367,77 +368,82 @@ const ManageProducts = () => {
 
         {/* Mobile Card View */}
         <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
-          {paginatedProducts.map((p) => (
-            <div key={p.id || p._id} className="p-md space-y-sm text-xs">
-              <div className="flex gap-md">
-                <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
-                  <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+          {paginatedProducts.map((p) => {
+            const isItemInStock = p.inStock !== false && p.stock > 0;
+            return (
+              <div key={p.id || p._id} className="p-md space-y-sm text-xs">
+                <div className="flex gap-md">
+                  <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
+                    <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+                  </div>
+                  <div className="space-y-xs truncate flex-grow">
+                    <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">
+                      {p.manufacturer || p.brand} • {typeof p.category === "object" ? p.category?.name : p.category}
+                    </p>
+                    <p className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm">{formatCurrency(p.price)}</p>
+                  </div>
                 </div>
-                <div className="space-y-xs truncate flex-grow">
-                  <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">SKU: {p.sku || "N/A"} • {typeof p.category === "object" ? p.category?.name : p.category}</p>
-                  <p className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm">{formatCurrency(p.price)}</p>
+
+                <div className="flex flex-wrap gap-xs items-center justify-between pt-xs">
+                  <div className="flex flex-wrap gap-xs items-center">
+                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold ${
+                      isItemInStock ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : "bg-red-50 text-red-600 dark:bg-red-955/20"
+                    }`}>
+                      {isItemInStock ? "In Stock" : "Out of Stock"}
+                    </span>
+
+                    {p.requiresRx ? (
+                      <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-955/20 text-amber-700 dark:text-amber-400 rounded-lg text-[9px] font-bold uppercase">
+                        Rx
+                      </span>
+                    ) : (
+                      <span className="inline-flex px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[9px] font-bold uppercase">
+                        OTC
+                      </span>
+                    )}
+
+                    {isItemInStock ? (
+                      <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-red-50 dark:bg-red-955/20 text-red-650 dark:text-red-400 rounded-lg text-[9px] font-bold">
+                        Out of Stock
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-sm">
+                    <button
+                      onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Edit Details"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="View details on site"
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.id || p._id, p.name)}
+                      className="p-sm text-red-600 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      title="Delete Product"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-xs items-center justify-between pt-xs">
-                <div className="flex flex-wrap gap-xs items-center">
-                  <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold ${
-                    p.stock > 10 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : p.stock > 0 ? "bg-amber-50 text-amber-600 dark:bg-amber-950/20" : "bg-red-50 text-red-600 dark:bg-red-950/20"
-                  }`}>
-                    {p.stock} Units
-                  </span>
-
-                  {p.requiresRx ? (
-                    <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-[9px] font-bold uppercase">
-                      Rx
-                    </span>
-                  ) : (
-                    <span className="inline-flex px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[9px] font-bold uppercase">
-                      OTC
-                    </span>
-                  )}
-
-                  {p.stock > 0 ? (
-                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-xs px-2 py-0.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[9px] font-bold">
-                      Out of Stock
-                    </span>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-sm">
-                  <button
-                    onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
-                    className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
-                    title="Edit Details"
-                  >
-                    <Edit size={14} />
-                  </button>
-                  <button
-                    onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
-                    className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
-                    title="View details on site"
-                  >
-                    <Eye size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p.id || p._id, p.name)}
-                    className="p-sm text-red-600 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
-                    title="Delete Product"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {filteredProducts.length === 0 && (
-            <p className="p-lg text-center text-slate-455">No items match the chosen filters.</p>
+            <p className="p-lg text-center text-slate-400">No items match the chosen filters.</p>
           )}
         </div>
 

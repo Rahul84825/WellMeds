@@ -25,7 +25,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
-    if (product.stock === 0) return;
+    if (product.inStock === false || product.stock === 0) return;
     
     if (product.requiresRx && !localRxFile) {
       setRxUploadOpen(true);
@@ -109,13 +109,9 @@ const ProductCard = ({ product }) => {
                 {calculateDiscount()}
               </span>
             )}
-            {product.stock === 0 ? (
+            {product.inStock === false || product.stock === 0 ? (
               <span className="bg-slate-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
                 Out of Stock
-              </span>
-            ) : product.stock <= 10 ? (
-              <span className="bg-amber-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
-                Low Stock
               </span>
             ) : null}
             {product.badge && product.badge !== "Rx Required" && product.badge !== "Top Rated" && product.badge !== "Low Stock" && (
@@ -190,8 +186,8 @@ const ProductCard = ({ product }) => {
           <div className="space-y-1 text-center">
             
             {/* Brand */}
-            <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-extrabold truncate ${product.brand ? "text-slate-400 dark:text-zinc-500" : "text-transparent select-none"}`}>
-              {product.brand || "Placeholder"}
+            <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-extrabold truncate ${product.manufacturer || product.brand ? "text-slate-400 dark:text-zinc-500" : "text-transparent select-none"}`}>
+              {product.manufacturer || product.brand || "Placeholder"}
             </p>
  
             {/* Product Title */}
@@ -254,9 +250,9 @@ const ProductCard = ({ product }) => {
             {/* Add to Cart full-width button */}
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0 || isAdding}
+              disabled={(product.inStock === false || product.stock === 0) || isAdding}
               aria-label={
-                product.stock === 0 
+                product.inStock === false || product.stock === 0 
                   ? "Out of Stock" 
                   : isRx && !localRxFile 
                     ? "Upload prescription to purchase product" 
@@ -266,7 +262,7 @@ const ProductCard = ({ product }) => {
             >
               {isAdding ? (
                 <RefreshCw className="animate-spin h-4 w-4" />
-              ) : product.stock === 0 ? (
+              ) : product.inStock === false || product.stock === 0 ? (
                 "Out of Stock"
               ) : isRx && !localRxFile ? (
                 "Upload Rx & Add"

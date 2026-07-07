@@ -40,19 +40,8 @@ const PurchaseCard = ({
           <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
         </div>
 
-        {/* Variant Selector (Available Strengths/Pack Sizes) */}
-        {(product.packSize || product.strength) && (
-          <div className="bg-slate-50/50 dark:bg-zinc-955/10 px-md py-sm rounded-xl border border-slate-100 dark:border-zinc-855 text-left space-y-xs">
-            <span className="block text-[8px] font-extrabold uppercase text-slate-450 tracking-wider">Purchase Variant</span>
-            <div className="flex justify-between items-center text-[11px] font-extrabold text-slate-700 dark:text-zinc-250">
-              <span>{product.packSize || "Single Pack"}</span>
-              <span>{product.strength || ""}</span>
-            </div>
-          </div>
-        )}
-
         {/* Quantity Selector */}
-        {product.stock > 0 ? (
+        {(product.inStock !== false && product.stock > 0) ? (
           <div className="space-y-sm text-left">
             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
             <div className="flex items-center border border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-900 h-11 w-full justify-between p-1">
@@ -68,7 +57,7 @@ const PurchaseCard = ({
               <button
                 type="button"
                 onClick={handleIncrement}
-                disabled={quantity >= product.stock}
+                disabled={quantity >= 30}
                 className="w-9 h-9 flex items-center justify-center text-on-surface hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 outline-none rounded-xl cursor-pointer transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -85,14 +74,14 @@ const PurchaseCard = ({
         <div className="space-y-sm pt-xs">
           <button
             onClick={handleBuyNow}
-            disabled={product.stock === 0}
+            disabled={product.inStock === false || product.stock === 0}
             className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-2xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs shadow-sm"
           >
             Buy Now
           </button>
           <button
             onClick={handleAddToCart}
-            disabled={product.stock === 0}
+            disabled={product.inStock === false || product.stock === 0}
             className="w-full border-2 border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]/50 hover:bg-[#004782]/5 font-bold h-11 rounded-2xl transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm outline-none cursor-pointer text-xs"
           >
             Add to Cart

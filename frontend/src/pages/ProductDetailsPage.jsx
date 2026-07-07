@@ -71,11 +71,11 @@ const ProductDetails = () => {
         // Fetch all products for fallbacks
         const allProds = await api.getProductsList();
         
-        // Related products: from product.relatedProducts or fallback to same brand
+        // Related products: from product.relatedProducts or fallback to same manufacturer
         if (prod.relatedProducts && prod.relatedProducts.length > 0) {
           setRelatedProducts(prod.relatedProducts);
         } else {
-          const related = allProds.filter(p => p.brand === prod.brand && p.slug !== prod.slug).slice(0, 4);
+          const related = allProds.filter(p => (p.manufacturer || p.brand) === (prod.manufacturer || prod.brand) && p.slug !== prod.slug).slice(0, 4);
           setRelatedProducts(related);
         }
 
@@ -111,7 +111,7 @@ const ProductDetails = () => {
             id: prod.id || prod._id,
             _id: prod.id || prod._id,
             name: prod.name,
-            brand: prod.brand,
+            brand: prod.manufacturer || prod.brand,
             price: prod.price,
             originalPrice: prod.originalPrice,
             image: prod.image,
@@ -139,6 +139,18 @@ const ProductDetails = () => {
   useEffect(() => {
     setIsImageLoading(true);
   }, [activeImageIdx, slug]);
+
+  // Close fullscreen preview on ESC key
+  useEffect(() => {
+    if (!isFullscreenOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsFullscreenOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreenOpen]);
 
   // --- SEO & Schema.org JSON-LD Injector ---
   useEffect(() => {
@@ -222,14 +234,14 @@ const ProductDetails = () => {
           "sku": product.sku,
           "brand": {
             "@type": "Brand",
-            "name": product.brand
+            "name": product.manufacturer || product.brand
           },
           "offers": {
             "@type": "Offer",
             "priceCurrency": "INR",
             "price": product.price,
             "itemCondition": "https://schema.org/NewCondition",
-            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "availability": (product.inStock !== false && product.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             "url": window.location.href,
             "seller": {
               "@type": "Organization",
@@ -306,7 +318,7 @@ const ProductDetails = () => {
   }, [loading, product]);
 
   const handleIncrement = () => {
-    if (quantity < product.stock) {
+    if (quantity < 30) {
       setQuantity(prev => prev + 1);
     }
   };
@@ -318,7 +330,7 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    if (product.stock === 0) return;
+    if (product.inStock === false || product.stock === 0) return;
     if (product.requiresRx && !localRxFile) {
       setRxUploadOpen(true);
       return;
@@ -328,7 +340,7 @@ const ProductDetails = () => {
   };
 
   const handleBuyNow = () => {
-    if (product.stock === 0) return;
+    if (product.inStock === false || product.stock === 0) return;
     if (product.requiresRx && !localRxFile) {
       setRxUploadOpen(true);
       return;
@@ -583,14 +595,14 @@ const ProductDetails = () => {
         <div className="flex gap-xs flex-1 max-w-[240px]">
           <button
             onClick={handleBuyNow}
-            disabled={product.stock === 0}
+            disabled={product.inStock === false || product.stock === 0}
             className="flex-1 bg-[#086b53] hover:bg-[#055746] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
           >
             Buy Now
           </button>
           <button
             onClick={handleAddToCart}
-            disabled={product.stock === 0}
+            disabled={product.inStock === false || product.stock === 0}
             className="flex-1 bg-[#004782] hover:bg-[#003c6e] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
           >
             Add
@@ -621,18 +633,27 @@ const ProductDetails = () => {
 
       {/* Fullscreen Preview Modal */}
       {isFullscreenOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-md animate-[fade-in_0.2s_ease-out]">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsFullscreenOpen(false);
+            }
+          }}
+          className="fixed inset-0 w-screen h-screen bg-black/55 backdrop-blur-[8px] z-[9999] flex items-center justify-center p-md animate-[fade-in_0.2s_ease-out] select-none cursor-zoom-out"
+        >
           <button 
             type="button"
             onClick={() => setIsFullscreenOpen(false)}
-            className="absolute top-4 right-4 text-white hover:text-slate-300 p-2 rounded-full outline-none transition-colors"
+            className="absolute top-6 right-6 w-10 h-10 bg-white hover:bg-slate-100 text-slate-800 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-[10000]"
+            aria-label="Close image viewer"
           >
-            <X size={28} />
+            <X size={20} className="stroke-[2.5]" />
           </button>
           <img 
             src={imagesList[activeImageIdx]} 
             alt={product.name} 
-            className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-scale-up cursor-default select-none"
           />
         </div>
       )}

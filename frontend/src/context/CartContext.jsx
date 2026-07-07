@@ -53,7 +53,8 @@ export const CartProvider = ({ children }) => {
           originalPrice: product.originalPrice || null,
           image: product.image || "",
           category: product.category || "",
-          brand: product.brand || "",
+          brand: product.manufacturer || product.brand || "",
+          manufacturer: product.manufacturer || product.brand || "",
           stock: product.stock ?? 999,
           requiresRx: product.requiresRx || false,
           badge: product.badge || "",
@@ -122,7 +123,7 @@ export const CartProvider = ({ children }) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === productId);
       if (existing) {
-        const newQty = Math.min(product.stock, existing.quantity + quantity);
+        const newQty = Math.min(30, existing.quantity + quantity);
         return prev.map((i) => (i.id === productId ? { ...i, quantity: newQty } : i));
       }
       return [
@@ -131,7 +132,7 @@ export const CartProvider = ({ children }) => {
           ...product,
           id: productId,
           _id: productId,
-          quantity: Math.min(product.stock, quantity),
+          quantity: Math.min(30, quantity),
         },
       ];
     });

@@ -41,32 +41,11 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Brand, Name, & Manufacturer details */}
       <div className="space-y-1">
         <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-[10px]">
-          {product.brand}
+          {product.manufacturer || product.brand}
         </p>
         <h1 className="font-headline-md text-xl md:text-2xl text-on-surface font-black leading-tight">
           {product.name}
         </h1>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-md gap-y-1 text-slate-500 dark:text-zinc-400 text-[11px] font-semibold pt-1">
-          {product.manufacturer && (
-            <p>
-              Mfg by: <span className="text-slate-700 dark:text-zinc-200 font-bold">{product.manufacturer}</span>
-            </p>
-          )}
-          {product.marketer && (
-            <p>
-              Marketer: <span className="text-slate-700 dark:text-zinc-200 font-bold">{product.marketer}</span>
-            </p>
-          )}
-          {product.country && (
-            <p>
-              Country of Origin: <span className="text-slate-700 dark:text-zinc-200 font-bold">{product.country}</span>
-            </p>
-          )}
-          <p>
-            Import Status: <span className="text-slate-700 dark:text-zinc-200 font-bold">{product.isImported ? `Imported (from ${product.importedCountry || "Abroad"})` : "Domestic Product"}</span>
-          </p>
-        </div>
       </div>
       
       {/* Salt Composition */}
@@ -82,22 +61,6 @@ const ProductInfo = ({ product, handleShare }) => {
           </div>
         </div>
       )}
-
-      {/* Available Strengths, Pack Size & Category Dynamic parameters */}
-      <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 grid grid-cols-2 gap-sm text-[11px] font-semibold">
-        {product.strength && (
-          <div>
-            <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider">Available Strength</span>
-            <span className="text-slate-700 dark:text-zinc-200">{product.strength}</span>
-          </div>
-        )}
-        {product.packSize && (
-          <div>
-            <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider">Pack Size</span>
-            <span className="text-slate-700 dark:text-zinc-200">{product.packSize}</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
