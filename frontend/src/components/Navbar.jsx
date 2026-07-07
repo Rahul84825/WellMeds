@@ -647,7 +647,6 @@ const Navbar = () => {
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [desktopSearchQuery, setDesktopSearchQuery] = useState("");
   const [showNavbarSearch, setShowNavbarSearch] = useState(false);
-  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
   const items = useNavConfig();
 
@@ -680,10 +679,10 @@ const Navbar = () => {
         backgroundColor: "rgba(255,255,255,0.88)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
-        transition: "height 300ms cubic-bezier(.22,.61,.36,1), padding 300ms cubic-bezier(.22,.61,.36,1)"
+        transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
       }}
       className={`w-full border-b border-slate-150 sticky top-0 z-[100] flex-shrink-0 ${
-        showNavbarSearch ? "h-[68px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[88px] shadow-sm"
+        showNavbarSearch ? "h-[106px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[118px] shadow-sm"
       }`}
     >
       {/* Desktop & Mobile Navbar Container */}
@@ -692,10 +691,10 @@ const Navbar = () => {
         {/* Row 1: Logo & Action Buttons */}
         <div 
           style={{
-            height: showNavbarSearch ? "68px" : "56px",
+            height: showNavbarSearch ? "72px" : "80px",
             transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
           }}
-          className="flex items-center justify-between gap-md relative z-10 w-full"
+          className="flex items-center justify-between gap-[24px] relative z-10 w-full"
         >
           {/* Left/Centered Brand Logo */}
           <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-20 flex items-center shrink-0">
@@ -708,7 +707,7 @@ const Navbar = () => {
                 src={logoImg}
                 alt="WellMeds Logo"
                 style={{
-                  height: showNavbarSearch ? "44px" : "54px",
+                  height: showNavbarSearch ? "54px" : "64px",
                   transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
                 }}
                 className="object-contain"
@@ -716,79 +715,25 @@ const Navbar = () => {
             </NavLink>
           </div>
 
-          {/* Desktop Search & Browse Wrapper (Morphing Search) */}
-          <div className="hidden lg:flex items-center gap-md flex-grow justify-center max-w-[680px] mx-md relative z-10">
+          {/* Desktop Search Wrapper (Morphing Search) */}
+          <div className="hidden lg:flex items-center justify-center flex-grow max-w-[520px] mx-md relative z-10">
             
-            {/* Mega Menu Toggle (Browse) */}
-            {showNavbarSearch && (
-              <div className="relative">
-                <button 
-                  onClick={() => setMegaMenuOpen(!megaMenuOpen)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer border border-slate-200 select-none shrink-0"
-                >
-                  <Menu size={14} />
-                  <span>Browse</span>
-                </button>
-                
-                {/* Mega Menu Dropdown Panel */}
-                {megaMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-[105]" onClick={() => setMegaMenuOpen(false)} />
-                    <div className="absolute top-[48px] left-0 w-[240px] bg-white border border-slate-200 rounded-xl shadow-2xl p-sm z-[110] animate-modal-zoom-in text-left">
-                      <div className="flex flex-col gap-1">
-                        {items.map((item) => (
-                          <div key={item.id} className="relative group/mega">
-                            {item.type === "dropdown" ? (
-                              <>
-                                <div className="font-bold text-slate-700 text-xs px-2.5 py-1.5 uppercase tracking-wider text-[10px] text-slate-400 mt-2 first:mt-0">
-                                  {item.label}
-                                </div>
-                                {item.children?.map((child) => (
-                                  <Link
-                                    key={child.id}
-                                    to={child.to}
-                                    onClick={() => setMegaMenuOpen(false)}
-                                    className="block px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-[#004782] rounded-lg transition-colors"
-                                  >
-                                    {child.label}
-                                  </Link>
-                                ))}
-                              </>
-                            ) : (
-                              <Link
-                                key={item.id}
-                                to={item.to}
-                                onClick={() => setMegaMenuOpen(false)}
-                                className="block px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#004782] rounded-lg transition-colors"
-                              >
-                                {item.label}
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Morphing Search Input */}
+            {/* Morphing Search Input styled exactly like the Hero Search Bar */}
             <div 
               style={{
-                transition: "opacity 300ms cubic-bezier(.22,.61,.36,1), transform 300ms cubic-bezier(.22,.61,.36,1), width 300ms cubic-bezier(.22,.61,.36,1)",
+                transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1), width 280ms cubic-bezier(.22,.61,.36,1)",
                 transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                 opacity: showNavbarSearch ? 1 : 0,
-                width: showNavbarSearch ? "480px" : "560px",
+                width: showNavbarSearch ? "460px" : "500px",
               }}
-              className={`hidden lg:flex items-center bg-slate-100/60 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/80 focus-within:bg-white focus-within:border-primary rounded-xl px-3 py-1.5 shadow-sm focus-within:shadow-md transition-all duration-300 ${
+              className={`hidden lg:flex items-center bg-[#038076] border border-[#026b62] rounded-[24px] p-1.5 flex-row relative gap-2 shadow-[0_4px_12px_rgba(3,128,118,0.15)] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 ${
                 showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
-              <Search className="text-slate-400 mr-2 shrink-0" size={16} />
+              <Search className="text-white/70 ml-3 shrink-0" size={18} />
               <input
                 type="text"
-                placeholder="Search medicines, molecules, manufacturers..."
+                placeholder="Search Medicines, Molecules..."
                 value={desktopSearchQuery}
                 onChange={(e) => setDesktopSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -796,17 +741,18 @@ const Navbar = () => {
                     navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
                   }
                 }}
-                className="w-full bg-transparent border-none text-xs outline-none text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:ring-0 focus:outline-none p-0"
+                className="w-full bg-transparent border-none text-xs md:text-sm outline-none text-white placeholder-white/60 focus:ring-0 focus:outline-none p-0"
               />
               <button 
-                type="button" 
-                className="text-slate-400 hover:text-primary transition-colors ml-2 cursor-pointer focus:outline-none"
-                title="Voice Search (Coming Soon)"
+                type="button"
+                onClick={() => {
+                  if (desktopSearchQuery.trim()) {
+                    navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
+                  }
+                }}
+                className="bg-white text-[#038076] px-5 py-1.5 rounded-[16px] font-bold text-xs hover:bg-gray-50 active:scale-[0.97] transition-all shrink-0 shadow-sm"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" className="bi bi-mic text-slate-400" viewBox="0 0 16 16">
-                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
-                  <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
-                </svg>
+                Search
               </button>
             </div>
 
@@ -878,17 +824,13 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Row 2: Centered Navigation Menu (Desktop Only) */}
+        {/* Row 2: Centered Navigation Menu (Desktop Only) - Always Visible */}
         <div 
           style={{
-            transition: "transform 300ms cubic-bezier(.22,.61,.36,1), opacity 300ms cubic-bezier(.22,.61,.36,1), height 300ms cubic-bezier(.22,.61,.36,1)",
-            transform: showNavbarSearch ? "translate3d(0, -100%, 0)" : "translate3d(0, 0, 0)",
-            opacity: showNavbarSearch ? 0 : 1,
-            height: showNavbarSearch ? "0px" : "32px"
+            transition: "height 300ms cubic-bezier(.22,.61,.36,1)",
+            height: showNavbarSearch ? "34px" : "38px"
           }}
-          className={`hidden lg:flex items-center justify-center border-t border-gray-50 z-0 relative ${
-            showNavbarSearch ? "pointer-events-none overflow-hidden" : ""
-          }`}
+          className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-0 relative w-full overflow-hidden"
         >
           <NavMenu />
         </div>

@@ -32,17 +32,17 @@ const Hero = () => {
       {/* Content Overlay */}
       <div className="relative max-w-[1440px] w-full mx-auto px-6 lg:px-10 xl:px-16 flex flex-col items-center text-center z-10">
         <h1 className="font-bold text-[36px] md:text-[48px] tracking-tight leading-tight text-center max-w-3xl mb-4">
-          <span className="text-[#1e1b4b] block">More Than a Pharmacy.</span>
-          <span className="text-[#038076] block mt-1">Your Partner in Better Health.</span>
+          <span className="text-[#1D2B5C] block">More Than a Pharmacy.</span>
+          <span className="text-[#00796B] block mt-1">Your Partner in Better Health.</span>
         </h1>
         
-        <p className="text-gray-600 text-[16px] md:text-[18px] max-w-2xl mb-10 leading-relaxed font-medium">
+        <p style={{ color: "#2F3B52" }} className="text-[16px] md:text-[18px] max-w-2xl mb-10 leading-relaxed font-medium">
           Life-saving medicines, surgical essentials, wellness products,<br className="hidden md:inline" />
           and expert support – all in one place.
         </p>
         
         {/* Integrated Search & Delivery Pin Card */}
-        <div className="w-full max-w-4xl bg-[#038076] rounded-[24px] shadow-[0_15px_40px_rgba(3,128,118,0.15)] p-2.5 flex flex-col md:flex-row items-center gap-3 border border-[#026b62] relative">
+        <div className="w-full max-w-4xl bg-[#038076] rounded-[24px] shadow-[0_20px_50px_rgba(3,128,118,0.22)] p-2.5 flex flex-col md:flex-row items-center gap-3 border border-[#026b62] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 relative">
           
           {/* Deliver To Section */}
           <div className="relative w-full md:w-auto shrink-0">
