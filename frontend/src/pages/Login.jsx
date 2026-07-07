@@ -39,9 +39,20 @@ const sanitiseError = (err) => {
   if (/invalid.*mobile|valid.*mobile|valid.*number/i.test(raw)) return err?.response?.data?.message || "Please enter a valid 10-digit mobile number.";
   if (/network error/i.test(err?.message) || err?.code === "ERR_NETWORK") return "Unable to connect. Please check your internet connection.";
 
-  // Use backend message if it's safe (doesn't mention internals)
+  // Catch duplicate key / conflict errors — never show raw Mongo messages to user
+  const httpStatus = err?.response?.status;
+  if (httpStatus === 409 || /duplicate|conflict|already exist|e11000/i.test(raw)) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[LOGIN] Duplicate key error from backend:", err?.response?.data);
+    }
+    return "We couldn't complete sign in. Please try again.";
+  }
+
+  // Use backend message only if it looks safe (no internal DB/tech leakage)
   const safe = err?.response?.data?.message || "";
-  if (safe && safe.length < 120) return safe;
+  if (safe && safe.length < 120 && !/duplicate|mongo|e11000|keypattern|keyvalue/i.test(safe.toLowerCase())) {
+    return safe;
+  }
 
   return "Something went wrong. Please try again.";
 };

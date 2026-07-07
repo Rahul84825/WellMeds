@@ -8,10 +8,13 @@ export const errorHandler = (err, req, res, next) => {
     message = "Resource not found (invalid ID format)";
   }
 
-  // Mongoose Duplicate Key Error
+  // Mongoose Duplicate Key Error (E11000)
+  // Log full Mongo error for debugging; return a neutral message to the client.
   else if (err.code === 11000) {
-    statusCode = 400;
-    message = "Duplicate field value entered";
+    const duplicateField = Object.keys(err.keyPattern || err.keyValue || {}).join(", ") || "unknown field";
+    console.error(`[ERROR_MIDDLEWARE] E11000 duplicate key on field(s): ${duplicateField}. Full error:`, err);
+    statusCode = 409; // 409 Conflict is more semantically correct than 400
+    message = "We couldn't complete that request. Please try again.";
   }
 
   // Mongoose Validation Error
