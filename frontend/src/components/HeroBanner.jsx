@@ -19,29 +19,26 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-visible bg-[#eaf5f2] min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center justify-center py-16 md:py-24 transition-colors duration-300 w-full border-t border-gray-100">
-      {/* Background Image containing stethoscope and clipboard */}
-      <img
-        src={heroImage}
-        alt="Hero Background"
-        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none p-8 md:p-14 opacity-90"
-        draggable={false}
-      />
-
-      {/* Ambient Waves / Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/30 pointer-events-none"></div>
-
-      {/* Content Overlay */}
-      <div className="relative max-w-[1400px] w-full mx-auto px-6 lg:px-10 xl:px-16 flex flex-col items-center text-center z-10">
+    <section 
+      style={{
+        backgroundImage: `url(${heroImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}
+      className="relative w-[95%] max-w-[1600px] mx-auto mt-[24px] rounded-[32px] overflow-hidden flex flex-col justify-center items-center h-auto min-h-[500px] md:min-h-[560px] lg:min-h-[650px] lg:h-[650px] md:h-[560px] transition-all duration-300 p-[24px] py-[48px] md:p-[48px] lg:pt-[64px] lg:pb-[60px] lg:px-[72px] shadow-sm select-none"
+    >
+      {/* Content Overlay - Centered Vertically using flex */}
+      <div className="relative w-full max-w-[1400px] mx-auto flex flex-col items-center justify-center text-center z-10 h-full">
         
-        {/* Text Container restricted to 900px to prevent stretched text */}
-        <div className="max-w-[900px] flex flex-col items-center text-center">
-          <h1 className="font-extrabold text-[36px] sm:text-[48px] lg:text-[58px] tracking-tight leading-tight text-[#1D2B5C] mb-[32px]">
+        {/* Text Container - Centered and restricted to 720px width to prevent stretched description text */}
+        <div className="max-w-[720px] flex flex-col items-center text-center">
+          <h1 className="font-extrabold text-[36px] sm:text-[48px] lg:text-[58px] tracking-tight leading-tight text-[#1D2B5C] mb-[20px]">
             <span>More Than a Pharmacy.</span>
             <span className="text-[#038076] block mt-1">Your Partner in Better Health.</span>
           </h1>
 
-          <p style={{ color: "#2F3B52" }} className="text-[15px] sm:text-[18px] lg:text-[24px] leading-relaxed font-medium mb-[48px]">
+          <p style={{ color: "#2F3B52" }} className="text-[15px] sm:text-[18px] lg:text-[24px] leading-relaxed font-medium mb-[40px]">
             Life-saving medicines, surgical essentials, wellness products,<br className="hidden md:inline" />
             and expert support – all in one place.
           </p>
@@ -113,25 +110,25 @@ const Hero = () => {
           </button>
         </div>
 
-        {/* Bottom Badges (36px vertical margin top, gap 16px, gap between badges 32-40px) */}
-        <div className="mt-[36px] flex flex-wrap justify-center gap-x-[36px] gap-y-3 text-slate-700 font-semibold select-none">
+        {/* Bottom Badges (48px top spacing, aligned perfectly to search bar width) */}
+        <div className="mt-[48px] w-full max-w-[900px] flex flex-col sm:flex-row justify-between items-center gap-y-4 text-slate-700 font-semibold select-none">
           <div className="flex items-center gap-[16px]">
-            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white">
+            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white shrink-0">
               <Check className="w-3.5 h-3.5 stroke-[3.5]" />
             </div>
-            <span className="text-[15px]">FDA Approved Brands</span>
+            <span className="text-[15px] whitespace-nowrap">FDA Approved Brands</span>
           </div>
           <div className="flex items-center gap-[16px]">
-            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white">
+            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white shrink-0">
               <Check className="w-3.5 h-3.5 stroke-[3.5]" />
             </div>
-            <span className="text-[15px]">Next-day Delivery</span>
+            <span className="text-[15px] whitespace-nowrap">Next-day Delivery</span>
           </div>
           <div className="flex items-center gap-[16px]">
-            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white">
+            <div className="w-[22px] h-[22px] rounded-full bg-[#038076] flex items-center justify-center text-white shrink-0">
               <Check className="w-3.5 h-3.5 stroke-[3.5]" />
             </div>
-            <span className="text-[15px]">24/7 Pharmacist Support</span>
+            <span className="text-[15px] whitespace-nowrap">24/7 Pharmacist Support</span>
           </div>
         </div>
 

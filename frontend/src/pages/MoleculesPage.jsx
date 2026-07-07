@@ -72,35 +72,6 @@ const MoleculesPage = () => {
         <span className="text-[#038076] dark:text-[#a4c9ff]">Molecules</span>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#003865] via-[#004782] to-[#038076] text-white p-lg sm:p-xl md:p-xxl shadow-lg border border-[#004782]/20 mb-xl select-none">
-        <div className="relative z-10 max-w-2xl space-y-md">
-          <div className="inline-flex items-center gap-xs text-[10px] font-extrabold uppercase tracking-widest bg-white/10 px-md py-1 rounded-full border border-white/15">
-            <FlaskConical size={12} className="text-white" />
-            Active Ingredients
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Browse Medicines by Molecules
-          </h1>
-          <p className="text-sm text-slate-200 font-medium leading-relaxed max-w-xl">
-            A molecule represents the active chemical ingredient in a drug. Searching by active molecule empowers you to compare therapeutic alternatives, find generic savings, and understand exact clinical formulas.
-          </p>
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative max-w-md mb-lg">
-        <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-        <input
-          type="text"
-          placeholder="Search molecules by name or alias..."
-          value={searchVal}
-          onChange={(e) => setSearchVal(e.target.value)}
-          className="w-full pl-xl pr-md py-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl outline-none text-xs focus:ring-1 focus:ring-[#038076] focus:border-[#038076]"
-        />
-      </div>
-
       {/* Alphabet Navigation Subbar */}
       <div className="sticky top-16 bg-slate-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-30 py-sm border-b border-slate-200/60 dark:border-zinc-800/60 mb-xl flex flex-wrap gap-xs items-center select-none overflow-x-auto scrollbar-none">
         {alphabet.map((letter) => {
