@@ -15,7 +15,8 @@ import {
   Search,
   Globe,
   Handshake,
-  ArrowLeft
+  ArrowLeft,
+  MapPin
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
@@ -213,6 +214,29 @@ const DropdownMenu = ({ isOpen, onClose, items, activeIndex, setActiveIndex }) =
       el?.focus();
     }
   }, [activeIndex, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target) && !event.target.closest("button")) {
+        onClose();
+      }
+    };
+
+    const handleGlobalKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -648,6 +672,8 @@ const Navbar = () => {
   const [desktopSearchQuery, setDesktopSearchQuery] = useState("");
   const [showNavbarSearch, setShowNavbarSearch] = useState(false);
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("Pune, 411021");
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const items = useNavConfig();
 
   useEffect(() => {
@@ -688,7 +714,7 @@ const Navbar = () => {
       {/* Desktop & Mobile Navbar Container */}
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-center">
 
-        {/* Row 1: Logo & Action Buttons */}
+        {/* Row 1: Logo, Location Selector, Search, & Actions */}
         <div 
           style={{
             height: showNavbarSearch ? "72px" : "80px",
@@ -696,12 +722,13 @@ const Navbar = () => {
           }}
           className="flex items-center justify-between gap-[24px] relative z-10 w-full"
         >
-          {/* Left/Centered Brand Logo */}
-          <div className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0 z-20 flex items-center shrink-0">
+          {/* Logo & Delivery Location Selector wrapper */}
+          <div className="flex items-center gap-[24px] shrink-0">
+            {/* Left Brand Logo */}
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center group transition-all duration-180 hover:scale-[1.03] select-none cursor-pointer"
+              className="flex items-center group transition-all duration-185 hover:scale-[1.03] select-none cursor-pointer"
             >
               <img 
                 src={logoImg}
@@ -713,20 +740,59 @@ const Navbar = () => {
                 className="object-contain"
               />
             </NavLink>
+
+            {/* Delivery Address Selector (Desktop Only) */}
+            <div className="relative shrink-0 hidden md:block z-25">
+              <button
+                type="button"
+                onClick={() => setLocationMenuOpen(!locationMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 rounded-xl transition-all focus:outline-none text-left cursor-pointer border border-slate-200"
+                aria-label="Select delivery location"
+              >
+                <MapPin className="w-[18px] h-[18px] text-[#038076] shrink-0" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Deliver to</span>
+                  <span className="text-[12px] font-bold text-slate-800 mt-[2px] flex items-center gap-0.5">
+                    {selectedLocation} 
+                    <ChevronDown className={`w-[12px] h-[12px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
+                  </span>
+                </div>
+              </button>
+
+              {locationMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
+                  <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-modal-zoom-in">
+                    {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => {
+                          setSelectedLocation(loc);
+                          setLocationMenuOpen(false);
+                        }}
+                        className="w-full px-4 py-2 hover:bg-slate-50 hover:text-primary font-bold text-left transition-colors focus:outline-none"
+                      >
+                        {loc}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Desktop Search Wrapper (Morphing Search) */}
-          <div className="hidden lg:flex items-center justify-center flex-grow max-w-[520px] mx-md relative z-10">
+          {/* Desktop Search Wrapper (Morphing Search) - flex-grow / flex-1 */}
+          <div className="hidden lg:flex items-center justify-center flex-1 mx-md relative z-10">
             
             {/* Morphing Search Input styled exactly like the Hero Search Bar */}
             <div 
               style={{
-                transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1), width 280ms cubic-bezier(.22,.61,.36,1)",
+                transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1)",
                 transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                 opacity: showNavbarSearch ? 1 : 0,
-                width: showNavbarSearch ? "460px" : "500px",
               }}
-              className={`hidden lg:flex items-center bg-[#038076] border border-[#026b62] rounded-[24px] p-1.5 flex-row relative gap-2 shadow-[0_4px_12px_rgba(3,128,118,0.15)] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 ${
+              className={`hidden lg:flex items-center bg-[#038076] border border-[#026b62] rounded-[24px] p-1.5 flex-row relative gap-2 shadow-[0_4px_12px_rgba(3,128,118,0.15)] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 w-full ${
                 showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
@@ -830,7 +896,7 @@ const Navbar = () => {
             transition: "height 300ms cubic-bezier(.22,.61,.36,1)",
             height: showNavbarSearch ? "34px" : "38px"
           }}
-          className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-0 relative w-full overflow-hidden"
+          className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full"
         >
           <NavMenu />
         </div>
