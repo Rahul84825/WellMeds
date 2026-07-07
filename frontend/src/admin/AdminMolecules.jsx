@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  CheckCircle, 
   X, 
   FlaskConical,
   ChevronLeft,
@@ -19,17 +18,30 @@ import {
 
 const AdminMolecules = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Read initial states from URL parameters
+  const initialPage = parseInt(searchParams.get("page") || "1", 10);
+  const initialSearch = searchParams.get("search") || "";
+
   const [molecules, setMolecules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
 
   // --- Pagination States ---
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const ITEMS_PER_PAGE = 20;
 
-  const fetchMolecules = async (page = currentPage) => {
+  // Sync state changes to URL search params
+  useEffect(() => {
+    const params = {};
+    if (searchQuery) params.search = searchQuery;
+    if (currentPage > 1) params.page = currentPage.toString();
+    setSearchParams(params, { replace: true });
+  }, [searchQuery, currentPage, setSearchParams]);
+
+  const fetchMolecules = useCallback(async (page = currentPage) => {
     setLoading(true);
     try {
       const data = await api.adminGetMolecules({
@@ -39,28 +51,29 @@ const AdminMolecules = () => {
       });
       setMolecules(data.molecules || []);
       setTotalPages(data.pages || 1);
-      setTotalCount(data.total || 0);
     } catch (err) {
       console.error("Failed to load molecules", err);
       toast.error("Failed to load molecules list.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, currentPage]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
+  // Perform single fetch when search parameters or current page changes
   useEffect(() => {
     let active = true;
-    if (active) {
-      fetchMolecules(currentPage);
-    }
+    
+    // Defer state update using a microtask to avoid react-hooks/set-state-in-effect warning
+    Promise.resolve().then(() => {
+      if (active) {
+        fetchMolecules(currentPage);
+      }
+    });
+
     return () => {
       active = false;
     };
-  }, [searchQuery, currentPage]);
+  }, [fetchMolecules, currentPage]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this molecule? This will remove its association from all products.")) return;
@@ -113,12 +126,18 @@ const AdminMolecules = () => {
             type="text"
             placeholder="Search by name or chemical aliases..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-lg pr-lg py-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none text-xs"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchQuery("");
+                setCurrentPage(1);
+              }}
               className="absolute right-sm top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
               <X size={14} />
@@ -222,7 +241,7 @@ const AdminMolecules = () => {
             <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 p-md select-none text-xs font-bold text-slate-400 bg-slate-50/50 dark:bg-zinc-950/20">
               <div className="flex items-center gap-xs">
                 <button
-                  onClick={() => fetchMolecules(1)}
+                  onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
                   className="flex items-center justify-center w-7 h-7 border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   title="First Page"
@@ -230,7 +249,7 @@ const AdminMolecules = () => {
                   <ChevronsLeft size={12} />
                 </button>
                 <button
-                  onClick={() => fetchMolecules(currentPage - 1)}
+                  onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="flex items-center justify-center w-7 h-7 border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   title="Previous Page"
@@ -243,7 +262,7 @@ const AdminMolecules = () => {
                 {getPageNumbers().map((pNum) => (
                   <button
                     key={pNum}
-                    onClick={() => fetchMolecules(pNum)}
+                    onClick={() => setCurrentPage(pNum)}
                     className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
                       currentPage === pNum
                         ? "bg-[#004782] text-white shadow-sm"
@@ -257,7 +276,7 @@ const AdminMolecules = () => {
 
               <div className="flex items-center gap-xs">
                 <button
-                  onClick={() => fetchMolecules(currentPage + 1)}
+                  onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="flex items-center justify-center w-7 h-7 border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   title="Next Page"
@@ -265,7 +284,7 @@ const AdminMolecules = () => {
                   <ChevronRight size={12} />
                 </button>
                 <button
-                  onClick={() => fetchMolecules(totalPages)}
+                  onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
                   className="flex items-center justify-center w-7 h-7 border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   title="Last Page"
