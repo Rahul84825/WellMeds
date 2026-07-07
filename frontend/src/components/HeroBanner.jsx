@@ -21,11 +21,13 @@ const Hero = () => {
   return (
     <section className="relative overflow-visible bg-[#eaf5f2] min-h-[480px] flex items-center justify-center py-16 transition-colors duration-300 w-full border-t border-gray-100">
       {/* Background Image containing stethoscope and clipboard */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-90 pointer-events-none"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      ></div>
-      
+      <img
+  src={heroImage}
+  alt="Hero Background"
+  className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
+  draggable={false}
+/>
+
       {/* Ambient Waves / Gradients */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/30 pointer-events-none"></div>
 
@@ -35,15 +37,15 @@ const Hero = () => {
           <span className="text-[#1D2B5C] block">More Than a Pharmacy.</span>
           <span className="text-[#ffffff] block mt-1">Your Partner in Better Health.</span>
         </h1>
-        
+
         <p style={{ color: "#2F3B52" }} className="text-[16px] md:text-[18px] max-w-2xl mb-10 leading-relaxed font-medium">
           Life-saving medicines, surgical essentials, wellness products,<br className="hidden md:inline" />
           and expert support – all in one place.
         </p>
-        
+
         {/* Integrated Search & Delivery Pin Card */}
         <div className="w-full max-w-4xl bg-[#038076] rounded-[24px] shadow-[0_20px_50px_rgba(3,128,118,0.22)] p-2.5 flex flex-col md:flex-row items-center gap-3 border border-[#026b62] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 relative">
-          
+
           {/* Deliver To Section */}
           <div className="relative w-full md:w-auto shrink-0">
             <button
@@ -96,9 +98,9 @@ const Hero = () => {
             />
             <button type="submit" className="hidden" />
           </form>
-          
+
           {/* Search Button */}
-          <button 
+          <button
             type="button"
             onClick={handleHeroSearch}
             className="w-full md:w-auto bg-white text-[#038076] px-8 py-3 rounded-[16px] font-bold text-[16px] hover:bg-gray-50 transition-all duration-200 shadow-md active:scale-[0.98] shrink-0"
@@ -106,7 +108,7 @@ const Hero = () => {
             Search
           </button>
         </div>
-        
+
         {/* Bottom Badges */}
         <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-gray-700 font-semibold select-none">
           <div className="flex items-center gap-2">

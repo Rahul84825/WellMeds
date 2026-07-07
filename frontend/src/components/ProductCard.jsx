@@ -121,65 +121,70 @@ const ProductCard = ({ product }) => {
             )}
           </div>
  
-          {/* Top Right Badges Overlay */}
-          {(isRx || isColdChain) && (
-            <div className="absolute top-2 right-2 flex flex-col items-center gap-2 z-20">
-              {/* Rx Badge */}
-              {isRx && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleRxTooltip}
-                    onMouseEnter={() => setActiveTooltip("rx")}
-                    onMouseLeave={() => setActiveTooltip(null)}
-                    className="w-9 h-9 rounded-full bg-rose-50 dark:bg-rose-955/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
-                  >
-                    <span className="font-extrabold text-[11px] tracking-tight">Rx</span>
-                  </button>
-                  {activeTooltip === "rx" && (
-                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
-                      <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-rose-400">
-                        <span className="material-symbols-outlined text-[15px]">verified</span>
-                        Prescription Required
-                      </div>
-                      <div className="text-[10px] leading-relaxed text-slate-300">
-                        A valid doctor's prescription is required before this medicine can be purchased.
-                      </div>
-                      <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Cold Chain Badge */}
-              {isColdChain && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleColdChainTooltip}
-                    onMouseEnter={() => setActiveTooltip("coldChain")}
-                    onMouseLeave={() => setActiveTooltip(null)}
-                    className="w-9 h-9 rounded-full bg-sky-50 dark:bg-sky-955/40 border border-sky-200 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-9 sm:h-9"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">ac_unit</span>
-                  </button>
-                  {activeTooltip === "coldChain" && (
-                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-60 bg-slate-900 dark:bg-zinc-950 text-white rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 p-sm z-50 pointer-events-auto transition-all duration-200 origin-right animate-tooltip text-left">
-                      <div className="font-bold text-xs mb-1 flex items-center gap-1.5 text-sky-400">
-                        <span className="material-symbols-outlined text-[15px]">ac_unit</span>
-                        Temperature Controlled
-                      </div>
-                      <div className="text-[10px] leading-relaxed text-slate-300">
-                        This medicine is shipped using certified cold-chain logistics to maintain the required storage temperature throughout delivery.
-                      </div>
-                      <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-r border-t border-slate-800 dark:border-zinc-800"></div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
+
+        {/* Top Right Badges Overlay (moved outside image container to prevent overflow clipping) */}
+        {(isRx || isColdChain) && (
+          <div className="absolute top-3 right-3 flex flex-col items-center gap-2 z-20">
+            {/* Rx Badge */}
+            {isRx && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleRxTooltip}
+                  onMouseEnter={() => setActiveTooltip("rx")}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                  className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-955/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-0 min-h-0"
+                >
+                  <span className="font-extrabold text-[11px] tracking-tight">Rx</span>
+                </button>
+                
+                {/* Compact Rx Tooltip Pill */}
+                <div 
+                  style={{
+                    transform: activeTooltip === "rx" ? "translate3d(0, -4px, 0)" : "translate3d(0, 4px, 0)",
+                    pointerEvents: activeTooltip === "rx" ? "auto" : "none",
+                  }}
+                  className={`absolute bottom-full right-0 mb-2 max-w-[140px] w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-800 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center ${
+                    activeTooltip === "rx" ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-rose-400">Rx Required</span>
+                  <div className="absolute bottom-[-4px] right-[12px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-800"></div>
+                </div>
+              </div>
+            )}
+
+            {/* Cold Chain Badge */}
+            {isColdChain && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleColdChainTooltip}
+                  onMouseEnter={() => setActiveTooltip("coldChain")}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                  className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-955/40 border border-sky-200 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-0 min-h-0"
+                >
+                  <span className="material-symbols-outlined text-[16px]">ac_unit</span>
+                </button>
+
+                {/* Compact Cold Chain Tooltip Pill */}
+                <div 
+                  style={{
+                    transform: activeTooltip === "coldChain" ? "translate3d(0, -4px, 0)" : "translate3d(0, 4px, 0)",
+                    pointerEvents: activeTooltip === "coldChain" ? "auto" : "none",
+                  }}
+                  className={`absolute bottom-full right-0 mb-2 max-w-[140px] w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-800 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center ${
+                    activeTooltip === "coldChain" ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-sky-400">Keep Refrigerated</span>
+                  <div className="absolute bottom-[-4px] right-[12px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-800"></div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
  
         {/* Product Details Section */}
         <div className="pt-sm pb-xs flex-1 flex flex-col justify-between">
