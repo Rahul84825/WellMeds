@@ -6,8 +6,10 @@ import { sendSms, generateOtpCode, hashOtp } from "../services/otpService.js";
 import otpConfig from "../config/otp.js";
 
 // ─── Cookie Options ──────────────────────────────────────────────────────────
-const getCookieOptions = (expireString) => {
-  const isProduction = process.env.NODE_ENV === "production";
+const getCookieOptions = (expireString, req) => {
+  const isSecure = process.env.NODE_ENV === "production" || 
+                   (req && (req.secure || req.headers["x-forwarded-proto"] === "https"));
+
   let maxAge = 30 * 24 * 60 * 60 * 1000; // Default 30 days
   if (expireString && expireString.endsWith("d")) {
     const days = parseInt(expireString.slice(0, -1));
@@ -18,9 +20,10 @@ const getCookieOptions = (expireString) => {
   }
   return {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: isSecure,
+    sameSite: isSecure ? "none" : "lax",
     maxAge,
+    path: "/",
   };
 };
 
@@ -336,8 +339,8 @@ export const verifyOtp = async (req, res, next) => {
     await User.updateOne({ _id: user._id }, { $set: { refreshToken } });
 
     // ── Set HttpOnly cookies ──────────────────────────────────────────────────
-    res.cookie("accessToken", accessToken, getCookieOptions(process.env.JWT_EXPIRE));
-    res.cookie("refreshToken", refreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE));
+    res.cookie("accessToken", accessToken, getCookieOptions(process.env.JWT_EXPIRE, req));
+    res.cookie("refreshToken", refreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE, req));
 
     const statusCode = isNewUser ? 201 : 200;
 

@@ -4,8 +4,9 @@ import { generateRefreshToken } from "../utils/generateRefreshToken.js";
 import jwt from "jsonwebtoken";
 
 // ─── Cookie Options ──────────────────────────────────────────────────────────
-const getCookieOptions = (expireString) => {
-  const isProduction = process.env.NODE_ENV === "production";
+const getCookieOptions = (expireString, req) => {
+  const isSecure = process.env.NODE_ENV === "production" || 
+                   (req && (req.secure || req.headers["x-forwarded-proto"] === "https"));
 
   let maxAge = 30 * 24 * 60 * 60 * 1000; // Default 30 days
   if (expireString && expireString.endsWith("d")) {
@@ -18,9 +19,10 @@ const getCookieOptions = (expireString) => {
 
   return {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: isSecure,
+    sameSite: isSecure ? "none" : "lax",
     maxAge,
+    path: "/",
   };
 };
 
@@ -84,8 +86,8 @@ export const refresh = async (req, res, next) => {
     secLog("[TOKEN_REFRESH]", { userId: user._id });
 
     // Update both cookies
-    res.cookie("accessToken", newAccessToken, getCookieOptions(process.env.JWT_EXPIRE));
-    res.cookie("refreshToken", newRefreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE));
+    res.cookie("accessToken", newAccessToken, getCookieOptions(process.env.JWT_EXPIRE, req));
+    res.cookie("refreshToken", newRefreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE, req));
 
     res.status(200).json({
       success: true,

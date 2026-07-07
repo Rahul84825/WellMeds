@@ -22,7 +22,21 @@ apiInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Auto-refresh access token on 401, with guards
+// Response Interceptor: Auto-refresh access token on 401, with guards and concurrent request queueing
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 apiInstance.interceptors.response.use(
   (response) => response.data,
   async (error) => {
@@ -52,12 +66,29 @@ apiInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Guard 4: Only retry once per request
+    // Guard 5: Only retry once per request
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
+
+    if (isRefreshing) {
+      console.log(`[AUTH] Queueing concurrent request: ${originalRequest.url}`);
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      })
+        .then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiInstance(originalRequest);
+        })
+        .catch((err) => {
+          return Promise.reject(err);
+        });
+    }
+
+    isRefreshing = true;
+    console.log("[AUTH] Access token expired, initiating refresh...");
 
     try {
       // Attempt to get a new access token using the HttpOnly refresh cookie
@@ -68,12 +99,17 @@ apiInstance.interceptors.response.use(
       );
       const { token } = response.data;
 
+      console.log("[AUTH] Refresh success, retrying queued requests.");
       // Persist new access token and retry the original request
       localStorage.setItem("medishop_token", token);
       originalRequest.headers.Authorization = `Bearer ${token}`;
 
+      processQueue(null, token);
       return apiInstance(originalRequest);
     } catch (refreshError) {
+      console.error(`[AUTH] Refresh failed, logging out: ${refreshError.message}`);
+      processQueue(refreshError, null);
+
       // Refresh failed — clear local session state
       localStorage.removeItem("medishop_token");
       sessionStorage.removeItem("medishop_user");
@@ -84,6 +120,8 @@ apiInstance.interceptors.response.use(
       }
 
       return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
     }
   }
 );

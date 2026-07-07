@@ -8,8 +8,13 @@ export const AuthContext = createContext();
 const decodeJwt = (token) => {
   try {
     const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
-  } catch {
+    let base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) {
+      base64 += "=";
+    }
+    return JSON.parse(atob(base64));
+  } catch (err) {
+    console.warn("Failed to decode JWT:", err);
     return null;
   }
 };
@@ -116,6 +121,29 @@ export const AuthProvider = ({ children }) => {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
   }, []); // eslint-disable-line
+
+  // ── Synchronize Auth State Across Tabs ────────────────────────────────────
+  useEffect(() => {
+    const handleStorageChange = async (e) => {
+      if (e.key === "medishop_token") {
+        if (!e.newValue) {
+          setUser(null);
+        } else {
+          try {
+            const currentUser = await api.getCurrentUser();
+            setUser(currentUser);
+          } catch {
+            setUser(null);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   // ── Send OTP ──────────────────────────────────────────────────────────────
   const sendOtp = useCallback(async (mobile, name = "", email = "") => {
