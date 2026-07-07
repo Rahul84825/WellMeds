@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
@@ -403,8 +403,21 @@ const NavActions = ({ isShrunk }) => {
         setProfileDropdownOpen(false);
       }
     };
+
+    const handleGlobalKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setProfileDropdownOpen(false);
+        const buttonEl = document.getElementById("user-profile-menu-button");
+        if (buttonEl) buttonEl.focus();
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
   }, []);
 
   const dropdownItems = [];
@@ -604,7 +617,7 @@ const NavActions = ({ isShrunk }) => {
             id="user-profile-menu"
             role="menu"
             aria-label="User Profile Options"
-            className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50 animate-[slide-up_0.15s_ease-out]"
+            className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-[150] animate-[slide-up_0.15s_ease-out]"
           >
             <div className="px-4 py-2 border-b border-gray-100 mb-1">
               <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
@@ -668,15 +681,21 @@ const Navbar = () => {
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [desktopSearchQuery, setDesktopSearchQuery] = useState("");
-  const [showNavbarSearch, setShowNavbarSearch] = useState(false);
+  const [showNavbarSearch, setShowNavbarSearch] = useState(location.pathname !== "/");
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("Pune, 411021");
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const items = useNavConfig();
 
   useEffect(() => {
+    if (location.pathname !== "/") {
+      setShowNavbarSearch(true);
+      return;
+    }
+
     let ticking = false;
 
     const handleScroll = () => {
@@ -697,7 +716,7 @@ const Navbar = () => {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   return (
     <nav 
@@ -720,11 +739,10 @@ const Navbar = () => {
             height: showNavbarSearch ? "72px" : "80px",
             transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
           }}
-          className="flex items-center justify-between gap-[24px] relative z-10 w-full"
+          className="flex items-center justify-between gap-[24px] relative z-30 w-full"
         >
-          {/* Logo & Delivery Location Selector wrapper */}
-          <div className="flex items-center gap-[24px] shrink-0">
-            {/* Left Brand Logo */}
+          {/* Brand Logo */}
+          <div className="flex items-center shrink-0">
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
@@ -734,56 +752,16 @@ const Navbar = () => {
                 src={logoImg}
                 alt="WellMeds Logo"
                 style={{
-                  height: showNavbarSearch ? "90px" : "120px",
+                  height: showNavbarSearch ? "54px" : "64px",
                   transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
                 }}
                 className="object-contain"
               />
             </NavLink>
-
-            {/* Delivery Address Selector (Desktop Only) */}
-            <div className="relative shrink-0 hidden md:block z-25">
-              <button
-                type="button"
-                onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 rounded-xl transition-all focus:outline-none text-left cursor-pointer border border-slate-200"
-                aria-label="Select delivery location"
-              >
-                <MapPin className="w-[18px] h-[18px] text-[#038076] shrink-0" />
-                <div className="flex flex-col leading-none">
-                  <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Deliver to</span>
-                  <span className="text-[12px] font-bold text-slate-800 mt-[2px] flex items-center gap-0.5">
-                    {selectedLocation} 
-                    <ChevronDown className={`w-[12px] h-[12px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
-                  </span>
-                </div>
-              </button>
-
-              {locationMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
-                  <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-modal-zoom-in">
-                    {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
-                      <button
-                        key={loc}
-                        type="button"
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setLocationMenuOpen(false);
-                        }}
-                        className="w-full px-4 py-2 hover:bg-slate-50 hover:text-primary font-bold text-left transition-colors focus:outline-none"
-                      >
-                        {loc}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
           </div>
 
-          {/* Desktop Search Wrapper (Morphing Search) - flex-grow / flex-1 */}
-          <div className="hidden lg:flex items-center justify-center flex-1 mx-md relative z-10">
+          {/* Desktop Unified Search & Location Module (Morphing Search) - flex-grow / flex-1 */}
+          <div className="hidden lg:flex items-center justify-center flex-grow flex-1 mx-lg relative z-10">
             
             {/* Morphing Search Input styled exactly like the Hero Search Bar */}
             <div 
@@ -796,19 +774,67 @@ const Navbar = () => {
                 showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
-              <Search className="text-white/70 ml-3 shrink-0" size={18} />
-              <input
-                type="text"
-                placeholder="Search Medicines, Molecules..."
-                value={desktopSearchQuery}
-                onChange={(e) => setDesktopSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && desktopSearchQuery.trim()) {
-                    navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
-                  }
-                }}
-                className="w-full bg-transparent border-none text-xs md:text-sm outline-none text-white placeholder-white/60 focus:ring-0 focus:outline-none p-0"
-              />
+              {/* Delivery Location Selector (Desktop Only) */}
+              <div className="relative shrink-0 z-25">
+                <button
+                  type="button"
+                  onClick={() => setLocationMenuOpen(!locationMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1 text-white hover:bg-white/10 rounded-xl transition-all focus:outline-none text-left cursor-pointer"
+                  aria-label="Select delivery location"
+                >
+                  <MapPin className="w-[18px] h-[18px] text-white shrink-0" />
+                  <div className="flex flex-col leading-none select-none">
+                    <span className="text-[8px] text-white/70 uppercase font-bold tracking-wider">Deliver to</span>
+                    <span className="text-[12px] font-bold text-white mt-[2px] flex items-center gap-0.5">
+                      {selectedLocation} 
+                      <ChevronDown className={`w-[12px] h-[12px] text-white/70 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
+                    </span>
+                  </div>
+                </button>
+
+                {locationMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
+                    <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-modal-zoom-in">
+                      {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
+                        <button
+                          key={loc}
+                          type="button"
+                          onClick={() => {
+                            setSelectedLocation(loc);
+                            setLocationMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-2 hover:bg-slate-50 hover:text-primary font-bold text-left transition-colors focus:outline-none"
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Separator line (desktop) */}
+              <div className="w-px h-6 bg-white/20 shrink-0 mx-1"></div>
+
+              {/* Search Input Part */}
+              <div className="flex-1 flex items-center relative gap-2">
+                <Search className="text-white/70 ml-1 shrink-0" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search Medicines, Molecules..."
+                  value={desktopSearchQuery}
+                  onChange={(e) => setDesktopSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && desktopSearchQuery.trim()) {
+                      navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
+                    }
+                  }}
+                  className="w-full bg-transparent border-none text-xs md:text-sm outline-none text-white placeholder-white/60 focus:ring-0 focus:outline-none p-0"
+                />
+              </div>
+
+              {/* Search Button Part */}
               <button 
                 type="button"
                 onClick={() => {
