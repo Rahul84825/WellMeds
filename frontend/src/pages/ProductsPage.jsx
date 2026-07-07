@@ -258,7 +258,7 @@ const ProductsPage = () => {
           <Loader size="lg" />
         </div>
       ) : products.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md w-full">
           {products.map((prod) => (
             <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
           ))}

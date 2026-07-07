@@ -182,7 +182,7 @@ const WellnessPage = () => {
               <p className="text-xs text-slate-450 mt-1">Our top-rated nutritional supplements and personal care essentials.</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
             {featuredProducts.map((prod) => (
               <ProductCard key={prod.id || prod._id} product={prod} />
             ))}
@@ -237,7 +237,7 @@ const WellnessPage = () => {
                 Showing <span className="font-extrabold text-slate-700 dark:text-zinc-250">{showingStart}–{showingEnd}</span> of <span className="font-extrabold text-slate-700 dark:text-zinc-250">{totalProducts}</span> Wellness Products
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
               {products.map((prod) => (
                 <ProductCard key={prod.id || prod._id} product={prod} />
               ))}

@@ -1,85 +1,186 @@
-# WellMeds – Production Molecule Import Utility
+# WellMeds – Import Utilities
 
-This utility facilitates the safe, production-ready import of active pharmaceutical ingredients (molecules) from an Excel spreadsheet directly into the WellMeds MongoDB instance. 
-
----
-
-## Purpose
-- Automate import of 200+ clinical molecules into the database.
-- Keep production data 100% safe by skipping existing molecules (case-insensitive name & slug matching).
-- Automatically generate required fields: URL slugs, uppercase starting alphabetical index letter, and default SEO optimization metadata.
+Two production-grade import utilities for safely inserting data into MongoDB from Excel files.
+Both utilities are **ADD ONLY** — they never delete, update, overwrite, or modify existing documents.
 
 ---
 
 ## Folder Structure
+
 ```
 backend/
 └── scripts/
-    ├── README.md                 # This documentation
-    ├── importMolecules.js        # Main execution driver script
+    ├── README.md                      # This documentation
+    ├── importMolecules.js             # Molecule Import Utility
+    ├── importProducts.js              # Product Import Utility  ← NEW
     ├── data/
-    │   └── wellmeds-molecules.xlsx # Spreadsheet containing clinical molecules data
+    │   ├── wellmeds molecules list.xlsx   # Molecule source file
+    │   └── Product_Template.xlsx          # Product source file
     └── helpers/
-        ├── db.js                 # Safe Mongoose connection setup & teardown
-        ├── excelReader.js        # Parses Excel sheets using the `xlsx` library
-        ├── logger.js             # Colored terminal outputs for execution progress
-        └── slugify.js            # Automatically structures safe web URL slugs
+        ├── db.js                      # Shared: MongoDB connection & teardown
+        ├── excelReader.js             # Shared: molecule Excel reader
+        ├── productExcelReader.js      # Product Excel reader      ← NEW
+        ├── logger.js                  # Shared: coloured terminal logger
+        ├── slugify.js                 # Shared: URL slug generator
+        └── parser.js                  # Product data parser       ← NEW
 ```
 
 ---
 
-## Prerequisites
-The utility uses the `xlsx` library to parse spreadsheets:
-```bash
-npm install xlsx
-```
-*(This package has been pre-configured in `package.json` dependencies).*
+## 1 — Molecule Import Utility
 
----
+### Purpose
+- Bulk import active pharmaceutical ingredients (molecules) from Excel.
+- Skips duplicates by name and slug (case-insensitive).
+- Auto-generates slugs, letter index and SEO metadata.
 
-## How to Run
-Run the importer script using NPM:
+### How to Run
 ```bash
+# From backend/ directory
 npm run import:molecules
-```
-Or run the file directly with node inside the `backend` folder:
-```bash
+
+# Or directly
 node scripts/importMolecules.js
 ```
 
+### Excel Format
+Place the file at `backend/scripts/data/wellmeds-molecules.xlsx`.
+
+| Column       | Description           |
+|--------------|-----------------------|
+| Generic Name | Molecule display name |
+| URL Slug     | Optional custom slug  |
+
 ---
 
-## Expected Output
-During execution, the script will output colorized results indicating whether rows were imported, skipped, or failed:
+## 2 — Product Import Utility  (ADD ONLY)
+
+### Purpose
+- Bulk import products from a client-supplied Excel template.
+- Resolves all references: **Category**, **Molecules**, **Specialities**, **SurgicalCategory**, **Related Products**.
+- Skips duplicates by **Product Name**, **Slug**, and **SKU**.
+- Generates SEO metadata, safety cards, FAQs, composition, benefits and more.
+- **Never** modifies, deletes, or overwrites any existing product or relationship.
+
+### How to Run
+```bash
+# From backend/ directory
+npm run import:products
+
+# Or directly
+node scripts/importProducts.js
+```
+
+### Changing the Excel Filename
+Open `scripts/importProducts.js` and update line:
+```js
+const PRODUCT_EXCEL_FILENAME = "Product_Template.xlsx";
+```
+
+Place the new Excel file at `backend/scripts/data/<your-filename>.xlsx`.
+
+### Excel Column Mapping
+
+| Excel Column                          | Product Field(s)                       |
+|---------------------------------------|----------------------------------------|
+| PRODUCT NAME                          | `name`                                 |
+| URL Custom Slug                       | `slug` (auto-generated if missing)     |
+| Manufacturer                          | `manufacturer`                         |
+| Category                              | `category` (resolved to ObjectId)      |
+| Associated Molecules                  | `molecules[]` (resolved to ObjectIds)  |
+| Specialities                          | `specialities[]` (resolved)            |
+| Surgical Category                     | `surgicalCategory` (resolved)          |
+| Introduction / Description            | `description`                          |
+| Uses                                  | `medicalSections[Uses]`                |
+| Effects (How It Works)                | `medicalSections[How It Works]`        |
+| Interaction with Other Drugs          | `medicalSections[Drug Interactions]`   |
+| More Information                      | `medicalSections[More Information]`    |
+| Usage & Dosage Instructions           | `usageInstructions[]`                  |
+| Storage Instructions                  | `storageInstructions[]`                |
+| Warnings                              | `warnings[]`                           |
+| Common Side Effects                   | `sideEffects[]`                        |
+| Serious Side Effects                  | `sideEffects[]` (appended)             |
+| Safety Advice                         | `safetyCards[]`                        |
+| Safety Information Cards              | `safetyCards[]` (appended)             |
+| Patient FAQs                          | `faqs[]`                               |
+| Composition                           | `composition[]`                        |
+| Benefits                              | `benefits[]`                           |
+| Specifications                        | `specifications[]`                     |
+| Images Data                           | `imagesData[]`                         |
+| Search Engine Optimization (SEO)      | `seo` (metaTitle, metaDescription, …)  |
+| Medical References / Citations        | `references[]`                         |
+| Related Products                      | `relatedProducts[]` (resolved)         |
+| Price / MRP                           | `price`                                |
+| Original Price                        | `originalPrice`                        |
+| Stock / Quantity                      | `stock`                                |
+| SKU                                   | `sku`                                  |
+| Badge                                 | `badge`                                |
+| Product Type                          | `productType` (medicine/wellness)      |
+| requiresRx / Requires Rx              | `requiresRx`                           |
+| isColdChain / Cold Chain              | `isColdChain`                          |
+| isPrescriptionRequired                | `isPrescriptionRequired`               |
+| isImported / Is Imported              | `isImported`                           |
+| isSurgical / Is Surgical              | `isSurgical`                           |
+| inStock / In Stock                    | `inStock`                              |
+| Display Order                         | `displayOrder`                         |
+| Similar Medicine Priority             | `similarMedicinePriority`              |
+| Medicine Category                     | `medicineCategory`                     |
+| Molecule Slug                         | `moleculeSlug`                         |
+
+### Expected Output
 
 ```
-=== WellMeds Molecule Import Utility ===
+=== WellMeds Product Import Utility  (ADD ONLY) ===
 
-i Connecting to MongoDB database...
-✓ Database connected successfully.
-i Reading Excel sheet...
-✓ Read sheet "Life Saving Molecules" containing 248 rows.
-i Fetching existing molecules from database to avoid duplicate queries...
-✓ Found 5 existing molecules in database.
-⚠ Skipped: Molecule "Imatinib" already exists in database.
-✓ Inserted: Molecule "Paracetamol"
-✗ Failed: Molecule "Aspirin" - Validation error details...
+i Connecting to MongoDB…
+✓ [CONNECTED] MongoDB Connected
+i [READ] Reading Excel…
+✓ [READ] Sheet "Products" loaded — 20 data row(s) found.
+i Pre-loading reference collections…
+✓ Reference data loaded: 7 categories, 251 molecules, 1 specialities, 6 surgical categories.
+✓ Existing products in DB: 13 (all will be preserved).
+i [ROW] Processing: Bevatas 400mg Injection
+  [CATEGORY] Matched: Oncology
+  [MOLECULE] Matched: Bevacizumab
+⚠ [WARNING] Unknown Molecule: "SomeDrug"
+✓ [INSERTED] Bevatas 400mg Injection
+⚠ [SKIPPED] Product already exists (name match): Herceptin 440mg
 
-=================================
-Import Finished
-Inserted: 243
-Skipped: 5
-Failed: 0
-Execution Time: 1.45s
-=================================
+===========================================
+  Import Completed
+===========================================
+  Imported : 18
+  Skipped  : 2
+  Warnings : 1
+  Errors   : 0
+  Time     : 4.2s
+===========================================
 
-i Disconnecting from database...
+i Disconnecting from database…
 ✓ Database connection closed.
 ```
+
+### Duplicate Detection Logic
+
+Before inserting, the importer checks:
+1. **Product Name** — case-insensitive match
+2. **Slug** — exact match
+3. **SKU** — exact match (if provided)
+
+If any match is found, the row is **skipped** and logged — never overwritten.
 
 ---
 
 ## Troubleshooting
-- **Missing File Error**: If you see an error saying the Excel file is not found, verify the spreadsheet is present at `backend/scripts/data/wellmeds-molecules.xlsx` (or named `wellmeds molecules list.xlsx`).
-- **Database Connection Failure**: Ensure your `.env` contains a valid `MONGODB_URI` definition matching your MongoDB Atlas or local deployment connection string.
-- **Validation Errors**: The importer handles individual row validation errors without stopping execution. Any failed rows will be summarized in the output report.
+
+| Error | Resolution |
+|-------|-----------|
+| Excel file not found | Check `backend/scripts/data/` contains the file named exactly as configured in `PRODUCT_EXCEL_FILENAME` |
+| Unknown Category / Molecule / Speciality | The referenced name does not exist in MongoDB. Create it first or check spelling. |
+| Database Connection Failure | Ensure `.env` has a valid `MONGODB_URI` pointing to Atlas or local MongoDB |
+| Validation Errors | Per-row errors are caught and logged. The import continues with remaining rows. |
+| Product skipped unexpectedly | Check if the product already exists in the DB (name, slug, or SKU match) |
+
+---
+
+> **Safety guarantee**: Both importers are strictly `INSERT` utilities. They contain no `deleteOne`, `deleteMany`, `findOneAndReplace`, `drop`, `remove`, or bulk-delete operations anywhere in their codebase.

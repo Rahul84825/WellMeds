@@ -10,7 +10,8 @@
     "seed": "node seed.js",
     "seed-admin": "node seeds/seedAdmin.js",
     "seed:product-info": "node src/seeds/seedProductInformation.js",
-    "import:molecules": "node scripts/importMolecules.js"
+    "import:molecules": "node scripts/importMolecules.js",
+    "import:products": "node scripts/importProducts.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

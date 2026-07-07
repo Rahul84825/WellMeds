@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
@@ -8,6 +8,7 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const [rxUploadOpen, setRxUploadOpen] = useState(false);
   const [localRxFile, setLocalRxFile] = useState(null);
@@ -25,6 +26,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (product.inStock === false || product.stock === 0) return;
     
     if (product.requiresRx && !localRxFile) {
@@ -85,174 +87,165 @@ const ProductCard = ({ product }) => {
     setActiveTooltip(activeTooltip === "coldChain" ? null : "coldChain");
   };
 
+  const handleCardClick = (e) => {
+    navigate(`/products/${product.slug || productId}`);
+  };
+
   return (
     <>
       <div 
-        role="group"
+        role="button"
+        tabIndex="0"
+        onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardClick(e);
+          }
+        }}
         aria-label={`Product card for ${product.name}`}
-        className="group relative bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-sm sm:p-md flex flex-col justify-between h-full transition-all duration-300 md:hover:shadow-xl md:hover:-translate-y-1.5 hover:border-primary/30 dark:hover:border-primary/50 select-none text-left shadow-xs"
+        className="group relative w-full max-w-[300px] mx-auto bg-white dark:bg-zinc-900 border border-[#E8EEF3] dark:border-zinc-800 rounded-[24px] p-[22px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-250 ease-out hover:-translate-y-[6px] hover:shadow-[0_20px_45px_rgba(15,79,156,0.08)] hover:border-teal-500/20 dark:hover:border-teal-500/30 cursor-pointer flex flex-col justify-between h-full select-none text-left"
       >
-        
-        {/* Product Image Section (45-50% height) */}
-        <div className="relative overflow-hidden rounded-xl bg-white dark:bg-zinc-955 flex items-center justify-center shrink-0 h-[140px] sm:h-[160px] md:h-[180px] w-full">
-          <img
-            alt={product.name}
-            className="max-h-[90%] max-w-[90%] object-contain p-1 transition-transform duration-500 md:group-hover:scale-104"
-            src={product.image}
-            loading="lazy"
-          />
-          
-          {/* Badges Stack (Vertical top-left) */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+        {/* Top Badges and Tooltips Row */}
+        <div className="flex justify-between items-start w-full mb-3 shrink-0">
+          {/* Discount Badge & Stock Status on Top Left */}
+          <div className="flex flex-col gap-1 z-10">
             {calculateDiscount() && (
-              <span className="bg-rose-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
+              <span className="bg-[#0f8f87] text-white text-[10px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm w-fit tracking-wider">
                 {calculateDiscount()}
               </span>
             )}
             {product.inStock === false || product.stock === 0 ? (
-              <span className="bg-slate-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
+              <span className="bg-slate-500 text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
                 Out of Stock
               </span>
             ) : null}
             {product.badge && product.badge !== "Rx Required" && product.badge !== "Top Rated" && product.badge !== "Low Stock" && (
-              <span className="bg-teal-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
+              <span className="bg-[#0f8f87] text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-full shadow-sm w-fit">
                 {product.badge}
               </span>
             )}
           </div>
- 
+
+          {/* Rx & Cold Chain Icons on Top Right */}
+          {(isRx || isColdChain) && (
+            <div className="flex items-center gap-2 z-20">
+              {/* Rx Badge */}
+              {isRx && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={toggleRxTooltip}
+                    onMouseEnter={() => setActiveTooltip("rx")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    className="w-10 h-10 rounded-full bg-white dark:bg-zinc-800 border border-[#E8EEF3] dark:border-zinc-700 text-rose-600 dark:text-rose-450 flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer min-w-0 min-h-0"
+                  >
+                    <span className="font-extrabold text-[12px] tracking-tight">Rx</span>
+                  </button>
+                  
+                  {/* Compact Rx Tooltip Pill */}
+                  {activeTooltip === "rx" && (
+                    <div className="absolute bottom-full right-0 mb-2 w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-850 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center">
+                      <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-rose-400">Prescription Required</span>
+                      <div className="absolute bottom-[-4px] right-[16px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-850"></div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Cold Chain Badge */}
+              {isColdChain && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={toggleColdChainTooltip}
+                    onMouseEnter={() => setActiveTooltip("coldChain")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    className="w-10 h-10 rounded-full bg-white dark:bg-zinc-800 border border-[#E8EEF3] dark:border-zinc-700 text-[#0f4f9c] dark:text-[#a4c9ff] flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer min-w-0 min-h-0"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">ac_unit</span>
+                  </button>
+
+                  {/* Compact Cold Chain Tooltip Pill */}
+                  {activeTooltip === "coldChain" && (
+                    <div className="absolute bottom-full right-0 mb-2 w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-850 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center">
+                      <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-[#a4c9ff]">Keep Refrigerated</span>
+                      <div className="absolute bottom-[-4px] right-[16px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-850"></div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Top Right Badges Overlay (moved outside image container to prevent overflow clipping) */}
-        {(isRx || isColdChain) && (
-          <div className="absolute top-3 right-3 flex flex-col items-center gap-2 z-20">
-            {/* Rx Badge */}
-            {isRx && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleRxTooltip}
-                  onMouseEnter={() => setActiveTooltip("rx")}
-                  onMouseLeave={() => setActiveTooltip(null)}
-                  className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-955/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-0 min-h-0"
-                >
-                  <span className="font-extrabold text-[11px] tracking-tight">Rx</span>
-                </button>
-                
-                {/* Compact Rx Tooltip Pill */}
-                <div 
-                  style={{
-                    transform: activeTooltip === "rx" ? "translate3d(0, -4px, 0)" : "translate3d(0, 4px, 0)",
-                    pointerEvents: activeTooltip === "rx" ? "auto" : "none",
-                  }}
-                  className={`absolute bottom-full right-0 mb-2 max-w-[140px] w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-800 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center ${
-                    activeTooltip === "rx" ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-rose-400">Rx Required</span>
-                  <div className="absolute bottom-[-4px] right-[12px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-800"></div>
-                </div>
-              </div>
-            )}
+        {/* Product Image Section */}
+        <div className="relative overflow-hidden flex items-center justify-center shrink-0 h-[180px] w-full mb-4">
+          <img
+            alt={product.name}
+            className="max-h-full max-w-full object-contain p-2 transition-transform duration-250 ease-out group-hover:scale-[1.03]"
+            src={product.image}
+            loading="lazy"
+          />
+        </div>
 
-            {/* Cold Chain Badge */}
-            {isColdChain && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleColdChainTooltip}
-                  onMouseEnter={() => setActiveTooltip("coldChain")}
-                  onMouseLeave={() => setActiveTooltip(null)}
-                  className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-955/40 border border-sky-200 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shadow-xs transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer min-w-0 min-h-0"
-                >
-                  <span className="material-symbols-outlined text-[16px]">ac_unit</span>
-                </button>
-
-                {/* Compact Cold Chain Tooltip Pill */}
-                <div 
-                  style={{
-                    transform: activeTooltip === "coldChain" ? "translate3d(0, -4px, 0)" : "translate3d(0, 4px, 0)",
-                    pointerEvents: activeTooltip === "coldChain" ? "auto" : "none",
-                  }}
-                  className={`absolute bottom-full right-0 mb-2 max-w-[140px] w-max bg-slate-900 dark:bg-zinc-950 text-white rounded-[10px] border border-slate-800 dark:border-zinc-800 px-3 py-2 shadow-md z-50 transition-all duration-200 ease-out text-center ${
-                    activeTooltip === "coldChain" ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <span className="font-medium text-[11px] leading-none block whitespace-nowrap text-sky-400">Keep Refrigerated</span>
-                  <div className="absolute bottom-[-4px] right-[12px] rotate-45 w-2 h-2 bg-slate-900 dark:bg-zinc-950 border-b border-r border-slate-800 dark:border-zinc-800"></div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
- 
-        {/* Product Details Section */}
-        <div className="pt-sm pb-xs flex-1 flex flex-col justify-between">
-          <div className="space-y-1 text-center">
-            
-            {/* Brand */}
-            <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-extrabold truncate ${product.manufacturer || product.brand ? "text-slate-400 dark:text-zinc-500" : "text-transparent select-none"}`}>
+        {/* Details and Actions */}
+        <div className="flex-1 flex flex-col justify-between">
+          <div className="text-left w-full">
+            {/* Brand / Manufacturer */}
+            <p className={`text-[10px] uppercase tracking-widest font-bold mb-1 truncate ${product.manufacturer || product.brand ? "text-[#0f4f9c]/60 dark:text-[#a4c9ff]/60" : "text-transparent select-none"}`}>
               {product.manufacturer || product.brand || "Placeholder"}
             </p>
- 
+
             {/* Product Title */}
-            <Link 
-              to={`/products/${product.slug || productId}`} 
-              aria-label={`View details for ${product.name}`}
-              className="block hover:text-primary dark:hover:text-primary-fixed-dim transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded-sm"
-            >
-              <h3 className="text-center font-extrabold text-[13px] sm:text-[14px] text-slate-800 dark:text-zinc-100 leading-snug line-clamp-2 h-10 sm:h-12 overflow-hidden hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" title={product.name}>
-                {product.name}
-              </h3>
-            </Link>
- 
-            {/* Molecule Link (Dynamic secondary navigation) */}
-            <div className="h-4 sm:h-5 flex items-center justify-center mt-1">
+            <h3 className="font-bold text-[15px] text-[#0f172a] dark:text-zinc-150 leading-snug line-clamp-2 h-[44px] overflow-hidden mb-1.5" title={product.name}>
+              {product.name}
+            </h3>
+
+            {/* Molecule Link */}
+            <div className="h-5 flex items-center mb-3">
               {molecule ? (
                 <Link 
                   to={`/molecules/${molecule.slug}`} 
                   onClick={(e) => e.stopPropagation()}
-                  aria-label={`Search other medicines containing molecule ${molecule.name}`}
-                  className="inline-block text-[9px] sm:text-[10px] font-black tracking-wider text-[#038076]/80 dark:text-[#84d6b9]/80 hover:text-[#038076] dark:hover:text-[#84d6b9] hover:underline cursor-pointer uppercase truncate max-w-full"
+                  className="text-[10px] font-bold tracking-wider text-[#0f8f87] dark:text-[#84d6b9] hover:text-[#0f4f9c] dark:hover:text-[#a4c9ff] hover:underline cursor-pointer uppercase truncate max-w-full"
                   title={molecule.name}
                 >
                   {molecule.name}
                 </Link>
               ) : (
-                <span className="text-transparent select-none text-[9px] sm:text-[10px]">-</span>
+                <span className="text-transparent select-none text-[10px]">-</span>
               )}
             </div>
           </div>
- 
-          {/* Pricing & Add to Cart */}
-          <div className="mt-3 space-y-md">
-            
+
+          <div className="w-full">
             {/* Price section */}
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="flex items-baseline justify-center gap-xs h-6">
-                <span className="text-[14px] sm:text-[15px] md:text-base font-black text-slate-800 dark:text-zinc-100">
+            <div className="flex flex-col mb-4">
+              <div className="flex items-baseline gap-2 h-6">
+                <span className="text-[18px] font-bold text-[#0f172a] dark:text-zinc-100">
                   {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && product.originalPrice > product.price ? (
-                  <span className="text-slate-400 line-through text-[10px] md:text-xs font-semibold">
+                  <span className="text-[#94a3b8] line-through text-[13px] font-semibold">
                     {formatCurrency(product.originalPrice)}
                   </span>
                 ) : null}
               </div>
               
-              {/* Savings Slot (Fixed Height to align cards) */}
-              <div className="h-4 sm:h-5 flex items-center justify-center">
+              {/* Savings Row */}
+              <div className="h-5 flex items-center">
                 {savings > 0 ? (
-                  <span className="text-emerald-600 dark:text-emerald-400 text-[9px] md:text-[10px] font-bold">
-                    You Save {formatCurrency(savings)}
+                  <span className="text-[#0f8f87] dark:text-[#84d6b9] text-[11px] font-semibold">
+                    You Save: {formatCurrency(savings)} ({calculateDiscount()})
                   </span>
                 ) : (
-                  <span className="text-transparent select-none text-[9px] md:text-[10px]">-</span>
+                  <span className="text-transparent select-none text-[11px]">-</span>
                 )}
               </div>
             </div>
- 
-            {/* Add to Cart full-width button */}
+
+            {/* Action Button */}
             <button
               onClick={handleAddToCart}
               disabled={(product.inStock === false || product.stock === 0) || isAdding}
@@ -263,43 +256,50 @@ const ProductCard = ({ product }) => {
                     ? "Upload prescription to purchase product" 
                     : `Add ${product.name} to cart`
               }
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-[#004782] to-[#038076] hover:opacity-95 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs shadow-xs hover:shadow-md hover:shadow-[#038076]/10 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer min-h-[44px]"
+              className="w-full h-[54px] bg-gradient-to-r from-[#0f4f9c] to-[#0f8f87] hover:opacity-95 text-white rounded-[16px] font-bold text-[14px] flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:shadow-[#0f8f87]/15 active:scale-[0.98] transition-all duration-250 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
             >
               {isAdding ? (
-                <RefreshCw className="animate-spin h-4 w-4" />
+                <RefreshCw className="animate-spin h-5 w-5" />
               ) : product.inStock === false || product.stock === 0 ? (
                 "Out of Stock"
               ) : isRx && !localRxFile ? (
-                "Upload Rx & Add"
+                <>
+                  <span className="material-symbols-outlined text-[18px]">upload_file</span>
+                  <span>Upload Rx & Add</span>
+                </>
               ) : (
-                "Add to Cart"
+                <>
+                  <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                  <span>Add to Cart</span>
+                </>
               )}
             </button>
- 
           </div>
         </div>
       </div>
- 
+
       {/* Prescription Upload Modal */}
-      <Modal
-        isOpen={rxUploadOpen}
-        onClose={() => setRxUploadOpen(false)}
-        title="Upload Prescription (Rx Required)"
-        maxWidth="max-w-md"
-      >
-        <div className="space-y-sm mb-md text-left">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            You are adding a regulated prescription drug: <strong className="text-on-surface">{product.name}</strong>.
-          </p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            To proceed, upload a valid medical prescription signed by a certified practitioner.
-          </p>
-        </div>
-        <PrescriptionUpload
-          onUploadSuccess={handleRxSuccess}
+      <div onClick={(e) => e.stopPropagation()}>
+        <Modal
+          isOpen={rxUploadOpen}
           onClose={() => setRxUploadOpen(false)}
-        />
-      </Modal>
+          title="Upload Prescription (Rx Required)"
+          maxWidth="max-w-md"
+        >
+          <div className="space-y-sm mb-md text-left">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              You are adding a regulated prescription drug: <strong className="text-on-surface">{product.name}</strong>.
+            </p>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              To proceed, upload a valid medical prescription signed by a certified practitioner.
+            </p>
+          </div>
+          <PrescriptionUpload
+            onUploadSuccess={handleRxSuccess}
+            onClose={() => setRxUploadOpen(false)}
+          />
+        </Modal>
+      </div>
     </>
   );
 };
