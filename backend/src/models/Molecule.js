@@ -60,9 +60,7 @@ const moleculeSchema = new mongoose.Schema(
     },
     seo: {
       metaTitle: { type: String, default: "" },
-      metaDescription: { type: String, default: "" },
-      canonicalUrl: { type: String, default: "" },
-      ogImage: { type: String, default: "" }
+      metaDescription: { type: String, default: "" }
     },
     isFeatured: {
       type: Boolean,

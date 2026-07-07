@@ -91,9 +91,7 @@ const run = async () => {
         description: "",
         seo: {
           metaTitle,
-          metaDescription,
-          canonicalUrl: "",
-          ogImage: ""
+          metaDescription
         },
         isActive: true,
         isFeatured: false,

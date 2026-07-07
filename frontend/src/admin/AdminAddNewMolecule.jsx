@@ -55,8 +55,6 @@ const AdminAddNewMolecule = () => {
   // --- SEO ---
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
-  const [canonicalUrl, setCanonicalUrl] = useState("");
-  const [ogImage, setOgImage] = useState("");
 
   // Load database molecules (for related molecules lookup) and load edit data if applicable
   useEffect(() => {
@@ -130,8 +128,6 @@ const AdminAddNewMolecule = () => {
             if (mol.seo) {
               setMetaTitle(mol.seo.metaTitle || "");
               setMetaDescription(mol.seo.metaDescription || "");
-              setCanonicalUrl(mol.seo.canonicalUrl || "");
-              setOgImage(mol.seo.ogImage || "");
             }
           }
         }
@@ -209,12 +205,9 @@ const AdminAddNewMolecule = () => {
       // Relationships
       relatedMolecules,
 
-      // SEO
       seo: {
         metaTitle: metaTitle.trim() || undefined,
-        metaDescription: metaDescription.trim() || undefined,
-        canonicalUrl: canonicalUrl.trim() || undefined,
-        ogImage: ogImage.trim() || undefined
+        metaDescription: metaDescription.trim() || undefined
       }
     };
 
@@ -663,28 +656,7 @@ const AdminAddNewMolecule = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Canonical URL</label>
-                <input
-                  type="text"
-                  value={canonicalUrl}
-                  onChange={(e) => setCanonicalUrl(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="https://wellmeds.com/molecule/paracetamol"
-                />
-              </div>
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">OpenGraph Image URL</label>
-                <input
-                  type="text"
-                  value={ogImage}
-                  onChange={(e) => setOgImage(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="https://wellmeds.com/assets/og-paracetamol.jpg"
-                />
-              </div>
-            </div>
+
           </div>
         )}
 

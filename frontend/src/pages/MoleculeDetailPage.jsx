@@ -41,6 +41,42 @@ const MoleculeDetailPage = () => {
           }
           metaDesc.setAttribute("content", data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`);
           
+          // 4. Canonical Link (Dynamic from slug)
+          let canonical = document.querySelector("link[rel='canonical']");
+          if (!canonical) {
+            canonical = document.createElement("link");
+            canonical.setAttribute("rel", "canonical");
+            document.head.appendChild(canonical);
+          }
+          canonical.setAttribute("href", `https://wellmeds.com/molecules/${data.slug}`);
+
+          // 5. OpenGraph & Twitter Tags (Using default og-default.jpg)
+          const ogTags = {
+            "og:title": data.seo?.metaTitle || data.name,
+            "og:description": data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`,
+            "og:image": "/og-default.jpg",
+            "og:url": `https://wellmeds.com/molecules/${data.slug}`,
+            "og:type": "website",
+            "twitter:card": "summary_large_image",
+            "twitter:title": data.seo?.metaTitle || data.name,
+            "twitter:description": data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`,
+            "twitter:image": "/og-default.jpg"
+          };
+
+          Object.entries(ogTags).forEach(([property, content]) => {
+            let tag = document.querySelector(`meta[property='${property}']`) || document.querySelector(`meta[name='${property}']`);
+            if (!tag) {
+              tag = document.createElement("meta");
+              if (property.startsWith("og:")) {
+                tag.setAttribute("property", property);
+              } else {
+                tag.setAttribute("name", property);
+              }
+              document.head.appendChild(tag);
+            }
+            tag.setAttribute("content", content);
+          });
+
           // Fetch products dynamically containing this molecule
           fetchProducts(data._id || data.id);
         }
