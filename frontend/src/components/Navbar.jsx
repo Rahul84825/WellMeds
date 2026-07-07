@@ -245,9 +245,9 @@ const DropdownMenu = ({ isOpen, onClose, items, activeIndex, setActiveIndex }) =
       ref={menuRef}
       role="menu"
       onKeyDown={handleKeyDown}
-      className="absolute left-0 top-full z-50 mt-2 min-w-[220px] rounded-xl
-                 border border-gray-100 bg-white py-2 shadow-lg
-                 animate-in fade-in slide-in-from-top-1 duration-150"
+      className="absolute left-0 top-full z-50 mt-2 min-w-[220px] rounded-2xl
+                 border border-slate-100 bg-white p-2 shadow-[0_12px_36px_rgba(0,0,0,0.08)]
+                 animate-in fade-in slide-in-from-top-2 duration-200"
     >
       {items.map((child, idx) => (
         <Link
@@ -255,9 +255,9 @@ const DropdownMenu = ({ isOpen, onClose, items, activeIndex, setActiveIndex }) =
           to={child.to}
           role="menuitem"
           tabIndex={idx === activeIndex ? 0 : -1}
-          className="block px-4 py-2.5 text-[14px] font-medium text-gray-700
-                     transition-colors duration-150 hover:bg-gray-50
-                     hover:text-[#004782] focus:bg-gray-50 focus:text-[#004782]
+          className="block px-4 py-2 text-[14px] font-semibold text-slate-700
+                     rounded-xl transition-all duration-150 hover:bg-slate-50
+                     hover:text-[#038076] focus:bg-slate-50 focus:text-[#038076]
                      focus:outline-none"
         >
           {child.label}
@@ -319,15 +319,15 @@ const DropdownNavItem = ({ item }) => {
         onKeyDown={handleKeyDown}
         aria-haspopup="true"
         aria-expanded={open}
-        className="flex items-center gap-2 text-[18px] font-medium text-gray-900
-                   tracking-normal py-2 px-2 leading-none
-                    transition-colors duration-200 hover:text-[#004782]
-                    focus:text-[#004782] focus:outline-none"
+        className="flex items-center gap-2 text-[17px] font-medium text-slate-800
+                   tracking-normal py-2 px-2 leading-none cursor-pointer
+                    transition-colors duration-200 hover:text-[#038076]
+                    focus:text-[#038076] focus:outline-none"
       >
         <span>{item.label}</span>
         <NavBadge badge={item.badge} />
         <ChevronDown
-          className={`h-[16px] w-[16px] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`h-[16px] w-[16px] text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -348,10 +348,10 @@ const DropdownNavItem = ({ item }) => {
 const LinkNavItem = ({ item }) => (
   <Link
     to={item.to}
-    className="flex items-center gap-2 text-[18px] font-medium text-gray-900
-               tracking-normal py-2 px-2 leading-none
-                transition-colors duration-200 hover:text-[#004782]
-                focus:text-[#004782] focus:outline-none"
+    className="flex items-center gap-2 text-[17px] font-medium text-slate-800
+               tracking-normal py-2 px-2 leading-none cursor-pointer
+                transition-colors duration-200 hover:text-[#038076]
+                focus:text-[#038076] focus:outline-none"
   >
     <span>{item.label}</span>
     <NavBadge badge={item.badge} />
@@ -365,7 +365,7 @@ const NavMenu = () => {
   const items = useNavConfig();
 
   return (
-    <div className="flex h-full items-center justify-center gap-10 lg:gap-12 xl:gap-14">
+    <div className="flex h-full items-center justify-center gap-x-[48px] lg:gap-x-[56px]">
       {items.map((item) =>
         item.type === "dropdown" ? (
           <DropdownNavItem key={item.id} item={item} />
@@ -723,23 +723,16 @@ const Navbar = () => {
       style={{
         backgroundColor: "rgba(255,255,255,0.88)",
         backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
+        WebkitBackdropFilter: "blur(18px)"
       }}
-      className={`w-full border-b border-slate-150 sticky top-0 z-[100] flex-shrink-0 ${
-        showNavbarSearch ? "h-[86px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]" : "h-[95px] shadow-sm"
-      }`}
+      className="w-full border-b border-slate-150 sticky top-0 z-[100] flex-shrink-0 h-[128px] shadow-sm bg-white/90 backdrop-blur-md"
     >
       {/* Desktop & Mobile Navbar Container */}
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-center">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-center">
 
         {/* Row 1: Logo, Location Selector, Search, & Actions */}
         <div 
-          style={{
-            height: showNavbarSearch ? "58px" : "64px",
-            transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
-          }}
-          className="flex items-center justify-between gap-[24px] relative z-30 w-full"
+          className="flex items-center justify-between gap-[24px] relative z-30 w-full h-[72px]"
         >
           {/* Brand Logo */}
           <div className="flex items-center shrink-0">
@@ -752,8 +745,7 @@ const Navbar = () => {
                 src={logoImg}
                 alt="WellMeds Logo"
                 style={{
-                  height: showNavbarSearch ? "90px" : "120px",
-                  transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
+                  height: "50px"
                 }}
                 className="object-contain"
               />
@@ -770,7 +762,7 @@ const Navbar = () => {
                 transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                 opacity: showNavbarSearch ? 1 : 0,
               }}
-              className={`hidden lg:flex items-center bg-[#038076] border border-[#026b62] rounded-[24px] p-1.5 flex-row relative gap-2 shadow-[0_4px_12px_rgba(3,128,118,0.15)] focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 transition-all duration-300 w-full ${
+              className={`hidden lg:flex items-center bg-white border border-slate-200 rounded-full p-1.5 flex-row relative gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
                 showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
@@ -779,15 +771,15 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-1 text-white hover:bg-white/10 rounded-xl transition-all focus:outline-none text-left cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-1 text-slate-700 hover:bg-slate-50 rounded-full transition-all focus:outline-none text-left cursor-pointer"
                   aria-label="Select delivery location"
                 >
-                  <MapPin className="w-[18px] h-[18px] text-white shrink-0" />
+                  <MapPin className="w-[18px] h-[18px] text-[#038076] shrink-0" />
                   <div className="flex flex-col leading-none select-none">
-                    <span className="text-[8px] text-white/70 uppercase font-bold tracking-wider">Deliver to</span>
-                    <span className="text-[12px] font-bold text-white mt-[2px] flex items-center gap-0.5">
+                    <span className="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Deliver to</span>
+                    <span className="text-[12px] font-extrabold text-slate-800 mt-[2px] flex items-center gap-0.5">
                       {selectedLocation} 
-                      <ChevronDown className={`w-[12px] h-[12px] text-white/70 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`w-[12px] h-[12px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
                     </span>
                   </div>
                 </button>
@@ -804,7 +796,7 @@ const Navbar = () => {
                             setSelectedLocation(loc);
                             setLocationMenuOpen(false);
                           }}
-                          className="w-full px-4 py-2 hover:bg-slate-50 hover:text-primary font-bold text-left transition-colors focus:outline-none"
+                          className="w-full px-4 py-2 hover:bg-slate-50 hover:text-[#038076] font-bold text-left transition-colors focus:outline-none cursor-pointer"
                         >
                           {loc}
                         </button>
@@ -815,11 +807,11 @@ const Navbar = () => {
               </div>
 
               {/* Separator line (desktop) */}
-              <div className="w-px h-6 bg-white/20 shrink-0 mx-1"></div>
+              <div className="w-px h-6 bg-slate-200 shrink-0 mx-1"></div>
 
               {/* Search Input Part */}
               <div className="flex-1 flex items-center relative gap-2">
-                <Search className="text-white/70 ml-1 shrink-0" size={16} />
+                <Search className="text-slate-400 ml-1 shrink-0" size={16} />
                 <input
                   type="text"
                   placeholder="Search Medicines, Molecules..."
@@ -830,7 +822,7 @@ const Navbar = () => {
                       navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
                     }
                   }}
-                  className="w-full bg-transparent border-none text-xs md:text-sm outline-none text-white placeholder-white/60 focus:ring-0 focus:outline-none p-0"
+                  className="w-full bg-transparent border-none text-xs md:text-sm outline-none text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none p-0 font-medium"
                 />
               </div>
 
@@ -842,7 +834,7 @@ const Navbar = () => {
                     navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
                   }
                 }}
-                className="bg-white text-[#038076] px-5 py-1.5 rounded-[16px] font-bold text-xs hover:bg-gray-50 active:scale-[0.97] transition-all shrink-0 shadow-sm"
+                className="bg-[#038076] text-white px-5 py-2 rounded-full font-bold text-xs hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer"
               >
                 Search
               </button>
@@ -918,11 +910,7 @@ const Navbar = () => {
 
         {/* Row 2: Centered Navigation Menu (Desktop Only) - Always Visible */}
         <div 
-          style={{
-            transition: "height 300ms cubic-bezier(.22,.61,.36,1)",
-            height: showNavbarSearch ? "28px" : "31px"
-          }}
-          className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full"
+          className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[56px] py-[18px]"
         >
           <NavMenu />
         </div>
