@@ -33,7 +33,7 @@ const Hero = () => {
       <div className="relative max-w-[1440px] w-full mx-auto px-6 lg:px-10 xl:px-16 flex flex-col items-center text-center z-10">
         <h1 className="font-bold text-[36px] md:text-[48px] tracking-tight leading-tight text-center max-w-3xl mb-4">
           <span className="text-[#1D2B5C] block">More Than a Pharmacy.</span>
-          <span className="text-[#00796B] block mt-1">Your Partner in Better Health.</span>
+          <span className="text-[#ffffff] block mt-1">Your Partner in Better Health.</span>
         </h1>
         
         <p style={{ color: "#2F3B52" }} className="text-[16px] md:text-[18px] max-w-2xl mb-10 leading-relaxed font-medium">

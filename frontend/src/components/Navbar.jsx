@@ -707,7 +707,7 @@ const Navbar = () => {
                 src={logoImg}
                 alt="WellMeds Logo"
                 style={{
-                  height: showNavbarSearch ? "54px" : "64px",
+                  height: showNavbarSearch ? "90px" : "120px",
                   transition: "height 300ms cubic-bezier(.22,.61,.36,1)"
                 }}
                 className="object-contain"
