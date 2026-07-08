@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
@@ -51,6 +51,92 @@ const AdminAddNewMolecule = () => {
   const [allMolecules, setAllMolecules] = useState([]);
   const [relatedMolecules, setRelatedMolecules] = useState([]);
 
+  // Search & Autocomplete States for Related Molecules
+  const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [moleculeDropdownOpen, setMoleculeDropdownOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const dropdownRef = useRef(null);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(moleculeSearchQuery);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [moleculeSearchQuery]);
+
+  // Filtered suggestions
+  const filteredSuggestions = useMemo(() => {
+    const query = debouncedSearchQuery.toLowerCase().trim();
+    return allMolecules.filter((mol) => {
+      const molId = mol.id || mol._id;
+      // Exclude already selected
+      if (relatedMolecules.includes(molId)) return false;
+      // Exclude current molecule (redundancy check)
+      if (mol._id === id || mol.id === id || mol.slug === id) return false;
+      
+      if (!query) return true;
+      const matchesName = mol.name?.toLowerCase().includes(query);
+      const matchesAlias = mol.aliases?.some((alias) => alias.toLowerCase().includes(query));
+      const matchesSlug = mol.slug?.toLowerCase().includes(query);
+      return matchesName || matchesAlias || matchesSlug;
+    });
+  }, [allMolecules, debouncedSearchQuery, relatedMolecules, id]);
+
+  // Reset focus index when suggestions change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFocusedIndex(-1);
+  }, [debouncedSearchQuery]);
+
+  // Scroll focused suggestion into view
+  useEffect(() => {
+    if (focusedIndex >= 0 && dropdownRef.current) {
+      const activeEl = dropdownRef.current.children[focusedIndex];
+      if (activeEl) {
+        activeEl.scrollIntoView({
+          block: "nearest",
+        });
+      }
+    }
+  }, [focusedIndex]);
+
+  const handleKeyDown = (e) => {
+    if (!moleculeDropdownOpen) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        setMoleculeDropdownOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (filteredSuggestions.length > 0 ? (prev + 1) % filteredSuggestions.length : -1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (filteredSuggestions.length > 0 ? (prev - 1 + filteredSuggestions.length) % filteredSuggestions.length : -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (focusedIndex >= 0 && focusedIndex < filteredSuggestions.length) {
+        const selectedMol = filteredSuggestions[focusedIndex];
+        const molId = selectedMol.id || selectedMol._id;
+        setRelatedMolecules((prev) => [...prev, molId]);
+        setMoleculeSearchQuery("");
+        setFocusedIndex(-1);
+      }
+    } else if (e.key === "Escape") {
+      setMoleculeDropdownOpen(false);
+      setFocusedIndex(-1);
+    }
+  };
+
+  const handleSelectMolecule = (molId) => {
+    setRelatedMolecules((prev) => [...prev, molId]);
+    setMoleculeSearchQuery("");
+    setFocusedIndex(-1);
+  };
+
   // --- SEO ---
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
@@ -102,6 +188,8 @@ const AdminAddNewMolecule = () => {
           }
 
           if (mol) {
+            const currentMolId = mol._id || mol.id || id;
+            setAllMolecules(molList.filter((m) => m._id !== currentMolId && m.id !== currentMolId && m.slug !== currentMolId) || []);
             setName(mol.name || "");
             setSlug(mol.slug || "");
             setLetter(mol.letter || "");
@@ -611,38 +699,89 @@ const AdminAddNewMolecule = () => {
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs space-y-md">
             <h3 className="font-bold text-sm text-slate-850 dark:text-zinc-150 border-b border-slate-100 dark:border-zinc-800 pb-xs">Related Molecules</h3>
             <p className="text-xs text-slate-400">Choose molecules related to this active ingredient (these will show on its client detail page).</p>
-            
-            {allMolecules.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-md pt-xs">
-                {allMolecules.map((mol) => {
-                  const molId = mol.id || mol._id;
-                  const isChecked = relatedMolecules.includes(molId);
-                  return (
+                        {/* Selected Molecule Badges */}
+            <div className="flex flex-wrap gap-xs pb-xs pt-xs">
+              {relatedMolecules.map((molId) => {
+                const molObj = allMolecules.find(m => (m.id || m._id) === molId);
+                if (!molObj) return null;
+                return (
+                  <span
+                    key={molId}
+                    className="inline-flex items-center gap-xs px-sm py-1 rounded-xl bg-[#038076]/10 border border-[#038076]/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-bold animate-[fade-in_0.15s_ease-out]"
+                  >
+                    {molObj.name}
                     <button
-                      key={molId}
                       type="button"
-                      onClick={() => {
-                        if (isChecked) {
-                          setRelatedMolecules(prev => prev.filter(id => id !== molId));
-                        } else {
-                          setRelatedMolecules(prev => [...prev, molId]);
-                        }
-                      }}
-                      className={`flex items-center gap-xs px-sm py-sm rounded-xl border text-left font-semibold transition-all select-none cursor-pointer ${
-                        isChecked
-                          ? "bg-[#038076]/10 border-[#038076] text-[#038076]"
-                          : "bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
-                      }`}
+                      onClick={() => setRelatedMolecules(prev => prev.filter(id => id !== molId))}
+                      className="hover:text-red-500 font-bold focus:outline-none cursor-pointer ml-1"
                     >
-                      {isChecked && <span className="font-extrabold font-mono">✓</span>}
-                      {mol.name}
+                      &times;
                     </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-slate-450 italic py-md">No other molecules found to link.</p>
-            )}
+                  </span>
+                );
+              })}
+              {relatedMolecules.length === 0 && (
+                <span className="text-[10px] text-slate-400 italic">No related molecules selected.</span>
+              )}
+            </div>
+
+            {/* Search Input for Autocomplete Dropdown */}
+            <div className="relative w-full max-w-md">
+              <input
+                type="text"
+                placeholder="Search related molecules to add..."
+                value={moleculeSearchQuery}
+                onChange={(e) => {
+                  setMoleculeSearchQuery(e.target.value);
+                  setMoleculeDropdownOpen(true);
+                }}
+                onFocus={() => setMoleculeDropdownOpen(true)}
+                onKeyDown={handleKeyDown}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+              />
+              {moleculeDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => {
+                      setMoleculeDropdownOpen(false);
+                      setFocusedIndex(-1);
+                    }}
+                  />
+                  <div 
+                    ref={dropdownRef}
+                    className="absolute left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-20 divide-y divide-slate-100 dark:divide-zinc-800 text-xs"
+                  >
+                    {filteredSuggestions.map((mol, index) => {
+                      const molId = mol.id || mol._id;
+                      const isFocused = index === focusedIndex;
+                      return (
+                        <button
+                          key={molId}
+                          type="button"
+                          onClick={() => handleSelectMolecule(molId)}
+                          className={`w-full text-left p-sm flex items-center justify-between transition-colors ${
+                            isFocused 
+                              ? "bg-[#038076]/10 text-[#038076] dark:bg-zinc-800 dark:text-[#84d6b9]" 
+                              : "hover:bg-slate-50 dark:hover:bg-zinc-855 text-slate-700 dark:text-zinc-200"
+                          }`}
+                        >
+                          <div>
+                            <span className="font-bold">{mol.name}</span>
+                            {mol.aliases && mol.aliases.length > 0 && (
+                              <span className="text-[10px] text-slate-400 ml-sm italic">({mol.aliases.join(", ")})</span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                    {filteredSuggestions.length === 0 && (
+                      <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 
