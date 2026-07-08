@@ -22,7 +22,6 @@ const CategoryCard = ({ category, index = 0 }) => {
           padding: "12px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
           alignItems: "center",
           cursor: "pointer",
           transition: "transform 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms ease, border-color 250ms ease",
@@ -47,7 +46,8 @@ const CategoryCard = ({ category, index = 0 }) => {
           className="category-img-container"
           style={{
             width: "100%",
-            height: "114px",
+            height: "0px",
+            flexGrow: 1,
             background: "#f8fafc",
             borderRadius: "14px",
             border: "1px solid #f1f5f9",
@@ -55,7 +55,6 @@ const CategoryCard = ({ category, index = 0 }) => {
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
-            flexShrink: 0,
             padding: "8px",
             boxSizing: "border-box"
           }}
@@ -155,7 +154,8 @@ const CategoryCard = ({ category, index = 0 }) => {
             border-radius: 16px !important;
           }
           .category-img-container {
-            height: 108px !important;
+            height: 0px !important;
+            flex-grow: 1 !important;
             padding: 8px !important;
             border-radius: 12px !important;
           }
