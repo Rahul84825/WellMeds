@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { api } from "../services/api";
-import apiInstance from "../services/api/api";
+import { refreshSessionToken } from "../services/api/api";
 
 export const AuthContext = createContext();
 
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }) => {
 
   // Proactive refresh timer ref
   const refreshTimerRef = useRef(null);
+  const scheduleTokenRefreshRef = useRef(null);
 
   const registerLoginCallback = useCallback((fn) => {
     onLoginCallbacks.push(fn);
@@ -68,17 +70,20 @@ export const AuthProvider = ({ children }) => {
 
     refreshTimerRef.current = setTimeout(async () => {
       try {
-        const response = await apiInstance.post("/auth/refresh", {});
-        const newToken = response.token;
-        if (newToken) {
-          localStorage.setItem("medishop_token", newToken);
-          scheduleTokenRefresh(newToken); // reschedule for the next cycle
+        const newToken = await refreshSessionToken();
+        if (newToken && scheduleTokenRefreshRef.current) {
+          scheduleTokenRefreshRef.current(newToken); // reschedule for the next cycle
         }
       } catch {
         // Silent — if refresh fails the 401 interceptor will handle it
       }
     }, refreshInMs);
   }, []);
+
+  // Sync the helper ref to avoid recursive access warning/error before declaration
+  useEffect(() => {
+    scheduleTokenRefreshRef.current = scheduleTokenRefresh;
+  }, [scheduleTokenRefresh]);
 
   // ── Session bootstrap on mount ────────────────────────────────────────────
   useEffect(() => {
@@ -89,10 +94,8 @@ export const AuthProvider = ({ children }) => {
         // Proactive refresh: if token exists but expires within 1 hour, refresh first
         if (existingToken && isTokenExpiringSoon(existingToken, 3600)) {
           try {
-            const refreshResponse = await apiInstance.post("/auth/refresh", {});
-            const freshToken = refreshResponse.token;
+            const freshToken = await refreshSessionToken();
             if (freshToken) {
-              localStorage.setItem("medishop_token", freshToken);
               scheduleTokenRefresh(freshToken);
             }
           } catch {

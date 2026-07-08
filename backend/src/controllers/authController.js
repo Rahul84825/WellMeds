@@ -44,8 +44,16 @@ const secLog = (tag, data = {}) => {
 // ─── Logout ──────────────────────────────────────────────────────────────────
 export const logout = async (req, res, next) => {
   try {
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    const isSecure = process.env.NODE_ENV === "production" || 
+                     (req && (req.secure || req.headers["x-forwarded-proto"] === "https"));
+    const clearOptions = {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: isSecure ? "none" : "lax",
+      path: "/",
+    };
+    res.clearCookie("accessToken", clearOptions);
+    res.clearCookie("refreshToken", clearOptions);
 
     if (req.user) {
       secLog("[LOGOUT]", { userId: req.user._id });
@@ -92,6 +100,7 @@ export const refresh = async (req, res, next) => {
     res.status(200).json({
       success: true,
       token: newAccessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     console.error("[AUTH][TOKEN_REFRESH][FAIL]", error.message);

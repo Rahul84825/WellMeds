@@ -349,6 +349,7 @@ export const verifyOtp = async (req, res, next) => {
       isNewUser,
       message: isNewUser ? "Account created and logged in successfully!" : "Logged in successfully!",
       token: accessToken,
+      refreshToken: refreshToken,
       user: {
         id: user._id,
         name: user.name,

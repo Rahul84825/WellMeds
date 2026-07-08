@@ -20,6 +20,9 @@ export const authService = {
     const data = await apiInstance.post("/auth/otp/verify", { mobile, otp, name, email });
     if (data.success && data.token) {
       localStorage.setItem("medishop_token", data.token);
+      if (data.refreshToken) {
+        localStorage.setItem("medishop_refresh_token", data.refreshToken);
+      }
       sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
     }
     return data.user;
@@ -39,12 +42,11 @@ export const authService = {
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.removeItem("medishop_token");
+        localStorage.removeItem("medishop_refresh_token");
         sessionStorage.removeItem("medishop_user");
         return null;
       }
-      console.warn("Session check failed:", error.message);
-      localStorage.removeItem("medishop_token");
-      sessionStorage.removeItem("medishop_user");
+      console.warn("Session check failed (network/server error):", error.message);
       return null;
     }
   },
@@ -56,6 +58,7 @@ export const authService = {
       console.warn("Server logout request failed:", error.message);
     } finally {
       localStorage.removeItem("medishop_token");
+      localStorage.removeItem("medishop_refresh_token");
       sessionStorage.removeItem("medishop_user");
     }
     return true;

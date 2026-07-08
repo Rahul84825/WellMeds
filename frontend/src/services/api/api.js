@@ -24,6 +24,7 @@ apiInstance.interceptors.request.use(
 
 // Response Interceptor: Auto-refresh access token on 401, with guards and concurrent request queueing
 let isRefreshing = false;
+let refreshPromise = null;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
@@ -35,6 +36,53 @@ const processQueue = (error, token = null) => {
     }
   });
   failedQueue = [];
+};
+
+export const refreshSessionToken = async () => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  const storedRefreshToken = localStorage.getItem("medishop_refresh_token");
+
+  refreshPromise = axios.post(
+    `${API_URL}/auth/refresh`,
+    { refreshToken: storedRefreshToken },
+    { withCredentials: true }
+  )
+    .then((response) => {
+      const { token, refreshToken } = response.data;
+      if (!token) {
+        throw new Error("No token returned from refresh response");
+      }
+      localStorage.setItem("medishop_token", token);
+      if (refreshToken) {
+        localStorage.setItem("medishop_refresh_token", refreshToken);
+      }
+      isRefreshing = false;
+      refreshPromise = null;
+      processQueue(null, token);
+      return token;
+    })
+    .catch((error) => {
+      isRefreshing = false;
+      refreshPromise = null;
+      processQueue(error, null);
+
+      const isAuthError = error.response && (error.response.status === 401 || error.response.status === 400);
+      if (isAuthError) {
+        localStorage.removeItem("medishop_token");
+        localStorage.removeItem("medishop_refresh_token");
+        sessionStorage.removeItem("medishop_user");
+        if (!window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
+      throw error;
+    });
+
+  return refreshPromise;
 };
 
 apiInstance.interceptors.response.use(
@@ -87,41 +135,13 @@ apiInstance.interceptors.response.use(
         });
     }
 
-    isRefreshing = true;
-    console.log("[AUTH] Access token expired, initiating refresh...");
-
     try {
-      // Attempt to get a new access token using the HttpOnly refresh cookie
-      const response = await axios.post(
-        `${API_URL}/auth/refresh`,
-        {},
-        { withCredentials: true }
-      );
-      const { token } = response.data;
-
-      console.log("[AUTH] Refresh success, retrying queued requests.");
-      // Persist new access token and retry the original request
-      localStorage.setItem("medishop_token", token);
-      originalRequest.headers.Authorization = `Bearer ${token}`;
-
-      processQueue(null, token);
+      console.log("[AUTH] Access token expired, initiating centralized refresh...");
+      const newToken = await refreshSessionToken();
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return apiInstance(originalRequest);
     } catch (refreshError) {
-      console.error(`[AUTH] Refresh failed, logging out: ${refreshError.message}`);
-      processQueue(refreshError, null);
-
-      // Refresh failed — clear local session state
-      localStorage.removeItem("medishop_token");
-      sessionStorage.removeItem("medishop_user");
-
-      // Only redirect to login if not already there
-      if (!window.location.pathname.startsWith("/login")) {
-        window.location.href = "/login";
-      }
-
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   }
 );
