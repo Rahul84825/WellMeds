@@ -32,13 +32,14 @@ const AddNewProduct = () => {
   const [activeTab, setActiveTab] = useState("basic");
 
   // --- Basic Info States ---
+  const [existingProduct, setExistingProduct] = useState(null);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
   const [inStock, setInStock] = useState(true);
-  const [requiresRx, setRequiresRx] = useState(false);
+  const [prepaidOnly, setPrepaidOnly] = useState(false);
   const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
   const [isColdChain, setIsColdChain] = useState(false);
   const [description, setDescription] = useState("");
@@ -99,13 +100,23 @@ const AddNewProduct = () => {
         try {
           const product = await api.getProduct(id);
           if (product) {
+            setExistingProduct(product);
             setName(product.name || "");
             setCategory(product.category?._id || product.category?.id || product.category?.name || product.category || "");
             setProductType(product.productType || "medicine");
             setPrice(product.price || "");
             setOriginalPrice(product.originalPrice || "");
-            setInStock(product.inStock !== undefined ? product.inStock : (product.stock > 0));
-            setRequiresRx(product.requiresRx || false);
+            
+            let initialInStock = true;
+            if (product.stock === 0) {
+              initialInStock = false;
+            } else if (product.inStock !== undefined) {
+              initialInStock = product.inStock;
+            } else if (product.stock !== undefined) {
+              initialInStock = product.stock > 0;
+            }
+            setInStock(initialInStock);
+            setPrepaidOnly(product.prepaidOnly || false);
             setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
             setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
@@ -409,14 +420,25 @@ const AddNewProduct = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!name || !manufacturer || !price) {
-      toast.warning("Please fill in all required fields (Name, Manufacturer, Price).");
+    if (!name || !name.trim() || !category || !price || !manufacturer || !manufacturer.trim()) {
+      toast.warning("Please fill in all required fields (Name, Category, Selling Price, Manufacturer).");
       return;
     }
 
+    const hasExistingImage = isEditMode && existingProduct && (
+      existingProduct.image ||
+      (existingProduct.images && existingProduct.images.length > 0) ||
+      (existingProduct.imagesData && existingProduct.imagesData.length > 0)
+    );
+
     const primaryImageUrl = images[primaryImageIdx] || "";
-    if (!primaryImageUrl) {
+    if (!primaryImageUrl && !hasExistingImage) {
       toast.warning("Please upload at least one image.");
+      return;
+    }
+
+    if (originalPrice && parseFloat(originalPrice) < parseFloat(price)) {
+      toast.warning("Original Price cannot be less than Selling Price.");
       return;
     }
 
@@ -441,11 +463,13 @@ const AddNewProduct = () => {
       price: parseFloat(price),
       originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
       inStock,
+      prepaidOnly,
       requiresRx: isPrescriptionRequired,
       isPrescriptionRequired,
       isColdChain,
-      image: primaryImageUrl,
-      images: images,
+      image: primaryImageUrl || (existingProduct ? existingProduct.image : ""),
+      images: images.length > 0 ? images : (existingProduct ? (existingProduct.images || []) : []),
+      imagesData: existingProduct ? existingProduct.imagesData : undefined,
       description: description.trim(),
       specialities: selectedSpecialities,
       molecules: selectedMolecules,
@@ -593,7 +617,7 @@ const AddNewProduct = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
                   <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category *</label>
                     <select
                       value={getSelectedCategoryId()}
                       onChange={(e) => setCategory(e.target.value)}
@@ -718,13 +742,13 @@ const AddNewProduct = () => {
                 </div>
 
                 <div className="space-y-xs pt-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Description</label>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Introduction</label>
                   <textarea
                     rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="Provide a quick summary. Will be converted to 'Overview' if no medical sections are created."
+                    placeholder="Provide a quick introduction summary. Will be converted to 'Overview' if no medical sections are created."
                   />
                 </div>
               </div>
@@ -736,11 +760,10 @@ const AddNewProduct = () => {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
                   <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price / MRP (₹) *</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price / MRP (₹)</label>
                     <input
                       type="number"
                       step="0.01"
-                      required
                       value={originalPrice}
                       onChange={(e) => setOriginalPrice(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
@@ -763,8 +786,8 @@ const AddNewProduct = () => {
                     <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Discount Calculator</span>
                     <span className="font-bold text-emerald-600 dark:text-emerald-450 mt-1">
                       {price && originalPrice && parseFloat(originalPrice) > parseFloat(price)
-                        ? `${Math.round(((parseFloat(originalPrice) - parseFloat(price)) / parseFloat(originalPrice)) * 105) / 105}% Discount`
-                        : "No Discount Applied"}
+                        ? `${(((parseFloat(originalPrice) - parseFloat(price)) / parseFloat(originalPrice)) * 100).toFixed(2)}% Discount`
+                        : "No Discount"}
                     </span>
                   </div>
                 </div>
@@ -784,11 +807,32 @@ const AddNewProduct = () => {
                       onChange={(e) => setInStock(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-205 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    <div className="relative w-11 h-6 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                     <span className="ml-sm font-bold text-xs text-slate-700 dark:text-zinc-200">
                       {inStock ? "IN STOCK" : "OUT OF STOCK"}
                     </span>
                   </label>
+                </div>
+
+                <div className="flex flex-col gap-xs pt-sm border-t border-slate-100 dark:border-zinc-800/80">
+                  <div className="flex items-center gap-md">
+                    <span className="font-semibold text-slate-700 dark:text-zinc-200">Prepaid Only • Non-Refundable:</span>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={prepaidOnly}
+                        onChange={(e) => setPrepaidOnly(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="relative w-11 h-6 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                      <span className="ml-sm font-bold text-xs text-slate-700 dark:text-zinc-200">
+                        {prepaidOnly ? "PREPAID ONLY" : "COD ALLOWED"}
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 dark:text-zinc-500 leading-normal mt-0.5">
+                    Requires prepaid payment. Cash on Delivery disabled. Order is non-refundable.
+                  </p>
                 </div>
               </div>
 
@@ -822,10 +866,7 @@ const AddNewProduct = () => {
                       type="checkbox"
                       id="isPrescriptionRequired"
                       checked={isPrescriptionRequired}
-                      onChange={(e) => {
-                        setIsPrescriptionRequired(e.target.checked);
-                        setRequiresRx(e.target.checked);
-                      }}
+                      onChange={(e) => setIsPrescriptionRequired(e.target.checked)}
                       className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
                     />
                     <label htmlFor="isPrescriptionRequired" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">

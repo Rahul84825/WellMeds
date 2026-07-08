@@ -4,22 +4,21 @@ import slugify from "slugify";
 
 export const getMolecules = async (req, res, next) => {
   try {
-    const { search, letter, featured } = req.query;
+    const { search, letter } = req.query;
     const query = { isActive: true };
 
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
-        { aliases: { $regex: search, $options: "i" } }
+        { aliases: { $regex: search, $options: "i" } },
+        { "seo.focusKeyword": { $regex: search, $options: "i" } },
+        { "seo.seoKeywords": { $regex: search, $options: "i" } },
+        { "seo.searchTags": { $regex: search, $options: "i" } }
       ];
     }
 
     if (letter) {
       query.letter = letter.toUpperCase();
-    }
-
-    if (featured !== undefined) {
-      query.isFeatured = featured === "true";
     }
 
     const molecules = await Molecule.find(query)
@@ -66,7 +65,10 @@ export const adminGetMolecules = async (req, res, next) => {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
-        { aliases: { $regex: search, $options: "i" } }
+        { aliases: { $regex: search, $options: "i" } },
+        { "seo.focusKeyword": { $regex: search, $options: "i" } },
+        { "seo.seoKeywords": { $regex: search, $options: "i" } },
+        { "seo.searchTags": { $regex: search, $options: "i" } }
       ];
     }
 
@@ -104,7 +106,7 @@ export const adminGetMolecules = async (req, res, next) => {
 
 export const createMolecule = async (req, res, next) => {
   try {
-    const moleculeData = req.body;
+    const { isFeatured, ...moleculeData } = req.body;
     if (!moleculeData.slug && moleculeData.name) {
       moleculeData.slug = slugify(moleculeData.name, { lower: true });
     }
@@ -121,7 +123,7 @@ export const createMolecule = async (req, res, next) => {
 export const updateMolecule = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const moleculeData = req.body;
+    const { isFeatured, ...moleculeData } = req.body;
     if (moleculeData.name) {
       moleculeData.slug = slugify(moleculeData.name, { lower: true });
       moleculeData.letter = moleculeData.name.charAt(0).toUpperCase();

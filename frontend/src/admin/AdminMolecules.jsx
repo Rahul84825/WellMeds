@@ -157,19 +157,18 @@ const AdminMolecules = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-zinc-950 text-slate-450 border-b border-slate-100 dark:border-zinc-800 font-bold select-none uppercase tracking-wider">
-                  <th className="p-md">Name</th>
-                  <th className="p-md">Slug</th>
-                  <th className="p-md text-center">Letter</th>
-                  <th className="p-md text-center">Products Count</th>
-                  <th className="p-md text-center">Featured</th>
-                  <th className="p-md text-center">Status</th>
-                  <th className="p-md text-right">Actions</th>
+                  <th className="py-md px-lg">Name</th>
+                  <th className="py-md px-lg">Slug</th>
+                  <th className="py-md px-lg text-center">Letter</th>
+                  <th className="py-md px-lg text-center">Products Count</th>
+                  <th className="py-md px-lg text-center">Status</th>
+                  <th className="py-md px-lg text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 font-medium">
                 {molecules.map((mol) => (
                   <tr key={mol.id || mol._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-850/20 transition-all">
-                    <td className="p-md">
+                    <td className="py-md px-lg">
                       <div className="space-y-xs">
                         <span className="font-extrabold text-slate-800 dark:text-zinc-150 text-xs block">{mol.name}</span>
                         {mol.aliases && mol.aliases.length > 0 && (
@@ -177,23 +176,14 @@ const AdminMolecules = () => {
                         )}
                       </div>
                     </td>
-                    <td className="p-md text-slate-500 font-mono text-[11px]">{mol.slug}</td>
-                    <td className="p-md text-center font-extrabold text-[#038076]">{mol.letter}</td>
-                    <td className="p-md text-center">
+                    <td className="py-md px-lg text-slate-500 font-mono text-[11px]">{mol.slug}</td>
+                    <td className="py-md px-lg text-center font-extrabold text-[#038076]">{mol.letter}</td>
+                    <td className="py-md px-lg text-center">
                       <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-[10px] font-bold">
                         {mol.productCount || 0}
                       </span>
                     </td>
-                    <td className="p-md text-center">
-                      <span className={`inline-flex items-center px-sm py-0.5 rounded-lg text-[10px] font-bold border ${
-                        mol.isFeatured
-                          ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600 border-amber-200/50"
-                          : "bg-slate-50 dark:bg-zinc-950 text-slate-400 border-slate-200/50"
-                      }`}>
-                        {mol.isFeatured ? "Featured" : "Standard"}
-                      </span>
-                    </td>
-                    <td className="p-md text-center">
+                    <td className="py-md px-lg text-center">
                       <span className={`inline-flex items-center gap-xs px-sm py-0.5 rounded-lg text-[10px] font-bold border ${
                         mol.isActive
                           ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border-emerald-200/50"
@@ -202,7 +192,7 @@ const AdminMolecules = () => {
                         {mol.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="p-md text-right">
+                    <td className="py-md px-lg text-right">
                       <div className="flex items-center justify-end gap-xs">
                         <button
                           onClick={() => navigate(`/admin/molecules/${mol._id || mol.id}/edit`)}

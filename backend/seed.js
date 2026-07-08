@@ -78,7 +78,6 @@ const seedDB = async () => {
         storage: "Store at room temperature away from direct sunlight and moisture. Keep out of reach of children.",
         letter: "P",
         isActive: true,
-        isFeatured: true,
         faqs: [
           { question: "Is paracetamol safe for pregnant women?", answer: "Paracetamol is generally considered the first-choice painkiller for pregnant women when used at the lowest effective dose for the shortest time." },
           { question: "Can I take paracetamol with ibuprofen?", answer: "Yes, you can take paracetamol and ibuprofen together as they work differently. However, always confirm doses and check if your other medicines contain either ingredient." }
@@ -101,7 +100,6 @@ const seedDB = async () => {
         storage: "Keep in a cool, dry place. Keep bottle tightly closed.",
         letter: "A",
         isActive: true,
-        isFeatured: true,
         faqs: [
           { question: "Why is low-dose aspirin prescribed?", answer: "Low-dose aspirin (81mg) is prescribed to reduce the risk of blood clots forming in the arteries, thereby lowering the risk of heart attacks and strokes." }
         ],
@@ -123,7 +121,6 @@ const seedDB = async () => {
         storage: "Store capsules at room temperature. Liquid suspensions should ideally be refrigerated.",
         letter: "A",
         isActive: true,
-        isFeatured: false,
         faqs: [
           { question: "Is amoxicillin effective against the common cold?", answer: "No. Amoxicillin is an antibiotic and only kills bacteria. It is completely ineffective against viruses, which cause colds, flu, and most coughs." }
         ],
@@ -145,7 +142,6 @@ const seedDB = async () => {
         storage: "Store at room temperature in a dry place.",
         letter: "C",
         isActive: true,
-        isFeatured: true,
         faqs: [
           { question: "Does cetirizine cause drowsiness?", answer: "Cetirizine is a second-generation antihistamine, which means it causes much less drowsiness than older antihistamines. However, some drowsiness can still occur in sensitive individuals." }
         ],

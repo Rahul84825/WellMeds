@@ -31,7 +31,14 @@ const MoleculeDetailPage = () => {
         const data = await api.getMolecule(slug);
         setMolecule(data);
         if (data) {
-          document.title = `${data.seo?.metaTitle || data.name} | Active Ingredient | WellMeds`;
+          const seoTitle = data.seo?.metaTitle || data.name;
+          const seoDescription = data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`;
+          const ogTitle = data.seo?.openGraphTitle || seoTitle;
+          const ogDescription = data.seo?.openGraphDescription || seoDescription;
+          const canonicalUrl = data.seo?.canonicalUrl || `https://wellmeds.com/molecules/${data.slug}`;
+          const ogImage = data.seo?.ogImage || "/og-default.jpg";
+
+          document.title = `${seoTitle} | Active Ingredient | WellMeds`;
           
           let metaDesc = document.querySelector("meta[name='description']");
           if (!metaDesc) {
@@ -39,30 +46,41 @@ const MoleculeDetailPage = () => {
             metaDesc.setAttribute("name", "description");
             document.head.appendChild(metaDesc);
           }
-          metaDesc.setAttribute("content", data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`);
+          metaDesc.setAttribute("content", seoDescription);
           
-          // 4. Canonical Link (Dynamic from slug)
+          // Keywords Meta Tag
+          if (data.seo?.seoKeywords && data.seo.seoKeywords.length > 0) {
+            let metaKeywords = document.querySelector("meta[name='keywords']");
+            if (!metaKeywords) {
+              metaKeywords = document.createElement("meta");
+              metaKeywords.setAttribute("name", "keywords");
+              document.head.appendChild(metaKeywords);
+            }
+            metaKeywords.setAttribute("content", data.seo.seoKeywords.join(", "));
+          }
+          
+          // Canonical Link
           let canonical = document.querySelector("link[rel='canonical']");
           if (!canonical) {
             canonical = document.createElement("link");
             canonical.setAttribute("rel", "canonical");
             document.head.appendChild(canonical);
           }
-          canonical.setAttribute("href", `https://wellmeds.com/molecules/${data.slug}`);
-
-          // 5. OpenGraph & Twitter Tags (Using default og-default.jpg)
+          canonical.setAttribute("href", canonicalUrl);
+ 
+          // OpenGraph & Twitter Tags
           const ogTags = {
-            "og:title": data.seo?.metaTitle || data.name,
-            "og:description": data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`,
-            "og:image": "/og-default.jpg",
+            "og:title": ogTitle,
+            "og:description": ogDescription,
+            "og:image": ogImage,
             "og:url": `https://wellmeds.com/molecules/${data.slug}`,
             "og:type": "website",
             "twitter:card": "summary_large_image",
-            "twitter:title": data.seo?.metaTitle || data.name,
-            "twitter:description": data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name} active pharmaceutical ingredient, dosage, uses, benefits, and side effects.`,
-            "twitter:image": "/og-default.jpg"
+            "twitter:title": ogTitle,
+            "twitter:description": ogDescription,
+            "twitter:image": ogImage
           };
-
+ 
           Object.entries(ogTags).forEach(([property, content]) => {
             let tag = document.querySelector(`meta[property='${property}']`) || document.querySelector(`meta[name='${property}']`);
             if (!tag) {

@@ -31,7 +31,6 @@ const AdminAddNewMolecule = () => {
   const [letter, setLetter] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
-  const [isFeatured, setIsFeatured] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
   // --- Clinical Details ---
@@ -55,6 +54,13 @@ const AdminAddNewMolecule = () => {
   // --- SEO ---
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
+  const [focusKeyword, setFocusKeyword] = useState("");
+  const [seoKeywords, setSeoKeywords] = useState([]);
+  const [canonicalUrl, setCanonicalUrl] = useState("");
+  const [openGraphTitle, setOpenGraphTitle] = useState("");
+  const [openGraphDescription, setOpenGraphDescription] = useState("");
+  const [ogImage, setOgImage] = useState("");
+  const [searchTags, setSearchTags] = useState([]);
 
   // Load database molecules (for related molecules lookup) and load edit data if applicable
   useEffect(() => {
@@ -102,7 +108,6 @@ const AdminAddNewMolecule = () => {
             setAliases(mol.aliases ? mol.aliases.join(", ") : "");
             setShortDescription(mol.shortDescription || "");
             setDescription(mol.description || "");
-            setIsFeatured(mol.isFeatured || false);
             setIsActive(mol.isActive !== undefined ? mol.isActive : true);
 
             // Clinical Details
@@ -128,6 +133,13 @@ const AdminAddNewMolecule = () => {
             if (mol.seo) {
               setMetaTitle(mol.seo.metaTitle || "");
               setMetaDescription(mol.seo.metaDescription || "");
+              setFocusKeyword(mol.seo.focusKeyword || "");
+              setSeoKeywords(mol.seo.seoKeywords || []);
+              setCanonicalUrl(mol.seo.canonicalUrl || "");
+              setOpenGraphTitle(mol.seo.openGraphTitle || "");
+              setOpenGraphDescription(mol.seo.openGraphDescription || "");
+              setOgImage(mol.seo.ogImage || "");
+              setSearchTags(mol.seo.searchTags || []);
             }
           }
         }
@@ -163,6 +175,15 @@ const AdminAddNewMolecule = () => {
     setReferences(references.map((r, idx) => idx === index ? value : r));
   };
 
+  // Handle Chips lists management
+  const removeSeoKeyword = (keywordToRemove) => {
+    setSeoKeywords(seoKeywords.filter((k) => k !== keywordToRemove));
+  };
+
+  const removeSearchTag = (tagToRemove) => {
+    setSearchTags(searchTags.filter((t) => t !== tagToRemove));
+  };
+
   // Submit Handler
   const handleSave = async (e) => {
     e.preventDefault();
@@ -185,7 +206,6 @@ const AdminAddNewMolecule = () => {
       letter: letter.trim() || name.trim().charAt(0).toUpperCase(),
       shortDescription: shortDescription.trim(),
       description: description.trim(),
-      isFeatured,
       isActive,
 
       // Clinical
@@ -207,7 +227,14 @@ const AdminAddNewMolecule = () => {
 
       seo: {
         metaTitle: metaTitle.trim() || undefined,
-        metaDescription: metaDescription.trim() || undefined
+        metaDescription: metaDescription.trim() || undefined,
+        focusKeyword: focusKeyword.trim() || undefined,
+        seoKeywords: seoKeywords,
+        canonicalUrl: canonicalUrl.trim() || undefined,
+        openGraphTitle: openGraphTitle.trim() || undefined,
+        openGraphDescription: openGraphDescription.trim() || undefined,
+        ogImage: ogImage.trim() || undefined,
+        searchTags: searchTags
       }
     };
 
@@ -366,16 +393,6 @@ const AdminAddNewMolecule = () => {
             </div>
 
             <div className="flex gap-md pt-xs select-none">
-              <label className="flex items-center gap-xs font-bold text-slate-600 dark:text-zinc-350 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isFeatured}
-                  onChange={(e) => setIsFeatured(e.target.checked)}
-                  className="w-4 h-4 rounded text-primary focus:ring-0"
-                />
-                Featured Molecule
-              </label>
-
               <label className="flex items-center gap-xs font-bold text-slate-600 dark:text-zinc-350 cursor-pointer">
                 <input
                   type="checkbox"
@@ -635,7 +652,7 @@ const AdminAddNewMolecule = () => {
             <h3 className="font-bold text-sm text-slate-850 dark:text-zinc-150 border-b border-slate-100 dark:border-zinc-800 pb-xs">SEO Metadata</h3>
             
             <div className="space-y-xs">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SEO Meta Title (Fallback is Molecule Name)</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SEO Title (Fallback is Molecule Name)</label>
               <input
                 type="text"
                 value={metaTitle}
@@ -646,7 +663,7 @@ const AdminAddNewMolecule = () => {
             </div>
 
             <div className="space-y-xs">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SEO Meta Description</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Meta Description (Fallback is Short Description)</label>
               <textarea
                 rows={3}
                 value={metaDescription}
@@ -656,6 +673,126 @@ const AdminAddNewMolecule = () => {
               />
             </div>
 
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Focus Keyword</label>
+              <input
+                type="text"
+                value={focusKeyword}
+                onChange={(e) => setFocusKeyword(e.target.value)}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                placeholder="e.g. Paracetamol"
+              />
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SEO Keywords (Press Enter to add)</label>
+              <div className="flex flex-wrap gap-xs p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus-within:bg-white focus-within:border-primary">
+                {seoKeywords.map((kw, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-[4px] px-sm py-0.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20 select-none">
+                    {kw}
+                    <button
+                      type="button"
+                      onClick={() => removeSeoKeyword(kw)}
+                      className="text-primary hover:text-red-500 font-extrabold focus:outline-none"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  placeholder="Type keyword and press Enter..."
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const val = e.target.value.trim();
+                      if (val && !seoKeywords.includes(val)) {
+                        setSeoKeywords([...seoKeywords, val]);
+                        e.target.value = "";
+                      }
+                    }
+                  }}
+                  className="flex-1 bg-transparent border-none outline-none text-xs focus:ring-0 p-0"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Canonical URL (Fallback is Current Molecule URL)</label>
+              <input
+                type="text"
+                value={canonicalUrl}
+                onChange={(e) => setCanonicalUrl(e.target.value)}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                placeholder="e.g. https://wellmeds.com/molecules/paracetamol"
+              />
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Open Graph Title (Fallback is SEO Title)</label>
+              <input
+                type="text"
+                value={openGraphTitle}
+                onChange={(e) => setOpenGraphTitle(e.target.value)}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                placeholder="e.g. Paracetamol active compound summary"
+              />
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Open Graph Description (Fallback is Meta Description)</label>
+              <textarea
+                rows={3}
+                value={openGraphDescription}
+                onChange={(e) => setOpenGraphDescription(e.target.value)}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                placeholder="Summarize the properties for social sharing previews..."
+              />
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Open Graph Image URL (Fallback is Default OG Image)</label>
+              <input
+                type="text"
+                value={ogImage}
+                onChange={(e) => setOgImage(e.target.value)}
+                className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                placeholder="e.g. https://wellmeds.com/images/paracetamol-og.jpg"
+              />
+            </div>
+
+            <div className="space-y-xs">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Search Tags (Press Enter to add)</label>
+              <div className="flex flex-wrap gap-xs p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus-within:bg-white focus-within:border-primary">
+                {searchTags.map((tag, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-[4px] px-sm py-0.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20 select-none">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeSearchTag(tag)}
+                      className="text-primary hover:text-red-500 font-extrabold focus:outline-none"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  placeholder="Type tag and press Enter..."
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const val = e.target.value.trim();
+                      if (val && !searchTags.includes(val)) {
+                        setSearchTags([...searchTags, val]);
+                        e.target.value = "";
+                      }
+                    }
+                  }}
+                  className="flex-1 bg-transparent border-none outline-none text-xs focus:ring-0 p-0"
+                />
+              </div>
+            </div>
 
           </div>
         )}

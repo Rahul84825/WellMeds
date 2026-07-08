@@ -377,7 +377,7 @@ export const getSimilarProducts = async (req, res, next) => {
       _id: { $ne: currentProduct._id },
       molecules: { $in: currentProduct.molecules }
     })
-    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules brand similarMedicinePriority displayOrder")
+    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired prepaidOnly badge molecules brand similarMedicinePriority displayOrder")
     .populate("molecules", "name slug")
     .sort({ similarMedicinePriority: -1, displayOrder: 1 })
     .limit(3);

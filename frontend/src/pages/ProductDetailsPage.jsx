@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
@@ -138,6 +138,7 @@ const ProductDetails = () => {
 
   // Reset image loading state on image change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsImageLoading(true);
   }, [activeImageIdx, slug]);
 
@@ -526,6 +527,18 @@ const ProductDetails = () => {
             <RXCard requiresRx={product.requiresRx} />
             <ColdChainCard isColdChain={product.isColdChain} />
           </div>
+
+          {/* Introduction Card */}
+          {product.description && product.description.trim() && (
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm">
+              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
+              </h2>
+              <p className="text-slate-650 dark:text-zinc-300 text-xs leading-relaxed whitespace-pre-line">
+                {product.description}
+              </p>
+            </div>
+          )}
 
           {/* Clinical Info sections */}
           <ProductTabs

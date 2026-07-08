@@ -94,7 +94,6 @@ const run = async () => {
           metaDescription
         },
         isActive: true,
-        isFeatured: false,
         aliases: [],
         uses: "",
         benefits: "",

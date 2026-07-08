@@ -1,4 +1,3 @@
-import React from "react";
 import MoleculeLink from "./MoleculeLink";
 import { Share2, ShieldCheck } from "lucide-react";
 
@@ -6,46 +5,40 @@ const ProductInfo = ({ product, handleShare }) => {
   return (
     <div className="space-y-sm text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-between h-full">
       
-      {/* Category and badges row */}
-      <div className="flex flex-wrap gap-xs items-center justify-between">
-        <div className="flex flex-wrap gap-xs items-center">
-          <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full border border-primary/10 shadow-xs">
-            {product.category?.name || product.category}
-          </span>
-          {product.requiresRx ? (
-            <span className="bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-              <ShieldCheck size={11} /> Rx Required
-            </span>
-          ) : (
-            <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
-              OTC Medicine
-            </span>
-          )}
-          {product.isColdChain && (
-            <span className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
-              <span className="material-symbols-outlined text-[13px] leading-none">ac_unit</span> Cold Chain
-            </span>
-          )}
-        </div>
-
+      {/* Product Name & Share Button Row */}
+      <div className="flex justify-between items-start gap-md">
+        <h1 className="font-headline-md text-xl md:text-2xl text-on-surface font-black leading-tight">
+          {product.name}
+        </h1>
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-850 rounded-full transition-all cursor-pointer"
+          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-850 rounded-full transition-all cursor-pointer shrink-0"
           title="Share Product"
         >
           <Share2 size={14} />
         </button>
       </div>
 
-      {/* Brand, Name, & Manufacturer details */}
-      <div className="space-y-1">
-        <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-[10px]">
-          {product.manufacturer || product.brand}
-        </p>
-        <h1 className="font-headline-md text-xl md:text-2xl text-on-surface font-black leading-tight">
-          {product.name}
-        </h1>
+      {/* Category and badges row */}
+      <div className="flex flex-wrap gap-xs items-center">
+        <span className="bg-[#004782]/10 text-primary dark:text-[#a4c9ff] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full border border-primary/10 shadow-xs">
+          {product.category?.name || product.category}
+        </span>
+        {product.requiresRx ? (
+          <span className="bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+            <ShieldCheck size={11} /> Rx Required
+          </span>
+        ) : (
+          <span className="bg-[#086b53]/10 text-secondary dark:text-[#84d6b9] text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none border border-[#086b53]/10">
+            OTC Medicine
+          </span>
+        )}
+        {product.isColdChain && (
+          <span className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[9px] font-black uppercase tracking-wider px-md py-[4px] rounded-full flex items-center gap-1 shadow-xs select-none">
+            <span className="material-symbols-outlined text-[13px] leading-none">ac_unit</span> Cold Chain
+          </span>
+        )}
       </div>
       
       {/* Salt Composition */}
@@ -59,6 +52,27 @@ const ProductInfo = ({ product, handleShare }) => {
               <MoleculeLink key={mol.slug || idx} molecule={mol} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Manufacturer */}
+      {(product.manufacturer || product.brand) && (
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
+          <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            Manufacturer
+          </span>
+          <p className="text-body-md text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-widest text-[10px]">
+            {product.manufacturer || product.brand}
+          </p>
+        </div>
+      )}
+
+      {/* Prepaid Only Notice */}
+      {product.prepaidOnly && (
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
+          <p className="text-blue-650 dark:text-blue-400 font-bold text-xs">
+            Prepaid Only. Non-Refundable.
+          </p>
         </div>
       )}
     </div>
