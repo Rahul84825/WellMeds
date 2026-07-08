@@ -55,7 +55,7 @@ const CategoryCard = ({ category, index = 0 }) => {
             justifyContent: "center",
             overflow: "hidden",
             flexShrink: 0,
-            padding: "12px",
+            padding: "0px",
             boxSizing: "border-box"
           }}
         >
@@ -66,6 +66,8 @@ const CategoryCard = ({ category, index = 0 }) => {
               loading="lazy"
               draggable={false}
               style={{
+                width: "88%",
+                height: "88%",
                 maxWidth: "100%",
                 maxHeight: "100%",
                 objectFit: "contain",
@@ -153,7 +155,7 @@ const CategoryCard = ({ category, index = 0 }) => {
           }
           .category-img-container {
             height: 108px !important;
-            padding: 10px !important;
+            padding: 0px !important;
             border-radius: 12px !important;
           }
           .category-card-name {
