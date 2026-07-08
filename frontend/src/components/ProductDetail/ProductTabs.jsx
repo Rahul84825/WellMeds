@@ -14,6 +14,7 @@ const ProductTabs = ({
         return (
           <div
             key={sec.id}
+            id={sec.id}
             ref={el => sectionRefs.current[sec.id] = el}
             className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md scroll-mt-28 transition-all hover:shadow-md text-left"
           >

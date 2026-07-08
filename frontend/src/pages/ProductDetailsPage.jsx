@@ -29,7 +29,7 @@ const ProductDetails = () => {
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [similarProducts, setSimilarProducts] = useState([]);
+  const [substituteProducts, setSubstituteProducts] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -80,28 +80,28 @@ const ProductDetails = () => {
           setRelatedProducts(related);
         }
 
-        // Similar products: fetch dynamically using matching molecules sorted by priority
+        // Substitute products: fetch dynamically using matching molecules sorted by priority
         try {
-          const similar = await api.getSimilarProducts(prod._id || prod.id);
-          if (similar && similar.length > 0) {
-            setSimilarProducts(similar);
+          const substitutes = await api.getSimilarProducts(prod._id || prod.id);
+          if (substitutes && substitutes.length > 0) {
+            setSubstituteProducts(substitutes);
           } else {
             // Fallback: same category
             const prodCatId = prod.category?._id || prod.category;
-            const similarFallback = allProds.filter(p => {
+            const fallback = allProds.filter(p => {
               const pCatId = p.category?._id || p.category;
               return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
             }).slice(0, 4);
-            setSimilarProducts(similarFallback);
+            setSubstituteProducts(fallback);
           }
         } catch (e) {
-          console.warn("Failed to fetch similar products:", e);
+          console.warn("Failed to fetch substitute products:", e);
           const prodCatId = prod.category?._id || prod.category;
-          const similarFallback = allProds.filter(p => {
+          const fallback = allProds.filter(p => {
             const pCatId = p.category?._id || p.category;
             return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
           }).slice(0, 4);
-          setSimilarProducts(similarFallback);
+          setSubstituteProducts(fallback);
         }
 
         // Update recently viewed in localStorage
@@ -408,42 +408,110 @@ const ProductDetails = () => {
   const computedSections = useMemo(() => {
     if (!product) return [];
     
-    const sections = product.medicalSections && product.medicalSections.length > 0
-      ? [...product.medicalSections]
-      : (product.description ? [{ title: "Overview", content: product.description }] : []);
+    const sections = [];
+    
+    // Normalize standard medical sections to match standard IDs
+    const medicalSecs = product.medicalSections && product.medicalSections.length > 0
+      ? JSON.parse(JSON.stringify(product.medicalSections))
+      : [];
 
+    const findAndRemoveMedSec = (titles) => {
+      const idx = medicalSecs.findIndex(s => titles.some(t => s.title.toLowerCase() === t.toLowerCase()));
+      if (idx !== -1) {
+        return medicalSecs.splice(idx, 1)[0];
+      }
+      return null;
+    };
+
+    // 1. Uses
+    const usesSec = findAndRemoveMedSec(["uses", "use"]);
+    if (usesSec) {
+      sections.push({ id: "Uses", title: "Uses", content: usesSec.content });
+    }
+
+    // 2. Composition
     if (product.composition && product.composition.length > 0) {
-      sections.push({ id: "composition", title: "Composition", type: "composition" });
-    }
-    if (product.benefits && product.benefits.length > 0) {
-      sections.push({ id: "benefits", title: "Key Benefits", type: "benefits" });
-    }
-    if (product.usageInstructions && product.usageInstructions.length > 0) {
-      sections.push({ id: "usage", title: "Usage Instructions", type: "usage" });
-    }
-    if (product.warnings && product.warnings.length > 0) {
-      sections.push({ id: "warnings", title: "Warnings & Precautions", type: "warnings" });
-    }
-    if (product.sideEffects && product.sideEffects.length > 0) {
-      sections.push({ id: "sideeffects", title: "Side Effects", type: "sideeffects" });
-    }
-    if (product.safetyCards && product.safetyCards.length > 0) {
-      sections.push({ id: "safety", title: "Safety Information", type: "safety" });
-    }
-    if (product.faqs && product.faqs.length > 0) {
-      sections.push({ id: "faqs", title: "FAQs", type: "faqs" });
-    }
-    if (product.specifications && product.specifications.length > 0) {
-      sections.push({ id: "specifications", title: "Specifications", type: "specifications" });
-    }
-    if (product.references && product.references.length > 0) {
-      sections.push({ id: "references", title: "Citations & References", type: "references" });
+      sections.push({ id: "Composition", title: "Composition", type: "composition" });
     }
 
-    return sections.map((sec, idx) => ({
-      ...sec,
-      id: sec.id || `section-${idx}`,
-    }));
+    // 3. Benefits
+    const benefitsSec = findAndRemoveMedSec(["benefits", "key benefits"]);
+    if (product.benefits && product.benefits.length > 0) {
+      sections.push({ id: "Benefits", title: "Key Benefits", type: "benefits" });
+    } else if (benefitsSec) {
+      sections.push({ id: "Benefits", title: "Key Benefits", content: benefitsSec.content });
+    }
+
+    // 4. Dosage / Usage Instructions
+    const usageSec = findAndRemoveMedSec(["dosage", "how to use", "usage instructions", "dosage instructions"]);
+    if (product.usageInstructions && product.usageInstructions.length > 0) {
+      sections.push({ id: "Dosage", title: "Usage & Dosage Instructions", type: "usage" });
+    } else if (usageSec) {
+      sections.push({ id: "Dosage", title: "Usage & Dosage Instructions", content: usageSec.content });
+    }
+
+    // 5. Warnings & Precautions
+    const warningsSec = findAndRemoveMedSec(["warnings", "warnings & precautions", "warnings and precautions"]);
+    if (product.warnings && product.warnings.length > 0) {
+      sections.push({ id: "Warnings", title: "Warnings & Precautions", type: "warnings" });
+    } else if (warningsSec) {
+      sections.push({ id: "Warnings", title: "Warnings & Precautions", content: warningsSec.content });
+    }
+
+    // 6. Side Effects
+    const sideEffectsSec = findAndRemoveMedSec(["side effects", "sideeffects"]);
+    if (product.sideEffects && product.sideEffects.length > 0) {
+      sections.push({ id: "SideEffects", title: "Side Effects", type: "sideeffects" });
+    } else if (sideEffectsSec) {
+      sections.push({ id: "SideEffects", title: "Side Effects", content: sideEffectsSec.content });
+    }
+
+    // 7. Precautions / Safety Information
+    const safetySec = findAndRemoveMedSec(["precautions", "safety information", "safety advice", "safety cards"]);
+    if (product.safetyCards && product.safetyCards.length > 0) {
+      sections.push({ id: "Precautions", title: "Safety Information", type: "safety" });
+    } else if (safetySec) {
+      sections.push({ id: "Precautions", title: "Safety Information", content: safetySec.content });
+    }
+
+    // 8. Storage
+    const storageSec = findAndRemoveMedSec(["storage", "storage conditions", "storage instructions"]);
+    if (product.storageInstructions && product.storageInstructions.length > 0) {
+      sections.push({ id: "Storage", title: "Storage Instructions", type: "storage" });
+    } else if (storageSec) {
+      sections.push({ id: "Storage", title: "Storage Instructions", content: storageSec.content });
+    }
+
+    // 9. FAQs
+    const faqsSec = findAndRemoveMedSec(["faqs", "faq", "frequently asked questions"]);
+    if (product.faqs && product.faqs.length > 0) {
+      sections.push({ id: "FAQs", title: "FAQs", type: "faqs" });
+    } else if (faqsSec) {
+      sections.push({ id: "FAQs", title: "FAQs", content: faqsSec.content });
+    }
+
+    // 10. Specifications
+    if (product.specifications && product.specifications.length > 0) {
+      sections.push({ id: "Specifications", title: "Specifications", type: "specifications" });
+    }
+
+    // 11. References
+    const referencesSec = findAndRemoveMedSec(["references", "citations & references", "citations and references", "sources"]);
+    if (product.references && product.references.length > 0) {
+      sections.push({ id: "References", title: "Citations & References", type: "references" });
+    } else if (referencesSec) {
+      sections.push({ id: "References", title: "Citations & References", content: referencesSec.content });
+    }
+
+    // Add remaining custom sections
+    medicalSecs.forEach((sec, idx) => {
+      sections.push({
+        ...sec,
+        id: sec.id || `custom-section-${idx}`,
+      });
+    });
+
+    return sections;
   }, [product]);
 
   if (loading) {
@@ -474,17 +542,19 @@ const ProductDetails = () => {
         <span className="text-slate-650 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
 
-      {/* 3-COLUMN DESKTOP LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-lg mb-xl items-start w-full">
+      {/* 3-COLUMN DESKTOP / 2-COLUMN TABLET / 1-COLUMN MOBILE LAYOUT */}
+      <div className="flex flex-col md:flex-row flex-wrap lg:flex-nowrap gap-lg mb-xl items-start w-full">
         
-        {/* LEFT SIDEBAR (22%) */}
+        {/* LEFT SIDEBAR (22% on desktop, 28% on tablet, 100% on mobile) */}
         <StickySidebar
-          similarProducts={similarProducts}
+          substituteProducts={substituteProducts}
           product={product}
+          computedSections={computedSections}
+          activeSection={activeSection}
         />
 
-        {/* CENTER CONTENT (48%) */}
-        <div className="w-full lg:w-[48%] space-y-md order-1 lg:order-2">
+        {/* CENTER CONTENT (48% on desktop, 68% on tablet, 100% on mobile) */}
+        <div className="w-full md:w-[68%] lg:w-[48%] space-y-md order-1 md:order-2 lg:order-2">
           {/* Combined Product Info & Image Gallery Card */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
             {/* Left: Product Information (60%) */}
@@ -527,7 +597,11 @@ const ProductDetails = () => {
 
           {/* Introduction Card */}
           {product.description && product.description.trim() && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm">
+            <div 
+              id="Introduction"
+              ref={el => sectionRefs.current["Introduction"] = el}
+              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+            >
               <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
               </h2>
@@ -547,7 +621,7 @@ const ProductDetails = () => {
           />
         </div>
 
-        {/* RIGHT SIDEBAR (30%) */}
+        {/* RIGHT SIDEBAR (30% on desktop, 100% on tablet/mobile) */}
         <PurchaseCard
           product={product}
           quantity={quantity}
@@ -560,11 +634,11 @@ const ProductDetails = () => {
       </div>
 
       {/* Bottom carousels */}
-      {similarProducts.length > 0 && (
+      {substituteProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Similar Products (Same Category)</h2>
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Substitute Products (Same Category)</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
-            {similarProducts.map((p) => (
+            {substituteProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
             ))}
           </div>
