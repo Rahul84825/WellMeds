@@ -55,7 +55,7 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    prepaidOnly: {
+    isNonRefundable: {
       type: Boolean,
       default: false,
     },

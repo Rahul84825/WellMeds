@@ -481,9 +481,6 @@ const ProductDetails = () => {
         <StickySidebar
           similarProducts={similarProducts}
           product={product}
-          computedSections={computedSections}
-          activeSection={activeSection}
-          sectionRefs={sectionRefs}
         />
 
         {/* CENTER CONTENT (48%) */}

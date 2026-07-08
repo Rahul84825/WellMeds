@@ -547,8 +547,8 @@ const run = async () => {
           getVal(row, ["inStock", "In Stock", "In stock"]),
           true // default true
         );
-        const prepaidOnly = toBoolean(
-          getVal(row, ["prepaidOnly", "Prepaid Only", "PrepaidOnly", "prepaid_only"]),
+        const isNonRefundable = toBoolean(
+          getVal(row, ["isNonRefundable", "nonRefundable", "Non-Refundable", "prepaidOnly", "Prepaid Only", "PrepaidOnly", "prepaid_only", "isPrepaidOnly"]),
           false // default false
         );
 
@@ -674,7 +674,7 @@ const run = async () => {
           isPrescriptionRequired,
           isImported,
           inStock,
-          prepaidOnly,
+          isNonRefundable,
 
           medicalSections,
           usageInstructions,

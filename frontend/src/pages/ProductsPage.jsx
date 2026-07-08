@@ -178,53 +178,7 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Toolbar: Search & Count */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md mb-md">
-        <div className="flex items-center gap-sm flex-wrap">
-          <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
-            {totalProducts > 0 ? (
-              <>
-                Showing <span className="font-extrabold text-slate-800 dark:text-zinc-100">{showingStart}–{showingEnd}</span> of <span className="font-extrabold text-slate-800 dark:text-zinc-100">{totalProducts}</span> Products
-              </>
-            ) : (
-              "0 Products Found"
-            )}
-          </p>
-          {/* Active category filter chip */}
-          {categoryParam && (
-            <span className="inline-flex items-center gap-xs text-[10px] font-bold text-[#038076] bg-[#038076]/8 border border-[#038076]/25 px-sm py-0.5 rounded-full">
-              {categoryParam}
-              <button
-                onClick={() => navigate("/products")}
-                className="hover:text-red-500 transition-colors"
-                aria-label="Clear category filter"
-              >
-                <X size={11} />
-              </button>
-            </span>
-          )}
-        </div>
-        
-        {/* Search Input */}
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-          <input
-            type="text"
-            placeholder="Search name, brand, description..."
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            className="w-full pl-xl pr-md py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-[#038076] rounded-xl text-xs outline-none transition-all"
-          />
-          {searchVal && (
-            <button 
-              onClick={() => setSearchVal("")}
-              className="absolute right-sm top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      </div>
+
 
       {/* Matching Molecules Widget */}
       {!loading && matchedMolecules.length > 0 && (

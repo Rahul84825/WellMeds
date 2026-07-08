@@ -5,14 +5,12 @@ import { formatCurrency } from "../../utils/currency";
 const SimilarProducts = ({ similarProducts, product }) => {
   if (!similarProducts || similarProducts.length === 0) return null;
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-md rounded-2xl shadow-xs select-none">
-      <h3 className="font-extrabold text-[11px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-zinc-800 mb-sm flex items-center gap-1.5">
-        <span className="material-symbols-outlined text-[16px] text-[#038076]">science</span>
-        Similar Medicines
-      </h3>
-      
-      <div className="space-y-sm">
-        {similarProducts.slice(0, 3).map((item) => {
+    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm lg:p-md rounded-2xl shadow-xs select-none w-full">
+      <div 
+        className="flex flex-row lg:flex-col gap-sm lg:gap-md overflow-x-auto lg:overflow-x-visible pb-sm lg:pb-0 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {similarProducts.slice(0, 4).map((item) => {
           const itemDisc = item.originalPrice && item.originalPrice > item.price
             ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
             : 0;
@@ -20,26 +18,31 @@ const SimilarProducts = ({ similarProducts, product }) => {
             <Link
               key={item.slug || item._id}
               to={`/products/${item.slug}`}
-              className="flex gap-sm p-sm rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 transition-all border border-transparent hover:border-slate-100 dark:hover:border-zinc-850"
+              className="flex items-center gap-md p-sm lg:p-md rounded-xl lg:rounded-2xl transition-all duration-150 border border-transparent hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 hover:border-[#038076] dark:hover:border-[#038076] cursor-pointer w-[80vw] sm:w-[280px] lg:w-full shrink-0 lg:shrink snap-start bg-slate-50/[0.15] dark:bg-zinc-950/20 lg:bg-transparent lg:dark:bg-transparent"
             >
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 border border-slate-100 dark:border-zinc-800 flex items-center justify-center p-0.5">
+              {/* Product Image: size ≈64px (w-16 h-16) */}
+              <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0 border border-slate-100 dark:border-zinc-800 flex items-center justify-center p-1">
                 <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
               </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
-                <div className="space-y-0.5">
-                  <p className="text-[8px] uppercase tracking-wider font-extrabold text-[#004782]/80 dark:text-[#a4c9ff]/80 truncate">
+              
+              {/* Text content */}
+              <div className="flex-1 min-w-0 flex flex-col text-left leading-[1.4]">
+                {(item.manufacturer || item.brand) && (
+                  <p className="text-[13px] font-medium text-[#004782]/80 dark:text-[#a4c9ff]/80 truncate">
                     {item.manufacturer || item.brand}
                   </p>
-                  <h4 className="font-extrabold text-[10px] text-slate-850 dark:text-zinc-200 line-clamp-1 leading-tight">
-                    {item.name}
-                  </h4>
-                </div>
-                <div className="flex items-baseline gap-xs flex-wrap">
-                  <span className="font-black text-[11px] text-slate-800 dark:text-zinc-200">
+                )}
+                
+                <h4 className="font-bold text-[17px] text-slate-850 dark:text-zinc-200 line-clamp-1 leading-[1.4] mt-[2px]">
+                  {item.name}
+                </h4>
+                
+                <div className="flex items-baseline gap-sm mt-[8px] flex-wrap">
+                  <span className="font-bold text-[17px] text-slate-800 dark:text-zinc-200 leading-none">
                     {formatCurrency(item.price)}
                   </span>
                   {itemDisc > 0 && (
-                    <span className="text-[8px] font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                       {itemDisc}% Off
                     </span>
                   )}
@@ -49,18 +52,6 @@ const SimilarProducts = ({ similarProducts, product }) => {
           );
         })}
       </div>
-
-      {product.molecules?.[0] && (
-        <div className="mt-sm pt-xs border-t border-slate-100 dark:border-zinc-800">
-          <Link
-            to={`/molecule/${product.molecules[0].slug}`}
-            className="text-[10px] font-black text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center justify-center gap-xs"
-          >
-            <span>Compare Generic Mappings</span>
-            <span className="material-symbols-outlined text-[11px] leading-none">arrow_forward</span>
-          </Link>
-        </div>
-      )}
     </div>
   );
 };
