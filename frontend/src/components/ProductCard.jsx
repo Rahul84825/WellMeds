@@ -6,6 +6,7 @@ import PrescriptionUpload from "./PrescriptionUpload";
 import { formatCurrency } from "../utils/currency";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import MiniTooltip from "./MiniTooltip";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -21,6 +22,7 @@ const ProductCard = ({ product }) => {
   const isRx       = product.isPrescriptionRequired || product.requiresRx || false;
   const isColdChain= product.isColdChain || false;
   const isOOS      = product.inStock === false || product.stock === 0;
+  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   const savings = product.originalPrice && product.originalPrice > product.price
     ? product.originalPrice - product.price : 0;
@@ -92,7 +94,7 @@ const ProductCard = ({ product }) => {
                    cursor-pointer select-none rounded-2xl border
                    border-slate-100 dark:border-zinc-800/80
                    bg-white dark:bg-zinc-900
-                   shadow-sm transition-all duration-300 overflow-hidden
+                   shadow-sm transition-all duration-300
                    md:hover:-translate-y-1.5
                    md:hover:shadow-[0_12px_32px_rgba(3,128,118,0.12)]
                    md:hover:border-[#038076]/30
@@ -103,12 +105,12 @@ const ProductCard = ({ product }) => {
         {/* ── Top accent line (teal gradient, matches hero) ── */}
         <div className="h-[3px] w-full bg-gradient-to-r from-[#004782] to-[#038076]
                         opacity-0 transition-opacity duration-300
-                        group-hover:opacity-100" />
+                        group-hover:opacity-100 rounded-t-2xl" />
 
         {/* ── Image section ── */}
         <div className="relative flex items-center justify-center overflow-hidden
                         bg-slate-50 dark:bg-zinc-950
-                        h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0">
+                        h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0 rounded-t-2xl">
           <img
             alt={product.name}
             src={product.image}
@@ -151,8 +153,8 @@ const ProductCard = ({ product }) => {
                 <button
                   type="button"
                   onClick={(e) => toggleTooltip("rx", e)}
-                  onMouseEnter={() => setActiveTooltip("rx")}
-                  onMouseLeave={() => setActiveTooltip(null)}
+                  onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("rx")}
+                  onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-8 w-8 cursor-pointer items-center justify-center
                              rounded-full border border-rose-200 bg-rose-50
                              text-rose-600 shadow-sm transition-all duration-300
@@ -161,25 +163,11 @@ const ProductCard = ({ product }) => {
                 >
                   <span className="text-[11px] font-extrabold tracking-tight">Rx</span>
                 </button>
-                <div
-                  style={{
-                    transform: activeTooltip === "rx"
-                      ? "translate3d(0,-4px,0)" : "translate3d(0,4px,0)",
-                    pointerEvents: activeTooltip === "rx" ? "auto" : "none",
-                  }}
-                  className={`absolute bottom-full right-0 z-50 mb-2 w-max
-                              max-w-[140px] rounded-[10px] border border-slate-800
-                              bg-slate-900 px-3 py-2 text-center shadow-md
-                              transition-all duration-200 ease-out
-                              dark:border-zinc-800 dark:bg-zinc-950
-                              ${activeTooltip === "rx" ? "opacity-100" : "opacity-0"}`}
-                >
-                  <span className="block whitespace-nowrap text-[11px] font-medium
-                                   leading-none text-rose-400">Rx Required</span>
-                  <div className="absolute -bottom-1 right-3 h-2 w-2 rotate-45
-                                  border-b border-r border-slate-800 bg-slate-900
-                                  dark:border-zinc-800 dark:bg-zinc-950" />
-                </div>
+                <MiniTooltip
+                  text="Prescription Only"
+                  active={activeTooltip === "rx"}
+                  textColor="text-rose-400"
+                />
               </div>
             )}
 
@@ -188,8 +176,8 @@ const ProductCard = ({ product }) => {
                 <button
                   type="button"
                   onClick={(e) => toggleTooltip("coldChain", e)}
-                  onMouseEnter={() => setActiveTooltip("coldChain")}
-                  onMouseLeave={() => setActiveTooltip(null)}
+                  onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("coldChain")}
+                  onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-8 w-8 cursor-pointer items-center justify-center
                              rounded-full border border-sky-200 bg-sky-50
                              text-sky-600 shadow-sm transition-all duration-300
@@ -198,25 +186,11 @@ const ProductCard = ({ product }) => {
                 >
                   <span className="material-symbols-outlined text-[16px]">ac_unit</span>
                 </button>
-                <div
-                  style={{
-                    transform: activeTooltip === "coldChain"
-                      ? "translate3d(0,-4px,0)" : "translate3d(0,4px,0)",
-                    pointerEvents: activeTooltip === "coldChain" ? "auto" : "none",
-                  }}
-                  className={`absolute bottom-full right-0 z-50 mb-2 w-max
-                              max-w-[140px] rounded-[10px] border border-slate-800
-                              bg-slate-900 px-3 py-2 text-center shadow-md
-                              transition-all duration-200 ease-out
-                              dark:border-zinc-800 dark:bg-zinc-950
-                              ${activeTooltip === "coldChain" ? "opacity-100" : "opacity-0"}`}
-                >
-                  <span className="block whitespace-nowrap text-[11px] font-medium
-                                   leading-none text-sky-400">Keep Refrigerated</span>
-                  <div className="absolute -bottom-1 right-3 h-2 w-2 rotate-45
-                                  border-b border-r border-slate-800 bg-slate-900
-                                  dark:border-zinc-800 dark:bg-zinc-950" />
-                </div>
+                <MiniTooltip
+                  text="Store at 2–8°C"
+                  active={activeTooltip === "coldChain"}
+                  textColor="text-sky-400"
+                />
               </div>
             )}
           </div>
