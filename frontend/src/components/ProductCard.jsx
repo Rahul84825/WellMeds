@@ -95,13 +95,9 @@ const ProductCard = ({ product }) => {
                    bg-white dark:bg-zinc-900
                    focus-visible:outline-none
                    focus-visible:ring-2 focus-visible:ring-[#038076]
+                   overflow-hidden
                    wellmeds-product-card"
       >
-
-        {/* ── Top accent line (teal gradient, matches hero) ── */}
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#004782] to-[#038076]
-                        opacity-0 transition-opacity duration-300
-                        group-hover:opacity-100 rounded-t-2xl" />
 
         {/* ── Image section ── */}
         <div className="relative flex items-center justify-center overflow-hidden
