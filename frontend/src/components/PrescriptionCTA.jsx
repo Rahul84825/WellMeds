@@ -54,7 +54,7 @@ const PrescriptionCTA = () => {
       {/* Background Pattern Grid */}
       <div className="absolute inset-0 medical-pattern opacity-30 pointer-events-none"></div>
  
-      <div className="max-w-max-width mx-auto px-margin-desktop relative z-10">
+      <div className="home-section-container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-center">
           
           {/* Left Column: 35% Width Marketing */}

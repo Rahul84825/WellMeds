@@ -107,7 +107,7 @@ const CategorySection = () => {
         style={{ background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)" }}
       >
         <div
-          className="max-w-max-width mx-auto px-margin-desktop flex justify-center items-center"
+          className="home-section-container flex justify-center items-center"
           style={{ minHeight: "220px" }}
         >
           <Loader size="md" />
@@ -129,7 +129,7 @@ const CategorySection = () => {
         paddingBottom: "64px",
       }}
     >
-      <div className="max-w-max-width mx-auto px-margin-desktop">
+      <div className="home-section-container">
 
         {/* ── Section Header ─────────────────────────────────────── */}
         <div

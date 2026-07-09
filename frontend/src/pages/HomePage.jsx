@@ -10,6 +10,7 @@ import PrescriptionCTA from "../components/PrescriptionCTA";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ConsultationModal from "../components/ConsultationModal";
+import HomeSectionContainer from "../components/layout/HomeSectionContainer";
 
 const HomePage = () => {
   const [consultModalOpen, setConsultModalOpen] = useState(false);
@@ -20,7 +21,9 @@ const HomePage = () => {
       <Hero />
 
       {/* NEW Promotional Carousel */}
-      <PromoCarousel />
+      <HomeSectionContainer>
+        <PromoCarousel />
+      </HomeSectionContainer>
 
       {/* Active Coupons Carousel */}
       <CouponCarousel />

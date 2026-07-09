@@ -184,3 +184,186 @@
   transform: translateY(0) scale(0.98);
 }
 
+/* HealthcareInformation Custom Section Typography & Spacing Scale (33% Reduction) */
+.wellmeds-healthcare-sec {
+  background-color: #ffffff;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .wellmeds-healthcare-sec {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wellmeds-healthcare-sec {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+}
+
+.wellmeds-healthcare-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px; /* reduced from 48px/50px by 20% */
+}
+
+@media (max-width: 768px) {
+  .wellmeds-healthcare-container {
+    gap: 32px;
+  }
+}
+
+/* Reusable homepage/storefront section container wrapper */
+.home-section-container {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .home-section-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-section-container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .home-section-container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+/* Blocks */
+.wellmeds-healthcare-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* reduced from 16px (space-y-4) by 25% */
+}
+
+/* Main Heading (Section 1 Title) */
+.wellmeds-healthcare-main-heading {
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0F172A;
+}
+
+@media (max-width: 768px) {
+  .wellmeds-healthcare-main-heading {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wellmeds-healthcare-main-heading {
+    font-size: 1.5rem;
+  }
+}
+
+/* Section Headings */
+.wellmeds-healthcare-sec-heading {
+  font-size: 1.4rem; /* 22px */
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0F172A;
+}
+
+@media (max-width: 768px) {
+  .wellmeds-healthcare-sec-heading {
+    font-size: 1.25rem;
+  }
+}
+
+/* Small Sub-headings */
+.wellmeds-healthcare-sub-heading {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.4;
+  color: #038076;
+}
+
+/* Paragraphs */
+.wellmeds-healthcare-para {
+  font-size: 0.95rem; /* 15px */
+  line-height: 1.7;
+  color: #475569;
+}
+
+/* Bullet Lists */
+.wellmeds-healthcare-list {
+  font-size: 0.92rem; /* ~14.5px */
+  line-height: 1.7;
+  color: #475569;
+  display: grid;
+  grid-template-cols: 1fr;
+  row-gap: 8px; /* reduced from 10px by 20% */
+  column-gap: 24px;
+  padding-top: 8px;
+}
+
+@media (min-width: 640px) {
+  .wellmeds-healthcare-list.cols-2,
+  .wellmeds-healthcare-list.cols-3 {
+    grid-template-cols: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .wellmeds-healthcare-list.cols-3 {
+    grid-template-cols: repeat(3, 1fr);
+  }
+}
+
+/* List Items and Icons */
+.wellmeds-healthcare-list-item {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+
+.wellmeds-healthcare-icon {
+  width: 14px;
+  height: 14px;
+  color: #038076;
+  flex-shrink: 0;
+  margin-top: 5px; /* aligned with smaller text */
+}
+
+/* Dark mode overrides */
+.dark .wellmeds-healthcare-sec {
+  background-color: #18181b; /* zinc-900 */
+  border-top-color: #27272a; /* zinc-800 */
+}
+
+.dark .wellmeds-healthcare-main-heading,
+.dark .wellmeds-healthcare-sec-heading {
+  color: #f4f4f5; /* zinc-100 */
+}
+
+.dark .wellmeds-healthcare-sub-heading {
+  color: #a4c9ff; /* primary-fixed-dim */
+}
+
+.dark .wellmeds-healthcare-para,
+.dark .wellmeds-healthcare-list {
+  color: #a1a1aa; /* zinc-400 */
+}
+
+

@@ -340,7 +340,7 @@ const PromoCarousel = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="relative max-w-[1470px] mx-auto my-md min-h-[540px] sm:min-h-[480px] md:min-h-[480px] lg:min-h-[560px] lg:h-[560px] rounded-[32px] overflow-hidden bg-white dark:bg-zinc-950 shadow-[0_20px_50px_-12px_rgba(0,43,73,0.08)] group focus:ring-2 focus:ring-[#038076] focus:ring-offset-2 outline-none transition-all duration-300 flex flex-col justify-center"
+      className="relative w-full my-md min-h-[540px] sm:min-h-[480px] md:min-h-[480px] lg:min-h-[560px] lg:h-[560px] rounded-[32px] overflow-hidden bg-white dark:bg-zinc-950 shadow-[0_20px_50px_-12px_rgba(0,43,73,0.08)] group focus:ring-2 focus:ring-[#038076] focus:ring-offset-2 outline-none transition-all duration-300 flex flex-col justify-center"
     >
       {/* Subtle Medical SVG Grid Overlay */}
       <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22><path d=%22M0 0h40v40H0z%22 fill=%22none%22/><path d=%22M0 20h40M20 0v40%22 stroke=%22%23086b53%22 stroke-width=%221.5%22/></svg>')] bg-repeat" />

@@ -48,7 +48,7 @@ const TrustStatsBar = () => {
 
   return (
     <section className="py-16 bg-surface-container/30 dark:bg-surface-container-high/20 transition-colors duration-300">
-      <div className="max-w-max-width mx-auto px-margin-desktop">
+      <div className="home-section-container">
         <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/30 dark:border-outline/20 p-lg md:p-xl rounded-2xl shadow-sm transition-all duration-300 hover:scale-[1.005] hover:shadow-md relative overflow-hidden">
           
           {/* Subtle gradient background overlay */}

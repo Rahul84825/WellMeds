@@ -729,7 +729,7 @@ const CouponCarousel = () => {
           background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         }}
       >
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="home-section-container">
           <div
             style={{
               display: "grid",
@@ -754,7 +754,7 @@ const CouponCarousel = () => {
           background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         }}
       >
-        <div className="max-w-max-width mx-auto px-margin-desktop text-center">
+        <div className="home-section-container text-center">
           <div
             style={{
               background: "#fff",
@@ -827,7 +827,7 @@ const CouponCarousel = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="max-w-max-width mx-auto px-margin-desktop">
+      <div className="home-section-container">
 
         {/* ── Section Header ──────────────────────────────────── */}
         <div

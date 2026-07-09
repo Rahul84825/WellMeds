@@ -26,7 +26,7 @@ const testimonialsData = [
 
 export const TestimonialsSection = () => {
   return (
-    <section className="py-16 max-w-max-width mx-auto px-margin-desktop">
+    <section className="py-16 home-section-container">
       <h2 className="font-headline-md text-headline-md text-on-surface mb-xl text-center">What our customers say</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {testimonialsData.map((item) => (

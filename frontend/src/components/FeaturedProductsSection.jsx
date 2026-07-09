@@ -9,7 +9,7 @@ export const FeaturedProductsSection = () => {
 
   if (loading) {
     return (
-      <section className="py-16 max-w-max-width mx-auto px-margin-desktop flex justify-center items-center">
+      <section className="py-16 home-section-container flex justify-center items-center">
         <Loader size="md" />
       </section>
     );
@@ -20,7 +20,7 @@ export const FeaturedProductsSection = () => {
   }
 
   return (
-    <section className="py-16 max-w-max-width mx-auto px-margin-desktop">
+    <section className="py-16 home-section-container">
       <div className="flex items-center justify-between mb-xl">
         <h2 className="font-headline-md text-headline-md text-on-surface">Best Sellers</h2>
         <Link to="/products" className="text-primary dark:text-primary-fixed-dim font-label-md hover:underline flex items-center gap-xs">
