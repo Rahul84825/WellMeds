@@ -91,15 +91,11 @@ const ProductCard = ({ product }) => {
         onClick={handleCardClick}
         onKeyDown={(e) => { if (e.key === "Enter") navigate(productUrl); }}
         className="group relative flex h-full flex-col justify-between
-                   cursor-pointer select-none rounded-2xl border
-                   border-slate-100 dark:border-zinc-800/80
+                   cursor-pointer select-none rounded-2xl
                    bg-white dark:bg-zinc-900
-                   shadow-sm transition-all duration-300
-                   md:hover:-translate-y-1.5
-                   md:hover:shadow-[0_12px_32px_rgba(3,128,118,0.12)]
-                   md:hover:border-[#038076]/30
                    focus-visible:outline-none
-                   focus-visible:ring-2 focus-visible:ring-[#038076]"
+                   focus-visible:ring-2 focus-visible:ring-[#038076]
+                   wellmeds-product-card"
       >
 
         {/* ── Top accent line (teal gradient, matches hero) ── */}
@@ -285,13 +281,9 @@ const ProductCard = ({ product }) => {
               }
               className="flex min-h-[40px] w-full cursor-pointer items-center
                          justify-center gap-1.5 rounded-xl px-4 py-2
-                         text-xs font-bold text-white shadow-sm
-                         transition-all duration-300 active:scale-[0.98]
-                         select-none sm:text-sm
-                         bg-gradient-to-r from-[#004782] to-[#038076]
-                         hover:opacity-90 hover:shadow-md
-                         hover:shadow-[#038076]/15
-                         disabled:cursor-not-allowed disabled:opacity-50"
+                         text-xs font-bold text-white select-none sm:text-sm
+                         disabled:cursor-not-allowed disabled:opacity-50
+                         wellmeds-product-card-cta"
             >
               {isAdding ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />

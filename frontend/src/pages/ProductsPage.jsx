@@ -29,6 +29,9 @@ const ProductsPage = () => {
   // Category filter from URL (?category=...)
   const categoryParam = searchParams.get("category") || "";
 
+  // Speciality filter from URL (?speciality=...)
+  const specialityParam = searchParams.get("speciality") || "";
+
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") || "");
@@ -70,14 +73,15 @@ const ProductsPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchVal);
-      // Sync search param to URL, preserve category
+      // Sync search param to URL, preserve category & speciality
       const newParams = {};
       if (searchVal.trim()) newParams.search = searchVal;
       if (categoryParam) newParams.category = categoryParam;
+      if (specialityParam) newParams.speciality = specialityParam;
       setSearchParams(Object.keys(newParams).length ? newParams : {});
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchVal, setSearchParams, categoryParam]);
+  }, [searchVal, setSearchParams, categoryParam, specialityParam]);
 
   // Fetch Products
   const fetchProducts = useCallback(async () => {
@@ -88,6 +92,7 @@ const ProductsPage = () => {
         limit,
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
+        speciality: specialityParam || undefined,
         productType: "medicine",
       });
       setProducts(data.products || []);
@@ -97,16 +102,16 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, categoryParam]);
+  }, [currentPage, debouncedSearch, categoryParam, specialityParam]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Reset to page 1 when search query or category changes
+  // Reset to page 1 when search query, category, or speciality changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, categoryParam]);
+  }, [debouncedSearch, categoryParam, specialityParam]);
 
   // Scroll to top when page changes
   useEffect(() => {

@@ -140,3 +140,47 @@
 .animate-modal-zoom-in {
   animation: modal-zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Custom Product Card Visual separation polish */
+.wellmeds-product-card {
+  border: 1px solid rgba(3, 128, 118, 0.12);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .wellmeds-product-card {
+  border-color: rgba(63, 63, 70, 0.8);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 768px) {
+  .wellmeds-product-card:hover {
+    transform: translateY(-4px);
+    border-color: #038076;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
+  
+  .dark .wellmeds-product-card:hover {
+    border-color: #038076;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Custom Product Card CTA button styling */
+.wellmeds-product-card-cta {
+  background-color: #038076;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.wellmeds-product-card-cta:hover:not(:disabled) {
+  background-color: #02655f;
+  transform: translateY(-1px);
+}
+
+.wellmeds-product-card-cta:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
