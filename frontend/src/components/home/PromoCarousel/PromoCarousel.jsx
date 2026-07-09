@@ -4,8 +4,20 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // Import local promotional banner assets
 import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
 import savingImg from "../../../assets/PromoCarousel/saving.png";
+import surgicalImg from "../../../assets/PromoCarousel/surgical.png";
+import cancerImg from "../../../assets/PromoCarousel/cancer.png";
 
 const promoBanners = [
+  {
+    id: "surgical",
+    img: surgicalImg,
+    alt: "Surgical Promo Banner"
+  },
+  {
+    id: "cancer",
+    img: cancerImg,
+    alt: "Cancer Care Promo Banner"
+  },
   {
     id: "delivery",
     img: deliveryImg,
