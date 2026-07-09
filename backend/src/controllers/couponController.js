@@ -93,9 +93,11 @@ export const applyCoupon = async (req, res, next) => {
 // Customer: list active coupons
 export const getCoupons = async (req, res, next) => {
   try {
+    const now = new Date();
     const coupons = await Coupon.find({
-      isActive: true,
-      expiryDate: { $gt: new Date() }
+      status: "Active",
+      startDate: { $lte: now },
+      expiryDate: { $gt: now }
     });
     res.status(200).json({ success: true, coupons });
   } catch (error) {

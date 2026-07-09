@@ -809,71 +809,9 @@ const CouponCarousel = () => {
     );
   }
 
-  /* ── Empty State ─────────────────────────────────────────── */
+  /* ── Empty State — Hide entire section ─────────────────── */
   if (coupons.length === 0) {
-    return (
-      <section
-        style={{
-          padding: "56px 0",
-          background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
-        }}
-      >
-        <div className="max-w-max-width mx-auto px-margin-desktop text-center">
-          <div
-            style={{
-              background: "#fff",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: "28px",
-              padding: "48px 32px",
-              maxWidth: "440px",
-              margin: "0 auto",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-            }}
-          >
-            <Tag size={36} style={{ color: "#94a3b8", margin: "0 auto 16px" }} />
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "#1e293b",
-                marginBottom: "8px",
-              }}
-            >
-              No active offers right now
-            </h3>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#64748b",
-                marginBottom: "24px",
-                lineHeight: 1.5,
-              }}
-            >
-              Check back later for exclusive discounts on your medications and clinical supplies.
-            </p>
-            <Link
-              to="/products"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                background: "linear-gradient(135deg, #038076, #0891b2)",
-                color: "#fff",
-                padding: "12px 28px",
-                borderRadius: "14px",
-                textDecoration: "none",
-                fontSize: "13px",
-                fontWeight: 700,
-                boxShadow: "0 4px 18px rgba(3,128,118,0.25)",
-              }}
-            >
-              Browse Products
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   /* ── Main Render ─────────────────────────────────────────── */

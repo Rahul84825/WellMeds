@@ -119,6 +119,19 @@ const Checkout = () => {
     setCouponDiscount(0);
   };
 
+  // Auto-apply coupon from query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const promo = params.get("coupon");
+    if (promo) {
+      const code = promo.trim().toUpperCase();
+      setCouponCode(code);
+      if (subtotal > 0) {
+        handleApplyCoupon(code);
+      }
+    }
+  }, [subtotal]);
+
   // ─────────────────────────────────────────────────────
   // Order placement
   // ─────────────────────────────────────────────────────

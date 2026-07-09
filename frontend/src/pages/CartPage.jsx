@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { formatCurrency } from "../utils/currency";
@@ -24,6 +24,34 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
+
+  // Auto-apply coupon from query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const promo = params.get("coupon");
+    if (promo) {
+      const code = promo.trim().toUpperCase();
+      setCouponCode(code);
+      if (subtotal > 0) {
+        const applyPromo = async () => {
+          try {
+            const res = await api.validateCoupon(code, subtotal);
+            if (res.success) {
+              setCouponApplied(true);
+              setCouponDiscount(res.discountAmount || 0);
+              toast.success(res.message || "Coupon applied successfully!");
+            } else {
+              toast.error(res.message || "Invalid coupon code.");
+            }
+          } catch (err) {
+            const msg = err.response?.data?.message || "Failed to validate coupon.";
+            toast.error(msg);
+          }
+        };
+        applyPromo();
+      }
+    }
+  }, [subtotal]);
 
   const handleApplyCoupon = async (e) => {
     e.preventDefault();
