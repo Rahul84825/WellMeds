@@ -29,6 +29,16 @@ export const errorHandler = (err, req, res, next) => {
     message = "File size exceeds the allowed limit";
   }
 
+  // Multer Error or file validation errors
+  else if (
+    err.name === "MulterError" ||
+    err.message.includes("Invalid file type") ||
+    err.message.includes("Only PDF, JPG, PNG") ||
+    err.message.includes("Only JPG, PNG")
+  ) {
+    statusCode = 400;
+  }
+
   // Clean up generic 500 internal errors to prevent leaking internal database/system log details in production
   if (statusCode === 500 && process.env.NODE_ENV === "production") {
     message = "An unexpected server error occurred. Please contact support.";

@@ -238,8 +238,8 @@ const AddNewProduct = () => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (file.size > 10 * 1024 * 1024) {
-          toast.warning(`File "${file.name}" exceeds 10MB limit.`);
+        if (file.size > 5 * 1024 * 1024) {
+          toast.warning(`File "${file.name}" exceeds 5MB limit.`);
           continue;
         }
 
@@ -257,7 +257,8 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error("Image upload failed", err);
-      toast.error("Failed to upload image. Please verify local environment.");
+      const errMsg = err.response?.data?.message || err.message || "Failed to upload image. Please verify local environment.";
+      toast.error(errMsg);
     } finally {
       setUploadProgress(null);
     }
@@ -273,8 +274,8 @@ const AddNewProduct = () => {
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) {
-          toast.warning(`File "${file.name}" exceeds 10MB limit.`);
+        if (file.size > 5 * 1024 * 1024) {
+          toast.warning(`File "${file.name}" exceeds 5MB limit.`);
           continue;
         }
         const secureUrl = await api.uploadImage(file);
@@ -285,7 +286,8 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to drop and upload image.");
+      const errMsg = err.response?.data?.message || err.message || "Failed to drop and upload image.";
+      toast.error(errMsg);
     } finally {
       setUploadProgress(null);
     }

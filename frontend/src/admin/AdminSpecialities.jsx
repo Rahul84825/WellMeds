@@ -171,7 +171,8 @@ const AdminSpecialities = () => {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to upload image.");
+      const errMsg = err.response?.data?.message || err.message || "Failed to upload image.";
+      toast.error(errMsg);
     } finally {
       setUploadingIcon(false);
       setUploadingBanner(false);

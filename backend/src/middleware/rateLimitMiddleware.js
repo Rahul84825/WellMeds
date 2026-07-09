@@ -48,10 +48,10 @@ export const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit file uploads to 10 uploads per 10 minutes to prevent resource abuse
+// Limit file uploads to 100 uploads per 10 minutes to prevent resource abuse
 export const uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 10,
+  max: 100,
   message: {
     success: false,
     message: "Too many file upload requests from this IP, please try again after 10 minutes",

@@ -22,6 +22,7 @@ import moleculeRoutes from "./src/routes/moleculeRoutes.js";
 import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 
 // Security Middlewares

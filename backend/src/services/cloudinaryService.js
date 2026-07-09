@@ -9,6 +9,7 @@ export const uploadToCloudinary = async (localFilePath, folderName = "medishop")
       const result = await cloudinary.uploader.upload(localFilePath, {
         folder: folderName,
         resource_type: "auto",
+        timeout: 60000,
       });
       // Delete temporary local file
       if (fs.existsSync(localFilePath)) {

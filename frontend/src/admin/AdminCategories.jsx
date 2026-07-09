@@ -78,8 +78,8 @@ const ProductCategories = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.warning("File size exceeds 10MB limit.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning("File size exceeds 5MB limit.");
       return;
     }
 
@@ -87,9 +87,11 @@ const ProductCategories = () => {
     try {
       const secureUrl = await api.uploadImage(file);
       setImage(secureUrl);
+      toast.success("Category image uploaded successfully.");
     } catch (err) {
       console.error("Category image upload failed", err);
-      toast.error("Failed to upload category image.");
+      const errMsg = err.response?.data?.message || err.message || "Failed to upload category image.";
+      toast.error(errMsg);
     } finally {
       setUploading(false);
     }
