@@ -13,10 +13,10 @@ const CategoryCard = ({ category }) => {
         style={{ textDecoration: "none" }}
       >
         {/*
-          Fixed card height = 210px on desktop, 190px on mobile.
-          The image now occupies the entire card area.
+          Perfect square card layout.
+          The image occupies the complete card area with cover aspect ratio.
         */}
-        <div className="category-card" style={{ width: "170px" }}>
+        <div className="category-card">
 
           {/* ── Image area — full-bleed, no padding, fills the entire card ── */}
           <div className="category-img-wrap">
@@ -54,7 +54,8 @@ const CategoryCard = ({ category }) => {
       <style>{`
         /* ── Card shell ── */
         .category-card {
-          height: 210px;
+          width: 170px;
+          aspect-ratio: 1 / 1;
           display: flex;
           flex-direction: column;
           background: #ffffff;
@@ -88,15 +89,15 @@ const CategoryCard = ({ category }) => {
           align-items: center;
           justify-content: center;
           background: #ffffff;
-          padding: 8px;
+          padding: 0;
           box-sizing: border-box;
         }
 
-        /* ── Image itself — contain so it never crops ── */
+        /* ── Image itself — cover so it fills the box ── */
         .category-card-img {
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: cover;
           object-position: center;
           display: block;
           transition: transform 280ms ease;
@@ -122,7 +123,8 @@ const CategoryCard = ({ category }) => {
           }
           .category-card {
             width: 100% !important;
-            height: 190px !important;
+            height: auto !important;
+            aspect-ratio: 1 / 1 !important;
           }
           .category-img-wrap {
             height: 100% !important;
