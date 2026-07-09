@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
-import { api } from "../services/api";
+import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
 import { 
@@ -152,8 +152,8 @@ const AdminSpecialities = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.warning("File size must not exceed 5MB.");
+    if (file.size > MAX_FILE_SIZE) {
+      toast.warning(`File size must not exceed ${MAX_FILE_SIZE_MB}MB.`);
       return;
     }
 

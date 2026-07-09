@@ -43,12 +43,14 @@ const prescriptionFilter = (req, file, cb) => {
   }
 };
 
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 // Multer instances
 export const uploadImage = multer({
   storage: storage,
   fileFilter: imageFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB Limit for images
+    fileSize: MAX_FILE_SIZE, // 10MB Limit for images
   },
 });
 
@@ -56,7 +58,7 @@ export const uploadPrescriptionFile = multer({
   storage: storage,
   fileFilter: prescriptionFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB Limit for prescriptions
+    fileSize: MAX_FILE_SIZE, // 10MB Limit for prescriptions
   },
 });
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { api } from "../services/api";
+import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
 import { 
@@ -238,8 +238,8 @@ const AddNewProduct = () => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (file.size > 5 * 1024 * 1024) {
-          toast.warning(`File "${file.name}" exceeds 5MB limit.`);
+        if (file.size > MAX_FILE_SIZE) {
+          toast.warning(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
           continue;
         }
 
@@ -274,8 +274,8 @@ const AddNewProduct = () => {
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.warning(`File "${file.name}" exceeds 5MB limit.`);
+        if (file.size > MAX_FILE_SIZE) {
+          toast.warning(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
           continue;
         }
         const secureUrl = await api.uploadImage(file);
