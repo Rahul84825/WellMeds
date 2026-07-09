@@ -87,15 +87,17 @@ const CategoryCard = ({ category }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #f8fafc;
+          background: #ffffff;
+          padding: 8px;
+          box-sizing: border-box;
         }
 
-        /* ── Image itself — cover so it fills the box ── */
+        /* ── Image itself — contain so it never crops ── */
         .category-card-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          object-position: center top;
+          object-fit: contain;
+          object-position: center;
           display: block;
           transition: transform 280ms ease;
         }
