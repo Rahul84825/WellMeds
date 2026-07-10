@@ -213,14 +213,14 @@
   max-width: 1200px !important; /* centered desktop container width */
   margin-left: auto !important;
   margin-right: auto !important;
-  padding-left: 20px !important; /* Mobile horizontal padding: 16px-20px */
-  padding-right: 20px !important;
+  padding-left: 18px !important; /* Mobile horizontal padding: reduced by 12% from 20px */
+  padding-right: 18px !important;
 }
 
 @media (min-width: 768px) {
   .wellmeds-healthcare-container {
-    padding-left: 30px !important; /* Tablet horizontal padding */
-    padding-right: 30px !important;
+    padding-left: 26px !important; /* Tablet horizontal padding: reduced by 12% from 30px */
+    padding-right: 26px !important;
   }
 }
 
@@ -232,8 +232,8 @@
 
 @media (min-width: 1024px) {
   .wellmeds-healthcare-container {
-    padding-left: clamp(40px, 5vw, 72px) !important; /* Desktop horizontal padding (+26% increase) */
-    padding-right: clamp(40px, 5vw, 72px) !important;
+    padding-left: clamp(35px, 4.4vw, 63px) !important; /* Desktop horizontal padding: reduced by 12% */
+    padding-right: clamp(35px, 4.4vw, 63px) !important;
   }
 }
 
@@ -276,53 +276,53 @@
 
 /* Main Heading (Section 1 Title) */
 .wellmeds-healthcare-main-heading {
-  font-size: 1.73rem; /* reduced further by 23% */
+  font-size: 1.5rem; /* reduced H1 further by 13% */
   font-weight: 700;
   line-height: 1.2;
   color: #0F172A;
   margin-top: 0;
-  margin-bottom: 14px; /* Heading margin: reduced by 23% */
+  margin-bottom: 14px; /* Heading margin: preserved */
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-main-heading {
-    font-size: 1.35rem;
+    font-size: 1.17rem; /* reduced by 13% */
     margin-bottom: 11px;
   }
 }
 
 @media (max-width: 480px) {
   .wellmeds-healthcare-main-heading {
-    font-size: 1.15rem;
+    font-size: 1rem; /* reduced by 13% */
     margin-bottom: 9px;
   }
 }
 
 /* Section Headings */
 .wellmeds-healthcare-sec-heading {
-  font-size: 1rem; /* reduced H2 further by 23% */
+  font-size: 0.87rem; /* reduced H2 further by 13% */
   font-weight: 600;
   line-height: 1.3;
   color: #0F172A;
   margin-top: 0;
-  margin-bottom: 14px; /* Heading margin: reduced by 23% */
+  margin-bottom: 14px; /* Heading margin: preserved */
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-sec-heading {
-    font-size: 0.88rem;
+    font-size: 0.77rem; /* reduced H2 tablet by 13% */
     margin-bottom: 11px;
   }
 }
 
 /* Small Sub-headings (Subtitles) */
 .wellmeds-healthcare-sub-heading {
-  font-size: 0.7rem; /* reduced further by 23% */
+  font-size: 0.61rem; /* reduced H3 further by 13% */
   font-weight: 600;
   line-height: 1.4;
   color: #038076;
   margin-top: 0;
-  margin-bottom: 11px; /* subtitle spacing: reduced by 23% */
+  margin-bottom: 11px; /* subtitle spacing: preserved */
 }
 
 /* Paragraphs */
