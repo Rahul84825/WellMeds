@@ -18,7 +18,7 @@ const QuickActionCards = () => {
         <a
           key={card.id}
           href="#"
-          className="block cursor-pointer w-full h-[90px]
+          className="block cursor-pointer w-full h-auto p-[8px]
                      rounded-2xl border border-[rgba(15,23,42,0.06)] dark:border-zinc-800/80 bg-white dark:bg-zinc-900
                      shadow-[0_6px_18px_rgba(15,23,42,0.08)] 
                      hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)] 
@@ -33,8 +33,8 @@ const QuickActionCards = () => {
             alt={card.alt}
             style={{
               width: "100%",
-              height: "100%",
-              objectFit: "fill",
+              height: "auto",
+              objectFit: "contain",
               display: "block",
               borderRadius: "inherit",
               overflow: "hidden",
