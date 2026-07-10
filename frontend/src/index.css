@@ -188,33 +188,35 @@
 .wellmeds-healthcare-sec {
   background-color: #ffffff;
   border-top: 1px solid #E5E7EB;
-  padding-top: 64px;
-  padding-bottom: 64px;
+  padding-top: 40px; /* reduced vertical whitespace */
+  padding-bottom: 40px; /* reduced vertical whitespace */
+  margin-top: 32px; /* section spacing */
+  margin-bottom: 20px; /* section spacing */
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-sec {
-    padding-top: 48px;
-    padding-bottom: 48px;
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
 }
 
 @media (max-width: 480px) {
   .wellmeds-healthcare-sec {
-    padding-top: 32px;
-    padding-bottom: 32px;
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 }
 
 .wellmeds-healthcare-container {
   display: flex;
   flex-direction: column;
-  gap: 40px; /* reduced from 48px/50px by 20% */
+  gap: 32px; /* reduced spacing between sections */
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-container {
-    gap: 32px;
+    gap: 24px;
   }
 }
 
@@ -254,12 +256,12 @@
 .wellmeds-healthcare-block {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* reduced from 16px (space-y-4) by 25% */
+  gap: 12px; /* heading spacing margin-bottom: 12px & paragraph spacing: 12px */
 }
 
 /* Main Heading (Section 1 Title) */
 .wellmeds-healthcare-main-heading {
-  font-size: 2rem; /* 32px */
+  font-size: 2.25rem; /* reduced from typical default by ~35% relative to initial scale */
   font-weight: 700;
   line-height: 1.2;
   color: #0F172A;
@@ -267,33 +269,33 @@
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-main-heading {
-    font-size: 1.75rem;
+    font-size: 1.85rem;
   }
 }
 
 @media (max-width: 480px) {
   .wellmeds-healthcare-main-heading {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 }
 
 /* Section Headings */
 .wellmeds-healthcare-sec-heading {
-  font-size: 1.4rem; /* 22px */
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 600;
   line-height: 1.3;
   color: #0F172A;
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-sec-heading {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 }
 
 /* Small Sub-headings */
 .wellmeds-healthcare-sub-heading {
-  font-size: 1rem; /* 16px */
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.4;
   color: #038076;
@@ -301,19 +303,19 @@
 
 /* Paragraphs */
 .wellmeds-healthcare-para {
-  font-size: 0.95rem; /* 15px */
-  line-height: 1.7;
+  font-size: 0.92rem; /* reduced to be denser but perfectly readable */
+  line-height: 1.5; /* reduced line height for density */
   color: #475569;
 }
 
 /* Bullet Lists */
 .wellmeds-healthcare-list {
-  font-size: 0.92rem; /* ~14.5px */
-  line-height: 1.7;
+  font-size: 0.92rem;
+  line-height: 1.5; /* line-height 1.5 as requested */
   color: #475569;
   display: grid;
   grid-template-cols: 1fr;
-  row-gap: 8px; /* reduced from 10px by 20% */
+  row-gap: 8px;
   column-gap: 24px;
   padding-top: 8px;
 }
@@ -329,6 +331,11 @@
   .wellmeds-healthcare-list.cols-3 {
     grid-template-cols: repeat(3, 1fr);
   }
+}
+
+/* Small Labels */
+.wellmeds-healthcare-label {
+  font-size: 0.8rem;
 }
 
 /* List Items and Icons */
