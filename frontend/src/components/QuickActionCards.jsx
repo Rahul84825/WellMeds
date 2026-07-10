@@ -20,13 +20,18 @@ const QuickActionCards = () => {
           href="#"
           className="block cursor-pointer w-full hover:scale-[1.02] hover:shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
           style={{
-            borderRadius: "24px",
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "stretch",
             overflow: "hidden",
-            display: "block",
+            borderRadius: "24px",
             width: "100%",
-            height: "auto",
+            aspectRatio: "1600 / 393",
             cursor: "pointer",
             transition: "transform 0.25s ease, box-shadow 0.25s ease",
+            backgroundColor: "transparent",
+            padding: 0,
+            margin: 0,
           }}
         >
           <img
@@ -34,9 +39,10 @@ const QuickActionCards = () => {
             alt={card.alt}
             style={{
               width: "100%",
-              height: "auto",
-              objectFit: "cover",
+              height: "100%",
               display: "block",
+              objectFit: "cover",
+              objectPosition: "center",
             }}
           />
         </a>
