@@ -18,15 +18,16 @@ const QuickActionCards = () => {
         <a
           key={card.id}
           href="#"
-          className="block cursor-pointer w-full h-auto p-[8px]
-                     rounded-2xl border border-[rgba(15,23,42,0.06)] dark:border-zinc-800/80 bg-white dark:bg-zinc-900
-                     shadow-[0_6px_18px_rgba(15,23,42,0.08)] 
-                     hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)] 
-                     hover:scale-[1.02]
-                     transition-all duration-[250ms] ease-in-out 
-                     overflow-hidden
-                     dark:shadow-[0_6px_18px_rgba(0,0,0,0.4)]
-                     dark:hover:shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+          className="block cursor-pointer w-full hover:scale-[1.02] hover:shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+          style={{
+            borderRadius: "24px",
+            overflow: "hidden",
+            display: "block",
+            width: "100%",
+            height: "auto",
+            cursor: "pointer",
+            transition: "transform 0.25s ease, box-shadow 0.25s ease",
+          }}
         >
           <img
             src={card.image}
@@ -34,10 +35,8 @@ const QuickActionCards = () => {
             style={{
               width: "100%",
               height: "auto",
-              objectFit: "contain",
+              objectFit: "cover",
               display: "block",
-              borderRadius: "inherit",
-              overflow: "hidden",
             }}
           />
         </a>
