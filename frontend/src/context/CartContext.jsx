@@ -24,6 +24,7 @@ export const CartProvider = ({ children }) => {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [pendingRxFile, setPendingRxFile] = useState(null);
 
   // Persist to localStorage on every change
   useEffect(() => {
@@ -223,6 +224,8 @@ export const CartProvider = ({ children }) => {
         clearCart,
         syncCartForUser,
         saveCartToLocalOnLogout,
+        pendingRxFile,
+        setPendingRxFile,
       }}
     >
       {children}

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../hooks/useCart";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import PrescriptionCard from "../components/PrescriptionCard";
 import { toast } from "sonner";
 import PrescriptionTimeline from "../components/PrescriptionTimeline";
 import Modal from "../components/Modal";
+import LoginRequiredModal from "../components/LoginRequiredModal";
 import { 
   UploadCloud, 
   HelpCircle, 
@@ -35,7 +37,9 @@ import {
 
 const UploadPrescriptionPage = () => {
   const { user } = useAuth();
+  const { pendingRxFile, setPendingRxFile } = useCart();
   const navigate = useNavigate();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Prescriptions state
   const [savedPrescriptions, setSavedPrescriptions] = useState([]);
@@ -79,6 +83,8 @@ const UploadPrescriptionPage = () => {
   useEffect(() => {
     if (user) {
       fetchPrescriptions();
+    } else {
+      setLoadingRx(false);
     }
   }, [user]);
 
@@ -98,14 +104,35 @@ const UploadPrescriptionPage = () => {
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      validateAndSetFile(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (!user) {
+        setPendingRxFile(file);
+        setIsLoginModalOpen(true);
+        return;
+      }
+      validateAndSetFile(file);
     }
   };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      validateAndSetFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (!user) {
+        setPendingRxFile(file);
+        setIsLoginModalOpen(true);
+        return;
+      }
+      validateAndSetFile(file);
     }
+  };
+
+  const handleDropzoneClick = () => {
+    if (!user) {
+      sessionStorage.setItem("auth_redirect_intent", "upload_prescription_click");
+      setIsLoginModalOpen(true);
+      return;
+    }
+    document.getElementById("prescription-file-upload")?.click();
   };
 
   const validateAndSetFile = (file) => {
@@ -169,6 +196,33 @@ const UploadPrescriptionPage = () => {
       setUploading(false);
     }
   };
+
+  // Trigger file picker if the user clicked the dropzone as a guest and has now logged in
+  useEffect(() => {
+    if (user && sessionStorage.getItem("auth_redirect_intent") === "upload_prescription_click") {
+      sessionStorage.removeItem("auth_redirect_intent");
+      setTimeout(() => {
+        document.getElementById("prescription-file-upload")?.click();
+      }, 500);
+    }
+  }, [user]);
+
+  // Capture pendingRxFile from guest state when user successfully logs in
+  useEffect(() => {
+    if (user && pendingRxFile) {
+      validateAndSetFile(pendingRxFile);
+      setPendingRxFile(null);
+      sessionStorage.setItem("auth_rx_auto_trigger", "true");
+    }
+  }, [user, pendingRxFile, setPendingRxFile]);
+
+  // Auto-submit file if auto-trigger is set
+  useEffect(() => {
+    if (user && uploadFile && sessionStorage.getItem("auth_rx_auto_trigger") === "true") {
+      sessionStorage.removeItem("auth_rx_auto_trigger");
+      handleUploadSubmit();
+    }
+  }, [user, uploadFile]);
 
   const handleDeleteRx = (id, name) => {
     toast.warning(`Are you sure you want to delete "${name}"?`, {
@@ -336,7 +390,7 @@ const UploadPrescriptionPage = () => {
                     onDragOver={handleDrag}
                     onDragLeave={handleDrag}
                     onDrop={handleDrop}
-                    onClick={() => document.getElementById("prescription-file-upload").click()}
+                    onClick={handleDropzoneClick}
                     className={`border-2 border-dashed rounded-3xl p-xl text-center cursor-pointer transition-all duration-300 bg-slate-50/50 hover:bg-slate-50 dark:bg-zinc-900/60 dark:hover:bg-zinc-850 flex flex-col items-center justify-center space-y-md group hover:border-[#004782] ${
                       dragActive ? "border-[#004782] bg-[#004782]/5" : "border-outline-variant/60"
                     }`}
@@ -746,6 +800,14 @@ const UploadPrescriptionPage = () => {
           </div>
         </div>
       </Modal>
+
+      <LoginRequiredModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        fromPath="/upload-prescription"
+        message="Please login to upload your prescription."
+        cancelText="Cancel"
+      />
     </div>
   );
 };

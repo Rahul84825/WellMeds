@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
+import { useAuth } from "../hooks/useAuth";
 import { formatCurrency } from "../utils/currency";
 import { api } from "../services/api";
+import LoginRequiredModal from "../components/LoginRequiredModal";
 
 import { toast } from "sonner";
 
@@ -20,10 +22,12 @@ const Cart = () => {
     clearCart
   } = useCart();
 
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Auto-apply coupon from query parameter
   useEffect(() => {
@@ -283,7 +287,13 @@ const Cart = () => {
             )}
 
             <button
-              onClick={() => navigate("/checkout")}
+              onClick={() => {
+                if (!user) {
+                  setIsLoginModalOpen(true);
+                } else {
+                  navigate("/checkout");
+                }
+              }}
               className="w-full bg-secondary text-white font-bold py-md rounded-lg hover:bg-on-secondary-container transition-all active:scale-95 flex items-center justify-center gap-sm shadow-md"
             >
               <span>Proceed to Checkout</span>
@@ -299,6 +309,11 @@ const Cart = () => {
           </div>
         </div>
       </div>
+      <LoginRequiredModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        fromPath="/checkout"
+      />
     </div>
   );
 };

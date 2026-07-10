@@ -6,6 +6,8 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import Modal from "../components/Modal";
+import LoginRequiredModal from "../components/LoginRequiredModal";
+import { UploadCloud, CheckCircle2, ClipboardList, Stethoscope } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
 import { toast } from "sonner";
 
@@ -32,6 +34,8 @@ const Checkout = () => {
   const [rxAttached, setRxAttached] = useState(false);
   const [rxFileName, setRxFileName] = useState("");
   const [rxModalOpen, setRxModalOpen] = useState(false);
+  const [rxInfoModalOpen, setRxInfoModalOpen] = useState(false);
+  const [rxSuccessModalOpen, setRxSuccessModalOpen] = useState(false);
 
   // Coupon
   const [couponCode, setCouponCode] = useState("");
@@ -149,7 +153,7 @@ const Checkout = () => {
         return;
       }
       if (!hasApprovedRx && !rxAttachedCheck) {
-        setRxModalOpen(true);
+        setRxInfoModalOpen(true);
         return;
       }
     }
@@ -201,6 +205,7 @@ const Checkout = () => {
     setRxFileName(data.fileName);
     setRxAttached(true);
     setRxModalOpen(false);
+    setRxSuccessModalOpen(true);
   };
 
   if (cartItems.length === 0) {
@@ -215,9 +220,16 @@ const Checkout = () => {
   }
 
   // ── Guest Auth Gate ─────────────────────────────────────────────────────────
-  // Show inline OTP flow instead of redirecting — cart is never cleared.
   if (!authLoading && !user) {
-    return <CheckoutAuthGate sendOtp={sendOtp} verifyOtp={verifyOtp} />;
+    return (
+      <div className="min-h-[60vh] bg-surface relative flex items-center justify-center backdrop-blur-md">
+        <LoginRequiredModal
+          isOpen={true}
+          onClose={() => navigate("/cart")}
+          fromPath="/checkout"
+        />
+      </div>
+    );
   }
 
   return (
@@ -689,6 +701,73 @@ const Checkout = () => {
         </div>
       </div>
 
+      {/* Prescription Info Modal */}
+      <Modal
+        isOpen={rxInfoModalOpen}
+        onClose={() => setRxInfoModalOpen(false)}
+        title="Prescription Required"
+        maxWidth="max-w-md"
+        showCloseButton={true}
+      >
+        <div className="flex flex-col items-center text-center space-y-4 py-4 select-none">
+          {/* Illustration / Icon */}
+          <div className="w-16 h-16 rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] dark:text-[#84d6b9] flex items-center justify-center animate-pulse">
+            <ClipboardList className="w-8 h-8" />
+          </div>
+
+          <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2">
+            One or more products in your cart require a valid doctor's prescription before they can be dispatched.
+          </p>
+
+          {/* 3 Steps */}
+          <div className="w-full space-y-4 my-6 text-left border-y border-slate-100 dark:border-zinc-800/80 py-4">
+            {/* Step 1 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/20 text-[#038076] dark:text-[#84d6b9] flex items-center justify-center shrink-0 border border-teal-100/30">
+                <UploadCloud className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-150">Step 1</h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">Upload your doctor's prescription.</p>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-8 h-8 rounded-xl bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center shrink-0 border border-blue-100/10">
+                <Stethoscope className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-150">Step 2</h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">Our licensed pharmacist verifies your prescription.</p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0 border border-emerald-100/10">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-150">Step 3</h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">After approval, your order proceeds for payment and dispatch.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Button */}
+          <button
+            onClick={() => {
+              setRxInfoModalOpen(false);
+              setRxModalOpen(true);
+            }}
+            className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-2.5 px-4 rounded-xl text-[13px] font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98]"
+          >
+            I Understand
+          </button>
+        </div>
+      </Modal>
+
       {/* Prescription Upload Modal */}
       <Modal
         isOpen={rxModalOpen}
@@ -705,6 +784,36 @@ const Checkout = () => {
           onUploadSuccess={handleRxSuccess}
           onClose={() => setRxModalOpen(false)}
         />
+      </Modal>
+
+      {/* Prescription Success Modal */}
+      <Modal
+        isOpen={rxSuccessModalOpen}
+        onClose={() => setRxSuccessModalOpen(false)}
+        title="Prescription Uploaded Successfully"
+        maxWidth="max-w-md"
+        showCloseButton={true}
+      >
+        <div className="flex flex-col items-center text-center space-y-4 py-4 select-none">
+          {/* Success Checkmark Icon */}
+          <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-450 flex items-center justify-center animate-bounce">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+
+          <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2">
+            Our pharmacist will review your prescription shortly. Verification usually takes only a few minutes during business hours. We will notify you once your prescription has been approved.
+          </p>
+
+          <button
+            onClick={() => {
+              setRxSuccessModalOpen(false);
+              handlePlaceOrder();
+            }}
+            className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-2.5 px-4 rounded-xl text-[13px] font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98]"
+          >
+            Continue
+          </button>
+        </div>
       </Modal>
     </div>
   );

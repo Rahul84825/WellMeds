@@ -103,14 +103,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="upload-prescription"
-          element={
-            <ProtectedRoute>
-              <UploadPrescriptionPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
       </Route>
 
       {/* Admin Portal Routes */}
