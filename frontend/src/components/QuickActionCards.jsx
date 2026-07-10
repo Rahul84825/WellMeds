@@ -6,10 +6,10 @@ import surgeryImg from "../assets/QuickActions/surgery.jpeg";
 
 const QuickActionCards = () => {
   const cards = [
-    { id: 1, image: talkImg, alt: "Talk to Pharmacist" },
-    { id: 2, image: chronicCareImg, alt: "Chronic Care Services" },
-    { id: 3, image: coldChainImg, alt: "Cold Chain Logistics" },
-    { id: 4, image: surgeryImg, alt: "Surgical Products" },
+    { id: 1, image: talkImg, alt: "Talk to Pharmacist", ratio: "1358 / 279" },
+    { id: 2, image: chronicCareImg, alt: "Chronic Care Services", ratio: "1347 / 279" },
+    { id: 3, image: coldChainImg, alt: "Cold Chain Logistics", ratio: "1355 / 281" },
+    { id: 4, image: surgeryImg, alt: "Surgical Products", ratio: "1362 / 279" },
   ];
 
   return (
@@ -26,7 +26,7 @@ const QuickActionCards = () => {
             overflow: "hidden",
             borderRadius: "24px",
             width: "100%",
-            aspectRatio: "1600 / 393",
+            aspectRatio: card.ratio,
             cursor: "pointer",
             transition: "transform 0.25s ease, box-shadow 0.25s ease",
             backgroundColor: "transparent",
@@ -41,7 +41,7 @@ const QuickActionCards = () => {
               width: "100%",
               height: "100%",
               display: "block",
-              objectFit: "cover",
+              objectFit: "contain",
               objectPosition: "center",
             }}
           />
