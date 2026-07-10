@@ -90,7 +90,7 @@ const PatientAssistanceProgramPage = () => {
     <div className="bg-background text-on-surface min-h-screen text-left">
       {/* Breadcrumbs */}
       <div className="border-b border-outline-variant/30 bg-surface-container-lowest/50 py-sm">
-        <div className="max-w-max-width mx-auto px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
           <Link to="/" className="hover:text-primary transition-colors">Home</Link>
           <span>/</span>
           <span className="text-primary font-bold">Patient Assistance Program (PAP)</span>
@@ -101,7 +101,7 @@ const PatientAssistanceProgramPage = () => {
       <section className="py-xxl bg-gradient-to-b from-[#038076]/5 via-background to-background relative overflow-hidden">
         <div className="absolute inset-0 opacity-5 pointer-events-none medical-pattern"></div>
 
-        <div className="max-w-max-width mx-auto px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
           <div className="lg:col-span-7 space-y-md">
             <span className="inline-flex items-center gap-xs bg-primary/10 text-primary border border-primary/20 px-md py-xs rounded-full text-xs font-bold uppercase tracking-wider">
               <span className="material-symbols-outlined text-[14px]">handshake</span> Therapy Co-Pay Support
@@ -163,7 +163,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* How PAP Works (Timeline) */}
       <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Timeline</p>
             <h2 className="text-3xl font-black text-on-surface">How PAP Works</h2>
@@ -191,7 +191,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* Who Can Apply Section */}
       <section className="py-xxl bg-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Patient Criteria</p>
             <h2 className="text-3xl font-black text-on-surface">Who Can Apply</h2>
@@ -219,7 +219,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* Benefits Section */}
       <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Added Value</p>
             <h2 className="text-3xl font-black text-on-surface">Program Benefits</h2>
@@ -247,7 +247,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* Required Documents Section */}
       <section className="py-xxl bg-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Preparation checklist</p>
             <h2 className="text-3xl font-black text-on-surface">Required Documents</h2>
@@ -275,7 +275,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* FAQ Section */}
       <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Clear Doubts</p>
             <h2 className="text-3xl font-black text-on-surface">Frequently Asked Questions</h2>
@@ -313,7 +313,7 @@ const PatientAssistanceProgramPage = () => {
 
       {/* Static Contact Section */}
       <section id="pap-contact" className="py-xxl bg-gradient-to-t from-[#038076]/5 via-background to-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/35 dark:border-outline/20 rounded-3xl p-lg md:p-xl shadow-lg max-w-4xl mx-auto text-center space-y-lg relative overflow-hidden">
             <div className="absolute -top-32 -left-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>

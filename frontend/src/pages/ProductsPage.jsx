@@ -140,7 +140,7 @@ const ProductsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
       {/* Breadcrumbs & Header */}
       <div className="mb-lg">

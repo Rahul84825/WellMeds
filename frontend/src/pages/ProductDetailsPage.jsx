@@ -529,7 +529,7 @@ const ProductDetails = () => {
     : 0;
 
   return (
-    <div className="max-w-[1550px] mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
       {/* Breadcrumbs */}
       <nav className="mb-lg text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">

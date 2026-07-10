@@ -98,7 +98,7 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="max-w-max-width mx-auto px-margin-desktop py-xxl text-center space-y-md">
+      <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center space-y-md">
         <span className="material-symbols-outlined text-5xl text-outline">lock</span>
         <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">Please log in to view your profile</h2>
         <Link to="/login" className="inline-block bg-primary text-white px-xl py-sm rounded-lg font-label-md font-bold hover:opacity-90">
@@ -109,7 +109,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
       <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold">My Profile</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-xl items-start">

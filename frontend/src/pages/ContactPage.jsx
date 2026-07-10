@@ -25,7 +25,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       <div className="text-center space-y-sm max-w-2xl mx-auto mb-xxl">
         <span className="bg-primary-container text-on-primary-container border border-primary/20 px-md py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">
           Get in Touch

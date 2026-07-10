@@ -291,7 +291,7 @@ const Login = () => {
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-xl px-margin-desktop bg-surface transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-[80vh] flex items-center justify-center py-xl px-margin-mobile md:px-margin-desktop bg-surface transition-colors duration-300 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 medical-pattern pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />

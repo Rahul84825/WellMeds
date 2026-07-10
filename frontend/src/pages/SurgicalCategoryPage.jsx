@@ -123,7 +123,7 @@ const SurgicalCategoryPage = () => {
 
   if (!category) {
     return (
-      <div className="max-w-7xl mx-auto px-margin-desktop py-xxl text-center">
+      <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
         <ShieldAlert className="mx-auto text-red-500 mb-md" size={48} />
         <h2 className="font-extrabold text-xl text-slate-800 dark:text-zinc-100">Category Not Found</h2>
         <p className="text-xs text-slate-400 mt-xs mb-lg">The surgical category you are looking for does not exist or has been disabled.</p>
@@ -138,7 +138,7 @@ const SurgicalCategoryPage = () => {
   const sortedProducts = getSortedProducts();
 
   return (
-    <div className="max-w-7xl mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">

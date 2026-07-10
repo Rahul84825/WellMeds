@@ -23,7 +23,7 @@ const About = () => {
   ];
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] space-y-xxl text-left">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] space-y-xxl text-left">
       {/* Intro Header */}
       <section className="text-center space-y-md max-w-3xl mx-auto py-xl">
         <span className="bg-primary-container text-on-primary-container border border-primary/20 px-md py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">

@@ -95,7 +95,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       <h1 className="font-headline-lg text-headline-lg text-on-surface mb-xl font-bold">Shopping Cart</h1>
 
       <div className="flex flex-col lg:flex-row gap-xl items-start">

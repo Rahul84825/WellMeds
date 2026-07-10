@@ -118,7 +118,7 @@ const SurgicalLandingPage = () => {
       {/* Hero Banner Section */}
       <section className="relative bg-gradient-to-br from-[#001f3f] via-[#004782] to-[#086b53] text-white py-16 md:py-24 overflow-hidden border-b border-slate-100 dark:border-zinc-800">
         <div className="absolute inset-0 medical-pattern opacity-10 pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-margin-desktop relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           <div className="space-y-6 md:space-y-8 animate-[fade-in_0.4s_ease-out]">
             <span className="inline-block bg-white/10 text-white text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider border border-white/20">
@@ -181,7 +181,7 @@ const SurgicalLandingPage = () => {
       </section>
 
       {/* Categories Grid Section */}
-      <section id="categories-section" className="py-16 max-w-7xl mx-auto px-margin-desktop">
+      <section id="categories-section" className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="text-center space-y-xs mb-12">
           <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
             Shop Surgical Categories
@@ -244,7 +244,7 @@ const SurgicalLandingPage = () => {
 
       {/* Featured Surgical Products Section */}
       <section className="bg-slate-100/50 dark:bg-zinc-900/20 py-16 border-y border-slate-100 dark:border-zinc-900">
-        <div className="max-w-7xl mx-auto px-margin-desktop">
+        <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md mb-12">
             <div>
               <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
@@ -282,7 +282,7 @@ const SurgicalLandingPage = () => {
       </section>
 
       {/* Why Buy Surgical Products from WellMeds */}
-      <section className="py-16 max-w-7xl mx-auto px-margin-desktop space-y-12">
+      <section className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop space-y-12">
         <div className="text-center space-y-xs">
           <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
             Why Buy Surgical Supplies From WellMeds
@@ -325,7 +325,7 @@ const SurgicalLandingPage = () => {
 
       {/* Trusted Brands */}
       <section className="bg-slate-100/30 dark:bg-zinc-900/10 py-12 border-t border-slate-100 dark:border-zinc-900">
-        <div className="max-w-7xl mx-auto px-margin-desktop text-center space-y-8">
+        <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop text-center space-y-8">
           <h3 className="font-extrabold text-xs text-slate-400 uppercase tracking-widest">
             Partnered Medical Manufacturers
           </h3>
@@ -340,7 +340,7 @@ const SurgicalLandingPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 max-w-4xl mx-auto px-margin-desktop space-y-12">
+      <section className="py-16 max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop space-y-12">
         <div className="text-center space-y-xs">
           <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
             Frequently Asked Questions
@@ -380,7 +380,7 @@ const SurgicalLandingPage = () => {
 
       {/* Bottom CTA Section */}
       <section className="bg-gradient-to-br from-[#004782] to-[#002b55] py-16 text-white border-t border-slate-100 dark:border-zinc-900">
-        <div className="max-w-4xl mx-auto px-margin-desktop text-center space-y-6">
+        <div className="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop text-center space-y-6">
           <h2 className="font-extrabold text-3xl">Professional Grade Medical Catalog</h2>
           <p className="text-slate-200 text-sm max-w-xl mx-auto leading-relaxed font-medium">
             Order certified hospital consumables, dressings, syringes, and clinical equipment. Fast shipping directly to your facility or home.

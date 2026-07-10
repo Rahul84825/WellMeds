@@ -237,7 +237,7 @@ const UploadPrescriptionPage = () => {
       {/* 1. HERO SECTION */}
       <section className="bg-gradient-to-br from-[#004782] via-[#055746] to-[#086b53] text-white py-16 relative overflow-hidden text-left">
         <div className="absolute inset-0 medical-pattern opacity-10 pointer-events-none"></div>
-        <div className="max-w-max-width mx-auto px-margin-desktop relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-lg">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-lg">
           <div className="space-y-md max-w-xl">
             <nav className="flex items-center text-xs text-white/70 gap-xs">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -285,7 +285,7 @@ const UploadPrescriptionPage = () => {
       </section>
 
       {/* Main Content Grid */}
-      <section className="py-12 max-w-max-width mx-auto px-margin-desktop">
+      <section className="py-12 max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
           
           {/* Left Column (70%) */}

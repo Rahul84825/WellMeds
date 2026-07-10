@@ -1,7 +1,9 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const FloatingWhatsApp = () => {
   const [hovered, setHovered] = useState(false);
+  const { pathname } = useLocation();
 
   const handleClick = () => {
     window.open("https://wa.me/919511289914", "_blank", "noopener,noreferrer");
@@ -14,12 +16,21 @@ const FloatingWhatsApp = () => {
     }
   };
 
+  // Determine if this is a page with a sticky bottom bar or primary CTAs at the bottom on mobile
+  const isOffsetPage = 
+    pathname.includes("/cart") || 
+    pathname.includes("/checkout") || 
+    pathname.includes("/upload-prescription") ||
+    pathname.startsWith("/products/") || 
+    pathname.startsWith("/surgical/");
+
   return (
     <div
-      className="fixed z-[9990] flex items-center gap-3
-                 right-4 bottom-4
-                 md:right-5 md:bottom-5
-                 lg:right-6 lg:bottom-6"
+      className={`fixed z-[9990] flex items-center gap-3 right-4 transition-all duration-300 md:right-5 lg:right-6 ${
+        isOffsetPage
+          ? "bottom-20 md:bottom-24 lg:bottom-6"
+          : "bottom-4 md:bottom-5 lg:bottom-6"
+      }`}
     >
       {/* Desktop hover tooltip — hidden on mobile */}
       <div

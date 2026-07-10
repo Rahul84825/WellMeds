@@ -42,7 +42,7 @@ const VerifyEmail = () => {
   }, [token]);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center py-xl px-margin-desktop bg-surface transition-colors duration-300">
+    <div className="min-h-[70vh] flex items-center justify-center py-xl px-margin-mobile md:px-margin-desktop bg-surface transition-colors duration-300">
       <div className="absolute inset-0 medical-pattern"></div>
 
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-center">

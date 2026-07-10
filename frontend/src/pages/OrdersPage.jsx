@@ -49,7 +49,7 @@ const Orders = () => {
 
   if (!user) {
     return (
-      <div className="max-w-max-width mx-auto px-margin-desktop py-xxl text-center">
+      <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
         <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">Please log in to view orders</h2>
       </div>
     );
@@ -65,7 +65,7 @@ const Orders = () => {
 
   if (error) {
     return (
-      <div className="max-w-max-width mx-auto px-margin-desktop py-xxl text-center">
+      <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
         <span className="material-symbols-outlined text-5xl text-error mb-md">error</span>
         <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">{error}</h2>
       </div>
@@ -73,7 +73,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
       <div>
         <h1 className="font-headline-lg text-headline-lg text-on-surface mb-xs font-bold">Order History</h1>
         <p className="font-body-sm text-on-surface-variant">

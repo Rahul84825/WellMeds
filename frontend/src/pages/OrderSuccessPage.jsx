@@ -11,7 +11,7 @@ const OrderSuccess = () => {
   // Fallback if accessed directly without state
   if (!order) {
     return (
-      <div className="max-w-max-width mx-auto px-margin-desktop py-xxl text-center">
+      <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
         <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">No order details found</h2>
         <Link to="/products" className="text-primary hover:underline mt-md inline-block">Continue Shopping</Link>
       </div>
@@ -19,7 +19,7 @@ const OrderSuccess = () => {
   }
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       <div className="max-w-2xl mx-auto space-y-xl text-center bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-xl shadow-lg">
         {/* Animated Checkmark Indicator */}
         <div className="space-y-sm flex flex-col items-center">

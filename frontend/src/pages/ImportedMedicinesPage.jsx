@@ -140,7 +140,7 @@ const ImportedMedicinesPage = () => {
     <div className="bg-background text-on-surface min-h-screen text-left">
       {/* Breadcrumbs */}
       <div className="border-b border-outline-variant/30 bg-surface-container-lowest/50 py-sm">
-        <div className="max-w-max-width mx-auto px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
           <Link to="/" className="hover:text-primary transition-colors">Home</Link>
           <span>/</span>
           <span className="text-primary font-bold">Imported Medicines</span>
@@ -152,7 +152,7 @@ const ImportedMedicinesPage = () => {
         {/* Decorative Grid BG */}
         <div className="absolute inset-0 opacity-5 pointer-events-none medical-pattern"></div>
         
-        <div className="max-w-max-width mx-auto px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
           <div className="lg:col-span-7 space-y-md">
             <span className="inline-flex items-center gap-xs bg-primary/10 text-primary border border-primary/20 px-md py-xs rounded-full text-xs font-bold uppercase tracking-wider">
               <span className="material-symbols-outlined text-[14px]">public</span> Global Medical Access
@@ -216,7 +216,7 @@ const ImportedMedicinesPage = () => {
 
       {/* How It Works Section */}
       <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Process flow</p>
             <h2 className="text-3xl font-black text-on-surface">How It Works</h2>
@@ -257,7 +257,7 @@ const ImportedMedicinesPage = () => {
 
       {/* Why Choose WellMeds Section */}
       <section className="py-xxl bg-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Quality Assurance</p>
             <h2 className="text-3xl font-black text-on-surface">Why Choose WellMeds</h2>
@@ -285,7 +285,7 @@ const ImportedMedicinesPage = () => {
 
       {/* Types of Imported Medicines Grid */}
       <section id="imported-categories" className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Specialty Offerings</p>
             <h2 className="text-3xl font-black text-on-surface">Specialty Therapeutic Areas</h2>
@@ -313,7 +313,7 @@ const ImportedMedicinesPage = () => {
 
       {/* Accordion FAQ Section */}
       <section className="py-xxl bg-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Clear Doubts</p>
             <h2 className="text-3xl font-black text-on-surface">Frequently Asked Questions</h2>
@@ -351,7 +351,7 @@ const ImportedMedicinesPage = () => {
 
       {/* Static Contact Section */}
       <section id="imported-contact" className="py-xxl bg-gradient-to-t from-[#038076]/5 via-background to-background">
-        <div className="max-w-max-width mx-auto px-margin-desktop">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/35 dark:border-outline/20 rounded-3xl p-lg md:p-xl shadow-lg max-w-4xl mx-auto text-center space-y-lg relative overflow-hidden">
             {/* Background Accent Gradient */}
             <div className="absolute -top-32 -left-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
