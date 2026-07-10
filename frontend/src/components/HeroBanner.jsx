@@ -26,7 +26,7 @@ const Hero = () => {
         backgroundPosition: "center top",
         backgroundRepeat:   "no-repeat",
       }}
-      className="relative w-full overflow-hidden h-[532px] md:h-[562px]
+      className="relative w-full overflow-hidden h-[400px] md:h-[432px]
                  flex flex-col items-center justify-center select-none"
     >
       {/* Content */}
@@ -39,14 +39,6 @@ const Hero = () => {
           <span className="text-white">More Than a Pharmacy.</span>
           <span className="text-[#7DDFD8] block mt-1">Your Partner in Better Health.</span>
         </h1>
-
-        {/* Sub */}
-        <p className="text-[13px] font-medium leading-relaxed text-white/60
-                      sm:text-[15px] lg:text-[17px]">
-          Life-saving medicines, surgical essentials, wellness products,
-          <br className="hidden md:inline" />
-          and expert support – all in one place.
-        </p>
 
         {/* Search bar — original rounded-full pill */}
         <div className="mt-2 w-full rounded-full border border-slate-200/80
@@ -133,24 +125,6 @@ const Hero = () => {
           >
             Search
           </button>
-        </div>
-
-        {/* Trust badges */}
-        <div className="mt-6 flex w-full flex-col items-center justify-between
-                        gap-4 font-semibold text-white/80 sm:flex-row">
-          {[
-            "FDA Approved Brands",
-            "Next-day Delivery",
-            "24/7 Pharmacist Support",
-          ].map((label) => (
-            <div key={label} className="flex items-center gap-3">
-              <div className="flex h-[22px] w-[22px] shrink-0 items-center
-                              justify-center rounded-full bg-[#038076] text-white">
-                <Check className="h-3.5 w-3.5 stroke-[3.5]" />
-              </div>
-              <span className="whitespace-nowrap text-[14px]">{label}</span>
-            </div>
-          ))}
         </div>
 
       </div>
