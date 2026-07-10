@@ -5,7 +5,7 @@ const QuickActionCards = () => {
   const cards = [1, 2, 3, 4];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center w-full my-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center w-full">
       {cards.map((cardId) => (
         <a
           key={cardId}

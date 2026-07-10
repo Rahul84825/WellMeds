@@ -125,8 +125,8 @@ const CategorySection = () => {
       aria-label="Shop by Category"
       style={{
         background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
-        paddingTop: "56px",
-        paddingBottom: "64px",
+        paddingTop: "48px",
+        paddingBottom: "56px",
       }}
     >
       <div className="home-section-container">

@@ -819,7 +819,7 @@ const CouponCarousel = () => {
     <section
       aria-label="Exclusive Offers and Coupons"
       style={{
-        padding: "56px 0 64px",
+        padding: "48px 0 56px",
         background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         position: "relative",
         overflow: "hidden",

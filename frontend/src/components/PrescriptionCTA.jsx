@@ -49,7 +49,7 @@ const PrescriptionCTA = () => {
   ];
 
   return (
-    <section className="py-5 md:py-20 bg-slate-50/50 dark:bg-zinc-950/40 border-y border-slate-100 dark:border-zinc-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-10 md:py-14 bg-slate-50/50 dark:bg-zinc-950/40 border-y border-slate-100 dark:border-zinc-900 relative overflow-hidden transition-colors duration-300">
       
       {/* Background Pattern Grid */}
       <div className="absolute inset-0 medical-pattern opacity-30 pointer-events-none"></div>

@@ -86,7 +86,7 @@ const PromoCarousel = () => {
   };
 
   return (
-    <div className="w-full my-md">
+    <div className="w-full">
       <div
         role="region"
         aria-roledescription="carousel"

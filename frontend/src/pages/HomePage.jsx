@@ -22,12 +22,12 @@ const HomePage = () => {
       <Hero />
 
       {/* Quick Action Cards Section */}
-      <HomeSectionContainer className="mt-6">
+      <HomeSectionContainer className="mt-12 md:mt-14">
         <QuickActionCards />
       </HomeSectionContainer>
 
       {/* NEW Promotional Carousel */}
-      <HomeSectionContainer>
+      <HomeSectionContainer className="mt-12 md:mt-14">
         <PromoCarousel />
       </HomeSectionContainer>
 
