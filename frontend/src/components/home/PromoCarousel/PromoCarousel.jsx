@@ -129,7 +129,7 @@ const PromoCarousel = () => {
                 alt={banner.alt}
                 loading="lazy"
                 draggable={false}
-                className="w-full h-full object-cover object-center block"
+                className="w-full h-full object-contain object-center block"
               />
             </div>
           ))}
@@ -156,7 +156,8 @@ const PromoCarousel = () => {
         .promo-banner-container {
           width: 100%;
           max-width: 1400px;
-          height: 480px;                          /* default desktop banner height */
+          aspect-ratio: 3200 / 1312;
+          height: auto;
           position: relative;
           overflow: hidden;
           border-radius: 24px;
@@ -263,13 +264,13 @@ const PromoCarousel = () => {
         /* ── Responsive Scaling ── */
         @media (max-width: 1024px) {
           .promo-banner-container {
-            height: 380px;                        /* tablet height scaling */
+            height: auto;                         /* use aspect ratio scaling */
           }
         }
 
         @media (max-width: 640px) {
           .promo-banner-container {
-            aspect-ratio: 16 / 9;                 /* maintain proportional aspect ratio on mobile */
+            aspect-ratio: 3200 / 1312;            /* maintain exact banner aspect ratio on mobile */
             height: auto;
             border-radius: 18px;
           }
