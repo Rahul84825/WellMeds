@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Hero from "../components/HeroBanner";
+import QuickActionCards from "../components/QuickActionCards";
 import PromoCarousel from "../components/home/PromoCarousel";
 import CategorySection from "../components/CategorySection";
 import FeaturedProductsSection from "../components/FeaturedProductsSection";
@@ -19,6 +20,11 @@ const HomePage = () => {
     <div className="animate-[fade-in_0.3s_ease-out]">
       {/* Hero Banner */}
       <Hero />
+
+      {/* Quick Action Cards Section */}
+      <HomeSectionContainer className="mt-6">
+        <QuickActionCards />
+      </HomeSectionContainer>
 
       {/* NEW Promotional Carousel */}
       <HomeSectionContainer>

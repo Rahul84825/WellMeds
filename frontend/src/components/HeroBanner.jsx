@@ -26,7 +26,7 @@ const Hero = () => {
         backgroundPosition: "center top",
         backgroundRepeat:   "no-repeat",
       }}
-      className="relative w-full overflow-hidden h-[400px] md:h-[432px]
+      className="relative w-full overflow-hidden h-[310px] md:h-[335px]
                  flex flex-col items-center justify-center select-none"
     >
       {/* Content */}
@@ -34,20 +34,20 @@ const Hero = () => {
                       items-center justify-center px-6 text-center gap-4">
 
         {/* Heading */}
-        <h1 className="text-[28px] font-extrabold leading-tight tracking-tight
-                       sm:text-[36px] lg:text-[46px]">
+        <h1 className="text-[25px] font-extrabold leading-tight tracking-tight
+                       sm:text-[32px] lg:text-[41px]">
           <span className="text-white">More Than a Pharmacy.</span>
           <span className="text-[#7DDFD8] block mt-1">Your Partner in Better Health.</span>
         </h1>
 
-        {/* Search bar — original rounded-full pill */}
+        {/* Search bar — refined rounded-full pill */}
         <div className="mt-2 w-full rounded-full border border-slate-200/80
-                        bg-white p-2 shadow-[0_15px_45px_rgba(3,128,118,0.12)]
+                        bg-white p-1.5 shadow-[0_15px_45px_rgba(3,128,118,0.12)]
                         focus-within:border-[#038076]
                         focus-within:ring-2 focus-within:ring-[#038076]/10
                         transition-all duration-300
                         flex flex-col md:flex-row items-center gap-3
-                        min-h-[64px] md:min-h-[72px]">
+                        min-h-[56px] md:min-h-[62px]">
 
           {/* Location picker */}
           <div className="relative w-full shrink-0 md:w-auto">
@@ -56,10 +56,10 @@ const Hero = () => {
               onClick={() => setLocationMenuOpen((v) => !v)}
               aria-label="Select delivery location"
               className="flex cursor-pointer items-center gap-3 rounded-full
-                         px-5 py-2 text-slate-800 transition-colors
+                         px-4 py-1.5 text-slate-800 transition-colors
                          hover:bg-slate-50 focus:outline-none"
             >
-              <MapPin className="h-6 w-6 shrink-0 text-[#038076]" />
+              <MapPin className="h-[22px] w-[22px] shrink-0 text-[#038076]" />
               <div className="flex flex-col items-start leading-none text-left">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
                   Deliver to
@@ -69,7 +69,7 @@ const Hero = () => {
                   {selectedLocation}
                   <ChevronDown
                     className={`h-3.5 w-3.5 text-slate-500 transition-transform
-                                ${locationMenuOpen ? "rotate-180" : ""}`}
+                              ${locationMenuOpen ? "rotate-180" : ""}`}
                   />
                 </span>
               </div>
@@ -106,8 +106,8 @@ const Hero = () => {
               placeholder="Search Medicines, Molecules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border-none bg-transparent py-3 pl-12 pr-4
-                         text-[15px] font-medium text-slate-800
+              className="w-full border-none bg-transparent py-2 pl-12 pr-4
+                         text-[15px] search-input-poppins text-slate-800
                          placeholder-slate-400 focus:outline-none focus:ring-0
                          sm:text-[16px]"
             />
@@ -118,7 +118,7 @@ const Hero = () => {
             type="button"
             onClick={handleHeroSearch}
             className="w-full shrink-0 cursor-pointer rounded-full bg-[#038076]
-                       px-8 py-3.5 text-[16px] font-bold text-white shadow-md
+                       px-7 py-2.5 text-[16px] font-bold text-white shadow-md
                        shadow-[#038076]/10 transition-all duration-300
                        hover:bg-[#02665e] hover:shadow-lg hover:shadow-[#038076]/15
                        active:scale-[0.98] md:w-auto"
