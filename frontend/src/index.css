@@ -210,11 +210,30 @@
   display: flex;
   flex-direction: column;
   gap: 32px; /* Section gap: reduced by further 23% */
+  max-width: 1200px !important; /* centered desktop container width */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 20px !important; /* Mobile horizontal padding: 16px-20px */
+  padding-right: 20px !important;
+}
+
+@media (min-width: 768px) {
+  .wellmeds-healthcare-container {
+    padding-left: 30px !important; /* Tablet horizontal padding */
+    padding-right: 30px !important;
+  }
 }
 
 @media (max-width: 768px) {
   .wellmeds-healthcare-container {
     gap: 23px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wellmeds-healthcare-container {
+    padding-left: clamp(40px, 5vw, 72px) !important; /* Desktop horizontal padding (+26% increase) */
+    padding-right: clamp(40px, 5vw, 72px) !important;
   }
 }
 
