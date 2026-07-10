@@ -25,71 +25,64 @@ const PrescriptionCTA = () => {
     {
       number: 1,
       title: "Upload Your Prescription",
-      description: "Upload through the website or share it via WhatsApp.",
+      description: "Upload through our secure portal or send it to us via WhatsApp.",
       icon: UploadCloud,
-      iconColor: "text-[#004782]",
-      borderColor: "border-[#004782]",
     },
     {
       number: 2,
       title: "Pharmacist Verification",
-      description: "Our licensed pharmacist reviews your prescription and confirms medicine availability.",
+      description: "Licensed pharmacists review the details and confirm medicine availability.",
       icon: ClipboardCheck,
-      iconColor: "text-[#086b53]",
-      borderColor: "border-[#086b53]",
     },
     {
       number: 3,
-      title: "Fast Delivery",
-      description: "Medicines are packed securely and delivered quickly across Pune and throughout India.",
+      title: "Fast Doorstep Delivery",
+      description: "Medicines are packaged securely and dispatched with temperature care.",
       icon: Truck,
-      iconColor: "text-[#004782]",
-      borderColor: "border-[#004782]",
     },
   ];
 
   return (
-    <section className="py-10 md:py-14 bg-slate-50/50 dark:bg-zinc-950/40 border-y border-slate-100 dark:border-zinc-900 relative overflow-hidden transition-colors duration-300">
-      
-      {/* Background Pattern Grid */}
-      <div className="absolute inset-0 medical-pattern opacity-30 pointer-events-none"></div>
- 
-      <div className="home-section-container relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-center">
+    <section className="py-10 md:py-14 bg-white dark:bg-zinc-950 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-stretch">
           
-          {/* Left Column: 35% Width Marketing */}
-          <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="space-y-4">
-              <span className="inline-block bg-[#004782]/10 dark:bg-[#004782]/20 text-[#004782] dark:text-[#a4c9ff] text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
-                How It Works
-              </span>
-              <h2 className="font-headline-md text-[22px] md:text-headline-md text-on-surface lg:text-headline-lg lg:font-headline-lg">
-                Get Your Medicines in 3 Simple Steps
+          {/* Left Column: Step Guide */}
+          <div className="lg:col-span-7 flex flex-col justify-center text-left">
+            <div className="space-y-3">
+              
+              <h2 className="text-[32px] font-extrabold leading-tight tracking-tight
+                             text-[#1D2B5C] dark:text-zinc-100">
+                Get Your Prescription Medicines in <span className="text-[#038076]">3 Simple Steps</span>
               </h2>
-              <p className="font-body-md text-[13px] md:text-sm lg:text-base text-on-surface-variant dark:text-surface-variant max-w-xl">
-                Upload your doctor's prescription and let WellMeds handle the rest with fast verification and reliable delivery.
-              </p>
             </div>
- 
-            {/* Vertical Timeline */}
-            <div className="relative pl-lg border-l-2 border-dashed border-outline-variant/60 dark:border-outline/40 space-y-lg ml-md pt-xs pb-xs">
+
+            {/* List of Steps */}
+            <div className="space-y-4 mt-6">
               {steps.map((step) => {
-                const IconComponent = step.icon;
                 return (
-                  <div key={step.number} className="relative group">
-                    {/* Badge centered on the line */}
-                    <div className={`absolute -left-[38px] top-0 w-9 h-9 bg-surface-container-lowest dark:bg-inverse-surface border-2 ${step.borderColor} rounded-full flex items-center justify-center ${step.iconColor} shadow-xs transition-transform duration-300 group-hover:scale-110`}>
-                      <IconComponent className="w-4.5 h-4.5" />
+                  <div
+                    key={step.number}
+                    className="group flex gap-4 rounded-xl border border-slate-100 bg-slate-50/60 p-4
+                               transition-all duration-200
+                               hover:-translate-y-0.5
+                               hover:border-[#038076]/25
+                               hover:bg-white
+                               hover:shadow-[0_6px_20px_rgba(3,128,118,0.06)]
+                               dark:border-zinc-800 dark:bg-zinc-900/60
+                               dark:hover:border-[#038076]/40 dark:hover:bg-zinc-900"
+                  >
+                    {/* Icon container */}
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-slate-100 shadow-xs text-[#004782] dark:bg-zinc-950 dark:border-zinc-800 dark:text-[#a4c9ff] font-extrabold text-[14px]">
+                      {step.number}
                     </div>
- 
-                    <div className="pl-sm">
-                      <h4 className="font-headline-sm text-[16px] md:text-headline-sm text-on-surface mb-xs flex items-center gap-sm">
-                        <span>{step.title}</span>
-                        <span className="hidden sm:inline-flex bg-surface-container dark:bg-surface-container-high text-on-surface-variant/70 dark:text-surface-variant/70 text-[10px] px-2 py-0.5 rounded-full font-medium">
-                          Step {step.number}
-                        </span>
-                      </h4>
-                      <p className="font-body-sm text-[13px] md:text-sm text-on-surface-variant dark:text-surface-variant leading-relaxed max-w-lg">
+
+                    {/* Step Content */}
+                    <div className="text-left">
+                      <h3 className="text-[14px] font-bold text-[#1D2B5C] dark:text-zinc-100 group-hover:text-[#038076] transition-colors leading-tight mb-1">
+                        {step.title}
+                      </h3>
+                      <p className="text-[12px] leading-relaxed text-slate-500 dark:text-zinc-400">
                         {step.description}
                       </p>
                     </div>
@@ -98,58 +91,65 @@ const PrescriptionCTA = () => {
               })}
             </div>
           </div>
- 
+
           {/* Right Column: Upload Card */}
-          <div className="lg:col-span-5 h-full flex flex-col justify-center">
-            <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/40 dark:border-outline/20 p-4 md:p-xl rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden flex flex-col items-center justify-center text-center">
+          <div className="lg:col-span-5 flex flex-col justify-center">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex flex-col justify-between h-full">
               
-              {/* Decorative radial background glow */}
-              <div className="absolute -right-20 -top-20 w-48 h-48 bg-[#004782]/5 dark:bg-[#004782]/10 rounded-full blur-2xl pointer-events-none"></div>
-              
-              {/* Upload Icon Badge */}
-              <div className="w-11 h-11 md:w-16 md:h-16 bg-[#004782]/10 dark:bg-[#004782]/20 text-[#004782] dark:text-[#a4c9ff] rounded-full flex items-center justify-center mb-md md:mb-lg shadow-inner group-hover:scale-105 transition-transform duration-300">
-                <UploadCloud className="w-6 h-6 md:w-8 md:h-8" />
-              </div>
- 
-              {/* Title & Info */}
-              <h3 className="font-headline-sm text-[18px] md:text-headline-sm text-on-surface mb-sm">
-                Upload Your Prescription
-              </h3>
-              
-              <div className="space-y-xs mb-md md:mb-lg">
-                <p className="font-body-sm text-[13px] md:text-sm text-on-surface-variant dark:text-surface-variant">
-                  Supported Formats: <strong className="text-on-surface dark:text-white font-semibold">PNG, JPG, JPEG, PDF</strong>
+              {/* Drop-zone style zone */}
+              <div className="border border-dashed border-[#038076]/30 dark:border-[#038076]/50 rounded-xl bg-slate-50/50 dark:bg-zinc-950/40 p-6 flex flex-col items-center justify-center text-center group transition-all hover:bg-slate-50 hover:border-[#038076]/65 dark:hover:bg-zinc-950/60">
+                
+                {/* Upload icon */}
+                <div className="w-12 h-12 rounded-xl bg-[#004782]/10 dark:bg-[#004782]/20 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 shrink-0">
+                  <UploadCloud className="w-6 h-6" />
+                </div>
+                
+                <h3 className="text-[15px] font-extrabold text-[#1D2B5C] dark:text-zinc-100 mb-1 leading-tight">
+                  Upload Prescription
+                </h3>
+                
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mb-4">
+                  PNG, JPG, JPEG, PDF (Max 10 MB)
                 </p>
-                <p className="text-[12px] text-on-surface-variant/70 dark:text-surface-variant/70">
-                  Maximum file size: <span className="font-medium">10 MB</span>
-                </p>
+
+                {/* Core Upload Button */}
+                <button
+                  onClick={handleUploadClick}
+                  className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-2.5 px-4 rounded-xl text-[13px] font-bold shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Select File to Upload</span>
+                </button>
               </div>
- 
-              {/* Action Button */}
-              <button
-                onClick={handleUploadClick}
-                className="w-full bg-[#004782] hover:bg-[#003866] text-white h-[45px] md:py-sm px-lg rounded-xl font-label-md text-label-md font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#004782] focus:ring-offset-2 flex items-center justify-center gap-xs cursor-pointer select-none"
-              >
-                <ShieldCheck className="w-5 h-5" />
-                <span>Upload Prescription</span>
-              </button>
- 
-              {/* Help & WhatsApp Link */}
-              <div className="mt-md pt-md border-t border-outline-variant/20 dark:border-outline/10 w-full text-center">
-                <p className="text-[12px] text-on-surface-variant/70 dark:text-surface-variant/70 mb-xs">
-                  Need Help?
+
+              {/* Benefit Bullets */}
+              <div className="mt-4 space-y-2 border-t border-slate-50 dark:border-zinc-800/60 pt-4 text-left">
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-zinc-300">
+                  <span className="text-[#038076] font-extrabold text-sm">&#10003;</span>
+                  <span>100% secure &amp; confidential prescription management</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-zinc-300">
+                  <span className="text-[#038076] font-extrabold text-sm">&#10003;</span>
+                  <span>Reviewed by certified pharmacists before checkout</span>
+                </div>
+              </div>
+
+              {/* WhatsApp Option */}
+              <div className="mt-4 pt-3 border-t border-slate-50 dark:border-zinc-800/60 text-center">
+                <p className="text-[11px] text-slate-400 dark:text-zinc-500 mb-2 font-medium">
+                  Prefer using WhatsApp? Send prescription here:
                 </p>
                 <a
                   href="https://wa.me/917420909445"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-xs text-[#086b53] dark:text-[#84d6b9] font-bold text-sm hover:underline hover:scale-[1.01] active:scale-[0.99] transition-transform"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50/50 hover:bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 px-3.5 py-1.5 text-emerald-700 dark:text-emerald-400 font-bold text-[12px] transition-all hover:-translate-y-0.5 hover:shadow-sm"
                 >
-                  <MessageCircle className="w-4 h-4 fill-current" />
-                  <span>WhatsApp Us: +91 74209 09445</span>
+                  <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                  <span>WhatsApp: +91 74209 09445</span>
                 </a>
               </div>
- 
+
             </div>
           </div>
 

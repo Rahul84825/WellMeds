@@ -55,20 +55,11 @@ const WhyChooseWellMeds = () => {
         {/* ── Header ── */}
         <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
-            <span className="inline-block mb-2 rounded-full bg-[#038076]/10 px-3 py-1
-                             text-[10px] font-bold uppercase tracking-widest text-[#038076]">
-              Our Quality Standards
-            </span>
-            <h2 className="text-[22px] font-extrabold leading-tight tracking-tight
-                           text-[#1D2B5C] dark:text-zinc-100 sm:text-[26px]">
+            <h2 className="text-[32px] font-extrabold leading-tight tracking-tight
+                           text-[#1D2B5C] dark:text-zinc-100">
               Why Choose{" "}
               <span className="text-[#038076]">WellMeds</span>?
             </h2>
-            <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed
-                          text-slate-500 dark:text-zinc-400">
-              Your trusted healthcare partner — authentic medicines and expert pharmacist
-              guidance when it matters most.
-            </p>
           </div>
 
           {/* CTA pill */}

@@ -141,23 +141,9 @@ const CategorySection = () => {
           }}
         >
           <div>
-            {/* Eyebrow label */}
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "#038076",
-                marginBottom: "6px",
-              }}
-            >
-              Healthcare Categories
-            </p>
-
             <h2
               style={{
-                fontSize: "clamp(22px, 3vw, 30px)",
+                fontSize: "clamp(32px, 3vw, 40px)",
                 fontWeight: 800,
                 color: "#0f172a",
                 lineHeight: 1.2,
@@ -167,17 +153,6 @@ const CategorySection = () => {
             >
               Shop by Category
             </h2>
-
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#64748b",
-                marginTop: "6px",
-                fontWeight: 400,
-              }}
-            >
-              Explore our curated range of medical products and wellness solutions.
-            </p>
           </div>
 
           {/* View All pill button */}
