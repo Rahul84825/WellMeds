@@ -6,6 +6,7 @@ import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
 import savingImg from "../../../assets/PromoCarousel/saving.png";
 import surgicalImg from "../../../assets/PromoCarousel/surgical.png";
 import cancerImg from "../../../assets/PromoCarousel/cancer.png";
+import coldChainImg from "../../../assets/PromoCarousel/cold-chain.png";
 
 const promoBanners = [
   {
@@ -27,6 +28,11 @@ const promoBanners = [
     id: "saving",
     img: savingImg,
     alt: "Affordable Healthcare: Direct-from-Manufacturer pricing delivering up to 85% savings on chronic care therapies"
+  },
+  {
+    id: "cold-chain",
+    img: coldChainImg,
+    alt: "Cold Chain Promo Banner"
   }
 ];
 
