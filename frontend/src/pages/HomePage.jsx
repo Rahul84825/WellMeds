@@ -37,6 +37,9 @@ const HomePage = () => {
       {/* Shop by Category strip */}
       <CategorySection />
 
+      {/* Surgical Devices / OTC Catalog Strip */}
+      <SurgicalProductsSection />
+
       {/* Featured Best Sellers Grid */}
       <FeaturedProductsSection />
 
@@ -57,9 +60,6 @@ const HomePage = () => {
 
       {/* Upload Rx Prescription CTA */}
       <PrescriptionCTA />
-
-      {/* Surgical Devices / OTC Catalog Strip */}
-      <SurgicalProductsSection />
 
       {/* Customer Testimonials & Reviews */}
       <TestimonialsSection />
