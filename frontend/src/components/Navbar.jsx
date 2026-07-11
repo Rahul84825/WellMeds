@@ -384,6 +384,7 @@ const NavActions = ({ isShrunk }) => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -428,32 +429,28 @@ const NavActions = ({ isShrunk }) => {
         type: "link",
         to: "/admin",
         label: "Admin Dashboard",
-        icon: LayoutDashboard,
-        className: "font-bold text-[#004782] bg-[#f2f6fa] border-l-4 border-[#004782] hover:bg-blue-50"
+        icon: LayoutDashboard
       });
       dropdownItems.push({
         id: "admin-products",
         type: "link",
-        to: "/admin/products",
+        to: "/products",
         label: "Products",
-        icon: Package,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: Package
       });
       dropdownItems.push({
         id: "admin-orders",
         type: "link",
-        to: "/admin/orders",
+        to: "/orders",
         label: "Orders",
-        icon: History,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: History
       });
       dropdownItems.push({
         id: "admin-prescriptions",
         type: "link",
-        to: "/admin/prescriptions",
+        to: "/upload-prescription",
         label: "Prescriptions",
-        icon: FileText,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: FileText
       });
     } else {
       dropdownItems.push({
@@ -461,24 +458,21 @@ const NavActions = ({ isShrunk }) => {
         type: "link",
         to: "/profile",
         label: "Profile",
-        icon: User,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: User
       });
       dropdownItems.push({
         id: "order-history",
         type: "link",
         to: "/orders",
         label: "Orders",
-        icon: History,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: History
       });
       dropdownItems.push({
         id: "my-prescriptions",
         type: "link",
         to: "/upload-prescription",
         label: "Prescriptions",
-        icon: FileText,
-        className: "text-gray-700 hover:bg-gray-50 font-medium"
+        icon: FileText
       });
     }
     dropdownItems.push({
@@ -486,8 +480,7 @@ const NavActions = ({ isShrunk }) => {
       type: "button",
       onClick: handleLogout,
       label: "Logout",
-      icon: LogOut,
-      className: "text-red-600 hover:bg-red-50 font-medium"
+      icon: LogOut
     });
   }
 
@@ -617,38 +610,61 @@ const NavActions = ({ isShrunk }) => {
             id="user-profile-menu"
             role="menu"
             aria-label="User Profile Options"
-            className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-[150] animate-[slide-up_0.15s_ease-out]"
+            className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xl z-[150] animate-[slide-up_0.15s_ease-out] overflow-hidden"
           >
-            <div className="px-4 py-2 border-b border-gray-100 mb-1">
-              <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email || user.phone || ""}</p>
+            {/* Header with Avatar */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 dark:border-zinc-800 select-none">
+              <div className="w-10 h-10 rounded-full bg-[#038076]/10 text-[#038076] dark:bg-[#038076]/20 dark:text-[#84d6b9] flex items-center justify-center font-extrabold text-base shrink-0">
+                {user.name ? user.name[0].toUpperCase() : "U"}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-bold text-gray-800 dark:text-zinc-100 truncate leading-snug">{user.name}</p>
+                <p className="text-[11px] text-gray-500 dark:text-zinc-400 truncate leading-normal">{user.email || user.phone || ""}</p>
+              </div>
             </div>
 
-            {dropdownItems.map((item, index) => {
-              const isLink = item.type === "link";
-              const Comp = isLink ? Link : "button";
-              const compProps = isLink ? { to: item.to } : { onClick: item.onClick, type: "button" };
+            {/* Menu Items */}
+            <div className="flex flex-col gap-1 px-2 pb-2">
+              {dropdownItems.map((item, index) => {
+                const isLink = item.type === "link";
+                const Comp = isLink ? Link : "button";
+                const compProps = isLink ? { to: item.to } : { onClick: item.onClick, type: "button" };
+                const isActive = isLink && (location.pathname === item.to || (item.to === "/admin" && location.pathname.startsWith("/admin")));
 
-              return (
-                <React.Fragment key={item.id}>
-                  {isAdmin && item.id === "admin-products" && (
-                    <hr className="border-gray-100 my-1" />
-                  )}
-                  {item.id === "logout" && (
-                    <hr className="border-gray-100 my-1" />
-                  )}
-                  <Comp
-                    ref={(el) => (menuItemsRefs.current[index] = el)}
-                    role="menuitem"
-                    {...compProps}
-                    className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none w-full text-left"
-                  >
-                    <item.icon className="w-4 h-4 text-gray-500" />
-                    <span className={item.className}>{item.label}</span>
-                  </Comp>
-                </React.Fragment>
-              );
-            })}
+                return (
+                  <React.Fragment key={item.id}>
+                    {item.id === "logout" && (
+                      <hr className="border-slate-100 dark:border-zinc-800 my-1 -mx-2" />
+                    )}
+                    <Comp
+                      ref={(el) => (menuItemsRefs.current[index] = el)}
+                      role="menuitem"
+                      {...compProps}
+                      className={`group flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold tracking-tight rounded-lg select-none transition-all duration-200 w-full text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#038076]/20
+                        ${item.id === "logout"
+                          ? "text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300"
+                          : isActive
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
+                            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                        }
+                      `}
+                    >
+                      <item.icon
+                        className={`w-[18px] h-[18px] shrink-0 transition-colors duration-200
+                          ${item.id === "logout"
+                            ? "text-red-500 group-hover:text-red-600 dark:text-red-400 dark:group-hover:text-red-300"
+                            : isActive
+                              ? "text-emerald-700 dark:text-emerald-400"
+                              : "text-slate-400 group-hover:text-slate-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"
+                          }
+                        `}
+                      />
+                      <span>{item.label}</span>
+                    </Comp>
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
