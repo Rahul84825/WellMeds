@@ -5,8 +5,6 @@ import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
-import Modal from "../components/Modal";
-import PrescriptionUpload from "../components/PrescriptionUpload";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
@@ -36,9 +34,6 @@ const ProductDetails = () => {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [zoomStyle, setZoomStyle] = useState({ display: "none" });
 
-  const [rxUploadOpen, setRxUploadOpen] = useState(false);
-  const [localRxFile, setLocalRxFile] = useState(null);
-
   // Accordion state for FAQs
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
 
@@ -67,7 +62,6 @@ const ProductDetails = () => {
         setProduct(prod);
         setActiveImageIdx(0);
         setQuantity(1);
-        setLocalRxFile(null);
         
         // Fetch all products for fallbacks
         const allProds = await api.getProductsList();
@@ -333,29 +327,14 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     if (product.inStock === false || product.stock === 0) return;
-    if (product.requiresRx && !localRxFile) {
-      setRxUploadOpen(true);
-      return;
-    }
-    addToCart({ ...product, rxUploaded: !!localRxFile, rxFile: localRxFile }, quantity);
+    addToCart(product, quantity);
     toast.success(`${quantity} item(s) added to cart.`);
   };
 
   const handleBuyNow = () => {
     if (product.inStock === false || product.stock === 0) return;
-    if (product.requiresRx && !localRxFile) {
-      setRxUploadOpen(true);
-      return;
-    }
-    addToCart({ ...product, rxUploaded: !!localRxFile, rxFile: localRxFile }, quantity);
+    addToCart(product, quantity);
     navigate("/cart");
-  };
-
-  const handleRxSuccess = (data) => {
-    setLocalRxFile(data.fileName);
-    setRxUploadOpen(false);
-    addToCart({ ...product, rxUploaded: true, rxFile: data.fileName }, quantity);
-    toast.success(`${quantity} prescription item(s) added to cart.`);
   };
 
   const handleShare = () => {
@@ -694,27 +673,6 @@ const ProductDetails = () => {
           </button>
         </div>
       </div>
-
-      {/* Prescription Verification Modal */}
-      <Modal
-        isOpen={rxUploadOpen}
-        onClose={() => setRxUploadOpen(false)}
-        title="Upload Prescription (Rx Required)"
-        maxWidth="max-w-md"
-      >
-        <div className="space-y-md mb-lg text-left">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            You are adding a regulated prescription drug: <strong className="text-on-surface">{product.name}</strong>.
-          </p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            To proceed, upload a valid medical prescription signed by a certified practitioner.
-          </p>
-        </div>
-        <PrescriptionUpload
-          onUploadSuccess={handleRxSuccess}
-          onClose={() => setRxUploadOpen(false)}
-        />
-      </Modal>
 
       {/* Fullscreen Preview Modal */}
       {isFullscreenOpen && createPortal(

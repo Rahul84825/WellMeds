@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
-import Modal from "./Modal";
-import PrescriptionUpload from "./PrescriptionUpload";
 import { formatCurrency } from "../utils/currency";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -11,8 +9,6 @@ import MiniTooltip from "./MiniTooltip";
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  const [rxUploadOpen, setRxUploadOpen]   = useState(false);
-  const [localRxFile, setLocalRxFile]     = useState(null);
   const [isAdding, setIsAdding]           = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null); // 'rx' | 'coldChain' | null
 
@@ -49,15 +45,9 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOOS) return;
-    if (isRx && !localRxFile) { setRxUploadOpen(true); return; }
     setIsAdding(true);
     try {
-      await addToCart(
-        isRx && localRxFile
-          ? { ...product, rxUploaded: true, rxFile: localRxFile }
-          : product,
-        1
-      );
+      await addToCart(product, 1);
       toast.success(`${product.name} added to cart!`);
     } catch (err) {
       console.error(err);
@@ -65,13 +55,6 @@ const ProductCard = ({ product }) => {
     } finally {
       setIsAdding(false);
     }
-  };
-
-  const handleRxSuccess = (data) => {
-    setLocalRxFile(data.fileName);
-    setRxUploadOpen(false);
-    addToCart({ ...product, rxUploaded: true, rxFile: data.fileName }, 1);
-    toast.success(`${product.name} added to cart with prescription!`);
   };
 
   const toggleTooltip = (key, e) => {
@@ -272,7 +255,6 @@ const ProductCard = ({ product }) => {
               disabled={isOOS || isAdding}
               aria-label={
                 isOOS ? "Out of Stock"
-                : isRx && !localRxFile ? "Upload prescription to add"
                 : `Add ${product.name} to cart`
               }
               className="flex min-h-[40px] w-full cursor-pointer items-center
@@ -285,8 +267,6 @@ const ProductCard = ({ product }) => {
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : isOOS ? (
                 "Out of Stock"
-              ) : isRx && !localRxFile ? (
-                "Upload Rx & Add"
               ) : (
                 "Add to Cart"
               )}
@@ -294,28 +274,6 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
       </div>
-
-      {/* Prescription modal */}
-      <Modal
-        isOpen={rxUploadOpen}
-        onClose={() => setRxUploadOpen(false)}
-        title="Upload Prescription (Rx Required)"
-        maxWidth="max-w-md"
-      >
-        <div className="mb-4 space-y-2 text-left">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            You are adding a regulated prescription drug:{" "}
-            <strong className="text-on-surface">{product.name}</strong>.
-          </p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            To proceed, upload a valid medical prescription signed by a certified practitioner.
-          </p>
-        </div>
-        <PrescriptionUpload
-          onUploadSuccess={handleRxSuccess}
-          onClose={() => setRxUploadOpen(false)}
-        />
-      </Modal>
     </>
   );
 };
