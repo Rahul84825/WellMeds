@@ -39,15 +39,17 @@ const QuickActionCards = () => {
           <a
             key={card.id}
             href="#"
-            className="quick-action-card"
+            className="quick-action-card-link"
             aria-label={card.ariaLabel}
           >
-            <img
-              src={card.image}
-              alt={card.alt}
-              className="quick-action-img"
-              loading="lazy"
-            />
+            <div className="quick-action-card">
+              <img
+                src={card.image}
+                alt={card.alt}
+                className="quick-action-img"
+                loading="lazy"
+              />
+            </div>
           </a>
         ))}
       </div>
@@ -62,54 +64,65 @@ const QuickActionCards = () => {
           box-sizing: border-box;
         }
 
+        /* Link Wrapper */
+        .quick-action-card-link {
+          display: block;
+          text-decoration: none;
+          outline: none;
+          box-sizing: border-box;
+          width: 100%;
+        }
+
         /* Card Shell */
         .quick-action-card {
-          display: block;
           width: 100%;
-          height: 96px; /* Desktop height (within 90-100px range) */
-          background: #ffffff;
+          aspect-ratio: 340 / 95; /* Strict 340x95 ratio */
+          display: flex;
+          flex-direction: column;
+          background: transparent;
           border-radius: 16px;
-          overflow: hidden;
+          overflow: hidden; /* clips image to rounded corners */
+          cursor: pointer;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
           transition: transform 0.25s ease, box-shadow 0.25s ease;
-          cursor: pointer;
-          text-decoration: none;
           box-sizing: border-box;
-          outline: none;
+          padding: 0;
+          margin: 0;
+          border: none;
         }
 
         /* Hover & Focus state */
-        .quick-action-card:hover {
+        .quick-action-card-link:hover .quick-action-card {
           transform: translateY(-3px);
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
 
-        .quick-action-card:focus-visible {
+        .quick-action-card-link:focus-visible .quick-action-card {
           outline: 3px solid #038076;
           outline-offset: 4px;
         }
 
-        /* Image element */
+        /* Image element - fills card completely */
         .quick-action-img {
           width: 100%;
           height: 100%;
           display: block;
           object-fit: cover;
           object-position: center;
+          padding: 0;
+          margin: 0;
+          border: none;
         }
 
-        /* Tablet responsiveness (2 cards per row) */
+        /* Tablet responsiveness (2 cards per row, same ratio) */
         @media (max-width: 1024px) and (min-width: 768px) {
           .quick-actions-container {
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
           }
-          .quick-action-card {
-            height: 96px;
-          }
         }
 
-        /* Mobile responsiveness (horizontal scroll track / swipe carousel) */
+        /* Mobile responsiveness (horizontal scroll track / swipe carousel, same ratio) */
         @media (max-width: 767px) {
           .quick-actions-container {
             display: flex;
@@ -130,11 +143,10 @@ const QuickActionCards = () => {
             display: none; /* Hide scrollbar for Chrome/Safari */
           }
 
-          .quick-action-card {
+          .quick-action-card-link {
             flex-shrink: 0;
             scroll-snap-align: start;
             width: 280px; /* Peek next cards for clear swipe affordance */
-            height: 84px; /* Mobile premium ratio */
           }
         }
       `}</style>
