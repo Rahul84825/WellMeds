@@ -41,11 +41,11 @@ const QuickActionCards = () => {
           className="block w-[280px] md:w-full flex-shrink-0 snap-start"
           aria-label={card.ariaLabel}
         >
-          <div className="w-full aspect-[340/95] rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer">
+          <div className="w-full aspect-[1355/280] rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
             <img
               src={card.image}
               alt={card.alt}
-              className="w-full h-full object-cover object-center block select-none pointer-events-none"
+              className="w-full h-full block object-fill object-center select-none pointer-events-none"
               loading="lazy"
             />
           </div>
