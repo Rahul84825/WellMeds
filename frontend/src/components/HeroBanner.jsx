@@ -37,7 +37,7 @@ const Hero = () => {
         <h1 className="text-[25px] font-extrabold leading-tight tracking-tight
                        sm:text-[32px] lg:text-[41px]">
           <span className="text-white">More Than a Pharmacy.</span>
-          <span className="text-[#7DDFD8] block mt-1">Your Partner in Better Health.</span>
+          <span className="text-[#038076] block mt-1">Your Partner in Better Health.</span>
         </h1>
 
         {/* Search bar — refined rounded-full pill */}

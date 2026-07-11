@@ -134,7 +134,8 @@ export default {
         "body-lg": ["Inter", "sans-serif"],
         "body-sm": ["Inter", "sans-serif"],
         "body-md": ["Inter", "sans-serif"],
-        "headline-lg-mobile": ["Inter", "sans-serif"]
+        "headline-lg-mobile": ["Inter", "sans-serif"],
+        "poppins": ["Poppins", "sans-serif"]
       },
       fontSize: {
         "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
