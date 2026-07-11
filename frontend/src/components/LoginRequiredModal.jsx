@@ -7,13 +7,18 @@ const LoginRequiredModal = ({
   isOpen, 
   onClose, 
   fromPath = "/checkout", 
-  message = "Please login to continue with your order. Your cart has been saved and will be ready after you sign in.",
-  cancelText = "Continue Shopping"
+  message = "Please login to continue checkout.",
+  cancelText = "Continue Browsing"
 }) => {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
     navigate("/login", { state: { from: fromPath } });
+    onClose();
+  };
+
+  const handleRegisterClick = () => {
+    navigate("/register", { state: { from: fromPath } });
     onClose();
   };
 
@@ -26,7 +31,7 @@ const LoginRequiredModal = ({
         </div>
         
         {/* Title / Description */}
-        <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2">
+        <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2 font-medium">
           {message}
         </p>
 
@@ -39,8 +44,14 @@ const LoginRequiredModal = ({
             Login
           </button>
           <button
+            onClick={handleRegisterClick}
+            className="w-full bg-secondary-container/20 text-[#038076] hover:bg-[#038076]/10 py-2.5 px-4 rounded-xl text-[13px] font-bold border border-[#038076]/25 transition-all cursor-pointer active:scale-[0.98]"
+          >
+            Create Account
+          </button>
+          <button
             onClick={onClose}
-            className="w-full border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 py-2.5 px-4 rounded-xl text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98]"
+            className="w-full border border-slate-200 dark:border-zinc-800 text-slate-550 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 py-2.5 px-4 rounded-xl text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98]"
           >
             {cancelText}
           </button>

@@ -5,9 +5,12 @@ export const prescriptionService = {
    * Upload a new prescription file.
    * @param {File} file - the prescription file (PDF/JPG/PNG)
    */
-  async uploadPrescription(file) {
+  async uploadPrescription(file, cartSnapshot) {
     const formData = new FormData();
     formData.append("prescription", file);
+    if (cartSnapshot) {
+      formData.append("cartSnapshot", JSON.stringify(cartSnapshot));
+    }
 
     const data = await apiInstance.post("/prescriptions/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },

@@ -93,6 +93,10 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    requiresRx: {
+      type: Boolean,
+      default: false,
+    },
     rxFile: {
       type: String,
       default: null,

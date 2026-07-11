@@ -45,6 +45,10 @@ const prescriptionSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    cartSnapshot: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,

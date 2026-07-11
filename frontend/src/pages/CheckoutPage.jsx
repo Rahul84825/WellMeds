@@ -37,6 +37,12 @@ const Checkout = () => {
   const [rxInfoModalOpen, setRxInfoModalOpen] = useState(false);
   const [rxSuccessModalOpen, setRxSuccessModalOpen] = useState(false);
 
+  // Dynamic Rx verification states
+  const [rxStatus, setRxStatus] = useState("Prescription Required"); // Prescription Required | Needs Re-verification | Pending Verification | Rejected | Verified
+  const [rxMessage, setRxMessage] = useState("");
+  const [myPrescriptions, setMyPrescriptions] = useState([]);
+  const [matchingRxDoc, setMatchingRxDoc] = useState(null);
+
   // Coupon
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -72,24 +78,95 @@ const Checkout = () => {
   const [loadingRxCheck, setLoadingRxCheck] = useState(requiresRx);
   const [hasApprovedRx, setHasApprovedRx] = useState(false);
 
-  useEffect(() => {
-    const checkRxStatus = async () => {
-      if (requiresRx && user) {
-        try {
-          const data = await api.getMyPrescriptions();
-          const approved = data.some((rx) => rx.status === "Approved");
-          setHasApprovedRx(approved);
-        } catch (err) {
-          console.error("Failed to check prescription status", err);
-        } finally {
-          setLoadingRxCheck(false);
+  // Helper to normalize items in cart for matching CartSnapshot
+  const getRxCartItems = useCallback((items) => {
+    return items.filter(item => item.requiresRx).map(item => ({
+      productId: (item._id || item.id)?.toString(),
+      name: item.name,
+      quantity: item.quantity,
+      strength: item.strength || item.specifications?.find(s => s.label?.toLowerCase() === 'strength')?.value || '',
+      packSize: item.packSize || item.specifications?.find(s => s.label?.toLowerCase() === 'pack size' || s.label?.toLowerCase() === 'packsize')?.value || ''
+    }));
+  }, []);
+
+  // Helper to compare a snapshot with the current cart
+  const isSnapshotMatchingCart = useCallback((snapshot, items) => {
+    if (!snapshot || !Array.isArray(snapshot.items)) return false;
+    const rxCart = getRxCartItems(items);
+    const snapshotItems = snapshot.items;
+    
+    if (rxCart.length !== snapshotItems.length) return false;
+    
+    return rxCart.every(cartItem => {
+      const match = snapshotItems.find(snapItem => snapItem.productId === cartItem.productId);
+      if (!match) return false;
+      return (
+        match.quantity === cartItem.quantity &&
+        match.strength === cartItem.strength &&
+        match.packSize === cartItem.packSize
+      );
+    });
+  }, [getRxCartItems]);
+
+  const checkRxStatus = useCallback(async () => {
+    if (requiresRx && user) {
+      try {
+        const data = await api.getMyPrescriptions();
+        setMyPrescriptions(data);
+        
+        // Find if there is any prescription matching the current cart snapshot
+        const match = data.find(rx => isSnapshotMatchingCart(rx.cartSnapshot, cartItems));
+        setMatchingRxDoc(match);
+        
+        if (match) {
+          if (match.status === "Approved") {
+            setRxStatus("Verified");
+            setHasApprovedRx(true);
+          } else if (match.status === "Pending Review" || match.status === "Under Verification") {
+            setRxStatus("Pending Verification");
+            setHasApprovedRx(false);
+          } else if (match.status === "Rejected") {
+            setRxStatus("Rejected");
+            setRxMessage(match.adminNotes || "Your prescription was rejected by our pharmacist.");
+            setHasApprovedRx(false);
+          } else {
+            setRxStatus("Prescription Required");
+            setHasApprovedRx(false);
+          }
+        } else {
+          setHasApprovedRx(false);
+          const hasAnyRx = data.length > 0;
+          if (hasAnyRx) {
+            setRxStatus("Needs Re-verification");
+          } else {
+            setRxStatus("Prescription Required");
+          }
         }
-      } else {
+      } catch (err) {
+        console.error("Failed to check prescription status", err);
+      } finally {
         setLoadingRxCheck(false);
       }
-    };
+    } else {
+      setLoadingRxCheck(false);
+    }
+  }, [requiresRx, user, cartItems, isSnapshotMatchingCart]);
+
+  useEffect(() => {
     checkRxStatus();
-  }, [requiresRx, user]);
+  }, [checkRxStatus]);
+
+  // Dynamic automatic status checking (polling every 8 seconds when Pending Verification)
+  useEffect(() => {
+    if (!requiresRx || !user) return;
+    let interval;
+    if (rxStatus === "Pending Verification") {
+      interval = setInterval(() => {
+        checkRxStatus();
+      }, 8000);
+    }
+    return () => clearInterval(interval);
+  }, [requiresRx, user, rxStatus, checkRxStatus]);
 
   // ─────────────────────────────────────────────────────
   // Coupon application
@@ -140,7 +217,7 @@ const Checkout = () => {
   // Order placement
   // ─────────────────────────────────────────────────────
   const handlePlaceOrder = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     if (!address || !city || !state || !pincode || !fullName || !email) {
       toast.warning("Please fill in all shipping details.");
@@ -152,8 +229,16 @@ const Checkout = () => {
         toast.info("Verifying prescription status, please wait...");
         return;
       }
-      if (!hasApprovedRx && !rxAttachedCheck) {
+      if (rxStatus === "Prescription Required" || rxStatus === "Needs Re-verification") {
         setRxInfoModalOpen(true);
+        return;
+      }
+      if (rxStatus === "Rejected") {
+        setRxModalOpen(true);
+        return;
+      }
+      if (rxStatus === "Pending Verification") {
+        toast.info("Waiting for pharmacist verification. Please wait until approved.");
         return;
       }
     }
@@ -179,8 +264,8 @@ const Checkout = () => {
         discount: discountAmount,
         couponCode: couponApplied?.code || null,
         requiresRx,
-        rxUploaded: requiresRx ? rxAttachedCheck : false,
-        rxFile: rxFileName || cartItems.find((i) => i.rxFile)?.rxFile || null,
+        rxUploaded: requiresRx ? (rxStatus === "Verified") : false,
+        rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
         shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
         paymentMethod,
       };
@@ -206,6 +291,7 @@ const Checkout = () => {
     setRxAttached(true);
     setRxModalOpen(false);
     setRxSuccessModalOpen(true);
+    checkRxStatus();
   };
 
   if (cartItems.length === 0) {
@@ -349,65 +435,110 @@ const Checkout = () => {
 
               {loadingRxCheck ? (
                 <div className="py-md flex justify-center"><Loader size="sm" /></div>
-              ) : !hasApprovedRx ? (
-                <div className="bg-error-container/20 border-2 border-error/30 rounded-xl p-md space-y-sm text-error text-left">
-                  <div className="flex items-start gap-xs">
-                    <span className="material-symbols-outlined text-2xl shrink-0">warning</span>
+              ) : rxStatus === "Verified" ? (
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-md flex items-center justify-between text-emerald-600">
+                  <div className="flex items-center gap-xs">
+                    <span className="material-symbols-outlined text-[24px] text-emerald-500">verified</span>
                     <div>
-                      <h4 className="font-bold text-sm text-on-surface">Prescription Approval Required</h4>
-                      <p className="text-xs mt-1 text-on-surface-variant leading-relaxed">
-                        You do not have an approved prescription on file. Regulation requires a verified prescription to complete checkout.
+                      <h4 className="font-label-md text-sm font-bold text-slate-800 dark:text-zinc-150">Prescription Verified</h4>
+                      <p className="text-[11px] text-slate-450 mt-0.5 truncate max-w-[200px]">
+                        {matchingRxDoc?.name || "Verified Prescription Document"}
                       </p>
                     </div>
                   </div>
-                  <div className="pt-sm border-t border-error/10 flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
-                    <p className="text-[10px] text-on-surface-variant leading-tight">
-                      Please upload a prescription sheet and await review (takes 5-10 minutes).
-                    </p>
-                    <Link
-                      to="/upload-prescription"
-                      className="bg-[#004782] text-white px-sm py-1.5 rounded-lg text-xs font-bold text-center hover:opacity-90 active:scale-95 transition-all inline-block shrink-0"
-                    >
-                      Upload Prescription
-                    </Link>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRxModalOpen(true)}
+                    className="text-[#038076] font-bold text-xs hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
                 </div>
-              ) : (
-                <>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                    Regulated items require prescription upload to verify and dispense this order.
-                  </p>
-
-                  {rxAttachedCheck ? (
-                    <div className="bg-secondary-container/20 border border-secondary/20 rounded-xl p-md flex items-center justify-between text-secondary">
-                      <div className="flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-[24px]">verified</span>
-                        <div>
-                          <h4 className="font-label-sm text-label-sm font-bold">Prescription Document Attached</h4>
-                          <p className="text-[12px] text-on-surface-variant leading-none mt-0.5">
-                            {rxFileName || cartItems.find((i) => i.rxFile)?.rxFile || "Attached from Cart"}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => { setRxAttached(false); setRxFileName(""); }}
-                        className="text-error font-bold text-sm hover:underline"
-                      >
-                        Change
-                      </button>
+              ) : rxStatus === "Pending Verification" ? (
+                <div className="bg-amber-500/[0.03] border border-amber-500/20 rounded-xl p-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-sm">
+                  <div className="flex items-start gap-xs">
+                    <span className="material-symbols-outlined text-2xl text-amber-500 shrink-0 animate-spin">refresh</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-150">Waiting for Pharmacist Verification</h4>
+                      <p className="text-xs text-slate-455 dark:text-zinc-450 leading-relaxed mt-0.5">
+                        We are verifying prescription "{matchingRxDoc?.name || "Document"}". Please wait a moment...
+                      </p>
                     </div>
-                  ) : (
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => checkRxStatus()}
+                    className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 px-md py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    Check Status
+                  </button>
+                </div>
+              ) : rxStatus === "Rejected" ? (
+                <div className="bg-rose-500/[0.03] border border-rose-500/20 rounded-xl p-md space-y-sm text-left">
+                  <div className="flex items-start gap-xs">
+                    <span className="material-symbols-outlined text-2xl text-rose-500 shrink-0">error</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-150">Prescription Rejected</h4>
+                      <p className="text-xs text-rose-550/90 leading-relaxed mt-0.5">
+                        Reason: {rxMessage || "Prescription does not meet regulated criteria."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-sm border-t border-rose-500/10 flex justify-between items-center">
+                    <span className="text-[10px] text-slate-450">Please upload a valid, signed doctor's prescription sheet.</span>
                     <button
                       type="button"
                       onClick={() => setRxModalOpen(true)}
-                      className="w-full py-md border-2 border-dashed border-outline-variant hover:border-primary rounded-xl flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all"
+                      className="bg-rose-600 text-white px-md py-1.5 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-3xl mb-xs">cloud_upload</span>
-                      <span className="font-label-md text-sm font-bold">Attach Prescription Document</span>
+                      Upload Prescription
                     </button>
-                  )}
-                </>
+                  </div>
+                </div>
+              ) : rxStatus === "Needs Re-verification" ? (
+                <div className="bg-sky-500/[0.03] border border-sky-500/20 rounded-xl p-md space-y-sm text-left">
+                  <div className="flex items-start gap-xs">
+                    <span className="material-symbols-outlined text-2xl text-sky-600 shrink-0">published_with_changes</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-150">Needs Re-verification</h4>
+                      <p className="text-xs text-slate-450 dark:text-zinc-400 leading-relaxed mt-0.5">
+                        Your cart items or quantities have changed since your last prescription upload. Previous verification is invalidated.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-sm border-t border-sky-500/10 flex justify-between items-center">
+                    <span className="text-[10px] text-slate-455">Regulation requires you to upload a prescription for the current cart snapshot.</span>
+                    <button
+                      type="button"
+                      onClick={() => setRxInfoModalOpen(true)}
+                      className="bg-[#038076] hover:bg-[#02655f] text-white px-md py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Upload Prescription
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-amber-500/[0.03] border border-amber-500/20 rounded-xl p-md space-y-sm text-left">
+                  <div className="flex items-start gap-xs">
+                    <span className="material-symbols-outlined text-2xl text-amber-500 shrink-0">warning</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-150">Prescription Required</h4>
+                      <p className="text-xs text-slate-455 dark:text-zinc-400 leading-relaxed mt-0.5">
+                        You are purchasing regulated medicines. Please upload a valid medical prescription signed by a certified doctor.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-sm border-t border-amber-500/10 flex justify-between items-center">
+                    <span className="text-[10px] text-slate-455">Verifications are processed by our licensed pharmacists.</span>
+                    <button
+                      type="button"
+                      onClick={() => setRxInfoModalOpen(true)}
+                      className="bg-[#004782] text-white px-md py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
+                    >
+                      Upload Prescription
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -679,15 +810,43 @@ const Checkout = () => {
             </div>
 
             <button
-              onClick={handlePlaceOrder}
-              disabled={isSubmitting}
-              className="w-full bg-secondary text-white font-bold py-md rounded-lg hover:bg-on-secondary-container transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm shadow-md"
+              onClick={
+                requiresRx && rxStatus !== "Verified"
+                  ? (e) => {
+                      e.preventDefault();
+                      if (rxStatus === "Rejected") {
+                        setRxModalOpen(true);
+                      } else if (rxStatus === "Prescription Required" || rxStatus === "Needs Re-verification") {
+                        setRxInfoModalOpen(true);
+                      }
+                    }
+                  : handlePlaceOrder
+              }
+              disabled={isSubmitting || (requiresRx && rxStatus === "Pending Verification")}
+              className={`w-full font-bold py-md rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-sm shadow-md cursor-pointer select-none ${
+                requiresRx && rxStatus === "Pending Verification"
+                  ? "bg-slate-350 text-slate-500 dark:bg-zinc-800 dark:text-zinc-550 border border-slate-200 dark:border-zinc-700/40"
+                  : requiresRx && rxStatus === "Rejected"
+                  ? "bg-rose-600 hover:bg-rose-700 text-white"
+                  : requiresRx && rxStatus !== "Verified"
+                  ? "bg-[#038076] hover:bg-[#02655f] text-white"
+                  : "bg-secondary text-white hover:bg-on-secondary-container"
+              }`}
             >
               {isSubmitting ? (
                 <>
                   <Loader size="sm" color="white" />
                   Processing Order...
                 </>
+              ) : requiresRx && rxStatus === "Pending Verification" ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin text-slate-450 dark:text-zinc-550" />
+                  Waiting for Pharmacist Verification
+                </>
+              ) : requiresRx && rxStatus === "Rejected" ? (
+                "Upload New Prescription"
+              ) : requiresRx && rxStatus !== "Verified" ? (
+                "Upload Prescription"
               ) : (
                 "Place Secure Order"
               )}
@@ -710,14 +869,26 @@ const Checkout = () => {
         showCloseButton={true}
       >
         <div className="flex flex-col items-center text-center space-y-4 py-4 select-none">
-          {/* Illustration / Icon */}
-          <div className="w-16 h-16 rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] dark:text-[#84d6b9] flex items-center justify-center animate-pulse">
-            <ClipboardList className="w-8 h-8" />
+          {/* Modern Premium Illustration */}
+          <div className="relative mb-2">
+            <div className="absolute inset-0 rounded-full bg-teal-500/10 blur-xl animate-pulse"></div>
+            <div className="relative w-20 h-20 rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] dark:text-[#84d6b9] flex items-center justify-center border border-[#038076]/10 shadow-lg">
+              <ClipboardList className="w-10 h-10" />
+              <div className="absolute -bottom-1 -right-1 bg-[#086b53] text-white p-1 rounded-full border border-white text-[10px]">
+                <Clock size={12} className="animate-spin" />
+              </div>
+            </div>
           </div>
 
-          <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2">
+          <p className="font-body-md text-sm leading-relaxed text-slate-500 dark:text-zinc-400 px-2 font-medium">
             One or more medicines in your cart require a valid doctor's prescription before they can be processed.
           </p>
+
+          {/* Estimated verification time */}
+          <div className="bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 rounded-xl px-4 py-2 text-xs font-semibold text-[#038076] dark:text-[#84d6b9] inline-flex items-center gap-1.5">
+            <Clock size={14} />
+            <span>Estimated verification time: 5-10 mins</span>
+          </div>
 
           {/* 3 Steps */}
           <div className="w-full space-y-4 my-6 text-left border-y border-slate-100 dark:border-zinc-800/80 py-6">
@@ -739,7 +910,7 @@ const Checkout = () => {
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Step 2</span>
-                <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-0.5">Our licensed pharmacist verifies your prescription.</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-0.5">Our licensed pharmacist verifies your medicines.</p>
               </div>
             </div>
 
@@ -750,21 +921,29 @@ const Checkout = () => {
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-450">Step 3</span>
-                <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-0.5">Once approved, your order proceeds for payment and dispatch.</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-0.5">After approval, complete payment and we'll dispatch your order.</p>
               </div>
             </div>
           </div>
 
-          {/* Button */}
-          <button
-            onClick={() => {
-              setRxInfoModalOpen(false);
-              setRxModalOpen(true);
-            }}
-            className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-3 px-4 rounded-xl text-[13px] font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98]"
-          >
-            I Understand
-          </button>
+          {/* Buttons */}
+          <div className="w-full flex flex-col sm:flex-row gap-2 pt-2">
+            <button
+              onClick={() => {
+                setRxInfoModalOpen(false);
+                setRxModalOpen(true);
+              }}
+              className="flex-1 bg-[#038076] hover:bg-[#02655f] text-white py-3 px-4 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98] select-none"
+            >
+              Upload Prescription
+            </button>
+            <button
+              onClick={() => setRxInfoModalOpen(false)}
+              className="flex-1 border border-slate-200 dark:border-zinc-800 text-slate-555 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] select-none"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </Modal>
 
@@ -783,6 +962,11 @@ const Checkout = () => {
         <PrescriptionUpload
           onUploadSuccess={handleRxSuccess}
           onClose={() => setRxModalOpen(false)}
+          cartSnapshot={{
+            items: getRxCartItems(cartItems),
+            timestamp: new Date().toISOString(),
+            userId: user?._id || user?.id
+          }}
         />
       </Modal>
 
@@ -819,7 +1003,6 @@ const Checkout = () => {
           <button
             onClick={() => {
               setRxSuccessModalOpen(false);
-              handlePlaceOrder();
             }}
             className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-3 px-4 rounded-xl text-[13px] font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98]"
           >

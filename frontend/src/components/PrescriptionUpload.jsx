@@ -1,11 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { api } from "../services/api";
 
-const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
+const PrescriptionUpload = ({ onUploadSuccess, onClose, cartSnapshot }) => {
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Clean up object URL when component unmounts
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -25,10 +36,11 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
   const validateAndSetFile = (selectedFile) => {
     if (!selectedFile) return;
     
-    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+    const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/webp"];
     if (!validTypes.includes(selectedFile.type)) {
-      setError("Please upload a valid PDF, JPEG, or PNG file.");
+      setError("Please upload a valid PDF, JPEG, PNG, or WEBP file.");
       setFile(null);
+      setPreviewUrl(null);
       return;
     }
     
@@ -36,11 +48,20 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
     if (selectedFile.size > 10 * 1024 * 1024) {
       setError("File size exceeds 10MB limit.");
       setFile(null);
+      setPreviewUrl(null);
       return;
     }
 
     setError("");
     setFile(selectedFile);
+
+    // Create object URL for preview if it's an image
+    if (selectedFile.type.startsWith("image/")) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -52,11 +73,31 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
 
     setIsUploading(true);
     setError("");
+    setUploadProgress(10);
+
+    const progressInterval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 15;
+      });
+    }, 150);
+
     try {
-      const data = await api.uploadPrescription(file);
-      setIsUploading(false);
-      onUploadSuccess(data);
+      const data = await api.uploadPrescription(file, cartSnapshot);
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress(0);
+        onUploadSuccess(data);
+      }, 300);
     } catch (err) {
+      clearInterval(progressInterval);
+      setUploadProgress(0);
       console.error(err);
       setError(err.response?.data?.message || "File upload failed. Please try again.");
       setIsUploading(false);
@@ -73,7 +114,7 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
         <input
           type="file"
           id="rx-file-input"
-          accept=".pdf,.jpg,.jpeg,.png"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -83,7 +124,7 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
             {file ? file.name : "Drag & drop your prescription here"}
           </p>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            or click to browse from device (PDF, JPG, PNG up to 10MB)
+            or click to browse from device (PDF, JPG, PNG, WEBP up to 10MB)
           </p>
         </label>
       </div>
@@ -96,18 +137,46 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose }) => {
       )}
 
       {file && !error && (
-        <div className="bg-secondary-container/20 border border-secondary/30 text-on-secondary-container p-md rounded-lg text-body-sm flex items-center justify-between">
-          <div className="flex items-center gap-xs">
-            <span className="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
-            <span className="font-medium">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+        <div className="bg-secondary-container/20 border border-secondary/30 text-on-secondary-container p-md rounded-lg text-body-sm flex flex-col gap-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-xs">
+              <span className="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+              <span className="font-medium truncate max-w-[220px]">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setFile(null);
+                if (previewUrl) {
+                  URL.revokeObjectURL(previewUrl);
+                  setPreviewUrl(null);
+                }
+              }}
+              className="text-on-surface-variant hover:text-error transition-colors p-1"
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setFile(null)}
-            className="text-on-surface-variant hover:text-error transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-          </button>
+          {previewUrl && (
+            <div className="relative w-full max-h-[160px] rounded-lg overflow-hidden border border-outline-variant/60 bg-surface-container-low flex items-center justify-center p-1 animate-[fade-in_0.2s_ease-out]">
+              <img src={previewUrl} alt="Prescription Preview" className="max-h-[150px] object-contain rounded-md" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {isUploading && (
+        <div className="space-y-xs w-full animate-[fade-in_0.2s_ease-out]">
+          <div className="flex justify-between text-[11px] font-bold text-secondary">
+            <span>Uploading Prescription...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-secondary h-full transition-all duration-300 ease-out animate-[pulse_1.5s_infinite]"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
         </div>
       )}
 

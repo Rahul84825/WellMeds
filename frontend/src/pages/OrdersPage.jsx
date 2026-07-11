@@ -180,13 +180,20 @@ const Orders = () => {
                   </div>
                 </div>
 
-                {/* Rx badge if prescription required */}
-                {order.rxUploaded && (
-                  <div className="inline-flex items-center gap-xs px-sm py-0.5 bg-secondary-container/30 text-on-secondary-container rounded text-xs font-semibold">
-                    <span className="material-symbols-outlined text-[14px]">verified</span>
-                    Prescription Attached
-                  </div>
-                )}
+                {/* Rx verification status badge */}
+                <div className="flex gap-2 items-center flex-wrap pt-sm">
+                  {order.requiresRx ? (
+                    <div className="inline-flex items-center gap-xs px-sm py-1 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold shadow-sm">
+                      <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
+                      <span>Prescription Verified</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-xs px-sm py-1 bg-slate-105 text-slate-500 dark:bg-zinc-800 dark:text-zinc-450 border border-slate-200/50 dark:border-zinc-700/60 rounded text-xs font-bold">
+                      <span className="material-symbols-outlined text-[14px]">gpp_good</span>
+                      <span>No Prescription Required</span>
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}

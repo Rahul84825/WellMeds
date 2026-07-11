@@ -129,6 +129,7 @@ export const placeOrder = async (req, res, next) => {
       tax,
       total: finalAmount, // matches legacy 'total' field
       finalAmount, // matches new extended 'finalAmount' field
+      requiresRx: orderRequiresRx,
       status: orderRequiresRx ? "Prescription Review" : "Processing",
     });
 

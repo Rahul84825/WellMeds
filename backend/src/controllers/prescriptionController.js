@@ -21,6 +21,7 @@ export const uploadPrescription = async (req, res, next) => {
       fileSize: req.file.size || 0,
       fileType: req.file.mimetype || "",
       status: "Pending Review",
+      cartSnapshot: req.body.cartSnapshot ? JSON.parse(req.body.cartSnapshot) : null,
     });
 
     res.status(201).json({

@@ -161,12 +161,12 @@ const Profile = () => {
           </button>
         </div>
 
-        {/* Prescription Logs */}
+        {/* Prescription Logs - Premium Prescription Center */}
         <div className="md:col-span-2 bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg shadow-sm space-y-md">
           <div className="flex items-center justify-between pb-md border-b border-outline-variant/60 mb-lg">
             <div>
-              <h3 className="font-label-md text-label-md text-on-surface font-bold">Prescription Document Logs (Rx)</h3>
-              <p className="text-xs text-on-surface-variant mt-0.5">{prescriptions.length} document{prescriptions.length !== 1 ? "s" : ""} uploaded</p>
+              <h3 className="font-label-md text-label-md text-on-surface font-bold text-base">Prescription Center</h3>
+              <p className="text-xs text-on-surface-variant mt-0.5">{prescriptions.length} record{prescriptions.length !== 1 ? "s" : ""} found</p>
             </div>
             <div className="flex items-center gap-sm">
               <Link
@@ -178,7 +178,7 @@ const Profile = () => {
               </Link>
               <button
                 onClick={() => setUploadOpen(true)}
-                className="bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-xs font-bold hover:bg-primary-container active:scale-95 transition-all flex items-center gap-xs"
+                className="bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-xs font-bold hover:bg-primary-container active:scale-95 transition-all flex items-center gap-xs cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
                 Upload New Rx
@@ -186,66 +186,108 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-outline-variant text-label-sm text-on-surface-variant text-xs uppercase">
-                  <th className="py-sm font-bold">Document Name</th>
-                  <th className="py-sm font-bold">Date Uploaded</th>
-                  <th className="py-sm font-bold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/50 text-body-sm text-on-surface-variant dark:text-surface-variant">
-                {loadingRx ? (
-                  <tr>
-                    <td colSpan="3" className="py-lg text-center">
-                      <div className="flex justify-center py-md"><Loader size="sm" /></div>
-                    </td>
-                  </tr>
-                ) : prescriptions.length === 0 ? (
-                  <tr>
-                    <td colSpan="3" className="py-xl text-center">
+          <div className="space-y-sm">
+            {loadingRx ? (
+              <div className="flex justify-center py-lg"><Loader size="sm" /></div>
+            ) : prescriptions.length === 0 ? (
+              <div className="py-xl text-center border border-dashed border-outline-variant/60 rounded-xl bg-surface-container-low/20">
+                <div className="space-y-sm">
+                  <span className="material-symbols-outlined text-4xl text-outline block">description</span>
+                  <p className="text-on-surface-variant/60 text-sm font-semibold">No prescription records found.</p>
+                  <button
+                    onClick={() => setUploadOpen(true)}
+                    className="text-primary text-sm font-semibold hover:underline cursor-pointer"
+                  >
+                    Upload your first prescription →
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                {prescriptions.map((rx) => {
+                  const { badge: badgeClass, dot: dotClass } = getRxStatusStyle(rx.status);
+                  const uploadDate = rx.createdAt ? formatDate(rx.createdAt) : "—";
+                  const verificationDate = rx.approvedAt 
+                    ? formatDate(rx.approvedAt) 
+                    : (rx.status === "Rejected" && rx.updatedAt ? formatDate(rx.updatedAt) : "—");
+                  
+                  return (
+                    <div 
+                      key={rx.id || rx._id} 
+                      className="border border-outline-variant/50 dark:border-outline/30 rounded-2xl p-md bg-surface-container-low/10 hover:bg-surface-container-low/30 transition-all space-y-md flex flex-col justify-between"
+                    >
+                      {/* Header */}
                       <div className="space-y-sm">
-                        <span className="material-symbols-outlined text-4xl text-outline block">description</span>
-                        <p className="text-on-surface-variant/60">No prescription records found.</p>
-                        <button
-                          onClick={() => setUploadOpen(true)}
-                          className="text-primary text-sm font-semibold hover:underline"
-                        >
-                          Upload your first prescription →
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  prescriptions.map((rx) => {
-                    const { badge: badgeClass, dot: dotClass } = getRxStatusStyle(rx.status);
-                    const displayDate = rx.date || (rx.createdAt
-                      ? formatDate(rx.createdAt)
-                      : "—");
-                    return (
-                      <tr key={rx.id || rx._id} className="hover:bg-surface-container-low/30 transition-colors">
-                        <td className="py-md font-semibold text-on-surface">
-                          <div className="flex items-center gap-xs">
-                            <span className="material-symbols-outlined text-outline text-[18px]">
+                        <div className="flex justify-between items-start gap-xs pb-sm border-b border-outline-variant/30">
+                          <div className="flex items-start gap-xs">
+                            <span className="material-symbols-outlined text-outline text-[18px] mt-0.5">
                               {rx.fileType === "application/pdf" || rx.name?.endsWith(".pdf") ? "picture_as_pdf" : "image"}
                             </span>
-                            <span className="truncate max-w-[180px]">{rx.name}</span>
+                            <div>
+                              <a 
+                                href={rx.fileUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="font-extrabold text-slate-800 dark:text-zinc-150 hover:underline hover:text-primary transition-all text-xs truncate max-w-[130px] block"
+                                title={rx.name}
+                              >
+                                {rx.name}
+                              </a>
+                              <span className="text-[9px] text-slate-400 block mt-0.5">
+                                Size: {rx.fileSize ? `${(rx.fileSize / 1024).toFixed(1)} KB` : "—"}
+                              </span>
+                            </div>
                           </div>
-                        </td>
-                        <td className="py-md">{displayDate}</td>
-                        <td className="py-md">
-                          <span className={`inline-flex items-center gap-xs px-sm py-0.5 rounded-full text-xs font-semibold ${badgeClass}`}>
+                          <span className={`inline-flex items-center gap-xs px-sm py-0.5 rounded-full text-[9px] font-bold ${badgeClass}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`}></span>
                             {rx.status}
                           </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                        </div>
+
+                        {/* Info details grid */}
+                        <div className="grid grid-cols-2 gap-xs text-[10px] text-slate-500 dark:text-zinc-400">
+                          <div>
+                            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[8px]">Uploaded On</span>
+                            <p className="font-bold text-slate-700 dark:text-zinc-200 mt-0.5">{uploadDate}</p>
+                          </div>
+                          <div>
+                            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[8px]">
+                              {rx.status === "Rejected" ? "Rejected On" : "Verified On"}
+                            </span>
+                            <p className="font-bold text-slate-700 dark:text-zinc-200 mt-0.5">{verificationDate}</p>
+                          </div>
+                        </div>
+
+                        {/* Rejected Reason block */}
+                        {rx.status === "Rejected" && rx.adminNotes && (
+                          <div className="bg-rose-500/[0.03] border border-rose-500/10 rounded-lg p-xs text-[10px] text-rose-600 dark:text-rose-400">
+                            <span className="font-bold uppercase tracking-wider text-[8px] block text-rose-500">Rejection Reason</span>
+                            <p className="mt-0.5">{rx.adminNotes}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Approved Medicines Snapshot */}
+                      {rx.cartSnapshot && rx.cartSnapshot.items && (
+                        <div className="bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/40 rounded-xl p-xs text-[10px] mt-auto">
+                          <span className="font-bold text-slate-550 dark:text-zinc-400 uppercase tracking-wider text-[8px] block border-b border-slate-200/50 dark:border-zinc-800/60 pb-xs mb-xs">
+                            Associated Medicines
+                          </span>
+                          <div className="space-y-xs max-h-24 overflow-y-auto custom-scrollbar">
+                            {rx.cartSnapshot.items.map((med, index) => (
+                              <div key={index} className="flex justify-between items-center text-[9px] text-slate-650 dark:text-zinc-300">
+                                <span className="font-semibold truncate max-w-[130px]">{med.name}</span>
+                                <span className="font-bold shrink-0">Qty: {med.quantity}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

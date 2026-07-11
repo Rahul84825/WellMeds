@@ -401,6 +401,30 @@ const AdminPrescriptions = () => {
               </div>
             </div>
 
+            {/* Cart Snapshot Medicines */}
+            {selectedRx.cartSnapshot && selectedRx.cartSnapshot.items && (
+              <div className="bg-slate-50 dark:bg-zinc-950 p-sm rounded-xl border border-slate-100 dark:border-zinc-800 text-xs text-slate-600 dark:text-zinc-300 space-y-sm">
+                <h4 className="font-bold text-slate-800 dark:text-zinc-100 border-b border-slate-200 dark:border-zinc-800 pb-xs flex items-center gap-xs">
+                  <FileText size={14} className="text-[#004782]" />
+                  Medicines in this Request
+                </h4>
+                <div className="space-y-xs divide-y divide-slate-200/50 dark:divide-zinc-800/40">
+                  {selectedRx.cartSnapshot.items.map((item, idx) => (
+                    <div key={idx} className="pt-xs flex justify-between items-start text-[11px]">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-zinc-200">{item.name}</p>
+                        <p className="text-[10px] text-slate-450">
+                          {item.strength ? `Strength: ${item.strength}` : ''}
+                          {item.packSize ? ` | Pack size: ${item.packSize}` : ''}
+                        </p>
+                      </div>
+                      <span className="font-bold text-[#004782] dark:text-[#a4c9ff] shrink-0">Qty: {item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Doctor Checklist verification block */}
             <div className="space-y-sm p-sm border border-amber-200/50 rounded-xl bg-amber-500/[0.03] text-xs">
               <h4 className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-xs">
