@@ -10,6 +10,7 @@ const QuickActionCards = () => {
       icon: FileText,
       href: "#",
       ariaLabel: "Essential Recovery Kits. EXPLORE NOW.",
+      orderClass: "order-2 md:order-none",
       colors: {
         cardBg: "bg-[#e6f7f0] hover:bg-[#d6f2e6]",
         cardBorder: "border-[#c3efdb] hover:border-[#ade4cb]",
@@ -24,6 +25,7 @@ const QuickActionCards = () => {
       icon: Stethoscope,
       href: "#",
       ariaLabel: "Upload Prescription. Upload Now.",
+      orderClass: "order-3 md:order-none",
       colors: {
         cardBg: "bg-[#f0eefc] hover:bg-[#e4e1fb]",
         cardBorder: "border-[#dedbfb] hover:border-[#cdb9fa]",
@@ -39,6 +41,7 @@ const QuickActionCards = () => {
       icon: ShieldCheck,
       href: "#",
       ariaLabel: "Keep You Safe. LEARN MORE.",
+      orderClass: "order-1 md:order-none",
       colors: {
         cardBg: "bg-[#fdf6e2] hover:bg-[#faf0cb]",
         cardBorder: "border-[#f3e8c4] hover:border-[#e9d69e]",
@@ -53,6 +56,7 @@ const QuickActionCards = () => {
       icon: FlaskConical,
       href: "#",
       ariaLabel: "Get 30% off on Wellness Products. EXPLORE NOW.",
+      orderClass: "order-4 md:order-none",
       colors: {
         cardBg: "bg-[#fff0f2] hover:bg-[#ffe3e7]",
         cardBorder: "border-[#ffd6db] hover:border-[#ffbdc5]",
@@ -63,39 +67,39 @@ const QuickActionCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 w-full">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 w-full">
       {cards.map((card) => {
         const IconComponent = card.icon;
         return (
           <a
             key={card.id}
             href={card.href}
-            className={`group flex items-center justify-between p-4 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 w-full min-h-[88px] ${card.colors.cardBg} ${card.colors.cardBorder}`}
+            className={`group flex items-center justify-between p-3 sm:p-4 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 w-full h-24 md:h-auto md:min-h-[88px] ${card.orderClass} ${card.colors.cardBg} ${card.colors.cardBorder}`}
             aria-label={card.ariaLabel}
           >
             {/* Left: Icon Container with subtle background */}
-            <div className="relative flex-shrink-0 w-12 h-12 rounded-xl bg-white/70 flex items-center justify-center shadow-sm">
+            <div className="relative flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/70 flex items-center justify-center shadow-sm">
               {card.badge && (
                 <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 text-[8px] font-extrabold text-white bg-[#ba1a1a] rounded uppercase tracking-wider leading-none select-none z-10">
                   {card.badge}
                 </span>
               )}
-              <IconComponent className={`w-7 h-7 ${card.colors.iconColor}`} />
+              <IconComponent className={`w-5 h-5 sm:w-7 sm:h-7 ${card.colors.iconColor}`} />
             </div>
 
             {/* Center: Title and Action Label */}
-            <div className="flex-grow min-w-0 px-3 text-left">
-              <h3 className="font-bold text-slate-800 text-[14px] sm:text-[15px] leading-tight mb-0.5 font-poppins">
+            <div className="flex-grow min-w-0 px-2 sm:px-3 text-left">
+              <h3 className="font-bold text-slate-800 text-[11px] sm:text-[13px] md:text-[14px] lg:text-[15px] leading-tight mb-0.5 font-poppins truncate-two-lines">
                 {card.title}
               </h3>
-              <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase font-poppins ${card.colors.actionColor}`}>
+              <p className={`text-[8px] sm:text-[10px] md:text-[11px] font-extrabold tracking-wider uppercase font-poppins ${card.colors.actionColor}`}>
                 {card.actionText}
               </p>
             </div>
 
             {/* Right: Clean Chevron Arrow */}
             <div className="flex-shrink-0">
-              <ChevronRight className="w-5 h-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1" />
+              <ChevronRight className="w-4 h-4 sm:w-5 h-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </a>
         );
