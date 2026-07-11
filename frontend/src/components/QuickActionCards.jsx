@@ -5,11 +5,11 @@ const QuickActionCards = () => {
   const cards = [
     {
       id: 1,
-      title: "Get 20%* off on Medicines",
-      actionText: "UPLOAD NOW",
+      title: "Essential Recovery Kits",
+      actionText: "EXPLORE NOW",
       icon: FileText,
       href: "#",
-      ariaLabel: "Get 20% off on Medicines. Upload your prescription now.",
+      ariaLabel: "Essential Recovery Kits. EXPLORE NOW.",
       colors: {
         cardBg: "bg-[#e6f7f0] hover:bg-[#d6f2e6]",
         cardBorder: "border-[#c3efdb] hover:border-[#ade4cb]",
@@ -19,11 +19,11 @@ const QuickActionCards = () => {
     },
     {
       id: 2,
-      title: "Doctor Appointment",
-      actionText: "BOOK NOW",
+      title: "Upload Your Medical Prescription",
+      actionText: "UPLOAD NOW",
       icon: Stethoscope,
       href: "#",
-      ariaLabel: "Doctor Appointment. Book now.",
+      ariaLabel: "Upload Prescription. Upload Now.",
       colors: {
         cardBg: "bg-[#f0eefc] hover:bg-[#e4e1fb]",
         cardBorder: "border-[#dedbfb] hover:border-[#cdb9fa]",
@@ -33,12 +33,12 @@ const QuickActionCards = () => {
     },
     {
       id: 3,
-      title: "Health Insurance",
-      actionText: "EXPLORE PLANS",
+      title: "How We Keep You Safe",
+      actionText: "LEARN MORE",
       badge: "New",
       icon: ShieldCheck,
       href: "#",
-      ariaLabel: "Health Insurance. Explore plans.",
+      ariaLabel: "Keep You Safe. LEARN MORE.",
       colors: {
         cardBg: "bg-[#fdf6e2] hover:bg-[#faf0cb]",
         cardBorder: "border-[#f3e8c4] hover:border-[#e9d69e]",
@@ -48,11 +48,11 @@ const QuickActionCards = () => {
     },
     {
       id: 4,
-      title: "Lab Tests",
-      actionText: "AT HOME",
+      title: "Get 30% off on Wellness Products",
+      actionText: "EXPLORE NOW",
       icon: FlaskConical,
       href: "#",
-      ariaLabel: "Lab Tests. At home.",
+      ariaLabel: "Get 30% off on Wellness Products. EXPLORE NOW.",
       colors: {
         cardBg: "bg-[#fff0f2] hover:bg-[#ffe3e7]",
         cardBorder: "border-[#ffd6db] hover:border-[#ffbdc5]",

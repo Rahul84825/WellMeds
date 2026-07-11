@@ -6,7 +6,7 @@ import CategorySection from "../components/CategorySection";
 import FeaturedProductsSection from "../components/FeaturedProductsSection";
 import CouponCarousel from "../components/CouponCarousel";
 import WhyChooseWellMeds from "../components/WhyChooseWellMeds";
-import TrustStatsBar from "../components/TrustStatsBar";
+import clinicalBannerImg from "../assets/clinical/clinical_Excellence.png";
 import PrescriptionCTA from "../components/PrescriptionCTA";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
@@ -43,8 +43,17 @@ const HomePage = () => {
       {/* Brand Value Propositions */}
       <WhyChooseWellMeds />
 
-      {/* Trust & Clinical Statistics */}
-      <TrustStatsBar />
+      {/* Clinical Excellence Banner */}
+      <section className="py-12 md:py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <img
+            src={clinicalBannerImg}
+            alt="Clinical Excellence & Safety Assured"
+            loading="lazy"
+            className="w-full h-auto block object-contain"
+          />
+        </div>
+      </section>
 
       {/* Upload Rx Prescription CTA */}
       <PrescriptionCTA />
