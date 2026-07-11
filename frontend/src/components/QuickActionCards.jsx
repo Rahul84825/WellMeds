@@ -1,99 +1,101 @@
 import React from "react";
-import { Heart, FileText, Shield, Percent, ArrowRight } from "lucide-react";
+import { FileText, Stethoscope, ShieldCheck, FlaskConical, ChevronRight } from "lucide-react";
 
 const QuickActionCards = () => {
   const cards = [
     {
       id: 1,
-      title: "Patient Assistance Program",
-      subtitle: "Helping patients reduce treatment costs.",
-      icon: Heart,
+      title: "Get 20%* off on Medicines",
+      actionText: "UPLOAD NOW",
+      icon: FileText,
       href: "#",
-      ariaLabel: "Patient Assistance Program. Helping patients reduce treatment costs.",
+      ariaLabel: "Get 20% off on Medicines. Upload your prescription now.",
       colors: {
-        cardBg: "bg-rose-100/60 hover:bg-rose-100",
-        cardBorder: "border-rose-200/80 hover:border-rose-300",
-        iconBg: "bg-white text-rose-600 shadow-rose-100/50",
-        iconColor: "text-rose-600",
-        arrowColors: "bg-white text-rose-600 group-hover:bg-rose-600 group-hover:text-white group-hover:shadow-rose-200/50",
+        cardBg: "bg-[#e6f7f0] hover:bg-[#d6f2e6]",
+        cardBorder: "border-[#c3efdb] hover:border-[#ade4cb]",
+        iconColor: "text-[#028076]",
+        actionColor: "text-[#028076]",
       }
     },
     {
       id: 2,
-      title: "Order By Prescription",
-      subtitle: "Upload your prescription securely.",
-      icon: FileText,
+      title: "Doctor Appointment",
+      actionText: "BOOK NOW",
+      icon: Stethoscope,
       href: "#",
-      ariaLabel: "Order By Prescription. Upload your prescription securely.",
+      ariaLabel: "Doctor Appointment. Book now.",
       colors: {
-        cardBg: "bg-sky-100/60 hover:bg-sky-100",
-        cardBorder: "border-sky-200/80 hover:border-sky-300",
-        iconBg: "bg-white text-sky-700 shadow-sky-100/50",
-        iconColor: "text-sky-700",
-        arrowColors: "bg-white text-sky-700 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-sky-200/50",
+        cardBg: "bg-[#f0eefc] hover:bg-[#e4e1fb]",
+        cardBorder: "border-[#dedbfb] hover:border-[#cdb9fa]",
+        iconColor: "text-[#6366f1]",
+        actionColor: "text-[#6366f1]",
       }
     },
     {
       id: 3,
-      title: "Why Choose WellMeds?",
-      subtitle: "Trusted by thousands across India.",
-      icon: Shield,
+      title: "Health Insurance",
+      actionText: "EXPLORE PLANS",
+      badge: "New",
+      icon: ShieldCheck,
       href: "#",
-      ariaLabel: "Why Choose WellMeds? Trusted by thousands across India.",
+      ariaLabel: "Health Insurance. Explore plans.",
       colors: {
-        cardBg: "bg-emerald-100/60 hover:bg-emerald-100",
-        cardBorder: "border-emerald-200/80 hover:border-emerald-300",
-        iconBg: "bg-white text-emerald-700 shadow-emerald-100/50",
-        iconColor: "text-emerald-700",
-        arrowColors: "bg-white text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white group-hover:shadow-emerald-200/50",
+        cardBg: "bg-[#fdf6e2] hover:bg-[#faf0cb]",
+        cardBorder: "border-[#f3e8c4] hover:border-[#e9d69e]",
+        iconColor: "text-[#d97706]",
+        actionColor: "text-[#b45309]",
       }
     },
     {
       id: 4,
-      title: "Wellness Offers",
-      subtitle: "Exclusive savings every day.",
-      icon: Percent,
+      title: "Lab Tests",
+      actionText: "AT HOME",
+      icon: FlaskConical,
       href: "#",
-      ariaLabel: "Wellness Offers. Exclusive savings every day.",
+      ariaLabel: "Lab Tests. At home.",
       colors: {
-        cardBg: "bg-amber-100/60 hover:bg-amber-100",
-        cardBorder: "border-amber-200/80 hover:border-amber-300",
-        iconBg: "bg-white text-amber-700 shadow-amber-100/50",
-        iconColor: "text-amber-700",
-        arrowColors: "bg-white text-amber-700 group-hover:bg-amber-700 group-hover:text-white group-hover:shadow-amber-200/50",
+        cardBg: "bg-[#fff0f2] hover:bg-[#ffe3e7]",
+        cardBorder: "border-[#ffd6db] hover:border-[#ffbdc5]",
+        iconColor: "text-[#e11d48]",
+        actionColor: "text-[#be185d]",
       }
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 w-full">
       {cards.map((card) => {
         const IconComponent = card.icon;
         return (
           <a
             key={card.id}
             href={card.href}
-            className={`group flex items-center justify-between p-5 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-full min-h-[110px] md:min-h-[120px] lg:h-[120px] ${card.colors.cardBg} ${card.colors.cardBorder}`}
+            className={`group flex items-center justify-between p-4 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 w-full min-h-[88px] ${card.colors.cardBg} ${card.colors.cardBorder}`}
             aria-label={card.ariaLabel}
           >
-            {/* Left: Circular Icon Container */}
-            <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105 ${card.colors.iconBg}`}>
-              <IconComponent className="w-6 h-6" />
+            {/* Left: Icon Container with subtle background */}
+            <div className="relative flex-shrink-0 w-12 h-12 rounded-xl bg-white/70 flex items-center justify-center shadow-sm">
+              {card.badge && (
+                <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 text-[8px] font-extrabold text-white bg-[#ba1a1a] rounded uppercase tracking-wider leading-none select-none z-10">
+                  {card.badge}
+                </span>
+              )}
+              <IconComponent className={`w-7 h-7 ${card.colors.iconColor}`} />
             </div>
 
-            {/* Center: Typography */}
-            <div className="flex-grow min-w-0 px-4 text-left">
-              <h3 className="font-semibold text-slate-800 text-base leading-tight mb-1 font-poppins">
+            {/* Center: Title and Action Label */}
+            <div className="flex-grow min-w-0 px-3 text-left">
+              <h3 className="font-bold text-slate-800 text-[14px] sm:text-[15px] leading-tight mb-0.5 font-poppins">
                 {card.title}
               </h3>
-              <p className="text-sm text-slate-600 leading-snug font-poppins">
-                {card.subtitle}
+              <p className={`text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase font-poppins ${card.colors.actionColor}`}>
+                {card.actionText}
               </p>
             </div>
 
-            {/* Right: Circular Arrow Button */}
-            <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:translate-x-1 shadow-sm group-hover:shadow-md ${card.colors.arrowColors}`}>
-              <ArrowRight className="w-5 h-5" />
+            {/* Right: Clean Chevron Arrow */}
+            <div className="flex-shrink-0">
+              <ChevronRight className="w-5 h-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </a>
         );
