@@ -159,7 +159,7 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollLeft}
               aria-label="Scroll categories left"
-              className="absolute left-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute left-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
             >
               <ChevronLeft size={18} />
             </button>
@@ -170,7 +170,7 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollRight}
               aria-label="Scroll categories right"
-              className="absolute right-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute right-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
             >
               <ChevronRight size={18} />
             </button>
@@ -201,7 +201,7 @@ const SurgicalProductsSection = () => {
                     className="flex flex-col items-center group no-underline"
                   >
                     {/* Square Image Box */}
-                    <div className="w-full aspect-square rounded-[18px] border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-250 bg-white dark:bg-zinc-900 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.13)] dark:group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.25)] group-hover:border-[#038076] dark:group-hover:border-[#038076]">
+                    <div className="w-full aspect-square rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-250 bg-white dark:bg-zinc-900 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.13)] dark:group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.25)] group-hover:border-[#038076] dark:group-hover:border-[#038076]">
                       {cat.image ? (
                         <img
                           src={cat.image}
