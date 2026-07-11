@@ -34,11 +34,16 @@ const Hero = () => {
                       items-center justify-center px-6 text-center gap-4">
 
         {/* Heading */}
-        <h1 className="text-[25px] font-extrabold leading-tight tracking-tight
-                       sm:text-[32px] lg:text-[41px]">
-          <span className="text-white">More Than a Pharmacy.</span>
-          <span className="text-[#038076] block mt-1">Your Partner in Better Health.</span>
-        </h1>
+        <div className="flex flex-col items-center justify-center gap-1.5">
+          <h1 className="text-[25px] font-extrabold leading-tight tracking-tight text-white
+                         sm:text-[32px] lg:text-[41px]">
+            More Than a Pharmacy.
+          </h1>
+          <p className="text-[19px] font-semibold tracking-tight text-[#038076]
+                        sm:text-[24px] lg:text-[31px]">
+            Your Partner in Better Health.
+          </p>
+        </div>
 
         {/* Search bar — refined rounded-full pill */}
         <div className="mt-2 w-full rounded-full border border-slate-200/80

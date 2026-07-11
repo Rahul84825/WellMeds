@@ -11,8 +11,8 @@ const QuickActionCards = () => {
       href: "#",
       ariaLabel: "Patient Assistance Program. Helping patients reduce treatment costs.",
       colors: {
-        cardBg: "bg-rose-50/60 hover:bg-rose-50",
-        cardBorder: "border-rose-100/80 hover:border-rose-200",
+        cardBg: "bg-rose-100/60 hover:bg-rose-100",
+        cardBorder: "border-rose-200/80 hover:border-rose-300",
         iconBg: "bg-white text-rose-600 shadow-rose-100/50",
         iconColor: "text-rose-600",
         arrowColors: "bg-white text-rose-600 group-hover:bg-rose-600 group-hover:text-white group-hover:shadow-rose-200/50",
@@ -26,8 +26,8 @@ const QuickActionCards = () => {
       href: "#",
       ariaLabel: "Order By Prescription. Upload your prescription securely.",
       colors: {
-        cardBg: "bg-sky-50/60 hover:bg-sky-50",
-        cardBorder: "border-sky-100/80 hover:border-sky-200",
+        cardBg: "bg-sky-100/60 hover:bg-sky-100",
+        cardBorder: "border-sky-200/80 hover:border-sky-300",
         iconBg: "bg-white text-sky-700 shadow-sky-100/50",
         iconColor: "text-sky-700",
         arrowColors: "bg-white text-sky-700 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-sky-200/50",
@@ -41,8 +41,8 @@ const QuickActionCards = () => {
       href: "#",
       ariaLabel: "Why Choose WellMeds? Trusted by thousands across India.",
       colors: {
-        cardBg: "bg-emerald-50/60 hover:bg-emerald-50",
-        cardBorder: "border-emerald-100/80 hover:border-emerald-200",
+        cardBg: "bg-emerald-100/60 hover:bg-emerald-100",
+        cardBorder: "border-emerald-200/80 hover:border-emerald-300",
         iconBg: "bg-white text-emerald-700 shadow-emerald-100/50",
         iconColor: "text-emerald-700",
         arrowColors: "bg-white text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white group-hover:shadow-emerald-200/50",
@@ -56,8 +56,8 @@ const QuickActionCards = () => {
       href: "#",
       ariaLabel: "Wellness Offers. Exclusive savings every day.",
       colors: {
-        cardBg: "bg-amber-50/60 hover:bg-amber-50",
-        cardBorder: "border-amber-100/80 hover:border-amber-200",
+        cardBg: "bg-amber-100/60 hover:bg-amber-100",
+        cardBorder: "border-amber-200/80 hover:border-amber-300",
         iconBg: "bg-white text-amber-700 shadow-amber-100/50",
         iconColor: "text-amber-700",
         arrowColors: "bg-white text-amber-700 group-hover:bg-amber-700 group-hover:text-white group-hover:shadow-amber-200/50",
