@@ -44,7 +44,7 @@ const Hero = () => {
         </div>
 
         {/* Search bar — refined rounded-full pill */}
-        <div className="mt-2 w-full max-w-[520px] rounded-full border border-slate-200/80
+        <div className="mt-2 w-full max-w-[600px] rounded-full border border-slate-200/80
                         bg-white p-1.5 shadow-[0_15px_45px_rgba(3,128,118,0.12)]
                         focus-within:border-[#038076]
                         focus-within:ring-2 focus-within:ring-[#038076]/10
