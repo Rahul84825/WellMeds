@@ -55,7 +55,7 @@ export const promoSlides = [
   {
     id: "exclusive-savings",
     title: "Direct-from-Manufacturer Pricing",
-    subtitle: "Bypass distributor markups. WellMeds connects you directly to WHO-GMP certified manufacturers to deliver up to 85% savings on chronic care therapies.",
+    subtitle: "Bypass distributor markups. WellMeds connects you directly to WHO-GMP certified manufacturers to deliver up to 85% savings on Patient Assistance Program (PAP) therapies.",
     bgGradient: "from-[#0b5c9e] via-[#004782] to-[#086b53]",
     pattern: "hexagon",
     cta: [

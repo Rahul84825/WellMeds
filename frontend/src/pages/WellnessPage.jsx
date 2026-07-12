@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
@@ -18,6 +18,8 @@ import {
 
 const WellnessPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get("category") || "All";
   
   // Data State
   const [products, setProducts] = useState([]);
@@ -27,9 +29,14 @@ const WellnessPage = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   
   // Filtering & Pagination
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 12;
+
+  // Sync selectedCategory with categoryParam changes (e.g. from navbar link click)
+  useEffect(() => {
+    setSelectedCategory(categoryParam);
+  }, [categoryParam]);
 
   const wellnessCategories = [
     { name: "All", icon: Sparkles },
@@ -207,6 +214,11 @@ const WellnessPage = () => {
                 key={cat.name}
                 type="button"
                 onClick={() => {
+                  if (cat.name === "All") {
+                    setSearchParams({});
+                  } else {
+                    setSearchParams({ category: cat.name });
+                  }
                   setSelectedCategory(cat.name);
                   setCurrentPage(1);
                 }}

@@ -30,7 +30,7 @@ const WhyWellMedsBar = () => {
     {
       id: "savings",
       title: "Up to 85% Savings",
-      description: "Direct pricing to deliver significant savings on chronic and specialty care therapies.",
+      description: "Direct pricing to deliver significant savings on Patient Assistance Program (PAP) and specialty therapies.",
       icon: Percent,
       bgColor: "bg-amber-50 dark:bg-amber-950/20",
       textColor: "text-amber-600 dark:text-amber-400"

@@ -27,7 +27,7 @@ const promoBanners = [
   {
     id: "saving",
     img: savingImg,
-    alt: "Affordable Healthcare: Direct-from-Manufacturer pricing delivering up to 85% savings on chronic care therapies"
+    alt: "Affordable Healthcare: Direct-from-Manufacturer pricing delivering up to 85% savings on Patient Assistance Program (PAP) therapies"
   },
   {
     id: "cold-chain",

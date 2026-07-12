@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const PatientAssistanceProgramPage = () => {
   const [activeFaq, setActiveFaq] = useState(null);
+  const { hash } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     document.title = "Patient Assistance Program (PAP) | WellMeds";
     let metaDesc = document.querySelector("meta[name='description']");
     if (!metaDesc) {
@@ -14,7 +14,18 @@ const PatientAssistanceProgramPage = () => {
       document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute("content", "Access manufacturer-backed subsidies for high-cost specialty therapies through the Patient Assistance Program.");
-  }, []);
+
+    if (hash) {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [hash]);
 
   const handleApplyClick = () => {
     const el = document.getElementById("pap-contact");
@@ -162,7 +173,7 @@ const PatientAssistanceProgramPage = () => {
       </section>
 
       {/* How PAP Works (Timeline) */}
-      <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
+      <section id="pap-how-it-works" className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Timeline</p>
@@ -190,7 +201,7 @@ const PatientAssistanceProgramPage = () => {
       </section>
 
       {/* Who Can Apply Section */}
-      <section className="py-xxl bg-background">
+      <section id="pap-eligibility" className="py-xxl bg-background">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Patient Criteria</p>
@@ -218,7 +229,7 @@ const PatientAssistanceProgramPage = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
+      <section id="pap-programs" className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Added Value</p>
@@ -246,7 +257,7 @@ const PatientAssistanceProgramPage = () => {
       </section>
 
       {/* Required Documents Section */}
-      <section className="py-xxl bg-background">
+      <section id="pap-enrollment" className="py-xxl bg-background">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Preparation checklist</p>
@@ -274,7 +285,7 @@ const PatientAssistanceProgramPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
+      <section id="pap-faqs" className="py-xxl bg-surface-container-lowest border-t border-b border-outline-variant/20">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="text-center space-y-xs max-w-2xl mx-auto mb-xl">
             <p className="text-xs font-extrabold text-primary uppercase tracking-wider">Clear Doubts</p>

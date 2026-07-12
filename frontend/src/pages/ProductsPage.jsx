@@ -32,6 +32,9 @@ const ProductsPage = () => {
   // Speciality filter from URL (?speciality=...)
   const specialityParam = searchParams.get("speciality") || "";
 
+  // Source filter from URL (?isImported=...)
+  const isImportedParam = searchParams.get("isImported") || "";
+
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") || "");
@@ -57,9 +60,17 @@ const ProductsPage = () => {
 
   // SEO setup
   useEffect(() => {
-    document.title = categoryParam
-      ? `${categoryParam} | WellMeds`
-      : "Clinical Drug Catalog | WellMeds";
+    let titleStr = "Clinical Drug Catalog | WellMeds";
+    if (categoryParam) {
+      titleStr = `${categoryParam} | WellMeds`;
+    } else if (specialityParam) {
+      titleStr = `${specialityParam} | WellMeds`;
+    } else if (isImportedParam === "true") {
+      titleStr = "Imported Medicines | WellMeds";
+    } else if (isImportedParam === "false") {
+      titleStr = "Indian Generics | WellMeds";
+    }
+    document.title = titleStr;
     let metaDesc = document.querySelector("meta[name='description']");
     if (!metaDesc) {
       metaDesc = document.createElement("meta");
@@ -67,7 +78,7 @@ const ProductsPage = () => {
       document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute("content", "Shop authentic prescription medicines and healthcare products online at WellMeds.");
-  }, [categoryParam]);
+  }, [categoryParam, specialityParam, isImportedParam]);
 
   // Debounce search input
   useEffect(() => {
@@ -78,10 +89,11 @@ const ProductsPage = () => {
       if (searchVal.trim()) newParams.search = searchVal;
       if (categoryParam) newParams.category = categoryParam;
       if (specialityParam) newParams.speciality = specialityParam;
+      if (isImportedParam) newParams.isImported = isImportedParam;
       setSearchParams(Object.keys(newParams).length ? newParams : {});
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchVal, setSearchParams, categoryParam, specialityParam]);
+  }, [searchVal, setSearchParams, categoryParam, specialityParam, isImportedParam]);
 
   // Fetch Products
   const fetchProducts = useCallback(async () => {
@@ -93,6 +105,7 @@ const ProductsPage = () => {
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
         speciality: specialityParam || undefined,
+        isImported: isImportedParam !== "" ? isImportedParam : undefined,
         productType: "medicine",
       });
       setProducts(data.products || []);
@@ -102,16 +115,16 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, categoryParam, specialityParam]);
+  }, [currentPage, debouncedSearch, categoryParam, specialityParam, isImportedParam]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Reset to page 1 when search query, category, or speciality changes
+  // Reset to page 1 when search query, category, speciality, or isImported changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, categoryParam, specialityParam]);
+  }, [debouncedSearch, categoryParam, specialityParam, isImportedParam]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -159,25 +172,53 @@ const ProductsPage = () => {
               <span className="text-[#038076] dark:text-[#a4c9ff]">{categoryParam}</span>
             </>
           )}
+          {specialityParam && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-[#038076] dark:text-[#a4c9ff]">{specialityParam}</span>
+            </>
+          )}
+          {isImportedParam && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-[#038076] dark:text-[#a4c9ff]">
+                {isImportedParam === "true" ? "Imported Medicines" : "Indian Generics"}
+              </span>
+            </>
+          )}
         </nav>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
           <div>
             <h1 className="font-extrabold text-3xl md:text-4xl text-slate-800 dark:text-zinc-100 tracking-tight">
-              {categoryParam ? categoryParam : "All Products"}
+              {categoryParam
+                ? categoryParam
+                : specialityParam
+                ? specialityParam
+                : isImportedParam === "true"
+                ? "Imported Medicines"
+                : isImportedParam === "false"
+                ? "Indian Generics"
+                : "All Products"}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               {categoryParam
                 ? `Showing all products in the "${categoryParam}" category.`
+                : specialityParam
+                ? `Showing all products in the "${specialityParam}" speciality.`
+                : isImportedParam === "true"
+                ? "Showing our verified global imported medicines."
+                : isImportedParam === "false"
+                ? "Showing authentic Indian generic medicines."
                 : "Secure prescription verification, authentic formulations, and express doorstep delivery."}
             </p>
           </div>
-          {categoryParam && (
+          {(categoryParam || specialityParam || isImportedParam) && (
             <button
               onClick={() => navigate("/products")}
-              className="inline-flex items-center gap-xs text-[11px] font-bold text-[#038076] border border-[#038076]/30 bg-[#038076]/5 hover:bg-[#038076]/10 px-md py-xs rounded-full transition-all select-none"
+              className="inline-flex items-center gap-xs text-[11px] font-bold text-[#038076] border border-[#038076]/30 bg-[#038076]/5 hover:bg-[#038076]/10 px-md py-xs rounded-full transition-all select-none cursor-pointer"
             >
               <X size={12} />
-              Clear Category Filter
+              Clear Filter
             </button>
           )}
         </div>

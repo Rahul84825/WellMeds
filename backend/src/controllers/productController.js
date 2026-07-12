@@ -7,7 +7,7 @@ import slugify from "slugify";
 import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory } = req.query;
+  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isImported } = req.query;
 
   try {
     const query = {};
@@ -20,10 +20,13 @@ export const getProducts = async (req, res, next) => {
       ];
     }
 
-    // Filter by category name (case-insensitive lookup → ObjectId filter)
+    // Filter by category name or slug
     if (category && category.trim()) {
       const matchedCategory = await Category.findOne({
-        name: { $regex: `^${category.trim()}$`, $options: "i" },
+        $or: [
+          { name: { $regex: `^${category.trim()}$`, $options: "i" } },
+          { slug: category.trim().toLowerCase() }
+        ]
       });
       if (matchedCategory) {
         query.category = matchedCategory._id;
@@ -40,10 +43,13 @@ export const getProducts = async (req, res, next) => {
       }
     }
 
-    // Filter by speciality slug
+    // Filter by speciality slug or name
     if (speciality && speciality.trim()) {
       const matchedSpeciality = await MedicalSpeciality.findOne({
-        slug: speciality.trim(),
+        $or: [
+          { slug: speciality.trim().toLowerCase() },
+          { name: { $regex: `^${speciality.trim()}$`, $options: "i" } }
+        ]
       });
       if (matchedSpeciality) {
         query.specialities = matchedSpeciality._id;
@@ -58,6 +64,11 @@ export const getProducts = async (req, res, next) => {
           products: [],
         });
       }
+    }
+
+    // Filter by isImported (source)
+    if (isImported !== undefined && isImported !== "") {
+      query.isImported = isImported === "true";
     }
     // Filter by molecule slug or ID
     if (molecule && molecule.trim()) {
