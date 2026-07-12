@@ -128,6 +128,7 @@ export const getProfile = async (req, res, next) => {
         authProvider: user.authProvider,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
+        isProfileCompleted: user.isProfileCompleted ?? (!!user.email && !!user.name && !user.name.startsWith("User ")),
       },
     });
   } catch (error) {
@@ -152,6 +153,10 @@ export const updateProfile = async (req, res, next) => {
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
 
+    if (user.name && user.email) {
+      user.isProfileCompleted = true;
+    }
+
     await user.save();
 
     secLog("[PROFILE_UPDATE]", { userId: user._id });
@@ -166,6 +171,7 @@ export const updateProfile = async (req, res, next) => {
         role: user.role,
         avatar: user.avatar,
         authProvider: user.authProvider,
+        isProfileCompleted: user.isProfileCompleted,
       },
     });
   } catch (error) {

@@ -358,6 +358,7 @@ export const verifyOtp = async (req, res, next) => {
         role: user.role,
         avatar: user.avatar || "",
         authProvider: user.authProvider,
+        isProfileCompleted: user.isProfileCompleted ?? (!!user.email && !!user.name && !user.name.startsWith("User ")),
       },
     });
   } catch (error) {
