@@ -44,8 +44,7 @@ const secLog = (tag, data = {}) => {
 
 // ─── Mobile validation ────────────────────────────────────────────────────────
 const isValidMobile = (mobile) => {
-  // Indian 10-digit numbers (6-9 prefix) with optional +91 country code
-  return /^(\+91)?[6-9]\d{9}$/.test(mobile.trim());
+  return /^\d{10}$/.test(String(mobile).trim());
 };
 
 const normalizeMobile = (mobile) => {
@@ -72,7 +71,7 @@ export const sendOtp = async (req, res, next) => {
     if (!isValidMobile(mobile)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.",
+        message: "Mobile number must be exactly 10 digits.",
       });
     }
 
