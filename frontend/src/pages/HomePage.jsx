@@ -49,12 +49,12 @@ const HomePage = () => {
 
       {/* Clinical Excellence Banner */}
       <section className="mt-[48px] mb-[56px] home-section-container">
-        <div className="w-full h-auto sm:h-[320px] md:h-[380px] lg:h-[450px] relative overflow-hidden rounded-3xl shadow-lg group hover:scale-[1.01] transition-all duration-300">
+        <div className="w-full h-auto aspect-[3072/1408] sm:h-[320px] sm:aspect-none md:h-[380px] lg:h-[450px] relative overflow-hidden rounded-3xl shadow-lg group hover:scale-[1.01] transition-all duration-300">
           <img
             src={clinicalBannerImg}
             alt="Clinical Excellence & Safety Assured"
             loading="lazy"
-            className="w-full h-full object-cover object-center rounded-3xl"
+            className="w-full h-full object-cover object-[center_75%] rounded-3xl"
           />
         </div>
       </section>
