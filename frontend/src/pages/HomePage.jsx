@@ -48,13 +48,13 @@ const HomePage = () => {
       <WellnessProductsSection />
 
       {/* Clinical Excellence Banner */}
-      <section className="py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="mt-[40px] mb-[48px] home-section-container">
+        <div className="w-full relative overflow-hidden rounded-3xl shadow-lg group hover:scale-[1.01] transition-all duration-300">
           <img
             src={clinicalBannerImg}
             alt="Clinical Excellence & Safety Assured"
             loading="lazy"
-            className="w-full h-auto block object-contain"
+            className="w-full h-[160px] sm:h-[220px] md:h-[260px] lg:h-[300px] block object-cover rounded-3xl"
           />
         </div>
       </section>
