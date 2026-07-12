@@ -8,6 +8,7 @@ import { couponService } from "./couponService";
 import { specialityService } from "./specialityService";
 import { moleculeService } from "./moleculeService";
 import { surgicalCategoryService } from "./surgicalCategoryService";
+import { searchService } from "./searchService";
 
 import apiInstance from "./api";
 
@@ -49,6 +50,7 @@ export const api = {
   ...specialityService,
   ...moleculeService,
   ...surgicalCategoryService,
+  ...searchService,
 };
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export const MAX_FILE_SIZE_MB = 10;

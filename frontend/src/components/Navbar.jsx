@@ -29,6 +29,7 @@ import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
 import { toast } from "sonner";
 import { api } from "../services/api";
+import { UniversalSearch } from "./common/UniversalSearch";
 
 const Navbar = () => {
   const { user, logout, isAdmin, openLoginModal } = useAuth();
@@ -343,82 +344,9 @@ const Navbar = () => {
                 transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                 opacity: showNavbarSearch ? 1 : 0,
               }}
-              className={`flex items-center bg-white border border-slate-200 rounded-full p-1 flex-row relative gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
-                showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"
-              }`}
+              className={`w-full ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
             >
-              {/* Delivery Selector */}
-              <div className="relative shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-                  className="flex items-center gap-1.5 px-3 py-0.5 text-slate-700 hover:bg-slate-50 rounded-full transition-all focus:outline-none text-left cursor-pointer"
-                  aria-label="Select delivery location"
-                >
-                  <MapPin className="w-[16px] h-[16px] text-[#038076] shrink-0" />
-                  <div className="flex flex-col leading-none select-none">
-                    <span className="text-[7px] text-slate-400 uppercase font-bold tracking-wider">Deliver to</span>
-                    <span className="text-[11px] font-extrabold text-slate-800 mt-[1px] flex items-center gap-0.5">
-                      {selectedLocation} 
-                      <ChevronDown className={`w-[10px] h-[10px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
-                    </span>
-                  </div>
-                </button>
-
-                {locationMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
-                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-150 py-1 z-[110] text-left text-xs text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
-                      {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
-                        <button
-                          key={loc}
-                          type="button"
-                          onClick={() => {
-                            setSelectedLocation(loc);
-                            setLocationMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 hover:bg-slate-50 hover:text-[#038076] font-bold text-left transition-colors focus:outline-none cursor-pointer"
-                        >
-                          {loc}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Vertical separator */}
-              <div className="w-px h-5 bg-slate-200 shrink-0"></div>
-
-              {/* Search inputs */}
-              <div className="flex-1 flex items-center relative gap-2">
-                <Search className="text-slate-400 ml-1 shrink-0" size={14} />
-                <input
-                  type="text"
-                  placeholder="Search Medicines, Molecules..."
-                  value={desktopSearchQuery}
-                  onChange={(e) => setDesktopSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && desktopSearchQuery.trim()) {
-                      navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
-                    }
-                  }}
-                  className="w-full bg-transparent border-none text-[11px] outline-none text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none p-0 font-semibold"
-                />
-              </div>
-
-              {/* Search button */}
-              <button 
-                type="button"
-                onClick={() => {
-                  if (desktopSearchQuery.trim()) {
-                    navigate(`/products?search=${encodeURIComponent(desktopSearchQuery.trim())}`);
-                  }
-                }}
-                className="bg-[#038076] text-white px-4 py-1.5 rounded-full font-bold text-xs hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer"
-              >
-                Search
-              </button>
+              <UniversalSearch variant="default" />
             </div>
           </div>
 
@@ -567,29 +495,21 @@ const Navbar = () => {
 
           {/* Mobile Fullscreen Search Expansion */}
           {mobileSearchExpanded && (
-            <div className="flex items-center w-full gap-2 px-4 py-2 bg-white z-30 absolute inset-0">
-              <button 
-                onClick={() => setMobileSearchExpanded(false)}
-                className="p-1 text-slate-500 hover:text-slate-800"
-                aria-label="Close Search"
-              >
-                <ArrowLeft size={18} />
-              </button>
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                <input
-                  type="text"
-                  placeholder="Search medicines..."
-                  value={mobileSearchQuery}
-                  onChange={(e) => setMobileSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && mobileSearchQuery.trim()) {
-                      navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
-                      setMobileSearchExpanded(false);
-                    }
-                  }}
-                  className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-primary transition-all font-semibold"
-                  autoFocus
+            <div className="flex flex-col w-full h-[100vh] bg-white z-[300] absolute inset-0 p-4 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-2 mb-4 shrink-0">
+                <button 
+                  onClick={() => setMobileSearchExpanded(false)}
+                  className="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-50 transition-colors"
+                  aria-label="Close Search"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <div className="text-sm font-black text-slate-800">Search WellMeds</div>
+              </div>
+              <div className="flex-grow overflow-y-auto">
+                <UniversalSearch 
+                  variant="mobile" 
+                  onCloseMobile={() => setMobileSearchExpanded(false)} 
                 />
               </div>
             </div>

@@ -59,6 +59,7 @@ const AddNewProduct = () => {
   const [displayOrder, setDisplayOrder] = useState("");
   const [isImported, setIsImported] = useState(false);
   const [slug, setSlug] = useState("");
+  const [isTrending, setIsTrending] = useState(false);
   
   // Images
   const [images, setImages] = useState([]);
@@ -126,6 +127,7 @@ const AddNewProduct = () => {
             setDisplayOrder(product.displayOrder !== undefined ? product.displayOrder : "");
             setIsImported(product.isImported || false);
             setSlug(product.slug || "");
+            setIsTrending(product.isTrending || false);
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -485,6 +487,7 @@ const AddNewProduct = () => {
       displayOrder: displayOrder !== "" ? parseInt(displayOrder) : 0,
       isImported,
       slug: slug.trim() || undefined,
+      isTrending,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -903,6 +906,20 @@ const AddNewProduct = () => {
                     />
                     <label htmlFor="isImportedToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
                       Imported Medicine
+                    </label>
+                  </div>
+
+                  {/* Trending Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isTrendingToggle"
+                      checked={isTrending}
+                      onChange={(e) => setIsTrending(e.target.checked)}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isTrendingToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Trending Product (Storefront Search Recommendation)
                     </label>
                   </div>
 

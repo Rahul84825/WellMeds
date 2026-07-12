@@ -1,5 +1,5 @@
 import express from "express";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts } from "../controllers/productController.js";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts, searchAll, getTrendingProducts } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 import { searchLimiter } from "../middleware/rateLimitMiddleware.js";
@@ -9,6 +9,12 @@ const router = express.Router();
 router.route("/")
   .get(searchLimiter, getProducts)
   .post(protect, admin, createProduct);
+
+router.route("/search-all")
+  .get(searchLimiter, searchAll);
+
+router.route("/trending")
+  .get(getTrendingProducts);
 
 router.route("/:id")
   .get(getProduct)

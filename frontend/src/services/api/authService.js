@@ -71,4 +71,19 @@ export const authService = {
     }
     return data.user;
   },
+
+  async getSearchHistory() {
+    const data = await apiInstance.get("/auth/search-history");
+    return data.history || [];
+  },
+
+  async addSearchHistory(term) {
+    const data = await apiInstance.post("/auth/search-history", { term });
+    return data.history || [];
+  },
+
+  async clearSearchHistory() {
+    const data = await apiInstance.delete("/auth/search-history");
+    return data.history || [];
+  },
 };

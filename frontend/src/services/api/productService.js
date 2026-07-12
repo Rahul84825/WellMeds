@@ -60,5 +60,10 @@ export const productService = {
   async getSimilarProducts(id) {
     const data = await apiInstance.get(`/products/${id}/similar`);
     return data.products || [];
+  },
+
+  async getTrendingProducts() {
+    const data = await apiInstance.get("/products/trending");
+    return data.products || [];
   }
 };

@@ -235,6 +235,10 @@ const productSchema = new mongoose.Schema(
         "Surgical Category is required if product is surgical",
       ],
     },
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -1,0 +1,1079 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { 
+  Search, MapPin, ChevronDown, Loader2, X, Heart, ShoppingBag, 
+  Clock, Compass, HelpCircle, PhoneCall, Handshake, FileText, 
+  Percent, Globe, Activity, ArrowUpRight
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import api from "../../services/api";
+
+export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  // Delivery selector states
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    return localStorage.getItem("wellmeds_location") || "Mumbai, 400001";
+  });
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+
+  // Dynamic / local static content lists
+  const [trendingMedicines, setTrendingMedicines] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+
+  const popularSearches = ["Paracetamol", "GLP-1 Injections", "Biologics", "Metformin", "Supplements", "Wheelchairs"];
+
+  const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const abortControllerRef = useRef(null);
+
+  // Handle location syncing across different search input instances
+  useEffect(() => {
+    const handleLocationChange = (e) => {
+      setSelectedLocation(e.detail);
+    };
+    window.addEventListener("wellmeds_location_changed", handleLocationChange);
+    return () => {
+      window.removeEventListener("wellmeds_location_changed", handleLocationChange);
+    };
+  }, []);
+
+  const handleLocationSelect = (loc) => {
+    setSelectedLocation(loc);
+    localStorage.setItem("wellmeds_location", loc);
+    window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
+    setLocationMenuOpen(false);
+  };
+
+  // Sync wishlist updates across instances
+  const updateWishlistFromLocal = useCallback(() => {
+    try {
+      const saved = localStorage.getItem("wellmeds_wishlist");
+      setWishlist(saved ? JSON.parse(saved) : []);
+    } catch {
+      setWishlist([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateWishlistFromLocal();
+    window.addEventListener("wellmeds_wishlist_updated", updateWishlistFromLocal);
+    return () => {
+      window.removeEventListener("wellmeds_wishlist_updated", updateWishlistFromLocal);
+    };
+  }, [updateWishlistFromLocal]);
+
+  const toggleWishlist = (product) => {
+    try {
+      let current = JSON.parse(localStorage.getItem("wellmeds_wishlist") || "[]");
+      const exists = current.find(p => p.id === product.id || p._id === product._id);
+      if (exists) {
+        current = current.filter(p => p.id !== product.id && p._id !== product._id);
+      } else {
+        current.push({
+          id: product.id || product._id,
+          _id: product.id || product._id,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          image: product.image,
+          brand: product.brand,
+          slug: product.slug
+        });
+      }
+      localStorage.setItem("wellmeds_wishlist", JSON.stringify(current));
+      window.dispatchEvent(new Event("wellmeds_wishlist_updated"));
+    } catch (err) {
+      console.warn("Failed to toggle wishlist", err);
+    }
+  };
+
+  // Fetch search history (Guest vs Logged-In User)
+  const fetchRecentSearches = useCallback(async () => {
+    if (user) {
+      try {
+        const history = await api.getSearchHistory();
+        setRecentSearches(history);
+      } catch (err) {
+        console.warn("Could not fetch search history from server:", err.message);
+      }
+    } else {
+      try {
+        const local = localStorage.getItem("wellmeds_recent_searches");
+        setRecentSearches(local ? JSON.parse(local) : []);
+      } catch {
+        setRecentSearches([]);
+      }
+    }
+  }, [user]);
+
+  // Save search query to history
+  const addQueryToHistory = async (term) => {
+    if (!term || !term.trim()) return;
+    const cleanTerm = term.trim();
+
+    if (user) {
+      try {
+        await api.addSearchHistory(cleanTerm);
+      } catch (err) {
+        console.warn("Could not save search history to server", err.message);
+      }
+    } else {
+      try {
+        let history = JSON.parse(localStorage.getItem("wellmeds_recent_searches") || "[]");
+        history = history.filter(t => t.toLowerCase() !== cleanTerm.toLowerCase());
+        history.unshift(cleanTerm);
+        if (history.length > 10) history = history.slice(0, 10);
+        localStorage.setItem("wellmeds_recent_searches", JSON.stringify(history));
+      } catch (err) {
+        console.warn("Could not save search history locally", err.message);
+      }
+    }
+    fetchRecentSearches();
+  };
+
+  // Clear search history
+  const clearHistory = async (e) => {
+    e.stopPropagation();
+    if (user) {
+      try {
+        await api.clearSearchHistory();
+        setRecentSearches([]);
+      } catch (err) {
+        console.warn("Could not clear search history on server", err.message);
+      }
+    } else {
+      localStorage.removeItem("wellmeds_recent_searches");
+      setRecentSearches([]);
+    }
+  };
+
+  // Fetch recently viewed products & trending medicines
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch trending medicines
+        const trending = await api.getTrendingProducts();
+        setTrendingMedicines(trending);
+
+        // Fetch recently viewed items from local storage
+        const viewed = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");
+        setRecentlyViewed(viewed);
+      } catch (err) {
+        console.warn("Could not fetch popular/recently viewed data", err.message);
+      }
+    };
+    fetchData();
+    fetchRecentSearches();
+  }, [fetchRecentSearches]);
+
+  // Handle outside clicks to close the dropdown
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setFocused(false);
+        setActiveIndex(-1);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  // Sync state with URL search query if on the Products page
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchVal = params.get("search");
+    if (searchVal) {
+      setQuery(searchVal);
+    }
+  }, [location.search]);
+
+  // Debounced search caller
+  const triggerSearch = useCallback((val) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+
+    if (val.trim().length < 2) {
+      setResults({});
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    abortControllerRef.current = new AbortController();
+
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        const data = await api.searchAll(val, abortControllerRef.current.signal);
+        if (data) {
+          setResults(data);
+        }
+      } catch (err) {
+        console.error("Search API failed", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
+  }, []);
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    setActiveIndex(-1);
+    triggerSearch(val);
+  };
+
+  const handleSearchSubmit = () => {
+    if (query.trim()) {
+      addQueryToHistory(query);
+      setFocused(false);
+      if (onCloseMobile) onCloseMobile();
+      navigate(`/products?search=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
+  // Compile flat items for keyboard arrow navigation
+  const getFlatSelectableItems = () => {
+    const items = [];
+    if (query.trim().length < 2) {
+      recentSearches.forEach(term => items.push({ type: "recent", value: term }));
+      popularSearches.forEach(term => items.push({ type: "popular", value: term }));
+      trendingMedicines.forEach(prod => items.push({ type: "product", value: prod }));
+    } else {
+      if (results.molecules?.length) {
+        results.molecules.forEach(mol => items.push({ type: "molecule", value: mol }));
+      }
+      if (results.categories?.length) {
+        results.categories.forEach(cat => items.push({ type: "category", value: cat }));
+      }
+      if (results.specialities?.length) {
+        results.specialities.forEach(spec => items.push({ type: "speciality", value: spec }));
+      }
+      if (results.medicines?.length) {
+        results.medicines.forEach(prod => items.push({ type: "product", value: prod }));
+      }
+      if (results.wellness?.length) {
+        results.wellness.forEach(prod => items.push({ type: "product", value: prod }));
+      }
+      if (results.surgical?.length) {
+        results.surgical.forEach(prod => items.push({ type: "product", value: prod }));
+      }
+      if (results.library?.length) {
+        results.library.forEach(art => items.push({ type: "library", value: art }));
+      }
+      if (results.pap?.length) {
+        results.pap.forEach(p => items.push({ type: "pap", value: p }));
+      }
+      if (results.offers?.length) {
+        results.offers.forEach(o => items.push({ type: "offer", value: o }));
+      }
+    }
+    return items;
+  };
+
+  // Keyboard navigation controller
+  const handleKeyDown = (e) => {
+    const flatItems = getFlatSelectableItems();
+    if (flatItems.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1 >= flatItems.length ? 0 : prev + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev - 1 < 0 ? flatItems.length - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0 && activeIndex < flatItems.length) {
+        handleSelectItem(flatItems[activeIndex]);
+      } else {
+        handleSearchSubmit();
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setFocused(false);
+      inputRef.current?.blur();
+      setActiveIndex(-1);
+    }
+  };
+
+  const handleSelectItem = (item) => {
+    setFocused(false);
+    setActiveIndex(-1);
+    if (onCloseMobile) onCloseMobile();
+
+    if (item.type === "recent" || item.type === "popular") {
+      setQuery(item.value);
+      addQueryToHistory(item.value);
+      navigate(`/products?search=${encodeURIComponent(item.value)}`);
+    } else if (item.type === "molecule") {
+      addQueryToHistory(item.value.name);
+      navigate(`/products?molecule=${encodeURIComponent(item.value.name)}`);
+    } else if (item.type === "category") {
+      addQueryToHistory(item.value.name);
+      navigate(`/products?category=${encodeURIComponent(item.value.slug || item.value.name)}`);
+    } else if (item.type === "speciality") {
+      addQueryToHistory(item.value.name);
+      navigate(`/products?speciality=${encodeURIComponent(item.value.slug || item.value.name)}`);
+    } else if (item.type === "product") {
+      addQueryToHistory(item.value.name);
+      // Track recently viewed product locally
+      let viewed = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");
+      viewed = viewed.filter(p => p.id !== item.value.id && p._id !== item.value._id);
+      viewed.unshift(item.value);
+      if (viewed.length > 5) viewed = viewed.slice(0, 5);
+      localStorage.setItem("wellmeds_recently_viewed", JSON.stringify(viewed));
+
+      navigate(`/products/${item.value.slug || item.value.id || item.value._id}`);
+    } else if (item.type === "library") {
+      addQueryToHistory(item.value.title);
+      navigate(`/library/${item.value.slug || "articles"}/${item.value.category || ""}`);
+    } else if (item.type === "pap") {
+      addQueryToHistory(item.value.title);
+      navigate(`/patient-assistance-program#${item.value.hash || ""}`);
+    } else if (item.type === "offer") {
+      addQueryToHistory(item.value.title);
+      navigate("/offers");
+    }
+  };
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIndex >= 0 && dropdownRef.current) {
+      const activeEl = dropdownRef.current.querySelector("[data-active='true']");
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [activeIndex]);
+
+  const hasResults = () => {
+    return (
+      results.molecules?.length ||
+      results.medicines?.length ||
+      results.wellness?.length ||
+      results.surgical?.length ||
+      results.categories?.length ||
+      results.surgicalCategories?.length ||
+      results.specialities?.length ||
+      results.library?.length ||
+      results.pap?.length ||
+      results.offers?.length
+    );
+  };
+
+  // Check if a product is in local wishlist
+  const isWishlisted = (prod) => {
+    return !!wishlist.find(w => w.id === prod.id || w._id === prod._id);
+  };
+
+  // Did you mean / fuzzy matching logic
+  const getFuzzyMatches = () => {
+    if (query.trim().length < 2) return [];
+    const lowerQuery = query.trim().toLowerCase();
+    const suggestions = [];
+
+    popularSearches.forEach(term => {
+      if (term.toLowerCase().includes(lowerQuery) || lowerQuery.includes(term.toLowerCase())) {
+        suggestions.push(term);
+      }
+    });
+
+    return [...new Set(suggestions)].slice(0, 3);
+  };
+
+  const isHero = variant === "hero";
+  const isMobile = variant === "mobile";
+
+  return (
+    <div 
+      ref={containerRef} 
+      className={`relative w-full ${isHero ? "max-w-2xl mx-auto" : ""}`}
+    >
+      {/* SEARCH BAR CONTAINER */}
+      <div 
+        className={`flex items-center bg-white border border-slate-200 rounded-full flex-row relative shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
+          isHero ? "p-2 md:p-2.5" : "p-1 gap-2"
+        }`}
+      >
+        {/* Left: Delivery location selector (hide in simple search overlays / mobile) */}
+        {!isMobile && (
+          <div className="relative shrink-0 flex items-center">
+            <button
+              type="button"
+              onClick={() => setLocationMenuOpen(!locationMenuOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-slate-700 hover:bg-slate-50 rounded-full transition-all focus:outline-none text-left cursor-pointer"
+              aria-label="Select delivery location"
+            >
+              <MapPin className="w-[16px] h-[16px] text-[#038076] shrink-0" />
+              <div className="flex flex-col leading-none select-none">
+                <span className="text-[7.5px] text-slate-400 uppercase font-black tracking-wider">Deliver to</span>
+                <span className="text-[11px] font-extrabold text-slate-800 mt-[1.5px] flex items-center gap-0.5">
+                  {selectedLocation} 
+                  <ChevronDown className={`w-[10px] h-[10px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
+                </span>
+              </div>
+            </button>
+
+            {locationMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
+                <div className="absolute left-0 top-full mt-2.5 w-48 bg-white rounded-xl shadow-xl border border-slate-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
+                    <button
+                      key={loc}
+                      type="button"
+                      onClick={() => handleLocationSelect(loc)}
+                      className="w-full px-4 py-2.5 hover:bg-slate-50 hover:text-[#038076] font-bold text-left transition-colors focus:outline-none cursor-pointer"
+                    >
+                      {loc}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Separator */}
+        {!isMobile && <div className="w-px h-6 bg-slate-200 shrink-0"></div>}
+
+        {/* Center: Search input */}
+        <div className="flex-1 flex items-center relative gap-2 pl-2">
+          <Search className="text-slate-400 shrink-0" size={isHero ? 18 : 15} />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search Medicines, Molecules, Wellness, Surgical..."
+            value={query}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setFocused(true)}
+            className={`w-full bg-transparent border-none text-xs outline-none text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none p-0 font-semibold ${
+              isHero ? "text-sm" : ""
+            }`}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setResults({});
+                setActiveIndex(-1);
+              }}
+              className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              aria-label="Clear Search Input"
+            >
+              <X size={14} />
+            </button>
+          )}
+          {loading && (
+            <Loader2 className="animate-spin text-[#038076] shrink-0" size={14} />
+          )}
+        </div>
+
+        {/* Right: Search button */}
+        <button 
+          type="button"
+          onClick={handleSearchSubmit}
+          className={`bg-[#038076] text-white rounded-full font-bold hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer ${
+            isHero ? "px-6 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
+          }`}
+        >
+          Search
+        </button>
+      </div>
+
+      {/* DROPDOWN AUTOCOMPLETE PANEL */}
+      {focused && (
+        <div 
+          ref={dropdownRef}
+          className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-[250] overflow-y-auto max-h-[500px] md:max-h-[600px] animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
+        >
+          {/* EMPTY QUERY STATE PANEL */}
+          {query.trim().length < 2 && (
+            <div className="p-5 flex flex-col gap-6 text-left">
+              {/* Recent Searches */}
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 select-none">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Recent Searches</span>
+                    </span>
+                    <button 
+                      onClick={clearHistory}
+                      className="text-[10px] font-extrabold text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recentSearches.map((term, index) => {
+                      const flatFlat = getFlatSelectableItems();
+                      const flatIndex = index;
+                      const active = activeIndex === flatIndex;
+                      return (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => handleSelectItem({ type: "recent", value: term })}
+                          data-active={active}
+                          className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all text-slate-600 hover:text-[#038076] hover:border-[#038076] hover:bg-[#e6f6f4]/20 ${
+                            active ? "border-[#038076] bg-[#e6f6f4]/30 text-[#038076]" : "border-slate-200 bg-white"
+                          }`}
+                        >
+                          {term}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular Searches */}
+              <div>
+                <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-2 select-none">
+                  <Compass className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Popular Searches</span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {popularSearches.map((term, index) => {
+                    const flatIndex = recentSearches.length + index;
+                    const active = activeIndex === flatIndex;
+                    return (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => handleSelectItem({ type: "popular", value: term })}
+                        data-active={active}
+                        className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all text-slate-600 hover:text-[#038076] hover:border-[#038076] hover:bg-[#e6f6f4]/20 ${
+                          active ? "border-[#038076] bg-[#e6f6f4]/30 text-[#038076]" : "border-slate-200 bg-white"
+                        }`}
+                      >
+                        {term}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recently Viewed Products */}
+              {recentlyViewed.length > 0 && (
+                <div>
+                  <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-3 select-none">
+                    <Activity className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Recently Viewed</span>
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {recentlyViewed.map((prod) => (
+                      <div 
+                        key={prod._id || prod.id}
+                        onClick={() => handleSelectItem({ type: "product", value: prod })}
+                        className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-100 hover:border-[#038076]/40 hover:bg-[#e6f6f4]/5 cursor-pointer transition-all"
+                      >
+                        <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg p-0.5 shrink-0 flex items-center justify-center">
+                          <img src={prod.image} alt={prod.name} className="w-full h-full object-contain" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-700 truncate">{prod.name}</p>
+                          <p className="text-[9.5px] text-[#038076] font-black mt-0.5">₹{prod.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Trending Medicines (config-backed) */}
+              {trendingMedicines.length > 0 && (
+                <div>
+                  <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-3 select-none">
+                    <Percent className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Trending Medicines</span>
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {trendingMedicines.map((prod, index) => {
+                      const flatIndex = recentSearches.length + popularSearches.length + index;
+                      const active = activeIndex === flatIndex;
+                      return (
+                        <div 
+                          key={prod._id || prod.id}
+                          onClick={() => handleSelectItem({ type: "product", value: prod })}
+                          data-active={active}
+                          className={`flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all ${
+                            active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:border-[#038076]/40 hover:bg-[#e6f6f4]/5"
+                          }`}
+                        >
+                          <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg p-0.5 shrink-0 flex items-center justify-center">
+                            <img src={prod.image} alt={prod.name} className="w-full h-full object-contain" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-700 truncate">{prod.name}</p>
+                            <p className="text-[9.5px] text-[#038076] font-black mt-0.5">₹{prod.price}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* RESULTS STATE PANEL */}
+          {query.trim().length >= 2 && !loading && (
+            <div className="flex flex-col text-left">
+              {/* NO RESULTS FALLBACK */}
+              {!hasResults() ? (
+                <div className="p-8 text-center flex flex-col items-center justify-center gap-4">
+                  <div className="w-14 h-14 bg-slate-50 border border-slate-100 text-slate-400 rounded-full flex items-center justify-center shadow-inner">
+                    <Search size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-slate-700 text-sm">No results found for "{query}"</h3>
+                    <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">Double check spelling, search generic salt names, or talk directly with a verified WellMeds pharmacist.</p>
+                  </div>
+
+                  {/* Fuzzy logic spell corrections */}
+                  {getFuzzyMatches().length > 0 && (
+                    <div className="mt-2 select-none">
+                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Did you mean:</span>
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-1.5">
+                        {getFuzzyMatches().map((term) => (
+                          <button
+                            key={term}
+                            onClick={() => handleSelectItem({ type: "popular", value: term })}
+                            className="px-3 py-1 bg-[#e6f6f4] hover:bg-[#cbece8] text-[#038076] font-bold text-[11px] rounded-full transition-colors cursor-pointer"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact pharmacist action buttons */}
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full max-w-xs">
+                    <a
+                      href="https://wa.me/917420909445?text=Hi%2C%20I%20need%20help%2520finding%2520a%2520medicine%2520called%2520"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-[#038076] hover:bg-[#02665e] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-[0.98]"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                      <span>Contact Pharmacist</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                // RESULTS GROUPS LIST
+                <div className="p-2 md:p-3 space-y-4">
+                  
+                  {/* GROUP 1: MOLECULES */}
+                  {results.molecules?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Molecules</span>
+                      </span>
+                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        {results.molecules.map((mol, idx) => {
+                          const flatItems = getFlatSelectableItems();
+                          // Calculate exact flat index for molecule items
+                          const flatIndex = flatItems.findIndex(i => i.type === "molecule" && i.value.slug === mol.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={mol.slug}
+                              onClick={() => handleSelectItem({ type: "molecule", value: mol })}
+                              data-active={active}
+                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all border ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-slate-700">{mol.name}</span>
+                                <span className="text-[9px] text-slate-400 font-medium">Salt Composition</span>
+                              </div>
+                              <span className="text-[10.5px] font-black text-[#038076] hover:underline flex items-center gap-0.5">
+                                <span>View Medicines</span>
+                                <ArrowUpRight className="w-3 h-3" />
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 2: CATEGORIES & SPECIALITIES */}
+                  {(results.categories?.length > 0 || results.specialities?.length > 0) && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
+                        <Compass className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Categories & Specialities</span>
+                      </span>
+                      <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
+                        {results.categories?.map((cat) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "category" && i.value.slug === cat.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={cat.slug}
+                              onClick={() => handleSelectItem({ type: "category", value: cat })}
+                              data-active={active}
+                              className={`px-3 py-2 rounded-xl border cursor-pointer text-xs font-bold transition-all ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" : "border-slate-100 hover:bg-slate-50 text-slate-700"
+                              }`}
+                            >
+                              <span className="text-slate-400 font-medium text-[9px] block uppercase">Category</span>
+                              <span className="truncate block mt-0.5">{cat.name}</span>
+                            </div>
+                          );
+                        })}
+
+                        {results.specialities?.map((spec) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "speciality" && i.value.slug === spec.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={spec.slug}
+                              onClick={() => handleSelectItem({ type: "speciality", value: spec })}
+                              data-active={active}
+                              className={`px-3 py-2 rounded-xl border cursor-pointer text-xs font-bold transition-all ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" : "border-slate-100 hover:bg-slate-50 text-slate-700"
+                              }`}
+                            >
+                              <span className="text-slate-400 font-medium text-[9px] block uppercase">Speciality</span>
+                              <span className="truncate block mt-0.5">{spec.name}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 3: MEDICINES */}
+                  {results.medicines?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
+                        <Globe className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Medicines & Prescription Drugs</span>
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        {results.medicines.map((prod) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div 
+                              key={prod._id || prod.id}
+                              data-active={active}
+                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                            >
+                              <ProductListItem 
+                                product={prod}
+                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                                onAddToCart={(p) => addToCart(p, 1)}
+                                onToggleWishlist={toggleWishlist}
+                                isWishlisted={isWishlisted(prod)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 4: WELLNESS */}
+                  {results.wellness?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
+                        <Activity className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Wellness & OTC Products</span>
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        {results.wellness.map((prod) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div 
+                              key={prod._id || prod.id}
+                              data-active={active}
+                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                            >
+                              <ProductListItem 
+                                product={prod}
+                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                                onAddToCart={(p) => addToCart(p, 1)}
+                                onToggleWishlist={toggleWishlist}
+                                isWishlisted={isWishlisted(prod)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 5: SURGICAL */}
+                  {results.surgical?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
+                        <Handshake className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Surgical & Instruments</span>
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        {results.surgical.map((prod) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div 
+                              key={prod._id || prod.id}
+                              data-active={active}
+                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                            >
+                              <ProductListItem 
+                                product={prod}
+                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                                onAddToCart={(p) => addToCart(p, 1)}
+                                onToggleWishlist={toggleWishlist}
+                                isWishlisted={isWishlisted(prod)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 6: HEALTH LIBRARY */}
+                  {results.library?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Health Library Guides</span>
+                      </span>
+                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        {results.library.map((art) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "library" && i.value.id === art.id);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={art.id}
+                              onClick={() => handleSelectItem({ type: "library", value: art })}
+                              data-active={active}
+                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
+                              }`}
+                            >
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-bold text-slate-700 truncate">{art.title}</span>
+                                <span className="text-[9.5px] text-slate-400 font-medium">Topic: {art.category}</span>
+                              </div>
+                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 7: PATIENT ASSISTANCE PROGRAM */}
+                  {results.pap?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
+                        <Handshake className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Patient Assistance Programs (PAP)</span>
+                      </span>
+                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        {results.pap.map((p) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "pap" && i.value.id === p.id);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={p.id}
+                              onClick={() => handleSelectItem({ type: "pap", value: p })}
+                              data-active={active}
+                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
+                              }`}
+                            >
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-bold text-slate-700 truncate">{p.title}</span>
+                                <span className="text-[9.5px] text-slate-400 font-medium">PAP Hub &bull; {p.category}</span>
+                              </div>
+                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GROUP 8: OFFERS */}
+                  {results.offers?.length > 0 && (
+                    <div>
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
+                        <Percent className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Available Coupons & Offers</span>
+                      </span>
+                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        {results.offers.map((o) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "offer" && i.value.id === o.id);
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <div
+                              key={o.id}
+                              onClick={() => handleSelectItem({ type: "offer", value: o })}
+                              data-active={active}
+                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
+                              }`}
+                            >
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-black text-[#038076]">{o.code}</span>
+                                <span className="text-[10px] font-bold text-slate-600 truncate mt-0.5">{o.title}</span>
+                              </div>
+                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Compact product card inner component
+const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isWishlisted }) => {
+  const discount = product.originalPrice && product.originalPrice > product.price
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  return (
+    <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all select-none group text-left">
+      {/* Product Image */}
+      <Link 
+        to={`/products/${product.slug || product._id || product.id}`}
+        onClick={onSelect}
+        className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 p-1 cursor-pointer"
+      >
+        <img 
+          src={product.image || "/assets/placeholder-medicine.png"} 
+          alt={product.name} 
+          className="w-full h-full object-contain"
+        />
+      </Link>
+
+      {/* Product Info */}
+      <div className="flex-grow min-w-0">
+        <div className="flex items-start gap-1">
+          <Link 
+            to={`/products/${product.slug || product._id || product.id}`}
+            onClick={onSelect}
+            className="font-bold text-xs text-slate-800 hover:text-[#038076] transition-colors truncate cursor-pointer"
+          >
+            {product.name}
+          </Link>
+          {product.requiresRx && (
+            <span className="bg-red-50 text-[8px] font-black text-red-600 px-1 py-0.5 rounded uppercase shrink-0 tracking-wider select-none">
+              Rx
+            </span>
+          )}
+        </div>
+        
+        <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+          {product.strength && <span>{product.strength}</span>}
+          {product.strength && product.packSize && <span> &bull; </span>}
+          {product.packSize && <span>{product.packSize}</span>}
+          {product.manufacturer && <span> &bull; {product.manufacturer}</span>}
+        </p>
+
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-xs font-black text-slate-800">₹{product.price}</span>
+          {discount > 0 && (
+            <>
+              <span className="text-[10px] text-slate-400 line-through">₹{product.originalPrice}</span>
+              <span className="bg-[#e6f6f4] text-[9px] font-extrabold text-[#038076] px-1 py-0.5 rounded select-none">
+                {discount}% OFF
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Stock & Actions */}
+      <div className="flex flex-col items-end shrink-0 gap-1.5 ml-2">
+        {product.stock > 0 && product.inStock !== false ? (
+          <span className="text-[8.5px] font-black text-[#038076] uppercase tracking-wider select-none">In Stock</span>
+        ) : (
+          <span className="text-[8.5px] font-black text-red-500 uppercase tracking-wider select-none">Out of Stock</span>
+        )}
+
+        <div className="flex items-center gap-1.5">
+          {/* Wishlist toggle */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onToggleWishlist(product);
+            }}
+            className={`p-1.5 border rounded-lg hover:bg-slate-50 transition-colors cursor-pointer ${
+              isWishlisted ? "text-red-500 border-red-150 bg-red-50/20" : "text-slate-400 border-slate-200"
+            }`}
+            aria-label="Toggle Wishlist"
+          >
+            <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current" : ""}`} />
+          </button>
+
+          {/* Add to cart */}
+          <button
+            type="button"
+            disabled={!(product.stock > 0 && product.inStock !== false)}
+            onClick={(e) => {
+              e.preventDefault();
+              onAddToCart(product);
+            }}
+            className="bg-[#038076] disabled:bg-slate-200 text-white p-1.5 rounded-lg font-bold text-xs hover:bg-[#02665e] transition-colors flex items-center justify-center cursor-pointer"
+            aria-label="Add to cart"
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UniversalSearch;

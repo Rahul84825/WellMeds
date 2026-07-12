@@ -178,3 +178,62 @@ export const updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── Search History Controllers ──────────────────────────────────────────────
+export const getSearchHistory = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, history: user.searchHistory || [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addSearchHistory = async (req, res, next) => {
+  const { term } = req.body;
+  try {
+    if (!term || !term.trim()) {
+      return res.status(400).json({ success: false, message: "Search term is required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    let history = user.searchHistory || [];
+    // Remove duplicate matches case-insensitively
+    history = history.filter((t) => t.toLowerCase() !== term.trim().toLowerCase());
+    // Insert at front
+    history.unshift(term.trim());
+    // Keep max 10
+    if (history.length > 10) {
+      history = history.slice(0, 10);
+    }
+
+    user.searchHistory = history;
+    await user.save();
+
+    res.status(200).json({ success: true, history });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const clearSearchHistory = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    user.searchHistory = [];
+    await user.save();
+    res.status(200).json({ success: true, history: [] });
+  } catch (error) {
+    next(error);
+  }
+};
+

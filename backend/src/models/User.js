@@ -77,6 +77,10 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     lockUntil: Date,
+    searchHistory: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
