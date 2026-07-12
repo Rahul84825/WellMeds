@@ -9,12 +9,18 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Mongoose Duplicate Key Error (E11000)
-  // Log full Mongo error for debugging; return a neutral message to the client.
+  // Log full Mongo error for debugging; return a friendly message to the client.
   else if (err.code === 11000) {
     const duplicateField = Object.keys(err.keyPattern || err.keyValue || {}).join(", ") || "unknown field";
     console.error(`[ERROR_MIDDLEWARE] E11000 duplicate key on field(s): ${duplicateField}. Full error:`, err);
     statusCode = 409; // 409 Conflict is more semantically correct than 400
-    message = "We couldn't complete that request. Please try again.";
+    if (duplicateField.includes("email")) {
+      message = "This email address is already registered. Please use a different one.";
+    } else if (duplicateField.includes("mobile")) {
+      message = "This mobile number is already registered.";
+    } else {
+      message = "We couldn't complete that request. Please try again.";
+    }
   }
 
   // Mongoose Validation Error
