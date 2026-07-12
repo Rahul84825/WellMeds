@@ -36,10 +36,9 @@ import {
 } from "lucide-react";
 
 const UploadPrescriptionPage = () => {
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const { pendingRxFile, setPendingRxFile } = useCart();
   const navigate = useNavigate();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Prescriptions state
   const [savedPrescriptions, setSavedPrescriptions] = useState([]);
@@ -107,7 +106,7 @@ const UploadPrescriptionPage = () => {
       const file = e.dataTransfer.files[0];
       if (!user) {
         setPendingRxFile(file);
-        setIsLoginModalOpen(true);
+        openLoginModal("/upload-prescription");
         return;
       }
       validateAndSetFile(file);
@@ -119,7 +118,7 @@ const UploadPrescriptionPage = () => {
       const file = e.target.files[0];
       if (!user) {
         setPendingRxFile(file);
-        setIsLoginModalOpen(true);
+        openLoginModal("/upload-prescription");
         return;
       }
       validateAndSetFile(file);
@@ -129,7 +128,7 @@ const UploadPrescriptionPage = () => {
   const handleDropzoneClick = () => {
     if (!user) {
       sessionStorage.setItem("auth_redirect_intent", "upload_prescription_click");
-      setIsLoginModalOpen(true);
+      openLoginModal("/upload-prescription");
       return;
     }
     document.getElementById("prescription-file-upload")?.click();
@@ -801,13 +800,6 @@ const UploadPrescriptionPage = () => {
         </div>
       </Modal>
 
-      <LoginRequiredModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        fromPath="/upload-prescription"
-        message="Please login to upload your prescription."
-        cancelText="Cancel"
-      />
     </div>
   );
 };

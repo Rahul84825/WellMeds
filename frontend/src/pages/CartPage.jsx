@@ -22,12 +22,11 @@ const Cart = () => {
     clearCart
   } = useCart();
 
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Prescription records loaded for verification badges
   const [prescriptions, setPrescriptions] = useState([]);
@@ -433,7 +432,7 @@ const Cart = () => {
             <button
               onClick={() => {
                 if (!user) {
-                  setIsLoginModalOpen(true);
+                  openLoginModal("/checkout");
                 } else {
                   navigate("/checkout");
                 }
@@ -453,12 +452,6 @@ const Cart = () => {
           </div>
         </div>
       </div>
-      
-      <LoginRequiredModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        fromPath="/checkout"
-      />
     </div>
   );
 };

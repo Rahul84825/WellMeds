@@ -13,8 +13,15 @@ import { toast } from "sonner";
 
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
-  const { user, loading: authLoading, sendOtp, verifyOtp } = useAuth();
+  const { user, loading: authLoading, openLoginModal } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      openLoginModal("/checkout");
+      navigate("/cart", { replace: true });
+    }
+  }, [authLoading, user, openLoginModal, navigate]);
 
   // Form states
   const [fullName, setFullName] = useState(user?.name || "");
@@ -307,15 +314,7 @@ const Checkout = () => {
 
   // ── Guest Auth Gate ─────────────────────────────────────────────────────────
   if (!authLoading && !user) {
-    return (
-      <div className="min-h-[60vh] bg-surface relative flex items-center justify-center backdrop-blur-md">
-        <LoginRequiredModal
-          isOpen={true}
-          onClose={() => navigate("/cart")}
-          fromPath="/checkout"
-        />
-      </div>
-    );
+    return null;
   }
 
   return (

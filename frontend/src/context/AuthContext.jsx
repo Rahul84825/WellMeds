@@ -192,6 +192,19 @@ export const AuthProvider = ({ children }) => {
     return updatedUser;
   }, []);
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalRedirect, setAuthModalRedirect] = useState(null);
+
+  const openLoginModal = useCallback((redirectPath = null) => {
+    setAuthModalRedirect(redirectPath);
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
+    setAuthModalRedirect(null);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -204,6 +217,10 @@ export const AuthProvider = ({ children }) => {
         isAdmin: user?.role === "admin",
         registerLoginCallback,
         registerLogoutCallback,
+        isAuthModalOpen,
+        openLoginModal,
+        closeAuthModal,
+        authModalRedirect,
       }}
     >
       {children}

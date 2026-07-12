@@ -432,32 +432,18 @@ const NavActions = ({ isShrunk }) => {
         icon: LayoutDashboard
       });
       dropdownItems.push({
-        id: "admin-products",
+        id: "my-profile",
         type: "link",
-        to: "/products",
-        label: "Products",
-        icon: Package
-      });
-      dropdownItems.push({
-        id: "admin-orders",
-        type: "link",
-        to: "/orders",
-        label: "Orders",
-        icon: History
-      });
-      dropdownItems.push({
-        id: "admin-prescriptions",
-        type: "link",
-        to: "/upload-prescription",
-        label: "Prescriptions",
-        icon: FileText
+        to: "/profile",
+        label: "Profile",
+        icon: User
       });
     } else {
       dropdownItems.push({
         id: "my-profile",
         type: "link",
         to: "/profile",
-        label: "Profile",
+        label: "My Profile",
         icon: User
       });
       dropdownItems.push({
@@ -473,6 +459,13 @@ const NavActions = ({ isShrunk }) => {
         to: "/upload-prescription",
         label: "Prescriptions",
         icon: FileText
+      });
+      dropdownItems.push({
+        id: "addresses",
+        type: "link",
+        to: "/profile?tab=addresses",
+        label: "Addresses",
+        icon: MapPin
       });
     }
     dropdownItems.push({
@@ -592,8 +585,8 @@ const NavActions = ({ isShrunk }) => {
             </span>
           </button>
         ) : (
-          <Link
-            to="/login"
+          <button
+            onClick={() => openLoginModal()}
             style={{
               width: isShrunk ? "86px" : "96px",
               height: isShrunk ? "30px" : "34px"
@@ -602,7 +595,7 @@ const NavActions = ({ isShrunk }) => {
           >
             <User className="w-[16px] h-[16px] text-gray-500" />
             <span>Login</span>
-          </Link>
+          </button>
         )}
 
         {profileDropdownOpen && user && (
@@ -693,7 +686,7 @@ const NavActions = ({ isShrunk }) => {
 // Main Component: Navbar
 // ==========================================
 const Navbar = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, openLoginModal } = useAuth();
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -1014,14 +1007,16 @@ const Navbar = () => {
                 <span>My Profile ({user.name})</span>
               </Link>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold"
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openLoginModal();
+                }}
+                className="px-sm py-sm rounded-xl text-xs text-on-surface hover:bg-slate-50 flex items-center gap-sm font-semibold w-full text-left cursor-pointer"
               >
                 <User size={16} className="text-slate-400" />
                 <span>Login / Register</span>
-              </Link>
+              </button>
             )}
 
             <Link
