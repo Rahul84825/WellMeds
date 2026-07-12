@@ -1,5 +1,5 @@
 import express from "express";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts, searchAll, getTrendingProducts } from "../controllers/productController.js";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts, searchAll, getTrendingProducts, searchProductsResults } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 import { searchLimiter } from "../middleware/rateLimitMiddleware.js";
@@ -12,6 +12,9 @@ router.route("/")
 
 router.route("/search-all")
   .get(searchLimiter, searchAll);
+
+router.route("/search-results")
+  .get(searchLimiter, searchProductsResults);
 
 router.route("/trending")
   .get(getTrendingProducts);

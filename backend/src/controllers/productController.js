@@ -546,3 +546,129 @@ export const getTrendingProducts = async (req, res, next) => {
   }
 };
 
+export const searchProductsResults = async (req, res, next) => {
+  const { q, page = 1, limit = 28 } = req.query;
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 28;
+  const skip = (pageNum - 1) * limitNum;
+
+  try {
+    if (!q || !q.trim()) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        total: 0,
+        page: pageNum,
+        pages: 1,
+        products: []
+      });
+    }
+
+    const queryStr = q.trim();
+    const regex = new RegExp(queryStr, "i");
+
+    // 1. Find matching Molecules
+    const matchedMols = await Molecule.find({ name: regex }).select("_id");
+    const molIds = matchedMols.map(m => m._id);
+
+    // 2. Find matching Categories
+    const matchedCats = await Category.find({ name: regex }).select("_id");
+    const catIds = matchedCats.map(c => c._id);
+
+    // 3. Find matching Surgical Categories
+    const matchedSurgCats = await SurgicalCategory.find({ name: regex }).select("_id");
+    const surgCatIds = matchedSurgCats.map(c => c._id);
+
+    // Build the query
+    const query = {
+      $or: [
+        { name: regex },
+        { brand: regex },
+        { manufacturer: regex },
+        { description: regex },
+        { strength: regex },
+        { "composition.ingredient": regex },
+        { molecules: { $in: molIds } },
+        { category: { $in: catIds } },
+        { surgicalCategory: { $in: surgCatIds } }
+      ]
+    };
+
+    // Fetch matching products and populate relations
+    const allProducts = await Product.find(query)
+      .populate("category specialities molecules");
+
+    // Ranking priority:
+    // 1. Exact Product Name
+    // 2. Product Name Starts With
+    // 3. Generic Name / Composition ingredient match
+    // 4. Brand
+    // 5. Molecule Match
+    // 6. Category Match
+    // 7. Description
+    const rankedProducts = allProducts.sort((a, b) => {
+      const aLowerName = a.name.toLowerCase();
+      const bLowerName = b.name.toLowerCase();
+      const qLower = queryStr.toLowerCase();
+
+      // Priority 1: Exact Name
+      const aExact = aLowerName === qLower;
+      const bExact = bLowerName === qLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+
+      // Priority 2: Starts with Name
+      const aStart = aLowerName.startsWith(qLower);
+      const bStart = bLowerName.startsWith(qLower);
+      if (aStart && !bStart) return -1;
+      if (!aStart && bStart) return 1;
+
+      // Priority 3: Composition / Generic Name match
+      const aComp = a.composition?.some(c => c.ingredient.toLowerCase().includes(qLower));
+      const bComp = b.composition?.some(c => c.ingredient.toLowerCase().includes(qLower));
+      if (aComp && !bComp) return -1;
+      if (!aComp && bComp) return 1;
+
+      // Priority 4: Brand/Manufacturer
+      const aBrand = a.brand?.toLowerCase().includes(qLower) || a.manufacturer?.toLowerCase().includes(qLower);
+      const bBrand = b.brand?.toLowerCase().includes(qLower) || b.manufacturer?.toLowerCase().includes(qLower);
+      if (aBrand && !bBrand) return -1;
+      if (!aBrand && bBrand) return 1;
+
+      // Priority 5: Molecule Match
+      const aMol = a.molecules?.some(m => m.name.toLowerCase().includes(qLower));
+      const bMol = b.molecules?.some(m => m.name.toLowerCase().includes(qLower));
+      if (aMol && !bMol) return -1;
+      if (!aMol && bMol) return 1;
+
+      // Priority 6: Category Match
+      const aCat = a.category?.name?.toLowerCase().includes(qLower);
+      const bCat = b.category?.name?.toLowerCase().includes(qLower);
+      if (aCat && !bCat) return -1;
+      if (!aCat && bCat) return 1;
+
+      // Priority 7: Description
+      const aDesc = a.description?.toLowerCase().includes(qLower);
+      const bDesc = b.description?.toLowerCase().includes(qLower);
+      if (aDesc && !bDesc) return -1;
+      if (!aDesc && bDesc) return 1;
+
+      return 0;
+    });
+
+    const total = rankedProducts.length;
+    const paginatedProducts = rankedProducts.slice(skip, skip + limitNum);
+
+    res.status(200).json({
+      success: true,
+      count: paginatedProducts.length,
+      total,
+      page: pageNum,
+      pages: Math.ceil(total / limitNum),
+      products: paginatedProducts
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

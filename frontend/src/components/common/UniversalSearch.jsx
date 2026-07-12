@@ -242,7 +242,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       addQueryToHistory(query);
       setFocused(false);
       if (onCloseMobile) onCloseMobile();
-      navigate(`/products?search=${encodeURIComponent(query.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
@@ -319,7 +319,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     if (item.type === "recent" || item.type === "popular") {
       setQuery(item.value);
       addQueryToHistory(item.value);
-      navigate(`/products?search=${encodeURIComponent(item.value)}`);
+      navigate(`/search?q=${encodeURIComponent(item.value)}`);
     } else if (item.type === "molecule") {
       addQueryToHistory(item.value.name);
       navigate(`/products?molecule=${encodeURIComponent(item.value.name)}`);
@@ -499,144 +499,17 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       </div>
 
       {/* DROPDOWN AUTOCOMPLETE PANEL */}
-      {focused && (
+      {focused && query.trim().length >= 2 && (
         <div 
           ref={dropdownRef}
           className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-[250] overflow-y-auto max-h-[500px] md:max-h-[600px] animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
         >
-          {/* EMPTY QUERY STATE PANEL */}
-          {query.trim().length < 2 && (
-            <div className="p-5 flex flex-col gap-6 text-left">
-              {/* Recent Searches */}
-              {recentSearches.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 select-none">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Recent Searches</span>
-                    </span>
-                    <button 
-                      onClick={clearHistory}
-                      className="text-[10px] font-extrabold text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {recentSearches.map((term, index) => {
-                      const flatFlat = getFlatSelectableItems();
-                      const flatIndex = index;
-                      const active = activeIndex === flatIndex;
-                      return (
-                        <button
-                          key={term}
-                          type="button"
-                          onClick={() => handleSelectItem({ type: "recent", value: term })}
-                          data-active={active}
-                          className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all text-slate-600 hover:text-[#038076] hover:border-[#038076] hover:bg-[#e6f6f4]/20 ${
-                            active ? "border-[#038076] bg-[#e6f6f4]/30 text-[#038076]" : "border-slate-200 bg-white"
-                          }`}
-                        >
-                          {term}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Popular Searches */}
-              <div>
-                <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-2 select-none">
-                  <Compass className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Popular Searches</span>
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {popularSearches.map((term, index) => {
-                    const flatIndex = recentSearches.length + index;
-                    const active = activeIndex === flatIndex;
-                    return (
-                      <button
-                        key={term}
-                        type="button"
-                        onClick={() => handleSelectItem({ type: "popular", value: term })}
-                        data-active={active}
-                        className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all text-slate-600 hover:text-[#038076] hover:border-[#038076] hover:bg-[#e6f6f4]/20 ${
-                          active ? "border-[#038076] bg-[#e6f6f4]/30 text-[#038076]" : "border-slate-200 bg-white"
-                        }`}
-                      >
-                        {term}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Recently Viewed Products */}
-              {recentlyViewed.length > 0 && (
-                <div>
-                  <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-3 select-none">
-                    <Activity className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Recently Viewed</span>
-                  </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                    {recentlyViewed.map((prod) => (
-                      <div 
-                        key={prod._id || prod.id}
-                        onClick={() => handleSelectItem({ type: "product", value: prod })}
-                        className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-100 hover:border-[#038076]/40 hover:bg-[#e6f6f4]/5 cursor-pointer transition-all"
-                      >
-                        <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg p-0.5 shrink-0 flex items-center justify-center">
-                          <img src={prod.image} alt={prod.name} className="w-full h-full object-contain" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-700 truncate">{prod.name}</p>
-                          <p className="text-[9.5px] text-[#038076] font-black mt-0.5">₹{prod.price}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Trending Medicines (config-backed) */}
-              {trendingMedicines.length > 0 && (
-                <div>
-                  <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mb-3 select-none">
-                    <Percent className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Trending Medicines</span>
-                  </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                    {trendingMedicines.map((prod, index) => {
-                      const flatIndex = recentSearches.length + popularSearches.length + index;
-                      const active = activeIndex === flatIndex;
-                      return (
-                        <div 
-                          key={prod._id || prod.id}
-                          onClick={() => handleSelectItem({ type: "product", value: prod })}
-                          data-active={active}
-                          className={`flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all ${
-                            active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:border-[#038076]/40 hover:bg-[#e6f6f4]/5"
-                          }`}
-                        >
-                          <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-lg p-0.5 shrink-0 flex items-center justify-center">
-                            <img src={prod.image} alt={prod.name} className="w-full h-full object-contain" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-700 truncate">{prod.name}</p>
-                            <p className="text-[9.5px] text-[#038076] font-black mt-0.5">₹{prod.price}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+          {loading ? (
+            <div className="p-8 text-center flex items-center justify-center gap-2 select-none">
+              <Loader2 className="animate-spin text-[#038076] w-4 h-4" />
+              <span className="text-xs font-semibold text-slate-500">Searching medicines...</span>
             </div>
-          )}
-
-          {/* RESULTS STATE PANEL */}
-          {query.trim().length >= 2 && !loading && (
+          ) : (
             <div className="flex flex-col text-left">
               {/* NO RESULTS FALLBACK */}
               {!hasResults() ? (
@@ -657,7 +530,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                         {getFuzzyMatches().map((term) => (
                           <button
                             key={term}
-                            onClick={() => handleSelectItem({ type: "popular", value: term })}
+                            onClick={() => {
+                              setQuery(term);
+                              addQueryToHistory(term);
+                              setFocused(false);
+                              if (onCloseMobile) onCloseMobile();
+                              navigate(`/search?q=${encodeURIComponent(term)}`);
+                            }}
                             className="px-3 py-1 bg-[#e6f6f4] hover:bg-[#cbece8] text-[#038076] font-bold text-[11px] rounded-full transition-colors cursor-pointer"
                           >
                             {term}
@@ -668,9 +547,9 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                   )}
 
                   {/* Contact pharmacist action buttons */}
-                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full max-w-xs">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full max-w-xs select-none">
                     <a
-                      href="https://wa.me/917420909445?text=Hi%2C%20I%20need%20help%2520finding%2520a%2520medicine%2520called%2520"
+                      href={`https://wa.me/917420909445?text=Hi%2C%20I%20need%20help%20finding%20a%20medicine%20called%20${encodeURIComponent(query)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full flex items-center justify-center gap-2 bg-[#038076] hover:bg-[#02665e] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-[0.98]"
@@ -692,9 +571,8 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                         <span>Molecules</span>
                       </span>
                       <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                        {results.molecules.map((mol, idx) => {
+                        {results.molecules.map((mol) => {
                           const flatItems = getFlatSelectableItems();
-                          // Calculate exact flat index for molecule items
                           const flatIndex = flatItems.findIndex(i => i.type === "molecule" && i.value.slug === mol.slug);
                           const active = activeIndex === flatIndex;
                           return (
@@ -777,7 +655,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                         <Globe className="w-3.5 h-3.5 text-slate-400" />
                         <span>Medicines & Prescription Drugs</span>
                       </span>
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {results.medicines.map((prod) => {
                           const flatItems = getFlatSelectableItems();
                           const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
@@ -785,16 +663,23 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                           return (
                             <div 
                               key={prod._id || prod.id}
+                              onClick={() => handleSelectItem({ type: "product", value: prod })}
                               data-active={active}
-                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                              }`}
                             >
-                              <ProductListItem 
-                                product={prod}
-                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                                onAddToCart={(p) => addToCart(p, 1)}
-                                onToggleWishlist={toggleWishlist}
-                                isWishlisted={isWishlisted(prod)}
-                              />
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-slate-700">
+                                  {prod.name}
+                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
+                                </span>
+                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
+                              </div>
+                              <div className="text-right flex items-center gap-2">
+                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
+                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
+                              </div>
                             </div>
                           );
                         })}
@@ -809,7 +694,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                         <Activity className="w-3.5 h-3.5 text-slate-400" />
                         <span>Wellness & OTC Products</span>
                       </span>
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {results.wellness.map((prod) => {
                           const flatItems = getFlatSelectableItems();
                           const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
@@ -817,16 +702,23 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                           return (
                             <div 
                               key={prod._id || prod.id}
+                              onClick={() => handleSelectItem({ type: "product", value: prod })}
                               data-active={active}
-                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                              }`}
                             >
-                              <ProductListItem 
-                                product={prod}
-                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                                onAddToCart={(p) => addToCart(p, 1)}
-                                onToggleWishlist={toggleWishlist}
-                                isWishlisted={isWishlisted(prod)}
-                              />
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-slate-700">
+                                  {prod.name}
+                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
+                                </span>
+                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
+                              </div>
+                              <div className="text-right flex items-center gap-2">
+                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
+                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
+                              </div>
                             </div>
                           );
                         })}
@@ -841,7 +733,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                         <Handshake className="w-3.5 h-3.5 text-slate-400" />
                         <span>Surgical & Instruments</span>
                       </span>
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {results.surgical.map((prod) => {
                           const flatItems = getFlatSelectableItems();
                           const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
@@ -849,16 +741,23 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                           return (
                             <div 
                               key={prod._id || prod.id}
+                              onClick={() => handleSelectItem({ type: "product", value: prod })}
                               data-active={active}
-                              className={active ? "ring-2 ring-[#038076] rounded-xl overflow-hidden" : ""}
+                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
+                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                              }`}
                             >
-                              <ProductListItem 
-                                product={prod}
-                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                                onAddToCart={(p) => addToCart(p, 1)}
-                                onToggleWishlist={toggleWishlist}
-                                isWishlisted={isWishlisted(prod)}
-                              />
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-slate-700">
+                                  {prod.name}
+                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
+                                </span>
+                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
+                              </div>
+                              <div className="text-right flex items-center gap-2">
+                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
+                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
+                              </div>
                             </div>
                           );
                         })}

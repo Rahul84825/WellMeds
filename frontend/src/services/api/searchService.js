@@ -37,6 +37,14 @@ export const searchService = {
     }
   },
 
+  async getSearchResults(params = {}) {
+    const { q, page, limit } = params;
+    const response = await apiInstance.get("/products/search-results", {
+      params: { q, page, limit }
+    });
+    return response;
+  },
+
   /**
    * Clear search cache
    */

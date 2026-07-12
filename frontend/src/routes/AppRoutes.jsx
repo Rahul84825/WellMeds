@@ -33,6 +33,7 @@ import SurgicalLandingPage from "../pages/SurgicalLandingPage";
 import AllSurgicalProductsPage from "../pages/AllSurgicalProductsPage";
 import SurgicalCategoryPage from "../pages/SurgicalCategoryPage";
 import OffersPage from "../pages/OffersPage";
+import SearchResultsPage from "../pages/SearchResultsPage";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -55,6 +56,7 @@ const AppRoutes = () => {
       {/* Client Portal Routes */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="search" element={<SearchResultsPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="category/:categorySlug" element={<Navigate to="/products" replace />} />
         <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
