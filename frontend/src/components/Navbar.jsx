@@ -609,7 +609,7 @@ const Navbar = () => {
               <button
                 id="trigger-medicines"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "medicines")}
-                className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Medicines</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
@@ -620,15 +620,15 @@ const Navbar = () => {
                 id="dropdown-medicines"
                 onMouseEnter={() => handleMouseEnter("medicines")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1 w-[880px] bg-white border border-slate-150 rounded-2xl shadow-xl p-6 transition-all duration-200 ease-out transform origin-top flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-0 top-full z-[200] mt-1 w-[900px] bg-white border border-slate-150 rounded-2xl shadow-xl p-8 transition-all duration-200 ease-out transform origin-top flex gap-10 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "medicines" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 {/* COLUMN 1: BY CONDITION */}
-                <div className="flex-1 min-w-[240px]">
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-50">BY CONDITION</h4>
+                <div className="flex-1 min-w-[250px]">
+                  <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">BY CONDITION</h4>
                   <div className="grid grid-cols-1 gap-0.5">
                     {[
                       { name: "Oncology / Cancer Care", filter: "Cancer Care" },
@@ -647,7 +647,7 @@ const Navbar = () => {
                         to={`/products?category=${encodeURIComponent(cond.filter)}`}
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="text-[12px] font-bold text-slate-600 py-1 hover:text-[#038076] transition-colors leading-relaxed block"
+                        className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
                       >
                         {cond.name}
                       </Link>
@@ -656,9 +656,9 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 2: SUPER SPECIALITY & SOURCE */}
-                <div className="w-[200px] flex flex-col justify-between">
+                <div className="w-[210px] flex flex-col justify-between">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-50">SUPER SPECIALITY</h4>
+                    <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">SUPER SPECIALITY</h4>
                     <div className="flex flex-col gap-0.5">
                       {[
                         { name: "GLP-1 Injections", slug: "glp-1" },
@@ -672,7 +672,7 @@ const Navbar = () => {
                           to={`/products?speciality=${spec.slug}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                          className="text-[12px] font-bold text-slate-600 py-1 hover:text-[#038076] transition-colors leading-relaxed block"
+                          className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
                         >
                           {spec.name}
                         </Link>
@@ -681,24 +681,24 @@ const Navbar = () => {
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-slate-100">
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 select-none">SOURCE</h4>
-                    <div className="flex flex-col gap-1">
+                    <h4 className="text-[11.5px] font-black uppercase text-slate-400 tracking-wider mb-2.5 select-none">SOURCE</h4>
+                    <div className="flex flex-col gap-1.5">
                       <Link
                         to="/products?isImported=true"
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-1.5 text-[12px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-0.5"
+                        className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
                       >
-                        <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <Globe className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>Imported Medicines</span>
                       </Link>
                       <Link
                         to="/products?isImported=false"
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-1.5 text-[12px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-0.5"
+                        className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
                       >
-                        <Activity className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <Activity className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>Indian Generics</span>
                       </Link>
                     </div>
@@ -706,15 +706,15 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 3: QUICK LINKS */}
-                <div className="w-[240px] bg-slate-50/70 p-4 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div className="w-[250px] bg-slate-50/70 p-5 rounded-xl border border-slate-100 flex flex-col justify-between">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none">Quick Links</h4>
-                    <div className="flex flex-col gap-2">
+                    <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">Quick Links</h4>
+                    <div className="flex flex-col gap-2.5">
                       <Link
                         to="/patient-assistance-program"
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[12px] font-extrabold text-[#004782] hover:text-[#038076] transition-colors"
+                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-[#004782] hover:text-[#038076] transition-colors py-0.5"
                       >
                         <Handshake className="w-4 h-4 shrink-0 text-[#004782]/70" />
                         <span>PAP Auto Refill</span>
@@ -723,7 +723,7 @@ const Navbar = () => {
                         to="/upload-prescription"
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[12px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors"
+                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
                       >
                         <FileText className="w-4 h-4 shrink-0 text-slate-400" />
                         <span>Upload Prescription</span>
@@ -732,7 +732,7 @@ const Navbar = () => {
                         to="/offers"
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[12px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors"
+                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
                       >
                         <Percent className="w-4 h-4 shrink-0 text-slate-400" />
                         <span>Today's Offers</span>
@@ -741,16 +741,16 @@ const Navbar = () => {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="bg-white p-3 rounded-lg border border-slate-100 text-xs">
-                      <p className="font-black text-slate-700 uppercase tracking-tight text-[10px] mb-1.5 flex items-center gap-1">
+                    <div className="bg-white p-3.5 rounded-lg border border-slate-100 text-xs">
+                      <p className="font-black text-slate-700 uppercase tracking-tight text-[11px] mb-2 flex items-center gap-1.5">
                         <HelpCircle className="w-3.5 h-3.5 text-[#038076]" />
                         <span>Need Help?</span>
                       </p>
-                      <a href="tel:+917420909445" className="flex items-center gap-1.5 font-extrabold text-slate-800 hover:text-[#038076] transition-colors mb-1">
+                      <a href="tel:+917420909445" className="flex items-center gap-2 font-extrabold text-slate-800 hover:text-[#038076] transition-colors mb-1 text-[13px]">
                         <PhoneCall className="w-3 h-3 text-[#038076]" />
                         <span>Talk to Pharmacist</span>
                       </a>
-                      <p className="text-[10px] text-slate-400 font-medium">Free support from licensed pharmacists.</p>
+                      <p className="text-[10.5px] text-slate-400 font-medium">Free support from licensed pharmacists.</p>
                     </div>
                   </div>
                 </div>
@@ -767,7 +767,7 @@ const Navbar = () => {
               <button
                 id="trigger-surgical"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "surgical")}
-                className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Surgical</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
@@ -818,7 +818,7 @@ const Navbar = () => {
               <button
                 id="trigger-wellness"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "wellness")}
-                className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Wellness</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "wellness" ? "rotate-180" : ""}`} />
@@ -869,7 +869,7 @@ const Navbar = () => {
               <button
                 id="trigger-library"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Health Library</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
@@ -917,7 +917,7 @@ const Navbar = () => {
               <button
                 id="trigger-pap"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "pap")}
-                className="flex items-center gap-1 text-[14px] font-bold text-[#004782] cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-[#004782] cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Patient Assistance Program (PAP)</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "pap" ? "rotate-180" : ""}`} />
