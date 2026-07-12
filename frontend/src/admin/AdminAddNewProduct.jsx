@@ -165,6 +165,7 @@ const AddNewProduct = () => {
             }
             setIsSurgical(product.isSurgical || false);
             setSurgicalCategory(product.surgicalCategory?._id || product.surgicalCategory || "");
+            setProductType(product.productType || "medicine");
           }
         } catch (err) {
           console.error("Failed to load product data", err);
@@ -477,6 +478,7 @@ const AddNewProduct = () => {
       molecules: selectedMolecules,
       isSurgical,
       surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
+      productType,
       
       // V2 Fields
       manufacturer: manufacturer.trim(),
@@ -905,17 +907,42 @@ const AddNewProduct = () => {
                   </div>
 
                   {/* Wellness Toggle */}
-                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
-                    <input
-                      type="checkbox"
-                      id="isWellnessToggle"
-                      checked={productType === "wellness"}
-                      onChange={(e) => setProductType(e.target.checked ? "wellness" : "medicine")}
-                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                    />
-                    <label htmlFor="isWellnessToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                  <div className="flex items-center justify-between p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <span className="font-bold text-slate-700 dark:text-zinc-200 select-none">
                       Wellness Product
-                    </label>
+                    </span>
+                    <button
+                      type="button"
+                      id="isWellnessToggle"
+                      onClick={() => setProductType(productType === "wellness" ? "medicine" : "wellness")}
+                      className={`relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary ${
+                        productType === "wellness" ? "bg-[#038076]" : "bg-slate-300 dark:bg-zinc-800"
+                      }`}
+                    >
+                      <span className="sr-only">Toggle Wellness Product</span>
+                      <span
+                        className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                          productType === "wellness" ? "translate-x-6" : "translate-x-0"
+                        }`}
+                      >
+                        <span
+                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${
+                            productType === "wellness" ? "opacity-100 ease-in" : "opacity-0 ease-out"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <span className="text-[8px] font-extrabold text-[#038076]">ON</span>
+                        </span>
+                        <span
+                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${
+                            productType === "wellness" ? "opacity-0 ease-out" : "opacity-100 ease-in"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <span className="text-[8px] font-extrabold text-slate-400">OFF</span>
+                        </span>
+                      </span>
+                    </button>
                   </div>
 
                   {/* Surgical Toggle */}

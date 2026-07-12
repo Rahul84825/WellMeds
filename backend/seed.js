@@ -181,11 +181,13 @@ const seedDB = async () => {
         linkedMolecules = [moleculeMap["Cetirizine"]];
       }
 
+      const isWellness = ["Vitamins", "Supplements", "Personal Care"].includes(prod.category);
       await Product.create({
         ...prod,
         category: categoryId,
         molecules: linkedMolecules,
-        slug: slugify(prod.name, { lower: true })
+        slug: slugify(prod.name, { lower: true }),
+        productType: isWellness ? "wellness" : "medicine"
       });
     }
     console.log("Products seeded.");

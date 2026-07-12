@@ -7,7 +7,8 @@ import FeaturedProductsSection from "../components/FeaturedProductsSection";
 import CouponCarousel from "../components/CouponCarousel";
 import WhyChooseWellMeds from "../components/WhyChooseWellMeds";
 import clinicalBannerImg from "../assets/clinical/clinical_Excellence.png";
-import PrescriptionCTA from "../components/PrescriptionCTA";
+import UploadPrescriptionBanner from "../components/UploadPrescriptionBanner";
+import WellnessProductsSection from "../components/WellnessProductsSection";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ConsultationModal from "../components/ConsultationModal";
@@ -40,11 +41,11 @@ const HomePage = () => {
       {/* Surgical Devices / OTC Catalog Strip */}
       <SurgicalProductsSection />
 
-      {/* Featured Best Sellers Grid */}
-      <FeaturedProductsSection />
+      {/* Upload Rx Prescription Banner */}
+      <UploadPrescriptionBanner />
 
-      {/* Brand Value Propositions */}
-      <WhyChooseWellMeds />
+      {/* Wellness Products Section */}
+      <WellnessProductsSection />
 
       {/* Clinical Excellence Banner */}
       <section className="py-12 md:py-16">
@@ -58,8 +59,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Upload Rx Prescription CTA */}
-      <PrescriptionCTA />
+      {/* Featured Best Sellers Grid */}
+      <FeaturedProductsSection />
+
+      {/* Brand Value Propositions */}
+      <WhyChooseWellMeds />
 
       {/* Customer Testimonials & Reviews */}
       <TestimonialsSection />
