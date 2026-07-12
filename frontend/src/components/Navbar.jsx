@@ -381,7 +381,7 @@ const NavMenu = () => {
 // Sub-Component: NavActions
 // ==========================================
 const NavActions = ({ isShrunk }) => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, openLoginModal } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
