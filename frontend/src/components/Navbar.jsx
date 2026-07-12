@@ -42,6 +42,33 @@ const Navbar = () => {
   const [activeMobileAccordion, setActiveMobileAccordion] = useState(null); // Accordions on mobile
   const [activeMobileSubAccordion, setActiveMobileSubAccordion] = useState(null); // Nested accordion for Medicines
 
+  // Hover timer state for desktop mega menus and dropdowns
+  const timeoutRef = useRef(null);
+
+  const handleMouseEnter = (menuKey) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setActiveDropdown(menuKey);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 150); // 150ms close delay
+  };
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   // Location selector states
   const [selectedLocation, setSelectedLocation] = useState("Pune, 411021");
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
@@ -287,11 +314,11 @@ const Navbar = () => {
   }, [focusedProfileIndex]);
 
   return (
-    <nav className="w-full sticky top-0 z-[100] flex-shrink-0 h-[128px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200">
+    <nav className="w-full sticky top-0 z-[100] flex-shrink-0 h-[144px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-between py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
-        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[64px]">
+        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[68px]">
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <NavLink
@@ -570,14 +597,14 @@ const Navbar = () => {
         </div>
 
         {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only) */}
-        <div className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[48px] py-1">
+        <div className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[68px]">
           <div className="flex h-full items-center justify-center gap-x-[48px] lg:gap-x-[56px]">
             
             {/* 1. MEDICINES (Mega Menu) */}
             <div 
-              className="static flex h-full items-center group"
-              onMouseEnter={() => setActiveDropdown("medicines")}
-              onMouseLeave={() => setActiveDropdown(null)}
+              className="static flex h-full items-center"
+              onMouseEnter={() => handleMouseEnter("medicines")}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 id="trigger-medicines"
@@ -585,16 +612,18 @@ const Navbar = () => {
                 className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Medicines</span>
-                <ChevronDown className="h-[14px] w-[14px] text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
               </button>
 
               {/* Medicines Mega Menu Container */}
               <div 
                 id="dropdown-medicines"
-                className={`absolute left-0 top-full z-[200] mt-1 w-[880px] bg-white border border-slate-150 rounded-2xl shadow-xl p-6 transition-all duration-200 ease-out transform origin-top flex gap-8 text-left ${
+                onMouseEnter={() => handleMouseEnter("medicines")}
+                onMouseLeave={handleMouseLeave}
+                className={`absolute left-0 top-full z-[200] mt-1 w-[880px] bg-white border border-slate-150 rounded-2xl shadow-xl p-6 transition-all duration-200 ease-out transform origin-top flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "medicines" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 {/* COLUMN 1: BY CONDITION */}
@@ -731,9 +760,9 @@ const Navbar = () => {
 
             {/* 2. SURGICAL (Simple Dropdown) */}
             <div 
-              className="relative flex h-full items-center group"
-              onMouseEnter={() => setActiveDropdown("surgical")}
-              onMouseLeave={() => setActiveDropdown(null)}
+              className="relative flex h-full items-center"
+              onMouseEnter={() => handleMouseEnter("surgical")}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 id="trigger-surgical"
@@ -741,15 +770,17 @@ const Navbar = () => {
                 className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Surgical</span>
-                <ChevronDown className="h-[14px] w-[14px] text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-surgical"
-                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top ${
+                onMouseEnter={() => handleMouseEnter("surgical")}
+                onMouseLeave={handleMouseLeave}
+                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "surgical" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 <div className="flex flex-col gap-0.5 text-left">
@@ -780,9 +811,9 @@ const Navbar = () => {
 
             {/* 3. WELLNESS (Simple Dropdown) */}
             <div 
-              className="relative flex h-full items-center group"
-              onMouseEnter={() => setActiveDropdown("wellness")}
-              onMouseLeave={() => setActiveDropdown(null)}
+              className="relative flex h-full items-center"
+              onMouseEnter={() => handleMouseEnter("wellness")}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 id="trigger-wellness"
@@ -790,15 +821,17 @@ const Navbar = () => {
                 className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Wellness</span>
-                <ChevronDown className="h-[14px] w-[14px] text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "wellness" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-wellness"
-                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top ${
+                onMouseEnter={() => handleMouseEnter("wellness")}
+                onMouseLeave={handleMouseLeave}
+                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "wellness" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 <div className="flex flex-col gap-0.5 text-left">
@@ -829,9 +862,9 @@ const Navbar = () => {
 
             {/* 4. HEALTH LIBRARY (Dropdown) */}
             <div 
-              className="relative flex h-full items-center group"
-              onMouseEnter={() => setActiveDropdown("library")}
-              onMouseLeave={() => setActiveDropdown(null)}
+              className="relative flex h-full items-center"
+              onMouseEnter={() => handleMouseEnter("library")}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 id="trigger-library"
@@ -839,15 +872,17 @@ const Navbar = () => {
                 className="flex items-center gap-1 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Health Library</span>
-                <ChevronDown className="h-[14px] w-[14px] text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-library"
-                className={`absolute left-0 top-full z-[200] mt-1 w-60 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top ${
+                onMouseEnter={() => handleMouseEnter("library")}
+                onMouseLeave={handleMouseLeave}
+                className={`absolute left-0 top-full z-[200] mt-1 w-60 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "library" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 <div className="flex flex-col gap-0.5 text-left">
@@ -875,9 +910,9 @@ const Navbar = () => {
 
             {/* 5. PATIENT ASSISTANCE PROGRAM (PAP) */}
             <div 
-              className="relative flex h-full items-center group"
-              onMouseEnter={() => setActiveDropdown("pap")}
-              onMouseLeave={() => setActiveDropdown(null)}
+              className="relative flex h-full items-center"
+              onMouseEnter={() => handleMouseEnter("pap")}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 id="trigger-pap"
@@ -885,15 +920,17 @@ const Navbar = () => {
                 className="flex items-center gap-1 text-[14px] font-bold text-[#004782] cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
               >
                 <span>Patient Assistance Program (PAP)</span>
-                <ChevronDown className="h-[14px] w-[14px] text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "pap" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-pap"
-                className={`absolute right-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top ${
+                onMouseEnter={() => handleMouseEnter("pap")}
+                onMouseLeave={handleMouseLeave}
+                className={`absolute right-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "pap" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
                 <div className="flex flex-col gap-0.5 text-left">
