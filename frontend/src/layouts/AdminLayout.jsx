@@ -110,7 +110,7 @@ const AdminLayout = () => {
       
       const filteredProds = prods.filter(p => p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)).slice(0, 3);
       const filteredCats = cats.filter(c => c.name.toLowerCase().includes(query)).slice(0, 3);
-      const filteredOrds = ords.filter(o => o.orderId.toLowerCase().includes(query) || o.customer.toLowerCase().includes(query)).slice(0, 3);
+      const filteredOrds = ords.filter(o => o && (o.orderId?.toLowerCase().includes(query) || o.customer?.toLowerCase().includes(query))).slice(0, 3);
       const filteredCoups = coups.filter(c => c.code.toLowerCase().includes(query)).slice(0, 3);
       const filteredUsrs = usrList.filter(u => u.name?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)).slice(0, 3);
 

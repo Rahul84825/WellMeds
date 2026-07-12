@@ -430,105 +430,109 @@ const ManageOrders = () => {
         title="Generate Order Invoice"
         maxWidth="max-w-2xl"
       >
-        {/* Print Area */}
-        <div className="space-y-md text-xs p-sm bg-slate-50 dark:bg-zinc-950/40 border border-slate-100 dark:border-zinc-800 rounded-2xl print:bg-transparent print:border-none pt-1">
-              
-              <div className="flex justify-between items-start border-b border-slate-200 dark:border-zinc-800 pb-sm">
-                <div>
-                  <h4 className="font-black text-base text-[#004782] dark:text-[#a4c9ff]">WELLMEDS INVOICE</h4>
-                  <p className="text-[10px] text-slate-400 mt-xs leading-snug">
-                    WellMeds Retailers Private Limited<br />
-                    Lic No: DL-293/B-10293
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="font-extrabold text-slate-800 dark:text-zinc-100 font-mono text-[11px] bg-slate-200 dark:bg-zinc-800 px-md py-0.5 rounded">
-                    {selectedOrder.orderId}
-                  </span>
-                  <p className="text-[10px] text-slate-400 mt-xs">Date: {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-sm text-[11px]">
-                <div>
-                  <p className="font-bold text-slate-400 uppercase text-[9px] mb-xs">Billed To</p>
-                  <p className="font-bold text-slate-700 dark:text-zinc-200">{selectedOrder.customer}</p>
-                  <p className="text-slate-500">{selectedOrder.email}</p>
-                </div>
-                <div>
-                  <p className="font-bold text-slate-400 uppercase text-[9px] mb-xs">Shipping Address</p>
-                  <p className="text-slate-600 dark:text-zinc-300 leading-tight">{selectedOrder.shippingAddress}</p>
-                </div>
-              </div>
-
-              {/* Items List */}
-              <div className="space-y-xs border-t border-b border-slate-200 dark:border-zinc-800 py-sm">
-                <div className="flex justify-between font-bold text-slate-400 text-[9px] uppercase tracking-wider pb-xs">
-                  <span>Product Item description</span>
-                  <div className="flex gap-lg">
-                    <span>Qty</span>
-                    <span className="w-16 text-right">Price</span>
-                  </div>
-                </div>
-                {selectedOrder.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-slate-700 dark:text-zinc-300">
-                    <span className="font-semibold truncate max-w-[280px]">{item.name}</span>
-                    <div className="flex gap-lg shrink-0">
-                      <span className="font-medium text-slate-400">x{item.quantity}</span>
-                      <span className="w-16 text-right font-bold">{formatCurrency(item.price)}</span>
+        {selectedOrder && (
+          <>
+            {/* Print Area */}
+            <div className="space-y-md text-xs p-sm bg-slate-50 dark:bg-zinc-950/40 border border-slate-100 dark:border-zinc-800 rounded-2xl print:bg-transparent print:border-none pt-1">
+                  
+                  <div className="flex justify-between items-start border-b border-slate-200 dark:border-zinc-800 pb-sm">
+                    <div>
+                      <h4 className="font-black text-base text-[#004782] dark:text-[#a4c9ff]">WELLMEDS INVOICE</h4>
+                      <p className="text-[10px] text-slate-400 mt-xs leading-snug">
+                        WellMeds Retailers Private Limited<br />
+                        Lic No: DL-293/B-10293
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-extrabold text-slate-800 dark:text-zinc-100 font-mono text-[11px] bg-slate-200 dark:bg-zinc-800 px-md py-0.5 rounded">
+                        {selectedOrder.orderId}
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-xs">Date: {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Price calculations */}
-              <div className="space-y-xs w-52 ml-auto text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Cart Subtotal:</span>
-                  <span className="font-semibold">{formatCurrency(selectedOrder.subtotal)}</span>
-                </div>
-                {selectedOrder.discountAmount > 0 && (
-                  <div className="flex justify-between text-red-500 font-bold">
-                    <span>Coupon Discount:</span>
-                    <span>-{formatCurrency(selectedOrder.discountAmount)}</span>
+                  <div className="grid grid-cols-2 gap-sm text-[11px]">
+                    <div>
+                      <p className="font-bold text-slate-400 uppercase text-[9px] mb-xs">Billed To</p>
+                      <p className="font-bold text-slate-700 dark:text-zinc-200">{selectedOrder.customer}</p>
+                      <p className="text-slate-500">{selectedOrder.email}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-400 uppercase text-[9px] mb-xs">Shipping Address</p>
+                      <p className="text-slate-600 dark:text-zinc-300 leading-tight">{selectedOrder.shippingAddress}</p>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Shipping charge:</span>
-                  <span>{selectedOrder.shipping === 0 ? "FREE" : formatCurrency(selectedOrder.shipping)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">GST Tax (12%):</span>
-                  <span>{formatCurrency(selectedOrder.tax)}</span>
-                </div>
-                <div className="flex justify-between border-t border-slate-200 dark:border-zinc-800 pt-xs font-black text-sm text-slate-800 dark:text-zinc-100">
-                  <span>Grand Total:</span>
-                  <span className="text-[#004782] dark:text-[#a4c9ff]">{formatCurrency(selectedOrder.finalAmount || selectedOrder.total)}</span>
-                </div>
-              </div>
 
-              <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/40 text-[9px] text-slate-400 text-center leading-normal">
-                This is a computer generated invoice valid at WellMeds Pharmacy outlets. Prepared under pharmacopeia specifications.
-              </div>
-            </div>
+                  {/* Items List */}
+                  <div className="space-y-xs border-t border-b border-slate-200 dark:border-zinc-800 py-sm">
+                    <div className="flex justify-between font-bold text-slate-400 text-[9px] uppercase tracking-wider pb-xs">
+                      <span>Product Item description</span>
+                      <div className="flex gap-lg">
+                        <span>Qty</span>
+                        <span className="w-16 text-right">Price</span>
+                      </div>
+                    </div>
+                    {selectedOrder.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-slate-700 dark:text-zinc-300">
+                        <span className="font-semibold truncate max-w-[280px]">{item.name}</span>
+                        <div className="flex gap-lg shrink-0">
+                          <span className="font-medium text-slate-400">x{item.quantity}</span>
+                          <span className="w-16 text-right font-bold">{formatCurrency(item.price)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-            {/* Footer Buttons */}
-            <div className="flex gap-sm justify-end print:hidden pt-sm border-t border-slate-100 dark:border-zinc-800">
-              <button
-                onClick={handlePrintInvoice}
-                className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-xs select-none cursor-pointer"
-              >
-                <Printer size={14} />
-                Print Invoice
-              </button>
-              <button
-                onClick={() => setInvoiceModalOpen(false)}
-                className="border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold px-lg py-sm rounded-xl transition-colors select-none cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-        </Modal>
+                  {/* Price calculations */}
+                  <div className="space-y-xs w-52 ml-auto text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Cart Subtotal:</span>
+                      <span className="font-semibold">{formatCurrency(selectedOrder.subtotal)}</span>
+                    </div>
+                    {selectedOrder.discountAmount > 0 && (
+                      <div className="flex justify-between text-red-500 font-bold">
+                        <span>Coupon Discount:</span>
+                        <span>-{formatCurrency(selectedOrder.discountAmount)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Shipping charge:</span>
+                      <span>{selectedOrder.shipping === 0 ? "FREE" : formatCurrency(selectedOrder.shipping)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">GST Tax (12%):</span>
+                      <span>{formatCurrency(selectedOrder.tax)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-slate-200 dark:border-zinc-800 pt-xs font-black text-sm text-slate-800 dark:text-zinc-100">
+                      <span>Grand Total:</span>
+                      <span className="text-[#004782] dark:text-[#a4c9ff]">{formatCurrency(selectedOrder.finalAmount || selectedOrder.total)}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/40 text-[9px] text-slate-400 text-center leading-normal">
+                    This is a computer generated invoice valid at WellMeds Pharmacy outlets. Prepared under pharmacopeia specifications.
+                  </div>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="flex gap-sm justify-end print:hidden pt-sm border-t border-slate-100 dark:border-zinc-800">
+                  <button
+                    onClick={handlePrintInvoice}
+                    className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-xs select-none cursor-pointer"
+                  >
+                    <Printer size={14} />
+                    Print Invoice
+                  </button>
+                  <button
+                    onClick={() => setInvoiceModalOpen(false)}
+                    className="border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold px-lg py-sm rounded-xl transition-colors select-none cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+          </>
+        )}
+      </Modal>
 
       {/* Details Timeline Modal */}
       <Modal
@@ -537,7 +541,8 @@ const ManageOrders = () => {
         title="Order Detail Card"
         maxWidth="max-w-lg"
       >
-
+        {selectedOrder && (
+          <>
             {/* Timeline */}
             <div className="space-y-sm text-xs">
               
@@ -636,7 +641,9 @@ const ManageOrders = () => {
                 Close
               </button>
             </div>
-        </Modal>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
