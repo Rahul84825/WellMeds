@@ -294,8 +294,83 @@ const AddNewProduct = () => {
   const [specificationsText, setSpecificationsText] = useState("");
   const [referencesText, setReferencesText] = useState("");
 
+  // --- Product Specifications States ---
+  const [specGenericName, setSpecGenericName] = useState("");
+  const [specStrength, setSpecStrength] = useState("");
+  const [specDosageForm, setSpecDosageForm] = useState("");
+  const [specRoute, setSpecRoute] = useState("");
+  const [specPrescription, setSpecPrescription] = useState("No");
+  const [specManufacturer, setSpecManufacturer] = useState("");
+  const [specPackSize, setSpecPackSize] = useState("");
+  const [specStorage, setSpecStorage] = useState("");
+  const [specShelfLife, setSpecShelfLife] = useState("");
+  const [specCountry, setSpecCountry] = useState("");
+  const [specColdChain, setSpecColdChain] = useState("No");
+  const [specProductType, setSpecProductType] = useState("");
+  const [specDrugClass, setSpecDrugClass] = useState("");
+  const [specTherapeuticCategory, setSpecTherapeuticCategory] = useState("");
+  const [specAvailablePackings, setSpecAvailablePackings] = useState("");
+
+  // Sync Logic / Helpers for spec fields
+  const [prevManufacturer, setPrevManufacturer] = useState("");
+  useEffect(() => {
+    if (manufacturer !== prevManufacturer) {
+      if (!specManufacturer || specManufacturer === prevManufacturer) {
+        setSpecManufacturer(manufacturer);
+      }
+      setPrevManufacturer(manufacturer);
+    }
+  }, [manufacturer, specManufacturer, prevManufacturer]);
+
+  const [prevIsPrescriptionRequired, setPrevIsPrescriptionRequired] = useState(false);
+  useEffect(() => {
+    if (isPrescriptionRequired !== prevIsPrescriptionRequired) {
+      setSpecPrescription(isPrescriptionRequired ? "Yes" : "No");
+      setPrevIsPrescriptionRequired(isPrescriptionRequired);
+    }
+  }, [isPrescriptionRequired, prevIsPrescriptionRequired]);
+
+  const [prevIsColdChain, setPrevIsColdChain] = useState(false);
+  useEffect(() => {
+    if (isColdChain !== prevIsColdChain) {
+      setSpecColdChain(isColdChain ? "Yes" : "No");
+      setPrevIsColdChain(isColdChain);
+    }
+  }, [isColdChain, prevIsColdChain]);
+
+  const handleSpecPrescriptionChange = (val) => {
+    setSpecPrescription(val);
+    setIsPrescriptionRequired(val === "Yes");
+  };
+
+  const handleSpecColdChainChange = (val) => {
+    setSpecColdChain(val);
+    setIsColdChain(val === "Yes");
+  };
+
+  const [prevProductType, setPrevProductType] = useState("");
+  useEffect(() => {
+    if (productType !== prevProductType) {
+      if (productType === "wellness" && specProductType !== "Wellness") {
+        setSpecProductType("Wellness");
+      } else if (productType === "medicine" && (specProductType === "Wellness" || !specProductType)) {
+        setSpecProductType("Medicine");
+      }
+      setPrevProductType(productType);
+    }
+  }, [productType, specProductType, prevProductType]);
+
+  const handleSpecProductTypeChange = (val) => {
+    setSpecProductType(val);
+    if (val === "Wellness") {
+      setProductType("wellness");
+    } else if (val) {
+      setProductType("medicine");
+    }
+  };
+
   // --- Accordion Active States ---
-  const [activeClinicalSection, setActiveClinicalSection] = useState("composition");
+  const [activeClinicalSection, setActiveClinicalSection] = useState("productSpecifications");
   const [activeSafetySection, setActiveSafetySection] = useState("usage");
   const [activeSeoCmsSection, setActiveSeoCmsSection] = useState("faqs");
   const [activeMedicalSecIdx, setActiveMedicalSecIdx] = useState(0);
@@ -370,6 +445,43 @@ const AddNewProduct = () => {
             if (product.faqs) setFaqsText(serializeFaqs(product.faqs));
             if (product.specifications) setSpecificationsText(serializeSpecifications(product.specifications));
             if (product.references) setReferencesText(serializeStringArray(product.references));
+
+            // Preload new specifications
+            if (product.productSpecifications) {
+              const ps = product.productSpecifications;
+              setSpecGenericName(ps.genericName || "");
+              setSpecStrength(ps.strength || "");
+              setSpecDosageForm(ps.dosageForm || "");
+              setSpecRoute(ps.route || "");
+              setSpecPrescription(ps.prescription || "No");
+              setSpecManufacturer(ps.manufacturer || "");
+              setSpecPackSize(ps.packSize || "");
+              setSpecStorage(ps.storage || "");
+              setSpecShelfLife(ps.shelfLife || "");
+              setSpecCountry(ps.country || "");
+              setSpecColdChain(ps.coldChain || "No");
+              setSpecProductType(ps.productType || "");
+              setSpecDrugClass(ps.drugClass || "");
+              setSpecTherapeuticCategory(ps.therapeuticCategory || "");
+              setSpecAvailablePackings(ps.availablePackings || "");
+            } else {
+              // Backward compatibility fallback from existing product fields
+              setSpecGenericName("");
+              setSpecStrength(product.strength || "");
+              setSpecDosageForm("");
+              setSpecRoute("");
+              setSpecPrescription(product.isPrescriptionRequired || product.requiresRx ? "Yes" : "No");
+              setSpecManufacturer(product.manufacturer || product.brand || "");
+              setSpecPackSize(product.packSize || "");
+              setSpecStorage("");
+              setSpecShelfLife("");
+              setSpecCountry(product.country || "");
+              setSpecColdChain(product.isColdChain ? "Yes" : "No");
+              setSpecProductType(product.productType === "wellness" ? "Wellness" : "Medicine");
+              setSpecDrugClass("");
+              setSpecTherapeuticCategory("");
+              setSpecAvailablePackings("");
+            }
             
             if (product.seo) {
               setMetaTitle(product.seo.metaTitle || "");
@@ -612,6 +724,11 @@ const AddNewProduct = () => {
       return;
     }
 
+    if (specStrength && specStrength.length > 50) {
+      toast.warning("Strength specification value should not exceed 50 characters.");
+      return;
+    }
+
     // Clean up empty records
     const cleanMedicalSections = medicalSections.filter(s => s.title.trim() && s.content.trim());
     const cleanComposition = parseCompositionText(compositionText).filter(c => c.ingredient.trim() && c.strength.trim());
@@ -629,14 +746,14 @@ const AddNewProduct = () => {
       name: name.trim(),
       category: typeof category === "object" ? (category?.name || category?._id) : category,
       productType,
-      brand: manufacturer.trim(), // for DB required validation
+      brand: specManufacturer.trim() || manufacturer.trim(), // for DB required validation
       price: parseFloat(price),
       originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
       inStock,
       isNonRefundable,
-      requiresRx: isPrescriptionRequired,
-      isPrescriptionRequired,
-      isColdChain,
+      requiresRx: specPrescription === "Yes",
+      isPrescriptionRequired: specPrescription === "Yes",
+      isColdChain: specColdChain === "Yes",
       image: primaryImageUrl || (existingProduct ? existingProduct.image : ""),
       images: images.length > 0 ? images : (existingProduct ? (existingProduct.images || []) : []),
       imagesData: existingProduct ? existingProduct.imagesData : undefined,
@@ -645,10 +762,12 @@ const AddNewProduct = () => {
       molecules: selectedMolecules,
       isSurgical,
       surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
-      productType,
       
       // V2 Fields
-      manufacturer: manufacturer.trim(),
+      manufacturer: specManufacturer.trim() || manufacturer.trim(),
+      strength: specStrength.trim(),
+      packSize: specPackSize.trim(),
+      country: specCountry.trim(),
       displayOrder: displayOrder !== "" ? parseInt(displayOrder) : 0,
       isImported,
       slug: slug.trim() || undefined,
@@ -666,6 +785,25 @@ const AddNewProduct = () => {
       faqs: cleanFaqs,
       specifications: cleanSpecs,
       references: cleanRefs,
+      
+      // New Fixed Product Specifications
+      productSpecifications: {
+        genericName: specGenericName.trim(),
+        strength: specStrength.trim(),
+        dosageForm: specDosageForm,
+        route: specRoute,
+        prescription: specPrescription,
+        manufacturer: specManufacturer.trim() || manufacturer.trim(),
+        packSize: specPackSize.trim(),
+        storage: specStorage.trim(),
+        shelfLife: specShelfLife.trim(),
+        country: specCountry.trim(),
+        coldChain: specColdChain,
+        productType: specProductType,
+        drugClass: specDrugClass.trim(),
+        therapeuticCategory: specTherapeuticCategory.trim(),
+        availablePackings: specAvailablePackings.trim()
+      },
       
       // SEO Metadata
       seo: {
@@ -1338,33 +1476,10 @@ const AddNewProduct = () => {
 
           {/* TAB 3: CLINICAL & SPECIFICATIONS */}
           {activeTab === "clinical" && (
-            <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
-              
-              {/* Accordion Group */}
+            <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">              {/* Accordion Group */}
               <div className="space-y-md">
                 
-                {/* Accordion Panel 1: Composition */}
-                <AccordionSection
-                  title="Chemical Composition / Ingredients"
-                  isOpen={activeClinicalSection === "composition"}
-                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "composition" ? null : "composition")}
-                >
-                  <div className="space-y-xs">
-                    <div className="flex justify-between items-center">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Composition Editor</label>
-                      <span className="text-[10px] text-slate-400 font-medium">Format: Ingredient - Strength - Purpose</span>
-                    </div>
-                    <textarea
-                      rows={6}
-                      value={compositionText}
-                      onChange={(e) => setCompositionText(e.target.value)}
-                      placeholder="e.g.&#10;Paracetamol - 650mg - Pain Relief&#10;Caffeine - 50mg - Stimulant"
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
-                    />
-                  </div>
-                </AccordionSection>
-
-                {/* Accordion Panel 2: Benefits */}
+                {/* Accordion Panel 1: Benefits */}
                 <AccordionSection
                   title="Key Health Benefits"
                   isOpen={activeClinicalSection === "benefits"}
@@ -1385,29 +1500,262 @@ const AddNewProduct = () => {
                   </div>
                 </AccordionSection>
 
-                {/* Accordion Panel 3: Specifications */}
+                {/* Accordion Panel 2: Product Specifications */}
                 <AccordionSection
-                  title="Dynamic Product Specifications"
-                  isOpen={activeClinicalSection === "specifications"}
-                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "specifications" ? null : "specifications")}
+                  title="Product Specifications"
+                  isOpen={activeClinicalSection === "productSpecifications"}
+                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "productSpecifications" ? null : "productSpecifications")}
                 >
-                  <div className="space-y-xs">
-                    <div className="flex justify-between items-center">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specifications Editor</label>
-                      <span className="text-[10px] text-slate-400 font-medium">Format: Label: Value</span>
-                    </div>
-                    <textarea
-                      rows={6}
-                      value={specificationsText}
-                      onChange={(e) => setSpecificationsText(e.target.value)}
-                      placeholder="e.g.&#10;Country of Origin: India&#10;Storage Temperature: Below 30°C&#10;Packaging: 15 Tablets per strip"
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
-                    />
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-zinc-950 text-[10px] font-bold text-slate-450 dark:text-zinc-400 uppercase tracking-wider border-b border-slate-200 dark:border-zinc-800">
+                          <th className="px-md py-sm w-1/3">Specification</th>
+                          <th className="px-md py-sm">Value</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
+                        {/* Generic Name */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Generic Name</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specGenericName}
+                              onChange={(e) => setSpecGenericName(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. Paracetamol"
+                            />
+                          </td>
+                        </tr>
+                        {/* Strength */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Strength</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specStrength}
+                              onChange={(e) => setSpecStrength(e.target.value)}
+                              maxLength={50}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. 500mg / 650mg"
+                            />
+                          </td>
+                        </tr>
+                        {/* Dosage Form */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Dosage Form</td>
+                          <td className="px-md py-sm">
+                            <select
+                              value={specDosageForm}
+                              onChange={(e) => setSpecDosageForm(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                            >
+                              <option value="">Select Dosage Form</option>
+                              {["Tablet", "Capsule", "Injection", "Suspension", "Cream", "Gel", "Powder", "Syrup", "Inhaler", "Drops", "Spray", "Others"].map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                        {/* Route of Administration */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Route of Administration</td>
+                          <td className="px-md py-sm">
+                            <select
+                              value={specRoute}
+                              onChange={(e) => setSpecRoute(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                            >
+                              <option value="">Select Route</option>
+                              {["Oral", "Topical", "IV", "IM", "SC", "Nasal", "Ophthalmic", "Rectal", "Others"].map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                        {/* Prescription Required */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Prescription Required</td>
+                          <td className="px-md py-sm flex items-center gap-md">
+                            <label className="inline-flex items-center gap-xs cursor-pointer select-none">
+                              <input
+                                type="radio"
+                                name="specPrescription"
+                                value="Yes"
+                                checked={specPrescription === "Yes"}
+                                onChange={() => handleSpecPrescriptionChange("Yes")}
+                                className="text-primary focus:ring-primary h-3.5 w-3.5"
+                              />
+                              <span className="font-bold text-slate-700 dark:text-zinc-200">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center gap-xs cursor-pointer select-none">
+                              <input
+                                type="radio"
+                                name="specPrescription"
+                                value="No"
+                                checked={specPrescription === "No"}
+                                onChange={() => handleSpecPrescriptionChange("No")}
+                                className="text-primary focus:ring-primary h-3.5 w-3.5"
+                              />
+                              <span className="font-bold text-slate-700 dark:text-zinc-200">No</span>
+                            </label>
+                          </td>
+                        </tr>
+                        {/* Manufacturer */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Manufacturer</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specManufacturer}
+                              onChange={(e) => setSpecManufacturer(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. Sun Pharma"
+                            />
+                          </td>
+                        </tr>
+                        {/* Pack Size */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Pack Size</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specPackSize}
+                              onChange={(e) => setSpecPackSize(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. 10 Tablets, 100 ml"
+                            />
+                          </td>
+                        </tr>
+                        {/* Storage */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Storage</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specStorage}
+                              onChange={(e) => setSpecStorage(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. Store below 30°C"
+                            />
+                          </td>
+                        </tr>
+                        {/* Shelf Life */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Shelf Life</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specShelfLife}
+                              onChange={(e) => setSpecShelfLife(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. 24 Months, 2 Years"
+                            />
+                          </td>
+                        </tr>
+                        {/* Country of Origin */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Country of Origin</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specCountry}
+                              onChange={(e) => setSpecCountry(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. India"
+                            />
+                          </td>
+                        </tr>
+                        {/* Cold Chain Required */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Cold Chain Required</td>
+                          <td className="px-md py-sm flex items-center gap-md">
+                            <label className="inline-flex items-center gap-xs cursor-pointer select-none">
+                              <input
+                                type="radio"
+                                name="specColdChain"
+                                value="Yes"
+                                checked={specColdChain === "Yes"}
+                                onChange={() => handleSpecColdChainChange("Yes")}
+                                className="text-primary focus:ring-primary h-3.5 w-3.5"
+                              />
+                              <span className="font-bold text-slate-700 dark:text-zinc-200">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center gap-xs cursor-pointer select-none">
+                              <input
+                                type="radio"
+                                name="specColdChain"
+                                value="No"
+                                checked={specColdChain === "No"}
+                                onChange={() => handleSpecColdChainChange("No")}
+                                className="text-primary focus:ring-primary h-3.5 w-3.5"
+                              />
+                              <span className="font-bold text-slate-700 dark:text-zinc-200">No</span>
+                            </label>
+                          </td>
+                        </tr>
+                        {/* Product Type */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Product Type</td>
+                          <td className="px-md py-sm">
+                            <select
+                              value={specProductType}
+                              onChange={(e) => handleSpecProductTypeChange(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                            >
+                              <option value="">Select Product Type</option>
+                              {["Medicine", "OTC", "Wellness", "Medical Device", "Surgical", "Supplement"].map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                        {/* Drug Class */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Drug Class</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specDrugClass}
+                              onChange={(e) => setSpecDrugClass(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. NSAID"
+                            />
+                          </td>
+                        </tr>
+                        {/* Therapeutic Category */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Therapeutic Category</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specTherapeuticCategory}
+                              onChange={(e) => setSpecTherapeuticCategory(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. Analgesic & Antipyretic"
+                            />
+                          </td>
+                        </tr>
+                        {/* Available Packings */}
+                        <tr className="hover:bg-slate-50/30 transition-colors">
+                          <td className="px-md py-sm font-bold text-slate-500">Available Packings</td>
+                          <td className="px-md py-sm">
+                            <input
+                              type="text"
+                              value={specAvailablePackings}
+                              onChange={(e) => setSpecAvailablePackings(e.target.value)}
+                              className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
+                              placeholder="e.g. 10s Strip, 15s Strip"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </AccordionSection>
 
               </div>
-
             </div>
           )}
 

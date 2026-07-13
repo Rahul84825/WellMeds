@@ -470,8 +470,10 @@ const ProductDetails = () => {
     }
 
     // 10. Specifications
-    if (product.specifications && product.specifications.length > 0) {
-      sections.push({ id: "Specifications", title: "Specifications", type: "specifications" });
+    const hasNewSpecs = product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
+    const hasOldSpecs = product.specifications && product.specifications.length > 0;
+    if (hasNewSpecs || hasOldSpecs) {
+      sections.push({ id: "Specifications", title: "Product Specifications", type: "specifications" });
     }
 
     // 11. References

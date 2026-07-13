@@ -140,6 +140,23 @@ const productSchema = new mongoose.Schema(
       }],
       default: []
     },
+    productSpecifications: {
+      genericName: { type: String, default: "" },
+      strength: { type: String, default: "", maxlength: [50, "Strength specification cannot exceed 50 characters"] },
+      dosageForm: { type: String, default: "" },
+      route: { type: String, default: "" },
+      prescription: { type: String, default: "" },
+      manufacturer: { type: String, default: "" },
+      packSize: { type: String, default: "" },
+      storage: { type: String, default: "" },
+      shelfLife: { type: String, default: "" },
+      country: { type: String, default: "" },
+      coldChain: { type: String, default: "" },
+      productType: { type: String, default: "" },
+      drugClass: { type: String, default: "" },
+      therapeuticCategory: { type: String, default: "" },
+      availablePackings: { type: String, default: "" }
+    },
     seo: {
       metaTitle: { type: String },
       metaDescription: { type: String },
