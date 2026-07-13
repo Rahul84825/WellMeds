@@ -7,6 +7,16 @@
     @apply bg-background text-on-surface font-sans antialiased overflow-x-hidden;
     font-family: 'Inter', sans-serif;
   }
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8 !important;
+    opacity: 0.65 !important;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #71717a !important;
+    opacity: 0.65 !important;
+  }
 }
 
 /* Material Symbols configuration */

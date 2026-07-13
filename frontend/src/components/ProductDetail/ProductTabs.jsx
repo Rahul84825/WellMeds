@@ -201,15 +201,8 @@ const ProductTabs = ({
                             { label: "Route", key: "route" },
                             { label: "Prescription", key: "prescription" },
                             { label: "Manufacturer", key: "manufacturer" },
-                            { label: "Pack Size", key: "packSize" },
-                            { label: "Storage", key: "storage" },
-                            { label: "Shelf Life", key: "shelfLife" },
-                            { label: "Country", key: "country" },
                             { label: "Cold Chain", key: "coldChain" },
-                            { label: "Product Type", key: "productType" },
-                            { label: "Drug Class", key: "drugClass" },
-                            { label: "Therapeutic Category", key: "therapeuticCategory" },
-                            { label: "Available Packings", key: "availablePackings" }
+                            { label: "Storage", key: "storage" }
                           ].map((spec) => {
                             const val = product.productSpecifications[spec.key];
                             if (!val || !val.trim()) return null;
@@ -233,15 +226,8 @@ const ProductTabs = ({
                         { label: "Route", key: "route" },
                         { label: "Prescription", key: "prescription" },
                         { label: "Manufacturer", key: "manufacturer" },
-                        { label: "Pack Size", key: "packSize" },
-                        { label: "Storage", key: "storage" },
-                        { label: "Shelf Life", key: "shelfLife" },
-                        { label: "Country", key: "country" },
                         { label: "Cold Chain", key: "coldChain" },
-                        { label: "Product Type", key: "productType" },
-                        { label: "Drug Class", key: "drugClass" },
-                        { label: "Therapeutic Category", key: "therapeuticCategory" },
-                        { label: "Available Packings", key: "availablePackings" }
+                        { label: "Storage", key: "storage" }
                       ].map((spec) => {
                         const val = product.productSpecifications[spec.key];
                         if (!val || !val.trim()) return null;
