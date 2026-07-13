@@ -234,116 +234,7 @@ const AccordionSection = ({ title, isOpen, onToggle, children }) => {
   );
 };
 
-const LivePreviewList = ({ items, label = "Items detected:" }) => {
-  if (!items || items.length === 0) return null;
-  return (
-    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
-      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-        {label}
-      </span>
-      <div className="space-y-1">
-        {items.map((item, idx) => (
-          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
-            <span className="text-emerald-500 font-bold shrink-0">✓</span>
-            <span className="leading-tight">{item}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
-const CompositionPreviewList = ({ ingredients }) => {
-  if (!ingredients || ingredients.length === 0) return null;
-  return (
-    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
-      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-        Ingredients detected:
-      </span>
-      <div className="space-y-1">
-        {ingredients.map((c, idx) => (
-          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
-            <span className="text-emerald-500 font-bold shrink-0">✓</span>
-            <span className="leading-tight">
-              <strong className="text-slate-800 dark:text-zinc-200">{c.ingredient}</strong>
-              {c.strength && c.strength !== "N/A" && ` (${c.strength})`}
-              {c.purpose && c.purpose !== "N/A" && ` - ${c.purpose}`}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const BenefitsPreviewList = ({ benefits }) => {
-  if (!benefits || benefits.length === 0) return null;
-  return (
-    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
-      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-        Benefits detected:
-      </span>
-      <div className="space-y-1">
-        {benefits.map((b, idx) => (
-          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
-            <span className="text-emerald-500 font-bold shrink-0">✓</span>
-            <span className="leading-tight">
-              <strong className="text-slate-800 dark:text-zinc-200">{b.title}</strong>
-              {b.description && `: ${b.description}`}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const SpecificationsPreviewList = ({ specs }) => {
-  if (!specs || specs.length === 0) return null;
-  return (
-    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
-      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-        Specifications detected:
-      </span>
-      <div className="space-y-1">
-        {specs.map((s, idx) => (
-          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
-            <span className="text-emerald-500 font-bold shrink-0">✓</span>
-            <span className="leading-tight">
-              <strong className="text-slate-800 dark:text-zinc-200">{s.label}</strong>
-              {s.value && s.value !== "N/A" && `: ${s.value}`}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const FaqPreviewList = ({ faqs }) => {
-  if (!faqs || faqs.length === 0) return null;
-  return (
-    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
-      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-        Questions & Answers detected:
-      </span>
-      <div className="space-y-sm divide-y divide-emerald-100 dark:divide-emerald-900/20">
-        {faqs.map((faq, idx) => (
-          <div key={idx} className="pt-sm first:pt-0 space-y-1">
-            <div className="flex items-start gap-xs text-[11px] text-slate-700 dark:text-zinc-300 font-bold">
-              <span className="text-emerald-500 shrink-0">Q:</span>
-              <span>{faq.question}</span>
-            </div>
-            <div className="flex items-start gap-xs text-[11px] text-slate-500 dark:text-zinc-400 font-medium pl-md">
-              <span className="text-emerald-400 shrink-0">A:</span>
-              <span>{faq.answer || <span className="italic text-slate-400">(empty)</span>}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const AddNewProduct = () => {
   const navigate = useNavigate();
@@ -1427,8 +1318,6 @@ const AddNewProduct = () => {
                               placeholder="Type details about this section..."
                               className="w-full p-sm bg-white dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                             />
-                            {/* Live Preview */}
-                            <LivePreviewList items={parsedPreview} label="Items detected in this section:" />
                           </div>
                         </div>
                       )}
@@ -1472,7 +1361,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Paracetamol - 650mg - Pain Relief&#10;Caffeine - 50mg - Stimulant"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <CompositionPreviewList ingredients={parseCompositionText(compositionText)} />
                   </div>
                 </AccordionSection>
 
@@ -1494,7 +1382,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Reduces high fever quickly: Works on the temperature-regulating center of the brain&#10;Relieves mild to moderate pain"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <BenefitsPreviewList benefits={parseBenefitsText(benefitsText)} />
                   </div>
                 </AccordionSection>
 
@@ -1516,7 +1403,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Country of Origin: India&#10;Storage Temperature: Below 30°C&#10;Packaging: 15 Tablets per strip"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <SpecificationsPreviewList specs={parseSpecificationsText(specificationsText)} />
                   </div>
                 </AccordionSection>
 
@@ -1547,7 +1433,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Take one tablet twice daily after meals&#10;Drink plenty of water"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <LivePreviewList items={parseTextareaToArray(usageText)} />
                   </div>
                 </AccordionSection>
 
@@ -1566,7 +1451,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Store in a cool dry place, away from sunlight&#10;Keep out of reach of children"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <LivePreviewList items={parseTextareaToArray(storageText)} />
                   </div>
                 </AccordionSection>
 
@@ -1585,7 +1469,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Do not exceed the recommended daily dose&#10;Avoid alcohol consumption during treatment"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <LivePreviewList items={parseTextareaToArray(warningsText)} />
                   </div>
                 </AccordionSection>
 
@@ -1604,7 +1487,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;Nausea&#10;Dizziness&#10;Mild headache"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <LivePreviewList items={parseTextareaToArray(sideEffectsText)} />
                   </div>
                 </AccordionSection>
 
@@ -1711,7 +1593,6 @@ const AddNewProduct = () => {
                       placeholder="Question:&#10;Is it safe to take this medicine on an empty stomach?&#10;&#10;Answer:&#10;Consult your doctor first.&#10;&#10;------------------------&#10;&#10;Question:&#10;Can pregnant women use it?&#10;&#10;Answer:&#10;Consult your doctor first."
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <FaqPreviewList faqs={parseFaqText(faqsText)} />
                   </div>
                 </AccordionSection>
 
@@ -1730,7 +1611,6 @@ const AddNewProduct = () => {
                       placeholder="e.g.&#10;WHO Model List of Essential Medicines&#10;Clinical Trials data for Paracetamol"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
-                    <LivePreviewList items={parseTextareaToArray(referencesText)} label="Citations detected:" />
                   </div>
                 </AccordionSection>
 
