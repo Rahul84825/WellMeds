@@ -22,6 +22,329 @@ import {
   FileText
 } from "lucide-react";
 
+// --- CMS Parsing and Serialization Utilities ---
+
+const parseLine = (line) => {
+  let cleaned = line.trim();
+  cleaned = cleaned.replace(/^\s*(?:[•\-*\u2022\u2219\u25e6\u25aa\u25ab\u2043\u2014]|\d+[\.)])\s*/, "");
+  return cleaned.trim();
+};
+
+const parseTextareaToArray = (text) => {
+  if (!text) return [];
+  const lines = text.split(/\r?\n/).map(l => parseLine(l)).filter(Boolean);
+  return [...new Set(lines)];
+};
+
+const serializeStringArray = (arr) => {
+  if (!arr || !arr.length) return "";
+  return arr.join("\n");
+};
+
+const parseCompositionText = (text) => {
+  if (!text) return [];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+  for (const line of lines) {
+    const cleaned = parseLine(line);
+    if (!cleaned) continue;
+
+    let parts = [];
+    if (cleaned.includes(" - ")) {
+      parts = cleaned.split(" - ");
+    } else if (cleaned.includes(" | ")) {
+      parts = cleaned.split(" | ");
+    } else if (cleaned.includes(",")) {
+      parts = cleaned.split(",");
+    } else {
+      parts = [cleaned];
+    }
+
+    const ingredient = (parts[0] || "").trim();
+    const strength = (parts[1] || "").trim();
+    const purpose = (parts[2] || "").trim();
+
+    if (ingredient) {
+      parsed.push({
+        ingredient,
+        strength: strength || "N/A",
+        purpose: purpose || "N/A"
+      });
+    }
+  }
+  return parsed;
+};
+
+const serializeComposition = (compList) => {
+  if (!compList || !compList.length) return "";
+  return compList.map(c => {
+    const parts = [];
+    if (c.ingredient) parts.push(c.ingredient);
+    if (c.strength) parts.push(c.strength);
+    if (c.purpose) parts.push(c.purpose);
+    return parts.join(" - ");
+  }).join("\n");
+};
+
+const parseBenefitsText = (text) => {
+  if (!text) return [];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+  for (const line of lines) {
+    const cleaned = parseLine(line);
+    if (!cleaned) continue;
+
+    const colonIdx = cleaned.indexOf(":");
+    let title = "";
+    let description = "";
+    if (colonIdx !== -1) {
+      title = cleaned.substring(0, colonIdx).trim();
+      description = cleaned.substring(colonIdx + 1).trim();
+    } else {
+      title = cleaned;
+    }
+
+    if (title) {
+      parsed.push({
+        title,
+        description: description || ""
+      });
+    }
+  }
+  return parsed;
+};
+
+const serializeBenefits = (benefitsList) => {
+  if (!benefitsList || !benefitsList.length) return "";
+  return benefitsList.map(b => {
+    if (b.description) {
+      return `${b.title || ""}: ${b.description || ""}`;
+    }
+    return b.title || "";
+  }).join("\n");
+};
+
+const parseSpecificationsText = (text) => {
+  if (!text) return [];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+  for (const line of lines) {
+    const cleaned = parseLine(line);
+    if (!cleaned) continue;
+
+    const colonIdx = cleaned.indexOf(":");
+    let label = "";
+    let value = "";
+    if (colonIdx !== -1) {
+      label = cleaned.substring(0, colonIdx).trim();
+      value = cleaned.substring(colonIdx + 1).trim();
+    } else {
+      label = cleaned;
+    }
+
+    if (label) {
+      parsed.push({
+        label,
+        value: value || "N/A"
+      });
+    }
+  }
+  return parsed;
+};
+
+const serializeSpecifications = (specsList) => {
+  if (!specsList || !specsList.length) return "";
+  return specsList.map(s => {
+    return `${s.label || ""}: ${s.value || ""}`;
+  }).join("\n");
+};
+
+const parseFaqText = (text) => {
+  if (!text) return [];
+  const sections = text.split(/\r?\n\s*-{3,}\s*\r?\n/);
+  const parsedFaqs = [];
+
+  for (const section of sections) {
+    if (!section.trim()) continue;
+
+    const qIndex = section.toLowerCase().indexOf("question:");
+    const aIndex = section.toLowerCase().indexOf("answer:");
+
+    let question = "";
+    let answer = "";
+
+    if (qIndex !== -1 && aIndex !== -1) {
+      if (qIndex < aIndex) {
+        question = section.substring(qIndex + 9, aIndex).trim();
+        answer = section.substring(aIndex + 7).trim();
+      } else {
+        answer = section.substring(aIndex + 7, qIndex).trim();
+        question = section.substring(qIndex + 9).trim();
+      }
+    } else if (qIndex !== -1) {
+      question = section.substring(qIndex + 9).trim();
+    } else if (aIndex !== -1) {
+      answer = section.substring(aIndex + 7).trim();
+    } else {
+      const lines = section.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (lines.length > 0) {
+        question = lines[0];
+        answer = lines.slice(1).join("\n");
+      }
+    }
+
+    if (question || answer) {
+      parsedFaqs.push({
+        question: question || "Untitled Question",
+        answer: answer || ""
+      });
+    }
+  }
+  return parsedFaqs;
+};
+
+const serializeFaqs = (faqsArray) => {
+  if (!faqsArray || !faqsArray.length) return "";
+  return faqsArray.map(faq => {
+    return `Question:\n${faq.question || ""}\n\nAnswer:\n${faq.answer || ""}`;
+  }).join("\n\n------------------------\n\n");
+};
+
+// --- Custom CMS UI Accordion and Preview Components ---
+
+const AccordionSection = ({ title, isOpen, onToggle, children }) => {
+  return (
+    <div className="border border-slate-200 dark:border-zinc-850 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-zinc-955/10">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex justify-between items-center p-md text-left font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-zinc-350 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer select-none"
+      >
+        <span>{title}</span>
+        <span className="text-slate-400">
+          {isOpen ? "▼" : "▶"}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="p-md border-t border-slate-100 dark:border-zinc-850 bg-white dark:bg-zinc-900 space-y-md animate-[fade-in_0.2s_ease-out]">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const LivePreviewList = ({ items, label = "Items detected:" }) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
+      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+        {label}
+      </span>
+      <div className="space-y-1">
+        {items.map((item, idx) => (
+          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+            <span className="text-emerald-500 font-bold shrink-0">✓</span>
+            <span className="leading-tight">{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CompositionPreviewList = ({ ingredients }) => {
+  if (!ingredients || ingredients.length === 0) return null;
+  return (
+    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
+      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+        Ingredients detected:
+      </span>
+      <div className="space-y-1">
+        {ingredients.map((c, idx) => (
+          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+            <span className="text-emerald-500 font-bold shrink-0">✓</span>
+            <span className="leading-tight">
+              <strong className="text-slate-800 dark:text-zinc-200">{c.ingredient}</strong>
+              {c.strength && c.strength !== "N/A" && ` (${c.strength})`}
+              {c.purpose && c.purpose !== "N/A" && ` - ${c.purpose}`}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const BenefitsPreviewList = ({ benefits }) => {
+  if (!benefits || benefits.length === 0) return null;
+  return (
+    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
+      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+        Benefits detected:
+      </span>
+      <div className="space-y-1">
+        {benefits.map((b, idx) => (
+          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+            <span className="text-emerald-500 font-bold shrink-0">✓</span>
+            <span className="leading-tight">
+              <strong className="text-slate-800 dark:text-zinc-200">{b.title}</strong>
+              {b.description && `: ${b.description}`}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SpecificationsPreviewList = ({ specs }) => {
+  if (!specs || specs.length === 0) return null;
+  return (
+    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
+      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+        Specifications detected:
+      </span>
+      <div className="space-y-1">
+        {specs.map((s, idx) => (
+          <div key={idx} className="flex items-start gap-xs text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+            <span className="text-emerald-500 font-bold shrink-0">✓</span>
+            <span className="leading-tight">
+              <strong className="text-slate-800 dark:text-zinc-200">{s.label}</strong>
+              {s.value && s.value !== "N/A" && `: ${s.value}`}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FaqPreviewList = ({ faqs }) => {
+  if (!faqs || faqs.length === 0) return null;
+  return (
+    <div className="mt-sm p-sm bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/65 dark:border-emerald-900/30 rounded-xl space-y-xs">
+      <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+        Questions & Answers detected:
+      </span>
+      <div className="space-y-sm divide-y divide-emerald-100 dark:divide-emerald-900/20">
+        {faqs.map((faq, idx) => (
+          <div key={idx} className="pt-sm first:pt-0 space-y-1">
+            <div className="flex items-start gap-xs text-[11px] text-slate-700 dark:text-zinc-300 font-bold">
+              <span className="text-emerald-500 shrink-0">Q:</span>
+              <span>{faq.question}</span>
+            </div>
+            <div className="flex items-start gap-xs text-[11px] text-slate-500 dark:text-zinc-400 font-medium pl-md">
+              <span className="text-emerald-400 shrink-0">A:</span>
+              <span>{faq.answer || <span className="italic text-slate-400">(empty)</span>}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const AddNewProduct = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -69,16 +392,22 @@ const AddNewProduct = () => {
 
   // --- CMS States ---
   const [medicalSections, setMedicalSections] = useState([]);
-  const [composition, setComposition] = useState([]);
-  const [benefits, setBenefits] = useState([]);
-  const [usageInstructions, setUsageInstructions] = useState([]);
-  const [storageInstructions, setStorageInstructions] = useState([]);
-  const [warnings, setWarnings] = useState([]);
-  const [sideEffects, setSideEffects] = useState([]);
+  const [compositionText, setCompositionText] = useState("");
+  const [benefitsText, setBenefitsText] = useState("");
+  const [usageText, setUsageText] = useState("");
+  const [storageText, setStorageText] = useState("");
+  const [warningsText, setWarningsText] = useState("");
+  const [sideEffectsText, setSideEffectsText] = useState("");
   const [safetyCards, setSafetyCards] = useState([]);
-  const [faqs, setFaqs] = useState([]);
-  const [specifications, setSpecifications] = useState([]);
-  const [references, setReferences] = useState([]);
+  const [faqsText, setFaqsText] = useState("");
+  const [specificationsText, setSpecificationsText] = useState("");
+  const [referencesText, setReferencesText] = useState("");
+
+  // --- Accordion Active States ---
+  const [activeClinicalSection, setActiveClinicalSection] = useState("composition");
+  const [activeSafetySection, setActiveSafetySection] = useState("usage");
+  const [activeSeoCmsSection, setActiveSeoCmsSection] = useState("faqs");
+  const [activeMedicalSecIdx, setActiveMedicalSecIdx] = useState(0);
   
   // SEO States
   const [metaTitle, setMetaTitle] = useState("");
@@ -140,16 +469,16 @@ const AddNewProduct = () => {
 
             // Set CMS fields
             if (product.medicalSections) setMedicalSections(product.medicalSections);
-            if (product.composition) setComposition(product.composition);
-            if (product.benefits) setBenefits(product.benefits);
-            if (product.usageInstructions) setUsageInstructions(product.usageInstructions);
-            if (product.storageInstructions) setStorageInstructions(product.storageInstructions);
-            if (product.warnings) setWarnings(product.warnings);
-            if (product.sideEffects) setSideEffects(product.sideEffects);
+            if (product.composition) setCompositionText(serializeComposition(product.composition));
+            if (product.benefits) setBenefitsText(serializeBenefits(product.benefits));
+            if (product.usageInstructions) setUsageText(serializeStringArray(product.usageInstructions));
+            if (product.storageInstructions) setStorageText(serializeStringArray(product.storageInstructions));
+            if (product.warnings) setWarningsText(serializeStringArray(product.warnings));
+            if (product.sideEffects) setSideEffectsText(serializeStringArray(product.sideEffects));
             if (product.safetyCards) setSafetyCards(product.safetyCards);
-            if (product.faqs) setFaqs(product.faqs);
-            if (product.specifications) setSpecifications(product.specifications);
-            if (product.references) setReferences(product.references);
+            if (product.faqs) setFaqsText(serializeFaqs(product.faqs));
+            if (product.specifications) setSpecificationsText(serializeSpecifications(product.specifications));
+            if (product.references) setReferencesText(serializeStringArray(product.references));
             
             if (product.seo) {
               setMetaTitle(product.seo.metaTitle || "");
@@ -357,39 +686,6 @@ const AddNewProduct = () => {
     });
   };
 
-  // Composition
-  const addCompositionRow = () => {
-    setComposition(prev => [...prev, { ingredient: "", strength: "", purpose: "" }]);
-  };
-  const updateCompositionRow = (index, key, val) => {
-    setComposition(prev => prev.map((row, idx) => idx === index ? { ...row, [key]: val } : row));
-  };
-  const deleteCompositionRow = (index) => {
-    setComposition(prev => prev.filter((_, idx) => idx !== index));
-  };
-
-  // Benefits
-  const addBenefit = () => {
-    setBenefits(prev => [...prev, { title: "", description: "" }]);
-  };
-  const updateBenefit = (index, key, val) => {
-    setBenefits(prev => prev.map((item, idx) => idx === index ? { ...item, [key]: val } : item));
-  };
-  const deleteBenefit = (index) => {
-    setBenefits(prev => prev.filter((_, idx) => idx !== index));
-  };
-
-  // Checklist builders (Usage, Storage, Warnings, Side Effects, References)
-  const addChecklistItem = (setter) => {
-    setter(prev => [...prev, ""]);
-  };
-  const updateChecklistItem = (setter, index, val) => {
-    setter(prev => prev.map((item, idx) => idx === index ? val : item));
-  };
-  const deleteChecklistItem = (setter, index) => {
-    setter(prev => prev.filter((_, idx) => idx !== index));
-  };
-
   // Safety Cards
   const addSafetyCard = () => {
     setSafetyCards(prev => [...prev, { icon: "Pregnancy", title: "Pregnancy", status: "Consult Doctor", description: "" }]);
@@ -399,28 +695,6 @@ const AddNewProduct = () => {
   };
   const deleteSafetyCard = (index) => {
     setSafetyCards(prev => prev.filter((_, idx) => idx !== index));
-  };
-
-  // FAQs
-  const addFaq = () => {
-    setFaqs(prev => [...prev, { question: "", answer: "" }]);
-  };
-  const updateFaq = (index, key, val) => {
-    setFaqs(prev => prev.map((faq, idx) => idx === index ? { ...faq, [key]: val } : faq));
-  };
-  const deleteFaq = (index) => {
-    setFaqs(prev => prev.filter((_, idx) => idx !== index));
-  };
-
-  // Specifications
-  const addSpecification = () => {
-    setSpecifications(prev => [...prev, { label: "", value: "" }]);
-  };
-  const updateSpecification = (index, key, val) => {
-    setSpecifications(prev => prev.map((spec, idx) => idx === index ? { ...spec, [key]: val } : spec));
-  };
-  const deleteSpecification = (index) => {
-    setSpecifications(prev => prev.filter((_, idx) => idx !== index));
   };
 
   const handleSave = async (e) => {
@@ -449,16 +723,16 @@ const AddNewProduct = () => {
 
     // Clean up empty records
     const cleanMedicalSections = medicalSections.filter(s => s.title.trim() && s.content.trim());
-    const cleanComposition = composition.filter(c => c.ingredient.trim() && c.strength.trim());
-    const cleanBenefits = benefits.filter(b => b.title.trim());
-    const cleanUsage = usageInstructions.filter(i => i.trim());
-    const cleanStorage = storageInstructions.filter(i => i.trim());
-    const cleanWarnings = warnings.filter(w => w.trim());
-    const cleanSideEffects = sideEffects.filter(s => s.trim());
+    const cleanComposition = parseCompositionText(compositionText).filter(c => c.ingredient.trim() && c.strength.trim());
+    const cleanBenefits = parseBenefitsText(benefitsText).filter(b => b.title.trim());
+    const cleanUsage = parseTextareaToArray(usageText);
+    const cleanStorage = parseTextareaToArray(storageText);
+    const cleanWarnings = parseTextareaToArray(warningsText);
+    const cleanSideEffects = parseTextareaToArray(sideEffectsText);
     const cleanSafetyCards = safetyCards.filter(c => c.title.trim() && c.status.trim());
-    const cleanFaqs = faqs.filter(f => f.question.trim() && f.answer.trim());
-    const cleanSpecs = specifications.filter(s => s.label.trim() && s.value.trim());
-    const cleanRefs = references.filter(r => r.trim());
+    const cleanFaqs = parseFaqText(faqsText).filter(f => f.question.trim() && f.answer.trim());
+    const cleanSpecs = parseSpecificationsText(specificationsText).filter(s => s.label.trim() && s.value.trim());
+    const cleanRefs = parseTextareaToArray(referencesText);
 
     const productData = {
       name: name.trim(),
@@ -1043,7 +1317,7 @@ const AddNewProduct = () => {
 
           {/* TAB 2: MEDICAL CONTENT SECTIONS */}
           {activeTab === "medical" && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs animate-[fade-in_0.2s_ease-out]">
               <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
                 <div>
                   <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Medical Article Builder</h3>
@@ -1052,83 +1326,115 @@ const AddNewProduct = () => {
                 <button
                   type="button"
                   onClick={addMedicalSection}
-                  className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
+                  className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all cursor-pointer select-none"
                 >
                   <Plus size={12} /> Add Section
                 </button>
               </div>
 
-              <div className="space-y-md">
-                {medicalSections.map((sec, index) => (
-                  <div 
-                    key={index}
-                    className="border border-slate-200 dark:border-zinc-800 rounded-2xl p-md bg-slate-50/30 dark:bg-zinc-950/10 space-y-sm relative group"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Section #{index + 1}</span>
-                      
-                      <div className="flex items-center gap-xs">
-                        <button
-                          type="button"
-                          disabled={index === 0}
-                          onClick={() => reorderMedicalSection(index, "up")}
-                          className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30"
-                          title="Move Up"
-                        >
-                          <ArrowUp size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={index === medicalSections.length - 1}
-                          onClick={() => reorderMedicalSection(index, "down")}
-                          className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30"
-                          title="Move Down"
-                        >
-                          <ArrowDown size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => duplicateMedicalSection(index)}
-                          className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded text-slate-400 hover:text-slate-600"
-                          title="Duplicate Section"
-                        >
-                          <Copy size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteMedicalSection(index)}
-                          className="p-1 hover:bg-red-100 text-red-500 rounded"
-                          title="Delete Section"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
+              <div className="space-y-sm">
+                {medicalSections.map((sec, index) => {
+                  const isExpanded = activeMedicalSecIdx === index;
+                  const parsedPreview = parseTextareaToArray(sec.content);
 
-                    <div className="grid grid-cols-1 gap-md">
-                      <div className="space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Section Title</label>
-                        <input
-                          type="text"
-                          value={sec.title}
-                          onChange={(e) => updateMedicalSection(index, "title", e.target.value)}
-                          placeholder="e.g. How It Works, Precautions, Dosage"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none"
-                        />
+                  return (
+                    <div 
+                      key={index}
+                      className="border border-slate-200 dark:border-zinc-850 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-zinc-950/10 transition-all"
+                    >
+                      {/* Accordion Header */}
+                      <div className="w-full flex justify-between items-center p-md bg-slate-50/50 dark:bg-zinc-950/30 border-b border-slate-155 dark:border-zinc-850 select-none">
+                        <button
+                          type="button"
+                          onClick={() => setActiveMedicalSecIdx(isExpanded ? null : index)}
+                          className="flex-1 flex items-center gap-xs text-left font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-zinc-350 hover:text-primary dark:hover:text-[#a4c9ff] transition-colors cursor-pointer"
+                        >
+                          <span>{isExpanded ? "▼" : "▶"}</span>
+                          <span>Section #{index + 1}: {sec.title || <span className="italic text-slate-450">Untitled Section</span>}</span>
+                        </button>
+
+                        <div className="flex items-center gap-xs">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => {
+                              reorderMedicalSection(index, "up");
+                              if (activeMedicalSecIdx === index) setActiveMedicalSecIdx(index - 1);
+                              else if (activeMedicalSecIdx === index - 1) setActiveMedicalSecIdx(index);
+                            }}
+                            className="p-1 hover:bg-slate-250 dark:hover:bg-zinc-850 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30 cursor-pointer"
+                            title="Move Up"
+                          >
+                            <ArrowUp size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === medicalSections.length - 1}
+                            onClick={() => {
+                              reorderMedicalSection(index, "down");
+                              if (activeMedicalSecIdx === index) setActiveMedicalSecIdx(index + 1);
+                              else if (activeMedicalSecIdx === index + 1) setActiveMedicalSecIdx(index);
+                            }}
+                            className="p-1 hover:bg-slate-250 dark:hover:bg-zinc-850 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30 cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              duplicateMedicalSection(index);
+                              setActiveMedicalSecIdx(index + 1);
+                            }}
+                            className="p-1 hover:bg-slate-250 dark:hover:bg-zinc-850 rounded text-slate-400 hover:text-slate-600 cursor-pointer"
+                            title="Duplicate Section"
+                          >
+                            <Copy size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              deleteMedicalSection(index);
+                              setActiveMedicalSecIdx(null);
+                            }}
+                            className="p-1 hover:bg-red-100 text-red-500 rounded cursor-pointer"
+                            title="Delete Section"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Content (Rich Text / Details)</label>
-                        <textarea
-                          rows={6}
-                          value={sec.content}
-                          onChange={(e) => updateMedicalSection(index, "content", e.target.value)}
-                          placeholder="Type details about this section..."
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none font-sans leading-relaxed"
-                        />
-                      </div>
+
+                      {/* Accordion Content */}
+                      {isExpanded && (
+                        <div className="p-md bg-white dark:bg-zinc-900 space-y-md animate-[fade-in_0.2s_ease-out]">
+                          <div className="space-y-xs">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Section Title</label>
+                            <input
+                              type="text"
+                              value={sec.title}
+                              onChange={(e) => updateMedicalSection(index, "title", e.target.value)}
+                              placeholder="e.g. How It Works, Precautions, Dosage"
+                              className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none"
+                            />
+                          </div>
+                          <div className="space-y-xs">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Content (Natural lines or detailed text)</label>
+                            <textarea
+                              rows={6}
+                              value={sec.content}
+                              onChange={(e) => updateMedicalSection(index, "content", e.target.value)}
+                              placeholder="Type details about this section..."
+                              className="w-full p-sm bg-white dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                            />
+                            {/* Live Preview */}
+                            <LivePreviewList items={parsedPreview} label="Items detected in this section:" />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {medicalSections.length === 0 && (
                   <div className="text-center py-xl border border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl">
@@ -1143,180 +1449,77 @@ const AddNewProduct = () => {
 
           {/* TAB 3: CLINICAL & SPECIFICATIONS */}
           {activeTab === "clinical" && (
-            <div className="space-y-lg text-xs">
+            <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
               
-              {/* Composition Repeater */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
-                <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Chemical Composition / Ingredients</h3>
-                    <p className="text-[10px] text-slate-400 mt-xs">List active salts, ingredients, strengths, and purposes.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addCompositionRow}
-                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
-                  >
-                    <Plus size={12} /> Add Ingredient
-                  </button>
-                </div>
-
-                <div className="space-y-sm">
-                  {composition.map((row, index) => (
-                    <div key={index} className="flex flex-col sm:flex-row gap-md items-end p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50">
-                      <div className="flex-1 space-y-xs w-full">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ingredient / Salt Name</label>
-                        <input
-                          type="text"
-                          value={row.ingredient}
-                          onChange={(e) => updateCompositionRow(index, "ingredient", e.target.value)}
-                          placeholder="e.g. Paracetamol"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                      <div className="w-full sm:w-32 space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Strength</label>
-                        <input
-                          type="text"
-                          value={row.strength}
-                          onChange={(e) => updateCompositionRow(index, "strength", e.target.value)}
-                          placeholder="e.g. 650mg"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                      <div className="flex-1 space-y-xs w-full">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Purpose / Action</label>
-                        <input
-                          type="text"
-                          value={row.purpose}
-                          onChange={(e) => updateCompositionRow(index, "purpose", e.target.value)}
-                          placeholder="e.g. Pain Relief"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => deleteCompositionRow(index)}
-                        className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+              {/* Accordion Group */}
+              <div className="space-y-md">
+                
+                {/* Accordion Panel 1: Composition */}
+                <AccordionSection
+                  title="Chemical Composition / Ingredients"
+                  isOpen={activeClinicalSection === "composition"}
+                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "composition" ? null : "composition")}
+                >
+                  <div className="space-y-xs">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Composition Editor</label>
+                      <span className="text-[10px] text-slate-400 font-medium">Format: Ingredient - Strength - Purpose</span>
                     </div>
-                  ))}
-                  {composition.length === 0 && (
-                    <p className="text-[10px] text-slate-400 text-center py-sm">No composition details listed. Highly recommended for medicines.</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Key Benefits Repeater */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
-                <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Key Health Benefits</h3>
-                    <p className="text-[10px] text-slate-400 mt-xs">Highlight primary clinical and health advantages.</p>
+                    <textarea
+                      rows={6}
+                      value={compositionText}
+                      onChange={(e) => setCompositionText(e.target.value)}
+                      placeholder="e.g.&#10;Paracetamol - 650mg - Pain Relief&#10;Caffeine - 50mg - Stimulant"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <CompositionPreviewList ingredients={parseCompositionText(compositionText)} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={addBenefit}
-                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
-                  >
-                    <Plus size={12} /> Add Benefit
-                  </button>
-                </div>
+                </AccordionSection>
 
-                <div className="space-y-sm">
-                  {benefits.map((benefit, index) => (
-                    <div key={index} className="p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 space-y-sm">
-                      <div className="flex justify-between items-start gap-md">
-                        <div className="flex-1 space-y-xs">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Benefit Title</label>
-                          <input
-                            type="text"
-                            value={benefit.title}
-                            onChange={(e) => updateBenefit(index, "title", e.target.value)}
-                            placeholder="e.g. Reduces high fever quickly"
-                            className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => deleteBenefit(index)}
-                          className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl mt-6"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <div className="space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detailed Description</label>
-                        <textarea
-                          rows={2}
-                          value={benefit.description}
-                          onChange={(e) => updateBenefit(index, "description", e.target.value)}
-                          placeholder="Provide details or evidence..."
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
+                {/* Accordion Panel 2: Benefits */}
+                <AccordionSection
+                  title="Key Health Benefits"
+                  isOpen={activeClinicalSection === "benefits"}
+                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "benefits" ? null : "benefits")}
+                >
+                  <div className="space-y-xs">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Benefits Editor</label>
+                      <span className="text-[10px] text-slate-400 font-medium">Format: Title: Description (or just Title)</span>
                     </div>
-                  ))}
-                  {benefits.length === 0 && (
-                    <p className="text-[10px] text-slate-400 text-center py-sm">No benefits listed yet.</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Specifications Repeater */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
-                <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Dynamic Product Specifications</h3>
-                    <p className="text-[10px] text-slate-400 mt-xs">Add manufacturer details, country of origin, storage temperature, packaging, etc.</p>
+                    <textarea
+                      rows={6}
+                      value={benefitsText}
+                      onChange={(e) => setBenefitsText(e.target.value)}
+                      placeholder="e.g.&#10;Reduces high fever quickly: Works on the temperature-regulating center of the brain&#10;Relieves mild to moderate pain"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <BenefitsPreviewList benefits={parseBenefitsText(benefitsText)} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={addSpecification}
-                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
-                  >
-                    <Plus size={12} /> Add Specification
-                  </button>
-                </div>
+                </AccordionSection>
 
-                <div className="space-y-sm">
-                  {specifications.map((spec, index) => (
-                    <div key={index} className="flex gap-md items-end p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50">
-                      <div className="flex-1 space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specification Label</label>
-                        <input
-                          type="text"
-                          value={spec.label}
-                          onChange={(e) => updateSpecification(index, "label", e.target.value)}
-                          placeholder="e.g. Country of Origin, Storage Temp"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                      <div className="flex-1 space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Value</label>
-                        <input
-                          type="text"
-                          value={spec.value}
-                          onChange={(e) => updateSpecification(index, "value", e.target.value)}
-                          placeholder="e.g. India, Below 30°C"
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => deleteSpecification(index)}
-                        className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                {/* Accordion Panel 3: Specifications */}
+                <AccordionSection
+                  title="Dynamic Product Specifications"
+                  isOpen={activeClinicalSection === "specifications"}
+                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "specifications" ? null : "specifications")}
+                >
+                  <div className="space-y-xs">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specifications Editor</label>
+                      <span className="text-[10px] text-slate-400 font-medium">Format: Label: Value</span>
                     </div>
-                  ))}
-                  {specifications.length === 0 && (
-                    <p className="text-[10px] text-slate-400 text-center py-sm">No specifications added yet.</p>
-                  )}
-                </div>
+                    <textarea
+                      rows={6}
+                      value={specificationsText}
+                      onChange={(e) => setSpecificationsText(e.target.value)}
+                      placeholder="e.g.&#10;Country of Origin: India&#10;Storage Temperature: Below 30°C&#10;Packaging: 15 Tablets per strip"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <SpecificationsPreviewList specs={parseSpecificationsText(specificationsText)} />
+                  </div>
+                </AccordionSection>
+
               </div>
 
             </div>
@@ -1324,104 +1527,90 @@ const AddNewProduct = () => {
 
           {/* TAB 4: SAFETY & INSTRUCTIONS */}
           {activeTab === "safety" && (
-            <div className="space-y-lg text-xs">
+            <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
               
-              {/* Checklist Builders */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
-                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  Dosage, Warnings & Side Effects lists
-                </h3>
+              {/* Accordion Group */}
+              <div className="space-y-md">
                 
-                {/* Usage Instructions */}
-                <div className="space-y-xs">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usage & Dosage Instructions</label>
-                    <button type="button" onClick={() => addChecklistItem(setUsageInstructions)} className="text-primary dark:text-[#a4c9ff] font-bold hover:underline">Add Row</button>
-                  </div>
+                {/* Accordion Panel 1: Usage */}
+                <AccordionSection
+                  title="Usage & Dosage Instructions"
+                  isOpen={activeSafetySection === "usage"}
+                  onToggle={() => setActiveSafetySection(activeSafetySection === "usage" ? null : "usage")}
+                >
                   <div className="space-y-xs">
-                    {usageInstructions.map((item, idx) => (
-                      <div key={idx} className="flex gap-xs items-center">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateChecklistItem(setUsageInstructions, idx, e.target.value)}
-                          placeholder="e.g. Take one tablet twice daily after meals"
-                          className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                        <button type="button" onClick={() => deleteChecklistItem(setUsageInstructions, idx)} className="text-red-500 p-xs"><Trash2 size={14} /></button>
-                      </div>
-                    ))}
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">One instruction per line</label>
+                    <textarea
+                      rows={5}
+                      value={usageText}
+                      onChange={(e) => setUsageText(e.target.value)}
+                      placeholder="e.g.&#10;Take one tablet twice daily after meals&#10;Drink plenty of water"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <LivePreviewList items={parseTextareaToArray(usageText)} />
                   </div>
-                </div>
+                </AccordionSection>
 
-                {/* Storage Instructions */}
-                <div className="space-y-xs pt-md border-t border-slate-100 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Storage Instructions</label>
-                    <button type="button" onClick={() => addChecklistItem(setStorageInstructions)} className="text-primary dark:text-[#a4c9ff] font-bold hover:underline">Add Row</button>
-                  </div>
+                {/* Accordion Panel 2: Storage */}
+                <AccordionSection
+                  title="Storage Instructions"
+                  isOpen={activeSafetySection === "storage"}
+                  onToggle={() => setActiveSafetySection(activeSafetySection === "storage" ? null : "storage")}
+                >
                   <div className="space-y-xs">
-                    {storageInstructions.map((item, idx) => (
-                      <div key={idx} className="flex gap-xs items-center">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateChecklistItem(setStorageInstructions, idx, e.target.value)}
-                          placeholder="e.g. Store in a cool dry place, away from sunlight"
-                          className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                        <button type="button" onClick={() => deleteChecklistItem(setStorageInstructions, idx)} className="text-red-500 p-xs"><Trash2 size={14} /></button>
-                      </div>
-                    ))}
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">One instruction per line</label>
+                    <textarea
+                      rows={5}
+                      value={storageText}
+                      onChange={(e) => setStorageText(e.target.value)}
+                      placeholder="e.g.&#10;Store in a cool dry place, away from sunlight&#10;Keep out of reach of children"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <LivePreviewList items={parseTextareaToArray(storageText)} />
                   </div>
-                </div>
+                </AccordionSection>
 
-                {/* Warnings */}
-                <div className="space-y-xs pt-md border-t border-slate-100 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Clinical Warnings & Precautions</label>
-                    <button type="button" onClick={() => addChecklistItem(setWarnings)} className="text-primary dark:text-[#a4c9ff] font-bold hover:underline">Add Row</button>
-                  </div>
+                {/* Accordion Panel 3: Warnings */}
+                <AccordionSection
+                  title="Clinical Warnings & Precautions"
+                  isOpen={activeSafetySection === "warnings"}
+                  onToggle={() => setActiveSafetySection(activeSafetySection === "warnings" ? null : "warnings")}
+                >
                   <div className="space-y-xs">
-                    {warnings.map((item, idx) => (
-                      <div key={idx} className="flex gap-xs items-center">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateChecklistItem(setWarnings, idx, e.target.value)}
-                          placeholder="e.g. Do not exceed the recommended daily dose"
-                          className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                        <button type="button" onClick={() => deleteChecklistItem(setWarnings, idx)} className="text-red-500 p-xs"><Trash2 size={14} /></button>
-                      </div>
-                    ))}
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">One warning per line</label>
+                    <textarea
+                      rows={5}
+                      value={warningsText}
+                      onChange={(e) => setWarningsText(e.target.value)}
+                      placeholder="e.g.&#10;Do not exceed the recommended daily dose&#10;Avoid alcohol consumption during treatment"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <LivePreviewList items={parseTextareaToArray(warningsText)} />
                   </div>
-                </div>
+                </AccordionSection>
 
-                {/* Side Effects */}
-                <div className="space-y-xs pt-md border-t border-slate-100 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Common Side Effects</label>
-                    <button type="button" onClick={() => addChecklistItem(setSideEffects)} className="text-primary dark:text-[#a4c9ff] font-bold hover:underline">Add Row</button>
-                  </div>
+                {/* Accordion Panel 4: Side Effects */}
+                <AccordionSection
+                  title="Common Side Effects"
+                  isOpen={activeSafetySection === "sideEffects"}
+                  onToggle={() => setActiveSafetySection(activeSafetySection === "sideEffects" ? null : "sideEffects")}
+                >
                   <div className="space-y-xs">
-                    {sideEffects.map((item, idx) => (
-                      <div key={idx} className="flex gap-xs items-center">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateChecklistItem(setSideEffects, idx, e.target.value)}
-                          placeholder="e.g. Nausea, dizziness, mild headache"
-                          className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                        <button type="button" onClick={() => deleteChecklistItem(setSideEffects, idx)} className="text-red-500 p-xs"><Trash2 size={14} /></button>
-                      </div>
-                    ))}
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">One side effect per line</label>
+                    <textarea
+                      rows={5}
+                      value={sideEffectsText}
+                      onChange={(e) => setSideEffectsText(e.target.value)}
+                      placeholder="e.g.&#10;Nausea&#10;Dizziness&#10;Mild headache"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <LivePreviewList items={parseTextareaToArray(sideEffectsText)} />
                   </div>
-                </div>
+                </AccordionSection>
+
               </div>
 
-              {/* Safety Cards Builder */}
+              {/* Safety Cards Builder (UNTOUCHED) */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
                 <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
                   <div>
@@ -1431,7 +1620,7 @@ const AddNewProduct = () => {
                   <button
                     type="button"
                     onClick={addSafetyCard}
-                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
+                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all cursor-pointer select-none"
                   >
                     <Plus size={12} /> Add Safety Card
                   </button>
@@ -1439,7 +1628,7 @@ const AddNewProduct = () => {
 
                 <div className="space-y-md">
                   {safetyCards.map((card, index) => (
-                    <div key={index} className="p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 space-y-sm relative">
+                    <div key={index} className="p-sm bg-slate-50/50 dark:bg-zinc-955/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 space-y-sm relative">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
                         <div className="space-y-xs">
                           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Card Category / Icon</label>
@@ -1470,7 +1659,7 @@ const AddNewProduct = () => {
                           <button
                             type="button"
                             onClick={() => deleteSafetyCard(index)}
-                            className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl"
+                            className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl cursor-pointer"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -1499,65 +1688,55 @@ const AddNewProduct = () => {
 
           {/* TAB 5: FAQS & SEO METADATA */}
           {activeTab === "seo" && (
-            <div className="space-y-lg text-xs">
+            <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
               
-              {/* FAQ Builder */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
-                <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Patient FAQs</h3>
-                    <p className="text-[10px] text-slate-400 mt-xs">Frequently asked questions by patients regarding this medicine.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addFaq}
-                    className="flex items-center gap-xs bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all"
-                  >
-                    <Plus size={12} /> Add FAQ
-                  </button>
-                </div>
-
-                <div className="space-y-md">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="p-sm bg-slate-50/50 dark:bg-zinc-950/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 space-y-sm relative">
-                      <div className="flex justify-between items-start gap-md">
-                        <div className="flex-1 space-y-xs">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Question</label>
-                          <input
-                            type="text"
-                            value={faq.question}
-                            onChange={(e) => updateFaq(index, "question", e.target.value)}
-                            placeholder="e.g. Is it safe to take Paracetamol on an empty stomach?"
-                            className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => deleteFaq(index)}
-                          className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl mt-6"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <div className="space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Answer</label>
-                        <textarea
-                          rows={3}
-                          value={faq.answer}
-                          onChange={(e) => updateFaq(index, "answer", e.target.value)}
-                          placeholder="Provide a detailed, helpful answer..."
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
+              {/* Accordion Group */}
+              <div className="space-y-md">
+                
+                {/* Accordion Panel 1: Patient FAQs */}
+                <AccordionSection
+                  title="Patient FAQs"
+                  isOpen={activeSeoCmsSection === "faqs"}
+                  onToggle={() => setActiveSeoCmsSection(activeSeoCmsSection === "faqs" ? null : "faqs")}
+                >
+                  <div className="space-y-xs">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">FAQs Editor</label>
+                      <span className="text-[10px] text-slate-400 font-medium">Use '---' (three hyphens) to separate FAQs</span>
                     </div>
-                  ))}
-                  {faqs.length === 0 && (
-                    <p className="text-[10px] text-slate-400 text-center py-sm">No FAQs configured yet.</p>
-                  )}
-                </div>
+                    <textarea
+                      rows={8}
+                      value={faqsText}
+                      onChange={(e) => setFaqsText(e.target.value)}
+                      placeholder="Question:&#10;Is it safe to take this medicine on an empty stomach?&#10;&#10;Answer:&#10;Consult your doctor first.&#10;&#10;------------------------&#10;&#10;Question:&#10;Can pregnant women use it?&#10;&#10;Answer:&#10;Consult your doctor first."
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <FaqPreviewList faqs={parseFaqText(faqsText)} />
+                  </div>
+                </AccordionSection>
+
+                {/* Accordion Panel 2: References / Citations */}
+                <AccordionSection
+                  title="Medical References / Citations"
+                  isOpen={activeSeoCmsSection === "references"}
+                  onToggle={() => setActiveSeoCmsSection(activeSeoCmsSection === "references" ? null : "references")}
+                >
+                  <div className="space-y-xs">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">One citation per line</label>
+                    <textarea
+                      rows={5}
+                      value={referencesText}
+                      onChange={(e) => setReferencesText(e.target.value)}
+                      placeholder="e.g.&#10;WHO Model List of Essential Medicines&#10;Clinical Trials data for Paracetamol"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
+                    />
+                    <LivePreviewList items={parseTextareaToArray(referencesText)} label="Citations detected:" />
+                  </div>
+                </AccordionSection>
+
               </div>
 
-              {/* SEO Builder */}
+              {/* SEO Builder (UNTOUCHED) */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md">
                 <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
                   Search Engine Optimization (SEO)
@@ -1615,7 +1794,7 @@ const AddNewProduct = () => {
                       value={canonicalUrl}
                       onChange={(e) => setCanonicalUrl(e.target.value)}
                       placeholder="e.g. https://wellmeds.com/products/dolo-650"
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                     />
                   </div>
                   <div className="space-y-xs">
@@ -1629,29 +1808,6 @@ const AddNewProduct = () => {
                     />
                   </div>
                 </div>
-
-                {/* References List */}
-                <div className="space-y-xs pt-md border-t border-slate-100 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Medical References / Citations</label>
-                    <button type="button" onClick={() => addChecklistItem(setReferences)} className="text-primary dark:text-[#a4c9ff] font-bold hover:underline">Add Citation</button>
-                  </div>
-                  <div className="space-y-xs">
-                    {references.map((item, idx) => (
-                      <div key={idx} className="flex gap-xs items-center">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateChecklistItem(setReferences, idx, e.target.value)}
-                          placeholder="e.g. WHO Model List of Essential Medicines..."
-                          className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                        <button type="button" onClick={() => deleteChecklistItem(setReferences, idx)} className="text-red-500 p-xs"><Trash2 size={14} /></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
               </div>
 
             </div>
