@@ -17,10 +17,10 @@ const ProductAttributeIcon = ({ type }) => {
 
 const ProductInfo = ({ product, handleShare }) => {
   return (
-    <div className="space-y-md text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-start gap-md h-full">
+    <div className="space-y-2.5 text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-start gap-2.5 h-full">
       
       {/* Product Name & Share Button Row */}
-      <div className="flex justify-between items-start gap-md">
+      <div className="flex justify-between items-start gap-sm">
         <h1 className="font-headline-md text-xl md:text-2xl text-on-surface font-black leading-tight">
           {product.name}
         </h1>
@@ -35,7 +35,7 @@ const ProductInfo = ({ product, handleShare }) => {
       </div>
 
       {/* Category and badges row */}
-      <div className="flex flex-wrap gap-md items-center">
+      <div className="flex flex-wrap gap-sm items-center">
         
         {product.requiresRx ? (
           <span className="text-[#111827] dark:text-zinc-100 font-medium text-xs flex items-center gap-3 select-none transition-opacity hover:opacity-80">
@@ -55,8 +55,8 @@ const ProductInfo = ({ product, handleShare }) => {
       
       {/* Salt Composition */}
       {product.molecules && product.molecules.length > 0 && (
-        <div className="pt-md border-t border-slate-100 dark:border-zinc-800/80 mt-sm">
-          <span className="block text-[11px] font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-2.5 flex items-center gap-1.5 select-none">
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
+          <span className="block text-xs font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 select-none">
             <span className="material-symbols-outlined text-[13px] leading-none text-slate-700 dark:text-zinc-350">science</span> Salt Composition
           </span>
           <div className="flex flex-wrap items-center text-xs">
@@ -72,11 +72,11 @@ const ProductInfo = ({ product, handleShare }) => {
 
       {/* Manufacturer */}
       {(product.manufacturer || product.brand) && (
-        <div className="pt-md border-t border-slate-100 dark:border-zinc-800/80 mt-sm">
-          <span className="block text-[11px] font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-2 select-none">
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
+          <span className="block text-[11px] font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1 select-none">
             Manufacturer
           </span>
-          <p className="text-[#123C7A] dark:text-[#a4c9ff] font-bold uppercase tracking-[0.1em] text-xs">
+          <p className="text-[#123C7A] dark:text-[#a4c9ff] font-bold uppercase tracking-[0.1em] text-sm">
             {product.manufacturer || product.brand}
           </p>
         </div>
@@ -84,7 +84,7 @@ const ProductInfo = ({ product, handleShare }) => {
 
       {/* Non-Refundable Notice */}
       {(product.isNonRefundable || product.prepaidOnly) && (
-        <div className="pt-md border-t border-slate-100 dark:border-zinc-800/80 mt-sm">
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
           <p className="text-blue-650 dark:text-blue-400 font-bold text-xs">
             Non-Refundable
           </p>

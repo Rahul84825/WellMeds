@@ -12,10 +12,10 @@ const PurchaseCard = ({
   discountPercent
 }) => {
   return (
-    <aside className="w-full lg:w-[28%] lg:sticky lg:top-24 space-y-md order-3 max-w-[380px] text-xs select-none">
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 py-lg px-md rounded-3xl shadow-lg space-y-lg">
+    <aside className="w-full lg:w-[26%] lg:sticky lg:top-24 space-y-md order-3 max-w-[380px] text-xs select-none">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 py-md px-sm rounded-3xl shadow-lg space-y-md">
         {/* Price Panel */}
-        <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-855 text-left">
+        <div className="bg-slate-50/50 dark:bg-zinc-955/20 py-2.5 px-3 rounded-2xl border border-slate-100 dark:border-zinc-855 text-left">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Price</span>
           <div className="flex items-baseline gap-xs mt-xs flex-wrap">
             <span className="text-2xl font-black text-[#004782] dark:text-primary-fixed-dim">
@@ -28,7 +28,7 @@ const PurchaseCard = ({
             )}
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
-            <div className="flex flex-wrap gap-xs items-center mt-sm">
+            <div className="flex flex-wrap gap-xs items-center mt-1">
               <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
                 {discountPercent}% OFF
               </span>
@@ -37,12 +37,12 @@ const PurchaseCard = ({
               </span>
             </div>
           )}
-          <p className="text-[10px] text-slate-400 mt-sm font-medium">Inclusive of all taxes & GST</p>
+          <p className="text-[10px] text-slate-400 mt-1 font-medium">Inclusive of all taxes & GST</p>
         </div>
 
         {/* Quantity Selector */}
         {(product.inStock !== false && product.stock > 0) ? (
-          <div className="space-y-sm text-left">
+          <div className="space-y-1.5 text-left">
             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Quantity</span>
             <div className="flex items-center border border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-900 h-11 w-full justify-between p-1">
               <button
@@ -71,7 +71,7 @@ const PurchaseCard = ({
         )}
 
         {/* Checkout / ATC Buttons */}
-        <div className="space-y-sm pt-xs">
+        <div className="space-y-2 pt-0.5">
           <button
             onClick={handleBuyNow}
             disabled={product.inStock === false || product.stock === 0}
@@ -89,7 +89,7 @@ const PurchaseCard = ({
         </div>
 
         {/* Delivery estimate */}
-        <div className="text-left bg-slate-50 dark:bg-zinc-955/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
+        <div className="text-left bg-slate-50 dark:bg-zinc-955/20 py-2.5 px-3 rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-xs">
           <p className="font-bold text-[10px] text-slate-500 flex items-center gap-xs">
             <Truck size={12} className="text-[#086b53]" /> Delivery Estimate
           </p>
@@ -97,7 +97,7 @@ const PurchaseCard = ({
         </div>
 
         {/* Trust badges */}
-        <div className="space-y-sm pt-md border-t border-slate-150 dark:border-zinc-855 text-left">
+        <div className="space-y-2 pt-sm border-t border-slate-150 dark:border-zinc-855 text-left">
           <div className="flex items-center gap-sm text-[10px] font-bold text-slate-400">
             <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
               <Check size={12} className="text-emerald-500" />

@@ -524,17 +524,17 @@ const ProductDetails = () => {
           activeSection={activeSection}
         />
 
-        {/* CENTER CONTENT (50% on desktop, 68% on tablet, 100% on mobile) */}
-        <div className="w-full md:w-[68%] lg:w-[50%] space-y-md order-1 md:order-2 lg:order-2">
+        {/* CENTER CONTENT (52% on desktop, 68% on tablet, 100% on mobile) */}
+        <div className="w-full md:w-[68%] lg:w-[52%] space-y-md order-1 md:order-2 lg:order-2">
           {/* Combined Product Info & Image Gallery Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-xl flex flex-col lg:flex-row gap-xl items-stretch">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
             {/* Left: Product Information (60%) */}
             <div className="w-full lg:w-[60%] flex flex-col justify-between">
               <ProductInfo product={product} handleShare={handleShare} />
             </div>
 
             {/* Right: Product Image Gallery (40%) */}
-            <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-xl lg:pt-0 lg:pl-xl">
+            <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
               <ProductGallery
                 imagesList={imagesList}
                 activeImageIdx={activeImageIdx}
@@ -547,7 +547,6 @@ const ProductDetails = () => {
                 handleTouchMove={handleTouchMove}
                 handleTouchEnd={handleTouchEnd}
                 setIsFullscreenOpen={setIsFullscreenOpen}
-                zoomStyle={zoomStyle}
                 discountPercent={discountPercent}
                 productName={product.name}
               />
