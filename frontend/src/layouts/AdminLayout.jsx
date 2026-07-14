@@ -72,6 +72,8 @@ const AdminLayout = () => {
     navigate("/");
   };
 
+  const ENABLE_MEGA_MENU_ADMIN = false;
+
   const navItems = [
     { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: ShoppingBag },
@@ -83,7 +85,7 @@ const AdminLayout = () => {
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/users", label: "Users", icon: Users },
-    { to: "/admin/megamenu", label: "Mega Menu", icon: Globe },
+    ...(ENABLE_MEGA_MENU_ADMIN ? [{ to: "/admin/megamenu", label: "Mega Menu", icon: Globe }] : []),
     { to: "/admin/settings", label: "Settings", icon: Settings }
   ];
 
