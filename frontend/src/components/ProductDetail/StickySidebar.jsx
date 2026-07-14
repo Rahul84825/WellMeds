@@ -8,8 +8,11 @@ const StickySidebar = ({
   computedSections = [],
   activeSection = ""
 }) => {
+  const hasSpecs = product?.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
+  
   // Compile active clinical sections containing data
   const clinicalItems = [
+    { label: "Specifications", id: "Specifications", available: !!hasSpecs },
     { label: "Introduction", id: "Introduction", available: !!(product?.description && product.description.trim()) },
     { label: "Uses", id: "Uses", available: computedSections.some(s => s.id === "Uses") },
     { label: "Benefits", id: "Benefits", available: computedSections.some(s => s.id === "Benefits") },

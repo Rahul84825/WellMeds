@@ -465,11 +465,6 @@ const ProductDetails = () => {
       sections.push({ id: "FAQs", title: "FAQs", content: faqsSec.content });
     }
 
-    // 10. Specifications
-    const hasNewSpecs = product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
-    if (hasNewSpecs) {
-      sections.push({ id: "Specifications", title: "Product Specifications", type: "specifications" });
-    }
 
     // 11. References
     const referencesSec = findAndRemoveMedSec(["references", "citations & references", "citations and references", "sources"]);
@@ -570,6 +565,53 @@ const ProductDetails = () => {
             <RXCard requiresRx={product.requiresRx} />
             <ColdChainCard isColdChain={product.isColdChain} />
           </div>
+
+          {/* Product Specifications Section */}
+          {product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "") && (
+            <div 
+              id="Specifications"
+              ref={el => sectionRefs.current["Specifications"] = el}
+              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+            >
+              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
+              </h2>
+              <div className="overflow-x-auto w-full rounded-2xl border border-slate-150 dark:border-zinc-800">
+                <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
+                  <thead>
+                    <tr className="bg-[#004782] text-white">
+                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle w-1/3 border-r border-[#004782]">Specification</th>
+                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
+                    {[
+                      { label: "Generic Name", key: "genericName" },
+                      { label: "Strength", key: "strength" },
+                      { label: "Dosage Form", key: "dosageForm" },
+                      { label: "Route", key: "route" },
+                      { label: "Prescription", key: "prescription" },
+                      { label: "Manufacturer", key: "manufacturer" },
+                      { label: "Cold Chain", key: "coldChain" },
+                      { label: "Storage", key: "storage" }
+                    ].map((spec) => {
+                      const val = product.productSpecifications[spec.key];
+                      if (!val || !val.trim()) return null;
+                      return (
+                        <tr 
+                          key={spec.key} 
+                          className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
+                        >
+                          <td className="px-lg py-md font-bold text-slate-500 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
+                          <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Introduction Card */}
           {product.description && product.description.trim() && (

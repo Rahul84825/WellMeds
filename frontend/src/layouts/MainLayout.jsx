@@ -6,6 +6,7 @@ import FloatingWhatsApp from "../components/FloatingWhatsApp";
 import HealthcareInformation from "../components/layout/HealthcareInformation";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import AuthModal from "../components/auth/AuthModal";
+import GlobalDrawer from "../components/GlobalDrawer";
 
 const MainLayout = () => {
   const location = useLocation();
@@ -54,6 +55,8 @@ const MainLayout = () => {
       <AuthModal />
       {/* Global floating WhatsApp support button — customer pages only */}
       <FloatingWhatsApp />
+      {/* Global App Drawer */}
+      <GlobalDrawer />
     </div>
   );
 };

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
+import { useDrawer } from "../context/DrawerContext";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
@@ -34,11 +35,11 @@ import { UniversalSearch } from "./common/UniversalSearch";
 const Navbar = () => {
   const { user, logout, isAdmin, openLoginModal } = useAuth();
   const { cartCount } = useCart();
+  const { isDrawerOpen, setIsDrawerOpen } = useDrawer();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Navigation states
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null); // 'medicines' | 'surgical' | 'wellness' | 'library' | 'pap'
   const [activeMobileAccordion, setActiveMobileAccordion] = useState(null); // Accordions on mobile
   const [activeMobileSubAccordion, setActiveMobileSubAccordion] = useState(null); // Nested accordion for Medicines
@@ -92,8 +93,6 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const profileMenuRefs = useRef([]);
-  const drawerRef = useRef(null);
-  const lastActiveElementRef = useRef(null);
 
   // Fetch Surgical Categories dynamically
   useEffect(() => {
@@ -188,16 +187,15 @@ const Navbar = () => {
         setActiveDropdown(null);
         setProfileDropdownOpen(false);
         setLocationMenuOpen(false);
-        setMobileMenuOpen(false);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Prevent background scrolling when mobile menu or mobile search is open
+  // Prevent background scrolling when mobile search is open
   useEffect(() => {
-    if (mobileSearchExpanded || mobileMenuOpen) {
+    if (mobileSearchExpanded) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -205,60 +203,7 @@ const Navbar = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [mobileSearchExpanded, mobileMenuOpen]);
-
-  // Accessibility: Focus trap & focus restoration for Mobile Drawer
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      lastActiveElementRef.current = document.activeElement;
-      // Delay slightly to allow transition animation to complete
-      const timer = setTimeout(() => {
-        const firstFocusable = drawerRef.current?.querySelector(
-          'button, a, input, select, textarea, [tabindex="0"]'
-        );
-        if (firstFocusable) firstFocusable.focus();
-      }, 150);
-      return () => clearTimeout(timer);
-    } else {
-      if (lastActiveElementRef.current) {
-        lastActiveElementRef.current.focus();
-        lastActiveElementRef.current = null;
-      }
-    }
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
-
-    const handleFocusTrap = (e) => {
-      if (e.key === "Tab") {
-        const focusableElements = drawerRef.current?.querySelectorAll(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        if (!focusableElements || focusableElements.length === 0) return;
-
-        const firstEl = focusableElements[0];
-        const lastEl = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === firstEl) {
-            lastEl.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === lastEl) {
-            firstEl.focus();
-            e.preventDefault();
-          }
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleFocusTrap);
-    return () => {
-      document.removeEventListener("keydown", handleFocusTrap);
-    };
-  }, [mobileMenuOpen]);
+  }, [mobileSearchExpanded]);
 
   const handleLogout = async () => {
     await logout();
@@ -382,7 +327,7 @@ const Navbar = () => {
   }, [focusedProfileIndex]);
 
   return (
-    <nav className={`w-full sticky top-0 flex-shrink-0 h-[68px] lg:h-[144px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200 ${mobileMenuOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}>
+    <nav className={`w-full sticky top-0 flex-shrink-0 h-[68px] lg:h-[144px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200 ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}>
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-between py-0 lg:py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
@@ -391,7 +336,7 @@ const Navbar = () => {
           <div className="flex items-center shrink-0">
             <NavLink
               to="/"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => setIsDrawerOpen(false)}
               className="flex items-center group transition-all duration-150 hover:scale-[1.02] select-none cursor-pointer"
             >
               <img 
@@ -551,11 +496,11 @@ const Navbar = () => {
               )}
             </Link>
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
               className="w-[36px] h-[36px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none transition-all cursor-pointer"
               aria-label="Toggle Navigation Drawer"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {isDrawerOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
 
@@ -947,450 +892,7 @@ const Navbar = () => {
 
       </div>
 
-      {/* MOBILE DRAWER BACKDROP */}
-      <div
-        className={`fixed inset-0 bg-black/50 z-[1000] transition-opacity duration-300 lg:hidden ${
-          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      />
 
-      {/* MOBILE DRAWER CONTAINER */}
-      <div
-        ref={drawerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Mobile Navigation Menu"
-        className={`fixed top-0 bottom-0 left-0 w-[90vw] sm:w-[80vw] max-w-[340px] bg-white z-[1001] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Drawer Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
-          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center h-10">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-16 w-auto" />
-          </Link>
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full focus:outline-none min-h-[48px] min-w-[48px] flex items-center justify-center"
-            aria-label="Close Mobile Menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Drawer Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-left">
-          
-          {/* Mobile Search input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input
-              type="text"
-              placeholder="Search medicines..."
-              value={mobileSearchQuery}
-              onChange={(e) => setMobileSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && mobileSearchQuery.trim()) {
-                  setMobileMenuOpen(false);
-                  navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
-                }
-              }}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary font-semibold"
-            />
-          </div>
-
-          {/* Quick Upload Rx Button */}
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              navigate("/upload-prescription");
-            }}
-            className="w-full bg-[#004782] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm min-h-[48px] cursor-pointer"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Upload Doctor Rx</span>
-          </button>
-
-          {/* ACCORDION MENU ITEMS */}
-          <div className="flex flex-col gap-1 border-t border-slate-100 pt-3">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2 px-1">Navigation Menu</span>
-
-            {/* 1. Medicines Accordion */}
-            <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "meds" ? null : "meds")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1"
-              >
-                <span>Medicines</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "meds" ? "rotate-180" : ""}`} />
-              </button>
-
-              {activeMobileAccordion === "meds" && (
-                <div className="pl-3 py-1.5 space-y-2.5 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200">
-                  {/* Sub Accordion: By Condition */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "cond" ? null : "cond")}
-                      className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px]"
-                    >
-                      <span>By Condition</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "cond" ? "rotate-180" : ""}`} />
-                    </button>
-                    {activeMobileSubAccordion === "cond" && (
-                      <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
-                        {[
-                          { name: "Oncology / Cancer Care", filter: "Cancer Care" },
-                          { name: "HIV / AIDS Care", filter: "HIV / AIDS Care" },
-                          { name: "Hepatitis Care", filter: "Hepatitis Care" },
-                          { name: "Cardiac Care", filter: "Cardiac Care" },
-                          { name: "Diabetes Care", filter: "Diabetes Care" },
-                          { name: "Kidney / Transplant Care", filter: "Kidney / Transplant Care" },
-                          { name: "Respiratory Care", filter: "Respiratory Care" },
-                          { name: "Neuro & Mental Health", filter: "Neuro & Mental Health" },
-                          { name: "Rare & Orphan Diseases", filter: "Rare & Orphan Diseases" },
-                          { name: "Pain Management / Palliative Care", filter: "Palliative Care" }
-                        ].map((cond) => (
-                          <Link
-                            key={cond.name}
-                            to={`/products?category=${encodeURIComponent(cond.filter)}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                          >
-                            {cond.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Sub Accordion: Super Speciality */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "spec" ? null : "spec")}
-                      className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px]"
-                    >
-                      <span>Super Speciality</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "spec" ? "rotate-180" : ""}`} />
-                    </button>
-                    {activeMobileSubAccordion === "spec" && (
-                      <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
-                        {[
-                          { name: "GLP-1 Injections", slug: "glp-1" },
-                          { name: "Biologics", slug: "biologics" },
-                          { name: "Immunosuppressants", slug: "immunosuppressants" },
-                          { name: "Chemotherapy Support", slug: "chemotherapy-support" },
-                          { name: "Specialty Injectables", slug: "specialty-injectables" }
-                        ].map((spec) => (
-                          <Link
-                            key={spec.name}
-                            to={`/products?speciality=${spec.slug}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                          >
-                            {spec.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Sub Accordion: Source */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "source" ? null : "source")}
-                      className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px]"
-                    >
-                      <span>Source</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "source" ? "rotate-180" : ""}`} />
-                    </button>
-                    {activeMobileSubAccordion === "source" && (
-                      <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
-                        <Link
-                          to="/products?isImported=true"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center gap-1.5"
-                        >
-                          <Globe className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Imported Medicines</span>
-                        </Link>
-                        <Link
-                          to="/products?isImported=false"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center gap-1.5"
-                        >
-                          <Activity className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Indian Generics</span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Sub Accordion: Quick Links */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "quick" ? null : "quick")}
-                      className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px]"
-                    >
-                      <span>Quick Links</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "quick" ? "rotate-180" : ""}`} />
-                    </button>
-                    {activeMobileSubAccordion === "quick" && (
-                      <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
-                        <Link
-                          to="/patient-assistance-program"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="py-2.5 text-[11px] font-bold text-[#004782] block min-h-[48px] flex items-center gap-1.5"
-                        >
-                          <Handshake className="w-3.5 h-3.5" />
-                          <span>PAP Auto Refill</span>
-                        </Link>
-                        <Link
-                          to="/offers"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="py-2.5 text-[11px] font-bold text-slate-600 block min-h-[48px] flex items-center gap-1.5"
-                        >
-                          <Percent className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Today's Offers</span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-              )}
-            </div>
-
-            {/* 2. Surgical Accordion */}
-            <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "surg" ? null : "surg")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1"
-              >
-                <span>Surgical</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "surg" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "surg" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {surgicalCategories.map((cat) => (
-                    <Link
-                      key={cat.id || cat._id}
-                      to={`/surgical/${cat.slug}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                  <hr className="border-slate-100 my-1" />
-                  <Link
-                    to="/surgical/all"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 text-[11px] font-black text-[#004782] block min-h-[48px] flex items-center justify-between"
-                  >
-                    <span>View All Surgical</span>
-                    <span>&rarr;</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* 3. Wellness Accordion */}
-            <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "well" ? null : "well")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1"
-              >
-                <span>Wellness</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "well" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "well" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {wellnessCategories.map((cat) => (
-                    <Link
-                      key={cat.id || cat._id}
-                      to={`/wellness?category=${encodeURIComponent(cat.name)}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                  <hr className="border-slate-100 my-1" />
-                  <Link
-                    to="/wellness"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 text-[11px] font-black text-[#004782] block min-h-[48px] flex items-center justify-between"
-                  >
-                    <span>View All Wellness</span>
-                    <span>&rarr;</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* 4. Health Library Accordion */}
-            <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "lib" ? null : "lib")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1"
-              >
-                <span>Health Library</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "lib" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "lib" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {[
-                    { label: "Articles", to: "/library/articles" },
-                    { label: "Health Guides", to: "/library/health-guides" },
-                    { label: "Medicine Guides", to: "/library/medicine-guides" },
-                    { label: "Disease Awareness", to: "/library/disease-awareness" },
-                    { label: "Lifestyle", to: "/library/lifestyle" },
-                    { label: "Nutrition", to: "/library/nutrition" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 5. Patient Assistance Program (PAP) Accordion */}
-            <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "pap" ? null : "pap")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-[#004782] min-h-[48px] px-1"
-              >
-                <span>Patient Assistance Program (PAP)</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "pap" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "pap" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {[
-                    { label: "Manufacturer PAP", to: "/patient-assistance-program" },
-                    { label: "Eligibility", to: "/patient-assistance-program#pap-eligibility" },
-                    { label: "Enrollment", to: "/patient-assistance-program#pap-enrollment" },
-                    { label: "Available Programs", to: "/patient-assistance-program#pap-programs" },
-                    { label: "How It Works", to: "/patient-assistance-program#pap-how-it-works" },
-                    { label: "FAQs", to: "/patient-assistance-program#pap-faqs" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-primary block min-h-[48px] flex items-center"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Profile Options / Login for Mobile */}
-          <div className="flex flex-col gap-1 pt-4 border-t border-slate-100 select-none">
-            {user ? (
-              <>
-                <div className="flex items-center gap-2.5 px-1 py-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-extrabold text-sm shrink-0">
-                    {user.name ? user.name[0].toUpperCase() : "U"}
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-xs font-bold text-gray-800 truncate">{user.name}</p>
-                    <p className="text-[9px] text-gray-400 truncate mt-[1px]">{user.email || user.phone || ""}</p>
-                  </div>
-                </div>
-
-                {isAdmin ? (
-                  <>
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                      <span>Admin Dashboard</span>
-                    </Link>
-                    <Link
-                      to="/profile"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
-                    >
-                      <User className="w-4 h-4 text-slate-400" />
-                      <span>Profile</span>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/profile"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
-                    >
-                      <User className="w-4 h-4 text-slate-400" />
-                      <span>My Profile</span>
-                    </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
-                    >
-                      <History className="w-4 h-4 text-slate-400" />
-                      <span>Orders</span>
-                    </Link>
-                    <Link
-                      to="/upload-prescription"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
-                    >
-                      <FileText className="w-4 h-4 text-slate-400" />
-                      <span>Prescriptions</span>
-                    </Link>
-                  </>
-                )}
-                
-                <hr className="border-slate-100 my-2" />
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left py-2.5 px-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 rounded-xl min-h-[48px] cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4 text-red-500" />
-                  <span>Logout</span>
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openLoginModal();
-                }}
-                className="w-full py-3 px-4 border border-slate-200 bg-white rounded-xl flex items-center justify-center gap-2 text-slate-700 hover:bg-slate-50 transition-colors font-bold text-xs min-h-[48px] cursor-pointer"
-              >
-                <User className="w-4 h-4 text-slate-400" />
-                <span>Login / Register</span>
-              </button>
-            )}
-          </div>
-
-        </div>
-      </div>
 
       {/* Prescription Upload Modal trigger */}
       <Modal

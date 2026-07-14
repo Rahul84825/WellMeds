@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 // Context Providers
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
+import { DrawerProvider } from "./context/DrawerContext";
 
 import { Toaster } from "sonner";
 
@@ -43,10 +44,12 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
-          <Toaster position="top-right" richColors closeButton />
-          <ScrollToTop />
-          <SyncBridge />
-          <AppRoutes />
+          <DrawerProvider>
+            <Toaster position="top-right" richColors closeButton />
+            <ScrollToTop />
+            <SyncBridge />
+            <AppRoutes />
+          </DrawerProvider>
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>

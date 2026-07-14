@@ -156,33 +156,6 @@ const ProductTabs = ({
               </div>
             )}
 
-            {/* Specifications List */}
-            {sec.type === "specifications" && (
-              <div className="w-full max-w-2xl">
-                <div className="space-y-sm">
-                  {[
-                    { label: "Generic Name", key: "genericName" },
-                    { label: "Strength", key: "strength" },
-                    { label: "Dosage Form", key: "dosageForm" },
-                    { label: "Route", key: "route" },
-                    { label: "Prescription", key: "prescription" },
-                    { label: "Manufacturer", key: "manufacturer" },
-                    { label: "Cold Chain", key: "coldChain" },
-                    { label: "Storage", key: "storage" }
-                  ].map((spec) => {
-                    const val = product.productSpecifications?.[spec.key];
-                    if (!val || !val.trim()) return null;
-                    return (
-                      <div key={spec.key} className="flex items-baseline py-xs text-xs">
-                        <span className="text-slate-400 dark:text-zinc-550 font-bold shrink-0">{spec.label}</span>
-                        <span className="flex-grow border-b border-dotted border-slate-200 dark:border-zinc-800 mx-2 h-3 min-w-[8px]"></span>
-                        <span className="text-right font-medium text-slate-750 dark:text-zinc-200 break-words max-w-[60%] sm:max-w-[70%]">{val}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* References */}
             {sec.type === "references" && (
