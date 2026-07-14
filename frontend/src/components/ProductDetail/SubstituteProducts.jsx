@@ -63,12 +63,12 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm lg:p-md rounded-2xl shadow-xs select-none w-full flex flex-col gap-sm">
-      <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider flex items-center gap-xs">
+      <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-150 uppercase tracking-wider flex items-center gap-xs">
         Substitute Products
       </h3>
       
       {!hasSubstitutes ? (
-        <div className="text-center py-6 text-base text-slate-400 dark:text-zinc-500 font-medium">
+        <div className="text-center py-6 text-sm text-slate-400 dark:text-zinc-500 font-medium">
           No substitute products available.
         </div>
       ) : (
@@ -85,24 +85,24 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                   key={item.slug || item._id}
                   to={`/products/${item.slug}`}
                   onClick={() => window.scrollTo(0, 0)}
-                  className="flex flex-col justify-center px-sm lg:px-md py-xs lg:py-sm rounded-xl transition-all duration-150 border border-slate-105 dark:border-zinc-850 hover:bg-[#038076]/[0.05] dark:hover:bg-[#038076]/[0.03] hover:border-[#038076] dark:hover:border-[#038076]/70 cursor-pointer w-full shrink-0 h-[76px] lg:h-[84px]"
+                  className="flex flex-col justify-center px-sm lg:px-md py-xs lg:py-sm rounded-xl transition-all duration-150 border border-slate-105 dark:border-zinc-850 hover:bg-[#038076]/[0.05] dark:hover:bg-[#038076]/[0.03] hover:border-[#038076] dark:hover:border-[#038076]/70 cursor-pointer w-full shrink-0 h-[76px] lg:h-[80px]"
                 >
                   {/* Product Name */}
-                  <h4 className="font-semibold text-base lg:text-[21px] text-slate-855 dark:text-zinc-200 line-clamp-2 leading-tight">
+                  <h4 className="font-semibold text-sm lg:text-[18px] text-slate-855 dark:text-zinc-200 line-clamp-2 leading-tight">
                     {item.name}
                   </h4>
                   
                   {/* Price section */}
                   <div className="flex items-baseline gap-xs mt-1 flex-wrap leading-none">
-                    <span className="font-bold text-base lg:text-lg text-slate-800 dark:text-zinc-200">
+                    <span className="font-bold text-sm lg:text-base text-slate-800 dark:text-zinc-200">
                       {formatCurrency(item.price)}
                     </span>
                     {item.originalPrice && item.originalPrice > item.price && (
                       <>
-                        <span className="text-xs lg:text-base text-slate-400 line-through">
+                        <span className="text-[11px] lg:text-sm text-slate-400 line-through">
                           MRP {formatCurrency(item.originalPrice)}
                         </span>
-                        <span className="text-xs lg:text-base font-bold text-emerald-600 dark:text-emerald-400">
+                        <span className="text-[11px] lg:text-sm font-bold text-emerald-600 dark:text-emerald-400">
                           {itemDisc}% OFF
                         </span>
                       </>
@@ -117,7 +117,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           <button
             ref={viewAllBtnRef}
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center w-full h-11 rounded-xl text-base font-bold text-white bg-gradient-to-r from-[#004782] to-[#038076] hover:opacity-90 transition-all active:scale-[0.98] mt-xs cursor-pointer shadow-sm shadow-[#038076]/10"
+            className="flex items-center justify-center w-full h-9 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#004782] to-[#038076] hover:opacity-90 transition-all active:scale-[0.98] mt-xs cursor-pointer shadow-sm shadow-[#038076]/10"
           >
             View All →
           </button>
@@ -141,7 +141,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-md mb-md">
-              <h3 className="font-extrabold text-2xl text-slate-800 dark:text-zinc-150 uppercase tracking-wider">
+              <h3 className="font-extrabold text-xl text-slate-800 dark:text-zinc-150 uppercase tracking-wider">
                 Substitute Products
               </h3>
               <button
@@ -149,7 +149,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                 aria-label="Close substitutes modal"
                 className="p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-slate-400 hover:text-slate-650 cursor-pointer active:scale-95 transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#038076]/30"
               >
-                <X size={26} className="stroke-[2.5]" />
+                <X size={22} className="stroke-[2.5]" />
               </button>
             </div>
 
@@ -172,11 +172,11 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                   >
                     {/* Name & Manufacturer */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-base sm:text-xl text-slate-855 dark:text-zinc-205 truncate">
+                      <h4 className="font-semibold text-sm sm:text-base text-slate-855 dark:text-zinc-205 truncate">
                         {item.name}
                       </h4>
                       {item.manufacturer && (
-                        <p className="text-base text-slate-455 dark:text-zinc-500 mt-[2px] font-medium">
+                        <p className="text-xs text-slate-455 dark:text-zinc-500 mt-[2px] font-medium">
                           {item.manufacturer}
                         </p>
                       )}
@@ -184,15 +184,15 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
 
                     {/* Pricing Info */}
                     <div className="flex items-center gap-sm shrink-0">
-                      <span className="font-bold text-base sm:text-xl text-slate-800 dark:text-zinc-200">
+                      <span className="font-bold text-sm sm:text-base text-slate-800 dark:text-zinc-200">
                         {formatCurrency(item.price)}
                       </span>
                       {item.originalPrice && item.originalPrice > item.price && (
                         <>
-                          <span className="text-base text-slate-400 line-through">
+                          <span className="text-xs text-slate-400 line-through">
                             {formatCurrency(item.originalPrice)}
                           </span>
-                          <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                             {itemDisc}% OFF
                           </span>
                         </>
