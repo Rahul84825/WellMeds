@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Loader from "../Loader";
 
 const ProductGallery = ({
@@ -21,12 +21,19 @@ const ProductGallery = ({
   const scrollRef = useRef(null);
 
   const handleNext = () => {
+    if (imagesList.length <= 1) return;
     setActiveImageIdx((prev) => (prev + 1) % imagesList.length);
   };
 
   const handlePrev = () => {
+    if (imagesList.length <= 1) return;
     setActiveImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
+
+  // Thumbnail rendering logic: cap at 4, show +N count on the 4th if there's more
+  const maxThumbnails = 4;
+  const visibleThumbnails = imagesList.slice(0, maxThumbnails);
+  const showRemainingOverlay = imagesList.length > maxThumbnails;
 
   return (
     <div className="w-full flex flex-col items-center select-none relative group/gallery-main">
@@ -39,88 +46,94 @@ const ProductGallery = ({
 
       {/* Main Image Container */}
       <div 
-        className="w-full aspect-square rounded-2xl bg-white dark:bg-zinc-900 overflow-hidden relative cursor-zoom-in flex items-center justify-center p-[24px] group/zoom"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        className="w-[95%] aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden relative cursor-zoom-in flex items-center justify-center p-[20px] shadow-sm border border-slate-100 dark:border-zinc-800/40 transition-shadow duration-200 hover:shadow-md"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onClick={() => setIsFullscreenOpen(true)}
       >
         {isImageLoading && (
-          <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-955 animate-pulse flex items-center justify-center rounded-2xl z-10">
+          <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-955 animate-pulse flex items-center justify-center rounded-3xl z-10">
             <Loader size="sm" />
           </div>
         )}
+        
+        {/* Main Product Image (Hero) */}
         <img 
+          src={imagesList[activeImageIdx]} 
           alt={productName} 
-          className="w-auto h-auto max-w-[85%] max-h-[85%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
-          src={imagesList[activeImageIdx]}
+          className="w-auto h-auto max-w-[92%] max-h-[92%] object-contain select-none transition-transform duration-[250ms] ease-in-out" 
           onLoad={() => setIsImageLoading(false)}
         />
         
-        {/* Fullscreen Trigger */}
-        <button
-          type="button"
-          className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black p-2 rounded-full shadow-md text-slate-705 dark:text-slate-300 transition-colors z-10 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsFullscreenOpen(true);
-          }}
-        >
-          <Maximize2 size={14} />
-        </button>
-
-        {/* Hover zoom magnifying portal */}
-        <div 
-          className="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-zinc-900 hidden md:block opacity-0 group-hover/zoom:opacity-100 transition-opacity duration-300" 
-          style={{
-            ...zoomStyle,
-            backgroundSize: "220%"
-          }}
-        />
-
         {/* Navigation Arrows for slide selection */}
         {imagesList.length > 1 && (
           <>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 p-1.5 rounded-full shadow-md z-10 transition-all opacity-0 group-hover/gallery-main:opacity-100 cursor-pointer"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                handlePrev(); 
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 w-10 h-10 rounded-full shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
+              aria-label="Previous Image"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={20} className="stroke-[2.5]" />
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); handleNext(); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 p-1.5 rounded-full shadow-md z-10 transition-all opacity-0 group-hover/gallery-main:opacity-100 cursor-pointer"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                handleNext(); 
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 w-10 h-10 rounded-full shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
+              aria-label="Next Image"
             >
-              <ChevronRight size={14} />
+              <ChevronRight size={20} className="stroke-[2.5]" />
             </button>
           </>
         )}
       </div>
 
-      {/* Thumbnail strip */}
+      {/* Simplified Thumbnails centered below the image */}
       {imagesList.length > 1 && (
         <div 
           ref={scrollRef}
-          className="flex gap-sm overflow-x-auto mt-md pb-xs scrollbar-none snap-x snap-mandatory justify-center w-full"
+          className="flex gap-3 justify-center w-full mt-4 pb-1 overflow-x-auto scrollbar-none"
         >
-          {imagesList.map((img, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setActiveImageIdx(idx)}
-              className={`w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border-2 p-sm flex items-center justify-center shrink-0 transition-all snap-start cursor-pointer ${
-                activeImageIdx === idx 
-                  ? "border-[#004782] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
-                  : "border-slate-100 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
-              }`}
-            >
-              <img src={img} alt="" className="max-h-full max-w-full object-contain" />
-            </button>
-          ))}
+          {visibleThumbnails.map((img, idx) => {
+            const isLastThumbnail = idx === maxThumbnails - 1;
+            const remainingCount = imagesList.length - (maxThumbnails - 1);
+            
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  if (isLastThumbnail && showRemainingOverlay) {
+                    setIsFullscreenOpen(true);
+                  } else {
+                    setActiveImageIdx(idx);
+                  }
+                }}
+                className={`relative w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${
+                  activeImageIdx === idx && !(isLastThumbnail && showRemainingOverlay)
+                    ? "border-[#038076] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
+                    : "border-slate-100 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-750"
+                }`}
+                aria-label={`View thumbnail ${idx + 1}`}
+              >
+                <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                
+                {/* +N Counter Overlay for remaining images */}
+                {isLastThumbnail && showRemainingOverlay && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xs transition-colors hover:bg-black/50">
+                    +{remainingCount}
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
 
 // V2 Modular Components
@@ -136,17 +136,21 @@ const ProductDetails = () => {
     setIsImageLoading(true);
   }, [activeImageIdx, slug]);
 
-  // Close fullscreen preview on ESC key
+  // Keyboard Navigation for Fullscreen Preview
   useEffect(() => {
     if (!isFullscreenOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setIsFullscreenOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        setActiveImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIdx((prev) => (prev + 1) % imagesList.length);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFullscreenOpen]);
+  }, [isFullscreenOpen, imagesList.length]);
 
   // --- SEO & Schema.org JSON-LD Injector ---
   useEffect(() => {
@@ -712,7 +716,7 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {/* Fullscreen Preview Modal */}
+      {/* Premium Floating Image Viewer Modal */}
       {isFullscreenOpen && createPortal(
         <div 
           onClick={(e) => {
@@ -720,22 +724,56 @@ const ProductDetails = () => {
               setIsFullscreenOpen(false);
             }
           }}
-          className="fixed inset-0 w-screen h-screen bg-black/55 backdrop-blur-[8px] z-[9999] flex items-center justify-center p-md animate-[fade-in_0.2s_ease-out] select-none cursor-zoom-out"
+          className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[9999] flex items-center justify-center p-md animate-[fade-in_0.25s_ease-out] select-none cursor-default"
         >
-          <button 
-            type="button"
-            onClick={() => setIsFullscreenOpen(false)}
-            className="absolute top-6 right-6 w-10 h-10 bg-white hover:bg-slate-100 text-slate-800 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-[10000]"
-            aria-label="Close image viewer"
-          >
-            <X size={20} className="stroke-[2.5]" />
-          </button>
-          <img 
-            src={imagesList[activeImageIdx]} 
-            alt={product.name} 
+          {/* Modal Container Card */}
+          <div 
+            className="bg-white dark:bg-zinc-900 w-[95vw] md:w-[70vw] max-w-[900px] h-auto max-h-[80vh] md:max-h-[85vh] rounded-3xl shadow-2xl relative flex flex-col items-center justify-center p-lg animate-[scale-up_0.25s_ease-out] border border-slate-100 dark:border-zinc-800/40"
             onClick={(e) => e.stopPropagation()}
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-scale-up cursor-default select-none"
-          />
+          >
+            {/* Close Button */}
+            <button 
+              type="button"
+              onClick={() => setIsFullscreenOpen(false)}
+              className="absolute top-4 right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-850 dark:hover:bg-zinc-750 text-slate-800 dark:text-zinc-200 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-20"
+              aria-label="Close image viewer"
+            >
+              <X size={20} className="stroke-[2.5]" />
+            </button>
+
+            {/* Left navigation arrow */}
+            {imagesList.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setActiveImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-slate-100/90 hover:bg-slate-200/95 dark:bg-zinc-800/90 dark:hover:bg-zinc-700/95 text-slate-850 dark:text-zinc-200 w-11 h-11 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={24} className="stroke-[2.5]" />
+              </button>
+            )}
+
+            {/* Image Viewer */}
+            <div className="w-full flex items-center justify-center p-md md:p-lg overflow-hidden h-[65vh] md:h-[70vh]">
+              <img 
+                src={imagesList[activeImageIdx]} 
+                alt={product.name} 
+                className="max-w-full max-h-full object-contain rounded-2xl transition-all duration-200 ease-in-out select-none"
+              />
+            </div>
+
+            {/* Right navigation arrow */}
+            {imagesList.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setActiveImageIdx((prev) => (prev + 1) % imagesList.length)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-100/90 hover:bg-slate-200/95 dark:bg-zinc-800/90 dark:hover:bg-zinc-700/95 text-slate-850 dark:text-zinc-200 w-11 h-11 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight size={24} className="stroke-[2.5]" />
+              </button>
+            )}
+          </div>
         </div>,
         document.body
       )}
