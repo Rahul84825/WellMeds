@@ -20,6 +20,7 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import specialityRoutes from "./src/routes/specialityRoutes.js";
 import moleculeRoutes from "./src/routes/moleculeRoutes.js";
 import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
+import megaMenuRoutes from "./src/routes/megaMenuRoutes.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -101,6 +102,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/specialities", specialityRoutes);
 app.use("/api/molecules", moleculeRoutes);
 app.use("/api/surgical-categories", surgicalCategoryRoutes);
+app.use("/api/megamenu", megaMenuRoutes);
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

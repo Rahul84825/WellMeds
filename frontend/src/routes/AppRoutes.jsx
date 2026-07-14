@@ -49,6 +49,7 @@ import AdminPrescriptions from "../admin/AdminPrescriptions";
 import AdminCoupons from "../admin/AdminCoupons";
 import AdminUsers from "../admin/AdminUsers";
 import AdminSettings from "../admin/AdminSettings";
+import AdminMegaMenu from "../admin/AdminMegaMenu";
 
 const AppRoutes = () => {
   return (
@@ -132,6 +133,7 @@ const AppRoutes = () => {
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="megamenu" element={<AdminMegaMenu />} />
         <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
         <Route path="cms/pap" element={<Navigate to="/admin" replace />} />
       </Route>

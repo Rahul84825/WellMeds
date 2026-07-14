@@ -83,6 +83,7 @@ const AdminLayout = () => {
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/users", label: "Users", icon: Users },
+    { to: "/admin/megamenu", label: "Mega Menu", icon: Globe },
     { to: "/admin/settings", label: "Settings", icon: Settings }
   ];
 

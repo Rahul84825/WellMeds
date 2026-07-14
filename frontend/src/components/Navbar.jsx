@@ -32,10 +32,28 @@ import { toast } from "sonner";
 import { api } from "../services/api";
 import { UniversalSearch } from "./common/UniversalSearch";
 
+const iconMap = {
+  Globe,
+  Activity,
+  Handshake,
+  FileText,
+  Percent,
+  PhoneCall,
+  HelpCircle,
+  User,
+  History,
+  Package
+};
+
+const renderIcon = (name, className = "w-4 h-4") => {
+  const IconComp = iconMap[name] || HelpCircle;
+  return <IconComp className={className} />;
+};
+
 const Navbar = () => {
   const { user, logout, isAdmin, openLoginModal } = useAuth();
   const { cartCount } = useCart();
-  const { isDrawerOpen, setIsDrawerOpen } = useDrawer();
+  const { isDrawerOpen, setIsDrawerOpen, menuData, menuLoading } = useDrawer();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -561,21 +579,10 @@ const Navbar = () => {
                 <div className="flex-1 min-w-[250px]">
                   <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">BY CONDITION</h4>
                   <div className="grid grid-cols-1 gap-0.5">
-                    {[
-                      { name: "Oncology / Cancer Care", filter: "Cancer Care" },
-                      { name: "HIV / AIDS Care", filter: "HIV / AIDS Care" },
-                      { name: "Hepatitis Care", filter: "Hepatitis Care" },
-                      { name: "Cardiac Care", filter: "Cardiac Care" },
-                      { name: "Diabetes Care", filter: "Diabetes Care" },
-                      { name: "Kidney / Transplant Care", filter: "Kidney / Transplant Care" },
-                      { name: "Respiratory Care", filter: "Respiratory Care" },
-                      { name: "Neuro & Mental Health", filter: "Neuro & Mental Health" },
-                      { name: "Rare & Orphan Diseases", filter: "Rare & Orphan Diseases" },
-                      { name: "Pain Management / Palliative Care", filter: "Palliative Care" }
-                    ].map((cond) => (
+                    {menuData.conditions.map((cond) => (
                       <Link
-                        key={cond.name}
-                        to={`/products?category=${encodeURIComponent(cond.filter)}`}
+                        key={cond._id || cond.id}
+                        to={`/products?category=${encodeURIComponent(cond.linkedCategory || cond.name)}`}
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
                         className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
@@ -591,16 +598,10 @@ const Navbar = () => {
                   <div>
                     <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">SUPER SPECIALITY</h4>
                     <div className="flex flex-col gap-0.5">
-                      {[
-                        { name: "GLP-1 Injections", slug: "glp-1" },
-                        { name: "Biologics", slug: "biologics" },
-                        { name: "Immunosuppressants", slug: "immunosuppressants" },
-                        { name: "Chemotherapy Support", slug: "chemotherapy-support" },
-                        { name: "Specialty Injectables", slug: "specialty-injectables" }
-                      ].map((spec) => (
+                      {menuData.specialities.map((spec) => (
                         <Link
-                          key={spec.name}
-                          to={`/products?speciality=${spec.slug}`}
+                          key={spec._id || spec.id}
+                          to={`/products?speciality=${spec.linkedSpeciality || spec.slug}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
                           className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
@@ -614,24 +615,18 @@ const Navbar = () => {
                   <div className="mt-4 pt-4 border-t border-slate-100">
                     <h4 className="text-[11.5px] font-black uppercase text-slate-400 tracking-wider mb-2.5 select-none">SOURCE</h4>
                     <div className="flex flex-col gap-1.5">
-                      <Link
-                        to="/products?isImported=true"
-                        onClick={() => setActiveDropdown(null)}
-                        onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
-                      >
-                        <Globe className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Imported Medicines</span>
-                      </Link>
-                      <Link
-                        to="/products?isImported=false"
-                        onClick={() => setActiveDropdown(null)}
-                        onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
-                      >
-                        <Activity className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Indian Generics</span>
-                      </Link>
+                      {menuData.sources.map((source) => (
+                        <Link
+                          key={source._id || source.id}
+                          to={`/products?${source.queryParam}`}
+                          onClick={() => setActiveDropdown(null)}
+                          onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
+                          className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
+                        >
+                          {renderIcon(source.icon || "Globe", "w-4 h-4 text-slate-400 shrink-0")}
+                          <span>{source.name}</span>
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -641,49 +636,49 @@ const Navbar = () => {
                   <div>
                     <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">Quick Links</h4>
                     <div className="flex flex-col gap-2.5">
-                      <Link
-                        to="/patient-assistance-program"
-                        onClick={() => setActiveDropdown(null)}
-                        onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-[#004782] hover:text-[#038076] transition-colors py-0.5"
-                      >
-                        <Handshake className="w-4 h-4 shrink-0 text-[#004782]/70" />
-                        <span>PAP Auto Refill</span>
-                      </Link>
-                      <Link
-                        to="/upload-prescription"
-                        onClick={() => setActiveDropdown(null)}
-                        onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
-                      >
-                        <FileText className="w-4 h-4 shrink-0 text-slate-400" />
-                        <span>Upload Prescription</span>
-                      </Link>
-                      <Link
-                        to="/offers"
-                        onClick={() => setActiveDropdown(null)}
-                        onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
-                      >
-                        <Percent className="w-4 h-4 shrink-0 text-slate-400" />
-                        <span>Today's Offers</span>
-                      </Link>
+                      {menuData.quickLinks.filter(l => !l.isHelpCard).map((link) => {
+                        const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
+                        const Comp = isLinkExternal ? "a" : Link;
+                        const props = isLinkExternal 
+                          ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
+                          : { to: link.route };
+
+                        return (
+                          <Comp
+                            key={link._id || link.id}
+                            {...props}
+                            onClick={() => setActiveDropdown(null)}
+                            onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
+                            className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
+                          >
+                            {renderIcon(link.icon || "Link", "w-4 h-4 shrink-0 text-slate-400")}
+                            <span>{link.name}</span>
+                          </Comp>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="bg-white p-3.5 rounded-lg border border-slate-100 text-xs">
-                      <p className="font-black text-slate-700 uppercase tracking-tight text-[11px] mb-2 flex items-center gap-1.5">
-                        <HelpCircle className="w-3.5 h-3.5 text-[#038076]" />
-                        <span>Need Help?</span>
-                      </p>
-                      <a href="tel:+917420909445" className="flex items-center gap-2 font-extrabold text-slate-800 hover:text-[#038076] transition-colors mb-1 text-[13px]">
-                        <PhoneCall className="w-3 h-3 text-[#038076]" />
-                        <span>Talk to Pharmacist</span>
-                      </a>
-                      <p className="text-[10.5px] text-slate-400 font-medium">Free support from licensed pharmacists.</p>
+                  {menuData.quickLinks.filter(l => l.isHelpCard).map((helpCard) => (
+                    <div key={helpCard._id || helpCard.id} className="mt-4 pt-3 border-t border-slate-100">
+                      <div className="bg-white p-3.5 rounded-lg border border-slate-100 text-xs">
+                        <p className="font-black text-slate-700 uppercase tracking-tight text-[11px] mb-2 flex items-center gap-1.5">
+                          {renderIcon(helpCard.icon || "HelpCircle", "w-3.5 h-3.5 text-[#038076]")}
+                          <span>Need Help?</span>
+                        </p>
+                        <a 
+                          href={helpCard.route}
+                          target={helpCard.openInNewTab ? "_blank" : undefined}
+                          rel={helpCard.openInNewTab ? "noopener noreferrer" : undefined}
+                          className="flex items-center gap-2 font-extrabold text-slate-800 hover:text-[#038076] transition-colors mb-1 text-[13px]"
+                        >
+                          {renderIcon(helpCard.icon || "PhoneCall", "w-3 h-3 text-[#038076]")}
+                          <span>{helpCard.name}</span>
+                        </a>
+                        <p className="text-[10.5px] text-slate-400 font-medium">{helpCard.helpSubtext}</p>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
 
               </div>
