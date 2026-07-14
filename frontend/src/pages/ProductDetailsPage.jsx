@@ -408,10 +408,6 @@ const ProductDetails = () => {
       sections.push({ id: "Uses", title: "Uses", content: usesSec.content });
     }
 
-    // 2. Composition
-    if (product.composition && product.composition.length > 0) {
-      sections.push({ id: "Composition", title: "Composition", type: "composition" });
-    }
 
     // 3. Benefits
     const benefitsSec = findAndRemoveMedSec(["benefits", "key benefits"]);
@@ -471,8 +467,7 @@ const ProductDetails = () => {
 
     // 10. Specifications
     const hasNewSpecs = product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
-    const hasOldSpecs = product.specifications && product.specifications.length > 0;
-    if (hasNewSpecs || hasOldSpecs) {
+    if (hasNewSpecs) {
       sections.push({ id: "Specifications", title: "Product Specifications", type: "specifications" });
     }
 

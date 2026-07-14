@@ -22,29 +22,6 @@ const ProductTabs = ({
               {sec.title}
             </h2>
 
-            {/* Composition Table */}
-            {sec.type === "composition" && (
-              <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
-                <table className="w-full text-xs text-left text-slate-650 dark:text-zinc-300">
-                  <thead className="bg-slate-50 dark:bg-zinc-955/40 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                    <tr>
-                      <th className="px-lg py-md">Ingredient</th>
-                      <th className="px-lg py-md">Strength</th>
-                      <th className="px-lg py-md">Purpose</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
-                    {product.composition.map((row, rIdx) => (
-                      <tr key={rIdx} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
-                        <td className="px-lg py-md font-bold text-slate-750 dark:text-zinc-200">{row.ingredient}</td>
-                        <td className="px-lg py-md font-mono text-slate-500">{row.strength}</td>
-                        <td className="px-lg py-md text-slate-500">{row.purpose}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
 
             {/* Key Benefits Icon Grid */}
             {sec.type === "benefits" && (
@@ -181,76 +158,29 @@ const ProductTabs = ({
 
             {/* Specifications List */}
             {sec.type === "specifications" && (
-              <div className="w-full">
-                {product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "") ? (
-                  <>
-                    {/* Desktop layout: Two-column table */}
-                    <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs bg-white dark:bg-zinc-900">
-                      <table className="w-full text-xs text-left border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50 dark:bg-zinc-955/40 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
-                            <th className="px-lg py-md w-1/3 md:w-1/4">Specification</th>
-                            <th className="px-lg py-md">Details</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
-                          {[
-                            { label: "Generic Name", key: "genericName" },
-                            { label: "Strength", key: "strength" },
-                            { label: "Dosage Form", key: "dosageForm" },
-                            { label: "Route", key: "route" },
-                            { label: "Prescription", key: "prescription" },
-                            { label: "Manufacturer", key: "manufacturer" },
-                            { label: "Cold Chain", key: "coldChain" },
-                            { label: "Storage", key: "storage" }
-                          ].map((spec) => {
-                            const val = product.productSpecifications[spec.key];
-                            if (!val || !val.trim()) return null;
-                            return (
-                              <tr key={spec.key} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
-                                <td className="px-lg py-md font-bold text-slate-400 w-1/3 md:w-1/4">{spec.label}</td>
-                                <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Mobile layout: Stacked list */}
-                    <div className="sm:hidden space-y-sm">
-                      {[
-                        { label: "Generic Name", key: "genericName" },
-                        { label: "Strength", key: "strength" },
-                        { label: "Dosage Form", key: "dosageForm" },
-                        { label: "Route", key: "route" },
-                        { label: "Prescription", key: "prescription" },
-                        { label: "Manufacturer", key: "manufacturer" },
-                        { label: "Cold Chain", key: "coldChain" },
-                        { label: "Storage", key: "storage" }
-                      ].map((spec) => {
-                        const val = product.productSpecifications[spec.key];
-                        if (!val || !val.trim()) return null;
-                        return (
-                          <div key={spec.key} className="p-md bg-slate-50/50 dark:bg-zinc-955/20 rounded-xl border border-slate-100 dark:border-zinc-850 text-xs flex flex-col gap-xs">
-                            <span className="font-bold text-slate-400">{spec.label}</span>
-                            <span className="font-medium text-slate-750 dark:text-zinc-200">{val}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  /* Fallback to old dynamic specifications if new ones aren't filled */
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-                    {product.specifications && product.specifications.map((spec, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-sm bg-slate-50/50 dark:bg-zinc-955/20 rounded-xl border border-slate-100 dark:border-zinc-850 text-xs">
-                        <span className="font-bold text-slate-400">{spec.label}</span>
-                        <span className="font-bold text-slate-700 dark:text-zinc-200">{spec.value}</span>
+              <div className="w-full max-w-2xl">
+                <div className="space-y-sm">
+                  {[
+                    { label: "Generic Name", key: "genericName" },
+                    { label: "Strength", key: "strength" },
+                    { label: "Dosage Form", key: "dosageForm" },
+                    { label: "Route", key: "route" },
+                    { label: "Prescription", key: "prescription" },
+                    { label: "Manufacturer", key: "manufacturer" },
+                    { label: "Cold Chain", key: "coldChain" },
+                    { label: "Storage", key: "storage" }
+                  ].map((spec) => {
+                    const val = product.productSpecifications?.[spec.key];
+                    if (!val || !val.trim()) return null;
+                    return (
+                      <div key={spec.key} className="flex items-baseline py-xs text-xs">
+                        <span className="text-slate-400 dark:text-zinc-550 font-bold shrink-0">{spec.label}</span>
+                        <span className="flex-grow border-b border-dotted border-slate-200 dark:border-zinc-800 mx-2 h-3 min-w-[8px]"></span>
+                        <span className="text-right font-medium text-slate-750 dark:text-zinc-200 break-words max-w-[60%] sm:max-w-[70%]">{val}</span>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
