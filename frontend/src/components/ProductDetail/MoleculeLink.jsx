@@ -6,9 +6,8 @@ const MoleculeLink = ({ molecule }) => {
   return (
     <Link
       to={`/molecule/${molecule.slug}`}
-      className="inline-flex items-center gap-1.5 px-md py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/15 border border-teal-500/20 text-[#038076] dark:text-[#84d6b9] text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer select-none"
+      className="text-[#111827] dark:text-zinc-100 hover:text-blue-400 dark:hover:text-blue-400 font-normal underline hover:no-underline transition-all duration-200 cursor-pointer text-xs"
     >
-      <span className="material-symbols-outlined text-[13px] leading-none">science</span>
       {molecule.name}
     </Link>
   );

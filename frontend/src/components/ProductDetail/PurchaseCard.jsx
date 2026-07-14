@@ -12,8 +12,8 @@ const PurchaseCard = ({
   discountPercent
 }) => {
   return (
-    <aside className="w-full lg:w-[30%] lg:sticky lg:top-24 space-y-md order-3 max-w-[380px] text-xs select-none">
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-850/60 p-lg rounded-3xl shadow-lg space-y-lg">
+    <aside className="w-full lg:w-[28%] lg:sticky lg:top-24 space-y-md order-3 max-w-[380px] text-xs select-none">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 py-lg px-md rounded-3xl shadow-lg space-y-lg">
         {/* Price Panel */}
         <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-855 text-left">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Price</span>

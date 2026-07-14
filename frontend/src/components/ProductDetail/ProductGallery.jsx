@@ -54,7 +54,7 @@ const ProductGallery = ({
         )}
         <img 
           alt={productName} 
-          className="w-auto h-auto max-w-[85%] max-h-[85%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
+          className="w-auto h-auto max-w-[93%] max-h-[93%] object-contain transition-transform duration-[250ms] ease group-hover/zoom:scale-[1.03]" 
           src={imagesList[activeImageIdx]}
           onLoad={() => setIsImageLoading(false)}
         />
