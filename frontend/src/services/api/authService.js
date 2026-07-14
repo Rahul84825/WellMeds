@@ -23,7 +23,7 @@ export const authService = {
       if (data.refreshToken) {
         localStorage.setItem("medishop_refresh_token", data.refreshToken);
       }
-      sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
+      localStorage.setItem("medishop_user", JSON.stringify(data.user));
     }
     return data.user;
   },
@@ -35,7 +35,7 @@ export const authService = {
         skipAuthRetry: !hasToken,
       });
       if (data.success && data.user) {
-        sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
+        localStorage.setItem("medishop_user", JSON.stringify(data.user));
         return data.user;
       }
       return null;
@@ -43,7 +43,7 @@ export const authService = {
       if (error.response?.status === 401) {
         localStorage.removeItem("medishop_token");
         localStorage.removeItem("medishop_refresh_token");
-        sessionStorage.removeItem("medishop_user");
+        localStorage.removeItem("medishop_user");
         return null;
       }
       console.warn("Session check failed (network/server error):", error.message);
@@ -59,7 +59,7 @@ export const authService = {
     } finally {
       localStorage.removeItem("medishop_token");
       localStorage.removeItem("medishop_refresh_token");
-      sessionStorage.removeItem("medishop_user");
+      localStorage.removeItem("medishop_user");
     }
     return true;
   },
@@ -67,7 +67,7 @@ export const authService = {
   async updateProfile(profileData) {
     const data = await apiInstance.put("/auth/profile", profileData);
     if (data.success && data.user) {
-      sessionStorage.setItem("medishop_user", JSON.stringify(data.user));
+      localStorage.setItem("medishop_user", JSON.stringify(data.user));
     }
     return data.user;
   },

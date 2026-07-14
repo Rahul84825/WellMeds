@@ -329,17 +329,19 @@ export const verifyOtp = async (req, res, next) => {
     }
 
     // ── Step 8: Issue JWT tokens ──────────────────────────────────────────────
-    const accessToken = generateToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-    console.log("[OTP][VERIFY] jwt issued: userId=", user._id);
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id, user.role);
+    console.log("[OTP][VERIFY] jwt issued: userId=", user._id, "role=", user.role);
 
     // Use updateOne to avoid triggering full schema validation / unique-index re-check
     // This is safe because we only touch the refreshToken field.
     await User.updateOne({ _id: user._id }, { $set: { refreshToken } });
 
     // ── Set HttpOnly cookies ──────────────────────────────────────────────────
-    res.cookie("accessToken", accessToken, getCookieOptions(process.env.JWT_EXPIRE, req));
-    res.cookie("refreshToken", refreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE, req));
+    const accessExpire = user.role === "admin" ? "30d" : "7d";
+    const refreshExpire = user.role === "admin" ? "90d" : "30d";
+    res.cookie("accessToken", accessToken, getCookieOptions(accessExpire, req));
+    res.cookie("refreshToken", refreshToken, getCookieOptions(refreshExpire, req));
 
     const statusCode = isNewUser ? 201 : 200;
 

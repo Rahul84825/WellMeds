@@ -75,8 +75,10 @@ export const refreshSessionToken = async () => {
       if (isAuthError) {
         localStorage.removeItem("medishop_token");
         localStorage.removeItem("medishop_refresh_token");
-        sessionStorage.removeItem("medishop_user");
-        if (!window.location.pathname.startsWith("/login")) {
+        localStorage.removeItem("medishop_user");
+        const path = window.location.pathname;
+        const isProtectedRoute = path.startsWith("/profile") || path.startsWith("/orders") || path.startsWith("/admin") || path.startsWith("/checkout");
+        if (isProtectedRoute && !path.startsWith("/login")) {
           window.location.href = "/login";
         }
       }

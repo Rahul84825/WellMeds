@@ -1,6 +1,6 @@
+import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./src/config/db.js";
-import dotenv from "dotenv";
 import dns from "dns";
 
 dns.setDefaultResultOrder("ipv4first");
@@ -9,8 +9,6 @@ try {
 } catch (e) {
   console.warn("Could not set custom DNS servers:", e.message);
 }
-
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 

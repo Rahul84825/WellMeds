@@ -29,8 +29,17 @@ const isTokenExpiringSoon = (token, withinSeconds = 3600) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem("medishop_user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    return !localStorage.getItem("medishop_token");
+  });
 
   // Cart sync callbacks — arrays are stable refs, no re-render on push/pop
   const [onLoginCallbacks] = useState([]);

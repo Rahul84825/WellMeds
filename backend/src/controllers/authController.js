@@ -83,19 +83,17 @@ export const refresh = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Invalid or expired refresh token" });
     }
 
-    // Issue new access + refresh tokens (sliding window — extends session on activity)
-    const newAccessToken = generateToken(user._id);
-    const newRefreshToken = generateRefreshToken(user._id);
+    // Issue new access token; reuse existing refresh token to prevent RTR race conditions
+    const newAccessToken = generateToken(user._id, user.role);
+    const newRefreshToken = token;
 
-    // Persist rotated refresh token
-    user.refreshToken = newRefreshToken;
-    await user.save();
-
-    secLog("[TOKEN_REFRESH]", { userId: user._id });
+    secLog("[TOKEN_REFRESH]", { userId: user._id, role: user.role });
 
     // Update both cookies
-    res.cookie("accessToken", newAccessToken, getCookieOptions(process.env.JWT_EXPIRE, req));
-    res.cookie("refreshToken", newRefreshToken, getCookieOptions(process.env.JWT_REFRESH_EXPIRE, req));
+    const accessExpire = user.role === "admin" ? "30d" : "7d";
+    const refreshExpire = user.role === "admin" ? "90d" : "30d";
+    res.cookie("accessToken", newAccessToken, getCookieOptions(accessExpire, req));
+    res.cookie("refreshToken", newRefreshToken, getCookieOptions(refreshExpire, req));
 
     res.status(200).json({
       success: true,
