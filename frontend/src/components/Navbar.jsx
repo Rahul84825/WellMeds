@@ -92,6 +92,8 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const profileMenuRefs = useRef([]);
+  const drawerRef = useRef(null);
+  const lastActiveElementRef = useRef(null);
 
   // Fetch Surgical Categories dynamically
   useEffect(() => {
@@ -192,6 +194,71 @@ const Navbar = () => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Prevent background scrolling when mobile menu or mobile search is open
+  useEffect(() => {
+    if (mobileSearchExpanded || mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileSearchExpanded, mobileMenuOpen]);
+
+  // Accessibility: Focus trap & focus restoration for Mobile Drawer
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      lastActiveElementRef.current = document.activeElement;
+      // Delay slightly to allow transition animation to complete
+      const timer = setTimeout(() => {
+        const firstFocusable = drawerRef.current?.querySelector(
+          'button, a, input, select, textarea, [tabindex="0"]'
+        );
+        if (firstFocusable) firstFocusable.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    } else {
+      if (lastActiveElementRef.current) {
+        lastActiveElementRef.current.focus();
+        lastActiveElementRef.current = null;
+      }
+    }
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleFocusTrap = (e) => {
+      if (e.key === "Tab") {
+        const focusableElements = drawerRef.current?.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusableElements || focusableElements.length === 0) return;
+
+        const firstEl = focusableElements[0];
+        const lastEl = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstEl) {
+            lastEl.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastEl) {
+            firstEl.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleFocusTrap);
+    return () => {
+      document.removeEventListener("keydown", handleFocusTrap);
+    };
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -315,11 +382,11 @@ const Navbar = () => {
   }, [focusedProfileIndex]);
 
   return (
-    <nav className="w-full sticky top-0 z-[100] flex-shrink-0 h-[144px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200">
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-between py-2">
+    <nav className={`w-full sticky top-0 flex-shrink-0 h-[68px] lg:h-[144px] border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200 ${mobileMenuOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-between py-0 lg:py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
-        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[68px]">
+        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-full lg:h-[68px]">
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <NavLink
@@ -330,8 +397,7 @@ const Navbar = () => {
               <img 
                 src={logoImg}
                 alt="WellMeds Logo"
-                style={{ height: "110px" }}
-                className="object-contain"
+                className="h-[48px] lg:h-[110px] object-contain"
               />
             </NavLink>
           </div>
@@ -495,7 +561,7 @@ const Navbar = () => {
 
           {/* Mobile Fullscreen Search Expansion */}
           {mobileSearchExpanded && (
-            <div className="flex flex-col w-full h-[100vh] bg-white z-[300] absolute inset-0 p-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex flex-col w-full h-[100vh] bg-white z-[300] fixed inset-0 p-4 animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <button 
                   onClick={() => setMobileSearchExpanded(false)}
@@ -883,7 +949,7 @@ const Navbar = () => {
 
       {/* MOBILE DRAWER BACKDROP */}
       <div
-        className={`fixed inset-0 bg-black/40 z-[200] transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 bg-black/50 z-[1000] transition-opacity duration-300 lg:hidden ${
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setMobileMenuOpen(false)}
@@ -891,7 +957,11 @@ const Navbar = () => {
 
       {/* MOBILE DRAWER CONTAINER */}
       <div
-        className={`fixed top-0 bottom-0 left-0 w-[300px] max-w-[85vw] bg-white z-[201] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Navigation Menu"
+        className={`fixed top-0 bottom-0 left-0 w-[90vw] sm:w-[80vw] max-w-[340px] bg-white z-[1001] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

@@ -11,7 +11,7 @@ const Hero = () => {
         backgroundPosition: "center top",
         backgroundRepeat:   "no-repeat",
       }}
-      className="relative w-full overflow-hidden h-[310px] md:h-[335px]
+      className="relative z-20 w-full h-[310px] md:h-[335px]
                  flex flex-col items-center justify-center select-none"
     >
       {/* Content */}
