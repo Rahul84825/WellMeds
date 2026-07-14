@@ -507,7 +507,7 @@ const ProductDetails = () => {
     <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       
       {/* Breadcrumbs */}
-      <nav className="mb-lg text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">
+      <nav className="mb-lg text-base font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">
         <Link to="/" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Home</Link>
         <span>/</span>
         <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Products</Link>
@@ -576,15 +576,15 @@ const ProductDetails = () => {
               ref={el => sectionRefs.current["Specifications"] = el}
               className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
             >
-              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
+              <h2 className="font-headline-sm text-lg text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[20px] leading-none">list_alt</span> Product Specifications
               </h2>
               <div className="overflow-x-auto w-full rounded-2xl border border-slate-150 dark:border-zinc-800">
-                <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
+                <table className="w-full text-base text-left border-collapse min-w-[450px] sm:min-w-0">
                   <thead>
                     <tr className="bg-[#004782] text-white">
-                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle w-1/3 border-r border-[#004782]">Specification</th>
-                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle">Value</th>
+                      <th className="px-[32px] py-[26px] font-bold text-base md:text-lg align-middle w-1/3 border-r border-[#004782]">Specification</th>
+                      <th className="px-[32px] py-[26px] font-bold text-base md:text-lg align-middle">Value</th>
                     </tr>
                   </thead>
                   <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
@@ -605,8 +605,8 @@ const ProductDetails = () => {
                           key={spec.key} 
                           className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
                         >
-                          <td className="px-lg py-md font-bold text-slate-500 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
-                          <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
+                          <td className="px-[32px] py-[26px] font-bold text-slate-500 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
+                          <td className="px-[32px] py-[26px] font-medium text-slate-750 dark:text-zinc-200">{val}</td>
                         </tr>
                       );
                     })}
@@ -623,10 +623,10 @@ const ProductDetails = () => {
               ref={el => sectionRefs.current["Introduction"] = el}
               className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
             >
-              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
+              <h2 className="font-headline-sm text-lg text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[20px] leading-none">info</span> Introduction
               </h2>
-              <p className="text-slate-650 dark:text-zinc-300 text-xs leading-relaxed whitespace-pre-line">
+              <p className="text-slate-655 dark:text-zinc-300 text-base leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>
@@ -657,7 +657,7 @@ const ProductDetails = () => {
       {/* Bottom carousels */}
       {substituteProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Substitute Products (Same Category)</h2>
+          <h2 className="font-headline-sm text-2xl text-on-surface mb-xl font-black text-left">Substitute Products (Same Category)</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
             {substituteProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
@@ -668,7 +668,7 @@ const ProductDetails = () => {
 
       {relatedProducts.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
+          <h2 className="font-headline-sm text-2xl text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id || p._id} product={p} />
@@ -679,7 +679,7 @@ const ProductDetails = () => {
 
       {recentlyViewed.length > 0 && (
         <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
+          <h2 className="font-headline-sm text-2xl text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
           <div className="flex gap-sm md:gap-lg overflow-x-auto pb-md scroll-smooth snap-x snap-mandatory scrollbar-none">
             {recentlyViewed.map((p) => (
               <div key={p.id || p._id} className="snap-start shrink-0 w-[calc(50%-6px)] md:w-[calc(33.33%-8px)] lg:w-[calc(25%-18px)]">
@@ -693,8 +693,8 @@ const ProductDetails = () => {
       {/* Sticky Bottom Bar (Mobile/Tablet only) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
         <div className="text-left pl-sm">
-          <p className="text-[9px] text-slate-450 font-black uppercase tracking-wider">Total Price</p>
-          <p className="text-base font-black text-[#004782] dark:text-primary-fixed-dim">
+          <p className="text-xs text-slate-455 font-black uppercase tracking-wider">Total Price</p>
+          <p className="text-xl font-black text-[#004782] dark:text-primary-fixed-dim">
             {formatCurrency(product.price * quantity)}
           </p>
         </div>
@@ -702,14 +702,14 @@ const ProductDetails = () => {
           <button
             onClick={handleBuyNow}
             disabled={product.inStock === false || product.stock === 0}
-            className="flex-1 bg-[#086b53] hover:bg-[#055746] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+            className="flex-1 bg-[#086b53] hover:bg-[#055746] text-white font-black h-11 rounded-xl text-base outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
           >
             Buy Now
           </button>
           <button
             onClick={handleAddToCart}
             disabled={product.inStock === false || product.stock === 0}
-            className="flex-1 bg-[#004782] hover:bg-[#003c6e] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+            className="flex-1 bg-[#004782] hover:bg-[#003c6e] text-white font-black h-11 rounded-xl text-base outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
           >
             Add
           </button>

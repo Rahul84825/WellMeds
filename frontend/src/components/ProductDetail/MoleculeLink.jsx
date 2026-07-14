@@ -6,7 +6,7 @@ const MoleculeLink = ({ molecule }) => {
   return (
     <Link
       to={`/molecule/${molecule.slug}`}
-      className="text-[#111827] dark:text-zinc-100 hover:text-blue-400 dark:hover:text-blue-400 font-normal underline hover:no-underline transition-all duration-200 cursor-pointer text-xs"
+      className="text-[#111827] dark:text-zinc-100 hover:text-blue-400 dark:hover:text-blue-400 font-normal underline hover:no-underline transition-all duration-200 cursor-pointer text-base"
     >
       {molecule.name}
     </Link>

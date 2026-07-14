@@ -4,33 +4,34 @@ import { Share2, Stethoscope, Snowflake, Pill } from "lucide-react";
 
 const ProductAttributeIcon = ({ type }) => {
   if (type === "rx") {
-    return <Stethoscope size={14} className="text-[#004782] dark:text-[#a4c9ff] shrink-0" />;
+    return <Stethoscope size={18} className="text-[#004782] dark:text-[#a4c9ff] shrink-0" />;
   }
   if (type === "coldChain") {
-    return <Snowflake size={14} className="text-sky-500 dark:text-sky-400 shrink-0" />;
+    return <Snowflake size={18} className="text-sky-500 dark:text-sky-400 shrink-0" />;
   }
   if (type === "otc") {
-    return <Pill size={14} className="text-[#086b53] dark:text-[#84d6b9] shrink-0" />;
+    return <Pill size={18} className="text-[#086b53] dark:text-[#84d6b9] shrink-0" />;
   }
   return null;
 };
 
 const ProductInfo = ({ product, handleShare }) => {
   return (
-    <div className="space-y-2.5 text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-start gap-2.5 h-full">
+    <div className="space-y-3.5 text-left animate-[fade-in_0.2s_ease-out] flex-1 flex flex-col justify-start gap-3.5 h-full">
       
       {/* Product Name & Share Button Row */}
       <div className="flex justify-between items-start gap-sm">
+        {/* Product Name remains EXACTLY as it currently appears (text-xl md:text-2xl) */}
         <h1 className="font-headline-md text-xl md:text-2xl text-on-surface font-black leading-tight">
           {product.name}
         </h1>
-        {/* Share Button */}
+        {/* Share Button Icon size scaled up */}
         <button
           onClick={handleShare}
           className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-850 rounded-full transition-all cursor-pointer shrink-0"
           title="Share Product"
         >
-          <Share2 size={14} />
+          <Share2 size={18} />
         </button>
       </div>
 
@@ -38,16 +39,16 @@ const ProductInfo = ({ product, handleShare }) => {
       <div className="flex flex-wrap gap-sm items-center">
         
         {product.requiresRx ? (
-          <span className="text-[#111827] dark:text-zinc-100 font-medium text-xs flex items-center gap-3 select-none transition-opacity hover:opacity-80">
+          <span className="text-[#111827] dark:text-zinc-100 font-medium text-base flex items-center gap-3 select-none transition-opacity hover:opacity-80">
             <ProductAttributeIcon type="rx" /> Rx Required
           </span>
         ) : (
-          <span className="text-[#111827] dark:text-zinc-100 font-medium text-xs flex items-center gap-3 select-none transition-opacity hover:opacity-80">
+          <span className="text-[#111827] dark:text-zinc-100 font-medium text-base flex items-center gap-3 select-none transition-opacity hover:opacity-80">
             <ProductAttributeIcon type="otc" /> OTC Medicine
           </span>
         )}
         {product.isColdChain && (
-          <span className="text-[#111827] dark:text-zinc-100 font-medium text-xs flex items-center gap-3 select-none transition-opacity hover:opacity-80">
+          <span className="text-[#111827] dark:text-zinc-100 font-medium text-base flex items-center gap-3 select-none transition-opacity hover:opacity-80">
             <ProductAttributeIcon type="coldChain" /> Cold Chain
           </span>
         )}
@@ -56,10 +57,10 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Salt Composition */}
       {product.molecules && product.molecules.length > 0 && (
         <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
-          <span className="block text-xs font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 select-none">
-            <span className="material-symbols-outlined text-[13px] leading-none text-slate-700 dark:text-zinc-350">science</span> Salt Composition
+          <span className="block text-base font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 select-none">
+            <span className="material-symbols-outlined text-[17px] leading-none text-slate-700 dark:text-zinc-350">science</span> Salt Composition
           </span>
-          <div className="flex flex-wrap items-center text-xs">
+          <div className="flex flex-wrap items-center text-base">
             {product.molecules.map((mol, idx) => (
               <Fragment key={mol.slug || idx}>
                 <MoleculeLink molecule={mol} />
@@ -73,10 +74,10 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Manufacturer */}
       {(product.manufacturer || product.brand) && (
         <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
-          <span className="block text-[11px] font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1 select-none">
+          <span className="block text-[15px] font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1 select-none">
             Manufacturer
           </span>
-          <p className="text-[#123C7A] dark:text-[#a4c9ff] font-bold uppercase tracking-[0.1em] text-sm">
+          <p className="text-[#123C7A] dark:text-[#a4c9ff] font-bold uppercase tracking-[0.1em] text-lg">
             {product.manufacturer || product.brand}
           </p>
         </div>
@@ -85,7 +86,7 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Non-Refundable Notice */}
       {(product.isNonRefundable || product.prepaidOnly) && (
         <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
-          <p className="text-blue-650 dark:text-blue-400 font-bold text-xs">
+          <p className="text-blue-650 dark:text-blue-400 font-bold text-base">
             Non-Refundable
           </p>
         </div>
