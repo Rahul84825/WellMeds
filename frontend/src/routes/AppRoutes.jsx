@@ -34,6 +34,7 @@ import AllSurgicalProductsPage from "../pages/AllSurgicalProductsPage";
 import SurgicalCategoryPage from "../pages/SurgicalCategoryPage";
 import OffersPage from "../pages/OffersPage";
 import SearchResultsPage from "../pages/SearchResultsPage";
+import HowWeKeepYouSafePage from "../pages/HowWeKeepYouSafePage";
 
 // Admin Pages
 import Dashboard from "../admin/AdminDashboard";
@@ -79,6 +80,7 @@ const AppRoutes = () => {
         <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
         <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
         <Route path="offers" element={<OffersPage />} />
+        <Route path="how-we-keep-you-safe" element={<HowWeKeepYouSafePage />} />
 
         {/* Primary auth route */}
         <Route path="login" element={<Login />} />

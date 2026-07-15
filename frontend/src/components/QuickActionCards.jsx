@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { FileText, Stethoscope, ShieldCheck, FlaskConical, ChevronRight } from "lucide-react";
 
 const QuickActionCards = () => {
@@ -8,7 +9,7 @@ const QuickActionCards = () => {
       title: "Essential Recovery Kits",
       actionText: "EXPLORE NOW",
       icon: FileText,
-      href: "#",
+      to: "/surgical",
       ariaLabel: "Essential Recovery Kits. EXPLORE NOW.",
       orderClass: "order-2 md:order-none",
       colors: {
@@ -23,7 +24,7 @@ const QuickActionCards = () => {
       title: "Upload Your Medical Prescription",
       actionText: "UPLOAD NOW",
       icon: Stethoscope,
-      href: "#",
+      to: "/upload-prescription",
       ariaLabel: "Upload Prescription. Upload Now.",
       orderClass: "order-3 md:order-none",
       colors: {
@@ -39,7 +40,7 @@ const QuickActionCards = () => {
       actionText: "LEARN MORE",
       badge: "New",
       icon: ShieldCheck,
-      href: "#",
+      to: "/how-we-keep-you-safe",
       ariaLabel: "Keep You Safe. LEARN MORE.",
       orderClass: "order-1 md:order-none",
       colors: {
@@ -54,7 +55,7 @@ const QuickActionCards = () => {
       title: "Get 30% off on Wellness Products",
       actionText: "EXPLORE NOW",
       icon: FlaskConical,
-      href: "#",
+      to: "/wellness",
       ariaLabel: "Get 30% off on Wellness Products. EXPLORE NOW.",
       orderClass: "order-4 md:order-none",
       colors: {
@@ -71,10 +72,10 @@ const QuickActionCards = () => {
       {cards.map((card) => {
         const IconComponent = card.icon;
         return (
-          <a
+          <Link
             key={card.id}
-            href={card.href}
-            className={`group flex items-center justify-between p-3 sm:p-4 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 w-full h-24 md:h-auto md:min-h-[88px] ${card.orderClass} ${card.colors.cardBg} ${card.colors.cardBorder}`}
+            to={card.to}
+            className={`group flex items-center justify-between p-3 sm:p-4 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/45 w-full h-24 md:h-auto md:min-h-[88px] ${card.orderClass} ${card.colors.cardBg} ${card.colors.cardBorder}`}
             aria-label={card.ariaLabel}
           >
             {/* Left: Icon Container with subtle background */}
@@ -101,7 +102,7 @@ const QuickActionCards = () => {
             <div className="flex-shrink-0">
               <ChevronRight className="w-4 h-4 sm:w-5 h-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
-          </a>
+          </Link>
         );
       })}
     </div>
