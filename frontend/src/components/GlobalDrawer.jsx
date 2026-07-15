@@ -9,6 +9,7 @@ import {
   Handshake,
   Percent,
   FileText,
+  FlaskConical,
   ChevronDown,
   LayoutDashboard,
   User,
@@ -31,7 +32,8 @@ const iconMap = {
   PhoneCall,
   HelpCircle,
   User,
-  History
+  History,
+  FlaskConical
 };
 
 const renderIcon = (name, className = "w-4 h-4") => {
@@ -52,7 +54,6 @@ const GlobalDrawer = () => {
 
   // Dynamic categories
   const [surgicalCategories, setSurgicalCategories] = useState([]);
-  const [wellnessCategories, setWellnessCategories] = useState([]);
 
   const drawerRef = useRef(null);
   const lastActiveElementRef = useRef(null);
@@ -79,38 +80,6 @@ const GlobalDrawer = () => {
     return () => { active = false; };
   }, [isDrawerOpen]);
 
-  // Fetch Wellness Categories dynamically
-  useEffect(() => {
-    if (!isDrawerOpen) return;
-    let active = true;
-    const fetchWellness = async () => {
-      try {
-        const cats = await api.getCategories();
-        if (active) {
-          const conditionNames = [
-            "Cardiac Care",
-            "Kidney / Transplant Care",
-            "HIV / AIDS Care",
-            "Cancer Care",
-            "Hepatitis Care",
-            "Diabetes Care",
-            "Respiratory Care",
-            "Neuro & Mental Health",
-            "Rare & Orphan Diseases",
-            "Palliative Care",
-            "Post-Surgery Recovery",
-            "Prescription"
-          ];
-          const filtered = (cats || []).filter(c => !conditionNames.includes(c.name));
-          setWellnessCategories(filtered);
-        }
-      } catch (err) {
-        console.error("Failed to load categories for wellness", err);
-      }
-    };
-    fetchWellness();
-    return () => { active = false; };
-  }, [isDrawerOpen]);
 
   // Close menus on Escape key
   useEffect(() => {
@@ -378,25 +347,41 @@ const GlobalDrawer = () => {
                       </button>
                       {activeMobileSubAccordion === "quick" && (
                         <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
-                          {menuData.quickLinks.map((link) => {
-                            const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
-                            const Comp = isLinkExternal ? "a" : Link;
-                            const props = isLinkExternal 
-                              ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
-                              : { to: link.route };
+                          {(() => {
+                            const list = [...menuData.quickLinks];
+                            const helpCardIndex = list.findIndex(l => l.isHelpCard);
+                            const newItem = {
+                              id: "molecules",
+                              name: "Molecules",
+                              route: "/molecules",
+                              icon: "FlaskConical",
+                              isExternal: false
+                            };
+                            if (helpCardIndex !== -1) {
+                              list.splice(helpCardIndex, 0, newItem);
+                            } else {
+                              list.push(newItem);
+                            }
+                            return list.map((link) => {
+                              const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
+                              const Comp = isLinkExternal ? "a" : Link;
+                              const props = isLinkExternal 
+                                ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
+                                : { to: link.route };
 
-                            return (
-                              <Comp
-                                key={link._id || link.id}
-                                {...props}
-                                onClick={() => setIsDrawerOpen(false)}
-                                className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center gap-1.5"
-                              >
-                                {renderIcon(link.icon || "Link", "w-3.5 h-3.5 text-slate-400")}
-                                <span>{link.name}</span>
-                              </Comp>
-                            );
-                          })}
+                              return (
+                                <Comp
+                                  key={link._id || link.id}
+                                  {...props}
+                                  onClick={() => setIsDrawerOpen(false)}
+                                  className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center gap-1.5"
+                                >
+                                  {renderIcon(link.icon || "Link", "w-3.5 h-3.5 text-slate-400")}
+                                  <span>{link.name}</span>
+                                </Comp>
+                              );
+                            });
+                          })()}
                         </div>
                       )}
                     </div>
@@ -441,39 +426,15 @@ const GlobalDrawer = () => {
               )}
             </div>
 
-            {/* 3. Wellness Accordion */}
+            {/* 3. Wellness (Direct Link) */}
             <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "well" ? null : "well")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer"
+              <Link
+                to="/wellness"
+                onClick={() => setIsDrawerOpen(false)}
+                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
-                <span>Wellness</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "well" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "well" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {wellnessCategories.map((cat) => (
-                    <Link
-                      key={cat.id || cat._id}
-                      to={`/wellness?category=${encodeURIComponent(cat.name)}`}
-                      onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                  <hr className="border-slate-100 my-1" />
-                  <Link
-                    to="/wellness"
-                    onClick={() => setIsDrawerOpen(false)}
-                    className="py-2.5 text-[11px] font-black text-[#004782] block min-h-[48px] flex items-center justify-between"
-                  >
-                    <span>View All Wellness</span>
-                    <span>&rarr;</span>
-                  </Link>
-                </div>
-              )}
+                Wellness
+              </Link>
             </div>
 
             {/* 4. Health Library Accordion */}
@@ -509,37 +470,15 @@ const GlobalDrawer = () => {
               )}
             </div>
 
-            {/* 5. Patient Assistance Program (PAP) Accordion */}
+            {/* 5. Patient Assistance Program (PAP) (Direct Link) */}
             <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "pap" ? null : "pap")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-[#004782] min-h-[48px] px-1 cursor-pointer"
+              <Link
+                to="/patient-assistance-program"
+                onClick={() => setIsDrawerOpen(false)}
+                className="w-full flex items-center py-3 text-xs font-bold text-[#004782] min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
-                <span>Patient Assistance Program (PAP)</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "pap" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "pap" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {[
-                    { label: "Manufacturer PAP", to: "/patient-assistance-program" },
-                    { label: "Eligibility", to: "/patient-assistance-program#pap-eligibility" },
-                    { label: "Enrollment", to: "/patient-assistance-program#pap-enrollment" },
-                    { label: "Available Programs", to: "/patient-assistance-program#pap-programs" },
-                    { label: "How It Works", to: "/patient-assistance-program#pap-how-it-works" },
-                    { label: "FAQs", to: "/patient-assistance-program#pap-faqs" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                Patient Assistance Program (PAP)
+              </Link>
             </div>
 
           </div>

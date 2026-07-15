@@ -12,6 +12,7 @@ import {
   ChevronDown,
   FileText,
   Package,
+  FlaskConical,
   Search,
   Globe,
   Handshake,
@@ -42,7 +43,8 @@ const iconMap = {
   HelpCircle,
   User,
   History,
-  Package
+  Package,
+  FlaskConical
 };
 
 const renderIcon = (name, className = "w-4 h-4") => {
@@ -106,7 +108,6 @@ const Navbar = () => {
 
   // Dynamic categories
   const [surgicalCategories, setSurgicalCategories] = useState([]);
-  const [wellnessCategories, setWellnessCategories] = useState([]);
 
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
@@ -127,37 +128,6 @@ const Navbar = () => {
     return () => { active = false; };
   }, []);
 
-  // Fetch Wellness Categories dynamically (excluding medicine conditions)
-  useEffect(() => {
-    let active = true;
-    const fetchWellness = async () => {
-      try {
-        const cats = await api.getCategories();
-        if (active) {
-          const conditionNames = [
-            "Cardiac Care",
-            "Kidney / Transplant Care",
-            "HIV / AIDS Care",
-            "Cancer Care",
-            "Hepatitis Care",
-            "Diabetes Care",
-            "Respiratory Care",
-            "Neuro & Mental Health",
-            "Rare & Orphan Diseases",
-            "Palliative Care",
-            "Post-Surgery Recovery",
-            "Prescription"
-          ];
-          const filtered = (cats || []).filter(c => !conditionNames.includes(c.name));
-          setWellnessCategories(filtered);
-        }
-      } catch (err) {
-        console.error("Failed to load categories for wellness", err);
-      }
-    };
-    fetchWellness();
-    return () => { active = false; };
-  }, []);
 
   // Sync scroll showing of search input on homepage
   useEffect(() => {
@@ -349,7 +319,7 @@ const Navbar = () => {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col h-full justify-between py-0 lg:py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
-        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-full lg:h-[68px]">
+        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-full lg:h-[64px]">
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <NavLink
@@ -546,7 +516,7 @@ const Navbar = () => {
         </div>
 
         {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only) */}
-        <div className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[68px]">
+        <div className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[64px]">
           <div className="flex h-full items-center justify-center gap-x-[48px] lg:gap-x-[56px]">
             
             {/* 1. MEDICINES (Mega Menu) */}
@@ -558,7 +528,7 @@ const Navbar = () => {
               <button
                 id="trigger-medicines"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "medicines")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
               >
                 <span>Medicines</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
@@ -636,26 +606,38 @@ const Navbar = () => {
                   <div>
                     <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">Quick Links</h4>
                     <div className="flex flex-col gap-2.5">
-                      {menuData.quickLinks.filter(l => !l.isHelpCard).map((link) => {
-                        const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
-                        const Comp = isLinkExternal ? "a" : Link;
-                        const props = isLinkExternal 
-                          ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
-                          : { to: link.route };
+                      {(() => {
+                        const regularQuickLinks = [...menuData.quickLinks.filter(l => !l.isHelpCard)];
+                        if (!regularQuickLinks.some(l => l.route === "/molecules")) {
+                          regularQuickLinks.push({
+                            id: "molecules",
+                            name: "Molecules",
+                            route: "/molecules",
+                            icon: "FlaskConical",
+                            isExternal: false
+                          });
+                        }
+                        return regularQuickLinks.map((link) => {
+                          const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
+                          const Comp = isLinkExternal ? "a" : Link;
+                          const props = isLinkExternal 
+                            ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
+                            : { to: link.route };
 
-                        return (
-                          <Comp
-                            key={link._id || link.id}
-                            {...props}
-                            onClick={() => setActiveDropdown(null)}
-                            onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                            className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
-                          >
-                            {renderIcon(link.icon || "Link", "w-4 h-4 shrink-0 text-slate-400")}
-                            <span>{link.name}</span>
-                          </Comp>
-                        );
-                      })}
+                          return (
+                            <Comp
+                              key={link._id || link.id}
+                              {...props}
+                              onClick={() => setActiveDropdown(null)}
+                              onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
+                              className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
+                            >
+                              {renderIcon(link.icon || "Link", "w-4 h-4 shrink-0 text-slate-400")}
+                              <span>{link.name}</span>
+                            </Comp>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
 
@@ -693,7 +675,7 @@ const Navbar = () => {
               <button
                 id="trigger-surgical"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "surgical")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
               >
                 <span>Surgical</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
@@ -735,56 +717,17 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* 3. WELLNESS (Simple Dropdown) */}
-            <div 
-              className="relative flex h-full items-center"
-              onMouseEnter={() => handleMouseEnter("wellness")}
-              onMouseLeave={handleMouseLeave}
+            {/* 3. Wellness (Direct Link) */}
+            <NavLink
+              to="/wellness"
+              className={({ isActive }) =>
+                `flex h-full items-center text-[14px] font-bold cursor-pointer transition-colors duration-150 outline-none border-none p-0 bg-transparent ${
+                  isActive ? "text-[#038076]" : "text-slate-800 hover:text-[#038076] focus:text-[#038076]"
+                }`
+              }
             >
-              <button
-                id="trigger-wellness"
-                onKeyDown={(e) => handleDropdownKeyDown(e, "wellness")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
-              >
-                <span>Wellness</span>
-                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "wellness" ? "rotate-180" : ""}`} />
-              </button>
-
-              <div 
-                id="dropdown-wellness"
-                onMouseEnter={() => handleMouseEnter("wellness")}
-                onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
-                  activeDropdown === "wellness" 
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                }`}
-              >
-                <div className="flex flex-col gap-0.5 text-left">
-                  {wellnessCategories.map((cat) => (
-                    <Link
-                      key={cat.id || cat._id}
-                      to={`/wellness?category=${encodeURIComponent(cat.name)}`}
-                      onClick={() => setActiveDropdown(null)}
-                      onKeyDown={(e) => handleLinkKeyDown(e, "wellness")}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                  <hr className="border-slate-100 my-1" />
-                  <Link
-                    to="/wellness"
-                    onClick={() => setActiveDropdown(null)}
-                    onKeyDown={(e) => handleLinkKeyDown(e, "wellness")}
-                    className="px-4 py-2.5 text-xs font-black text-[#004782] rounded-lg hover:bg-blue-50/50 transition-all flex items-center justify-between"
-                  >
-                    <span>View All Wellness</span>
-                    <span>&rarr;</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+              Wellness
+            </NavLink>
 
             {/* 4. HEALTH LIBRARY (Dropdown) */}
             <div 
@@ -795,7 +738,7 @@ const Navbar = () => {
               <button
                 id="trigger-library"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
+                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
               >
                 <span>Health Library</span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
@@ -834,53 +777,17 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* 5. PATIENT ASSISTANCE PROGRAM (PAP) */}
-            <div 
-              className="relative flex h-full items-center"
-              onMouseEnter={() => handleMouseEnter("pap")}
-              onMouseLeave={handleMouseLeave}
+            {/* 5. Patient Assistance Program (PAP) (Direct Link) */}
+            <NavLink
+              to="/patient-assistance-program"
+              className={({ isActive }) =>
+                `flex h-full items-center text-[14px] font-bold cursor-pointer transition-colors duration-150 outline-none border-none p-0 bg-transparent ${
+                  isActive ? "text-[#038076]" : "text-[#004782] hover:text-[#038076] focus:text-[#038076]"
+                }`
+              }
             >
-              <button
-                id="trigger-pap"
-                onKeyDown={(e) => handleDropdownKeyDown(e, "pap")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-[#004782] cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none"
-              >
-                <span>Patient Assistance Program (PAP)</span>
-                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "pap" ? "rotate-180" : ""}`} />
-              </button>
-
-              <div 
-                id="dropdown-pap"
-                onMouseEnter={() => handleMouseEnter("pap")}
-                onMouseLeave={handleMouseLeave}
-                className={`absolute right-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
-                  activeDropdown === "pap" 
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
-                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                }`}
-              >
-                <div className="flex flex-col gap-0.5 text-left">
-                  {[
-                    { label: "Manufacturer PAP", to: "/patient-assistance-program" },
-                    { label: "Eligibility", to: "/patient-assistance-program#pap-eligibility" },
-                    { label: "Enrollment", to: "/patient-assistance-program#pap-enrollment" },
-                    { label: "Available Programs", to: "/patient-assistance-program#pap-programs" },
-                    { label: "How It Works", to: "/patient-assistance-program#pap-how-it-works" },
-                    { label: "FAQs", to: "/patient-assistance-program#pap-faqs" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setActiveDropdown(null)}
-                      onKeyDown={(e) => handleLinkKeyDown(e, "pap")}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
+              Patient Assistance Program (PAP)
+            </NavLink>
 
           </div>
         </div>
