@@ -1,5 +1,10 @@
 import apiInstance from "./api";
 
+let productsListCache = null;
+let productsListPromise = null;
+const getProductPromises = {};
+const getSimilarProductPromises = {};
+
 export const productService = {
   /**
    * Get products with optional filters.
@@ -33,13 +38,37 @@ export const productService = {
    * Used by admin pages that don't need pagination.
    */
   async getProductsList(params = {}) {
+    const isDefault = !params || Object.keys(params).length === 0 || (params.limit === 1000 && Object.keys(params).length === 1);
+    if (isDefault) {
+      if (productsListCache) return productsListCache;
+      if (productsListPromise) return productsListPromise;
+      
+      productsListPromise = productService.getProducts({ limit: 1000, ...params })
+        .then(({ products }) => {
+          productsListCache = products;
+          productsListPromise = null;
+          return products;
+        })
+        .catch((err) => {
+          productsListPromise = null;
+          throw err;
+        });
+      return productsListPromise;
+    }
     const { products } = await productService.getProducts({ limit: 1000, ...params });
     return products;
   },
 
   async getProduct(id) {
-    const data = await apiInstance.get(`/products/${id}`);
-    return data.product;
+    if (getProductPromises[id]) {
+      return getProductPromises[id];
+    }
+    getProductPromises[id] = apiInstance.get(`/products/${id}`)
+      .then(data => data.product)
+      .finally(() => {
+        delete getProductPromises[id];
+      });
+    return getProductPromises[id];
   },
 
   async createProduct(productData) {
@@ -58,8 +87,15 @@ export const productService = {
   },
 
   async getSimilarProducts(id) {
-    const data = await apiInstance.get(`/products/${id}/similar`);
-    return data.products || [];
+    if (getSimilarProductPromises[id]) {
+      return getSimilarProductPromises[id];
+    }
+    getSimilarProductPromises[id] = apiInstance.get(`/products/${id}/similar`)
+      .then(data => data.products || [])
+      .finally(() => {
+        delete getSimilarProductPromises[id];
+      });
+    return getSimilarProductPromises[id];
   },
 
   async getTrendingProducts() {

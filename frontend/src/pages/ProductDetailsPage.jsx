@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
@@ -19,6 +19,7 @@ import DeliveryCard from "../components/ProductDetail/DeliveryCard";
 import RXCard from "../components/ProductDetail/RXCard";
 import ColdChainCard from "../components/ProductDetail/ColdChainCard";
 import ProductTabs from "../components/ProductDetail/ProductTabs";
+import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkeleton";
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -55,17 +56,24 @@ const ProductDetails = () => {
   }, [product]);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
         const prod = await api.getProduct(slug);
+        if (!isMounted) return;
         setProduct(prod);
         setActiveImageIdx(0);
         setQuantity(1);
         
-        // Fetch all products for fallbacks
-        const allProds = await api.getProductsList();
-        
+        // Fetch remaining data in parallel
+        const [substitutes, allProds] = await Promise.all([
+          api.getSimilarProducts(prod._id || prod.id).catch(() => []),
+          api.getProductsList().catch(() => [])
+        ]);
+
+        if (!isMounted) return;
+
         // Related products: from product.relatedProducts or fallback to same manufacturer
         if (prod.relatedProducts && prod.relatedProducts.length > 0) {
           setRelatedProducts(prod.relatedProducts);
@@ -75,21 +83,10 @@ const ProductDetails = () => {
         }
 
         // Substitute products: fetch dynamically using matching molecules sorted by priority
-        try {
-          const substitutes = await api.getSimilarProducts(prod._id || prod.id);
-          if (substitutes && substitutes.length > 0) {
-            setSubstituteProducts(substitutes);
-          } else {
-            // Fallback: same category
-            const prodCatId = prod.category?._id || prod.category;
-            const fallback = allProds.filter(p => {
-              const pCatId = p.category?._id || p.category;
-              return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
-            }).slice(0, 4);
-            setSubstituteProducts(fallback);
-          }
-        } catch (e) {
-          console.warn("Failed to fetch substitute products:", e);
+        if (substitutes && substitutes.length > 0) {
+          setSubstituteProducts(substitutes);
+        } else {
+          // Fallback: same category
           const prodCatId = prod.category?._id || prod.category;
           const fallback = allProds.filter(p => {
             const pCatId = p.category?._id || p.category;
@@ -122,13 +119,30 @@ const ProductDetails = () => {
         }
       } catch (err) {
         console.error("Product fetch failed", err);
-        navigate("/products");
+        if (isMounted) navigate("/products");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchProductDetails();
+
+    return () => {
+      isMounted = false;
+    };
   }, [slug, navigate]);
+
+  // Preload the primary product image once product data is loaded to optimize loading speed
+  useEffect(() => {
+    if (!product || !product.image) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = product.image;
+    document.head.appendChild(link);
+    return () => {
+      link.remove();
+    };
+  }, [product]);
 
   // Reset image loading state on image change
   useEffect(() => {
@@ -317,37 +331,33 @@ const ProductDetails = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loading, product]);
 
-  const handleIncrement = () => {
-    if (quantity < 30) {
-      setQuantity(prev => prev + 1);
-    }
-  };
+  const handleIncrement = useCallback(() => {
+    setQuantity(prev => (prev < 30 ? prev + 1 : prev));
+  }, []);
 
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
-  };
+  const handleDecrement = useCallback(() => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : prev));
+  }, []);
 
-  const handleAddToCart = () => {
-    if (product.inStock === false || product.stock === 0) return;
+  const handleAddToCart = useCallback(() => {
+    if (!product || product.inStock === false || product.stock === 0) return;
     addToCart(product, quantity);
     toast.success(`${quantity} item(s) added to cart.`);
-  };
+  }, [product, quantity, addToCart]);
 
-  const handleBuyNow = () => {
-    if (product.inStock === false || product.stock === 0) return;
+  const handleBuyNow = useCallback(() => {
+    if (!product || product.inStock === false || product.stock === 0) return;
     addToCart(product, quantity);
     navigate("/cart");
-  };
+  }, [product, quantity, addToCart, navigate]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Product link copied to clipboard!");
-  };
+  }, []);
 
   // Image Zoom Handlers
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     const { left, top, width, height } = e.target.getBoundingClientRect();
     const x = ((e.pageX - left - window.scrollX) / width) * 100;
     const y = ((e.pageY - top - window.scrollY) / height) * 100;
@@ -356,22 +366,22 @@ const ProductDetails = () => {
       backgroundPosition: `${x}% ${y}%`,
       backgroundImage: `url(${imagesList[activeImageIdx]})`
     });
-  };
+  }, [imagesList, activeImageIdx]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setZoomStyle({ display: "none" });
-  };
+  }, []);
 
   // Swipe gesture handlers for mobile image gallery
-  const handleTouchStart = (e) => {
+  const handleTouchStart = useCallback((e) => {
     setTouchStart(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = useCallback((e) => {
     setTouchEnd(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
@@ -385,7 +395,7 @@ const ProductDetails = () => {
     }
     setTouchStart(null);
     setTouchEnd(null);
-  };
+  }, [touchStart, touchEnd, activeImageIdx, imagesList.length]);
 
   // Compile Dynamic Content Sections
   const computedSections = useMemo(() => {
@@ -490,11 +500,7 @@ const ProductDetails = () => {
   }, [product]);
 
   if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader size="lg" />
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) return null;
@@ -502,6 +508,153 @@ const ProductDetails = () => {
   const discountPercent = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+
+  // Memoize sub-components to prevent rendering of large DOM trees on scroll
+  const memoizedStickySidebar = useMemo(() => (
+    <StickySidebar
+      substituteProducts={substituteProducts}
+      product={product}
+      computedSections={computedSections}
+      activeSection={activeSection}
+    />
+  ), [substituteProducts, product, computedSections, activeSection]);
+
+  const memoizedProductInfo = useMemo(() => (
+    <ProductInfo product={product} handleShare={handleShare} />
+  ), [product, handleShare]);
+
+  const memoizedProductGallery = useMemo(() => (
+    <ProductGallery
+      imagesList={imagesList}
+      activeImageIdx={activeImageIdx}
+      setActiveImageIdx={setActiveImageIdx}
+      isImageLoading={isImageLoading}
+      setIsImageLoading={setIsImageLoading}
+      handleMouseMove={handleMouseMove}
+      handleMouseLeave={handleMouseLeave}
+      handleTouchStart={handleTouchStart}
+      handleTouchMove={handleTouchMove}
+      handleTouchEnd={handleTouchEnd}
+      setIsFullscreenOpen={setIsFullscreenOpen}
+      discountPercent={discountPercent}
+      productName={product.name}
+    />
+  ), [
+    imagesList,
+    activeImageIdx,
+    isImageLoading,
+    handleMouseMove,
+    handleMouseLeave,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    setIsFullscreenOpen,
+    discountPercent,
+    product.name
+  ]);
+
+  const memoizedDispatchDelivery = useMemo(() => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+      <DispatchCard />
+      <DeliveryCard />
+    </div>
+  ), []);
+
+  const memoizedRxColdChain = useMemo(() => (
+    <div className="space-y-sm">
+      <RXCard requiresRx={product.requiresRx} />
+      <ColdChainCard isColdChain={product.isColdChain} />
+    </div>
+  ), [product.requiresRx, product.isColdChain]);
+
+  const memoizedSpecifications = useMemo(() => {
+    if (!product.productSpecifications || !Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) return null;
+    return (
+      <div 
+        id="Specifications"
+        ref={el => sectionRefs.current["Specifications"] = el}
+        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+      >
+        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
+        </h2>
+        <div className="overflow-x-auto w-full rounded-2xl border border-slate-150 dark:border-zinc-800">
+          <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
+            <thead>
+              <tr className="bg-[#004782] text-white">
+                <th className="px-lg py-md font-bold text-xs md:text-sm align-middle w-1/3 border-r border-[#004782]">Specification</th>
+                <th className="px-lg py-md font-bold text-xs md:text-sm align-middle">Value</th>
+              </tr>
+            </thead>
+            <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
+              {[
+                { label: "Generic Name", key: "genericName" },
+                { label: "Strength", key: "strength" },
+                { label: "Dosage Form", key: "dosageForm" },
+                { label: "Route", key: "route" },
+                { label: "Prescription", key: "prescription" },
+                { label: "Manufacturer", key: "manufacturer" },
+                { label: "Cold Chain", key: "coldChain" },
+                { label: "Storage", key: "storage" }
+              ].map((spec) => {
+                const val = product.productSpecifications[spec.key];
+                if (!val || !val.trim()) return null;
+                return (
+                  <tr 
+                    key={spec.key} 
+                    className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
+                  >
+                    <td className="px-lg py-md font-bold text-slate-505 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
+                    <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }, [product.productSpecifications]);
+
+  const memoizedIntroduction = useMemo(() => {
+    if (!product.description || !product.description.trim()) return null;
+    return (
+      <div 
+        id="Introduction"
+        ref={el => sectionRefs.current["Introduction"] = el}
+        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+      >
+        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
+        </h2>
+        <p className="text-slate-655 dark:text-zinc-300 text-xs leading-relaxed whitespace-pre-line">
+          {product.description}
+        </p>
+      </div>
+    );
+  }, [product.description]);
+
+  const memoizedProductTabs = useMemo(() => (
+    <ProductTabs
+      computedSections={computedSections}
+      openFaqIdx={openFaqIdx}
+      setOpenFaqIdx={setOpenFaqIdx}
+      product={product}
+      sectionRefs={sectionRefs}
+    />
+  ), [computedSections, openFaqIdx, product]);
+
+  const memoizedPurchaseCard = useMemo(() => (
+    <PurchaseCard
+      product={product}
+      quantity={quantity}
+      handleDecrement={handleDecrement}
+      handleIncrement={handleIncrement}
+      handleBuyNow={handleBuyNow}
+      handleAddToCart={handleAddToCart}
+      discountPercent={discountPercent}
+    />
+  ), [product, quantity, handleDecrement, handleIncrement, handleBuyNow, handleAddToCart, discountPercent]);
 
   return (
     <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
@@ -521,12 +674,7 @@ const ProductDetails = () => {
       <div className="flex flex-col md:flex-row flex-wrap lg:flex-nowrap gap-lg mb-xl items-start w-full">
         
         {/* LEFT SIDEBAR (22% on desktop, 28% on tablet, 100% on mobile) */}
-        <StickySidebar
-          substituteProducts={substituteProducts}
-          product={product}
-          computedSections={computedSections}
-          activeSection={activeSection}
-        />
+        {memoizedStickySidebar}
 
         {/* CENTER CONTENT (52% on desktop, 68% on tablet, 100% on mobile) */}
         <div className="w-full md:w-[68%] lg:w-[52%] space-y-md order-1 md:order-2 lg:order-2">
@@ -534,124 +682,33 @@ const ProductDetails = () => {
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
             {/* Left: Product Information (60%) */}
             <div className="w-full lg:w-[60%] flex flex-col justify-between">
-              <ProductInfo product={product} handleShare={handleShare} />
+              {memoizedProductInfo}
             </div>
 
             {/* Right: Product Image Gallery (40%) */}
             <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
-              <ProductGallery
-                imagesList={imagesList}
-                activeImageIdx={activeImageIdx}
-                setActiveImageIdx={setActiveImageIdx}
-                isImageLoading={isImageLoading}
-                setIsImageLoading={setIsImageLoading}
-                handleMouseMove={handleMouseMove}
-                handleMouseLeave={handleMouseLeave}
-                handleTouchStart={handleTouchStart}
-                handleTouchMove={handleTouchMove}
-                handleTouchEnd={handleTouchEnd}
-                setIsFullscreenOpen={setIsFullscreenOpen}
-                discountPercent={discountPercent}
-                productName={product.name}
-              />
+              {memoizedProductGallery}
             </div>
           </div>
 
           {/* Dispatch Banner / Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-            <DispatchCard />
-            <DeliveryCard />
-          </div>
+          {memoizedDispatchDelivery}
 
           {/* Prescription and Cold Chain Cards */}
-          <div className="space-y-sm">
-            <RXCard requiresRx={product.requiresRx} />
-            <ColdChainCard isColdChain={product.isColdChain} />
-          </div>
+          {memoizedRxColdChain}
 
           {/* Product Specifications Section */}
-          {product.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "") && (
-            <div 
-              id="Specifications"
-              ref={el => sectionRefs.current["Specifications"] = el}
-              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
-            >
-              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
-              </h2>
-              <div className="overflow-x-auto w-full rounded-2xl border border-slate-150 dark:border-zinc-800">
-                <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
-                  <thead>
-                    <tr className="bg-[#004782] text-white">
-                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle w-1/3 border-r border-[#004782]">Specification</th>
-                      <th className="px-lg py-md font-bold text-xs md:text-sm align-middle">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
-                    {[
-                      { label: "Generic Name", key: "genericName" },
-                      { label: "Strength", key: "strength" },
-                      { label: "Dosage Form", key: "dosageForm" },
-                      { label: "Route", key: "route" },
-                      { label: "Prescription", key: "prescription" },
-                      { label: "Manufacturer", key: "manufacturer" },
-                      { label: "Cold Chain", key: "coldChain" },
-                      { label: "Storage", key: "storage" }
-                    ].map((spec) => {
-                      const val = product.productSpecifications[spec.key];
-                      if (!val || !val.trim()) return null;
-                      return (
-                        <tr 
-                          key={spec.key} 
-                          className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
-                        >
-                          <td className="px-lg py-md font-bold text-slate-505 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
-                          <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {memoizedSpecifications}
 
           {/* Introduction Card */}
-          {product.description && product.description.trim() && (
-            <div 
-              id="Introduction"
-              ref={el => sectionRefs.current["Introduction"] = el}
-              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
-            >
-              <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
-              </h2>
-              <p className="text-slate-655 dark:text-zinc-300 text-xs leading-relaxed whitespace-pre-line">
-                {product.description}
-              </p>
-            </div>
-          )}
+          {memoizedIntroduction}
 
           {/* Clinical Info sections */}
-          <ProductTabs
-            computedSections={computedSections}
-            openFaqIdx={openFaqIdx}
-            setOpenFaqIdx={setOpenFaqIdx}
-            product={product}
-            sectionRefs={sectionRefs}
-          />
+          {memoizedProductTabs}
         </div>
 
         {/* RIGHT SIDEBAR (30% on desktop, 100% on tablet/mobile) */}
-        <PurchaseCard
-          product={product}
-          quantity={quantity}
-          handleDecrement={handleDecrement}
-          handleIncrement={handleIncrement}
-          handleBuyNow={handleBuyNow}
-          handleAddToCart={handleAddToCart}
-          discountPercent={discountPercent}
-        />
+        {memoizedPurchaseCard}
       </div>
 
       {/* Bottom carousels */}

@@ -20,12 +20,18 @@ const Hero = () => {
 
         {/* Heading */}
         <div className="flex flex-col items-center justify-center gap-1.5">
-          <h1 className="text-[25px] font-extrabold leading-tight tracking-tight text-white
-                         sm:text-[32px] lg:text-[41px]">
+          <h1 
+            style={{ textShadow: "0 2px 8px rgba(255,255,255,0.45)" }}
+            className="text-[25px] font-extrabold leading-tight tracking-tight text-[#0F2D52]
+                           sm:text-[32px] lg:text-[41px]"
+          >
             More Than a Pharmacy.
           </h1>
-          <p className="text-[19px] font-semibold tracking-tight text-[#038076]
-                        sm:text-[24px] lg:text-[31px]">
+          <p 
+            style={{ textShadow: "0 2px 6px rgba(255,255,255,0.35)" }}
+            className="text-[19px] font-bold tracking-tight text-[#00796B]
+                          sm:text-[24px] lg:text-[31px]"
+          >
             Your Partner in Better Health.
           </p>
         </div>

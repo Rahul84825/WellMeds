@@ -62,6 +62,8 @@ const ProductGallery = ({
         <img 
           src={imagesList[activeImageIdx]} 
           alt={productName} 
+          loading="eager"
+          fetchpriority="high"
           className="w-auto h-auto max-w-[92%] max-h-[92%] object-contain select-none transition-transform duration-[250ms] ease-in-out" 
           onLoad={() => setIsImageLoading(false)}
         />
@@ -123,7 +125,7 @@ const ProductGallery = ({
                 }`}
                 aria-label={`View thumbnail ${idx + 1}`}
               >
-                <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                <img src={img} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
                 
                 {/* +N Counter Overlay for remaining images */}
                 {isLastThumbnail && showRemainingOverlay && (
