@@ -499,47 +499,48 @@ const ProductDetails = () => {
     return sections;
   }, [product]);
 
-  if (loading) {
-    return <ProductDetailSkeleton />;
-  }
-
-  if (!product) return null;
-
-  const discountPercent = product.originalPrice && product.originalPrice > product.price
+  const discountPercent = product?.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
   // Memoize sub-components to prevent rendering of large DOM trees on scroll
-  const memoizedStickySidebar = useMemo(() => (
-    <StickySidebar
-      substituteProducts={substituteProducts}
-      product={product}
-      computedSections={computedSections}
-      activeSection={activeSection}
-    />
-  ), [substituteProducts, product, computedSections, activeSection]);
+  const memoizedStickySidebar = useMemo(() => {
+    if (!product) return null;
+    return (
+      <StickySidebar
+        substituteProducts={substituteProducts}
+        product={product}
+        computedSections={computedSections}
+        activeSection={activeSection}
+      />
+    );
+  }, [substituteProducts, product, computedSections, activeSection]);
 
-  const memoizedProductInfo = useMemo(() => (
-    <ProductInfo product={product} handleShare={handleShare} />
-  ), [product, handleShare]);
+  const memoizedProductInfo = useMemo(() => {
+    if (!product) return null;
+    return <ProductInfo product={product} handleShare={handleShare} />;
+  }, [product, handleShare]);
 
-  const memoizedProductGallery = useMemo(() => (
-    <ProductGallery
-      imagesList={imagesList}
-      activeImageIdx={activeImageIdx}
-      setActiveImageIdx={setActiveImageIdx}
-      isImageLoading={isImageLoading}
-      setIsImageLoading={setIsImageLoading}
-      handleMouseMove={handleMouseMove}
-      handleMouseLeave={handleMouseLeave}
-      handleTouchStart={handleTouchStart}
-      handleTouchMove={handleTouchMove}
-      handleTouchEnd={handleTouchEnd}
-      setIsFullscreenOpen={setIsFullscreenOpen}
-      discountPercent={discountPercent}
-      productName={product.name}
-    />
-  ), [
+  const memoizedProductGallery = useMemo(() => {
+    if (!product) return null;
+    return (
+      <ProductGallery
+        imagesList={imagesList}
+        activeImageIdx={activeImageIdx}
+        setActiveImageIdx={setActiveImageIdx}
+        isImageLoading={isImageLoading}
+        setIsImageLoading={setIsImageLoading}
+        handleMouseMove={handleMouseMove}
+        handleMouseLeave={handleMouseLeave}
+        handleTouchStart={handleTouchStart}
+        handleTouchMove={handleTouchMove}
+        handleTouchEnd={handleTouchEnd}
+        setIsFullscreenOpen={setIsFullscreenOpen}
+        discountPercent={discountPercent}
+        productName={product.name}
+      />
+    );
+  }, [
     imagesList,
     activeImageIdx,
     isImageLoading,
@@ -550,25 +551,31 @@ const ProductDetails = () => {
     handleTouchEnd,
     setIsFullscreenOpen,
     discountPercent,
-    product.name
+    product
   ]);
 
-  const memoizedDispatchDelivery = useMemo(() => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-      <DispatchCard />
-      <DeliveryCard />
-    </div>
-  ), []);
+  const memoizedDispatchDelivery = useMemo(() => {
+    if (!product) return null;
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+        <DispatchCard />
+        <DeliveryCard />
+      </div>
+    );
+  }, [product]);
 
-  const memoizedRxColdChain = useMemo(() => (
-    <div className="space-y-sm">
-      <RXCard requiresRx={product.requiresRx} />
-      <ColdChainCard isColdChain={product.isColdChain} />
-    </div>
-  ), [product.requiresRx, product.isColdChain]);
+  const memoizedRxColdChain = useMemo(() => {
+    if (!product) return null;
+    return (
+      <div className="space-y-sm">
+        <RXCard requiresRx={product.requiresRx} />
+        <ColdChainCard isColdChain={product.isColdChain} />
+      </div>
+    );
+  }, [product]);
 
   const memoizedSpecifications = useMemo(() => {
-    if (!product.productSpecifications || !Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) return null;
+    if (!product || !product.productSpecifications || !Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) return null;
     return (
       <div 
         id="Specifications"
@@ -614,10 +621,10 @@ const ProductDetails = () => {
         </div>
       </div>
     );
-  }, [product.productSpecifications]);
+  }, [product]);
 
   const memoizedIntroduction = useMemo(() => {
-    if (!product.description || !product.description.trim()) return null;
+    if (!product || !product.description || !product.description.trim()) return null;
     return (
       <div 
         id="Introduction"
@@ -632,29 +639,41 @@ const ProductDetails = () => {
         </p>
       </div>
     );
-  }, [product.description]);
+  }, [product]);
 
-  const memoizedProductTabs = useMemo(() => (
-    <ProductTabs
-      computedSections={computedSections}
-      openFaqIdx={openFaqIdx}
-      setOpenFaqIdx={setOpenFaqIdx}
-      product={product}
-      sectionRefs={sectionRefs}
-    />
-  ), [computedSections, openFaqIdx, product]);
+  const memoizedProductTabs = useMemo(() => {
+    if (!product) return null;
+    return (
+      <ProductTabs
+        computedSections={computedSections}
+        openFaqIdx={openFaqIdx}
+        setOpenFaqIdx={setOpenFaqIdx}
+        product={product}
+        sectionRefs={sectionRefs}
+      />
+    );
+  }, [computedSections, openFaqIdx, product]);
 
-  const memoizedPurchaseCard = useMemo(() => (
-    <PurchaseCard
-      product={product}
-      quantity={quantity}
-      handleDecrement={handleDecrement}
-      handleIncrement={handleIncrement}
-      handleBuyNow={handleBuyNow}
-      handleAddToCart={handleAddToCart}
-      discountPercent={discountPercent}
-    />
-  ), [product, quantity, handleDecrement, handleIncrement, handleBuyNow, handleAddToCart, discountPercent]);
+  const memoizedPurchaseCard = useMemo(() => {
+    if (!product) return null;
+    return (
+      <PurchaseCard
+        product={product}
+        quantity={quantity}
+        handleDecrement={handleDecrement}
+        handleIncrement={handleIncrement}
+        handleBuyNow={handleBuyNow}
+        handleAddToCart={handleAddToCart}
+        discountPercent={discountPercent}
+      />
+    );
+  }, [product, quantity, handleDecrement, handleIncrement, handleBuyNow, handleAddToCart, discountPercent]);
+
+  if (loading) {
+    return <ProductDetailSkeleton />;
+  }
+
+  if (!product) return null;
 
   return (
     <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
