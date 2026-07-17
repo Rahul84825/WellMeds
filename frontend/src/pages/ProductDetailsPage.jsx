@@ -4,7 +4,6 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
-import Loader from "../components/Loader";
 import { toast } from "sonner";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
@@ -33,7 +32,6 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
-  const [zoomStyle, setZoomStyle] = useState({ display: "none" });
 
   // Accordion state for FAQs
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
@@ -356,21 +354,7 @@ const ProductDetails = () => {
     toast.success("Product link copied to clipboard!");
   }, []);
 
-  // Image Zoom Handlers
-  const handleMouseMove = useCallback((e) => {
-    const { left, top, width, height } = e.target.getBoundingClientRect();
-    const x = ((e.pageX - left - window.scrollX) / width) * 100;
-    const y = ((e.pageY - top - window.scrollY) / height) * 100;
-    setZoomStyle({
-      display: "block",
-      backgroundPosition: `${x}% ${y}%`,
-      backgroundImage: `url(${imagesList[activeImageIdx]})`
-    });
-  }, [imagesList, activeImageIdx]);
 
-  const handleMouseLeave = useCallback(() => {
-    setZoomStyle({ display: "none" });
-  }, []);
 
   // Swipe gesture handlers for mobile image gallery
   const handleTouchStart = useCallback((e) => {
@@ -530,8 +514,6 @@ const ProductDetails = () => {
         setActiveImageIdx={setActiveImageIdx}
         isImageLoading={isImageLoading}
         setIsImageLoading={setIsImageLoading}
-        handleMouseMove={handleMouseMove}
-        handleMouseLeave={handleMouseLeave}
         handleTouchStart={handleTouchStart}
         handleTouchMove={handleTouchMove}
         handleTouchEnd={handleTouchEnd}
@@ -544,8 +526,6 @@ const ProductDetails = () => {
     imagesList,
     activeImageIdx,
     isImageLoading,
-    handleMouseMove,
-    handleMouseLeave,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -589,8 +569,8 @@ const ProductDetails = () => {
           <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
             <thead>
               <tr className="bg-[#004782] text-white">
-                <th className="px-lg py-md font-bold text-xs md:text-sm align-middle w-1/3 border-r border-[#004782]">Specification</th>
-                <th className="px-lg py-md font-bold text-xs md:text-sm align-middle">Value</th>
+                <th className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-xs md:text-sm align-middle w-[28%] border-r border-[#004782]">Specification</th>
+                <th className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-xs md:text-sm align-middle">Value</th>
               </tr>
             </thead>
             <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
@@ -611,8 +591,8 @@ const ProductDetails = () => {
                     key={spec.key} 
                     className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
                   >
-                    <td className="px-lg py-md font-bold text-slate-505 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
-                    <td className="px-lg py-md font-medium text-slate-750 dark:text-zinc-200">{val}</td>
+                    <td className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-slate-505 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
+                    <td className="px-6 sm:px-8 py-3.5 sm:py-4 font-medium text-slate-750 dark:text-zinc-200">{val}</td>
                   </tr>
                 );
               })}
@@ -689,45 +669,59 @@ const ProductDetails = () => {
         <span className="text-slate-655 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
       </nav>
 
-      {/* 3-COLUMN DESKTOP / 2-COLUMN TABLET / 1-COLUMN MOBILE LAYOUT */}
-      <div className="flex flex-col md:flex-row flex-wrap lg:flex-nowrap gap-lg mb-xl items-start w-full">
+      {/* 2-COLUMN ROOT LAYOUT: LEFT SIDEBAR & RIGHT CONTAINER */}
+      <div className="flex flex-col md:flex-row gap-lg mb-xl items-start w-full">
         
-        {/* LEFT SIDEBAR (22% on desktop, 28% on tablet, 100% on mobile) */}
+        {/* LEFT SIDEBAR (22% on desktop, 30% on tablet, 100% on mobile) */}
         {memoizedStickySidebar}
 
-        {/* CENTER CONTENT (52% on desktop, 68% on tablet, 100% on mobile) */}
-        <div className="w-full md:w-[68%] lg:w-[52%] space-y-md order-1 md:order-2 lg:order-2">
-          {/* Combined Product Info & Image Gallery Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
-            {/* Left: Product Information (60%) */}
-            <div className="w-full lg:w-[60%] flex flex-col justify-between">
-              {memoizedProductInfo}
+        {/* RIGHT CONTAINER (78% on desktop, 70% on tablet, 100% on mobile) */}
+        <div className="w-full md:w-[68%] lg:w-[78%] flex flex-col gap-md order-1 md:order-2 lg:order-2">
+          
+          {/* Top Row: Center Content & Purchase Card */}
+          <div className="flex flex-col lg:flex-row gap-lg items-start w-full">
+            {/* Center Content Column (Product Info, Gallery, Dispatch/Delivery, Rx/Cold Chain) */}
+            <div className="w-full lg:w-[66.6%] space-y-md">
+              {/* Combined Product Info & Image Gallery Card */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
+                {/* Left: Product Information (60%) */}
+                <div className="w-full lg:w-[60%] flex flex-col justify-between">
+                  {memoizedProductInfo}
+                </div>
+
+                {/* Right: Product Image Gallery (40%) */}
+                <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
+                  {memoizedProductGallery}
+                </div>
+              </div>
+
+              {/* Dispatch Banner / Cards */}
+              {memoizedDispatchDelivery}
+
+              {/* Prescription and Cold Chain Cards */}
+              {memoizedRxColdChain}
             </div>
 
-            {/* Right: Product Image Gallery (40%) */}
-            <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
-              {memoizedProductGallery}
+            {/* Right Column: Purchase Panel */}
+            <div className="w-full lg:w-[33.4%]">
+              {memoizedPurchaseCard}
             </div>
           </div>
 
-          {/* Dispatch Banner / Cards */}
-          {memoizedDispatchDelivery}
+          {/* Bottom Area: Combined Center + Right Column space */}
+          <div className="w-full space-y-md mt-md">
+            {/* Product Specifications Section */}
+            {memoizedSpecifications}
 
-          {/* Prescription and Cold Chain Cards */}
-          {memoizedRxColdChain}
+            {/* Introduction Card */}
+            {memoizedIntroduction}
 
-          {/* Product Specifications Section */}
-          {memoizedSpecifications}
+            {/* Clinical Info sections */}
+            {memoizedProductTabs}
+          </div>
 
-          {/* Introduction Card */}
-          {memoizedIntroduction}
-
-          {/* Clinical Info sections */}
-          {memoizedProductTabs}
         </div>
 
-        {/* RIGHT SIDEBAR (30% on desktop, 100% on tablet/mobile) */}
-        {memoizedPurchaseCard}
       </div>
 
       {/* Bottom carousels */}

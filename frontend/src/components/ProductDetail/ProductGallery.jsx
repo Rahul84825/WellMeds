@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Loader from "../Loader";
 
@@ -8,13 +8,10 @@ const ProductGallery = ({
   setActiveImageIdx,
   isImageLoading,
   setIsImageLoading,
-  handleMouseMove,
-  handleMouseLeave,
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
   setIsFullscreenOpen,
-  zoomStyle,
   discountPercent,
   productName
 }) => {

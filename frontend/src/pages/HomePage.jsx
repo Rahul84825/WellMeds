@@ -66,6 +66,7 @@ const HomePage = () => {
       <FeaturedProductsSection />
 
       {/* Brand Value Propositions */}
+      
       <WhyChooseWellMeds />
 
       {/* Pharmacist Consultation Details Form Modal */}
