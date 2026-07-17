@@ -19,8 +19,10 @@ const HomePage = () => {
 
   return (
     <div className="animate-[fade-in_0.3s_ease-out]">
-      {/* Hero Banner */}
-      <Hero />
+      {/* Hero Banner (hidden on mobile, visible on desktop) */}
+      <div className="hidden lg:block">
+        <Hero />
+      </div>
 
       {/* Quick Action Cards Section */}
       <HomeSectionContainer className="mt-7 md:mt-9">
