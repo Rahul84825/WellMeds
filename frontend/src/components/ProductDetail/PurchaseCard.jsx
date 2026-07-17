@@ -45,35 +45,35 @@ const PurchaseCard = ({
 
   return (
     <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24">
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 p-4 rounded-3xl shadow-lg space-y-3">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 p-3.5 rounded-3xl shadow-lg space-y-2.5">
         
         {/* 1. Price Section */}
         <div className="bg-slate-50/50 dark:bg-zinc-955/20 py-2 px-3 rounded-2xl border border-slate-100 dark:border-zinc-855 text-left">
-          <div className="flex justify-between items-baseline">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-[#004782] dark:text-primary-fixed-dim">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl md:text-2xl font-black text-[#004782] dark:text-primary-fixed-dim leading-none">
                 {formatCurrency(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-slate-400 line-through text-xs font-bold">
+                <span className="text-slate-400 line-through text-[10.5px] font-bold">
                   MRP {formatCurrency(product.originalPrice)}
                 </span>
               )}
             </div>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="bg-emerald-500 text-white font-extrabold text-[9px] px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-xs">
+              <span className="bg-[#086b53] dark:bg-emerald-600 text-white font-extrabold text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
                 {discountPercent}% OFF
               </span>
             )}
           </div>
-          <p className="text-[10px] text-slate-405 mt-0.5 font-medium">Inclusive of all taxes & GST</p>
+          <p className="text-[10px] text-slate-405 dark:text-zinc-500 mt-1 font-medium">Inclusive of all taxes & GST</p>
         </div>
 
-        {/* 2. Product Variant Card */}
+        {/* 2. Pack Size Selector */}
         {variants.length > 0 && (
-          <div className="space-y-1.5 text-left">
-            <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Choose Pack Size</span>
-            <div className="grid grid-cols-1 gap-2">
+          <div className="space-y-1 text-left">
+            <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Select Option</span>
+            <div className="flex flex-col gap-1.5">
               {variants.map((v, idx) => {
                 const isSelected = selectedVariantIdx === idx;
                 return (
@@ -81,17 +81,17 @@ const PurchaseCard = ({
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVariantIdx(idx)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border text-left cursor-pointer transition-all ${
+                    className={`w-full flex items-center justify-between py-2 px-3 rounded-xl border text-left cursor-pointer transition-all ${
                       isSelected
                         ? "border-[#038076] bg-[#038076]/5 dark:bg-[#038076]/10"
                         : "border-slate-200 dark:border-zinc-800 hover:border-slate-350 dark:hover:border-zinc-700 bg-transparent"
                     }`}
                   >
                     <div className="flex flex-col">
-                      <span className="font-bold text-xs text-slate-800 dark:text-zinc-100">{v.name}</span>
-                      <span className="text-[10px] text-slate-400 mt-0.5">Unit Price: {formatCurrency(v.price)}</span>
+                      <span className="font-bold text-xs text-slate-805 dark:text-zinc-150">{v.name}</span>
+                      <span className="text-[9.5px] text-slate-400 mt-0.5 font-medium">Unit Price: {formatCurrency(v.price)}</span>
                     </div>
-                    <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                       isSelected ? "border-[#038076] bg-[#038076]" : "border-slate-300 dark:border-zinc-700"
                     }`}>
                       {isSelected && <Check size={10} className="text-white stroke-[3.5]" />}
@@ -103,22 +103,22 @@ const PurchaseCard = ({
           </div>
         )}
 
-        {/* 3. Product Quantity/Pack Label */}
-        <div className="text-center font-bold text-slate-800 dark:text-zinc-150 uppercase tracking-wide text-[11px] py-1 border-y border-slate-100 dark:border-zinc-800/60">
+        {/* 3. Pack Description */}
+        <div className="text-center font-bold text-slate-805 dark:text-zinc-150 uppercase tracking-wide text-[10.5px] py-1.5 border-y border-slate-100 dark:border-zinc-800/60">
           {selectedVariant.name}
         </div>
 
-        {/* 4. Buy Button */}
-        <div className="space-y-2 pt-0.5">
+        {/* 4. Buy Now Button */}
+        <div className="space-y-2">
           <button
             onClick={handleBuyNow}
             disabled={product.inStock === false || product.stock === 0}
-            className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-11 rounded-xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 outline-none cursor-pointer text-xs shadow-sm"
+            className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold h-10 rounded-xl transition-all hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 outline-none cursor-pointer text-xs shadow-sm"
           >
             Buy Now
           </button>
 
-          {/* 5. Add To Cart + Quantity Interaction */}
+          {/* 5. Add To Cart / Quantity selector */}
           {isInCart ? (
             <div className="flex items-center border border-[#038076] rounded-xl bg-slate-50/50 dark:bg-zinc-900/60 h-10 w-full justify-between p-0.5 animate-[fade-in_0.20s_ease-out]">
               <button
@@ -128,7 +128,7 @@ const PurchaseCard = ({
               >
                 <span className="material-symbols-outlined text-[16px]">remove</span>
               </button>
-              <span className="font-extrabold text-xs text-slate-800 dark:text-zinc-100">{cartItem.quantity} in Cart</span>
+              <span className="font-extrabold text-xs text-slate-805 dark:text-zinc-100">{cartItem.quantity} in Cart</span>
               <button
                 type="button"
                 onClick={() => updateQuantity(productId, cartItem.quantity + 1)}
@@ -149,7 +149,7 @@ const PurchaseCard = ({
           )}
         </div>
 
-        {/* 6. Delivery Section */}
+        {/* 6. Delivery Card */}
         <div className="text-left bg-slate-50 dark:bg-zinc-955/20 py-2 px-3 rounded-xl border border-slate-100 dark:border-zinc-855 space-y-0.5">
           <p className="font-bold text-[10px] text-slate-500 flex items-center gap-1.5">
             <Truck size={12} className="text-[#086b53]" /> Delivery Location: Pune
@@ -158,16 +158,16 @@ const PurchaseCard = ({
         </div>
 
         {/* 7. Trust Information */}
-        <div className="space-y-1.5 pt-2.5 border-t border-slate-150 dark:border-zinc-800/80 text-left">
-          <div className="flex items-center gap-2 text-[10.5px] font-bold text-slate-400">
+        <div className="space-y-1.5 pt-2 border-t border-slate-150 dark:border-zinc-800/80 text-left">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
             <Check size={12} className="text-emerald-500 shrink-0" />
             <span>100% Genuine Product</span>
           </div>
-          <div className="flex items-center gap-2 text-[10.5px] font-bold text-slate-400">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
             <Lock size={11} className="text-[#004782] shrink-0" />
             <span>Secure Encrypted Payment</span>
           </div>
-          <div className="flex items-center gap-2 text-[10.5px] font-bold text-slate-400">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
             <ShieldCheck size={12} className="text-[#086b53] shrink-0" />
             <span>Pharmacist Verified</span>
           </div>

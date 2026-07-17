@@ -560,44 +560,38 @@ const ProductDetails = () => {
       <div 
         id="Specifications"
         ref={el => sectionRefs.current["Specifications"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-md scroll-mt-28"
       >
-        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+        <h2 className="font-headline-sm text-sm text-[#004782] dark:text-primary-fixed-dim font-extrabold pb-sm border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
           <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
         </h2>
-        <div className="overflow-x-auto w-full rounded-2xl border border-slate-150 dark:border-zinc-800">
-          <table className="w-full text-xs text-left border-collapse min-w-[450px] sm:min-w-0">
-            <thead>
-              <tr className="bg-[#004782] text-white">
-                <th className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-xs md:text-sm align-middle w-[28%] border-r border-[#004782]">Specification</th>
-                <th className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-xs md:text-sm align-middle">Value</th>
-              </tr>
-            </thead>
-            <tbody className="bg-[#004782]/[0.03] dark:bg-[#004782]/[0.015]">
-              {[
-                { label: "Generic Name", key: "genericName" },
-                { label: "Strength", key: "strength" },
-                { label: "Dosage Form", key: "dosageForm" },
-                { label: "Route", key: "route" },
-                { label: "Prescription", key: "prescription" },
-                { label: "Manufacturer", key: "manufacturer" },
-                { label: "Cold Chain", key: "coldChain" },
-                { label: "Storage", key: "storage" }
-              ].map((spec) => {
-                const val = product.productSpecifications[spec.key];
-                if (!val || !val.trim()) return null;
-                return (
-                  <tr 
-                    key={spec.key} 
-                    className="border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 hover:bg-[#004782]/10 dark:hover:bg-[#004782]/5"
-                  >
-                    <td className="px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-slate-505 dark:text-zinc-400 border-r border-slate-100 dark:border-zinc-800/40">{spec.label}</td>
-                    <td className="px-6 sm:px-8 py-3.5 sm:py-4 font-medium text-slate-750 dark:text-zinc-200">{val}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="flex flex-col w-full text-xs">
+          {[
+            { label: "Generic Name", key: "genericName" },
+            { label: "Strength", key: "strength" },
+            { label: "Dosage Form", key: "dosageForm" },
+            { label: "Route", key: "route" },
+            { label: "Prescription", key: "prescription" },
+            { label: "Manufacturer", key: "manufacturer" },
+            { label: "Cold Chain", key: "coldChain" },
+            { label: "Storage", key: "storage" }
+          ].map((spec) => {
+            const val = product.productSpecifications[spec.key];
+            if (!val || !val.trim()) return null;
+            return (
+              <div 
+                key={spec.key} 
+                className="flex flex-col sm:flex-row py-3 border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 items-start sm:items-center text-left"
+              >
+                <div className="w-full sm:w-[30%] font-semibold text-slate-550 dark:text-zinc-400">
+                  {spec.label}
+                </div>
+                <div className="w-full sm:w-[70%] font-extrabold text-slate-800 dark:text-zinc-150 mt-1 sm:mt-0">
+                  {val}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
