@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
-  Search, MapPin, ChevronDown, Loader2, X, Heart, ShoppingBag, 
+  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, 
   Clock, Activity
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -29,7 +29,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   // Dynamic / local static content lists
   const [trendingMedicines, setTrendingMedicines] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
 
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -53,50 +52,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     localStorage.setItem("wellmeds_location", loc);
     window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
     setLocationMenuOpen(false);
-  };
-
-  // Sync wishlist updates across instances
-  const updateWishlistFromLocal = useCallback(() => {
-    try {
-      const saved = localStorage.getItem("wellmeds_wishlist");
-      setWishlist(saved ? JSON.parse(saved) : []);
-    } catch {
-      setWishlist([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    updateWishlistFromLocal();
-    window.addEventListener("wellmeds_wishlist_updated", updateWishlistFromLocal);
-    return () => {
-      window.removeEventListener("wellmeds_wishlist_updated", updateWishlistFromLocal);
-    };
-  }, [updateWishlistFromLocal]);
-
-  const toggleWishlist = (product) => {
-    try {
-      let current = JSON.parse(localStorage.getItem("wellmeds_wishlist") || "[]");
-      const exists = current.find(p => p.id === product.id || p._id === product._id);
-      if (exists) {
-        current = current.filter(p => p.id !== product.id && p._id !== product._id);
-      } else {
-        current.push({
-          id: product.id || product._id,
-          _id: product.id || product._id,
-          name: product.name,
-          price: product.price,
-          originalPrice: product.originalPrice,
-          image: product.image,
-          brand: product.brand,
-          slug: product.slug
-        });
-      }
-      localStorage.setItem("wellmeds_wishlist", JSON.stringify(current));
-      window.dispatchEvent(new Event("wellmeds_wishlist_updated"));
-    } catch (err) {
-      console.warn("Failed to toggle wishlist", err);
-    }
   };
 
   // Fetch search history (Guest vs Logged-In User)
@@ -328,10 +283,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     );
   };
 
-  // Check if a product is in local wishlist
-  const isWishlisted = (prod) => {
-    return !!wishlist.find(w => w.id === prod.id || w._id === prod._id);
-  };
+
 
   const isHero = variant === "hero";
   const isMobile = variant === "mobile";
@@ -505,8 +457,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                           onAddToCart={(p) => {
                             addToCart(p, 1);
                           }}
-                          onToggleWishlist={toggleWishlist}
-                          isWishlisted={isWishlisted(prod)}
                         />
                       );
                     })}
@@ -568,8 +518,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                               onAddToCart={(p) => {
                                 addToCart(p, 1);
                               }}
-                              onToggleWishlist={toggleWishlist}
-                              isWishlisted={isWishlisted(prod)}
                             />
                           );
                         })}
@@ -619,7 +567,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 };
 
 // Compact product card inner component
-const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isWishlisted, active }) => {
+const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
   const navigate = useNavigate();
   const discount = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -695,22 +643,6 @@ const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isW
         )}
 
         <div className="flex items-center gap-1.5">
-          {/* Wishlist toggle */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleWishlist(product);
-            }}
-            className={`p-1.5 border rounded-lg hover:bg-slate-50 transition-colors cursor-pointer ${
-              isWishlisted ? "text-red-500 border-red-150 bg-red-50/20" : "text-slate-400 border-slate-200"
-            }`}
-            aria-label="Toggle Wishlist"
-          >
-            <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current" : ""}`} />
-          </button>
-
           {/* Add to cart */}
           <button
             type="button"
