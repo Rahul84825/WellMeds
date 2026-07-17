@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Hospital,
   ShieldCheck,
@@ -49,154 +48,137 @@ const benefits = [
 
 const WhyChooseWellMeds = () => {
   return (
-    <section className="py-10 md:py-14 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
+    <section className="relative py-10 md:py-12 bg-slate-50 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
+      {/* Background Decorative Element */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#038076]/5 dark:bg-[#038076]/10 blur-[100px] rounded-full pointer-events-none" />
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* ── Header ── */}
-        <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
-          <div>
-            <h2 className="text-[32px] font-extrabold leading-tight tracking-tight
-                           text-[#1D2B5C] dark:text-zinc-100">
-              Why Choose{" "}
-              <span className="text-[#038076]">WellMeds</span>?
+        <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-xl">
+            <span className="inline-block mb-2 text-[10px] font-bold tracking-widest text-[#038076] uppercase">
+              The WellMeds Advantage
+            </span>
+            <h2 className="text-2xl md:text-[32px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#004782] to-[#038076]">WellMeds</span>?
             </h2>
+            <p className="mt-2.5 text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+              Your trusted partner in health, delivering authentic medicines, professional support, and clinical safety.
+            </p>
           </div>
 
-          {/* CTA pill */}
           <a
             href="/about"
-            className="hidden md:inline-flex items-center gap-2 self-end
-                       rounded-full border border-[#038076] px-4 py-2
-                       text-[13px] font-semibold text-[#038076]
-                       transition-all hover:bg-[#038076] hover:text-white shrink-0"
+            className="group hidden md:inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 px-4 py-2 text-[13px] font-semibold text-slate-900 dark:text-white shadow-sm transition-all hover:shadow hover:border-[#038076]/50 shrink-0"
           >
-            Learn More <ArrowRight className="h-3.5 w-3.5" />
+            Learn More 
+            <ArrowRight className="h-3.5 w-3.5 text-[#038076] transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>
 
-        {/* ── Layout ── */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
+        {/* ── Grid Layout ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
 
-          {/* ── Featured card (left) ── */}
-          <div className="md:col-span-4 lg:col-span-4">
-            <div
-              className="relative flex h-full min-h-[260px] flex-col justify-between
-                         overflow-hidden rounded-2xl p-6 md:p-7"
-              style={{
-                background: "linear-gradient(135deg, #004782 0%, #038076 100%)",
-              }}
-            >
-              {/* Decorative circles */}
-              <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40
-                              rounded-full bg-white/8 blur-2xl" />
-              <div className="pointer-events-none absolute -bottom-6 -left-6 h-32 w-32
-                              rounded-full bg-white/6 blur-xl" />
+          {/* ── Featured Hero Card (Left, Spans 5 cols) ── */}
+          <div className="lg:col-span-5 flex flex-col">
+            <div className="group relative flex-1 w-full rounded-2xl overflow-hidden p-6 md:p-7 shadow-lg transition-transform duration-500 hover:scale-[1.01]"
+                 style={{ background: "radial-gradient(circle at top right, #038076 0%, #004782 100%)" }}>
+              
+              {/* Abstract Background Shapes */}
+              <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-[#004782]/40 blur-xl" />
 
-              {/* Icon */}
-              <div className="relative z-10 mb-4 flex h-11 w-11 items-center
-                              justify-center rounded-xl bg-white/15
-                              border border-white/20 backdrop-blur-sm">
-                <Hospital className="h-5 w-5 text-white" />
-              </div>
-
-              {/* Text */}
-              <div className="relative z-10 space-y-2">
-                <h3 className="text-[18px] font-extrabold leading-tight text-white
-                               sm:text-[20px]">
-                  Trusted by Patients Across India
-                </h3>
-                <p className="text-[12px] leading-relaxed text-white/75">
-                  Families navigating chronic illness, cancer care, and transplant
-                  therapies trust WellMeds for authentic medicines with complete
-                  clinical tracking.
-                </p>
-              </div>
-
-              {/* Badge */}
-              <div className="relative z-10 mt-5 flex items-center gap-3 rounded-xl
-                              border border-white/15 bg-white/10 p-3.5
-                              backdrop-blur-md">
-                <span className="text-[22px] font-extrabold text-white tracking-tight">
-                  100%
-                </span>
-                <div className="h-7 w-px bg-white/25" />
+              <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-white">
-                    Genuine Meds
+                  <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 border border-white/20 backdrop-blur-md shadow-sm">
+                    <Hospital className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold leading-tight text-white mb-2.5">
+                    Trusted by Patients Across India
+                  </h3>
+                  <p className="text-[13px] leading-relaxed text-white/80">
+                    Families navigating chronic illness, cancer care, and transplant
+                    therapies trust WellMeds for authentic medicines with complete
+                    clinical tracking.
                   </p>
-                  <p className="text-[11px] text-white/70">
-                    Sourced directly from manufacturers
-                  </p>
+                </div>
+
+                {/* Compact Glassy Badge */}
+                <div className="mt-8 flex items-center gap-3.5 rounded-xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md shadow-inner">
+                  <div className="flex-shrink-0">
+                    <span className="text-2xl font-black text-white tracking-tighter">
+                      100<span className="text-[#038076] text-xl">%</span>
+                    </span>
+                  </div>
+                  <div className="h-8 w-px bg-white/20" />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-white">
+                      Genuine Meds
+                    </p>
+                    <p className="text-[11px] text-white/70 mt-0.5">
+                      Sourced directly from manufacturers
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Benefit cards (right) ── */}
-          <div className="md:col-span-8 lg:col-span-8">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {benefits.map((b) => {
-                const Icon = b.icon;
-                return (
+          {/* ── Benefit Cards (Right, Spans 7 cols) ── */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {benefits.map((b, index) => {
+              const Icon = b.icon;
+              const isLast = index === benefits.length - 1;
+              
+              return (
+                <div
+                  key={b.id}
+                  className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-900/80 p-5 border border-slate-200/60 dark:border-zinc-800/80 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 dark:hover:bg-zinc-900 flex flex-row items-start gap-4
+                    ${isLast ? "sm:col-span-2 sm:max-w-[50%]" : ""}
+                  `}
+                >
+                  {/* Subtle hover gradient background */}
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at top right, ${b.accent}06 0%, transparent 70%)` }}
+                  />
+
+                  {/* Icon Wrapper (Left aligned now for compactness) */}
                   <div
-                    key={b.id}
-                    className="group flex flex-col gap-3 rounded-xl border
-                               border-slate-100 bg-slate-50/60 p-4
-                               transition-all duration-200
-                               hover:-translate-y-1
-                               hover:border-[#038076]/25
-                               hover:bg-white
-                               hover:shadow-[0_6px_20px_rgba(3,128,118,0.10)]
-                               dark:border-zinc-800 dark:bg-zinc-900
-                               dark:hover:border-[#038076]/40"
+                    className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+                    style={{
+                      background: `${b.accent}12`,
+                      color: b.accent,
+                    }}
                   >
-                    {/* Icon */}
-                    <div
-                      className="flex h-9 w-9 items-center justify-center
-                                 rounded-xl transition-transform duration-200
-                                 group-hover:scale-105"
-                      style={{
-                        background: `${b.accent}14`,
-                        color: b.accent,
-                      }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-
-                    {/* Text */}
-                    <div>
-                      <h4
-                        className="text-[13px] font-bold leading-snug text-[#1D2B5C]
-                                   transition-colors group-hover:text-[#038076]
-                                   dark:text-zinc-100"
-                      >
-                        {b.title}
-                      </h4>
-                      <p className="mt-1 text-[12px] leading-relaxed text-slate-500
-                                    dark:text-zinc-400">
-                        {b.description}
-                      </p>
-                    </div>
+                    <Icon className="h-5 w-5" strokeWidth={2} />
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
+                  {/* Text Content */}
+                  <div className="relative z-10 flex-1 pt-0.5">
+                    <h4 className="text-[14px] font-bold text-slate-900 dark:text-white mb-1 transition-colors group-hover:text-[#038076]">
+                      {b.title}
+                    </h4>
+                    <p className="text-[12px] leading-relaxed text-slate-500 dark:text-zinc-400">
+                      {b.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Mobile CTA */}
         <div className="mt-6 flex justify-center md:hidden">
           <a
             href="/about"
-            className="inline-flex items-center gap-2 rounded-full border
-                       border-[#038076] px-5 py-2.5 text-[13px] font-semibold
-                       text-[#038076] transition-all hover:bg-[#038076] hover:text-white"
+            className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#038076] px-5 py-3 text-[13px] font-semibold text-white shadow transition-all hover:bg-[#02665e] active:scale-95"
           >
-            Learn More <ArrowRight className="h-3.5 w-3.5" />
+            Learn More <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
-
       </div>
     </section>
   );

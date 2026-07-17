@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Hero from "../components/HeroBanner";
 import QuickActionCards from "../components/QuickActionCards";
 import PromoCarousel from "../components/home/PromoCarousel";
@@ -44,6 +44,9 @@ const HomePage = () => {
       {/* Upload Rx Prescription Banner */}
       <UploadPrescriptionBanner />
 
+      {/* Customer Testimonials & Reviews */}
+      <TestimonialsSection />
+
       {/* Wellness Products Section */}
       <WellnessProductsSection />
 
@@ -64,9 +67,6 @@ const HomePage = () => {
 
       {/* Brand Value Propositions */}
       <WhyChooseWellMeds />
-
-      {/* Customer Testimonials & Reviews */}
-      <TestimonialsSection />
 
       {/* Pharmacist Consultation Details Form Modal */}
       <ConsultationModal

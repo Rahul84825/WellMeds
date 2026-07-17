@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Search, MapPin, ChevronDown, Loader2, X, Heart, ShoppingBag, 
-  Clock, Compass, HelpCircle, PhoneCall, Handshake, FileText, 
-  Percent, Globe, Activity, ArrowUpRight
+  Clock, Activity
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -29,11 +28,8 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
   // Dynamic / local static content lists
   const [trendingMedicines, setTrendingMedicines] = useState([]);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
   const [wishlist, setWishlist] = useState([]);
-
-  const popularSearches = ["Paracetamol", "GLP-1 Injections", "Biologics", "Metformin", "Supplements", "Wheelchairs"];
 
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -70,6 +66,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateWishlistFromLocal();
     window.addEventListener("wellmeds_wishlist_updated", updateWishlistFromLocal);
     return () => {
@@ -170,14 +167,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         const trending = await api.getTrendingProducts();
         setTrendingMedicines(trending);
 
-        // Fetch recently viewed items from local storage
-        const viewed = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");
-        setRecentlyViewed(viewed);
+        // No recently viewed fetched since it is unused
       } catch (err) {
         console.warn("Could not fetch popular/recently viewed data", err.message);
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRecentSearches();
   }, [fetchRecentSearches]);
 
@@ -198,6 +194,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     const params = new URLSearchParams(location.search);
     const searchVal = params.get("search");
     if (searchVal) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery(searchVal);
     }
   }, [location.search]);
@@ -251,35 +248,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     const items = [];
     if (query.trim().length < 2) {
       recentSearches.forEach(term => items.push({ type: "recent", value: term }));
-      popularSearches.forEach(term => items.push({ type: "popular", value: term }));
       trendingMedicines.forEach(prod => items.push({ type: "product", value: prod }));
     } else {
+      if (results.products?.length) {
+        results.products.forEach(prod => items.push({ type: "product", value: prod }));
+      }
       if (results.molecules?.length) {
         results.molecules.forEach(mol => items.push({ type: "molecule", value: mol }));
-      }
-      if (results.categories?.length) {
-        results.categories.forEach(cat => items.push({ type: "category", value: cat }));
-      }
-      if (results.specialities?.length) {
-        results.specialities.forEach(spec => items.push({ type: "speciality", value: spec }));
-      }
-      if (results.medicines?.length) {
-        results.medicines.forEach(prod => items.push({ type: "product", value: prod }));
-      }
-      if (results.wellness?.length) {
-        results.wellness.forEach(prod => items.push({ type: "product", value: prod }));
-      }
-      if (results.surgical?.length) {
-        results.surgical.forEach(prod => items.push({ type: "product", value: prod }));
-      }
-      if (results.library?.length) {
-        results.library.forEach(art => items.push({ type: "library", value: art }));
-      }
-      if (results.pap?.length) {
-        results.pap.forEach(p => items.push({ type: "pap", value: p }));
-      }
-      if (results.offers?.length) {
-        results.offers.forEach(o => items.push({ type: "offer", value: o }));
       }
     }
     return items;
@@ -316,19 +291,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     setActiveIndex(-1);
     if (onCloseMobile) onCloseMobile();
 
-    if (item.type === "recent" || item.type === "popular") {
+    if (item.type === "recent") {
       setQuery(item.value);
       addQueryToHistory(item.value);
       navigate(`/search?q=${encodeURIComponent(item.value)}`);
     } else if (item.type === "molecule") {
       addQueryToHistory(item.value.name);
-      navigate(`/products?molecule=${encodeURIComponent(item.value.name)}`);
-    } else if (item.type === "category") {
-      addQueryToHistory(item.value.name);
-      navigate(`/products?category=${encodeURIComponent(item.value.slug || item.value.name)}`);
-    } else if (item.type === "speciality") {
-      addQueryToHistory(item.value.name);
-      navigate(`/products?speciality=${encodeURIComponent(item.value.slug || item.value.name)}`);
+      navigate(`/products?molecule=${encodeURIComponent(item.value.slug || item.value.name)}`);
     } else if (item.type === "product") {
       addQueryToHistory(item.value.name);
       // Track recently viewed product locally
@@ -339,15 +308,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       localStorage.setItem("wellmeds_recently_viewed", JSON.stringify(viewed));
 
       navigate(`/products/${item.value.slug || item.value.id || item.value._id}`);
-    } else if (item.type === "library") {
-      addQueryToHistory(item.value.title);
-      navigate(`/library/${item.value.slug || "articles"}/${item.value.category || ""}`);
-    } else if (item.type === "pap") {
-      addQueryToHistory(item.value.title);
-      navigate(`/patient-assistance-program#${item.value.hash || ""}`);
-    } else if (item.type === "offer") {
-      addQueryToHistory(item.value.title);
-      navigate("/offers");
     }
   };
 
@@ -362,38 +322,15 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   }, [activeIndex]);
 
   const hasResults = () => {
-    return (
+    return !!(
       results.molecules?.length ||
-      results.medicines?.length ||
-      results.wellness?.length ||
-      results.surgical?.length ||
-      results.categories?.length ||
-      results.surgicalCategories?.length ||
-      results.specialities?.length ||
-      results.library?.length ||
-      results.pap?.length ||
-      results.offers?.length
+      results.products?.length
     );
   };
 
   // Check if a product is in local wishlist
   const isWishlisted = (prod) => {
     return !!wishlist.find(w => w.id === prod.id || w._id === prod._id);
-  };
-
-  // Did you mean / fuzzy matching logic
-  const getFuzzyMatches = () => {
-    if (query.trim().length < 2) return [];
-    const lowerQuery = query.trim().toLowerCase();
-    const suggestions = [];
-
-    popularSearches.forEach(term => {
-      if (term.toLowerCase().includes(lowerQuery) || lowerQuery.includes(term.toLowerCase())) {
-        suggestions.push(term);
-      }
-    });
-
-    return [...new Set(suggestions)].slice(0, 3);
   };
 
   const isHero = variant === "hero";
@@ -499,15 +436,88 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       </div>
 
       {/* DROPDOWN AUTOCOMPLETE PANEL */}
-      {focused && query.trim().length >= 2 && (
+      {focused && (
         <div 
           ref={dropdownRef}
           className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-[250] overflow-y-auto max-h-[500px] md:max-h-[600px] animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
         >
-          {loading ? (
+          {query.trim().length < 2 ? (
+            /* EMPTY STATE: RECENT SEARCHES & TRENDING PRODUCTS ONLY */
+            <div className="p-4 space-y-4">
+              {/* Recent Searches */}
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between px-3 mb-1 select-none">
+                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 animate-[pulse_2s_infinite]" />
+                      <span>Recent Searches</span>
+                    </span>
+                    <button
+                      onClick={clearHistory}
+                      className="text-[10px] font-extrabold text-[#038076] hover:underline cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {recentSearches.map((term, idx) => {
+                      const flatItems = getFlatSelectableItems();
+                      const flatIndex = flatItems.findIndex(i => i.type === "recent" && i.value === term);
+                      const active = activeIndex === flatIndex;
+                      return (
+                        <div
+                          key={term + idx}
+                          onClick={() => handleSelectItem({ type: "recent", value: term })}
+                          data-active={active}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-xs font-semibold text-slate-700 transition-all border ${
+                            active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                          }`}
+                        >
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{term}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Trending Products */}
+              {trendingMedicines.length > 0 && (
+                <div>
+                  <div className="px-3 mb-1 select-none">
+                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-[#038076] animate-[pulse_2.5s_infinite]" />
+                      <span>Trending Products</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {trendingMedicines.map((prod) => {
+                      const flatItems = getFlatSelectableItems();
+                      const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.id === prod.id || i.value._id === prod._id));
+                      const active = activeIndex === flatIndex;
+                      return (
+                        <ProductListItem
+                          key={prod.id || prod._id}
+                          product={prod}
+                          active={active}
+                          onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                          onAddToCart={(p) => {
+                            addToCart(p, 1);
+                          }}
+                          onToggleWishlist={toggleWishlist}
+                          isWishlisted={isWishlisted(prod)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : loading ? (
             <div className="p-8 text-center flex items-center justify-center gap-2 select-none">
               <Loader2 className="animate-spin text-[#038076] w-4 h-4" />
-              <span className="text-xs font-semibold text-slate-500">Searching medicines...</span>
+              <span className="text-xs font-semibold text-slate-500">Searching catalog...</span>
             </div>
           ) : (
             <div className="flex flex-col text-left">
@@ -518,56 +528,60 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                     <Search size={22} />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-700 text-sm">No results found for "{query}"</h3>
-                    <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">Double check spelling, search generic salt names, or talk directly with a verified WellMeds pharmacist.</p>
+                    <h3 className="font-extrabold text-slate-700 text-sm">No medicines or molecules found.</h3>
                   </div>
-
-                  {/* Fuzzy logic spell corrections */}
-                  {getFuzzyMatches().length > 0 && (
-                    <div className="mt-2 select-none">
-                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Did you mean:</span>
-                      <div className="flex flex-wrap justify-center gap-1.5 mt-1.5">
-                        {getFuzzyMatches().map((term) => (
-                          <button
-                            key={term}
-                            onClick={() => {
-                              setQuery(term);
-                              addQueryToHistory(term);
-                              setFocused(false);
-                              if (onCloseMobile) onCloseMobile();
-                              navigate(`/search?q=${encodeURIComponent(term)}`);
-                            }}
-                            className="px-3 py-1 bg-[#e6f6f4] hover:bg-[#cbece8] text-[#038076] font-bold text-[11px] rounded-full transition-colors cursor-pointer"
-                          >
-                            {term}
-                          </button>
-                        ))}
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-2 w-full max-w-xs select-none">
+                    <button
+                      onClick={() => {
+                        setFocused(false);
+                        if (onCloseMobile) onCloseMobile();
+                        navigate("/products");
+                      }}
+                      className="w-full flex items-center justify-center gap-2 bg-[#038076] hover:bg-[#02665e] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <span>View All Products</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* RESULTS GROUPS LIST: PRODUCTS FIRST, THEN MOLECULES */
+                <div className="p-2 md:p-3 space-y-4">
+                  
+                  {/* GROUP 1: MEDICINES & PRODUCTS */}
+                  {results.products?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
+                        <ShoppingBag className="w-3.5 h-3.5 text-[#038076]" />
+                        <span>Medicines & Products</span>
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        {results.products.map((prod) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.slug === prod.slug || i.value.id === prod.id || i.value._id === prod._id));
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <ProductListItem
+                              key={prod.id || prod._id}
+                              product={prod}
+                              active={active}
+                              onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                              onAddToCart={(p) => {
+                                addToCart(p, 1);
+                              }}
+                              onToggleWishlist={toggleWishlist}
+                              isWishlisted={isWishlisted(prod)}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   )}
 
-                  {/* Contact pharmacist action buttons */}
-                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full max-w-xs select-none">
-                    <a
-                      href={`https://wa.me/917420909445?text=Hi%2C%20I%20need%20help%20finding%20a%20medicine%20called%20${encodeURIComponent(query)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-[#038076] hover:bg-[#02665e] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-[0.98]"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5" />
-                      <span>Contact Pharmacist</span>
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                // RESULTS GROUPS LIST
-                <div className="p-2 md:p-3 space-y-4">
-                  
-                  {/* GROUP 1: MOLECULES */}
+                  {/* GROUP 2: MOLECULES */}
                   {results.molecules?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
+                    <div>
                       <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <Activity className="w-3.5 h-3.5 text-slate-400" />
+                        <Search className="w-3.5 h-3.5 text-[#038076]" />
                         <span>Molecules</span>
                       </span>
                       <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
@@ -580,283 +594,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                               key={mol.slug}
                               onClick={() => handleSelectItem({ type: "molecule", value: mol })}
                               data-active={active}
-                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all border ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
+                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all border duration-250 ${
+                                active 
+                                  ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" 
+                                  : "border-transparent text-slate-700 hover:text-[#038076] hover:bg-slate-50"
                               }`}
                             >
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700">{mol.name}</span>
-                                <span className="text-[9px] text-slate-400 font-medium">Salt Composition</span>
-                              </div>
-                              <span className="text-[10.5px] font-black text-[#038076] hover:underline flex items-center gap-0.5">
-                                <span>View Medicines</span>
-                                <ArrowUpRight className="w-3 h-3" />
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 2: CATEGORIES & SPECIALITIES */}
-                  {(results.categories?.length > 0 || results.specialities?.length > 0) && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <Compass className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Categories & Specialities</span>
-                      </span>
-                      <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
-                        {results.categories?.map((cat) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "category" && i.value.slug === cat.slug);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div
-                              key={cat.slug}
-                              onClick={() => handleSelectItem({ type: "category", value: cat })}
-                              data-active={active}
-                              className={`px-3 py-2 rounded-xl border cursor-pointer text-xs font-bold transition-all ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" : "border-slate-100 hover:bg-slate-50 text-slate-700"
-                              }`}
-                            >
-                              <span className="text-slate-400 font-medium text-[9px] block uppercase">Category</span>
-                              <span className="truncate block mt-0.5">{cat.name}</span>
-                            </div>
-                          );
-                        })}
-
-                        {results.specialities?.map((spec) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "speciality" && i.value.slug === spec.slug);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div
-                              key={spec.slug}
-                              onClick={() => handleSelectItem({ type: "speciality", value: spec })}
-                              data-active={active}
-                              className={`px-3 py-2 rounded-xl border cursor-pointer text-xs font-bold transition-all ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" : "border-slate-100 hover:bg-slate-50 text-slate-700"
-                              }`}
-                            >
-                              <span className="text-slate-400 font-medium text-[9px] block uppercase">Speciality</span>
-                              <span className="truncate block mt-0.5">{spec.name}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 3: MEDICINES */}
-                  {results.medicines?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
-                        <Globe className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Medicines & Prescription Drugs</span>
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        {results.medicines.map((prod) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div 
-                              key={prod._id || prod.id}
-                              onClick={() => handleSelectItem({ type: "product", value: prod })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700">
-                                  {prod.name}
-                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
-                                </span>
-                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
-                              </div>
-                              <div className="text-right flex items-center gap-2">
-                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
-                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 4: WELLNESS */}
-                  {results.wellness?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
-                        <Activity className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Wellness & OTC Products</span>
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        {results.wellness.map((prod) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div 
-                              key={prod._id || prod.id}
-                              onClick={() => handleSelectItem({ type: "product", value: prod })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700">
-                                  {prod.name}
-                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
-                                </span>
-                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
-                              </div>
-                              <div className="text-right flex items-center gap-2">
-                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
-                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 5: SURGICAL */}
-                  {results.surgical?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
-                        <Handshake className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Surgical & Instruments</span>
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        {results.surgical.map((prod) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "product" && i.value.slug === prod.slug);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div 
-                              key={prod._id || prod.id}
-                              onClick={() => handleSelectItem({ type: "product", value: prod })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all border ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700">
-                                  {prod.name}
-                                  {prod.strength && <span className="text-slate-400 font-medium ml-1">({prod.strength})</span>}
-                                </span>
-                                {prod.brand && <span className="text-[9.5px] text-slate-400 font-medium">by {prod.brand}</span>}
-                              </div>
-                              <div className="text-right flex items-center gap-2">
-                                {prod.price && <span className="text-xs font-extrabold text-[#038076]">₹{prod.price}</span>}
-                                <ArrowUpRight className="w-3.5 h-3.5 text-slate-350" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 6: HEALTH LIBRARY */}
-                  {results.library?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Health Library Guides</span>
-                      </span>
-                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                        {results.library.map((art) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "library" && i.value.id === art.id);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div
-                              key={art.id}
-                              onClick={() => handleSelectItem({ type: "library", value: art })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-slate-700 truncate">{art.title}</span>
-                                <span className="text-[9.5px] text-slate-400 font-medium">Topic: {art.category}</span>
-                              </div>
-                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 7: PATIENT ASSISTANCE PROGRAM */}
-                  {results.pap?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <Handshake className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Patient Assistance Programs (PAP)</span>
-                      </span>
-                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                        {results.pap.map((p) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "pap" && i.value.id === p.id);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div
-                              key={p.id}
-                              onClick={() => handleSelectItem({ type: "pap", value: p })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-slate-700 truncate">{p.title}</span>
-                                <span className="text-[9.5px] text-slate-400 font-medium">PAP Hub &bull; {p.category}</span>
-                              </div>
-                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 8: OFFERS */}
-                  {results.offers?.length > 0 && (
-                    <div>
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <Percent className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Available Coupons & Offers</span>
-                      </span>
-                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                        {results.offers.map((o) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "offer" && i.value.id === o.id);
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <div
-                              key={o.id}
-                              onClick={() => handleSelectItem({ type: "offer", value: o })}
-                              data-active={active}
-                              className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer border transition-all ${
-                                active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-slate-100 hover:bg-slate-50"
-                              }`}
-                            >
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-black text-[#038076]">{o.code}</span>
-                                <span className="text-[10px] font-bold text-slate-600 truncate mt-0.5">{o.title}</span>
-                              </div>
-                              <span className="text-slate-400 shrink-0 select-none">&rarr;</span>
+                              <span className="text-xs font-bold">{mol.name}</span>
                             </div>
                           );
                         })}
@@ -875,17 +619,29 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 };
 
 // Compact product card inner component
-const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isWishlisted }) => {
+const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isWishlisted, active }) => {
+  const navigate = useNavigate();
   const discount = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  const handleRowClick = (e) => {
+    // Avoid navigation when clicking cart/wishlist buttons
+    if (e.target.closest("button")) return;
+    onSelect();
+    navigate(`/products/${product.slug || product._id || product.id}`);
+  };
+
   return (
-    <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all select-none group text-left">
+    <div 
+      onClick={handleRowClick}
+      data-active={active}
+      className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all select-none group text-left cursor-pointer ${
+        active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50 hover:border-slate-100"
+      }`}
+    >
       {/* Product Image */}
-      <Link 
-        to={`/products/${product.slug || product._id || product.id}`}
-        onClick={onSelect}
+      <div 
         className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 p-1 cursor-pointer"
       >
         <img 
@@ -893,18 +649,16 @@ const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isW
           alt={product.name} 
           className="w-full h-full object-contain"
         />
-      </Link>
+      </div>
 
       {/* Product Info */}
       <div className="flex-grow min-w-0">
         <div className="flex items-start gap-1">
-          <Link 
-            to={`/products/${product.slug || product._id || product.id}`}
-            onClick={onSelect}
+          <span 
             className="font-bold text-xs text-slate-800 hover:text-[#038076] transition-colors truncate cursor-pointer"
           >
             {product.name}
-          </Link>
+          </span>
           {product.requiresRx && (
             <span className="bg-red-50 text-[8px] font-black text-red-600 px-1 py-0.5 rounded uppercase shrink-0 tracking-wider select-none">
               Rx
@@ -946,6 +700,7 @@ const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isW
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onToggleWishlist(product);
             }}
             className={`p-1.5 border rounded-lg hover:bg-slate-50 transition-colors cursor-pointer ${
@@ -962,6 +717,7 @@ const ProductListItem = ({ product, onSelect, onAddToCart, onToggleWishlist, isW
             disabled={!(product.stock > 0 && product.inStock !== false)}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onAddToCart(product);
             }}
             className="bg-[#038076] disabled:bg-slate-200 text-white p-1.5 rounded-lg font-bold text-xs hover:bg-[#02665e] transition-colors flex items-center justify-center cursor-pointer"
