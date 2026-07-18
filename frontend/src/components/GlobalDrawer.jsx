@@ -16,10 +16,12 @@ import {
   History,
   LogOut,
   PhoneCall,
-  HelpCircle
+  HelpCircle,
+  ShoppingCart
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useDrawer } from "../context/DrawerContext";
+import { useCart } from "../hooks/useCart";
 import { api } from "../services/api";
 import logoImg from "../assets/logos/logo.png";
 
@@ -44,6 +46,7 @@ const renderIcon = (name, className = "w-4 h-4") => {
 const GlobalDrawer = () => {
   const { isDrawerOpen, setIsDrawerOpen, menuData, menuLoading } = useDrawer();
   const { user, logout, isAdmin, openLoginModal } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -186,21 +189,64 @@ const GlobalDrawer = () => {
         }`}
       >
         {/* Drawer Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
-          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center h-10">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-16 w-auto" />
-          </Link>
+        <div className="h-[68px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
           <button
             onClick={() => setIsDrawerOpen(false)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full focus:outline-none min-h-[48px] min-w-[48px] flex items-center justify-center cursor-pointer"
+            className="text-slate-700 hover:text-slate-900 focus:outline-none flex items-center justify-center w-10 h-10 cursor-pointer"
             aria-label="Close Mobile Menu"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 stroke-[2.5]" />
           </button>
+          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[150px]">
+            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[38px] w-auto" />
+          </Link>
+          <Link
+            to="/cart"
+            onClick={() => setIsDrawerOpen(false)}
+            className="relative w-10 h-10 rounded-full border border-slate-150 flex items-center justify-center text-slate-750 hover:bg-slate-55 cursor-pointer"
+            aria-label={`Cart with ${cartCount} items`}
+          >
+            <ShoppingCart className="w-[18px] h-[18px]" />
+            {cartCount > 0 && (
+              <span className="absolute top-[-2px] right-[-2px] bg-red-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
 
         {/* Drawer Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-left">
+        <div className="flex-1 overflow-y-auto pb-6 text-left">
+          
+          {/* User Greetings Login Card */}
+          <div 
+            onClick={() => {
+              if (!user) {
+                setIsDrawerOpen(false);
+                openLoginModal();
+              } else {
+                setIsDrawerOpen(false);
+                navigate("/profile");
+              }
+            }}
+            className="m-4 p-4 border border-slate-150 dark:border-zinc-800 rounded-3xl flex items-center gap-3.5 bg-slate-50/[0.05] dark:bg-zinc-900/30 hover:bg-slate-50 dark:hover:bg-zinc-800/40 cursor-pointer shadow-2xs select-none"
+          >
+            <div className="w-11 h-11 rounded-full bg-[#845ec2]/10 dark:bg-[#845ec2]/20 border border-[#845ec2]/35 flex items-center justify-center shrink-0">
+              <div className="w-8.5 h-8.5 rounded-full bg-[#845ec2] text-white flex items-center justify-center shadow-xs">
+                <User className="w-4.5 h-4.5 text-white/95" />
+              </div>
+            </div>
+            <div className="text-left space-y-0.5">
+              <p className="text-[10px] text-slate-400 font-extrabold flex items-center gap-1 uppercase tracking-wider">
+                👋 Hello
+              </p>
+              <p className="text-sm font-black text-slate-805 dark:text-zinc-100">
+                {user ? user.name : "Login"}
+              </p>
+            </div>
+          </div>
+
+          <div className="px-4 space-y-4">
           
           {/* Mobile Search input */}
           <div className="relative">
@@ -567,9 +613,9 @@ const GlobalDrawer = () => {
               </button>
             )}
           </div>
-
         </div>
       </div>
+    </div>
     </>,
     document.body
   );
