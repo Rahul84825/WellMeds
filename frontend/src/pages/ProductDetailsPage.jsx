@@ -25,11 +25,6 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const { cartItems, addToCart, updateQuantity } = useCart();
 
-  const productId = (product?._id || product?.id)?.toString();
-  const cartItem = cartItems?.find((item) => item.id === productId);
-  const isInCart = !!cartItem;
-  const cartQuantity = cartItem ? cartItem.quantity : 0;
-
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [substituteProducts, setSubstituteProducts] = useState([]);
@@ -37,6 +32,11 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  const productId = (product?._id || product?.id)?.toString();
+  const cartItem = cartItems?.find((item) => item.id === productId);
+  const isInCart = !!cartItem;
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   // Accordion state for FAQs
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
