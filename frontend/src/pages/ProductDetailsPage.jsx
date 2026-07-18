@@ -5,7 +5,7 @@ import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import { toast } from "sonner";
-import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
 
 // V2 Modular Components
@@ -85,6 +85,14 @@ const ProductDetails = () => {
     const options2 = { day: "numeric", month: "short" };
     
     return `${date1.toLocaleDateString("en-IN", options1)} - ${date2.toLocaleDateString("en-IN", options2)}`;
+  };
+
+  const getUnitPrice = () => {
+    if (!product) return 0;
+    const pack = product.packSize || product.productSpecifications?.packSize || "";
+    const match = pack.match(/(\d+(\.\d+)?)/);
+    const qty = match ? parseFloat(match[1]) : 1;
+    return qty > 0 ? (product.price / qty) : product.price;
   };
 
   const imagesList = useMemo(() => {
@@ -692,107 +700,43 @@ const ProductDetails = () => {
     return (
       <div className="bg-slate-50 dark:bg-zinc-950 min-h-screen pb-24 text-left animate-[fade-in_0.3s_ease-out] relative">
         {/* Mobile Header / Breadcrumbs */}
-        <div className="pt-4 px-4">
-          <nav className="mb-3 text-[11px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 flex-wrap select-none">
+        <div className="pt-4 px-4 flex justify-between items-center select-none">
+          <nav className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 flex-wrap">
             <Link to="/" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Home</Link>
             <span>/</span>
             <Link to="/products" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Products</Link>
             <span>/</span>
-            <span className="text-slate-600 dark:text-zinc-300 truncate max-w-[150px]">{product.name}</span>
+            <span className="text-slate-600 dark:text-zinc-305 truncate max-w-[120px]">{product.name}</span>
           </nav>
+          <button
+            onClick={handleShare}
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 border border-slate-100 dark:border-zinc-800 rounded-full bg-white dark:bg-zinc-900 shadow-2xs cursor-pointer animate-[fade-in_0.2s_ease-out]"
+          >
+            <Share2 size={14} />
+          </button>
         </div>
 
-        {/* Quick Summary Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 relative text-left">
-          {/* Header Row: Quick Summary & Share */}
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-[#038076] dark:text-[#84d6b9] font-black text-xs uppercase tracking-wider flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px] leading-none">notes</span> Quick Summary
-            </span>
-            <button
-              onClick={handleShare}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
-            >
-              <Share2 size={16} />
-            </button>
-          </div>
-
-          {/* Product Name & Badges Row */}
-          <div className="flex items-start gap-2 mb-1.5">
-            <h1 className="font-headline-sm text-lg font-extrabold text-slate-900 dark:text-zinc-100 flex-1 leading-tight">
-              {product.name}
-            </h1>
-            <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-              {product.requiresRx && (
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-red-500/30 bg-red-500/5 text-red-500 font-bold text-xs" title="Rx Required">
-                  Rₓ
-                </span>
-              )}
-              {product.isColdChain && (
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-sky-500/30 bg-sky-500/5 text-sky-500" title="Cold Chain Required">
-                  <Snowflake size={11} className="animate-pulse" />
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Molecule Name */}
+        {/* Product Title Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left">
+          <h1 className="font-headline-sm text-lg font-extrabold text-slate-905 dark:text-zinc-100 leading-tight">
+            {product.name}
+          </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-xs font-semibold text-[#004782] dark:text-[#a4c9ff] underline mb-3">
-              {product.molecules.map((mol, idx) => (
-                <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="hover:opacity-85 mr-1">
-                  {mol.name}
-                </Link>
-              ))}
+            <div className="text-xs font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase">
+              {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
-
           {/* Authors Attribution */}
-          <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-zinc-400 mb-3 border-b border-slate-100 dark:border-zinc-800/80 pb-3">
+          <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-zinc-400 mt-3 border-t border-slate-100 dark:border-zinc-800/80 pt-3">
             <p>Written By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Sakshi Anil More</span> <span className="text-[9px] text-slate-400">B. Pharm</span></p>
             <p>Reviewed By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Dr. Tejashwin Adiga</span> <span className="text-[9px] text-slate-400">MBBS</span></p>
             <p>Last updated on {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : "03 Jul 2026"} | 12:44 PM (IST)</p>
-          </div>
-
-          {/* Price & Savings */}
-          <div className="mb-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-900 dark:text-zinc-100">
-                {formatCurrency(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <>
-                  <span className="text-xs text-slate-400 line-through font-medium">
-                    MRP: {formatCurrency(product.originalPrice)}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    (You Save {formatCurrency(product.originalPrice - product.price)})
-                  </span>
-                </>
-              )}
-            </div>
-            {(product.packSize || product.productSpecifications?.packSize) && (
-              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">
-                {product.packSize || product.productSpecifications?.packSize}
-              </p>
-            )}
-          </div>
-
-          {/* Short Description */}
-          <p className="text-slate-600 dark:text-zinc-300 text-xs leading-relaxed mb-4">
-            {product.description ? (product.description.length > 220 ? `${product.description.substring(0, 220)}...` : product.description) : ""}
-          </p>
-
-          {/* Source Verification Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-blue-500/10 bg-blue-500/5 text-[#004782] dark:text-[#a4c9ff] text-xs font-bold w-full select-none">
-            <span className="material-symbols-outlined text-[16px] leading-none">verified_user</span>
-            <span>Sourced from: <span className="text-slate-900 dark:text-zinc-100 font-extrabold">{product.manufacturer || product.brand || "Direct From Manufacturer"}</span></span>
           </div>
         </div>
 
         {/* Product Image Gallery Card */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 relative flex flex-col items-center justify-center">
-          <div className="relative w-full aspect-square flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100/50 dark:border-zinc-850">
+          <div className="relative w-full aspect-square flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-105 dark:border-zinc-850">
             {/* Discount Percentage Tag */}
             {discountPercent > 0 && (
               <span className="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full z-10 select-none">
@@ -816,21 +760,148 @@ const ProductDetails = () => {
               </svg>
             </a>
           </div>
-          {/* Thumbnails indicator */}
+
+          {/* Star Rating below image */}
+          <div className="flex items-center justify-between w-full px-2 mt-3 select-none">
+            <div className="flex items-center gap-0.5 text-amber-400">
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+            </div>
+            <div className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+              <span className="font-extrabold">4.8</span>
+              <span className="text-amber-400 text-[10px]">★</span>
+              <span>On</span>
+              <span>
+                <span className="font-black text-[#4285F4]">G</span>
+                <span className="font-black text-[#EA4335]">o</span>
+                <span className="font-black text-[#FBBC05]">o</span>
+                <span className="font-black text-[#4285F4]">g</span>
+                <span className="font-black text-[#34A853]">l</span>
+                <span className="font-black text-[#EA4335]">e</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Thumbnails below rating */}
           {imagesList.length > 1 && (
-            <div className="flex justify-center gap-1.5 mt-3">
-              {imagesList.map((_, idx) => (
+            <div className="flex gap-2 justify-start w-full mt-3 overflow-x-auto no-scrollbar pb-1 px-2 select-none">
+              {imagesList.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    activeImageIdx === idx ? "bg-[#038076] w-3.5" : "bg-slate-350 dark:bg-zinc-700"
+                  className={`relative w-11 h-11 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${
+                    activeImageIdx === idx
+                      ? "border-[#038076] scale-[1.02]"
+                      : "border-slate-100 dark:border-zinc-800"
                   }`}
-                  aria-label={`View image ${idx + 1}`}
-                />
+                  aria-label={`Select image ${idx + 1}`}
+                >
+                  <img src={img} alt="" className="max-h-full max-w-full object-contain" />
+                </button>
               ))}
             </div>
           )}
+        </div>
+
+        {/* Price & Packaging Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
+          {/* Price & Discount Row */}
+          <div className="flex justify-between items-start mb-2 select-none">
+            <div>
+              <span className="text-2xl font-black text-slate-900 dark:text-zinc-100">
+                {formatCurrency(product.price)}
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+                  MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
+                </p>
+              )}
+              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
+                Inclusive of all taxes
+              </p>
+            </div>
+            {discountPercent > 0 && (
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                {discountPercent}% OFF
+              </span>
+            )}
+          </div>
+
+          {/* Selected Packaging Capsule */}
+          {(product.packSize || product.productSpecifications?.packSize) && (
+            <div className="mt-3 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3 flex justify-between items-center relative select-none">
+              <div>
+                <p className="text-xs font-black text-slate-805 dark:text-zinc-150">
+                  {product.packSize || product.productSpecifications?.packSize}
+                </p>
+                <p className="text-[10px] text-slate-455 dark:text-zinc-400 mt-1 font-semibold">
+                  {formatCurrency(getUnitPrice())}/Unit
+                </p>
+              </div>
+              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+                ✓
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Badges inline row */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
+          <div className="flex gap-4 items-center flex-wrap">
+            {product.requiresRx && (
+              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-[#845ec2] font-black text-xs border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
+              </span>
+            )}
+            {product.isColdChain && (
+              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-sky-500">❄️</span> Cold Chain
+              </span>
+            )}
+          </div>
+          <button className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200">
+            <Info size={16} />
+          </button>
+        </div>
+
+        {/* Salt Composition & Marketer Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5">
+          {/* Salt Composition */}
+          {product.molecules && product.molecules.length > 0 && (
+            <div>
+              <h4 className="text-[10.5px] font-black text-slate-455 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                Salt Composition
+              </h4>
+              <div className="text-xs font-bold text-[#004782] dark:text-[#a4c9ff] underline uppercase leading-relaxed">
+                {product.molecules.map((mol, idx) => (
+                  <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="hover:opacity-85 mr-2">
+                    {mol.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Marketer */}
+          {(product.manufacturer || product.brand) && (
+            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80">
+              <h4 className="text-[10.5px] font-black text-slate-455 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                Marketer
+              </h4>
+              <p className="text-xs font-extrabold text-slate-805 dark:text-zinc-150 uppercase">
+                {product.manufacturer || product.brand}
+              </p>
+            </div>
+          )}
+
+          {/* Prepaid / Returns */}
+          <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-sky-700 dark:text-sky-400 select-none">
+            <span>Prepaid Only. Non-Returnable.</span>
+            <HelpCircle size={15} className="text-slate-400 cursor-pointer" />
+          </div>
         </div>
 
         {/* Dual Delivery Cards */}
@@ -838,7 +909,7 @@ const ProductDetails = () => {
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
             <div>
               <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Get it by</p>
-              <p className="text-xs font-black text-slate-800 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
+              <p className="text-xs font-black text-slate-805 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
             </div>
             <span className="material-symbols-outlined text-slate-400 text-[18px]">calendar_today</span>
           </div>
