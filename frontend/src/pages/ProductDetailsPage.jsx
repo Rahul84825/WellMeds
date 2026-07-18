@@ -1173,53 +1173,6 @@ const ProductDetails = () => {
           )}
         </div>
 
-        {/* Why MrMed Section */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 mx-4 mb-4 text-center">
-          <h3 className="font-extrabold text-base text-slate-855 dark:text-zinc-150 mb-3 uppercase tracking-wider">
-            Why WellMeds?
-          </h3>
-          
-          <div className="grid grid-cols-2 gap-3 mb-4 text-center">
-            <div className="bg-[#f0f9ff] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
-              <div className="bg-sky-500/10 p-2 rounded-full text-sky-600 mb-2">
-                <span className="material-symbols-outlined text-[22px]">precision_manufacturing</span>
-              </div>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Directly from</p>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Manufacturers</p>
-            </div>
-            <div className="bg-[#fef3c7] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
-              <div className="bg-amber-500/10 p-2 rounded-full text-amber-600 mb-2">
-                <span className="material-symbols-outlined text-[22px]">flight_takeoff</span>
-              </div>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Quick Air</p>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Delivery</p>
-            </div>
-            <div className="bg-[#f0fdf4] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
-              <div className="bg-emerald-500/10 p-2 rounded-full text-emerald-600 mb-2">
-                <span className="material-symbols-outlined text-[22px]">verified_user</span>
-              </div>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Genuine</p>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Medicines</p>
-            </div>
-            <div className="bg-[#fdf2f8] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
-              <div className="bg-pink-500/10 p-2 rounded-full text-pink-650 mb-2">
-                <span className="material-symbols-outlined text-[22px]">percent</span>
-              </div>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Up-to 85%</p>
-              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Discount</p>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-100 dark:border-zinc-800 pt-3 text-left">
-            <h4 className="text-[9.5px] font-black text-[#004782] dark:text-[#a4c9ff] uppercase tracking-wider mb-1">
-              THE WELLMEDS CHECK: GET 100% GENUINE MEDICINES AT A PRICE LIKE NEVER BEFORE
-            </h4>
-            <p className="text-[9.5px] text-slate-505 dark:text-zinc-400 leading-relaxed font-semibold">
-              At WellMeds, we redefine accessibility to specialty medicines by offering comprehensive patient care services across India, serving customers and shipping medicines only within India.
-            </p>
-          </div>
-        </div>
-
         {/* Sticky Bottom Bar (Mobile/Tablet only) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-105 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
           <div className="text-left pl-sm">
