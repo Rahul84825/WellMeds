@@ -1,9 +1,11 @@
 import express from "express";
 import { 
-  getDashboardStats, 
-  getUsers, 
-  updateUserRole, 
-  uploadAdminImage 
+   getDashboardStats, 
+   getUsers, 
+   updateUserRole, 
+   uploadAdminImage,
+   getSalesReport,
+   getCustomersReport
 } from "../controllers/adminController.js";
 import { approvePrescription, rejectPrescription, updatePrescriptionStatus } from "../controllers/prescriptionController.js";
 import { 
@@ -24,6 +26,11 @@ router.post("/upload", protect, admin, uploadLimiter, uploadImage.single("image"
 
 // Dashboard stats
 router.get("/stats", protect, admin, getDashboardStats);
+
+// Reports
+router.get("/reports/sales", protect, admin, getSalesReport);
+router.get("/reports/customers", protect, admin, getCustomersReport);
+
 
 // User management
 router.get("/users", protect, admin, getUsers);

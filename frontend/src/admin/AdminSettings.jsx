@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "sonner";
+import { api } from "../services/api";
+import Loader from "../components/Loader";
 import { 
   Settings, 
   User, 
@@ -11,7 +13,8 @@ import {
   Save, 
   RefreshCw,
   Moon,
-  Info
+  Info,
+  Upload
 } from "lucide-react";
 
 const AdminSettings = () => {
@@ -23,6 +26,7 @@ const AdminSettings = () => {
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   // Store Configuration
   const [shippingLimit, setShippingLimit] = useState("499");
@@ -39,13 +43,36 @@ const AdminSettings = () => {
 
   const [savingSection, setSavingSection] = useState(null); // 'profile' | 'store' | 'notify'
 
-  const handleSaveProfile = (e) => {
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      toast.info("Uploading image to Cloudinary...");
+      const uploadedUrl = await api.uploadImage(file);
+      setAvatar(uploadedUrl);
+      toast.success("Avatar image uploaded successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload avatar image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     setSavingSection("profile");
-    setTimeout(() => {
-      setSavingSection(null);
+    try {
+      await api.updateProfile({ name, email, avatar });
       toast.success("Admin profile updated successfully!");
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update profile details.");
+    } finally {
+      setSavingSection(null);
+    }
   };
 
   const handleSaveStore = (e) => {
@@ -112,14 +139,37 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Avatar Image URL</label>
-                <input
-                  type="text"
-                  value={avatar}
-                  onChange={(e) => setAvatar(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                />
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Avatar</label>
+                <div className="flex flex-col sm:flex-row items-center gap-md bg-slate-50 dark:bg-zinc-950 p-md rounded-2xl border border-slate-200 dark:border-zinc-800">
+                  <div className="relative h-16 w-16 rounded-full bg-[#004782]/10 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
+                    {avatar ? (
+                      <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full bg-[#004782] text-white flex items-center justify-center font-bold text-lg">
+                        {name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Loader size="xs" color="text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow w-full">
+                    <label className="inline-flex items-center justify-center gap-xs px-md py-sm bg-white dark:bg-zinc-900 border border-slate-250 dark:border-zinc-850 hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-95 rounded-xl text-[11px] font-bold text-slate-700 dark:text-zinc-200 cursor-pointer shadow-xs transition-all min-h-[38px] select-none text-center">
+                      <Upload size={14} className="text-[#004782] dark:text-[#a4c9ff]" />
+                      <span>Upload Avatar Image</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleImageUpload} 
+                        disabled={uploading}
+                      />
+                    </label>
+                    <p className="text-[10px] text-slate-400 mt-2 font-medium">JPEG, PNG, or WEBP. Max size 5MB.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-md pt-sm border-t border-slate-100 dark:border-zinc-800">

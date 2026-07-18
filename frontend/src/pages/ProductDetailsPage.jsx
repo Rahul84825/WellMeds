@@ -5,7 +5,7 @@ import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import { toast } from "sonner";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
 
 // V2 Modular Components
@@ -47,6 +47,45 @@ const ProductDetails = () => {
   // Swipe gesture states for mobile gallery
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(25649); // 7h 7m 29s
+  const [activeMobileTab, setActiveMobileTab] = useState("overview");
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 25649));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isMobile]);
+
+  const formatTimeLeft = (sec) => {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
+
+  const getDeliveryDateRange = () => {
+    const today = new Date();
+    const date1 = new Date(today);
+    date1.setDate(today.getDate() + 3);
+    const date2 = new Date(today);
+    date2.setDate(today.getDate() + 4);
+    
+    const options1 = { day: "numeric", month: "short" };
+    const options2 = { day: "numeric", month: "short" };
+    
+    return `${date1.toLocaleDateString("en-IN", options1)} - ${date2.toLocaleDateString("en-IN", options2)}`;
+  };
 
   const imagesList = useMemo(() => {
     if (!product) return [];
@@ -649,6 +688,497 @@ const ProductDetails = () => {
 
   if (!product) return null;
 
+  if (isMobile) {
+    return (
+      <div className="bg-slate-50 dark:bg-zinc-950 min-h-screen pb-24 text-left animate-[fade-in_0.3s_ease-out] relative">
+        {/* Mobile Header / Breadcrumbs */}
+        <div className="pt-4 px-4">
+          <nav className="mb-3 text-[11px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 flex-wrap select-none">
+            <Link to="/" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Home</Link>
+            <span>/</span>
+            <Link to="/products" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Products</Link>
+            <span>/</span>
+            <span className="text-slate-600 dark:text-zinc-300 truncate max-w-[150px]">{product.name}</span>
+          </nav>
+        </div>
+
+        {/* Quick Summary Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 relative text-left">
+          {/* Header Row: Quick Summary & Share */}
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-[#038076] dark:text-[#84d6b9] font-black text-xs uppercase tracking-wider flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px] leading-none">notes</span> Quick Summary
+            </span>
+            <button
+              onClick={handleShare}
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
+            >
+              <Share2 size={16} />
+            </button>
+          </div>
+
+          {/* Product Name & Badges Row */}
+          <div className="flex items-start gap-2 mb-1.5">
+            <h1 className="font-headline-sm text-lg font-extrabold text-slate-900 dark:text-zinc-100 flex-1 leading-tight">
+              {product.name}
+            </h1>
+            <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+              {product.requiresRx && (
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-red-500/30 bg-red-500/5 text-red-500 font-bold text-xs" title="Rx Required">
+                  Rₓ
+                </span>
+              )}
+              {product.isColdChain && (
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-sky-500/30 bg-sky-500/5 text-sky-500" title="Cold Chain Required">
+                  <Snowflake size={11} className="animate-pulse" />
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Molecule Name */}
+          {product.molecules && product.molecules.length > 0 && (
+            <div className="text-xs font-semibold text-[#004782] dark:text-[#a4c9ff] underline mb-3">
+              {product.molecules.map((mol, idx) => (
+                <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="hover:opacity-85 mr-1">
+                  {mol.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Authors Attribution */}
+          <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-zinc-400 mb-3 border-b border-slate-100 dark:border-zinc-800/80 pb-3">
+            <p>Written By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Sakshi Anil More</span> <span className="text-[9px] text-slate-400">B. Pharm</span></p>
+            <p>Reviewed By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Dr. Tejashwin Adiga</span> <span className="text-[9px] text-slate-400">MBBS</span></p>
+            <p>Last updated on {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : "03 Jul 2026"} | 12:44 PM (IST)</p>
+          </div>
+
+          {/* Price & Savings */}
+          <div className="mb-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-zinc-100">
+                {formatCurrency(product.price)}
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <>
+                  <span className="text-xs text-slate-400 line-through font-medium">
+                    MRP: {formatCurrency(product.originalPrice)}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    (You Save {formatCurrency(product.originalPrice - product.price)})
+                  </span>
+                </>
+              )}
+            </div>
+            {(product.packSize || product.productSpecifications?.packSize) && (
+              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">
+                {product.packSize || product.productSpecifications?.packSize}
+              </p>
+            )}
+          </div>
+
+          {/* Short Description */}
+          <p className="text-slate-600 dark:text-zinc-300 text-xs leading-relaxed mb-4">
+            {product.description ? (product.description.length > 220 ? `${product.description.substring(0, 220)}...` : product.description) : ""}
+          </p>
+
+          {/* Source Verification Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-blue-500/10 bg-blue-500/5 text-[#004782] dark:text-[#a4c9ff] text-xs font-bold w-full select-none">
+            <span className="material-symbols-outlined text-[16px] leading-none">verified_user</span>
+            <span>Sourced from: <span className="text-slate-900 dark:text-zinc-100 font-extrabold">{product.manufacturer || product.brand || "Direct From Manufacturer"}</span></span>
+          </div>
+        </div>
+
+        {/* Product Image Gallery Card */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 relative flex flex-col items-center justify-center">
+          <div className="relative w-full aspect-square flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100/50 dark:border-zinc-850">
+            {/* Discount Percentage Tag */}
+            {discountPercent > 0 && (
+              <span className="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full z-10 select-none">
+                {discountPercent}% OFF
+              </span>
+            )}
+            <img
+              src={imagesList[activeImageIdx]}
+              alt={product.name}
+              className="max-h-[90%] max-w-[90%] object-contain select-none"
+            />
+            {/* WhatsApp Icon */}
+            <a
+              href="https://wa.me/911234567890"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-3 right-3 w-10 h-10 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.37 5.054L2 22l5.077-1.331a9.92 9.92 0 0 0 4.933 1.314h.005c5.505 0 9.988-4.478 9.99-9.985A9.972 9.972 0 0 0 12.012 2zm5.723 14.12c-.25.706-1.442 1.341-1.986 1.424-.492.077-1.134.14-3.328-.769-2.805-1.162-4.59-4.004-4.73-4.188-.14-.186-1.137-1.513-1.137-2.887 0-1.373.72-2.049.977-2.321.257-.272.565-.34.753-.34H9.5c.189 0 .443-.072.695.529.251.604.858 2.088.932 2.239.076.151.127.327.026.529-.101.202-.152.327-.303.504-.152.176-.32.392-.457.525-.152.151-.31.317-.133.621.176.303.784 1.29 1.684 2.093.9 1.006 1.658 1.318 1.96 1.469.303.151.48.127.656-.076.176-.202.753-.876.953-1.178.201-.302.402-.252.68-.151.278.101 1.764.832 2.067.983.303.151.504.227.58.353.076.126.076.731-.174 1.437z"/>
+              </svg>
+            </a>
+          </div>
+          {/* Thumbnails indicator */}
+          {imagesList.length > 1 && (
+            <div className="flex justify-center gap-1.5 mt-3">
+              {imagesList.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIdx(idx)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    activeImageIdx === idx ? "bg-[#038076] w-3.5" : "bg-slate-350 dark:bg-zinc-700"
+                  }`}
+                  aria-label={`View image ${idx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Dual Delivery Cards */}
+        <div className="grid grid-cols-2 gap-3 mx-4 mb-3 text-left">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Get it by</p>
+              <p className="text-xs font-black text-slate-800 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
+            </div>
+            <span className="material-symbols-outlined text-slate-400 text-[18px]">calendar_today</span>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Delivering To</p>
+              <p className="text-xs font-black text-[#004782] dark:text-[#a4c9ff] truncate max-w-[100px] mt-0.5">Pune, 411035</p>
+            </div>
+            <span className="material-symbols-outlined text-slate-400 text-[18px] cursor-pointer">edit</span>
+          </div>
+        </div>
+
+        {/* Cold Chain Ticking Banner */}
+        {product.isColdChain && (
+          <div className="mx-4 mb-3 bg-sky-500/[0.03] border border-sky-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
+            <div className="bg-sky-500/10 p-2.5 rounded-2xl text-sky-600 shrink-0">
+              <span className="material-symbols-outlined text-[20px] leading-none animate-bounce">local_shipping</span>
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs font-black text-sky-700 dark:text-sky-400 uppercase tracking-wider">{formatTimeLeft(timeLeft)}</span>
+                <span className="text-[10px] text-slate-405 font-bold">• Cold Chain Guaranteed</span>
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-normal">
+                Your medicine's temperature matters — we pause cold-chain delivery if temperature goes out of range. <span className="text-sky-600 dark:text-sky-400 font-bold underline cursor-pointer">Learn More</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Prescription Verification Warning */}
+        {product.requiresRx && (
+          <div className="mx-4 mb-3 bg-red-500/[0.03] border border-red-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
+            <div className="bg-red-500/10 p-2.5 rounded-2xl text-red-650 shrink-0">
+              <span className="material-symbols-outlined text-[20px] leading-none">description</span>
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="font-extrabold text-[11px] text-red-650 dark:text-red-400 uppercase tracking-wider">Prescription Verification Required</h4>
+              <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-normal">
+                A registered pharmacist will verify your prescription before shipment. Upload during checkout.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Substitutes Section */}
+        {substituteProducts.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+              Substitutes
+            </h3>
+            <div className="flex flex-col gap-2.5">
+              {substituteProducts.slice(0, 3).map((item) => {
+                const diffPercent = product.price > 0 
+                  ? Math.round(((item.price - product.price) / product.price) * 100) 
+                  : 0;
+                const isCostlier = diffPercent > 0;
+                const comparisonLabel = diffPercent === 0 
+                  ? "Same price" 
+                  : isCostlier 
+                    ? `${diffPercent}% costlier` 
+                    : `${Math.abs(diffPercent)}% cheaper`;
+
+                return (
+                  <Link
+                    key={item.slug || item._id}
+                    to={`/products/${item.slug}`}
+                    onClick={() => window.scrollTo(0, 0)}
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 dark:border-zinc-800 hover:bg-[#038076]/5 transition-all text-left"
+                  >
+                    <div className="flex-1 min-w-0 pr-2">
+                      <h4 className="font-bold text-xs text-slate-800 dark:text-zinc-200 truncate">{item.name}</h4>
+                      <p className="text-[9px] text-slate-405 uppercase font-semibold mt-0.5 truncate">{item.manufacturer || item.brand}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-black text-slate-800 dark:text-zinc-200">
+                        {formatCurrency(item.price)}
+                        <span className="text-[9px] text-slate-400 font-semibold">/{item.productSpecifications?.dosageForm || "Unit"}</span>
+                      </p>
+                      <span className={`inline-block text-[9px] font-black px-1.5 py-0.5 rounded-full mt-1 ${
+                        diffPercent === 0 
+                          ? "bg-slate-150 text-slate-600" 
+                          : isCostlier 
+                            ? "bg-red-500/10 text-red-655" 
+                            : "bg-emerald-500/10 text-emerald-655"
+                      }`}>
+                        {comparisonLabel}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {substituteProducts.length > 3 && (
+              <button
+                onClick={() => setIsFullscreenOpen(true)}
+                className="w-full mt-3 h-10 rounded-xl bg-[#482b8f] hover:bg-[#3b217a] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+              >
+                View All <span className="text-sm">→</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Doctor Care Offer Banner */}
+        <div className="mx-4 mb-4 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-50 to-[#e0f2fe] dark:from-zinc-800/40 dark:to-zinc-850/40 border border-blue-500/10 flex items-center justify-between p-4 relative shadow-2xs text-left">
+          <div className="space-y-1.5 max-w-[65%]">
+            <p className="text-[9px] text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-wider">Every GLP-1 order</p>
+            <h4 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-tight">Comes with extra care</h4>
+            <div className="bg-[#482b8f] text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full inline-block">
+              Get Free
+            </div>
+            <p className="text-[9px] text-slate-500 dark:text-zinc-405 font-bold leading-relaxed">
+              5X Sterile Needles & 6X Alcohol Swabs <span className="text-slate-400 text-[8px] font-medium block mt-0.5">(Imported from Ireland)</span>
+            </p>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=150"
+            alt="Professional Doctor"
+            className="w-20 h-20 object-cover rounded-full border-2 border-white dark:border-zinc-700 shadow-md shrink-0 self-end"
+          />
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mx-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+          {[
+            { id: "overview", label: "Medicine Overview" },
+            { id: "concerns", label: "Patient Concerns" },
+            { id: "info", label: "In Depth Info" },
+            { id: "disclaimer", label: "Disclaimer" }
+          ].map((tab) => {
+            const isActive = activeMobileTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveMobileTab(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all border ${
+                  isActive
+                    ? "bg-slate-900 text-white border-slate-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                    : "bg-white text-slate-655 border-slate-205 hover:bg-slate-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tabs Content rendering */}
+        <div className="mx-4 mb-4 text-left">
+          {activeMobileTab === "overview" && (
+            <div className="space-y-4">
+              {/* Introduction Card */}
+              {product.description && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                    Introduction
+                  </h3>
+                  <p className="text-slate-600 dark:text-zinc-305 text-xs leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+              {/* Uses / Dosage / Side Effects / Storage */}
+              {computedSections.map((sec) => {
+                if (["Uses", "Dosage", "SideEffects", "Storage"].includes(sec.id) && sec.content) {
+                  return (
+                    <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                        {sec.title}
+                      </h3>
+                      <div className="text-slate-600 dark:text-zinc-305 text-xs leading-relaxed whitespace-pre-line">
+                        {sec.content}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          )}
+
+          {activeMobileTab === "concerns" && (
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+                  Warnings & Precautions
+                </h3>
+                {product.warnings && product.warnings.length > 0 ? (
+                  <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-xs leading-relaxed">
+                    {product.warnings.map((warn, i) => (
+                      <li key={i}>{warn}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-slate-455 text-xs">No specific precaution warnings registered.</p>
+                )}
+              </div>
+              {computedSections.find(s => s.id === "Precautions")?.content && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                    Safety Advice
+                  </h3>
+                  <div className="text-slate-605 dark:text-zinc-305 text-xs leading-relaxed whitespace-pre-line">
+                    {computedSections.find(s => s.id === "Precautions").content}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeMobileTab === "info" && (
+            <div className="space-y-4">
+              {/* Product Specifications */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+                  Specifications
+                </h3>
+                <div className="flex flex-col text-xs divide-y divide-slate-100 dark:divide-zinc-800/40">
+                  {product.productSpecifications && Object.entries(product.productSpecifications).map(([key, val]) => {
+                    if (!val || typeof val !== "string" || !val.trim()) return null;
+                    const label = key.replace(/([A-Z])/g, " $1").trim().replace(/^\w/, c => c.toUpperCase());
+                    return (
+                      <div key={key} className="flex py-2.5 items-center">
+                        <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">{label}</span>
+                        <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{val}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* References / Citations */}
+              {product.references && product.references.length > 0 && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+                    Citations & References
+                  </h3>
+                  <ul className="list-decimal pl-4 space-y-2 text-slate-500 dark:text-zinc-400 text-xs break-all">
+                    {product.references.map((refLink, i) => (
+                      <li key={i}>
+                        <a href={refLink} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#004782] dark:text-[#a4c9ff]">
+                          {refLink}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeMobileTab === "disclaimer" && (
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                Disclaimer
+              </h3>
+              <p className="text-slate-455 dark:text-zinc-500 text-[11px] leading-relaxed">
+                The information provided here is for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Do not disregard professional medical advice or delay in seeking it because of something you have read on this website.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Why MrMed Section */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 mx-4 mb-4 text-center">
+          <h3 className="font-extrabold text-base text-slate-855 dark:text-zinc-150 mb-3 uppercase tracking-wider">
+            Why WellMeds?
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-3 mb-4 text-center">
+            <div className="bg-[#f0f9ff] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
+              <div className="bg-sky-500/10 p-2 rounded-full text-sky-600 mb-2">
+                <span className="material-symbols-outlined text-[22px]">precision_manufacturing</span>
+              </div>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Directly from</p>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Manufacturers</p>
+            </div>
+            <div className="bg-[#fef3c7] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
+              <div className="bg-amber-500/10 p-2 rounded-full text-amber-600 mb-2">
+                <span className="material-symbols-outlined text-[22px]">flight_takeoff</span>
+              </div>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Quick Air</p>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Delivery</p>
+            </div>
+            <div className="bg-[#f0fdf4] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
+              <div className="bg-emerald-500/10 p-2 rounded-full text-emerald-600 mb-2">
+                <span className="material-symbols-outlined text-[22px]">verified_user</span>
+              </div>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Genuine</p>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Medicines</p>
+            </div>
+            <div className="bg-[#fdf2f8] dark:bg-zinc-800/40 p-3 rounded-2xl flex flex-col items-center justify-center">
+              <div className="bg-pink-500/10 p-2 rounded-full text-pink-650 mb-2">
+                <span className="material-symbols-outlined text-[22px]">percent</span>
+              </div>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Up-to 85%</p>
+              <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200">Discount</p>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-100 dark:border-zinc-800 pt-3 text-left">
+            <h4 className="text-[9.5px] font-black text-[#004782] dark:text-[#a4c9ff] uppercase tracking-wider mb-1">
+              THE WELLMEDS CHECK: GET 100% GENUINE MEDICINES AT A PRICE LIKE NEVER BEFORE
+            </h4>
+            <p className="text-[9.5px] text-slate-505 dark:text-zinc-400 leading-relaxed font-semibold">
+              At WellMeds, we redefine accessibility to specialty medicines by offering comprehensive patient care services across India, serving customers and shipping medicines only within India.
+            </p>
+          </div>
+        </div>
+
+        {/* Sticky Bottom Bar (Mobile/Tablet only) */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-105 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
+          <div className="text-left pl-sm">
+            <p className="text-[9px] text-slate-455 font-black uppercase tracking-wider">Total Price</p>
+            <p className="text-base font-black text-[#004782] dark:text-[#a4c9ff]">
+              {formatCurrency(product.price * quantity)}
+            </p>
+          </div>
+          <div className="flex gap-xs flex-1 max-w-[240px]">
+            <button
+              onClick={handleBuyNow}
+              disabled={product.inStock === false || product.stock === 0}
+              className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+            >
+              Buy Now
+            </button>
+            <button
+              onClick={handleAddToCart}
+              disabled={product.inStock === false || product.stock === 0}
+              className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#038076] text-[#038076] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
+            >
+              Add <ShoppingCart size={13} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
       

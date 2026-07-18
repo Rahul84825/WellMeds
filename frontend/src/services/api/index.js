@@ -19,6 +19,30 @@ const adminService = {
     const data = await apiInstance.get("/admin/stats");
     return data; // { success, stats, recentOrders }
   },
+  async downloadSalesReport() {
+    const token = localStorage.getItem("medishop_token");
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    const res = await fetch(`${baseUrl}/admin/reports/sales`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error("Failed to download sales report");
+    return res.blob();
+  },
+  async downloadCustomersReport() {
+    const token = localStorage.getItem("medishop_token");
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    const res = await fetch(`${baseUrl}/admin/reports/customers`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error("Failed to download customer report");
+    return res.blob();
+  },
   async getUsers() {
     const data = await apiInstance.get("/admin/users");
     return data.users || [];
