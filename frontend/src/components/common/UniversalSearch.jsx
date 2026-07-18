@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
-  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, 
-  Clock, Activity
+  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import api from "../../services/api";
 
 export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
   const { addToCart } = useCart();
 
   const [query, setQuery] = useState("");
@@ -26,111 +23,11 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   });
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
 
-  // Dynamic / local static content lists
-  const [trendingMedicines, setTrendingMedicines] = useState([]);
-  const [recentSearches, setRecentSearches] = useState([]);
-
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   const timeoutRef = useRef(null);
   const abortControllerRef = useRef(null);
-
-  // Handle location syncing across different search input instances
-  useEffect(() => {
-    const handleLocationChange = (e) => {
-      setSelectedLocation(e.detail);
-    };
-    window.addEventListener("wellmeds_location_changed", handleLocationChange);
-    return () => {
-      window.removeEventListener("wellmeds_location_changed", handleLocationChange);
-    };
-  }, []);
-
-  const handleLocationSelect = (loc) => {
-    setSelectedLocation(loc);
-    localStorage.setItem("wellmeds_location", loc);
-    window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
-    setLocationMenuOpen(false);
-  };
-
-  // Fetch search history (Guest vs Logged-In User)
-  const fetchRecentSearches = useCallback(async () => {
-    if (user) {
-      try {
-        const history = await api.getSearchHistory();
-        setRecentSearches(history);
-      } catch (err) {
-        console.warn("Could not fetch search history from server:", err.message);
-      }
-    } else {
-      try {
-        const local = localStorage.getItem("wellmeds_recent_searches");
-        setRecentSearches(local ? JSON.parse(local) : []);
-      } catch {
-        setRecentSearches([]);
-      }
-    }
-  }, [user]);
-
-  // Save search query to history
-  const addQueryToHistory = async (term) => {
-    if (!term || !term.trim()) return;
-    const cleanTerm = term.trim();
-
-    if (user) {
-      try {
-        await api.addSearchHistory(cleanTerm);
-      } catch (err) {
-        console.warn("Could not save search history to server", err.message);
-      }
-    } else {
-      try {
-        let history = JSON.parse(localStorage.getItem("wellmeds_recent_searches") || "[]");
-        history = history.filter(t => t.toLowerCase() !== cleanTerm.toLowerCase());
-        history.unshift(cleanTerm);
-        if (history.length > 10) history = history.slice(0, 10);
-        localStorage.setItem("wellmeds_recent_searches", JSON.stringify(history));
-      } catch (err) {
-        console.warn("Could not save search history locally", err.message);
-      }
-    }
-    fetchRecentSearches();
-  };
-
-  // Clear search history
-  const clearHistory = async (e) => {
-    e.stopPropagation();
-    if (user) {
-      try {
-        await api.clearSearchHistory();
-        setRecentSearches([]);
-      } catch (err) {
-        console.warn("Could not clear search history on server", err.message);
-      }
-    } else {
-      localStorage.removeItem("wellmeds_recent_searches");
-      setRecentSearches([]);
-    }
-  };
-
-  // Fetch recently viewed products & trending medicines
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch trending medicines
-        const trending = await api.getTrendingProducts();
-        setTrendingMedicines(trending);
-
-        // No recently viewed fetched since it is unused
-      } catch (err) {
-        console.warn("Could not fetch popular/recently viewed data", err.message);
-      }
-    };
-    fetchData();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRecentSearches();
-  }, [fetchRecentSearches]);
 
   // Handle outside clicks to close the dropdown
   useEffect(() => {
@@ -191,7 +88,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
   const handleSearchSubmit = () => {
     if (query.trim()) {
-      addQueryToHistory(query);
       setFocused(false);
       if (onCloseMobile) onCloseMobile();
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
@@ -201,10 +97,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   // Compile flat items for keyboard arrow navigation
   const getFlatSelectableItems = () => {
     const items = [];
-    if (query.trim().length < 2) {
-      recentSearches.forEach(term => items.push({ type: "recent", value: term }));
-      trendingMedicines.forEach(prod => items.push({ type: "product", value: prod }));
-    } else {
+    if (query.trim().length >= 2) {
       if (results.products?.length) {
         results.products.forEach(prod => items.push({ type: "product", value: prod }));
       }
@@ -246,16 +139,10 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     setActiveIndex(-1);
     if (onCloseMobile) onCloseMobile();
 
-    if (item.type === "recent") {
-      setQuery(item.value);
-      addQueryToHistory(item.value);
-      navigate(`/search?q=${encodeURIComponent(item.value)}`);
-    } else if (item.type === "molecule") {
-      addQueryToHistory(item.value.name);
+    if (item.type === "molecule") {
       navigate(`/products?molecule=${encodeURIComponent(item.value.slug || item.value.name)}`);
     } else if (item.type === "product") {
-      addQueryToHistory(item.value.name);
-      // Track recently viewed product locally
+      // Track recently viewed product locally for the details page carousel
       let viewed = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");
       viewed = viewed.filter(p => p.id !== item.value.id && p._id !== item.value._id);
       viewed.unshift(item.value);
@@ -388,83 +275,12 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       </div>
 
       {/* DROPDOWN AUTOCOMPLETE PANEL */}
-      {focused && (
+      {focused && query.trim().length >= 2 && (
         <div 
           ref={dropdownRef}
           className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-[250] overflow-y-auto max-h-[500px] md:max-h-[600px] animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
         >
-          {query.trim().length < 2 ? (
-            /* EMPTY STATE: RECENT SEARCHES & TRENDING PRODUCTS ONLY */
-            <div className="p-4 space-y-4">
-              {/* Recent Searches */}
-              {recentSearches.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between px-3 mb-1 select-none">
-                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 animate-[pulse_2s_infinite]" />
-                      <span>Recent Searches</span>
-                    </span>
-                    <button
-                      onClick={clearHistory}
-                      className="text-[10px] font-extrabold text-[#038076] hover:underline cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    {recentSearches.map((term, idx) => {
-                      const flatItems = getFlatSelectableItems();
-                      const flatIndex = flatItems.findIndex(i => i.type === "recent" && i.value === term);
-                      const active = activeIndex === flatIndex;
-                      return (
-                        <div
-                          key={term + idx}
-                          onClick={() => handleSelectItem({ type: "recent", value: term })}
-                          data-active={active}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-xs font-semibold text-slate-700 transition-all border ${
-                            active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50"
-                          }`}
-                        >
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{term}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Trending Products */}
-              {trendingMedicines.length > 0 && (
-                <div>
-                  <div className="px-3 mb-1 select-none">
-                    <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-[#038076] animate-[pulse_2.5s_infinite]" />
-                      <span>Trending Products</span>
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    {trendingMedicines.map((prod) => {
-                      const flatItems = getFlatSelectableItems();
-                      const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.id === prod.id || i.value._id === prod._id));
-                      const active = activeIndex === flatIndex;
-                      return (
-                        <ProductListItem
-                          key={prod.id || prod._id}
-                          product={prod}
-                          active={active}
-                          onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                          onAddToCart={(p) => {
-                            addToCart(p, 1);
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : loading ? (
+          {loading ? (
             <div className="p-8 text-center flex items-center justify-center gap-2 select-none">
               <Loader2 className="animate-spin text-[#038076] w-4 h-4" />
               <span className="text-xs font-semibold text-slate-500">Searching catalog...</span>
@@ -478,7 +294,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                     <Search size={22} />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-700 text-sm">No medicines or molecules found.</h3>
+                    <h3 className="font-extrabold text-slate-700 text-sm">No products or molecules found.</h3>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-2 mt-2 w-full max-w-xs select-none">
                     <button
