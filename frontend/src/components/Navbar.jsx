@@ -336,7 +336,7 @@ const Navbar = () => {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col w-full py-0 lg:py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
-        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[64px] lg:h-[64px]">
+        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[76px] lg:h-[64px]">
           
           {/* Desktop Only Header (Visible on desktop only) */}
           <div className="hidden lg:flex items-center justify-between w-full h-full">
@@ -505,7 +505,7 @@ const Navbar = () => {
                 <img 
                   src={logoImg}
                   alt="WellMeds Logo"
-                  className="h-[60px] object-contain"
+                  className="h-[72px] object-contain"
                 />
               </NavLink>
             </div>

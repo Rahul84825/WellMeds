@@ -189,7 +189,7 @@ const GlobalDrawer = () => {
         }`}
       >
         {/* Drawer Header */}
-        <div className="h-[68px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
+        <div className="h-[80px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
           <button
             onClick={() => setIsDrawerOpen(false)}
             className="text-slate-700 hover:text-slate-900 focus:outline-none flex items-center justify-center w-10 h-10 cursor-pointer"
@@ -198,7 +198,7 @@ const GlobalDrawer = () => {
             <X className="w-5 h-5 stroke-[2.5]" />
           </button>
           <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[150px]">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[56px] w-auto" />
+            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[66px] w-auto" />
           </Link>
           <Link
             to="/cart"
