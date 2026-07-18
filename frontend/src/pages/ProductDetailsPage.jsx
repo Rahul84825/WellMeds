@@ -23,7 +23,12 @@ import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkel
 const ProductDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity } = useCart();
+
+  const productId = (product?._id || product?.id)?.toString();
+  const cartItem = cartItems?.find((item) => item.id === productId);
+  const isInCart = !!cartItem;
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -1178,24 +1183,57 @@ const ProductDetails = () => {
           <div className="text-left pl-sm">
             <p className="text-[9px] text-slate-455 font-black uppercase tracking-wider">Total Price</p>
             <p className="text-base font-black text-[#004782] dark:text-[#a4c9ff]">
-              {formatCurrency(product.price * quantity)}
+              {formatCurrency(product.price * (isInCart ? cartQuantity : quantity))}
             </p>
           </div>
-          <div className="flex gap-xs flex-1 max-w-[240px]">
-            <button
-              onClick={handleBuyNow}
-              disabled={product.inStock === false || product.stock === 0}
-              className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
-            >
-              Buy Now
-            </button>
-            <button
-              onClick={handleAddToCart}
-              disabled={product.inStock === false || product.stock === 0}
-              className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#038076] text-[#038076] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
-            >
-              Add <ShoppingCart size={13} />
-            </button>
+          <div className="flex gap-xs flex-1 max-w-[240px] items-center">
+            {isInCart ? (
+              <>
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-[10.5px] outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-0.5 select-none"
+                >
+                  Go To Cart <span className="text-xs font-semibold">↗</span>
+                </button>
+                <div className="flex-1 flex items-center justify-between p-1 bg-slate-100 dark:bg-zinc-800 rounded-2xl h-11">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(productId, cartQuantity - 1)}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 shadow-xs"
+                  >
+                    -
+                  </button>
+                  <span className="w-8 h-8 rounded-full bg-[#3f257a] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
+                    {cartQuantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(productId, cartQuantity + 1)}
+                    disabled={cartQuantity >= (product.stock || 30)}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    +
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.inStock === false || product.stock === 0}
+                  className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+                >
+                  Buy Now
+                </button>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={product.inStock === false || product.stock === 0}
+                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#038076] text-[#038076] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
+                >
+                  Add <ShoppingCart size={13} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
