@@ -25,9 +25,28 @@ export const DrawerProvider = ({ children }) => {
     let active = true;
     const fetchMenu = async () => {
       try {
-        const data = await api.getMegaMenu();
-        if (active && data) {
-          setMenuData(data);
+        const [megaData, cats, specs] = await Promise.all([
+          api.getMegaMenu().catch(() => null),
+          api.getCategories().catch(() => []),
+          api.getSpecialities().catch(() => [])
+        ]);
+
+        if (active) {
+          // Filter to display active categories only, and sort alphabetically
+          const activeCats = (cats || [])
+            .filter(cat => cat.status === "Active" || cat.isActive === true)
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+          // Sort specialities alphabetically by name
+          const sortedSpecs = (specs || [])
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+          setMenuData({
+            conditions: activeCats,
+            specialities: sortedSpecs,
+            sources: megaData?.sources || [],
+            quickLinks: megaData?.quickLinks || []
+          });
         }
       } catch (err) {
         console.error("Failed to fetch Medicines mega menu", err);
