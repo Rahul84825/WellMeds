@@ -198,7 +198,7 @@ const GlobalDrawer = () => {
             <X className="w-5 h-5 stroke-[2.5]" />
           </button>
           <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[150px]">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[38px] w-auto" />
+            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[48px] w-auto" />
           </Link>
           <Link
             to="/cart"

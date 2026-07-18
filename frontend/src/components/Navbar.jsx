@@ -505,7 +505,7 @@ const Navbar = () => {
                 <img 
                   src={logoImg}
                   alt="WellMeds Logo"
-                  className="h-[38px] object-contain"
+                  className="h-[52px] object-contain"
                 />
               </NavLink>
             </div>
