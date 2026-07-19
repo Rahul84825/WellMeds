@@ -23,6 +23,16 @@ const cartSchema = new mongoose.Schema(
       unique: true,
     },
     items: [cartItemSchema],
+    prescriptionStatus: {
+      type: String,
+      enum: ["Pending", "Uploaded", "Under Review", "Approved", "Rejected", "Expired"],
+      default: "Pending",
+    },
+    prescription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Prescription",
+      default: null,
+    },
   },
   {
     timestamps: true,

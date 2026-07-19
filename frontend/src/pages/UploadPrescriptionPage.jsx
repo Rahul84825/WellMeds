@@ -6,33 +6,22 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import PrescriptionCard from "../components/PrescriptionCard";
 import { toast } from "sonner";
-import PrescriptionTimeline from "../components/PrescriptionTimeline";
 import Modal from "../components/Modal";
-import LoginRequiredModal from "../components/LoginRequiredModal";
 import { 
   UploadCloud, 
   HelpCircle, 
   Phone, 
   MessageSquare, 
   Mail, 
-  Clock, 
   MapPin, 
   CheckCircle2, 
-  ChevronDown, 
-  ChevronUp, 
   FileText,
-  User,
-  Award,
-  Hospital,
-  Users,
-  Calendar,
-  PenTool,
-  ClipboardList,
-  Sparkles,
+  Clock,
   ArrowRight,
   ShieldAlert,
-  Lock,
-  Stethoscope
+  ShoppingCart,
+  CreditCard,
+  Trash2
 } from "lucide-react";
 
 const UploadPrescriptionPage = () => {
@@ -46,7 +35,7 @@ const UploadPrescriptionPage = () => {
 
   // Upload states
   const [dragActive, setDragActive] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadFiles, setUploadFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -54,13 +43,14 @@ const UploadPrescriptionPage = () => {
   // Post-Upload Success details
   const [uploadedRxRecord, setUploadedRxRecord] = useState(null);
 
-  // Accordion indices
-  const [guideOpenIdx, setGuideOpenIdx] = useState(null);
-  const [faqOpenIdx, setFaqOpenIdx] = useState(null);
+  // Accordion / Guide indices
+  const [validGuideOpen, setValidGuideOpen] = useState(true);
 
   // Right sidebar state
   const [orderMethod, setOrderMethod] = useState("upload-and-order");
-  const [duration, setDuration] = useState("30");
+  const [durationEnabled, setDurationEnabled] = useState(true);
+  const [durationValue, setDurationValue] = useState("7");
+  const [durationUnit, setDurationUnit] = useState("Days");
   const [address, setAddress] = useState(user?.shippingAddress || "Please set a shipping address in your profile.");
 
   // Modal for changing address
@@ -82,6 +72,7 @@ const UploadPrescriptionPage = () => {
   useEffect(() => {
     if (user) {
       fetchPrescriptions();
+      setAddress(user.shippingAddress || "Please set a shipping address in your profile.");
     } else {
       setLoadingRx(false);
     }
@@ -102,26 +93,26 @@ const UploadPrescriptionPage = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
+    if (e.dataTransfer.files) {
+      const files = Array.from(e.dataTransfer.files);
       if (!user) {
-        setPendingRxFile(file);
+        setPendingRxFile(files[0]);
         openLoginModal("/upload-prescription");
         return;
       }
-      validateAndSetFile(file);
+      validateAndAddFiles(files);
     }
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
       if (!user) {
-        setPendingRxFile(file);
+        setPendingRxFile(files[0]);
         openLoginModal("/upload-prescription");
         return;
       }
-      validateAndSetFile(file);
+      validateAndAddFiles(files);
     }
   };
 
@@ -134,31 +125,38 @@ const UploadPrescriptionPage = () => {
     document.getElementById("prescription-file-upload")?.click();
   };
 
-  const validateAndSetFile = (file) => {
+  const validateAndAddFiles = (files) => {
     setUploadError("");
     setUploadedRxRecord(null);
 
-    const validTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
-    if (!validTypes.includes(file.type)) {
-      setUploadError("Invalid file type. Only PDF, JPG, and PNG are allowed!");
-      setUploadFile(null);
-      return;
+    const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "application/pdf"];
+    const verifiedFiles = [];
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        setUploadError("Invalid file type. Only PDF, JPG, PNG, and WEBP files are allowed.");
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError("One or more files exceed the 10MB limit.");
+        continue;
+      }
+      verifiedFiles.push(file);
     }
 
-    // 10MB limit
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError("File size exceeds 10MB limit.");
-      setUploadFile(null);
-      return;
+    if (verifiedFiles.length > 0) {
+      setUploadFiles((prev) => [...prev, ...verifiedFiles]);
     }
+  };
 
-    setUploadFile(file);
+  const handleRemoveFile = (index) => {
+    setUploadFiles((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   // Perform upload
   const handleUploadSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!uploadFile) return;
+    if (uploadFiles.length === 0) return;
 
     setUploading(true);
     setUploadError("");
@@ -176,17 +174,19 @@ const UploadPrescriptionPage = () => {
     }, 150);
 
     try {
-      const data = await api.uploadPrescription(uploadFile);
+      // Pass the array of files to uploadPrescription
+      const data = await api.uploadPrescription(uploadFiles);
       clearInterval(progressInterval);
       setUploadProgress(100);
       
       // Update success states
       setUploadedRxRecord(data.prescription);
-      setUploadFile(null);
+      setUploadFiles([]);
       setUploadProgress(0);
 
       // Refresh list
       fetchPrescriptions();
+      toast.success("Prescription uploaded successfully!");
     } catch (err) {
       clearInterval(progressInterval);
       setUploadError(err.response?.data?.message || "Prescription upload failed. Please try again.");
@@ -209,7 +209,7 @@ const UploadPrescriptionPage = () => {
   // Capture pendingRxFile from guest state when user successfully logs in
   useEffect(() => {
     if (user && pendingRxFile) {
-      validateAndSetFile(pendingRxFile);
+      validateAndAddFiles([pendingRxFile]);
       setPendingRxFile(null);
       sessionStorage.setItem("auth_rx_auto_trigger", "true");
     }
@@ -217,11 +217,11 @@ const UploadPrescriptionPage = () => {
 
   // Auto-submit file if auto-trigger is set
   useEffect(() => {
-    if (user && uploadFile && sessionStorage.getItem("auth_rx_auto_trigger") === "true") {
+    if (user && uploadFiles.length > 0 && sessionStorage.getItem("auth_rx_auto_trigger") === "true") {
       sessionStorage.removeItem("auth_rx_auto_trigger");
       handleUploadSubmit();
     }
-  }, [user, uploadFile]);
+  }, [user, uploadFiles]);
 
   const handleDeleteRx = (id, name) => {
     toast.warning(`Are you sure you want to delete "${name}"?`, {
@@ -254,509 +254,498 @@ const UploadPrescriptionPage = () => {
       toast.warning("Please upload at least one prescription before continuing.");
       return;
     }
-    toast.success(`Order proceeding with method: ${orderMethod === "upload-and-order" ? "Upload & Order" : orderMethod === "callback" ? "Pharmacist Callback" : "Assistance Required"} for ${duration} days.`);
+    
+    const durationText = durationEnabled ? `${durationValue} ${durationUnit}` : "Not Specified";
+    toast.success(`Proceeding with order method: ${orderMethod === "upload-and-order" ? "Order Now" : "Request Callback"} (Duration: ${durationText})`);
     navigate("/checkout");
   };
 
-  // Static Data lists
-  const timelineSteps = [
-    { step: "01", title: "Upload Prescription", desc: "Upload scanned sheets or doctor PDFs securely.", icon: UploadCloud, color: "text-[#004782] bg-[#004782]/10" },
-    { step: "02", title: "Pharmacist Review", desc: "Our certified clinical experts read details.", icon: Stethoscope, color: "text-secondary bg-[#086b53]/10" },
-    { step: "03", title: "Verification", desc: "Dosages, durations, and brands validated.", icon: Award, color: "text-[#004782] bg-[#004782]/10" },
-    { step: "04", title: "Medicine Ordering", desc: "Cart generated and ready for check-out.", icon: ClipboardList, color: "text-secondary bg-[#086b53]/10" },
-  ];
-
-  const guideItems = [
-    { title: "Doctor Name & Qualifications", desc: "Doctor's name, credentials, and signatures clearly printed.", icon: User },
-    { title: "Registration Number", desc: "Valid medical council license registration digit string.", icon: Award },
-    { title: "Clinic or Hospital Letterhead", desc: "Official medical center letterhead indicating clinic address and phone details.", icon: Hospital },
-    { title: "Patient Name & Age", desc: "Full name matching patient registration, along with age/gender statistics.", icon: Users },
-    { title: "Date of Prescription", desc: "Prescription date clearly visible and issued within the last 6 months.", icon: Calendar },
-    { title: "Signature & Seal Stamp", desc: "Handwritten/digital signature or physical seal stamp of the consulting doctor.", icon: PenTool },
-    { title: "Medicine Specifications", desc: "Brand or generic drug name, clear strength, dosages, and course durations.", icon: ClipboardList }
-  ];
-
-  const faqItems = [
-    { q: "How long does verification take?", a: "Typically, our licensed pharmacists verify clinical prescriptions in 5 to 10 minutes from receipt during operation hours." },
-    { q: "Can I upload multiple prescriptions?", a: "Yes, you can upload as many prescription sheets as required for your clinical treatment course." },
-    { q: "Can I upload PDF files?", a: "Yes, we accept PDF, JPG, JPEG, and PNG files up to a maximum size of 10MB." },
-    { q: "Can I re-upload if rejected?", a: "Yes, you can delete a rejected prescription card and upload a corrected doc sheet instantly." },
-    { q: "How will I know the verification status?", a: "The visual progress tracker on your prescription card updates in real-time. You'll also receive checkout notifications." }
-  ];
-
   return (
-    <div className="bg-slate-50/50 dark:bg-zinc-950 transition-colors duration-300">
+    <div className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen transition-colors duration-300 text-left">
       
-      {/* 1. HERO SECTION */}
-      <section className="bg-gradient-to-br from-[#004782] via-[#055746] to-[#086b53] text-white py-16 relative overflow-hidden text-left">
-        <div className="absolute inset-0 medical-pattern opacity-10 pointer-events-none"></div>
-        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-lg">
-          <div className="space-y-md max-w-xl">
-            <nav className="flex items-center text-xs text-white/70 gap-xs">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <span className="font-bold text-white">Upload Prescription</span>
-            </nav>
-            <h1 className="font-headline-lg text-headline-lg lg:text-3xl text-white font-extrabold tracking-tight leading-tight">
-              Upload Your Prescription <br />
-              <span className="text-[#a4c9ff] dark:text-[#84d6b9]">Secure & Seamless Care</span>
-            </h1>
-            <p className="text-white/80 font-body-sm leading-relaxed max-w-md">
-              Submit your doctor's prescription sheets securely. Our certified in-house pharmacists will verify the dosages and prepare your cart in under 10 minutes.
-            </p>
-            
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-md pt-sm">
-              <span className="inline-flex items-center gap-xs text-[11px] bg-white/10 px-sm py-1 rounded-full border border-white/10 font-bold uppercase tracking-wider">
-                <Lock size={12} className="text-[#a4c9ff]" /> 100% Encrypted
-              </span>
-              <span className="inline-flex items-center gap-xs text-[11px] bg-white/10 px-sm py-1 rounded-full border border-white/10 font-bold uppercase tracking-wider">
-                <Stethoscope size={12} className="text-[#84d6b9]" /> Licensed Experts
-              </span>
-              <span className="inline-flex items-center gap-xs text-[11px] bg-white/10 px-sm py-1 rounded-full border border-white/10 font-bold uppercase tracking-wider">
-                <Clock size={12} className="text-yellow-400" /> 10-Min Verification
-              </span>
-            </div>
-          </div>
-          
-          {/* Medical Iconography Overlay */}
-          <div className="hidden md:flex bg-white/10 border border-white/20 p-lg rounded-3xl backdrop-blur-md shadow-2xl relative w-80 h-48 flex-col justify-between shrink-0">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/15 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-[#a4c9ff]" />
-              </div>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                ACTIVE PIPELINE
-              </span>
-            </div>
-            <div>
-              <p className="font-bold text-sm text-white uppercase tracking-wide leading-none">WellMeds Pharmacy</p>
-              <p className="text-xs text-white/70 mt-1 leading-normal">Clinical verification and digital tracking for high-end patient medicine distribution.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <nav className="flex items-center text-xs text-slate-400 gap-xs mb-2 select-none">
+          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+          <span className="text-slate-300">&gt;</span>
+          <Link to="/upload-prescription" className="hover:text-primary transition-colors">Upload Prescription</Link>
+          <span className="text-slate-300">&gt;</span>
+          <span className="font-bold text-slate-700 dark:text-zinc-300">Order</span>
+        </nav>
+      </div>
 
       {/* Main Content Grid */}
-      <section className="py-12 max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
+      <section className="pb-16 max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
           
           {/* Left Column (70%) */}
-          <div className="lg:col-span-8 space-y-lg text-left">
+          <div className="lg:col-span-8 space-y-md">
             
-            {/* 2. UPLOAD CARD */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-lg">
-              
-              {uploadedRxRecord ? (
-                // SUCCESS STATE CARD
-                <div className="space-y-lg animate-[fade-in_0.2s_ease-out]">
-                  <div className="bg-[#086b53]/5 border border-[#086b53]/15 rounded-3xl p-lg flex flex-col sm:flex-row items-start sm:items-center gap-md">
-                    <div className="w-12 h-12 bg-secondary/15 rounded-2xl flex items-center justify-center text-secondary shrink-0">
-                      <CheckCircle2 size={28} />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <h3 className="font-headline-sm text-headline-sm font-extrabold text-[#086b53]">Prescription Uploaded Successfully</h3>
-                      <p className="text-xs text-on-surface-variant font-medium">
-                        Your prescription sheet has been queued. Our clinical team is verifying it.
-                      </p>
-                      <div className="flex flex-wrap gap-x-md text-[11px] font-mono text-slate-400 pt-1">
-                        <span>ID: {uploadedRxRecord.orderId || uploadedRxRecord.id || uploadedRxRecord._id}</span>
-                        <span>•</span>
-                        <span>Estimated Review: 5-10 min</span>
+            {/* 1. What is Valid Prescription Banner */}
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl shadow-xs overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setValidGuideOpen(!validGuideOpen)}
+                className="w-full flex items-center justify-between p-md text-left font-bold text-xs text-[#004782] dark:text-[#a4c9ff] focus:outline-none hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <div className="flex items-center gap-xs">
+                  <HelpCircle size={16} className="text-primary shrink-0" />
+                  <span>What is valid prescription?</span>
+                </div>
+                <span className="material-symbols-outlined text-[18px] text-slate-400 select-none">
+                  {validGuideOpen ? "expand_less" : "expand_more"}
+                </span>
+              </button>
+              {validGuideOpen && (
+                <div className="p-md pt-2 pb-md border-t border-slate-100 dark:border-zinc-855 text-xs text-slate-500 dark:text-zinc-400 leading-relaxed bg-slate-50/30 dark:bg-zinc-950/20 flex flex-col md:flex-row justify-between gap-md items-center">
+                  <div className="flex-1 space-y-sm text-left">
+                    <p className="font-semibold text-slate-700 dark:text-zinc-300 mt-2">
+                      As per Indian Medical Laws a valid prescription should have the following information:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-sm pt-sm">
+                      <div className="flex flex-col items-center text-center p-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-850 rounded-xl space-y-xs">
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 rounded-xl flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">stethoscope</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300">Doctor's Details</span>
+                      </div>
+                      
+                      <div className="flex flex-col items-center text-center p-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-850 rounded-xl space-y-xs">
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 rounded-xl flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">badge</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300">Patient's Details</span>
+                      </div>
+
+                      <div className="flex flex-col items-center text-center p-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-850 rounded-xl space-y-xs">
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 rounded-xl flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300">Date of Prescription</span>
+                      </div>
+
+                      <div className="flex flex-col items-center text-center p-sm bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-850 rounded-xl space-y-xs">
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 rounded-xl flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">medication</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300">Dosage Details</span>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Right side: Mockup image of prescription sheet with highlight overlays */}
+                  <div className="w-full md:w-56 shrink-0 border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 p-2 shadow-xs relative overflow-hidden mt-md md:mt-0 select-none">
+                    <div className="border border-dashed border-slate-200 rounded-lg p-3 text-[8px] font-mono leading-tight space-y-xs relative">
+                      <div className="border-b pb-xs flex justify-between items-center text-[7px] text-slate-400">
+                        <div>
+                          <p className="font-bold text-slate-800 flex items-center gap-0.5">Dr. Rahul Sharma <span className="material-symbols-outlined text-[8px] text-emerald-500">check_circle</span></p>
+                          <p>MBBS, MD (General Medicine)</p>
+                          <p>Reg No: 123456</p>
+                        </div>
+                        <span className="font-bold">19-Jul-2026</span>
+                      </div>
+                      <div className="py-xs space-y-xs text-[7px] text-slate-450">
+                        <p className="border-b pb-xs"><span className="font-bold text-slate-800">Patient:</span> Amit Kumar, 32M <span className="material-symbols-outlined text-[8px] text-emerald-500">check_circle</span></p>
+                        <p className="font-bold text-slate-800">Rx Medicines: <span className="material-symbols-outlined text-[8px] text-emerald-500">check_circle</span></p>
+                        <ul className="list-disc pl-2 space-y-0.5">
+                          <li>Tab. Lipitor 10mg - Qty 30 (Once daily)</li>
+                          <li>Tab. Pan-D - Qty 10 (Before breakfast)</li>
+                        </ul>
+                      </div>
+                      <div className="border-t pt-xs flex justify-between items-end text-[6px] text-slate-400">
+                        <span>Sign/Seal <span className="material-symbols-outlined text-[8px] text-emerald-500">check_circle</span></span>
+                        <span className="italic font-bold text-indigo-500">Rahul Sharma</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-                  {/* Status Timeline */}
-                  <PrescriptionTimeline status={uploadedRxRecord.status} />
-
-                  <div className="flex justify-start">
+            {/* 2. Upload / Selected & Saved Prescriptions Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              
+              {/* Card 2.1: Selected Prescriptions */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
+                <h3 className="font-headline-sm text-sm font-extrabold text-slate-800 dark:text-zinc-150 pb-sm border-b border-slate-100 dark:border-zinc-800/60">
+                  Selected Prescriptions
+                </h3>
+                
+                {uploadedRxRecord ? (
+                  // SUCCESS STATE CARD
+                  <div className="space-y-md animate-[fade-in_0.2s_ease-out] text-center py-md">
+                    <div className="w-12 h-12 bg-secondary/15 rounded-full flex items-center justify-center text-secondary mx-auto mb-xs">
+                      <CheckCircle2 size={24} />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-extrabold text-xs text-[#086b53]">Uploaded Successfully</h4>
+                      <p className="text-[10px] text-slate-450 truncate max-w-[200px] mx-auto">
+                        {uploadedRxRecord.name}
+                      </p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setUploadedRxRecord(null)}
-                      className="text-[#004782] dark:text-[#a4c9ff] font-bold text-xs hover:underline flex items-center gap-xs bg-slate-50 dark:bg-zinc-800 px-md py-sm rounded-xl border border-slate-100 dark:border-zinc-700/80 hover:shadow-xs transition-all"
+                      className="text-xs text-primary font-bold hover:underline block mx-auto cursor-pointer"
                     >
-                      <UploadCloud size={14} />
-                      Upload Another prescription sheet
+                      Upload Another
                     </button>
                   </div>
-                </div>
-              ) : (
-                // DRAG & DROP UPLOAD ZONE
-                <div className="space-y-md">
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDrop={handleDrop}
-                    onClick={handleDropzoneClick}
-                    className={`border-2 border-dashed rounded-3xl p-xl text-center cursor-pointer transition-all duration-300 bg-slate-50/50 hover:bg-slate-50 dark:bg-zinc-900/60 dark:hover:bg-zinc-850 flex flex-col items-center justify-center space-y-md group hover:border-[#004782] ${
-                      dragActive ? "border-[#004782] bg-[#004782]/5" : "border-outline-variant/60"
-                    }`}
-                  >
-                    <input
-                      type="file"
-                      id="prescription-file-upload"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <div className="w-16 h-16 rounded-2xl bg-[#004782]/10 text-[#004782] dark:text-primary-fixed-dim flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:translate-y-[-2px] shadow-xs">
-                      <UploadCloud size={32} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="font-headline-sm text-headline-sm text-on-surface font-extrabold group-hover:text-[#004782] dark:group-hover:text-primary-fixed-dim transition-colors">
-                        {uploadFile ? uploadFile.name : "Drag & drop prescription here"}
-                      </p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
-                        or click to browse documents from your device storage (PDF, JPG, JPEG, PNG formats up to 10MB supported)
-                      </p>
-                    </div>
-                  </div>
-
-                  {uploadError && (
-                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 p-md rounded-2xl text-body-sm flex items-center gap-sm animate-[fade-in_0.2s_ease-out]">
-                      <ShieldAlert size={16} className="shrink-0" />
-                      <span>{uploadError}</span>
-                    </div>
-                  )}
-
-                  {uploadFile && (
-                    <div className="bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-md flex items-center justify-between animate-[fade-in_0.2s_ease-out]">
-                      <div className="flex items-center gap-sm truncate">
-                        <FileText className="text-[#004782] shrink-0" size={24} />
-                        <div className="truncate text-left">
-                          <p className="font-label-md text-label-md font-bold text-on-surface truncate max-w-[200px] sm:max-w-md">{uploadFile.name}</p>
-                          <p className="text-xs text-on-surface-variant">{(uploadFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                      </div>
+                ) : (
+                  // UPLOAD DROPZONE
+                  <div className="space-y-md">
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                      onClick={handleDropzoneClick}
+                      className={`border-2 border-dashed rounded-2xl p-lg text-center cursor-pointer transition-all duration-300 bg-slate-50/50 hover:bg-slate-50 dark:bg-zinc-900/60 dark:hover:bg-zinc-850 flex flex-col items-center justify-center min-h-[220px] group ${
+                        dragActive ? "border-primary bg-primary-container/10" : "border-outline-variant/60"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        id="prescription-file-upload"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        multiple
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
                       
-                      <button
-                        type="button"
-                        onClick={() => setUploadFile(null)}
-                        className="text-red-500 hover:text-red-600 transition-colors p-sm hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-
-                  {uploadFile && (
-                    <button
-                      onClick={handleUploadSubmit}
-                      disabled={uploading}
-                      className="w-full bg-[#004782] text-white font-bold py-md rounded-2xl hover:bg-[#003c70] transition-all flex items-center justify-center gap-sm shadow-md active:scale-98"
-                    >
-                      {uploading ? (
-                        <>
-                          <Loader size="sm" color="white" />
-                          <span>Uploading Clinical Document ({uploadProgress}%)</span>
-                        </>
-                      ) : (
-                        <>
+                      {/* Document upload illustration */}
+                      <div className="relative w-24 h-24 rounded-full bg-indigo-50/50 dark:bg-indigo-950/20 flex items-center justify-center mx-auto mb-2 group-hover:scale-105 transition-transform duration-300">
+                        <FileText className="w-10 h-10 text-indigo-400 dark:text-indigo-600" />
+                        <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#038076] text-white flex items-center justify-center shadow-md">
                           <UploadCloud size={16} />
-                          <span>Verify & Submit Prescription</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* 3. HOW IT WORKS */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-lg">
-              <h3 className="font-headline-sm text-headline-sm font-extrabold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800">
-                How Prescription Verification Works
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md pt-sm">
-                {timelineSteps.map((step) => {
-                  const Icon = step.icon;
-                  return (
-                    <div key={step.step} className="bg-slate-50 dark:bg-zinc-800/20 p-md rounded-2xl border border-slate-100 dark:border-zinc-800/80 hover:-translate-y-0.5 transition-all duration-200 text-left space-y-sm">
-                      <div className="flex justify-between items-start">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${step.color}`}>
-                          <Icon size={18} />
                         </div>
-                        <span className="text-xs font-black text-slate-300 dark:text-zinc-700">{step.step}</span>
                       </div>
-                      <div className="space-y-1">
-                        <h4 className="font-label-md text-label-md font-bold text-on-surface">{step.title}</h4>
-                        <p className="text-xs text-on-surface-variant dark:text-surface-variant leading-relaxed">{step.desc}</p>
-                      </div>
+
+                      <p className="text-[11px] text-slate-500 dark:text-zinc-455 leading-relaxed max-w-[200px] mx-auto">
+                        Supported files: PNG, JPEG, PDF (Max 10MB)
+                      </p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* 4. MY PRESCRIPTIONS (LISTING) */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
-              <h3 className="font-headline-sm text-headline-sm font-extrabold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800 mb-lg">
-                Your Saved Prescriptions
-              </h3>
+                    {uploadError && (
+                      <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 p-sm rounded-xl text-xs flex items-center gap-xs animate-[fade-in_0.2s_ease-out]">
+                        <ShieldAlert size={14} className="shrink-0" />
+                        <span>{uploadError}</span>
+                      </div>
+                    )}
 
-              {loadingRx ? (
-                <div className="py-xl flex justify-center"><Loader size="lg" /></div>
-              ) : savedPrescriptions.length === 0 ? (
-                <div className="text-center py-16 bg-slate-50/50 dark:bg-zinc-900/60 rounded-3xl border border-slate-100 dark:border-zinc-850">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-md text-slate-400">
-                    <FileText size={32} />
-                  </div>
-                  <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">No Prescriptions Uploaded</h4>
-                  <p className="font-body-sm text-on-surface-variant dark:text-surface-variant mt-xs max-w-sm mx-auto leading-relaxed">
-                    Submit your first prescription sheet to enable rapid verified ordering and checkout capabilities.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                  {savedPrescriptions.map((rx) => (
-                    <PrescriptionCard
-                      key={rx.id || rx._id}
-                      prescription={rx}
-                      onDelete={handleDeleteRx}
-                      onPreview={(record) => window.open(record.fileUrl, "_blank")}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 6. VALID PRESCRIPTION GUIDE (ACCORDION) */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
-              <h3 className="font-headline-sm text-headline-sm font-extrabold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800">
-                Prescription Guidelines Checklist
-              </h3>
-              <p className="text-xs text-on-surface-variant dark:text-surface-variant">
-                To guarantee safety, compliance, and fast order approvals, please verify that your prescription sheet contains these 7 key elements.
-              </p>
-              
-              <div className="space-y-sm mt-sm">
-                {guideItems.map((item, idx) => {
-                  const Icon = item.icon;
-                  const isOpen = guideOpenIdx === idx;
-                  return (
-                    <div key={idx} className="border border-slate-100 dark:border-zinc-800 rounded-2xl overflow-hidden bg-slate-50/50 dark:bg-zinc-900/40">
-                      <button
-                        type="button"
-                        onClick={() => setGuideOpenIdx(isOpen ? null : idx)}
-                        className="w-full flex justify-between items-center p-md text-left font-bold text-xs text-on-surface focus:outline-none hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
-                      >
-                        <div className="flex items-center gap-sm">
-                          <div className="w-8 h-8 rounded-lg bg-[#004782]/10 dark:bg-[#004782]/20 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center">
-                            <Icon size={14} />
+                    {/* Pre-upload List */}
+                    {uploadFiles.length > 0 && (
+                      <div className="space-y-xs max-h-36 overflow-y-auto pr-xs custom-scrollbar">
+                        {uploadFiles.map((file, idx) => (
+                          <div key={idx} className="bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/80 rounded-xl p-2 flex items-center justify-between text-xs animate-[fade-in_0.2s_ease-out]">
+                            <div className="flex items-center gap-xs truncate">
+                              <FileText className="text-primary shrink-0" size={16} />
+                              <div className="truncate text-left">
+                                <p className="font-semibold text-slate-700 dark:text-zinc-300 truncate max-w-[120px]">{file.name}</p>
+                                <p className="text-[9px] text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFile(idx)}
+                              className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 p-1 rounded-lg transition-colors cursor-pointer"
+                              title="Delete File"
+                            >
+                              <Trash2 size={14} />
+                            </button>
                           </div>
-                          <span>{item.title}</span>
-                        </div>
-                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                      {isOpen && (
-                        <div className="p-md pt-0 text-xs text-on-surface-variant dark:text-surface-variant leading-relaxed animate-[slide-down_0.2s_ease-out]">
-                          {item.desc}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                        ))}
+                      </div>
+                    )}
 
-            {/* 7. FAQ ACCORDION SECTION */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
-              <h3 className="font-headline-sm text-headline-sm font-extrabold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800">
-                Frequently Asked Questions
-              </h3>
-              
-              <div className="space-y-sm mt-sm">
-                {faqItems.map((faq, idx) => {
-                  const isOpen = faqOpenIdx === idx;
-                  return (
-                    <div key={idx} className="border border-slate-100 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900">
+                    {uploadFiles.length > 0 && (
                       <button
-                        type="button"
-                        onClick={() => setFaqOpenIdx(isOpen ? null : idx)}
-                        className="w-full flex justify-between items-center p-md text-left font-bold text-xs text-on-surface focus:outline-none hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                        onClick={handleUploadSubmit}
+                        disabled={uploading}
+                        className="w-full bg-[#038076] hover:bg-[#02655f] text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-xs shadow-sm active:scale-98 text-xs cursor-pointer"
                       >
-                        <div className="flex items-center gap-sm">
-                          <HelpCircle size={16} className="text-[#086b53]" />
-                          <span>{faq.q}</span>
-                        </div>
-                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {uploading ? (
+                          <>
+                            <Loader size="sm" color="white" />
+                            <span>Uploading ({uploadProgress}%)</span>
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud size={14} />
+                            <span>Verify & Upload</span>
+                          </>
+                        )}
                       </button>
-                      {isOpen && (
-                        <div className="p-md pt-0 text-xs text-on-surface-variant dark:text-surface-variant leading-relaxed animate-[slide-down_0.2s_ease-out]">
-                          {faq.a}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Card 2.2: Saved Prescriptions */}
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
+                <h3 className="font-headline-sm text-sm font-extrabold text-slate-800 dark:text-zinc-150 pb-sm border-b border-slate-100 dark:border-zinc-800/60">
+                  Saved Prescriptions
+                </h3>
+                
+                {!user ? (
+                  // GUEST STATE
+                  <div className="text-center py-12 bg-slate-50/50 dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-850 flex flex-col items-center justify-center min-h-[220px]">
+                    <p className="text-[11px] font-bold text-slate-450 dark:text-zinc-400">Login to view your saved prescriptions</p>
+                    <button
+                      type="button"
+                      onClick={() => openLoginModal("/upload-prescription")}
+                      className="mt-sm text-[#004782] dark:text-[#a4c9ff] font-extrabold text-xs hover:underline cursor-pointer"
+                    >
+                      Login
+                    </button>
+                  </div>
+                ) : loadingRx ? (
+                  // LOADING STATE
+                  <div className="py-xl flex justify-center items-center min-h-[220px]"><Loader size="md" /></div>
+                ) : savedPrescriptions.length === 0 ? (
+                  // EMPTY STATE
+                  <div className="text-center py-12 bg-slate-50/50 dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-850 flex flex-col items-center justify-center min-h-[220px]">
+                    <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-sm text-slate-400">
+                      <FileText size={20} />
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">No prescription found</p>
+                  </div>
+                ) : (
+                  // SAVED LIST
+                  <div className="space-y-sm max-h-[240px] overflow-y-auto pr-xs custom-scrollbar">
+                    {savedPrescriptions.map((rx) => (
+                      <PrescriptionCard
+                        key={rx.id || rx._id}
+                        prescription={rx}
+                        onDelete={handleDeleteRx}
+                        onPreview={(record) => window.open(record.fileUrl, "_blank")}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
 
           </div>
 
           {/* Right Column / Sidebar (30%) */}
-          <div className="lg:col-span-4 space-y-lg text-left">
+          <div className="lg:col-span-4 space-y-md">
             
-            {/* Delivery Location Widget */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
-              <div className="flex justify-between items-center pb-sm border-b border-slate-100 dark:border-zinc-800">
-                <h3 className="font-label-md text-label-md font-bold text-on-surface">Delivery Destination:</h3>
-                <button
-                  type="button"
-                  onClick={() => { setNewAddressInput(address); setAddressModalOpen(true); }}
-                  className="text-[#004782] dark:text-[#a4c9ff] text-xs font-bold hover:underline"
-                >
-                  Change
-                </button>
+            {/* Progress Steps Tracker */}
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-md shadow-xs flex items-center justify-between">
+              <div className="flex items-center justify-between w-full px-lg relative">
+                {/* Line behind */}
+                <div className="absolute top-1/2 left-lg right-lg h-0.5 border-t border-dashed border-slate-200 dark:border-zinc-800 -translate-y-1/2 z-0"></div>
+                
+                {/* Step 1: Rx */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-slate-150 text-slate-700 border-2 border-slate-300 dark:bg-zinc-800 dark:text-zinc-350 dark:border-zinc-700 flex items-center justify-center font-bold text-xs">
+                    Rx
+                  </div>
+                </div>
+
+                {/* Step 2: Upload */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#038076] text-white border-2 border-[#038076] flex items-center justify-center">
+                    <UploadCloud size={14} />
+                  </div>
+                </div>
+
+                {/* Step 3: Cart */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-400 flex items-center justify-center">
+                    <ShoppingCart size={13} />
+                  </div>
+                </div>
+
+                {/* Step 4: Pay */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-400 flex items-center justify-center">
+                    <CreditCard size={13} />
+                  </div>
+                </div>
               </div>
-              <div className="bg-slate-50 dark:bg-zinc-800/50 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 flex gap-sm items-start text-xs text-on-surface">
-                <MapPin className="text-[#004782] shrink-0" size={16} />
-                <p className="leading-relaxed break-words">{address}</p>
+            </div>
+
+            {/* Need Support Widget */}
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-md shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-zinc-100">Need Support?</span>
+              <div className="flex items-center gap-sm">
+                <a
+                  href="tel:+18005550199"
+                  className="w-8 h-8 rounded-full bg-[#e8e4f5] dark:bg-[#2d224d] text-[#6349c2] flex items-center justify-center hover:scale-105 transition-transform"
+                  title="Call Us"
+                >
+                  <Phone size={14} />
+                </a>
+                <a
+                  href="https://wa.me/18005550199"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-8 h-8 rounded-full bg-[#e3f7ed] dark:bg-[#183a2b] text-[#24b070] flex items-center justify-center hover:scale-105 transition-transform"
+                  title="WhatsApp Us"
+                >
+                  <MessageSquare size={14} />
+                </a>
+                <a
+                  href="mailto:support@wellmeds.com"
+                  className="w-8 h-8 rounded-full bg-[#e1f1fb] dark:bg-[#193247] text-[#1c8ad4] flex items-center justify-center hover:scale-105 transition-transform"
+                  title="Email Us"
+                >
+                  <Mail size={14} />
+                </a>
+              </div>
+            </div>
+
+            {/* Delivery Location Widget */}
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-md shadow-xs space-y-sm">
+              <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-850">
+                <h3 className="font-bold text-[11px] text-slate-400 uppercase tracking-wider">Deliver to:</h3>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => { setNewAddressInput(address); setAddressModalOpen(true); }}
+                    className="text-primary dark:text-[#a4c9ff] text-xs font-bold hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-xs items-start text-xs text-slate-800 dark:text-zinc-150">
+                <MapPin className="text-[#038076] shrink-0 mt-0.5" size={14} />
+                <p className="leading-tight break-words">{address}</p>
               </div>
             </div>
 
             {/* Select Order Method Widget */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-lg">
-              <h3 className="font-label-md text-label-md font-bold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800">
-                Order Processing Method
-              </h3>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl p-lg shadow-xs space-y-md">
+              <h3 className="font-bold text-xs text-slate-400 uppercase tracking-wider">Select order method</h3>
               
-              <div className="flex flex-col gap-sm">
-                
-                {/* Method 1 */}
-                <label
-                  className={`p-md border rounded-2xl flex items-center justify-between cursor-pointer transition-all duration-200 ${
+              <div className="space-y-sm">
+                {/* Option 1: Order Now */}
+                <div
+                  className={`p-md border rounded-2xl transition-all ${
                     orderMethod === "upload-and-order"
-                      ? "border-[#004782] bg-[#004782]/5 font-bold text-[#004782]"
-                      : "border-slate-100 dark:border-zinc-800 hover:bg-slate-50"
+                      ? "border-[#038076] bg-[#038076]/5 font-bold"
+                      : "border-slate-100 dark:border-zinc-800"
                   }`}
                 >
-                  <div className="flex items-center gap-sm">
-                    <input
-                      type="radio"
-                      name="orderMethod"
-                      value="upload-and-order"
-                      checked={orderMethod === "upload-and-order"}
-                      onChange={() => setOrderMethod("upload-and-order")}
-                      className="text-[#004782] focus:ring-[#004782] h-4 w-4"
-                    />
-                    <span className="text-xs text-on-surface font-semibold">Upload Rx & Order Now</span>
-                  </div>
-                  <FileText size={16} className="text-[#004782]" />
-                </label>
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex items-center gap-xs">
+                      <input
+                        type="radio"
+                        name="orderMethod"
+                        value="upload-and-order"
+                        checked={orderMethod === "upload-and-order"}
+                        onChange={() => setOrderMethod("upload-and-order")}
+                        className="text-[#038076] focus:ring-[#038076] h-4 w-4"
+                      />
+                      <span className="text-xs text-slate-800 dark:text-zinc-100 font-extrabold">ORDER NOW</span>
+                    </div>
+                    {orderMethod === "upload-and-order" && (
+                      <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
+                    )}
+                  </label>
+                  
+                  {orderMethod === "upload-and-order" && (
+                    <div className="mt-sm pt-sm border-t border-slate-150 dark:border-zinc-800/60 space-y-sm animate-[fade-in_0.2s_ease-out]">
+                      <label className="flex items-center gap-xs cursor-pointer text-[10px] text-slate-450 dark:text-zinc-450 font-bold select-none">
+                        <input
+                          type="checkbox"
+                          checked={durationEnabled}
+                          onChange={(e) => setDurationEnabled(e.target.checked)}
+                          className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                        />
+                        <span>Add Duration & Order</span>
+                      </label>
+                      
+                      {durationEnabled && (
+                        <div className="flex items-center gap-xs bg-white dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl p-1">
+                          <input
+                            type="number"
+                            value={durationValue}
+                            onChange={(e) => setDurationValue(e.target.value)}
+                            className="w-16 px-xs py-1 bg-transparent text-xs font-bold text-slate-800 dark:text-zinc-100 focus:outline-none"
+                            min="1"
+                          />
+                          <select
+                            value={durationUnit}
+                            onChange={(e) => setDurationUnit(e.target.value)}
+                            className="flex-1 bg-[#038076] text-white text-xs font-bold px-2 py-1 rounded-lg border-none focus:outline-none cursor-pointer"
+                          >
+                            <option value="Days">Days</option>
+                            <option value="Months">Months</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-                {/* Method 2 */}
-                <label
-                  className={`p-md border rounded-2xl flex items-center justify-between cursor-pointer transition-all duration-200 ${
+                {/* Option 2: Get Call */}
+                <div
+                  className={`p-md border rounded-2xl transition-all ${
                     orderMethod === "callback"
-                      ? "border-[#004782] bg-[#004782]/5 font-bold text-[#004782]"
-                      : "border-slate-100 dark:border-zinc-800 hover:bg-slate-50"
+                      ? "border-[#038076] bg-[#038076]/5 font-bold"
+                      : "border-slate-100 dark:border-zinc-800"
                   }`}
                 >
-                  <div className="flex items-center gap-sm">
-                    <input
-                      type="radio"
-                      name="orderMethod"
-                      value="callback"
-                      checked={orderMethod === "callback"}
-                      onChange={() => setOrderMethod("callback")}
-                      className="text-[#004782] focus:ring-[#004782] h-4 w-4"
-                    />
-                    <span className="text-xs text-on-surface font-semibold">Request Callback Assistance</span>
-                  </div>
-                  <MessageSquare size={16} className="text-secondary" />
-                </label>
-
-                {/* Method 3 */}
-                <label
-                  className={`p-md border rounded-2xl flex items-center justify-between cursor-pointer transition-all duration-200 ${
-                    orderMethod === "assistance"
-                      ? "border-[#004782] bg-[#004782]/5 font-bold text-[#004782]"
-                      : "border-slate-100 dark:border-zinc-800 hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-sm">
-                    <input
-                      type="radio"
-                      name="orderMethod"
-                      value="assistance"
-                      checked={orderMethod === "assistance"}
-                      onChange={() => setOrderMethod("assistance")}
-                      className="text-[#004782] focus:ring-[#004782] h-4 w-4"
-                    />
-                    <span className="text-xs text-on-surface font-semibold">Help Me Complete Order</span>
-                  </div>
-                  <Users size={16} className="text-teal-600" />
-                </label>
-
-              </div>
-
-              {/* Supply Duration Dropdown */}
-              <div className="pt-md border-t border-slate-100 dark:border-zinc-800 space-y-xs">
-                <label className="block text-xs font-bold text-on-surface uppercase tracking-wide">Supply Duration Goal</label>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="w-full p-md bg-white dark:bg-zinc-900 border border-outline-variant rounded-xl font-label-md text-on-surface focus:ring-1 focus:ring-primary focus:border-[#004782] outline-none transition-all cursor-pointer"
-                >
-                  <option value="7">7 Days Supply Course</option>
-                  <option value="15">15 Days Supply Course</option>
-                  <option value="30">30 Days Supply Course</option>
-                  <option value="60">60 Days Supply Course</option>
-                  <option value="90">90 Days Supply Course</option>
-                </select>
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="flex items-center gap-xs">
+                      <input
+                        type="radio"
+                        name="orderMethod"
+                        value="callback"
+                        checked={orderMethod === "callback"}
+                        onChange={() => setOrderMethod("callback")}
+                        className="text-[#038076] focus:ring-[#038076] h-4 w-4"
+                      />
+                      <span className="text-xs text-slate-800 dark:text-zinc-100 font-extrabold">GET CALL</span>
+                    </div>
+                    {orderMethod === "callback" && (
+                      <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
+                    )}
+                  </label>
+                  
+                  {orderMethod === "callback" && (
+                    <div className="mt-xs text-[10px] text-slate-500 dark:text-zinc-455 leading-normal pl-6 animate-[fade-in_0.2s_ease-out]">
+                      <span className="font-bold block text-slate-700 dark:text-zinc-300 mt-1">Consult WellMeds Expert</span>
+                      We've got you! Select now, and a WellMeds care expert will call to assist you with placing your order right away!
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Continue CTA Action Button */}
-            <button
-              onClick={handleContinue}
-              className="w-full bg-[#004782] hover:bg-[#003c70] text-white font-bold h-12 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 flex items-center justify-center gap-sm sticky bottom-lg z-30"
-            >
-              <span>Continue Checkout</span>
-              <ArrowRight size={18} />
-            </button>
-
-            {/* Support Call Widget */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-sm space-y-md">
-              <h3 className="font-label-md text-label-md font-bold text-on-surface pb-sm border-b border-slate-100 dark:border-zinc-800">
-                Prescription Support?
-              </h3>
-              
-              <div className="space-y-sm text-xs">
-                <a href="tel:+18005550199" className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-850 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 dark:border-zinc-800">
-                  <div className="w-8 h-8 rounded-lg bg-[#004782]/10 flex items-center justify-center text-[#004782] shrink-0">
-                    <Phone size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Toll Free Call</p>
-                    <p className="font-extrabold text-on-surface mt-1">+1 (800) 555-0199</p>
-                  </div>
-                </a>
-
-                <a href="https://wa.me/18005550199" target="_blank" rel="noreferrer" className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-850 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 dark:border-zinc-800">
-                  <div className="w-8 h-8 rounded-lg bg-[#086b53]/10 flex items-center justify-center text-[#086b53] shrink-0">
-                    <MessageSquare size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">WhatsApp Chat</p>
-                    <p className="font-extrabold text-on-surface mt-1">Connect instantly now</p>
-                  </div>
-                </a>
-
-                <a href="mailto:support@wellmeds.com" className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-850 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 dark:border-zinc-800">
-                  <div className="w-8 h-8 rounded-lg bg-[#004782]/10 flex items-center justify-center text-[#004782] shrink-0">
-                    <Mail size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Email Support</p>
-                    <p className="font-extrabold text-on-surface mt-1">support@wellmeds.com</p>
-                  </div>
-                </a>
-              </div>
-            </div>
+            {/* Action CTA Button */}
+            {!user ? (
+              <button
+                type="button"
+                onClick={() => openLoginModal("/upload-prescription")}
+                className="w-full bg-[#004782] hover:bg-[#003c70] text-white font-bold h-12 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-xs cursor-pointer text-xs uppercase tracking-wider"
+              >
+                <span>Login To Continue</span>
+                <ArrowRight size={14} />
+              </button>
+            ) : address === "Please set a shipping address in your profile." ? (
+              <button
+                type="button"
+                onClick={() => { setNewAddressInput(""); setAddressModalOpen(true); }}
+                className="w-full bg-[#004782] hover:bg-[#003c70] text-white font-bold h-12 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-xs cursor-pointer text-xs uppercase tracking-wider"
+              >
+                <span>Add Address</span>
+                <MapPin size={14} />
+              </button>
+            ) : (
+              <button
+                onClick={handleContinue}
+                className="w-full bg-[#038076] hover:bg-[#02655f] text-white font-bold h-12 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-xs cursor-pointer text-xs uppercase tracking-wider"
+              >
+                <span>Continue</span>
+                <ArrowRight size={14} />
+              </button>
+            )}
 
           </div>
 
@@ -777,7 +766,7 @@ const UploadPrescriptionPage = () => {
               value={newAddressInput}
               onChange={(e) => setNewAddressInput(e.target.value)}
               rows={4}
-              className="w-full p-md bg-white dark:bg-zinc-900 border border-outline-variant rounded-xl text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-[#004782] outline-none"
+              className="w-full p-md bg-white dark:bg-zinc-900 border border-outline-variant rounded-xl text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none"
               placeholder="Enter complete shipping address..."
             />
           </div>
@@ -792,7 +781,7 @@ const UploadPrescriptionPage = () => {
             <button
               type="button"
               onClick={handleSaveAddress}
-              className="flex-1 bg-[#004782] text-white py-sm rounded-xl font-label-md text-sm font-bold hover:bg-[#003c70] transition-all active:scale-95"
+              className="flex-1 bg-primary text-white py-sm rounded-xl font-label-md text-sm font-bold hover:opacity-90 transition-all active:scale-95"
             >
               Save Address
             </button>

@@ -26,6 +26,22 @@ export const orderService = {
   },
 
   /**
+   * Create Razorpay order session
+   */
+  async createRazorpayOrder(orderSessionData) {
+    const data = await apiInstance.post("/orders/razorpay", orderSessionData);
+    return data;
+  },
+
+  /**
+   * Check order payment status (polling)
+   */
+  async getOrderStatus(razorpayOrderId) {
+    const data = await apiInstance.get(`/orders/status/${razorpayOrderId}`);
+    return data;
+  },
+
+  /**
    * Admin: Update order status
    */
   async updateOrderStatus(id, status) {

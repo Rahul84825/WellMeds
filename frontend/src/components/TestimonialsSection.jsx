@@ -95,7 +95,7 @@ const TestimonialCard = ({ item }) => {
   const textToShow = isExpanded ? item.text : (shouldTruncate ? `${item.text.slice(0, maxLength)}...` : item.text);
 
   return (
-    <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] shrink-0 snap-start">
+    <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] shrink-0 snap-start testimonial-card-wrap">
       <div className="group relative flex flex-col justify-between h-full rounded-[24px] border border-slate-200/60 bg-white dark:bg-zinc-900 p-6 md:p-8 pb-24
                       shadow-[0_4px_20px_rgba(0,0,0,0.015)]
                       transition-all duration-300 ease-in-out
@@ -104,7 +104,7 @@ const TestimonialCard = ({ item }) => {
                       hover:shadow-[0_12px_30px_rgba(3,128,118,0.06)]
                       dark:border-zinc-800/80 dark:bg-zinc-950/40
                       dark:hover:border-[#038076] dark:hover:bg-zinc-950
-                      overflow-hidden min-h-[340px]">
+                      overflow-hidden min-h-[340px] testimonial-card-body">
         
         {/* Subtle Quote Watermark */}
         <div className="absolute top-20 right-6 text-slate-100 dark:text-zinc-800 opacity-[0.18] dark:opacity-[0.05] pointer-events-none select-none transition-colors group-hover:text-[#038076]/10">
@@ -113,10 +113,10 @@ const TestimonialCard = ({ item }) => {
 
         <div>
           {/* Top customer block */}
-          <div className="flex items-center gap-4 mb-5 relative z-10">
+          <div className="flex items-center gap-4 mb-5 relative z-10 testimonial-user-block">
             {/* Avatar */}
             {!item.image || imageError ? (
-              <div className="w-[64px] h-[64px] rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] flex items-center justify-center font-bold text-lg border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0">
+              <div className="w-[64px] h-[64px] rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] flex items-center justify-center font-bold text-lg border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0 testimonial-avatar">
                 {getInitials(item.name)}
               </div>
             ) : (
@@ -124,19 +124,19 @@ const TestimonialCard = ({ item }) => {
                 src={item.image}
                 alt={item.name}
                 onError={() => setImageError(true)}
-                className="w-[64px] h-[64px] rounded-full object-cover border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0"
+                className="w-[64px] h-[64px] rounded-full object-cover border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0 testimonial-avatar"
               />
             )}
 
             {/* User Meta */}
-            <div className="text-left">
-              <h4 className="text-[15px] font-bold text-slate-900 dark:text-zinc-100 leading-tight">
+            <div className="text-left testimonial-meta">
+              <h4 className="text-[15px] font-bold text-slate-900 dark:text-zinc-100 leading-tight testimonial-user-name">
                 {item.name}
               </h4>
-              <p className="text-[12px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5 mb-1.5">
+              <p className="text-[12px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5 mb-1.5 testimonial-user-role">
                 {item.role || "Verified Buyer"}
               </p>
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 testimonial-stars">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 ))}
@@ -145,8 +145,8 @@ const TestimonialCard = ({ item }) => {
           </div>
 
           {/* Testimonial body */}
-          <div className="relative z-10 text-left mb-6">
-            <p className="text-[14px] leading-relaxed text-slate-600 dark:text-zinc-300 font-medium">
+          <div className="relative z-10 text-left mb-6 testimonial-text-container">
+            <p className="text-[14px] leading-relaxed text-slate-600 dark:text-zinc-300 font-medium testimonial-text">
               "{textToShow}"
             </p>
             {shouldTruncate && (
@@ -161,7 +161,7 @@ const TestimonialCard = ({ item }) => {
         </div>
 
         {/* Footer (with card half blur effect) */}
-        <div className="absolute bottom-0 left-0 right-0 h-[72px] px-6 md:px-8 flex items-center justify-between border-t border-slate-150 dark:border-zinc-800/40 bg-white/70 dark:bg-zinc-950/60 backdrop-blur-md rounded-b-[24px] z-10">
+        <div className="absolute bottom-0 left-0 right-0 h-[72px] px-6 md:px-8 flex items-center justify-between border-t border-slate-150 dark:border-zinc-800/40 bg-white/70 dark:bg-zinc-950/60 backdrop-blur-md rounded-b-[24px] z-10 testimonial-footer">
           <div className="flex items-center gap-2">
             {/* Google G Logo SVG */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -187,7 +187,7 @@ const TestimonialCard = ({ item }) => {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 text-[11px] font-medium">
+          <div className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 text-[11px] font-medium testimonial-time">
             <span>•</span>
             <span>{item.time || "2 months ago"}</span>
           </div>
@@ -213,22 +213,22 @@ export const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 testimonials-section">
       <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6">
         
         {/* Header */}
-        <div className="mb-8 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+        <div className="mb-8 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 testimonials-header">
           <div className="text-left">
-            <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-bold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-bold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight testimonials-title">
               What Our <span className="text-[#038076]">Customers Say</span>
             </h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400 max-w-xl leading-relaxed">
+            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400 max-w-xl leading-relaxed testimonials-desc">
               Read genuine reviews from patients who rely on WellMeds for chronic care, oncology, and daily healthcare needs.
             </p>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-3 self-start sm:self-end shrink-0">
+          <div className="flex items-center gap-3 self-start sm:self-end shrink-0 testimonials-controls">
             <button
               onClick={() => scroll("left")}
               className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 text-[#1D2B5C] dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200 cursor-pointer"
@@ -257,6 +257,105 @@ export const TestimonialsSection = () => {
           <style>{`
             .no-scrollbar::-webkit-scrollbar {
               display: none;
+            }
+
+            /* ── Testimonials Mobile Overrides (≤768px) ── */
+            @media (max-width: 768px) {
+              .testimonials-section {
+                padding-top: 24px !important;
+                padding-bottom: 24px !important;
+              }
+              .testimonials-header {
+                margin-bottom: 16px !important;
+                gap: 12px !important;
+              }
+              .testimonials-title {
+                font-size: 24px !important; /* Reduced ~20% from 30px */
+                line-height: 1.25 !important;
+                font-weight: 700 !important;
+              }
+              .testimonials-desc {
+                font-size: 13px !important;
+                margin-top: 6px !important;
+                margin-bottom: 0 !important;
+                line-height: 1.4 !important;
+              }
+              .testimonials-controls {
+                gap: 8px !important;
+                margin-top: 4px !important;
+              }
+              .testimonials-controls button,
+              .testimonials-controls a {
+                height: 34px !important;
+                width: 34px !important;
+                font-size: 12px !important;
+                padding: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+              }
+              .testimonials-controls a {
+                width: auto !important;
+                padding-left: 14px !important;
+                padding-right: 14px !important;
+                border-radius: 999px !important;
+              }
+              .testimonial-card-wrap {
+                width: 280px !important; /* Peek next cards */
+                min-width: 280px !important;
+              }
+              .testimonial-card-body {
+                padding: 16px !important;
+                padding-bottom: 56px !important; /* Reduce padding to optimize vertical space */
+                min-height: 200px !important;
+                border-radius: 18px !important;
+              }
+              .testimonial-avatar {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 14px !important;
+              }
+              .testimonial-user-block {
+                gap: 10px !important;
+                margin-bottom: 12px !important;
+              }
+              .testimonial-user-name {
+                font-size: 14px !important;
+              }
+              .testimonial-user-role {
+                font-size: 11px !important;
+                margin-top: 1px !important;
+                margin-bottom: 4px !important;
+              }
+              .testimonial-stars svg {
+                width: 12px !important;
+                height: 12px !important;
+              }
+              .testimonial-text-container {
+                margin-bottom: 12px !important;
+              }
+              .testimonial-text {
+                font-size: 13px !important;
+                line-height: 1.45 !important;
+                margin-bottom: 0 !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 3 !important; /* Limit previews to 3 lines */
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+              }
+              .testimonial-footer {
+                height: 44px !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                border-radius: 0 0 18px 18px !important;
+              }
+              .testimonial-footer span {
+                font-size: 10px !important;
+              }
+              .testimonial-footer svg {
+                width: 14px !important;
+                height: 14px !important;
+              }
             }
           `}</style>
           <div

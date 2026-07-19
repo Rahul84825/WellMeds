@@ -17,6 +17,20 @@ const prescriptionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // Multi-page file support
+    fileUrls: {
+      type: [String],
+      default: [],
+    },
+    fileNames: {
+      type: [String],
+      default: [],
+    },
+    // Optional Doctor details
+    doctorName: {
+      type: String,
+      default: "",
+    },
     // File metadata
     fileSize: {
       type: Number, // bytes

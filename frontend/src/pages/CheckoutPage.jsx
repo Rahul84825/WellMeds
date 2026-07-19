@@ -11,6 +11,20 @@ import { UploadCloud, CheckCircle2, ClipboardList, Stethoscope, Clock } from "lu
 import { formatCurrency } from "../utils/currency";
 import { toast } from "sonner";
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
   const { user, loading: authLoading, openLoginModal } = useAuth();
@@ -22,6 +36,33 @@ const Checkout = () => {
       navigate("/cart", { replace: true });
     }
   }, [authLoading, user, openLoginModal, navigate]);
+
+  // Payment Recovery check: if user returns with a paid draft order
+  useEffect(() => {
+    const recoverOrder = async () => {
+      if (!user) return;
+      try {
+        const orders = await api.getUserOrders();
+        // Look for any order placed in the last 15 minutes that is Paid and has a Razorpay Order ID
+        const recentPaidOrder = orders.find(order => {
+          const isRecent = new Date() - new Date(order.createdAt) < 15 * 60 * 1000;
+          return isRecent && order.paymentStatus === "Paid" && order.razorpayOrderId;
+        });
+
+        if (recentPaidOrder) {
+          toast.success("Recovered successfully paid order!");
+          clearCart();
+          navigate("/order-success", { state: { order: recentPaidOrder }, replace: true });
+        }
+      } catch (err) {
+        console.warn("Payment recovery check failed:", err.message);
+      }
+    };
+    
+    if (user && cartItems.length > 0) {
+      recoverOrder();
+    }
+  }, [user, cartItems, navigate, clearCart]);
 
   // Form states
   const [fullName, setFullName] = useState(user?.name || "");
@@ -59,6 +100,8 @@ const Checkout = () => {
   const [availableCoupons, setAvailableCoupons] = useState([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [pollingTimeout, setPollingTimeout] = useState(false);
 
   // Fetch available coupons on checkout page load
   useEffect(() => {
@@ -253,14 +296,14 @@ const Checkout = () => {
     setIsSubmitting(true);
     try {
       const orderItems = cartItems.map((item) => ({
-        product: item._id || item.id,   // MongoDB ObjectId for stock deduction
-        id: item._id || item.id,         // fallback
+        product: item._id || item.id,
+        id: item._id || item.id,
         name: item.name,
         quantity: item.quantity,
         price: item.price,
       }));
 
-      const orderData = {
+      const baseOrderData = {
         customer: fullName,
         email,
         items: orderItems,
@@ -277,18 +320,110 @@ const Checkout = () => {
         paymentMethod,
       };
 
-      const completedOrder = await api.placeOrder(orderData);
+      if (paymentMethod === "cod") {
+        const completedOrder = await api.placeOrder(baseOrderData);
+        clearCart();
+        navigate("/order-success", { state: { order: completedOrder } });
+      } else {
+        // Online Payment Flow via Razorpay: calculate totals, and create draft order in DB
+        const orderSession = await api.createRazorpayOrder({
+          items: orderItems,
+          couponCode: couponApplied?.code || null,
+          customer: fullName,
+          email: email,
+          shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
+          rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
+          requiresRx
+        });
+        
+        if (!orderSession.success || !orderSession.razorpayOrder) {
+          throw new Error(orderSession.message || "Failed to initialize payment order session.");
+        }
 
-      // Clear cart
-      clearCart();
+        const isScriptLoaded = await loadRazorpayScript();
+        if (!isScriptLoaded) {
+          throw new Error("Unable to load payment gateway script. Please check your connection.");
+        }
 
-      // Redirect to success
-      navigate("/order-success", { state: { order: completedOrder } });
+        const razorpayOrder = orderSession.razorpayOrder;
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_mockkeyid123",
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: "WellMeds Pharmacy",
+          description: "Online Medicine Checkout",
+          order_id: razorpayOrder.id,
+          handler: async function (response) {
+            setPaymentProcessing(true);
+            setIsSubmitting(true);
+            
+            // 1. Kickstart frontend signature placement as fallback
+            const orderData = {
+              ...baseOrderData,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            };
+            
+            api.placeOrder(orderData).catch(err => {
+              console.warn("Client-side placeOrder fallback failed (will rely on Webhook):", err.message);
+            });
+
+            // 2. Start polling for order creation status (Authoritative source of truth)
+            let attempts = 0;
+            const maxAttempts = 30; // 60 seconds max (at 2s interval)
+            
+            const interval = setInterval(async () => {
+              attempts++;
+              try {
+                const statusRes = await api.getOrderStatus(response.razorpay_order_id);
+                if (statusRes.success && statusRes.paymentStatus === "Paid") {
+                  clearInterval(interval);
+                  setPaymentProcessing(false);
+                  setPollingTimeout(false);
+                  setIsSubmitting(false);
+                  clearCart();
+                  navigate("/order-success", { state: { order: statusRes.order } });
+                }
+              } catch (err) {
+                console.warn("Polling order status failed attempt:", attempts, err.message);
+              }
+
+              if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                setPollingTimeout(true);
+                clearCart();
+              }
+            }, 2000);
+          },
+          prefill: {
+            name: fullName,
+            email: email,
+            contact: user?.phone || user?.mobile || "",
+          },
+          theme: {
+            color: "#038076",
+          },
+          modal: {
+            ondismiss: function () {
+              setIsSubmitting(false);
+              toast.info("Payment cancelled.");
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          toast.error(`Payment transaction failed: ${response.error.description}`);
+          setIsSubmitting(false);
+        });
+        rzp.open();
+      }
     } catch (err) {
       console.error("Failed to place order", err);
-      const msg = err?.response?.data?.message || "Something went wrong placing your order. Please try again.";
+      const msg = err?.response?.data?.message || err?.message || "Something went wrong placing your order. Please try again.";
       toast.error(msg);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -340,15 +475,28 @@ const Checkout = () => {
               Shipping Information
             </h3>
 
+            {requiresRx && rxStatus !== "Verified" && (
+              <div className="bg-amber-500/[0.03] border border-amber-500/20 rounded-xl p-md flex items-start gap-xs text-amber-600 animate-[fade-in_0.2s_ease-out] mb-md select-none">
+                <span className="material-symbols-outlined text-[20px] text-amber-500 shrink-0">lock</span>
+                <div className="text-xs text-left">
+                  <h4 className="font-bold text-slate-800 dark:text-zinc-200">Shipping Locked</h4>
+                  <p className="text-slate-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                    Please upload a valid prescription and wait for pharmacist verification to unlock checkout details.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
               <div className="space-y-xs">
                 <label className="block text-label-sm font-semibold text-on-surface">Full Name</label>
                 <input
                   type="text"
                   required
+                  disabled={requiresRx && rxStatus !== "Verified"}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                   placeholder="Enter full name"
                 />
               </div>
@@ -357,9 +505,10 @@ const Checkout = () => {
                 <input
                   type="email"
                   required
+                  disabled={requiresRx && rxStatus !== "Verified"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                   placeholder="Enter email address"
                 />
               </div>
@@ -370,9 +519,10 @@ const Checkout = () => {
               <input
                 type="text"
                 required
+                disabled={requiresRx && rxStatus !== "Verified"}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                 placeholder="Enter street address"
               />
             </div>
@@ -383,9 +533,10 @@ const Checkout = () => {
                 <input
                   type="text"
                   required
+                  disabled={requiresRx && rxStatus !== "Verified"}
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                   placeholder="City"
                 />
               </div>
@@ -393,9 +544,10 @@ const Checkout = () => {
                 <label className="block text-label-sm font-semibold text-on-surface">State</label>
                 <select
                   required
+                  disabled={requiresRx && rxStatus !== "Verified"}
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                 >
                   <option value="">Select State</option>
                   {[
@@ -414,9 +566,10 @@ const Checkout = () => {
                 <input
                   type="text"
                   required
+                  disabled={requiresRx && rxStatus !== "Verified"}
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
+                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm disabled:opacity-60"
                   placeholder="6-digit Pincode"
                   maxLength={6}
                   pattern="[0-9]{6}"
@@ -554,16 +707,17 @@ const Checkout = () => {
                   paymentMethod === "upi"
                     ? "border-primary bg-primary-container/10 font-bold"
                     : "border-outline-variant hover:bg-surface-container-low"
-                }`}
+                } ${requiresRx && rxStatus !== "Verified" ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center gap-sm">
                   <input
                     type="radio"
                     name="payment"
                     value="upi"
+                    disabled={requiresRx && rxStatus !== "Verified"}
                     checked={paymentMethod === "upi"}
                     onChange={() => setPaymentMethod("upi")}
-                    className="text-primary focus:ring-primary h-4 w-4"
+                    className="text-primary focus:ring-primary h-4 w-4 disabled:opacity-50"
                   />
                   <span className="font-body-sm text-on-surface text-sm">UPI (PhonePe / GPay / Paytm)</span>
                 </div>
@@ -575,16 +729,17 @@ const Checkout = () => {
                   paymentMethod === "card"
                     ? "border-primary bg-primary-container/10 font-bold"
                     : "border-outline-variant hover:bg-surface-container-low"
-                }`}
+                } ${requiresRx && rxStatus !== "Verified" ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center gap-sm">
                   <input
                     type="radio"
                     name="payment"
                     value="card"
+                    disabled={requiresRx && rxStatus !== "Verified"}
                     checked={paymentMethod === "card"}
                     onChange={() => setPaymentMethod("card")}
-                    className="text-primary focus:ring-primary h-4 w-4"
+                    className="text-primary focus:ring-primary h-4 w-4 disabled:opacity-50"
                   />
                   <span className="font-body-sm text-on-surface text-sm">Debit / Credit Card</span>
                 </div>
@@ -596,16 +751,17 @@ const Checkout = () => {
                   paymentMethod === "cod"
                     ? "border-primary bg-primary-container/10 font-bold"
                     : "border-outline-variant hover:bg-surface-container-low"
-                }`}
+                } ${requiresRx && rxStatus !== "Verified" ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center gap-sm">
                   <input
                     type="radio"
                     name="payment"
                     value="cod"
+                    disabled={requiresRx && rxStatus !== "Verified"}
                     checked={paymentMethod === "cod"}
                     onChange={() => setPaymentMethod("cod")}
-                    className="text-primary focus:ring-primary h-4 w-4"
+                    className="text-primary focus:ring-primary h-4 w-4 disabled:opacity-50"
                   />
                   <span className="font-body-sm text-on-surface text-sm">Cash on Delivery</span>
                 </div>
@@ -1009,6 +1165,47 @@ const Checkout = () => {
           </button>
         </div>
       </Modal>
+
+      {/* Payment Processing Modal */}
+      {paymentProcessing && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[99999] flex items-center justify-center p-md select-none animate-[fade-in_0.2s_ease-out]">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-xl max-w-sm w-full text-center space-y-md shadow-2xl">
+            {!pollingTimeout ? (
+              <>
+                <div className="relative w-16 h-16 rounded-full bg-[#038076]/10 flex items-center justify-center mx-auto mb-2 text-[#038076]">
+                  <span className="material-symbols-outlined text-[32px] animate-spin">refresh</span>
+                </div>
+                <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-100">Payment Processing...</h4>
+                <p className="text-xs text-slate-455 dark:text-zinc-450 leading-relaxed">
+                  Confirming transaction parameters with the banking gateway. Please do not close or refresh this page.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="relative w-16 h-16 rounded-full bg-amber-50 text-amber-500 dark:bg-amber-955/20 flex items-center justify-center mx-auto mb-2 text-amber-600">
+                  <span className="material-symbols-outlined text-[32px]">info</span>
+                </div>
+                <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-100">Confirming Payment</h4>
+                <p className="text-xs text-slate-455 dark:text-zinc-450 leading-relaxed">
+                  We're still confirming your payment. You may safely close this page. We'll notify you once your order is confirmed.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaymentProcessing(false);
+                    setPollingTimeout(false);
+                    setIsSubmitting(false);
+                    navigate("/orders");
+                  }}
+                  className="w-full mt-lg bg-[#038076] hover:bg-[#02655f] text-white py-sm rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Go to My Orders
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

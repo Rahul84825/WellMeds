@@ -146,26 +146,47 @@ const PurchaseCard = ({
               </button>
 
               {/* Rounded quantity selector */}
-              <div className="flex items-center justify-center bg-slate-50 dark:bg-zinc-950/20 h-11 w-full rounded-xl p-1 gap-6 border border-slate-100 dark:border-zinc-800/40 animate-[fade-in_0.20s_ease-out]">
+              <div className="flex items-center justify-center bg-slate-50 dark:bg-zinc-950/20 h-11 w-full rounded-xl p-1 gap-6 border border-slate-100 dark:border-zinc-800/40 animate-[fade-in_0.20s_ease-out] product-detail-qty-selector">
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity - 1)}
-                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-850 cursor-pointer shadow-xs transition-colors"
+                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-850 cursor-pointer shadow-xs transition-colors product-detail-qty-btn"
                 >
                   <span className="material-symbols-outlined text-[16px] leading-none">remove</span>
                 </button>
-                <span className="w-8 h-8 rounded-full bg-[#086b53] text-white flex items-center justify-center font-extrabold text-xs shadow-xs">
+                <span className="w-8 h-8 rounded-full bg-[#086b53] text-white flex items-center justify-center font-extrabold text-xs shadow-xs product-detail-qty-val">
                   {cartItem.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity + 1)}
                   disabled={cartItem.quantity >= (product.stock || 30)}
-                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-850 cursor-pointer shadow-xs transition-colors"
+                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-850 cursor-pointer shadow-xs transition-colors product-detail-qty-btn"
                 >
                   <span className="material-symbols-outlined text-[16px] leading-none">add</span>
                 </button>
               </div>
+              <style>{`
+                @media (max-width: 768px) {
+                  .product-detail-qty-selector {
+                    height: 36px !important;
+                    gap: 12px !important;
+                    border-radius: 10px !important;
+                  }
+                  .product-detail-qty-btn {
+                    width: 28px !important;
+                    height: 28px !important;
+                  }
+                  .product-detail-qty-btn span {
+                    font-size: 14px !important;
+                  }
+                  .product-detail-qty-val {
+                    width: 28px !important;
+                    height: 28px !important;
+                    font-size: 11px !important;
+                  }
+                }
+              `}</style>
             </>
           ) : (
             <>

@@ -17,6 +17,7 @@ import prescriptionRoutes from "./src/routes/prescriptionRoutes.js";
 import couponRoutes from "./src/routes/couponRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
+import notificationRoutes from "./src/routes/notificationRoutes.js";
 import specialityRoutes from "./src/routes/specialityRoutes.js";
 import moleculeRoutes from "./src/routes/moleculeRoutes.js";
 import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
@@ -32,8 +33,9 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
+      connectSrc: ["'self'", "https://api.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://lh3.googleusercontent.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
@@ -75,7 +77,13 @@ app.use(cors({
 }));
 
 app.use(globalLimiter);
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    if (req.originalUrl && req.originalUrl.includes("/webhook")) {
+      req.rawBody = buf.toString();
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
@@ -99,6 +107,7 @@ app.use("/api/prescriptions", prescriptionRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/specialities", specialityRoutes);
 app.use("/api/molecules", moleculeRoutes);
 app.use("/api/surgical-categories", surgicalCategoryRoutes);

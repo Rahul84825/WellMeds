@@ -1,4 +1,6 @@
 import "dotenv/config";
+import validateEnv from "./src/config/validateEnv.js";
+validateEnv();
 import app from "./app.js";
 import { connectDB } from "./src/config/db.js";
 import dns from "dns";

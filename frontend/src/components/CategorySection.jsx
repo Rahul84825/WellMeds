@@ -123,6 +123,7 @@ const CategorySection = () => {
   return (
     <section
       aria-label="Shop by Category"
+      className="category-section"
       style={{
         background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         paddingTop: "48px",
@@ -133,6 +134,7 @@ const CategorySection = () => {
 
         {/* ── Section Header ─────────────────────────────────────── */}
         <div
+          className="category-section-header"
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -142,6 +144,7 @@ const CategorySection = () => {
         >
           <div>
             <h2
+              className="category-section-title"
               style={{
                 fontSize: "clamp(32px, 3vw, 40px)",
                 fontWeight: 800,
@@ -158,6 +161,7 @@ const CategorySection = () => {
           {/* View All pill button */}
           <Link
             to="/products"
+            className="category-section-view-all"
             aria-label="View all product categories"
             style={{
               display: "inline-flex",
@@ -279,7 +283,7 @@ const CategorySection = () => {
             ref={sliderRef}
             role="list"
             aria-label="Category carousel"
-            className="no-scrollbar"
+            className="category-slider-track no-scrollbar"
             style={{
               display: "flex",
               flexDirection: "row",
@@ -369,6 +373,63 @@ const CategorySection = () => {
           .category-card-wrapper {
             width: calc((100% - 14px) / 2) !important;
             min-width: calc((100% - 14px) / 2) !important;
+          }
+        }
+
+        /* ── Mobile Layout Optimization (≤768px) ── */
+        @media (max-width: 768px) {
+          .category-section {
+            padding-top: 24px !important;
+            padding-bottom: 24px !important;
+          }
+          .category-section-header {
+            display: flex !important;
+            align-items: center !important; /* Perfect vertical alignment */
+            justify-content: space-between !important;
+            margin-bottom: 16px !important; /* Proper vertical spacing */
+            padding-left: 8px !important; /* Aligns with screen left edge (total 16px) */
+            padding-right: 8px !important; /* Aligns with screen right edge */
+          }
+          .category-section-title {
+            font-size: 25px !important; /* Reduced from 32px (~22% reduction) */
+            font-weight: 700 !important; /* Bold but slightly lighter for visual balance */
+            line-height: 1.2 !important; /* Compact line-height */
+            letter-spacing: -0.02em !important;
+            margin: 0 !important;
+            color: #0f172a !important;
+          }
+          .category-section-view-all {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            padding: 8px 16px !important; /* Touch target optimized */
+            border-radius: 999px !important;
+            border: 1.5px solid #0e9f7e !important;
+            color: #0e9f7e !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            background: transparent !important;
+            transition: all 200ms ease !important;
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            min-height: 36px !important; /* Touch target height */
+          }
+          .category-slider-track {
+            gap: 12px !important; /* Consistent gap: cards never touch */
+            padding-left: 16px !important; /* Aligned with title */
+            padding-right: 16px !important;
+            padding-bottom: 12px !important;
+            margin-left: -8px !important; /* Allows scroll to bleed to screen edge */
+            margin-right: -8px !important;
+          }
+          .category-card-wrapper {
+            width: auto !important;
+            min-width: auto !important;
+            scroll-snap-align: start !important;
+          }
+          /* Hide scroll buttons on mobile */
+          .category-section button {
+            display: none !important;
           }
         }
       `}</style>

@@ -128,14 +128,14 @@ const SurgicalProductsSection = () => {
   return (
     <section
       aria-label="Surgical & Medical Supplies"
-      className="bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950/20 dark:to-zinc-900/10 pt-12 pb-14 border-t border-slate-100 dark:border-zinc-900/60"
+      className="surgical-section bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950/20 dark:to-zinc-900/10 pt-12 pb-14 border-t border-slate-100 dark:border-zinc-900/60"
     >
       <div className="home-section-container">
         
         {/* Section Header */}
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex items-center md:items-end justify-between mb-4 md:mb-8 surgical-section-header">
           <div>
-            <h2 className="text-[32px] md:text-[40px] font-extrabold text-[#0f172a] dark:text-zinc-100 leading-tight m-0 tracking-tight">
+            <h2 className="text-[25px] font-bold md:font-extrabold md:text-[40px] text-[#0f172a] dark:text-zinc-100 leading-tight m-0 tracking-tight">
               Surgical &amp; Medical Supplies
             </h2>
           </div>
@@ -144,7 +144,7 @@ const SurgicalProductsSection = () => {
           <Link
             to="/surgical/all"
             aria-label="View all surgical categories"
-            className="inline-flex items-center gap-1.5 px-5 py-[9px] rounded-full border-[1.5px] border-[#0e9f7e] text-[#0e9f7e] dark:text-[#84d6b9] dark:border-[#84d6b9] text-[13px] font-semibold no-underline bg-transparent transition-all duration-200 shrink-0 whitespace-nowrap hover:bg-[#0e9f7e] hover:text-white dark:hover:bg-[#84d6b9] dark:hover:text-zinc-950"
+            className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-[9px] rounded-full border-[1.5px] border-[#0e9f7e] text-[#0e9f7e] dark:text-[#84d6b9] dark:border-[#84d6b9] text-[13px] font-semibold no-underline bg-transparent transition-all duration-200 shrink-0 whitespace-nowrap min-h-[36px] md:min-h-0 hover:bg-[#0e9f7e] hover:text-white dark:hover:bg-[#84d6b9] dark:hover:text-zinc-950"
           >
             View All
             <ChevronRight size={15} />
@@ -181,7 +181,7 @@ const SurgicalProductsSection = () => {
             ref={sliderRef}
             role="list"
             aria-label="Surgical categories carousel"
-            className="no-scrollbar flex flex-row gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 px-1 cursor-grab active:cursor-grabbing select-none"
+            className="surgical-slider-track no-scrollbar flex flex-row gap-3 md:gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 px-1 cursor-grab active:cursor-grabbing select-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={stopDragging}
@@ -193,7 +193,7 @@ const SurgicalProductsSection = () => {
                 <div
                   key={categoryId?.toString()}
                   role="listitem"
-                  className="snap-start shrink-0 w-[calc((100%-14px)/2)] min-w-[calc((100%-14px)/2)] sm:w-[170px] sm:min-w-[170px] flex-none"
+                  className="snap-start shrink-0 w-[110px] min-w-[110px] sm:w-[170px] sm:min-w-[170px] flex-none surgical-card-wrapper"
                 >
                   <Link
                     to={`/surgical/${cat.slug}`}
@@ -201,14 +201,14 @@ const SurgicalProductsSection = () => {
                     className="flex flex-col items-center group no-underline"
                   >
                     {/* Square Image Box */}
-                    <div className="w-full aspect-square rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-250 bg-white dark:bg-zinc-900 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.13)] dark:group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.25)] group-hover:border-[#038076] dark:group-hover:border-[#038076]">
+                    <div className="w-full aspect-square rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-250 bg-white dark:bg-zinc-900 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.13)] dark:group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.25)] group-hover:border-[#038076] dark:group-hover:border-[#038076] p-2 sm:p-0">
                       {cat.image ? (
                         <img
                           src={cat.image}
                           alt={cat.name}
                           loading="lazy"
                           draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-280 group-hover:scale-106"
+                          className="w-full h-full object-contain sm:object-cover transition-transform duration-280 group-hover:scale-106"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-white dark:bg-zinc-900">
@@ -220,7 +220,7 @@ const SurgicalProductsSection = () => {
                     </div>
                     
                     {/* Title */}
-                    <h3 className="mt-3 text-center text-[15px] font-medium text-slate-800 dark:text-zinc-200 transition-colors duration-200 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] truncate w-full px-1">
+                    <h3 className="mt-2 text-center text-[13px] sm:text-[15px] font-medium text-slate-800 dark:text-zinc-200 transition-colors duration-200 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] truncate w-full px-1">
                       {cat.name}
                     </h3>
                   </Link>
@@ -245,6 +245,30 @@ const SurgicalProductsSection = () => {
           ))}
         </div>
       </div>
+
+      <style>{`
+        /* ── Mobile Layout Optimization (≤768px) ── */
+        @media (max-width: 768px) {
+          .surgical-section {
+            padding-top: 24px !important;
+            padding-bottom: 24px !important;
+          }
+          .surgical-section-header {
+            padding-left: 8px !important; /* Total 16px screen padding */
+            padding-right: 8px !important;
+          }
+          .surgical-slider-track {
+            padding-left: 16px !important; /* Align with title */
+            padding-right: 16px !important;
+            margin-left: -8px !important; /* Bleed to screen edges */
+            margin-right: -8px !important;
+          }
+          /* Hide scroll buttons on mobile */
+          .surgical-section button {
+            display: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };

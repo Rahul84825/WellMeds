@@ -23,7 +23,7 @@ const router = express.Router();
 // ─────────────────────────────────────────────────────────
 
 // ── Patient: Upload ───────────────────────────────────────
-router.post("/upload", protect, uploadLimiter, uploadPrescriptionFile.single("prescription"), uploadPrescription);
+router.post("/upload", protect, uploadLimiter, uploadPrescriptionFile.array("prescription", 10), uploadPrescription);
 
 // ── Patient: Get own prescriptions ───────────────────────
 router.get("/my", protect, getMyPrescriptions);

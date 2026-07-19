@@ -82,10 +82,12 @@ const orderSchema = new mongoose.Schema(
         "Processing",
         "Prescription Review",
         "Approved",
+        "Confirmed",
         "Packed",
         "Shipped",
         "Delivered",
         "Cancelled",
+        "Returned",
       ],
       default: "Pending",
     },
@@ -101,6 +103,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    prescription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Prescription",
+      default: null,
+    },
     shippingAddress: {
       type: String,
       required: true,
@@ -111,8 +118,30 @@ const orderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Pending", "Paid", "Failed"],
+      enum: ["Pending", "Paid", "Failed", "Cancelled", "Refunded", "Partially Refunded"],
       default: "Pending",
+    },
+    razorpayOrderId: {
+      type: String,
+      default: null,
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: null,
+    },
+    razorpaySignature: {
+      type: String,
+      default: null,
+    },
+    timeline: {
+      type: [
+        {
+          status: { type: String, required: true },
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now },
+        }
+      ],
+      default: []
     },
   },
   {

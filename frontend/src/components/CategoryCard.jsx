@@ -49,6 +49,11 @@ const CategoryCard = ({ category }) => {
             </div>
           </div>
         </div>
+        
+        {/* Title below the card — mobile only */}
+        <h3 className="category-card-title">
+          {category.name}
+        </h3>
       </Link>
 
       <style>{`
@@ -114,20 +119,52 @@ const CategoryCard = ({ category }) => {
           height: 100%;
         }
 
-        /* ── Mobile: 2-column grid ── */
-        @media (max-width: 640px) {
+        /* ── Title below card (hidden on desktop) ── */
+        .category-card-title {
+          display: none;
+        }
+
+        /* ── Mobile Layout Optimization (≤768px) ── */
+        @media (max-width: 768px) {
           .category-card-link {
-            width: calc((100% - 12px) / 2) !important;
-            min-width: 0 !important;
+            width: 110px !important;
+            min-width: 110px !important;
             flex-shrink: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
           }
           .category-card {
-            width: 100% !important;
-            height: auto !important;
+            width: 110px !important;
+            height: 110px !important;
             aspect-ratio: 1 / 1 !important;
+            border-radius: 16px !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
           }
           .category-img-wrap {
             height: 100% !important;
+            width: 100% !important;
+            padding: 8px !important; /* Premium consistent padding */
+            background: #ffffff !important;
+          }
+          .category-card-img {
+            object-fit: contain !important; /* Prevent crop and stretching */
+            width: 100% !important;
+            height: 100% !important;
+          }
+          .category-card-title {
+            display: block !important;
+            margin-top: 8px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #475569 !important; /* Balanced slate-600 */
+            text-align: center !important;
+            width: 100% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            line-height: 1.2 !important;
           }
         }
       `}</style>

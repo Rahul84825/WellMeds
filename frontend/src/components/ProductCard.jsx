@@ -85,7 +85,7 @@ const ProductCard = ({ product }) => {
         {/* ── Image section ── */}
         <div className="relative flex items-center justify-center overflow-hidden
                         bg-slate-50 dark:bg-zinc-950
-                        h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0 rounded-t-2xl">
+                        h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0 rounded-t-2xl product-card-img-wrap">
           <img
             alt={product.name}
             src={product.image}
@@ -172,14 +172,14 @@ const ProductCard = ({ product }) => {
         )}
 
         {/* ── Product details ── */}
-        <div className="flex flex-1 flex-col justify-between px-3 pb-3 pt-2">
+        <div className="flex flex-1 flex-col justify-between px-3 pb-3 pt-2 product-card-details">
 
           {/* Text block */}
           <div className="flex flex-col items-center text-center gap-0.5">
 
             {/* Brand */}
             <p className={`text-[9px] md:text-[10px] uppercase tracking-widest
-                           font-extrabold truncate
+                           font-extrabold truncate product-card-brand
                            ${product.manufacturer || product.brand
                              ? "text-slate-400 dark:text-zinc-500"
                              : "invisible"}`}>
@@ -192,14 +192,14 @@ const ProductCard = ({ product }) => {
                          text-[13px] font-extrabold leading-snug
                          text-[#1D2B5C] dark:text-zinc-100
                          transition-colors group-hover:text-[#038076]
-                         sm:text-[14px] sm:h-10"
+                         sm:text-[14px] sm:h-10 product-card-title"
               title={product.name}
             >
               {product.name}
             </h3>
 
             {/* Molecule — tighter gap, own click zone */}
-            <div className="mt-0.5 flex h-4 items-center justify-center">
+            <div className="mt-0.5 flex h-4 items-center justify-center product-card-molecule-wrap">
               {molecule ? (
                 <Link
                   to={`/molecules/${molecule.slug}`}
@@ -210,7 +210,7 @@ const ProductCard = ({ product }) => {
                              tracking-wider text-[#038076]/75
                              hover:text-[#038076] hover:underline
                              dark:text-[#84d6b9]/75 dark:hover:text-[#84d6b9]
-                             sm:text-[10px]"
+                             sm:text-[10px] product-card-molecule"
                 >
                   {molecule.name}
                 </Link>
@@ -221,25 +221,25 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Price + CTA */}
-          <div className="mt-2.5 space-y-2">
+          <div className="mt-2.5 space-y-2 product-card-price-wrap">
 
             {/* Price row */}
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="flex h-6 items-baseline justify-center gap-1.5">
+              <div className="flex h-6 items-baseline justify-center gap-1.5 product-card-price-row">
                 <span className="text-[14px] font-black text-[#1D2B5C]
-                                 dark:text-zinc-100 sm:text-[15px] md:text-base">
+                                 dark:text-zinc-100 sm:text-[15px] md:text-base product-card-price">
                   {formatCurrency(product.price)}
                 </span>
                 {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-[10px] font-semibold text-slate-400 line-through md:text-xs">
+                  <span className="text-[10px] font-semibold text-slate-400 line-through md:text-xs product-card-mrp">
                     {formatCurrency(product.originalPrice)}
                   </span>
                 )}
               </div>
-              <div className="flex h-4 items-center justify-center">
+              <div className="flex h-4 items-center justify-center product-card-savings-row">
                 {savings > 0 ? (
                   <span className="text-[9px] font-bold text-emerald-600
-                                   dark:text-emerald-400 md:text-[10px]">
+                                   dark:text-emerald-400 md:text-[10px] product-card-savings">
                     You Save {formatCurrency(savings)}
                   </span>
                 ) : (
@@ -261,7 +261,7 @@ const ProductCard = ({ product }) => {
                          justify-center gap-1.5 rounded-xl px-4 py-2
                          text-xs font-bold text-white select-none sm:text-sm
                          disabled:cursor-not-allowed disabled:opacity-50
-                         wellmeds-product-card-cta"
+                         wellmeds-product-card-cta product-card-cta-btn"
             >
               {isAdding ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -274,6 +274,61 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        /* ── Product Card Mobile Responsiveness Overrides (≤768px) ── */
+        @media (max-width: 768px) {
+          .product-card-img-wrap {
+            height: 105px !important; /* ~25% height reduction */
+          }
+          .product-card-details {
+            padding: 8px 10px !important; /* Tighter padding */
+          }
+          .product-card-brand {
+            font-size: 8px !important;
+          }
+          .product-card-title {
+            font-size: 11.5px !important;
+            line-height: 1.25 !important;
+            height: 30px !important; /* Fits exactly 2 lines */
+            margin-top: 2px !important;
+          }
+          .product-card-molecule-wrap {
+            height: 12px !important;
+            margin-top: 2px !important;
+          }
+          .product-card-molecule {
+            font-size: 8px !important;
+          }
+          .product-card-price-wrap {
+            margin-top: 6px !important;
+            gap: 4px !important;
+          }
+          .product-card-price-row {
+            height: 20px !important;
+            gap: 4px !important;
+          }
+          .product-card-price {
+            font-size: 13px !important;
+          }
+          .product-card-mrp {
+            font-size: 9px !important;
+          }
+          .product-card-savings-row {
+            height: 12px !important;
+          }
+          .product-card-savings {
+            font-size: 8px !important;
+          }
+          .product-card-cta-btn {
+            min-height: 32px !important;
+            font-size: 11px !important;
+            padding: 4px 10px !important;
+            border-radius: 10px !important;
+            margin-top: 6px !important;
+          }
+        }
+      `}</style>
     </>
   );
 };
