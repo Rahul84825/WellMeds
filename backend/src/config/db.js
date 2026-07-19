@@ -45,8 +45,14 @@ const seedAllDefaultData = async () => {
     if (productCount === 0) {
       console.log("[Database] Database has no products. Auto-seeding products...");
       for (const prod of INITIAL_PRODUCTS) {
+        const categoryDoc = await Category.findOne({ name: prod.category });
+        if (!categoryDoc) {
+          console.warn(`[Database] Skipping product "${prod.name}" because category "${prod.category}" does not exist.`);
+          continue;
+        }
         await Product.create({
           ...prod,
+          category: categoryDoc._id,
           slug: slugify(prod.name, { lower: true })
         });
       }

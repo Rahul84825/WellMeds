@@ -1,9 +1,12 @@
 import { URL } from "url";
 
 export const validateEnv = () => {
-  const required = [
+  const criticalRequired = [
     "MONGODB_URI",
     "JWT_SECRET",
+  ];
+
+  const optionalRequired = [
     "RAZORPAY_KEY_ID",
     "RAZORPAY_KEY_SECRET",
     "RAZORPAY_WEBHOOK_SECRET",
@@ -15,31 +18,35 @@ export const validateEnv = () => {
     "SMTP_USER",
   ];
 
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length > 0) {
-    console.error(`FATAL CONFIGURATION ERROR: Missing required environment variables: ${missing.join(", ")}`);
+  // Validate critical variables
+  const missingCritical = criticalRequired.filter((key) => !process.env[key]);
+  if (missingCritical.length > 0) {
+    console.error(`FATAL CONFIGURATION ERROR: Missing CRITICAL environment variables: ${missingCritical.join(", ")}`);
     process.exit(1);
   }
 
-  // Check SMTP password / pass (support either SMTP_PASSWORD or SMTP_PASS)
-  const smtpPass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD;
-  if (!smtpPass) {
-    console.error("FATAL CONFIGURATION ERROR: Missing environment variable SMTP_PASS or SMTP_PASSWORD");
-    process.exit(1);
+  // Warn about optional variables
+  const missingOptional = optionalRequired.filter((key) => !process.env[key]);
+  if (missingOptional.length > 0) {
+    console.warn(`[WARNING] Missing optional environment variables (some features may not work): ${missingOptional.join(", ")}`);
   }
 
-  // Check email from (support either SMTP_FROM or EMAIL_FROM)
-  const emailFrom = process.env.SMTP_FROM || process.env.EMAIL_FROM;
-  if (!emailFrom) {
-    console.error("FATAL CONFIGURATION ERROR: Missing environment variable SMTP_FROM or EMAIL_FROM");
-    process.exit(1);
+  // Check SMTP password / pass if SMTP_USER is set
+  if (process.env.SMTP_USER) {
+    const smtpPass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD;
+    if (!smtpPass) {
+      console.warn("[WARNING] Missing environment variable SMTP_PASS or SMTP_PASSWORD. Emails will be logged to console.");
+    }
+    const emailFrom = process.env.SMTP_FROM || process.env.EMAIL_FROM;
+    if (!emailFrom) {
+      console.warn("[WARNING] Missing environment variable SMTP_FROM or EMAIL_FROM. Defaulting to noreply@wellmeds.com.");
+    }
   }
 
-  // Check JWT expires (support either JWT_EXPIRES_IN or JWT_EXPIRE)
+  // Check JWT expires (warn and default to 7d if missing)
   const jwtExpires = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRE;
   if (!jwtExpires) {
-    console.error("FATAL CONFIGURATION ERROR: Missing environment variable JWT_EXPIRES_IN or JWT_EXPIRE");
-    process.exit(1);
+    console.warn("[WARNING] Missing environment variable JWT_EXPIRES_IN or JWT_EXPIRE. Defaulting to 7d.");
   }
 
   // 1. PORT is numeric
@@ -63,9 +70,9 @@ export const validateEnv = () => {
     process.exit(1);
   }
 
-  // 4. SMTP_PORT is numeric
-  if (isNaN(Number(process.env.SMTP_PORT))) {
-    console.error("FATAL CONFIGURATION ERROR: SMTP_PORT must be numeric.");
+  // 4. SMTP_PORT is numeric if provided
+  if (process.env.SMTP_PORT && isNaN(Number(process.env.SMTP_PORT))) {
+    console.error("FATAL CONFIGURATION ERROR: SMTP_PORT must be numeric if provided.");
     process.exit(1);
   }
 

@@ -3,14 +3,12 @@ import validateEnv from "./src/config/validateEnv.js";
 validateEnv();
 import app from "./app.js";
 import { connectDB } from "./src/config/db.js";
-import dns from "dns";
-
-dns.setDefaultResultOrder("ipv4first");
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-  console.warn("Could not set custom DNS servers:", e.message);
-}
+// dns.setDefaultResultOrder("ipv4first");
+// try {
+//   dns.setServers(["8.8.8.8", "1.1.1.1"]);
+// } catch (e) {
+//   console.warn("Could not set custom DNS servers:", e.message);
+// }
 
 const PORT = process.env.PORT || 5000;
 
