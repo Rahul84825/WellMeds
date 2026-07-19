@@ -1338,7 +1338,7 @@ const ProductDetails = () => {
           <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
           <div className="flex gap-sm md:gap-lg overflow-x-auto pb-md scroll-smooth snap-x snap-mandatory scrollbar-none">
             {recentlyViewed.map((p) => (
-              <div key={p.id || p._id} className="snap-start shrink-0 w-[calc(50%-6px)] md:w-[calc(33.33%-8px)] lg:w-[calc(25%-18px)]">
+              <div key={p.id || p._id} className="snap-start shrink-0 w-[calc((100%-8px)/1.45)] md:w-[calc(33.33%-8px)] lg:w-[calc(25%-18px)]">
                 <ProductCard product={p} />
               </div>
             ))}

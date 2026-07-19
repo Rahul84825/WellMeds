@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Star, Quote, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 const testimonialsData = [
   {
@@ -76,6 +76,27 @@ const testimonialsData = [
   }
 ];
 
+const GoogleIcon = () => (
+  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+    />
+  </svg>
+);
+
 const TestimonialCard = ({ item }) => {
   const [imageError, setImageError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -89,111 +110,88 @@ const TestimonialCard = ({ item }) => {
     return name.slice(0, 2).toUpperCase();
   };
 
-  // Truncate logic if content is long
-  const maxLength = 100;
+  const maxLength = 110;
   const shouldTruncate = item.text.length > maxLength;
   const textToShow = isExpanded ? item.text : (shouldTruncate ? `${item.text.slice(0, maxLength)}...` : item.text);
 
   return (
-    <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] shrink-0 snap-start testimonial-card-wrap">
-      <div className="group relative flex flex-col justify-between h-full rounded-[24px] border border-slate-200/60 bg-white dark:bg-zinc-900 p-6 md:p-8 pb-24
-                      shadow-[0_4px_20px_rgba(0,0,0,0.015)]
-                      transition-all duration-300 ease-in-out
-                      hover:-translate-y-1
-                      hover:border-[#038076]
-                      hover:shadow-[0_12px_30px_rgba(3,128,118,0.06)]
-                      dark:border-zinc-800/80 dark:bg-zinc-950/40
-                      dark:hover:border-[#038076] dark:hover:bg-zinc-950
-                      overflow-hidden min-h-[340px] testimonial-card-body">
-        
-        {/* Subtle Quote Watermark */}
-        <div className="absolute top-20 right-6 text-slate-100 dark:text-zinc-800 opacity-[0.18] dark:opacity-[0.05] pointer-events-none select-none transition-colors group-hover:text-[#038076]/10">
-          <Quote className="w-24 h-24 transform rotate-180" />
-        </div>
-
-        <div>
-          {/* Top customer block */}
-          <div className="flex items-center gap-4 mb-5 relative z-10 testimonial-user-block">
-            {/* Avatar */}
-            {!item.image || imageError ? (
-              <div className="w-[64px] h-[64px] rounded-full bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] flex items-center justify-center font-bold text-lg border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0 testimonial-avatar">
-                {getInitials(item.name)}
-              </div>
-            ) : (
-              <img
-                src={item.image}
-                alt={item.name}
-                onError={() => setImageError(true)}
-                className="w-[64px] h-[64px] rounded-full object-cover border border-slate-100 dark:border-zinc-800 shadow-sm shrink-0 testimonial-avatar"
-              />
-            )}
-
-            {/* User Meta */}
-            <div className="text-left testimonial-meta">
-              <h4 className="text-[15px] font-bold text-slate-900 dark:text-zinc-100 leading-tight testimonial-user-name">
-                {item.name}
-              </h4>
-              <p className="text-[12px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5 mb-1.5 testimonial-user-role">
-                {item.role || "Verified Buyer"}
-              </p>
-              <div className="flex items-center gap-0.5 testimonial-stars">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-            </div>
+    <div className="w-[85vw] sm:w-[320px] md:w-[350px] shrink-0 snap-start flex flex-col gap-sm select-none">
+      
+      {/* 1. Customer Details Header (Aligned outside the card body) */}
+      <div className="flex items-center gap-md px-xs">
+        {/* Avatar */}
+        {!item.image || imageError ? (
+          <div className="w-[52px] h-[52px] rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-bold text-base border border-slate-200 dark:border-zinc-800 shadow-xs shrink-0">
+            {getInitials(item.name)}
           </div>
+        ) : (
+          <img
+            src={item.image}
+            alt={item.name}
+            onError={() => setImageError(true)}
+            className="w-[52px] h-[52px] rounded-full object-cover border border-slate-200 dark:border-zinc-800 shadow-xs shrink-0"
+          />
+        )}
 
-          {/* Testimonial body */}
-          <div className="relative z-10 text-left mb-6 testimonial-text-container">
-            <p className="text-[14px] leading-relaxed text-slate-600 dark:text-zinc-300 font-medium testimonial-text">
-              "{textToShow}"
-            </p>
-            {shouldTruncate && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="mt-2 text-[12px] font-bold text-[#038076] hover:underline focus:outline-none cursor-pointer"
-              >
-                {isExpanded ? "Read Less" : "Read More"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Footer (with card half blur effect) */}
-        <div className="absolute bottom-0 left-0 right-0 h-[72px] px-6 md:px-8 flex items-center justify-between border-t border-slate-150 dark:border-zinc-800/40 bg-white/70 dark:bg-zinc-950/60 backdrop-blur-md rounded-b-[24px] z-10 testimonial-footer">
-          <div className="flex items-center gap-2">
-            {/* Google G Logo SVG */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500">
-              {item.source || "Google Review"}
+        {/* Name and Stars */}
+        <div className="text-left">
+          <div className="flex items-center gap-xs">
+            <span className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 leading-tight">
+              {item.name}
+            </span>
+            <span className="inline-flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 text-[9px] font-black px-1.5 py-0.5 rounded-md gap-0.5 shrink-0 select-none">
+              <Check className="w-2.5 h-2.5" />
+              Verified
             </span>
           </div>
-
-          <div className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 text-[11px] font-medium testimonial-time">
-            <span>•</span>
-            <span>{item.time || "2 months ago"}</span>
+          
+          <div className="flex items-center gap-0.5 mt-1">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            ))}
           </div>
+        </div>
+      </div>
+
+      {/* 2. Review Card Shell */}
+      <div className="relative flex flex-col justify-between h-[230px] rounded-[24px] border border-slate-150 dark:border-zinc-800/80 bg-[#f7f9fc] dark:bg-zinc-900 p-lg shadow-sm hover:shadow-md hover:border-[#038076] dark:hover:border-[#038076] transition-all duration-300 overflow-hidden">
+        
+        {/* Quote Watermark Decoration */}
+        <div className="absolute top-4 left-4 text-slate-250 dark:text-zinc-850 opacity-40 pointer-events-none select-none">
+          <Quote className="w-14 h-14 transform rotate-180 text-slate-300 dark:text-zinc-800" />
+        </div>
+
+        {/* Google Floating Badge at Top Right */}
+        <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white dark:bg-zinc-950 flex items-center justify-center border border-slate-150 dark:border-zinc-850 shadow-xs select-none z-10">
+          <GoogleIcon />
+        </div>
+
+        {/* Review Content */}
+        <div className="relative z-15 pt-8 text-left">
+          <p className="text-[13px] leading-relaxed text-slate-655 dark:text-zinc-300 font-medium font-poppins">
+            "{textToShow}"
+          </p>
+          {shouldTruncate && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-1 text-[11px] font-bold text-[#038076] hover:underline focus:outline-none cursor-pointer"
+            >
+              {isExpanded ? "Read Less" : "Read More"}
+            </button>
+          )}
+        </div>
+
+        {/* Card Footer */}
+        <div className="relative z-10 border-t border-slate-200/60 dark:border-zinc-800/50 pt-sm flex items-center justify-between text-[11px] font-bold text-slate-400 dark:text-zinc-550 select-none">
+          <span className="flex items-center gap-xs">
+            <GoogleIcon />
+            Google Review
+          </span>
+          <span>{item.time || "2 months ago"}</span>
         </div>
 
       </div>
+
     </div>
   );
 };
@@ -213,151 +211,32 @@ export const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 testimonials-section">
-      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6">
+    <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         
-        {/* Header */}
-        <div className="mb-8 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 testimonials-header">
-          <div className="text-left">
-            <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-bold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight testimonials-title">
+        {/* Section Header with Top View All Row */}
+        <div className="flex justify-between items-end mb-8 md:mb-12 border-b border-slate-100 dark:border-zinc-900 pb-md">
+          <div className="text-left max-w-2xl space-y-xs">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
               What Our <span className="text-[#038076]">Customers Say</span>
             </h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400 max-w-xl leading-relaxed testimonials-desc">
-              Read genuine reviews from patients who rely on WellMeds for chronic care, oncology, and daily healthcare needs.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+              Read genuine reviews from patients who rely on WellMeds for chronic care, oncology, surgical products, wellness, and daily healthcare.
             </p>
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-3 self-start sm:self-end shrink-0 testimonials-controls">
-            <button
-              onClick={() => scroll("left")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 text-[#1D2B5C] dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200 cursor-pointer"
-              aria-label="Previous testimonials"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+          <div className="shrink-0 pb-xs">
             <a
               href="/about"
-              className="inline-flex items-center justify-center px-5 h-10 rounded-full border border-slate-200 dark:border-zinc-800 text-sm font-semibold text-slate-900 dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200"
+              className="inline-flex items-center justify-center px-lg h-9 rounded-full border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-900 dark:text-zinc-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200 select-none cursor-pointer"
             >
-              View All
+              View All Reviews
             </a>
-            <button
-              onClick={() => scroll("right")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 text-[#1D2B5C] dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200 cursor-pointer"
-              aria-label="Next testimonials"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
-        {/* Testimonials Grid/Carousel */}
-        <div className="relative w-full">
-          <style>{`
-            .no-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-
-            /* ── Testimonials Mobile Overrides (≤768px) ── */
-            @media (max-width: 768px) {
-              .testimonials-section {
-                padding-top: 24px !important;
-                padding-bottom: 24px !important;
-              }
-              .testimonials-header {
-                margin-bottom: 16px !important;
-                gap: 12px !important;
-              }
-              .testimonials-title {
-                font-size: 24px !important; /* Reduced ~20% from 30px */
-                line-height: 1.25 !important;
-                font-weight: 700 !important;
-              }
-              .testimonials-desc {
-                font-size: 13px !important;
-                margin-top: 6px !important;
-                margin-bottom: 0 !important;
-                line-height: 1.4 !important;
-              }
-              .testimonials-controls {
-                gap: 8px !important;
-                margin-top: 4px !important;
-              }
-              .testimonials-controls button,
-              .testimonials-controls a {
-                height: 34px !important;
-                width: 34px !important;
-                font-size: 12px !important;
-                padding: 0 !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-              }
-              .testimonials-controls a {
-                width: auto !important;
-                padding-left: 14px !important;
-                padding-right: 14px !important;
-                border-radius: 999px !important;
-              }
-              .testimonial-card-wrap {
-                width: 280px !important; /* Peek next cards */
-                min-width: 280px !important;
-              }
-              .testimonial-card-body {
-                padding: 16px !important;
-                padding-bottom: 56px !important; /* Reduce padding to optimize vertical space */
-                min-height: 200px !important;
-                border-radius: 18px !important;
-              }
-              .testimonial-avatar {
-                width: 44px !important;
-                height: 44px !important;
-                font-size: 14px !important;
-              }
-              .testimonial-user-block {
-                gap: 10px !important;
-                margin-bottom: 12px !important;
-              }
-              .testimonial-user-name {
-                font-size: 14px !important;
-              }
-              .testimonial-user-role {
-                font-size: 11px !important;
-                margin-top: 1px !important;
-                margin-bottom: 4px !important;
-              }
-              .testimonial-stars svg {
-                width: 12px !important;
-                height: 12px !important;
-              }
-              .testimonial-text-container {
-                margin-bottom: 12px !important;
-              }
-              .testimonial-text {
-                font-size: 13px !important;
-                line-height: 1.45 !important;
-                margin-bottom: 0 !important;
-                display: -webkit-box !important;
-                -webkit-line-clamp: 3 !important; /* Limit previews to 3 lines */
-                -webkit-box-orient: vertical !important;
-                overflow: hidden !important;
-              }
-              .testimonial-footer {
-                height: 44px !important;
-                padding-left: 16px !important;
-                padding-right: 16px !important;
-                border-radius: 0 0 18px 18px !important;
-              }
-              .testimonial-footer span {
-                font-size: 10px !important;
-              }
-              .testimonial-footer svg {
-                width: 14px !important;
-                height: 14px !important;
-              }
-            }
-          `}</style>
+        {/* Testimonials Carousel Track */}
+        <div className="relative w-full overflow-hidden">
           <div
             ref={scrollRef}
             className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6"
@@ -370,6 +249,25 @@ export const TestimonialsSection = () => {
               <TestimonialCard key={item.id} item={item} />
             ))}
           </div>
+        </div>
+
+        {/* Separated Carousel Navigation Controls */}
+        <div className="flex items-center justify-center gap-md mt-md">
+          <button
+            onClick={() => scroll("left")}
+            className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
+            aria-label="Previous testimonials"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={() => scroll("right")}
+            className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
+            aria-label="Next testimonials"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
 
       </div>

@@ -1,65 +1,66 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, HeartPulse, MessageSquare, Tag, ChevronRight } from "lucide-react";
+import { FileText, Stethoscope, ShieldCheck, FlaskConical, ChevronRight } from "lucide-react";
 
 const QuickActionCards = () => {
   const cards = [
     {
       id: 1,
-      title: "Patient Assistance Program",
-      actionText: "LEARN MORE",
-      icon: HeartPulse,
-      to: "/patient-assistance-program",
-      ariaLabel: "Patient Assistance Program. LEARN MORE.",
-      orderClass: "order-1 md:order-none",
+      title: "Essential Recovery Kits",
+      actionText: "EXPLORE NOW",
+      icon: FileText,
+      to: "/surgical",
+      ariaLabel: "Essential Recovery Kits. EXPLORE NOW.",
+      orderClass: "order-2 md:order-none",
       colors: {
-        cardBg: "bg-[#fff0eb] hover:bg-[#ffe5dc]",
-        cardBorder: "border-[#ffe0d3] hover:border-[#ffd0bd]",
-        iconColor: "text-[#ff4d4d]",
-        actionColor: "text-[#ff4d4d]",
+        cardBg: "bg-[#e6f7f0] hover:bg-[#d6f2e6]",
+        cardBorder: "border-[#c3efdb] hover:border-[#ade4cb]",
+        iconColor: "text-[#028076]",
+        actionColor: "text-[#028076]",
       }
     },
     {
       id: 2,
-      title: "Order By Prescription",
+      title: "Upload Your Medical Prescription",
       actionText: "UPLOAD NOW",
-      icon: FileText,
+      icon: Stethoscope,
       to: "/upload-prescription",
-      ariaLabel: "Order By Prescription. UPLOAD NOW.",
-      orderClass: "order-2 md:order-none",
+      ariaLabel: "Upload Prescription. Upload Now.",
+      orderClass: "order-3 md:order-none",
       colors: {
-        cardBg: "bg-[#edf2f7] hover:bg-[#e2ebf3]",
-        cardBorder: "border-[#dbe7f0] hover:border-[#cbdced]",
-        iconColor: "text-[#004782]",
-        actionColor: "text-[#004782]",
+        cardBg: "bg-[#f0eefc] hover:bg-[#e4e1fb]",
+        cardBorder: "border-[#dedbfb] hover:border-[#cdb9fa]",
+        iconColor: "text-[#6366f1]",
+        actionColor: "text-[#6366f1]",
       }
     },
     {
       id: 3,
-      title: "Why People Love Us?",
-      actionText: "READ REVIEWS",
-      icon: MessageSquare,
+      title: "How We Keep You Safe",
+      actionText: "LEARN MORE",
+      badge: "New",
+      icon: ShieldCheck,
       to: "/how-we-keep-you-safe",
-      ariaLabel: "Why People Love Us? READ REVIEWS.",
-      orderClass: "order-3 md:order-none",
+      ariaLabel: "Keep You Safe. LEARN MORE.",
+      orderClass: "order-1 md:order-none",
       colors: {
-        cardBg: "bg-[#eafaf1] hover:bg-[#dbf5e7]",
-        cardBorder: "border-[#d3f4e2] hover:border-[#bbf0d2]",
-        iconColor: "text-[#038076]",
-        actionColor: "text-[#038076]",
+        cardBg: "bg-[#fdf6e2] hover:bg-[#faf0cb]",
+        cardBorder: "border-[#f3e8c4] hover:border-[#e9d69e]",
+        iconColor: "text-[#d97706]",
+        actionColor: "text-[#b45309]",
       }
     },
     {
       id: 4,
-      title: "How We give 85% Discount?",
+      title: "Get 30% off on Wellness Products",
       actionText: "EXPLORE NOW",
-      icon: Tag,
-      to: "/about",
-      ariaLabel: "How We give 85% Discount? EXPLORE NOW.",
+      icon: FlaskConical,
+      to: "/wellness",
+      ariaLabel: "Get 30% off on Wellness Products. EXPLORE NOW.",
       orderClass: "order-4 md:order-none",
       colors: {
-        cardBg: "bg-[#fff0f3] hover:bg-[#ffe3e8]",
-        cardBorder: "border-[#ffd9e1] hover:border-[#ffbfcc]",
+        cardBg: "bg-[#fff0f2] hover:bg-[#ffe3e7]",
+        cardBorder: "border-[#ffd6db] hover:border-[#ffbdc5]",
         iconColor: "text-[#e11d48]",
         actionColor: "text-[#be185d]",
       }
@@ -148,11 +149,12 @@ const QuickActionCards = () => {
             margin-bottom: 6px !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
           }
-          /* Custom pastel border/bg colors override on mobile */
-          .quick-action-card-link.bg-\\[\\#fff0eb\\] .quick-action-icon-wrap { background-color: #fff0eb !important; border-color: #ffe0d3 !important; }
-          .quick-action-card-link.bg-\\[\\#edf2f7\\] .quick-action-icon-wrap { background-color: #edf2f7 !important; border-color: #dbe7f0 !important; }
-          .quick-action-card-link.bg-\\[\\#eafaf1\\] .quick-action-icon-wrap { background-color: #eafaf1 !important; border-color: #d3f4e2 !important; }
-          .quick-action-card-link.bg-\\[\\#fff0f3\\] .quick-action-icon-wrap { background-color: #fff0f3 !important; border-color: #ffd9e1 !important; }
+          
+          /* Custom border/bg colors on mobile */
+          .quick-action-card-link.bg-\\[\\#e6f7f0\\] .quick-action-icon-wrap { background-color: #e6f7f0 !important; border-color: #c3efdb !important; }
+          .quick-action-card-link.bg-\\[\\#f0eefc\\] .quick-action-icon-wrap { background-color: #f0eefc !important; border-color: #dedbfb !important; }
+          .quick-action-card-link.bg-\\[\\#fdf6e2\\] .quick-action-icon-wrap { background-color: #fdf6e2 !important; border-color: #f3e8c4 !important; }
+          .quick-action-card-link.bg-\\[\\#fff0f2\\] .quick-action-icon-wrap { background-color: #fff0f2 !important; border-color: #ffd6db !important; }
 
           .quick-action-icon-wrap svg {
             width: 32px !important;

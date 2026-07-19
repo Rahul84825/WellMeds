@@ -137,7 +137,7 @@ const WellnessProductsSection = () => {
           {displayedProducts.map((prod) => (
             <div
               key={(prod._id || prod.id)?.toString()}
-              className="carousel-item shrink-0 w-[calc((100%-2*16px)/2.5)] md:w-[calc((100%-3*24px)/3.5)] lg:w-[calc((100%-4*24px)/4.5)] snap-start"
+              className="carousel-item shrink-0 w-[calc((100%-16px)/1.45)] md:w-[calc((100%-3*24px)/3.5)] lg:w-[calc((100%-4*24px)/4.5)] snap-start"
             >
               <ProductCard product={prod} />
             </div>
