@@ -6,6 +6,11 @@ export const categoryService = {
     return data.categories || [];
   },
 
+  async getCategory(slugOrId) {
+    const data = await apiInstance.get(`/categories/${encodeURIComponent(slugOrId)}`);
+    return data.category || null;
+  },
+
   async createCategory(categoryData) {
     // Check if passed legacy name and icon parameters, and convert to object
     const payload = typeof categoryData === "string"

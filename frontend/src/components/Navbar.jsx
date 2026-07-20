@@ -608,7 +608,7 @@ const Navbar = () => {
             
             {/* 1. MEDICINES (Mega Menu) */}
             <div 
-              className="static flex h-full items-center"
+              className="relative flex h-full items-center"
               onMouseEnter={() => handleMouseEnter("medicines")}
               onMouseLeave={handleMouseLeave}
             >
@@ -626,7 +626,7 @@ const Navbar = () => {
                 id="dropdown-medicines"
                 onMouseEnter={() => handleMouseEnter("medicines")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1 w-[900px] bg-white border border-slate-150 rounded-2xl shadow-xl p-8 transition-all duration-200 ease-out transform origin-top flex gap-10 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-1/2 -translate-x-1/2 top-full z-[200] mt-1 w-[900px] max-w-[calc(100vw-3rem)] bg-white border border-slate-150 rounded-2xl shadow-xl p-8 transition-all duration-200 ease-out transform origin-top flex gap-10 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "medicines" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"

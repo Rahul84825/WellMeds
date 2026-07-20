@@ -424,7 +424,8 @@ export const searchAll = async (req, res, next) => {
         { description: regex }
       ]
     })
-    .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType")
+    .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
+    .populate("category", "name slug")
     .limit(20);
 
     // Search Priority logic
@@ -510,12 +511,14 @@ export const searchAll = async (req, res, next) => {
 export const getTrendingProducts = async (req, res, next) => {
   try {
     let trending = await Product.find({ isTrending: true })
-      .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType")
+      .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
+      .populate("category", "name slug")
       .limit(6);
 
     if (trending.length === 0) {
       trending = await Product.find({})
-        .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType")
+        .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
+        .populate("category", "name slug")
         .sort({ displayOrder: 1 })
         .limit(6);
     }

@@ -1,57 +1,52 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { MongoMemoryServer } from "mongodb-memory-server";
-import dns from "dns";
 
 dotenv.config();
 
-dns.setDefaultResultOrder("ipv4first");
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-  console.warn("Could not set custom DNS servers:", e.message);
-}
-
-
-let mongoServer;
-
 export const connectDB = async () => {
-  if (mongoose.connection.readyState >= 1) return;
+  if (mongoose.connection.readyState >= 1) {
+    return {
+      connection: mongoose.connection,
+      host: mongoose.connection.host,
+      dbName: mongoose.connection.name,
+      isAtlas: (process.env.MONGODB_URI || "").includes("mongodb.net") || mongoose.connection.host.includes("mongodb.net"),
+    };
+  }
 
-  const dbUrl = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/wellmeds";
+  const dbUrl = process.env.MONGODB_URI;
+
+  if (!dbUrl || typeof dbUrl !== "string" || dbUrl.trim().length === 0) {
+    console.error("\n❌ MONGODB_URI environment variable is missing or empty.");
+    console.error("Import cancelled.");
+    console.error("No data was imported.\n");
+    process.exit(1);
+  }
+
+  const isAtlas = dbUrl.includes("mongodb.net");
 
   try {
-    console.log(`[Database] Attempting connection to ${dbUrl}...`);
-    await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 2000, // 2 seconds timeout to fail fast if offline
+    console.log(`[Database] Connecting to ${isAtlas ? "MongoDB Atlas" : "MongoDB"}...`);
+    const conn = await mongoose.connect(dbUrl, {
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout for cloud TLS connection
     });
-    console.log(`[Database] Connected successfully.`);
-  } catch (error) {
-    console.warn(`[Database] Primary database connection failed: ${error.message}`);
-    
-    if (dbUrl !== "mongodb://127.0.0.1:27017/wellmeds") {
-      try {
-        console.log(`[Database] Attempting local MongoDB connection (mongodb://127.0.0.1:27017/wellmeds)...`);
-        await mongoose.connect("mongodb://127.0.0.1:27017/wellmeds", {
-          serverSelectionTimeoutMS: 2000,
-        });
-        console.log(`[Database] Connected to local MongoDB.`);
-        return;
-      } catch (localError) {
-        console.warn(`[Database] Local MongoDB connection failed: ${localError.message}`);
-      }
-    }
 
-    console.log(`[Database] Falling back to a local in-memory MongoDB instance...`);
-    try {
-      mongoServer = await MongoMemoryServer.create();
-      const memoryDbUri = mongoServer.getUri();
-      console.log(`[Database] In-memory MongoDB started at: ${memoryDbUri}`);
-      await mongoose.connect(memoryDbUri);
-    } catch (memError) {
-      console.error(`[Database] Critical: Failed to start in-memory MongoDB: ${memError.message}`);
-      throw memError;
-    }
+    const host = conn.connection.host;
+    const dbName = conn.connection.name;
+
+    console.log(`[Database] Connected successfully to host: ${host} (Database: ${dbName})`);
+
+    return {
+      connection: conn.connection,
+      host,
+      dbName,
+      isAtlas,
+    };
+  } catch (error) {
+    console.error(`\n❌ Could not connect to MongoDB Atlas.`);
+    console.error(`Import cancelled.`);
+    console.error(`Reason: ${error.message}`);
+    console.error(`No data was imported.\n`);
+    process.exit(1);
   }
 };
 
@@ -59,7 +54,5 @@ export const disconnectDB = async () => {
   if (mongoose.connection.readyState >= 1) {
     await mongoose.disconnect();
   }
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
 };
+

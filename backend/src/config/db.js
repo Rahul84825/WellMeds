@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import { User } from "../models/User.js";
 import { Category } from "../models/Category.js";
 import { Product } from "../models/Product.js";
@@ -7,8 +6,6 @@ import { Coupon } from "../models/Coupon.js";
 import { SurgicalCategory } from "../models/SurgicalCategory.js";
 import slugify from "slugify";
 import { INITIAL_CATEGORIES, INITIAL_PRODUCTS, INITIAL_COUPONS } from "./initialData.js";
-
-let mongoServer;
 
 const seedAllDefaultData = async () => {
   try {
@@ -92,33 +89,24 @@ const seedAllDefaultData = async () => {
 
 export const connectDB = async () => {
   const dbUrl = process.env.MONGODB_URI;
+
+  if (!dbUrl || typeof dbUrl !== "string" || dbUrl.trim().length === 0) {
+    console.error("FATAL: MONGODB_URI environment variable is missing or empty.");
+    process.exit(1);
+  }
   
   try {
-    console.log(`[Database] Attempting connection to MongoDB...`);
+    console.log(`[Database] Connecting to MongoDB...`);
     const conn = await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 5000, // 5 seconds timeout
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout for Atlas
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host} (Database: ${conn.connection.name})`);
     
     // Auto-seed default data if empty in the primary database
     await seedAllDefaultData();
   } catch (error) {
-    console.warn(`[Database] Primary database connection failed: ${error.message}`);
-    console.log(`[Database] Falling back to a local in-memory MongoDB instance...`);
-    
-    try {
-      mongoServer = await MongoMemoryServer.create();
-      const memoryDbUri = mongoServer.getUri();
-      console.log(`[Database] In-memory MongoDB started at: ${memoryDbUri}`);
-      
-      const conn = await mongoose.connect(memoryDbUri);
-      console.log(`MongoDB Connected (In-Memory): ${conn.connection.host}`);
-      
-      // Auto-seed default data in the in-memory database
-      await seedAllDefaultData();
-    } catch (memError) {
-      console.error(`[Database] Critical: Failed to start in-memory MongoDB: ${memError.message}`);
-      process.exit(1);
-    }
+    console.error(`[Database] Connection failed: ${error.message}`);
+    process.exit(1);
   }
 };
+
