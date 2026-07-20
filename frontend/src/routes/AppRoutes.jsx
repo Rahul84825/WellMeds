@@ -54,6 +54,7 @@ import AdminMegaMenu from "../admin/AdminMegaMenu";
 
 import CategoryDetailPage from "../pages/CategoryDetailPage";
 import ConditionsPage from "../pages/ConditionsPage";
+import AllCategoriesPage from "../pages/AllCategoriesPage";
 
 const AppRoutes = () => {
   return (
@@ -63,8 +64,9 @@ const AppRoutes = () => {
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchResultsPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="condition" element={<ConditionsPage />} />
-        <Route path="conditions" element={<ConditionsPage />} />
+        <Route path="categories" element={<AllCategoriesPage />} />
+        <Route path="condition" element={<AllCategoriesPage />} />
+        <Route path="conditions" element={<AllCategoriesPage />} />
         <Route path="category/:categorySlug" element={<CategoryDetailPage />} />
         <Route path="condition/:categorySlug" element={<CategoryDetailPage />} />
         <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />

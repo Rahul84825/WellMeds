@@ -626,23 +626,23 @@ const Navbar = () => {
                 id="dropdown-medicines"
                 onMouseEnter={() => handleMouseEnter("medicines")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-1/2 -translate-x-1/2 top-full z-[200] mt-1 w-[900px] max-w-[calc(100vw-3rem)] bg-white border border-slate-150 rounded-2xl shadow-xl p-8 transition-all duration-200 ease-out transform origin-top flex gap-10 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-0 top-full z-[200] mt-1.5 w-[820px] max-w-[calc(100vw-3rem)] bg-white border border-slate-150 rounded-2xl shadow-xl p-6 transition-all duration-200 ease-out transform origin-top-left flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "medicines" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
-                {/* COLUMN 1: BY CONDITION */}
-                <div className="flex-1 min-w-[250px]">
-                  <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">BY CONDITION</h4>
+                {/* COLUMN 1: BY CONDITION (Limit to first 8 dynamic categories) */}
+                <div className="flex-1 min-w-[280px]">
+                  <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">BY CONDITION</h4>
                   <div className="grid grid-cols-1 gap-0.5">
-                    {menuData.conditions.map((cond) => (
+                    {menuData.conditions.slice(0, 8).map((cond) => (
                       <Link
                         key={cond._id || cond.id}
                         to={`/category/${cond.slug || encodeURIComponent(cond.linkedCategory || cond.name)}`}
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
+                        className="text-[13px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
                       >
                         {cond.name}
                       </Link>
@@ -651,9 +651,9 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 2: SUPER SPECIALITY & SOURCE */}
-                <div className="w-[210px] flex flex-col justify-between">
+                <div className="w-[220px] flex flex-col justify-between shrink-0">
                   <div>
-                    <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">SUPER SPECIALITY</h4>
+                    <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">SUPER SPECIALITY</h4>
                     <div className="flex flex-col gap-0.5">
                       {menuData.specialities.map((spec) => (
                         <Link
@@ -661,7 +661,7 @@ const Navbar = () => {
                           to={`/products?speciality=${spec.linkedSpeciality || spec.slug}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                          className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
+                          className="text-[13px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
                         >
                           {spec.name}
                         </Link>
@@ -669,18 +669,18 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <h4 className="text-[11.5px] font-black uppercase text-slate-400 tracking-wider mb-2.5 select-none">SOURCE</h4>
-                    <div className="flex flex-col gap-1.5">
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    <h4 className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider mb-2 select-none">SOURCE</h4>
+                    <div className="flex flex-col gap-1">
                       {menuData.sources.map((source) => (
                         <Link
                           key={source._id || source.id}
                           to={`/products?${source.queryParam}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                          className="flex items-center gap-2 text-[13.5px] font-bold text-slate-600 hover:text-[#038076] transition-colors py-1"
+                          className="flex items-center gap-2 text-[13px] font-semibold text-slate-700 hover:text-[#038076] px-2 -mx-2 py-1 rounded-md hover:bg-slate-50 transition-colors"
                         >
-                          {renderIcon(source.icon || "Globe", "w-4 h-4 text-slate-400 shrink-0")}
+                          {renderIcon(source.icon || "Globe", "w-3.5 h-3.5 text-slate-400 shrink-0")}
                           <span>{source.name}</span>
                         </Link>
                       ))}
@@ -689,10 +689,10 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 3: QUICK LINKS */}
-                <div className="w-[250px] bg-slate-50/70 p-5 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div className="w-[230px] bg-slate-50/70 p-4 rounded-xl border border-slate-100/80 flex flex-col justify-between shrink-0">
                   <div>
-                    <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-4 select-none pb-2 border-b border-slate-100/60">Quick Links</h4>
-                    <div className="flex flex-col gap-2.5">
+                    <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">Quick Links</h4>
+                    <div className="flex flex-col gap-2">
                       {(() => {
                         const regularQuickLinks = [...menuData.quickLinks.filter(l => !l.isHelpCard)];
                         if (!regularQuickLinks.some(l => l.route === "/molecules")) {
@@ -717,9 +717,9 @@ const Navbar = () => {
                               {...props}
                               onClick={() => setActiveDropdown(null)}
                               onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                              className="flex items-center gap-2 text-[13.5px] font-extrabold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
+                              className="flex items-center gap-2 text-[13px] font-bold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
                             >
-                              {renderIcon(link.icon || "Link", "w-4 h-4 shrink-0 text-slate-400")}
+                              {renderIcon(link.icon || "Link", "w-3.5 h-3.5 shrink-0 text-slate-400")}
                               <span>{link.name}</span>
                             </Comp>
                           );
@@ -729,9 +729,9 @@ const Navbar = () => {
                   </div>
 
                   {menuData.quickLinks.filter(l => l.isHelpCard).map((helpCard) => (
-                    <div key={helpCard._id || helpCard.id} className="mt-4 pt-3 border-t border-slate-100">
-                      <div className="bg-white p-3.5 rounded-lg border border-slate-100 text-xs">
-                        <p className="font-black text-slate-700 uppercase tracking-tight text-[11px] mb-2 flex items-center gap-1.5">
+                    <div key={helpCard._id || helpCard.id} className="mt-3 pt-2.5 border-t border-slate-200/60">
+                      <div className="bg-white p-3 rounded-lg border border-slate-150 shadow-2xs text-xs">
+                        <p className="font-black text-slate-700 uppercase tracking-tight text-[10.5px] mb-1.5 flex items-center gap-1.5">
                           {renderIcon(helpCard.icon || "HelpCircle", "w-3.5 h-3.5 text-[#038076]")}
                           <span>Need Help?</span>
                         </p>
@@ -739,12 +739,12 @@ const Navbar = () => {
                           href={helpCard.route}
                           target={helpCard.openInNewTab ? "_blank" : undefined}
                           rel={helpCard.openInNewTab ? "noopener noreferrer" : undefined}
-                          className="flex items-center gap-2 font-extrabold text-slate-800 hover:text-[#038076] transition-colors mb-1 text-[13px]"
+                          className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-[#038076] transition-colors mb-0.5 text-[12.5px]"
                         >
                           {renderIcon(helpCard.icon || "PhoneCall", "w-3 h-3 text-[#038076]")}
                           <span>{helpCard.name}</span>
                         </a>
-                        <p className="text-[10.5px] text-slate-400 font-medium">{helpCard.helpSubtext}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{helpCard.helpSubtext}</p>
                       </div>
                     </div>
                   ))}

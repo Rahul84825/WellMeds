@@ -160,7 +160,7 @@ const CategorySection = () => {
 
           {/* View All pill button */}
           <Link
-            to="/products"
+            to="/categories"
             className="category-section-view-all"
             aria-label="View all product categories"
             style={{
