@@ -52,6 +52,9 @@ import AdminUsers from "../admin/AdminUsers";
 import AdminSettings from "../admin/AdminSettings";
 import AdminMegaMenu from "../admin/AdminMegaMenu";
 
+import CategoryDetailPage from "../pages/CategoryDetailPage";
+import ConditionsPage from "../pages/ConditionsPage";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -60,7 +63,10 @@ const AppRoutes = () => {
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchResultsPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="category/:categorySlug" element={<Navigate to="/products" replace />} />
+        <Route path="condition" element={<ConditionsPage />} />
+        <Route path="conditions" element={<ConditionsPage />} />
+        <Route path="category/:categorySlug" element={<CategoryDetailPage />} />
+        <Route path="condition/:categorySlug" element={<CategoryDetailPage />} />
         <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
         <Route path="products/:slug" element={<ProductDetailsPage />} />
         <Route path="speciality/:slug" element={<SpecialityPage />} />

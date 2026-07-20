@@ -639,7 +639,7 @@ const Navbar = () => {
                     {menuData.conditions.map((cond) => (
                       <Link
                         key={cond._id || cond.id}
-                        to={`/products?category=${encodeURIComponent(cond.linkedCategory || cond.name)}`}
+                        to={`/category/${cond.slug || encodeURIComponent(cond.linkedCategory || cond.name)}`}
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
                         className="text-[13.5px] font-bold text-slate-600 py-1.5 hover:text-[#038076] transition-colors leading-relaxed block"
