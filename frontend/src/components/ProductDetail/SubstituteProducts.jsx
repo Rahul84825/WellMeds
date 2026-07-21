@@ -1,7 +1,51 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+
+const calculateUnitPrice = (prod) => {
+  if (!prod) return 0;
+  const pack = prod.packSize || prod.productSpecifications?.packSize || "";
+  const match = pack.match(/(\d+(\.\d+)?)/);
+  const qty = match ? parseFloat(match[1]) : 1;
+  return qty > 0 ? (prod.price / qty) : prod.price;
+};
+
+const getSubstituteComparison = (item, baseProduct) => {
+  if (!baseProduct || !item) {
+    return { diffPercent: 0, isCostlier: false, isCheaper: false, comparisonLabel: "Same price", dosageForm: "Unit" };
+  }
+
+  const baseUnit = calculateUnitPrice(baseProduct);
+  const itemUnit = calculateUnitPrice(item);
+
+  const hasUnitCalc = baseUnit > 0 && itemUnit > 0 && (baseProduct.packSize || item.packSize);
+  const basePrice = hasUnitCalc ? baseUnit : baseProduct.price;
+  const itemPrice = hasUnitCalc ? itemUnit : item.price;
+
+  const diffPercent = basePrice > 0 
+    ? Math.round(((itemPrice - basePrice) / basePrice) * 100) 
+    : 0;
+
+  const isCostlier = diffPercent > 0;
+  const isCheaper = diffPercent < 0;
+
+  const comparisonLabel = diffPercent === 0 
+    ? "Same price" 
+    : isCostlier 
+      ? `${diffPercent}% costlier` 
+      : `${Math.abs(diffPercent)}% cheaper`;
+
+  const dosageForm = item.productSpecifications?.dosageForm || item.productSpecifications?.packSize || item.packSize || "Injection";
+
+  return {
+    diffPercent,
+    isCostlier,
+    isCheaper,
+    comparisonLabel,
+    dosageForm,
+  };
+};
 
 const SubstituteProducts = ({ substituteProducts = [], product }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,14 +97,19 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
     }
   };
 
-  const hasSubstitutes = substituteProducts && substituteProducts.length > 0;
+  const sortedSubstitutes = useMemo(() => {
+    if (!substituteProducts || substituteProducts.length === 0) return [];
+    return [...substituteProducts].sort((a, b) => {
+      const compA = getSubstituteComparison(a, product).diffPercent;
+      const compB = getSubstituteComparison(b, product).diffPercent;
+      return compA - compB; // Cheaper substitutes (-20%) before costlier (+5%)
+    });
+  }, [substituteProducts, product]);
+
+  const hasSubstitutes = sortedSubstitutes && sortedSubstitutes.length > 0;
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm select-none w-full flex flex-col text-left">
-      <h3 className="font-bold text-base text-slate-800 dark:text-zinc-150 text-center mb-3">
-        Substitutes
-      </h3>
-      
       {!hasSubstitutes ? (
         <div className="text-center py-4 text-xs text-slate-400 font-medium">
           No substitute products available.
@@ -69,31 +118,25 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
         <>
           {/* Display ONLY 2 items */}
           <div className="flex flex-col divide-y divide-slate-100 dark:divide-zinc-800/80">
-            {substituteProducts.slice(0, 2).map((item, idx) => {
-              const diffPercent = product?.price && product.price > 0 
-                ? Math.round(((item.price - product.price) / product.price) * 100) 
-                : 0;
-              const isCostlier = diffPercent > 0;
-              const comparisonLabel = diffPercent === 0 
-                ? "Same price" 
-                : isCostlier 
-                  ? `${diffPercent}% costlier` 
-                  : `${Math.abs(diffPercent)}% cheaper`;
-
-              const dosageForm = item.productSpecifications?.dosageForm || "Injection";
+            {sortedSubstitutes.slice(0, 2).map((item, idx) => {
+              const { diffPercent, isCostlier, comparisonLabel, dosageForm } = getSubstituteComparison(item, product);
 
               return (
                 <Link
                   key={item.slug || item._id || idx}
                   to={`/products/${item.slug}`}
                   onClick={() => window.scrollTo(0, 0)}
-                  className="py-3 first:pt-0 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer"
+                  className="py-3.5 first:pt-0 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer min-w-0"
                 >
-                  <div className="flex-1 min-w-0 pr-3">
-                    <h4 className="font-bold text-xs sm:text-sm text-slate-700 dark:text-zinc-200 truncate">{item.name}</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">{item.manufacturer || item.brand}</p>
+                  <div className="flex-1 min-w-0 pr-1">
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-700 dark:text-zinc-200 truncate leading-snug" title={item.name}>
+                      {item.name}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">
+                      {item.manufacturer || item.brand || "WellMeds"}
+                    </p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 whitespace-nowrap">
                     <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
                       ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                     </p>
@@ -113,11 +156,11 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           </div>
 
           {/* View All Button if substituteProducts.length > 2 */}
-          {substituteProducts.length > 2 && (
+          {sortedSubstitutes.length > 2 && (
             <button
               ref={viewAllBtnRef}
               onClick={() => setIsModalOpen(true)}
-              className="mt-3 w-full bg-[#3f257a] hover:bg-[#321c62] text-white py-3 px-4 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-sm"
+              className="mt-3 w-full bg-[#3f257a] hover:bg-[#321c62] text-white py-3 px-4 rounded-full font-bold text-xs flex items-center justify-center gap-2 border-2 border-[#2563eb] shadow-sm transition-all active:scale-[0.98] cursor-pointer"
             >
               View All <span className="text-sm">→</span>
             </button>
@@ -154,18 +197,8 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
 
             {/* List of All Substitutes */}
             <div className="p-5 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-zinc-800 text-left">
-              {substituteProducts.map((item, idx) => {
-                const diffPercent = product?.price && product.price > 0 
-                  ? Math.round(((item.price - product.price) / product.price) * 100) 
-                  : 0;
-                const isCostlier = diffPercent > 0;
-                const comparisonLabel = diffPercent === 0 
-                  ? "Same price" 
-                  : isCostlier 
-                    ? `${diffPercent}% costlier` 
-                    : `${Math.abs(diffPercent)}% cheaper`;
-
-                const dosageForm = item.productSpecifications?.dosageForm || "Injection";
+              {sortedSubstitutes.map((item, idx) => {
+                const { diffPercent, isCostlier, comparisonLabel, dosageForm } = getSubstituteComparison(item, product);
 
                 return (
                   <Link
@@ -175,13 +208,17 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                       setIsModalOpen(false);
                       window.scrollTo(0, 0);
                     }}
-                    className="py-3.5 first:pt-0 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer"
+                    className="py-3.5 first:pt-0 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer min-w-0"
                   >
-                    <div className="flex-1 min-w-0 pr-3">
-                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100 truncate">{item.name}</h4>
-                      <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">{item.manufacturer || item.brand}</p>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100 truncate leading-snug" title={item.name}>
+                        {item.name}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">
+                        {item.manufacturer || item.brand || "WellMeds"}
+                      </p>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 whitespace-nowrap">
                       <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
                         ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                       </p>
