@@ -6,7 +6,7 @@ const WhyWellMedsBar = () => {
     {
       id: "authentic",
       title: "Authentic Medicines",
-      description: "100% genuine medications sourced from verified supply chains with full batch traceability.",
+      description: "100% genuine with batch traceability.",
       icon: ShieldCheck,
       bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
       textColor: "text-emerald-600 dark:text-emerald-400"
@@ -14,7 +14,7 @@ const WhyWellMedsBar = () => {
     {
       id: "sourcing",
       title: "Direct Manufacturer Sourcing",
-      description: "Sourced directly from FDA and WHO-GMP compliant pharmaceutical manufacturers.",
+      description: "FDA & WHO-GMP certified partners.",
       icon: Factory,
       bgColor: "bg-blue-50 dark:bg-blue-950/20",
       textColor: "text-blue-600 dark:text-blue-400"
@@ -22,7 +22,7 @@ const WhyWellMedsBar = () => {
     {
       id: "delivery",
       title: "Fast & Safe Delivery",
-      description: "Rapid delivery options with temperature-controlled shipping for sensitive medicines.",
+      description: "Temperature-controlled express shipping.",
       icon: Truck,
       bgColor: "bg-teal-50 dark:bg-teal-950/20",
       textColor: "text-teal-600 dark:text-teal-400"
@@ -30,7 +30,7 @@ const WhyWellMedsBar = () => {
     {
       id: "savings",
       title: "Up to 85% Savings",
-      description: "Direct pricing to deliver significant savings on Patient Assistance Program (PAP) and specialty therapies.",
+      description: "Direct manufacturer pricing.",
       icon: Percent,
       bgColor: "bg-amber-50 dark:bg-amber-950/20",
       textColor: "text-amber-600 dark:text-amber-400"
