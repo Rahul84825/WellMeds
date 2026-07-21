@@ -53,7 +53,7 @@ const WhyWellMedsBar = () => {
             return (
               <div 
                 key={item.id} 
-                className="flex flex-col items-center lg:items-start text-center lg:text-left relative select-none"
+                className="flex flex-col items-center text-center relative select-none px-2 lg:px-4"
               >
                 {/* Subtle vertical separator for desktop */}
                 {index < items.length - 1 && (
@@ -68,11 +68,11 @@ const WhyWellMedsBar = () => {
                 </div>
 
                 {/* Content */}
-                <div className="flex flex-col min-w-0 pr-0 lg:pr-6">
+                <div className="flex flex-col items-center text-center min-w-0 w-full">
                   <h3 className="text-base md:text-lg font-bold text-slate-800 dark:text-zinc-200 font-poppins mb-1.5">
                     {item.title}
                   </h3>
-                  <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-medium leading-relaxed max-w-[240px]">
                     {item.description}
                   </p>
                 </div>
