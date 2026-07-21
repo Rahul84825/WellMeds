@@ -66,6 +66,19 @@ const CategoryCard = ({ category, isSurgical = false, basePath }) => {
       </Link>
 
       <style>{`
+        /* ── Card wrapper stacking ── */
+        .category-card-link,
+        .category-card-wrapper,
+        .surgical-card-wrapper {
+          position: relative;
+          z-index: 1;
+        }
+        .category-card-link:hover,
+        .category-card-wrapper:hover,
+        .surgical-card-wrapper:hover {
+          z-index: 10;
+        }
+
         /* ── Card shell ── */
         .category-card {
           width: 170px;

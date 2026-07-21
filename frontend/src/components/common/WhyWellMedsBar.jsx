@@ -38,59 +38,41 @@ const WhyWellMedsBar = () => {
   ];
 
   return (
-    <section className="pt-16 pb-10 bg-white dark:bg-zinc-950 border-t border-slate-100 dark:border-zinc-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="pt-16 pb-14 bg-white dark:bg-zinc-950 border-t border-slate-100 dark:border-zinc-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Title */}
-        <h2 className="text-2xl md:text-3xl font-extrabold text-center text-[#1D2B5C] dark:text-zinc-100 mb-10 font-poppins tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-center text-[#1D2B5C] dark:text-zinc-100 mb-12 font-poppins tracking-tight">
           Why <span className="text-[#038076]">WellMeds</span>?
         </h2>
 
         {/* Items Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 md:gap-x-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
           {items.map((item, index) => {
             const IconComponent = item.icon;
             return (
               <div 
                 key={item.id} 
-                className="group flex flex-col lg:flex-row items-center lg:items-center gap-3 lg:gap-4 text-center lg:text-left relative select-none"
+                className="flex flex-col items-center lg:items-start text-center lg:text-left relative select-none"
               >
                 {/* Subtle vertical separator for desktop */}
                 {index < items.length - 1 && (
-                  <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-10 bg-slate-200 dark:bg-zinc-800" />
+                  <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-16 bg-slate-200 dark:bg-zinc-800" />
                 )}
 
                 {/* Rounded Icon Background */}
                 <div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0 ${item.bgColor} ${item.textColor}`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shrink-0 ${item.bgColor} ${item.textColor}`}
                 >
-                  <IconComponent className="w-6 h-6" />
+                  <IconComponent className="w-7 h-7" />
                 </div>
 
                 {/* Content */}
                 <div className="flex flex-col min-w-0 pr-0 lg:pr-6">
-                  {item.id === "authentic" ? (
-                    <div className="relative group/tooltip inline-block">
-                      <span className="text-sm font-bold text-slate-800 dark:text-zinc-200 font-poppins cursor-help border-b border-dotted border-slate-300 dark:border-zinc-700 pb-0.5">
-                        {item.title}
-                      </span>
-                      {/* Tooltip for Authentic Medicines */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-800 dark:bg-zinc-800 text-white text-[11px] rounded-lg py-2 px-3 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity duration-200 z-50 text-center shadow-lg font-normal leading-normal">
-                        {item.description}
-                        {/* Tooltip Arrow */}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800 dark:border-t-zinc-800" />
-                      </div>
-                    </div>
-                  ) : (
-                    <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-200 font-poppins">
-                      {item.title}
-                    </h3>
-                  )}
-                  {/* Subtle hover subtext on desktop, and regular subtext on mobile */}
-                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 font-medium lg:hidden">
-                    {item.description}
-                  </p>
-                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 font-medium hidden lg:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-[200px]">
+                  <h3 className="text-base md:text-lg font-bold text-slate-800 dark:text-zinc-200 font-poppins mb-1.5">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">
                     {item.description}
                   </p>
                 </div>

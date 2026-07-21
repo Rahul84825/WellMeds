@@ -129,7 +129,7 @@ const SurgicalProductsSection = () => {
   return (
     <section
       aria-label="Surgical & Medical Supplies"
-      className="surgical-section bg-white dark:bg-zinc-950 pt-12 pb-14 border-t border-slate-100 dark:border-zinc-900/60"
+      className="surgical-section bg-white dark:bg-zinc-950 pt-9 pb-11 border-t border-slate-100 dark:border-zinc-900/60"
     >
       <div className="home-section-container">
         
@@ -160,7 +160,7 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollLeft}
               aria-label="Scroll categories left"
-              className="absolute left-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
             >
               <ChevronLeft size={18} />
             </button>
@@ -171,7 +171,7 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollRight}
               aria-label="Scroll categories right"
-              className="absolute right-[-20px] top-[85px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
             >
               <ChevronRight size={18} />
             </button>
@@ -182,7 +182,7 @@ const SurgicalProductsSection = () => {
             ref={sliderRef}
             role="list"
             aria-label="Surgical categories carousel"
-            className="surgical-slider-track no-scrollbar flex flex-row gap-3 md:gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 px-1 cursor-grab active:cursor-grabbing select-none"
+            className="surgical-slider-track no-scrollbar flex flex-row gap-3 md:gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pt-4 pb-5 px-2 cursor-grab active:cursor-grabbing select-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={stopDragging}
@@ -231,6 +231,7 @@ const SurgicalProductsSection = () => {
             padding-right: 8px !important;
           }
           .surgical-slider-track {
+            padding-top: 4px !important;
             padding-left: 16px !important; /* Align with title */
             padding-right: 16px !important;
             margin-left: -8px !important; /* Bleed to screen edges */

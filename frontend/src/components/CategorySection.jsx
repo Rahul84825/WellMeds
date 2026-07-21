@@ -124,8 +124,8 @@ const CategorySection = () => {
       aria-label="Shop by Category"
       className="category-section bg-white dark:bg-zinc-950 text-2xl"
       style={{
-        paddingTop: "48px",
-        paddingBottom: "56px",
+        paddingTop: "36px",
+        paddingBottom: "44px",
       }}
     >
       <div className="home-section-container">
@@ -289,10 +289,10 @@ const CategorySection = () => {
               overflowX: "auto",
               scrollSnapType: "x mandatory",
               WebkitOverflowScrolling: "touch",
-              paddingBottom: "12px",
-              paddingTop: "4px",
-              paddingLeft: "4px",
-              paddingRight: "4px",
+              paddingTop: "16px",
+              paddingBottom: "20px",
+              paddingLeft: "8px",
+              paddingRight: "8px",
               cursor: "grab",
             }}
             onMouseDown={handleMouseDown}
@@ -414,6 +414,7 @@ const CategorySection = () => {
           }
           .category-slider-track {
             gap: 12px !important; /* Consistent gap: cards never touch */
+            padding-top: 4px !important;
             padding-left: 16px !important; /* Aligned with title */
             padding-right: 16px !important;
             padding-bottom: 12px !important;
