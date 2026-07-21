@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 
 const CategoryCard = ({ category }) => {
   const hasImage = Boolean(category.image?.trim());
+  const linkTarget = category.slug
+    ? `/category/${category.slug}`
+    : `/products?category=${encodeURIComponent(category.name)}`;
 
   return (
     <>
       <Link
-        to={`/products?category=${encodeURIComponent(category.name)}`}
+        to={linkTarget}
         aria-label={`Browse ${category.name} products`}
         className="category-card-link flex-none snap-start"
         style={{ textDecoration: "none" }}

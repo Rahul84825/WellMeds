@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import CategoryCard from "../components/CategoryCard";
 import { Search, X, FolderOpen, ChevronRight } from "lucide-react";
 
 const AllCategoriesPage = () => {
@@ -105,66 +106,24 @@ const AllCategoriesPage = () => {
 
       {/* Category Grid Section */}
       {loading ? (
-        /* Skeleton Loaders */
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+        /* Skeleton Loaders matching CategoryCard dimensions */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl p-3 sm:p-4 flex flex-col items-center justify-between h-[180px] sm:h-[200px] animate-pulse"
+              className="w-[110px] md:w-[170px] flex flex-col items-center animate-pulse"
             >
-              <div className="w-full aspect-square bg-slate-100 dark:bg-zinc-800 rounded-xl mb-3" />
-              <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
+              <div className="w-[110px] h-[110px] md:w-[170px] md:h-[170px] bg-slate-100 dark:bg-zinc-800 rounded-[16px] md:rounded-[18px]" />
+              <div className="h-3.5 bg-slate-100 dark:bg-zinc-800 rounded w-20 mt-2 md:hidden" />
             </div>
           ))}
         </div>
       ) : filteredCategories.length > 0 ? (
-        /* Dynamic Category Cards Grid */
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
-          {filteredCategories.map((cat) => {
-            const linkTarget = cat.slug
-              ? `/category/${cat.slug}`
-              : `/products?category=${encodeURIComponent(cat.name)}`;
-
-            return (
-              <Link
-                key={cat._id || cat.id}
-                to={linkTarget}
-                className="group flex flex-col items-center justify-between p-3 sm:p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl hover:border-[#038076] dark:hover:border-[#038076] hover:shadow-lg hover:-translate-y-1 transition-all duration-200 text-center cursor-pointer h-full"
-              >
-                {/* Image / Icon Box */}
-                <div className="w-full aspect-square rounded-xl bg-slate-50/80 dark:bg-zinc-800/40 overflow-hidden flex items-center justify-center p-2.5 mb-3 group-hover:bg-slate-100/80 dark:group-hover:bg-zinc-800/60 transition-colors">
-                  {cat.image ? (
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      loading="lazy"
-                      className="w-full h-full object-contain sm:object-cover group-hover:scale-106 transition-transform duration-300"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const fallback = e.currentTarget.nextElementSibling;
-                        if (fallback) fallback.style.display = "flex";
-                      }}
-                    />
-                  ) : null}
-
-                  {/* Fallback Icon */}
-                  <div
-                    className="w-full h-full flex items-center justify-center text-[#038076] dark:text-[#84d6b9]"
-                    style={{ display: cat.image ? "none" : "flex" }}
-                  >
-                    <span className="material-symbols-outlined text-[36px] sm:text-[42px] opacity-80">
-                      {cat.icon || "category"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Category Name */}
-                <h3 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] transition-colors leading-tight line-clamp-2 w-full px-0.5">
-                  {cat.name}
-                </h3>
-              </Link>
-            );
-          })}
+        /* Shared CategoryCard Component Grid */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+          {filteredCategories.map((cat, idx) => (
+            <CategoryCard key={(cat._id || cat.id)?.toString()} category={cat} index={idx} />
+          ))}
         </div>
       ) : (
         /* Empty State */
