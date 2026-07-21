@@ -1,9 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const CategoryCard = ({ category }) => {
+const CategoryCard = ({ category, isSurgical = false, basePath }) => {
   const hasImage = Boolean(category.image?.trim());
-  const linkTarget = category.slug
+  const linkTarget = basePath
+    ? `${basePath}${category.slug}`
+    : isSurgical
+    ? `/surgical/${category.slug}`
+    : category.slug
     ? `/category/${category.slug}`
     : `/products?category=${encodeURIComponent(category.name)}`;
 
@@ -12,7 +16,7 @@ const CategoryCard = ({ category }) => {
       <Link
         to={linkTarget}
         aria-label={`Browse ${category.name} products`}
-        className="category-card-link flex-none snap-start"
+        className="category-card-link flex-none flex flex-col items-center group snap-start"
         style={{ textDecoration: "none" }}
       >
         {/*
@@ -32,7 +36,9 @@ const CategoryCard = ({ category }) => {
                 className="category-card-img"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
-                  e.currentTarget.nextSibling.style.display = "flex";
+                  if (e.currentTarget.nextSibling) {
+                    e.currentTarget.nextSibling.style.display = "flex";
+                  }
                 }}
               />
             ) : null}
@@ -53,7 +59,7 @@ const CategoryCard = ({ category }) => {
           </div>
         </div>
         
-        {/* Title below the card — mobile only */}
+        {/* Title below the card */}
         <h3 className="category-card-title">
           {category.name}
         </h3>
@@ -122,9 +128,24 @@ const CategoryCard = ({ category }) => {
           height: 100%;
         }
 
-        /* ── Title below card (hidden on desktop) ── */
+        /* ── Title below card ── */
         .category-card-title {
-          display: none;
+          display: block;
+          margin-top: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #334155;
+          text-align: center;
+          width: 100%;
+          max-width: 170px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.3;
+          transition: color 200ms ease;
+        }
+        .category-card-link:hover .category-card-title {
+          color: #038076;
         }
 
         /* ── Mobile Layout Optimization (≤768px) ── */

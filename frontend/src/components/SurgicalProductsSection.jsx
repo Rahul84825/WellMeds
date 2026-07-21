@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "./Loader";
+import CategoryCard from "./CategoryCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
@@ -187,43 +188,15 @@ const SurgicalProductsSection = () => {
             onMouseUp={stopDragging}
             onMouseLeave={stopDragging}
           >
-            {categories.map((cat) => {
+            {categories.map((cat, idx) => {
               const categoryId = cat.id || cat._id;
               return (
                 <div
                   key={categoryId?.toString()}
                   role="listitem"
-                  className="snap-start shrink-0 w-[110px] min-w-[110px] sm:w-[170px] sm:min-w-[170px] flex-none surgical-card-wrapper"
+                  className="snap-start shrink-0 surgical-card-wrapper"
                 >
-                  <Link
-                    to={`/surgical/${cat.slug}`}
-                    aria-label={`Browse ${cat.name} products`}
-                    className="flex flex-col items-center group no-underline"
-                  >
-                    {/* Square Image Box */}
-                    <div className="w-full aspect-square rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-250 bg-white dark:bg-zinc-900 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.13)] dark:group-hover:shadow-[0_12px_28px_rgba(3,128,118,0.25)] group-hover:border-[#038076] dark:group-hover:border-[#038076] p-2 sm:p-0">
-                      {cat.image ? (
-                        <img
-                          src={cat.image}
-                          alt={cat.name}
-                          loading="lazy"
-                          draggable={false}
-                          className="w-full h-full object-contain sm:object-cover transition-transform duration-280 group-hover:scale-106"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-white dark:bg-zinc-900">
-                          <span className="material-symbols-outlined text-[40px] text-[#038076] dark:text-[#84d6b9] opacity-70">
-                            activity
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Title */}
-                    <h3 className="mt-2 text-center text-[13px] sm:text-[15px] font-medium text-slate-800 dark:text-zinc-200 transition-colors duration-200 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] truncate w-full px-1">
-                      {cat.name}
-                    </h3>
-                  </Link>
+                  <CategoryCard category={cat} isSurgical={true} index={idx} />
                 </div>
               );
             })}

@@ -122,7 +122,7 @@ const CategorySection = () => {
   return (
     <section
       aria-label="Shop by Category"
-      className="category-section bg-white dark:bg-zinc-950"
+      className="category-section bg-white dark:bg-zinc-950 text-2xl"
       style={{
         paddingTop: "48px",
         paddingBottom: "56px",

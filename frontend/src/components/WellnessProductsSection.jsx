@@ -85,7 +85,7 @@ const WellnessProductsSection = () => {
     <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-2">
         <div className="text-left">
-          <h2 className="font-headline-md text-headline-md text-on-surface">Wellness Products</h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface text-2xl">Wellness Products</h2>
         </div>
         <Link 
           to="/products?productType=wellness" 

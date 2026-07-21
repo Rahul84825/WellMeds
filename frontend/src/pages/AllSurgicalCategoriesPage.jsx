@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { 
-  Search, X, FolderOpen, ChevronRight, Scissors, Shield, 
-  Bandage, Syringe, Bed, Stethoscope, Activity, Heart, Thermometer, Layers 
-} from "lucide-react";
+import CategoryCard from "../components/CategoryCard";
+import { Search, X, FolderOpen, ChevronRight } from "lucide-react";
 
 // Icon mapping utility for surgical categories
 const getSurgicalIcon = (iconName) => {
@@ -132,67 +130,22 @@ const AllSurgicalCategoriesPage = () => {
 
       {/* Surgical Categories Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-5 space-y-4 shadow-xs animate-pulse"
+              className="w-[110px] md:w-[170px] flex flex-col items-center animate-pulse"
             >
-              <div className="flex justify-between items-center">
-                <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 rounded-xl" />
-                <div className="w-16 h-5 bg-slate-100 dark:bg-zinc-800 rounded-lg" />
-              </div>
-              <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
-              <div className="h-3 bg-slate-100 dark:bg-zinc-800 rounded w-full" />
+              <div className="w-[110px] h-[110px] md:w-[170px] md:h-[170px] bg-slate-100 dark:bg-zinc-800 rounded-[16px] md:rounded-[18px]" />
+              <div className="h-3.5 bg-slate-100 dark:bg-zinc-800 rounded w-20 mt-2 md:hidden" />
             </div>
           ))}
         </div>
       ) : filteredCategories.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredCategories.map((cat) => {
-            const IconComponent = getSurgicalIcon(cat.icon);
-            return (
-              <div
-                key={cat.id || cat._id}
-                onClick={() => navigate(`/surgical/${cat.slug}`)}
-                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-xs hover:shadow-md hover:-translate-y-1 hover:border-[#004782]/40 transition-all duration-300 cursor-pointer flex flex-col justify-between group h-full select-none"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 bg-slate-50 dark:bg-zinc-955 rounded-2xl p-2.5 flex items-center justify-center border border-slate-200/80 dark:border-zinc-800 shrink-0 transition-colors group-hover:bg-[#004782]/5">
-                      {cat.image ? (
-                        <img
-                          src={cat.image}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-xl"
-                          alt={cat.name}
-                        />
-                      ) : (
-                        <IconComponent
-                          size={22}
-                          className="text-slate-400 group-hover:text-[#004782] transition-colors"
-                        />
-                      )}
-                    </div>
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl border bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-500 group-hover:border-[#004782]/20 group-hover:bg-[#004782]/5 group-hover:text-[#004782] transition-colors">
-                      {cat.productCount || 0} items
-                    </span>
-                  </div>
-                  <div className="space-y-1 pt-1">
-                    <h3 className="font-extrabold text-slate-800 dark:text-zinc-100 text-base group-hover:text-[#004782] transition-colors">
-                      {cat.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                      {cat.description || `Browse quality ${cat.name} equipment and tools.`}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center text-[#004782] dark:text-[#a4c9ff] font-bold text-xs gap-1 pt-4 mt-auto group-hover:underline">
-                  <span>Browse Category Products</span>
-                  <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+          {filteredCategories.map((cat, idx) => (
+            <CategoryCard key={(cat._id || cat.id)?.toString()} category={cat} isSurgical={true} index={idx} />
+          ))}
         </div>
       ) : (
         /* Empty State */

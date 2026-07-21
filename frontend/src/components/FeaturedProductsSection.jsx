@@ -64,7 +64,7 @@ export const FeaturedProductsSection = () => {
   return (
     <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
       <div className="flex items-center justify-between mb-xl">
-        <h2 className="font-headline-md text-headline-md text-on-surface">Best Sellers</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface text-2xl">Best Sellers</h2>
         <Link to="/products" className="text-primary dark:text-primary-fixed-dim font-label-md hover:underline flex items-center gap-xs">
           <span>Browse Products</span>
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>

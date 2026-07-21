@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import ProductCard from "../components/ProductCard";
+import CategoryCard from "../components/CategoryCard";
 import { 
   Scissors, 
   Shield, 
@@ -209,44 +210,10 @@ const SurgicalLandingPage = () => {
             <p className="text-slate-400 font-semibold text-xs">No categories configured yet. Add them in the Admin Panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md">
-            {categories.map((cat) => {
-              const IconComponent = getSurgicalIcon(cat.icon);
-              return (
-                <div
-                  key={cat.id || cat._id}
-                  onClick={() => navigate(`/surgical/${cat.slug}`)}
-                  className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-850 rounded-2xl p-md shadow-xs hover:shadow-md hover:-translate-y-0.5 hover:border-[#004782]/30 transition-all duration-300 cursor-pointer flex flex-col justify-between group h-full"
-                >
-                  <div className="space-y-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="w-12 h-12 bg-slate-50 dark:bg-zinc-950 rounded-xl p-2.5 flex items-center justify-center border border-slate-100 dark:border-zinc-800 shrink-0 transition-colors group-hover:bg-[#004782]/5">
-                        {cat.image ? (
-                          <img src={cat.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={cat.name} />
-                        ) : (
-                          <IconComponent size={20} className="text-slate-400 group-hover:text-[#004782] transition-colors" />
-                        )}
-                      </div>
-                      <span className="text-[10px] font-bold px-sm py-0.5 rounded-lg border bg-slate-50 dark:bg-zinc-950 border-slate-250/30 dark:border-zinc-800 text-slate-400 group-hover:border-[#004782]/20 group-hover:bg-[#004782]/5 group-hover:text-[#004782] transition-colors">
-                        {cat.productCount || 0} items
-                      </span>
-                    </div>
-                    <div className="space-y-xs pt-1">
-                      <h3 className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm group-hover:text-[#004782] transition-colors">
-                        {cat.name}
-                      </h3>
-                      <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                        {cat.description || `Browse quality ${cat.name} equipment and tools.`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-[#004782] dark:text-[#a4c9ff] font-bold text-[11px] gap-xs pt-md mt-auto group-hover:underline">
-                    <span>View Category Products</span>
-                    <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+            {categories.map((cat, idx) => (
+              <CategoryCard key={(cat.id || cat._id)?.toString()} category={cat} isSurgical={true} index={idx} />
+            ))}
           </div>
         )}
       </section>
