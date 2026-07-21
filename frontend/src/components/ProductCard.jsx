@@ -272,11 +272,11 @@ const ProductCard = ({ product }) => {
           {cartQuantity > 0 ? (
             <div className="mt-3 flex items-center gap-2 w-full h-[40px]">
               {/* Stepper Control */}
-              <div className="flex items-center justify-between bg-[#f0edfd] dark:bg-purple-950/40 border border-[#7c75f2]/30 rounded-xl px-1.5 py-1 min-w-[85px] sm:min-w-[95px] h-full shrink-0">
+              <div className="flex items-center justify-between bg-[#f0edfd] dark:bg-purple-950/40 border border-[#3f257a]/30 rounded-xl px-1.5 py-1 min-w-[85px] sm:min-w-[95px] h-full shrink-0">
                 <button
                   type="button"
                   onClick={handleDecrement}
-                  className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-[#3f257a] hover:bg-[#321c62] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
                   aria-label="Decrease quantity"
                 >
                   -
@@ -287,7 +287,7 @@ const ProductCard = ({ product }) => {
                 <button
                   type="button"
                   onClick={handleIncrement}
-                  className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-6 h-6 rounded-full bg-[#3f257a] hover:bg-[#321c62] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
                   aria-label="Increase quantity"
                 >
                   +
@@ -298,7 +298,7 @@ const ProductCard = ({ product }) => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="flex-1 h-full py-2 px-3 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                className="flex-1 h-full py-2 px-3 rounded-xl bg-[#3f257a] hover:bg-[#321c62] text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
               >
                 Buy Now
               </button>
@@ -308,7 +308,7 @@ const ProductCard = ({ product }) => {
               type="button"
               onClick={handleAddToCart}
               disabled={isOOS || isAdding}
-              className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-[40px]"
+              className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#3f257a] hover:bg-[#321c62] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-[40px]"
             >
               {isAdding ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
