@@ -7,7 +7,7 @@ import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
   const [isAdding, setIsAdding]           = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null); // 'rx' | 'coldChain' | null
@@ -19,6 +19,12 @@ const ProductCard = ({ product }) => {
   const isColdChain= product.isColdChain || false;
   const isOOS      = product.inStock === false || product.stock === 0;
   const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+
+  const cartItem = cartItems?.find((item) => {
+    const itemPId = (item.product?._id || item.product?.id || item._id || item.id)?.toString();
+    return itemPId === productId;
+  });
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   const savings = product.originalPrice && product.originalPrice > product.price
     ? product.originalPrice - product.price 
@@ -53,6 +59,47 @@ const ProductCard = ({ product }) => {
       toast.error("Failed to add product to cart.");
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleIncrement = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await updateQuantity(productId, cartQuantity + 1);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update quantity.");
+    }
+  };
+
+  const handleDecrement = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      if (cartQuantity <= 1) {
+        await removeFromCart(productId);
+      } else {
+        await updateQuantity(productId, cartQuantity - 1);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update quantity.");
+    }
+  };
+
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOOS) return;
+    try {
+      if (cartQuantity === 0) {
+        await addToCart(product, 1);
+      }
+      navigate("/checkout");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to proceed to checkout.");
     }
   };
 
@@ -221,24 +268,60 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={isOOS || isAdding}
-            className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
-          >
-            {isAdding ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : isOOS ? (
-              "Out of Stock"
-            ) : (
-              <>
-                <ShoppingCart size={16} />
-                <span>Add to cart</span>
-              </>
-            )}
-          </button>
+          {/* Action Area: Add to Cart OR Quantity Stepper + Buy Now */}
+          {cartQuantity > 0 ? (
+            <div className="mt-3 flex items-center gap-2 w-full h-[40px]">
+              {/* Stepper Control */}
+              <div className="flex items-center justify-between bg-[#f0edfd] dark:bg-purple-950/40 border border-[#7c75f2]/30 rounded-xl px-1.5 py-1 min-w-[85px] sm:min-w-[95px] h-full shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 px-1 text-center">
+                  {cartQuantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleIncrement}
+                  className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Buy Now Button */}
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                className="flex-1 h-full py-2 px-3 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
+              >
+                Buy Now
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={isOOS || isAdding}
+              className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-[40px]"
+            >
+              {isAdding ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : isOOS ? (
+                "Out of Stock"
+              ) : (
+                <>
+                  <ShoppingCart size={16} />
+                  <span>Add to cart</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
