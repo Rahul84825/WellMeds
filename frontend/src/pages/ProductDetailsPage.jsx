@@ -5,8 +5,9 @@ import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import { toast } from "sonner";
-import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle, CheckCircle, AlertTriangle, Check } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
+import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
 // V2 Modular Components
 import StickySidebar from "../components/ProductDetail/StickySidebar";
@@ -18,6 +19,7 @@ import DeliveryCard from "../components/ProductDetail/DeliveryCard";
 import RXCard from "../components/ProductDetail/RXCard";
 import ColdChainCard from "../components/ProductDetail/ColdChainCard";
 import ProductTabs from "../components/ProductDetail/ProductTabs";
+import SubstituteProducts from "../components/ProductDetail/SubstituteProducts";
 import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkeleton";
 
 const ProductDetails = () => {
@@ -101,8 +103,11 @@ const ProductDetails = () => {
   };
 
   const imagesList = useMemo(() => {
-    if (!product) return [];
-    return product.images && product.images.length > 0 ? product.images : [product.image];
+    if (!product) return [DEFAULT_PRODUCT_IMAGE];
+    const validImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (validImages.length > 0) return validImages;
+    if (product.image) return [product.image];
+    return [DEFAULT_PRODUCT_IMAGE];
   }, [product]);
 
   useEffect(() => {
@@ -731,12 +736,7 @@ const ProductDetails = () => {
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
-          {/* Authors Attribution */}
-          <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-zinc-400 mt-3 border-t border-slate-100 dark:border-zinc-800/80 pt-3">
-            <p>Written By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Sakshi Anil More</span> <span className="text-[9px] text-slate-400">B. Pharm</span></p>
-            <p>Reviewed By: <span className="font-semibold text-slate-700 dark:text-zinc-300">Dr. Tejashwin Adiga</span> <span className="text-[9px] text-slate-400">MBBS</span></p>
-            <p>Last updated on {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : "03 Jul 2026"} | 12:44 PM (IST)</p>
-          </div>
+
         </div>
 
         {/* Product Image Gallery Card */}
@@ -962,60 +962,8 @@ const ProductDetails = () => {
 
         {/* Substitutes Section */}
         {substituteProducts.length > 0 && (
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
-              Substitutes
-            </h3>
-            <div className="flex flex-col gap-2.5">
-              {substituteProducts.slice(0, 3).map((item) => {
-                const diffPercent = product.price > 0 
-                  ? Math.round(((item.price - product.price) / product.price) * 100) 
-                  : 0;
-                const isCostlier = diffPercent > 0;
-                const comparisonLabel = diffPercent === 0 
-                  ? "Same price" 
-                  : isCostlier 
-                    ? `${diffPercent}% costlier` 
-                    : `${Math.abs(diffPercent)}% cheaper`;
-
-                return (
-                  <Link
-                    key={item.slug || item._id}
-                    to={`/products/${item.slug}`}
-                    onClick={() => window.scrollTo(0, 0)}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 dark:border-zinc-800 hover:bg-[#038076]/5 transition-all text-left"
-                  >
-                    <div className="flex-1 min-w-0 pr-2">
-                      <h4 className="font-bold text-xs text-slate-800 dark:text-zinc-200 truncate">{item.name}</h4>
-                      <p className="text-[9px] text-slate-405 uppercase font-semibold mt-0.5 truncate">{item.manufacturer || item.brand}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-black text-slate-800 dark:text-zinc-200">
-                        {formatCurrency(item.price)}
-                        <span className="text-[9px] text-slate-400 font-semibold">/{item.productSpecifications?.dosageForm || "Unit"}</span>
-                      </p>
-                      <span className={`inline-block text-[9px] font-black px-1.5 py-0.5 rounded-full mt-1 ${
-                        diffPercent === 0 
-                          ? "bg-slate-150 text-slate-600" 
-                          : isCostlier 
-                            ? "bg-red-500/10 text-red-655" 
-                            : "bg-emerald-500/10 text-emerald-655"
-                      }`}>
-                        {comparisonLabel}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-            {substituteProducts.length > 3 && (
-              <button
-                onClick={() => setIsFullscreenOpen(true)}
-                className="w-full mt-3 h-10 rounded-xl bg-[#482b8f] hover:bg-[#3b217a] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              >
-                View All <span className="text-sm">→</span>
-              </button>
-            )}
+          <div className="mx-4 mb-4">
+            <SubstituteProducts substituteProducts={substituteProducts} product={product} />
           </div>
         )}
 
@@ -1078,22 +1026,99 @@ const ProductDetails = () => {
                   </p>
                 </div>
               )}
-              {/* Uses / Dosage / Side Effects / Storage */}
-              {computedSections.map((sec) => {
-                if (["Uses", "Dosage", "SideEffects", "Storage"].includes(sec.id) && sec.content) {
-                  return (
-                    <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
-                        {sec.title}
-                      </h3>
-                      <div className="text-slate-600 dark:text-zinc-305 text-xs leading-relaxed whitespace-pre-line">
-                        {sec.content}
-                      </div>
+              {/* All Clinical Index Sections */}
+              {computedSections.map((sec) => (
+                <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
+                  <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2 pb-2 border-b border-slate-100 dark:border-zinc-800">
+                    {sec.title}
+                  </h3>
+
+                  {/* Key Benefits */}
+                  {sec.type === "benefits" && product.benefits && (
+                    <div className="grid grid-cols-1 gap-2.5 mt-2">
+                      {product.benefits.map((b, i) => (
+                        <div key={i} className="p-2.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-2 items-start">
+                          <CheckCircle className="text-[#086b53] shrink-0 mt-0.5" size={14} />
+                          <div>
+                            <p className="font-bold text-xs text-slate-800 dark:text-zinc-200">{b.title}</p>
+                            {b.description && <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{b.description}</p>}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  );
-                }
-                return null;
-              })}
+                  )}
+
+                  {/* Dosage & Usage */}
+                  {sec.type === "usage" && product.usageInstructions && (
+                    <ul className="space-y-2 text-xs text-slate-650 dark:text-zinc-300 font-medium mt-2">
+                      {product.usageInstructions.map((inst, idx) => (
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <Check className="text-[#004782] shrink-0 mt-0.5" size={12} />
+                          <span>{inst}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Side Effects */}
+                  {sec.type === "sideeffects" && product.sideEffects && (
+                    <ul className="space-y-2 text-xs text-slate-650 dark:text-zinc-300 font-medium mt-2">
+                      {product.sideEffects.map((side, idx) => (
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-550 shrink-0 mt-1.5" />
+                          <span>{side}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Storage */}
+                  {sec.type === "storage" && product.storageInstructions && (
+                    <ul className="space-y-2 text-xs text-slate-650 dark:text-zinc-300 font-medium mt-2">
+                      {product.storageInstructions.map((store, idx) => (
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#086b53] shrink-0 mt-1.5" />
+                          <span>{store}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Warnings */}
+                  {sec.type === "warnings" && product.warnings && (
+                    <div className="space-y-2 mt-2">
+                      {product.warnings.map((warn, idx) => (
+                        <div key={idx} className="p-2.5 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex gap-2 items-start">
+                          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={14} />
+                          <p className="text-xs text-slate-650 dark:text-zinc-300 leading-relaxed">{warn}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Safety */}
+                  {sec.type === "safety" && product.safetyCards && (
+                    <div className="grid grid-cols-1 gap-2 mt-2">
+                      {product.safetyCards.map((card, idx) => (
+                        <div key={idx} className="p-2.5 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-xs">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-slate-800 dark:text-zinc-100">{card.title}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
+                          </div>
+                          {card.description && <p className="text-[10px] text-slate-500 dark:text-zinc-400">{card.description}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Plain / Custom Content */}
+                  {sec.content && !sec.type && (
+                    <div className="text-slate-600 dark:text-zinc-305 text-xs leading-relaxed whitespace-pre-line mt-2">
+                      {sec.content}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 
@@ -1177,6 +1202,38 @@ const ProductDetails = () => {
             </div>
           )}
         </div>
+
+        {/* Related Products Section (Mobile Responsive) */}
+        {relatedProducts.length > 0 && (
+          <div className="mx-4 mb-6 text-left">
+            <h3 className="font-extrabold text-lg text-slate-900 dark:text-zinc-100 mb-3">
+              Related Products
+            </h3>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-3">
+              {relatedProducts.map((p) => (
+                <div key={p.id || p._id} className="snap-start shrink-0 w-[180px] sm:w-[210px]">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recently Viewed Products (Mobile Responsive) */}
+        {recentlyViewed.length > 0 && (
+          <div className="mx-4 mb-6 text-left">
+            <h3 className="font-extrabold text-lg text-slate-900 dark:text-zinc-100 mb-3">
+              Recently Viewed Products
+            </h3>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-3">
+              {recentlyViewed.map((p) => (
+                <div key={p.id || p._id} className="snap-start shrink-0 w-[180px] sm:w-[210px]">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Sticky Bottom Bar (Mobile/Tablet only) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-105 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">

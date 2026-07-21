@@ -103,8 +103,7 @@ const CategorySection = () => {
     return (
       <section
         aria-label="Shop by Category — loading"
-        className="py-16"
-        style={{ background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)" }}
+        className="py-16 bg-white dark:bg-zinc-950"
       >
         <div
           className="home-section-container flex justify-center items-center"
@@ -123,9 +122,8 @@ const CategorySection = () => {
   return (
     <section
       aria-label="Shop by Category"
-      className="category-section"
+      className="category-section bg-white dark:bg-zinc-950"
       style={{
-        background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         paddingTop: "48px",
         paddingBottom: "56px",
       }}

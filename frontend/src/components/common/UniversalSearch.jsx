@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import api from "../../services/api";
+import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
 
 export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const navigate = useNavigate();
@@ -408,9 +409,14 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
       <div 
         className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 p-1 cursor-pointer"
       >
+
         <img 
-          src={product.image || "/assets/placeholder-medicine.png"} 
+          src={product.image || DEFAULT_PRODUCT_IMAGE} 
           alt={product.name} 
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = DEFAULT_PRODUCT_IMAGE;
+          }}
           className="w-full h-full object-contain"
         />
       </div>

@@ -724,9 +724,9 @@ const CouponCarousel = () => {
     return (
       <section
         aria-label="Loading offers"
+        className="bg-white dark:bg-zinc-950"
         style={{
           padding: "56px 0 64px",
-          background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         }}
       >
         <div className="home-section-container">
@@ -749,9 +749,9 @@ const CouponCarousel = () => {
   if (error) {
     return (
       <section
+        className="bg-white dark:bg-zinc-950"
         style={{
           padding: "56px 0",
-          background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         }}
       >
         <div className="home-section-container text-center">
@@ -818,9 +818,9 @@ const CouponCarousel = () => {
   return (
     <section
       aria-label="Exclusive Offers and Coupons"
+      className="bg-white dark:bg-zinc-950"
       style={{
         padding: "48px 0 56px",
-        background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         position: "relative",
         overflow: "hidden",
       }}

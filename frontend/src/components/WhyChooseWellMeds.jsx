@@ -48,7 +48,7 @@ const benefits = [
 
 const WhyChooseWellMeds = () => {
   return (
-    <section className="relative py-10 md:py-12 bg-slate-50 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
+    <section className="relative py-10 md:py-12 bg-white dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
       {/* Background Decorative Element */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#038076]/5 dark:bg-[#038076]/10 blur-[100px] rounded-full pointer-events-none" />
       

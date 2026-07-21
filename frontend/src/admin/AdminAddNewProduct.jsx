@@ -665,17 +665,7 @@ const AddNewProduct = () => {
       return;
     }
 
-    const hasExistingImage = isEditMode && existingProduct && (
-      existingProduct.image ||
-      (existingProduct.images && existingProduct.images.length > 0) ||
-      (existingProduct.imagesData && existingProduct.imagesData.length > 0)
-    );
-
-    const primaryImageUrl = images[primaryImageIdx] || "";
-    if (!primaryImageUrl && !hasExistingImage) {
-      toast.warning("Please upload at least one image.");
-      return;
-    }
+    const primaryImageUrl = images[primaryImageIdx] || images[0] || "";
 
     if (originalPrice && parseFloat(originalPrice) < parseFloat(price)) {
       toast.warning("Original Price cannot be less than Selling Price.");
@@ -712,8 +702,8 @@ const AddNewProduct = () => {
       requiresRx: specPrescription === "Yes",
       isPrescriptionRequired: specPrescription === "Yes",
       isColdChain: specColdChain === "Yes",
-      image: primaryImageUrl || (existingProduct ? existingProduct.image : ""),
-      images: images.length > 0 ? images : (existingProduct ? (existingProduct.images || []) : []),
+      image: primaryImageUrl,
+      images: images,
       imagesData: existingProduct ? existingProduct.imagesData : undefined,
       description: description.trim(),
       specialities: selectedSpecialities,

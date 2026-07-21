@@ -68,51 +68,63 @@ export const CartProvider = ({ children }) => {
   // Backend sync — called after login with the logged-in token
   // Merges local guest cart with server cart, then syncs up.
   // ─────────────────────────────────────────────────────
-  const syncCartForUser = useCallback(async () => {
+  // ─────────────────────────────────────────────────────
+  // Backend sync — called after login with the logged-in token
+  // Merges local guest cart with server cart only on initial login.
+  // ─────────────────────────────────────────────────────
+  const syncCartForUser = useCallback(async (isInitialLogin = false) => {
     setIsSyncing(true);
     try {
       // 1. Fetch server cart
       const serverItems = await cartService.getCart();
       const normalizedServer = normalizeBackendItems(serverItems);
 
-      // 2. Get current local (guest) items
-      const localItems = cartItems;
-
-      if (localItems.length === 0) {
-        // No guest cart — just use server cart
+      if (!isInitialLogin) {
+        // Session restore or page refresh: server cart is the single source of truth!
         setCartItems(normalizedServer);
       } else {
-        // Merge: upload local items that aren't on server
-        const serverIds = normalizedServer.map((i) => i.id);
-        const guestOnlyItems = localItems.filter((i) => !serverIds.includes(i.id));
-
-        for (const item of guestOnlyItems) {
-          try {
-            await cartService.addToCart(item.id, item.quantity);
-          } catch (err) {
-            console.warn(`Could not sync guest cart item ${item.name}:`, err.message);
-          }
+        // Fresh login: merge guest cart items into server cart
+        const savedGuest = localStorage.getItem("medishop_cart");
+        let guestItems = [];
+        try {
+          guestItems = savedGuest ? JSON.parse(savedGuest) : [];
+        } catch {
+          guestItems = [];
         }
 
-        // Re-fetch merged server cart
-        const mergedServerItems = await cartService.getCart();
-        setCartItems(normalizeBackendItems(mergedServerItems));
+        if (guestItems.length === 0) {
+          setCartItems(normalizedServer);
+        } else {
+          const serverIds = normalizedServer.map((i) => i.id);
+          const guestOnlyItems = guestItems.filter((i) => !serverIds.includes(i.id));
+
+          for (const item of guestOnlyItems) {
+            try {
+              await cartService.addToCart(item.id, item.quantity);
+            } catch (err) {
+              console.warn(`Could not sync guest cart item ${item.name}:`, err.message);
+            }
+          }
+
+          // Re-fetch merged server cart
+          const mergedServerItems = await cartService.getCart();
+          setCartItems(normalizeBackendItems(mergedServerItems));
+        }
       }
     } catch (err) {
       console.warn("Cart sync failed, staying on local cart:", err.message);
     } finally {
       setIsSyncing(false);
     }
-  }, []); // eslint-disable-line
+  }, []);
 
   // Called on logout: save current cart to localStorage, no backend call needed
   const saveCartToLocalOnLogout = useCallback(() => {
-    // Cart is already persisted to localStorage via useEffect — nothing extra needed.
-    // This is a no-op but can be extended if needed.
+    // Cart is already persisted to localStorage via useEffect
   }, []);
 
   // ─────────────────────────────────────────────────────
-  // Cart operations — try backend first, fall back to local
+  // Cart operations — optimistic update + server sync
   // ─────────────────────────────────────────────────────
   const hasToken = () => !!localStorage.getItem("medishop_token");
 
@@ -141,7 +153,10 @@ export const CartProvider = ({ children }) => {
     // Backend sync if logged in
     if (hasToken()) {
       try {
-        await cartService.addToCart(productId, quantity);
+        const serverItems = await cartService.addToCart(productId, quantity);
+        if (serverItems) {
+          setCartItems(normalizeBackendItems(serverItems));
+        }
       } catch (err) {
         console.warn("Backend addToCart failed:", err.message);
       }
@@ -154,7 +169,10 @@ export const CartProvider = ({ children }) => {
 
     if (hasToken()) {
       try {
-        await cartService.removeFromCart(id);
+        const serverItems = await cartService.removeFromCart(id);
+        if (serverItems) {
+          setCartItems(normalizeBackendItems(serverItems));
+        }
       } catch (err) {
         console.warn("Backend removeFromCart failed:", err.message);
       }
@@ -175,12 +193,15 @@ export const CartProvider = ({ children }) => {
 
     if (hasToken()) {
       try {
-        await cartService.updateCartQuantity(id, quantity);
+        const serverItems = await cartService.updateCartQuantity(id, quantity);
+        if (serverItems) {
+          setCartItems(normalizeBackendItems(serverItems));
+        }
       } catch (err) {
         console.warn("Backend updateQuantity failed:", err.message);
       }
     }
-  }, []);
+  }, [removeFromCart]);
 
   const clearCart = useCallback(async () => {
     setCartItems([]);

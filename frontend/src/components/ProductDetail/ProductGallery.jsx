@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Loader from "../Loader";
+import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
 
 const ProductGallery = ({
   imagesList,
@@ -57,12 +58,17 @@ const ProductGallery = ({
         
         {/* Main Product Image (Hero) */}
         <img 
-          src={imagesList[activeImageIdx]} 
+          src={imagesList[activeImageIdx] || DEFAULT_PRODUCT_IMAGE} 
           alt={productName} 
           loading="eager"
           fetchpriority="high"
           className="w-auto h-auto max-w-[92%] max-h-[92%] object-contain select-none transition-transform duration-[250ms] ease-in-out" 
           onLoad={() => setIsImageLoading(false)}
+          onError={(e) => {
+            setIsImageLoading(false);
+            e.target.onerror = null;
+            e.target.src = DEFAULT_PRODUCT_IMAGE;
+          }}
         />
         
         {/* Navigation Arrows for slide selection */}

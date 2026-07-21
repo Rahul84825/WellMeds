@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }) => {
         const currentUser = await api.getCurrentUser();
         setUser(currentUser);
         if (currentUser) {
-          onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
+          onLoginCallbacks.forEach((fn) => fn(false).catch(() => {}));
         }
       } catch (err) {
         console.debug("Auth session bootstrap completed (no session):", err?.message);
@@ -173,8 +173,8 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("medishop_token");
       if (token) scheduleTokenRefresh(token);
 
-      // Fire post-login callbacks (cart merge)
-      onLoginCallbacks.forEach((fn) => fn().catch(() => {}));
+      // Fire post-login callbacks (cart merge for initial login)
+      onLoginCallbacks.forEach((fn) => fn(true).catch(() => {}));
       return loggedUser;
     } finally {
       setLoading(false);

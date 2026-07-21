@@ -82,7 +82,7 @@ const WellnessProductsSection = () => {
   const displayedProducts = products.slice(0, 8);
 
   return (
-    <section className="py-12 md:py-14 home-section-container">
+    <section className="py-12 md:py-14 home-section-container bg-white dark:bg-zinc-950">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-2">
         <div className="text-left">
           <h2 className="font-headline-md text-headline-md text-on-surface">Wellness Products</h2>
@@ -124,7 +124,7 @@ const WellnessProductsSection = () => {
 
         {/* Right Gradient Mask Overlay */}
         <div
-          className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-r from-transparent to-[#f7f9fb] dark:to-zinc-950 pointer-events-none z-10 transition-opacity duration-300 ${
+          className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-r from-transparent to-white dark:to-zinc-950 pointer-events-none z-10 transition-opacity duration-300 ${
             canScrollRight ? "opacity-100" : "opacity-0"
           }`}
         />

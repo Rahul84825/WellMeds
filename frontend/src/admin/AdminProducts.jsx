@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
+import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { 
   Plus, 
   Search, 
@@ -288,8 +289,16 @@ const ManageProducts = () => {
                   <tr key={p.id || p._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
                     <td className="p-md">
                       <div className="flex items-center gap-md">
-                        <div className="w-10 h-10 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
-                          <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+                        <div className="w-10 h-10 bg-slate-50 dark:bg-zinc-955 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
+                          <img
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                            src={p.image || DEFAULT_PRODUCT_IMAGE}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = DEFAULT_PRODUCT_IMAGE;
+                            }}
+                          />
                         </div>
                         <div className="truncate max-w-[180px] sm:max-w-xs">
                           <p className="font-bold text-slate-800 dark:text-zinc-100 truncate">{p.name}</p>
@@ -373,8 +382,16 @@ const ManageProducts = () => {
             return (
               <div key={p.id || p._id} className="p-md space-y-sm text-xs">
                 <div className="flex gap-md">
-                  <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-950 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
-                    <img alt={p.name} className="w-full h-full object-cover" src={p.image} />
+                  <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-955 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
+                    <img
+                      alt={p.name}
+                      className="w-full h-full object-cover"
+                      src={p.image || DEFAULT_PRODUCT_IMAGE}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_PRODUCT_IMAGE;
+                      }}
+                    />
                   </div>
                   <div className="space-y-xs truncate flex-grow">
                     <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>

@@ -18,7 +18,7 @@ const HomePage = () => {
   const [consultModalOpen, setConsultModalOpen] = useState(false);
 
   return (
-    <div className="animate-[fade-in_0.3s_ease-out]">
+    <div className="bg-white dark:bg-zinc-950 min-h-screen animate-[fade-in_0.3s_ease-out]">
       {/* Hero Banner (hidden on mobile, visible on desktop) */}
       <div className="hidden lg:block">
         <Hero />

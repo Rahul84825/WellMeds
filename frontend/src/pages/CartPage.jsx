@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
 import { formatCurrency } from "../utils/currency";
+import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { api } from "../services/api";
 import LoginRequiredModal from "../components/LoginRequiredModal";
 import { Trash2, AlertTriangle, FileText, ClipboardList, Clock, ArrowRight } from "lucide-react";
@@ -216,9 +217,18 @@ const Cart = () => {
   const renderCartItemRow = (item, isRxItem) => {
     return (
       <div key={item.id} className="py-md flex flex-col sm:flex-row items-stretch sm:items-center gap-md">
+
         {/* Product Thumbnail */}
         <div className="w-20 h-20 bg-slate-50 dark:bg-zinc-950 rounded-2xl overflow-hidden shrink-0 border border-outline-variant/60 flex items-center justify-center p-1 relative shadow-inner">
-          <img alt={item.name} className="max-w-[90%] max-h-[90%] object-contain" src={item.image} />
+          <img
+            alt={item.name}
+            className="max-w-[90%] max-h-[90%] object-contain"
+            src={item.image || DEFAULT_PRODUCT_IMAGE}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = DEFAULT_PRODUCT_IMAGE;
+            }}
+          />
           {isRxItem && (
             <span className="absolute top-1.5 left-1.5 bg-rose-600 text-white font-black text-[8px] px-1 py-0.2 rounded uppercase">Rx</span>
           )}

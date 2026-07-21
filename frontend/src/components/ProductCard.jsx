@@ -4,7 +4,7 @@ import { useCart } from "../hooks/useCart";
 import { formatCurrency } from "../utils/currency";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import MiniTooltip from "./MiniTooltip";
+import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -88,7 +88,11 @@ const ProductCard = ({ product }) => {
                         h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0 rounded-t-2xl product-card-img-wrap">
           <img
             alt={product.name}
-            src={product.image}
+            src={product.image || DEFAULT_PRODUCT_IMAGE}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = DEFAULT_PRODUCT_IMAGE;
+            }}
             loading="lazy"
             className="max-h-[88%] max-w-[88%] object-contain p-1
                        transition-transform duration-500 md:group-hover:scale-105"

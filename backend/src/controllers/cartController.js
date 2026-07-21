@@ -123,7 +123,12 @@ export const addToCart = async (req, res, next) => {
       cart = await Cart.create({ user: req.user._id, items: [] });
     }
 
-    const itemIndex = cart.items.findIndex((item) => item.product._id.toString() === productId);
+    const itemIndex = cart.items.findIndex((item) => {
+      if (!item || !item.product) return false;
+      const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+      return pId === productId;
+    });
+
     if (itemIndex > -1) {
       const newQuantity = cart.items[itemIndex].quantity + requestedQuantity;
       if (newQuantity > product.stock) {
@@ -149,9 +154,9 @@ export const addToCart = async (req, res, next) => {
 
     res.status(200).json({ 
       success: true, 
-      items: updatedCart.items,
-      prescriptionStatus: updatedCart.prescriptionStatus,
-      prescription: updatedCart.prescription
+      items: updatedCart ? updatedCart.items : [],
+      prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
+      prescription: updatedCart ? updatedCart.prescription : null
     });
   } catch (error) {
     next(error);
@@ -172,7 +177,12 @@ export const updateQuantity = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Cart not found" });
     }
 
-    const itemIndex = cart.items.findIndex((item) => item.product._id.toString() === productId);
+    const itemIndex = cart.items.findIndex((item) => {
+      if (!item || !item.product) return false;
+      const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+      return pId === productId;
+    });
+
     if (itemIndex > -1) {
       if (quantity <= 0) {
         cart.items.splice(itemIndex, 1);
@@ -197,9 +207,9 @@ export const updateQuantity = async (req, res, next) => {
 
     res.status(200).json({ 
       success: true, 
-      items: updatedCart.items,
-      prescriptionStatus: updatedCart.prescriptionStatus,
-      prescription: updatedCart.prescription
+      items: updatedCart ? updatedCart.items : [],
+      prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
+      prescription: updatedCart ? updatedCart.prescription : null
     });
   } catch (error) {
     next(error);
@@ -212,7 +222,11 @@ export const removeFromCart = async (req, res, next) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
     if (cart) {
-      cart.items = cart.items.filter((item) => item.product._id.toString() !== productId);
+      cart.items = cart.items.filter((item) => {
+        if (!item || !item.product) return false;
+        const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+        return pId !== productId;
+      });
       await cleanCartPrescription(cart);
       await cart.save();
     }
@@ -223,9 +237,9 @@ export const removeFromCart = async (req, res, next) => {
 
     res.status(200).json({ 
       success: true, 
-      items: updatedCart.items,
-      prescriptionStatus: updatedCart.prescriptionStatus,
-      prescription: updatedCart.prescription
+      items: updatedCart ? updatedCart.items : [],
+      prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
+      prescription: updatedCart ? updatedCart.prescription : null
     });
   } catch (error) {
     next(error);

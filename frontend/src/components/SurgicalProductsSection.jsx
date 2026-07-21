@@ -112,7 +112,7 @@ const SurgicalProductsSection = () => {
     return (
       <section
         aria-label="Surgical & Medical Supplies — loading"
-        className="py-12 md:py-14 bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950/20 dark:to-zinc-900/10"
+        className="py-12 md:py-14 bg-white dark:bg-zinc-950"
       >
         <div className="home-section-container flex justify-center items-center min-h-[220px]">
           <Loader size="md" />
@@ -128,7 +128,7 @@ const SurgicalProductsSection = () => {
   return (
     <section
       aria-label="Surgical & Medical Supplies"
-      className="surgical-section bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950/20 dark:to-zinc-900/10 pt-12 pb-14 border-t border-slate-100 dark:border-zinc-900/60"
+      className="surgical-section bg-white dark:bg-zinc-950 pt-12 pb-14 border-t border-slate-100 dark:border-zinc-900/60"
     >
       <div className="home-section-container">
         
