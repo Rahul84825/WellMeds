@@ -8,7 +8,7 @@ import { api } from "../services/api";
 import clinicalExcellenceImg from "../assets/clinical/clinical_Excellence.png";
 import { 
   Trash2, ShoppingCart, Phone, Mail, ChevronRight, ChevronDown, 
-  Home, Plus, Minus, ArrowRight, ShieldCheck 
+  Home, Plus, Minus, ArrowRight, ShieldCheck, Tag, Info
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -89,70 +89,58 @@ const Cart = () => {
   const wellMedsDiscount = originalTotal > subtotal ? originalTotal - subtotal : 0;
   const totalSavings = wellMedsDiscount + couponDiscount;
   const finalTotal = subtotal - couponDiscount;
-
   const rxItemsCount = cartItems.filter(item => item.isPrescriptionRequired || item.requiresRx).length;
 
+  // ── Empty State ──
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-16 animate-[fade-in_0.3s_ease-out] text-center">
-        <div className="max-w-md mx-auto space-y-4 py-12">
-          <div className="w-20 h-20 rounded-full bg-[#f0edfd] dark:bg-purple-950/40 text-[#3f257a] dark:text-[#a4c9ff] flex items-center justify-center mx-auto mb-4">
-            <ShoppingCart size={40} />
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-zinc-100">Your Cart is Empty</h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
-            Looks like you haven't added any medicines or health essentials to your cart yet.
-          </p>
-          <Link
-            to="/products"
-            className="inline-block bg-[#3f257a] hover:bg-[#321c62] text-white px-8 py-3 rounded-full font-bold text-sm active:scale-95 transition-all shadow-md mt-2"
-          >
-            Continue Shopping
-          </Link>
+      <div className="max-w-4xl mx-auto px-4 py-24 sm:py-32 animate-[fade-in_0.3s_ease-out] flex flex-col items-center text-center">
+        <div className="w-24 h-24 rounded-full bg-slate-50 dark:bg-zinc-900 flex items-center justify-center mb-6 shadow-sm border border-slate-100 dark:border-zinc-800">
+          <ShoppingCart size={32} className="text-slate-400 dark:text-zinc-500" />
         </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">Your cart is empty</h2>
+        <p className="text-slate-500 dark:text-zinc-400 mb-8 max-w-sm leading-relaxed">
+          Looks like you haven't added any medicines or health essentials to your cart yet.
+        </p>
+        <Link
+          to="/products"
+          className="bg-[#3f257a] hover:bg-[#321c62] text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-sm active:scale-95"
+        >
+          Continue Shopping
+        </Link>
       </div>
     );
   }
 
+  // ── Populated Cart ──
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 animate-[fade-in_0.3s_ease-out] text-left">
-      {/* Breadcrumbs */}
-      <nav className="mb-6 text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 select-none">
-        <Link to="/" className="hover:text-[#038076] transition-colors">Home</Link>
-        <span>&gt;</span>
-        <span className="text-slate-700 dark:text-zinc-200 font-bold">Cart</span>
-      </nav>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+      
+      {/* Header section */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Shopping Cart
+          </h1>
+          <p className="text-slate-500 dark:text-zinc-400 mt-1.5 text-sm">
+            {cartCount} {cartCount === 1 ? "Item" : "Items"} • {rxItemsCount > 0 ? (
+              <span className="text-[#3f257a] dark:text-[#a4c9ff] font-medium">{rxItemsCount} Prescription Required</span>
+            ) : "No Prescription Required"}
+          </p>
+        </div>
+        <Link to="/products" className="text-sm font-semibold text-[#3f257a] dark:text-[#a4c9ff] hover:underline flex items-center gap-1.5">
+          <Plus size={16} /> Add more items
+        </Link>
+      </div>
 
-      {/* 2-COLUMN LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+      <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
         
-        {/* LEFT COLUMN: Cart Items & Trust Banner */}
-        <div className="w-full lg:w-[68%] space-y-6">
+        {/* ── LEFT COLUMN: Cart Items ── */}
+        <div className="w-full lg:flex-1 space-y-6">
           
-          {/* Main Cart Container Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-sm">
-            
-            {/* Header row inside card */}
-            <div className="flex items-center justify-between pb-3">
-              <h2 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-100">
-                {cartCount} {cartCount === 1 ? "Item" : "Items"} in your cart
-              </h2>
-              <Link
-                to="/products"
-                className="text-[#3f257a] dark:text-[#a4c9ff] font-extrabold text-xs sm:text-sm flex items-center gap-1 hover:underline cursor-pointer"
-              >
-                <span>Add more items</span>
-                <span className="w-4 h-4 rounded-full bg-[#3f257a] text-white flex items-center justify-center text-xs font-black">+</span>
-              </Link>
-            </div>
-
-            {/* Sub-header for Rx item count */}
-            <div className="pt-3 pb-3 border-t border-slate-100 dark:border-zinc-800 text-xs font-bold text-slate-600 dark:text-zinc-300">
-              <span className="text-[#3f257a] dark:text-[#a4c9ff]">{rxItemsCount} Prescription</span> {rxItemsCount === 1 ? "Item" : "Items"} in your cart
-            </div>
-
-            {/* Cart Items List */}
-            <div className="divide-y divide-slate-100 dark:divide-zinc-800/80 pt-2">
+          {/* Items Container */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div className="divide-y divide-slate-100 dark:divide-zinc-800">
               {cartItems.map((item) => {
                 const itemId = item.id || item._id;
                 const isRxItem = item.isPrescriptionRequired || item.requiresRx || false;
@@ -166,111 +154,106 @@ const Cart = () => {
                 const moleculeName = item.molecules?.[0]?.name || item.genericName || item.productSpecifications?.genericName;
 
                 return (
-                  <div key={itemId} className="py-4 first:pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+                  <div key={itemId} className="p-4 sm:p-6 flex flex-col sm:flex-row items-start gap-5 transition-colors hover:bg-slate-50/50 dark:hover:bg-zinc-800/20">
                     
-                    {/* Left side: Thumbnail & Product Specs */}
-                    <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-                      
-                      {/* Image Thumbnail */}
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#eef3f7] dark:bg-zinc-955 rounded-2xl p-2 relative flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-zinc-800 select-none">
-                        <img
-                          alt={item.name}
-                          src={item.image || DEFAULT_PRODUCT_IMAGE}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = DEFAULT_PRODUCT_IMAGE;
-                          }}
-                          className="max-h-[90%] max-w-[90%] object-contain"
-                        />
-                        {discountPercent > 0 && (
-                          <span className="bg-[#cbf7cf] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-400 font-bold text-[9px] px-1.5 py-0.5 rounded-md absolute bottom-1 left-1 shadow-2xs">
-                            {discountPercent}% Off
-                          </span>
-                        )}
-                      </div>
+                    {/* Image */}
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center p-2">
+                      <img
+                        alt={item.name}
+                        src={item.image || DEFAULT_PRODUCT_IMAGE}
+                        onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_PRODUCT_IMAGE; }}
+                        className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal"
+                      />
+                      {discountPercent > 0 && (
+                        <span className="absolute -bottom-2 -left-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 font-bold text-[10px] px-2 py-0.5 rounded shadow-sm border border-emerald-200 dark:border-emerald-800">
+                          {discountPercent}% OFF
+                        </span>
+                      )}
+                    </div>
 
-                      {/* Info Block */}
-                      <div className="flex-1 min-w-0 space-y-0.5 pr-2">
-                        <Link
-                          to={`/products/${item.slug || item.id}`}
-                          className="font-bold text-sm sm:text-base text-slate-800 dark:text-zinc-100 hover:text-[#038076] transition-colors line-clamp-2 leading-snug"
-                        >
+                    {/* Details Container */}
+                    <div className="flex-1 min-w-0 w-full flex flex-col sm:flex-row justify-between gap-4">
+                      
+                      {/* Text Info */}
+                      <div className="space-y-1.5 flex-1 pr-4">
+                        <Link to={`/products/${item.slug || item.id}`} className="block font-bold text-base text-slate-900 dark:text-zinc-100 hover:text-[#3f257a] transition-colors leading-tight line-clamp-2">
                           {item.name}
                         </Link>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide truncate">
-                          By {manufacturer}
-                        </p>
-                        <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase truncate">
-                          {packSize}
-                        </p>
+                        
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-zinc-400">
+                          <span className="font-medium text-slate-600 dark:text-zinc-300">{packSize}</span>
+                          <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700"></span>
+                          <span>By {manufacturer}</span>
+                        </div>
+                        
                         {moleculeName && (
-                          <p className="text-[10px] font-bold text-[#5a6a85] dark:text-zinc-400 uppercase truncate">
+                          <p className="text-xs text-slate-400 dark:text-zinc-500 truncate mt-1">
                             {moleculeName}
                           </p>
                         )}
 
-                        {/* Badges under title */}
-                        <div className="flex items-center gap-1.5 pt-1">
+                        {/* Badges */}
+                        <div className="flex items-center gap-2 pt-2">
                           {isRxItem && (
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#3f257a] text-white text-[9px] font-black shadow-2xs" title="Prescription Required">
-                              Rx
+                            <span className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-900/20 text-[#3f257a] dark:text-purple-300 text-[10px] font-bold px-2 py-1 rounded-md border border-purple-100 dark:border-purple-800/50 uppercase tracking-wider">
+                              <span className="w-3 h-3 bg-[#3f257a] text-white rounded-full flex items-center justify-center text-[8px]">Rx</span>
+                              Prescription Required
                             </span>
                           )}
                           {isColdChain && (
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#009bde] text-white shadow-2xs" title="Store at 2-8°C">
+                            <span className="inline-flex items-center gap-1 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 text-[10px] font-bold px-2 py-1 rounded-md border border-sky-100 dark:border-sky-800/50 uppercase tracking-wider">
                               <span className="material-symbols-outlined text-[12px]">ac_unit</span>
+                              Cold Storage
                             </span>
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Right side: Stepper, Delete, Price */}
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-zinc-800">
-                      
-                      {/* Stepper Control */}
-                      <div className="flex items-center bg-[#f0edfd] dark:bg-purple-950/40 border border-[#7c75f2]/30 rounded-xl px-1.5 py-1 gap-2.5 select-none">
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
-                          aria-label="Decrease quantity"
-                        >
-                          -
-                        </button>
-                        <span className="font-extrabold text-xs text-slate-800 dark:text-zinc-100 min-w-[14px] text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-6 h-6 rounded-full bg-[#7c75f2] hover:bg-[#6860ee] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
-                          aria-label="Increase quantity"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Delete Icon */}
-                      <button
-                        type="button"
-                        onClick={() => removeFromCart(item.id)}
-                        className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-500 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center hover:bg-rose-100 transition-colors cursor-pointer shrink-0"
-                        title="Remove item"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-
-                      {/* Price Display */}
-                      <div className="text-right min-w-[100px] shrink-0">
-                        <p className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-100">
-                          ₹{(item.price * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        {item.originalPrice && item.originalPrice > item.price && (
-                          <p className="text-[11px] font-normal text-slate-400 dark:text-zinc-500 line-through">
-                            MRP: ₹{(item.originalPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {/* Pricing & Controls */}
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 shrink-0 mt-2 sm:mt-0">
+                        {/* Price Display */}
+                        <div className="text-left sm:text-right">
+                          <p className="font-bold text-lg text-slate-900 dark:text-white">
+                            {formatCurrency(item.price * item.quantity)}
                           </p>
-                        )}
+                          {item.originalPrice && item.originalPrice > item.price && (
+                            <p className="text-xs text-slate-400 dark:text-zinc-500 line-through mt-0.5">
+                              MRP {formatCurrency(item.originalPrice * item.quantity)}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Stepper & Actions */}
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.id)}
+                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer"
+                            title="Remove item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                          
+                          <div className="flex items-center bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-lg p-1">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-7 h-7 flex items-center justify-center text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                            >
+                              <Minus size={14} strokeWidth={3} />
+                            </button>
+                            <span className="w-8 text-center text-sm font-semibold text-slate-900 dark:text-white select-none">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-7 h-7 flex items-center justify-center text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                            >
+                              <Plus size={14} strokeWidth={3} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -279,206 +262,141 @@ const Cart = () => {
             </div>
           </div>
 
-          {/* 8000+ Products Trust Banner Card */}
-          <div className="bg-gradient-to-r from-[#e8f1fc] via-[#e6f4fc] to-[#eef2ff] dark:from-zinc-900 dark:to-zinc-800/80 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden select-none">
-            <img
-              src={clinicalExcellenceImg}
-              alt="Clinical Excellence Doctors"
-              className="w-48 sm:w-56 object-contain shrink-0"
-            />
-            <div className="flex-1 space-y-1 text-center md:text-left">
-              <h3 className="font-extrabold text-xl sm:text-2xl text-[#3f257a] dark:text-[#a4c9ff]">
-                8000+ Products
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-300 font-medium leading-relaxed max-w-sm">
-                We've got your back with top-notch quality! Every product is carefully checked so you get only the best!
-              </p>
-              <div className="flex items-center justify-center md:justify-start gap-2 pt-2 text-[#3f257a] dark:text-[#a4c9ff]">
-                <ShieldCheck size={16} />
-                <span className="text-[11px] font-bold">100% Genuine Clinical Supplies</span>
-              </div>
+          {/* Trust Banner */}
+          <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-zinc-900 dark:to-zinc-800/80 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 shrink-0">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-slate-900 dark:text-zinc-100">100% Genuine Clinical Supplies</h4>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">Sourced directly from manufacturers. Quality checked before every delivery.</p>
             </div>
           </div>
+
         </div>
 
-        {/* RIGHT COLUMN: Order Summary & Checkout */}
-        <div className="w-full lg:w-[32%] space-y-4 shrink-0">
+        {/* ── RIGHT COLUMN: Summary ── */}
+        <div className="w-full lg:w-[380px] shrink-0 sticky top-24">
           
-          {/* Checkout Steps bar */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-full py-3 px-6 shadow-xs flex items-center justify-between select-none">
-            <div className="w-8 h-8 rounded-full bg-[#3f257a] text-white flex items-center justify-center shadow-2xs">
-              <ShoppingCart size={15} />
-            </div>
-            <div className="flex-1 h-[2px] bg-slate-200 dark:bg-zinc-800 mx-2" />
-            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 font-bold text-xs flex items-center justify-center">
-              Rx
-            </div>
-            <div className="flex-1 h-[2px] bg-slate-200 dark:bg-zinc-800 mx-2" />
-            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 flex items-center justify-center">
-              <span className="material-symbols-outlined text-[16px]">credit_card</span>
-            </div>
-          </div>
-
-          {/* Need Support Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-full py-2.5 px-5 shadow-xs flex items-center justify-between select-none">
-            <span className="font-bold text-slate-700 dark:text-zinc-200 text-xs sm:text-sm">Need Support?</span>
-            <div className="flex items-center gap-2">
-              <a 
-                href="tel:+919876543210" 
-                className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-950/40 text-[#3f257a] dark:text-[#a4c9ff] flex items-center justify-center hover:bg-purple-100 transition-colors shadow-2xs"
-                title="Call Support"
-              >
-                <Phone size={14} />
-              </a>
-              <a 
-                href="https://wa.me/919876543210" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-100 transition-colors shadow-2xs"
-                title="WhatsApp Support"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
-                </svg>
-              </a>
-              <a 
-                href="mailto:support@wellmeds.com" 
-                className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center hover:bg-sky-100 transition-colors shadow-2xs"
-                title="Email Support"
-              >
-                <Mail size={14} />
-              </a>
-            </div>
-          </div>
-
-          {/* Pricing Summary Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm space-y-3 text-left relative overflow-hidden select-none">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col">
             
-            <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between items-center text-slate-600 dark:text-zinc-400">
-                <span>Total MRP</span>
-                <span className="font-semibold text-slate-800 dark:text-zinc-200">
-                  {formatCurrency(originalTotal)}
-                </span>
-              </div>
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Order Summary</h3>
+            </div>
 
+            {/* Coupons Section */}
+            <div className="p-6 border-b border-slate-100 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setShowOffers(!showOffers)}
+                className="w-full flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-zinc-300 group"
+              >
+                <span className="flex items-center gap-2">
+                  <Tag size={16} className="text-[#3f257a] dark:text-[#a4c9ff]" />
+                  Apply Coupon Code
+                </span>
+                <ChevronRight size={16} className={`text-slate-400 transition-transform ${showOffers ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+              </button>
+
+              {showOffers && (
+                <div className="mt-4 animate-[fade-in_0.2s_ease-out]">
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter code here"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      disabled={couponApplied}
+                      className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium uppercase placeholder:normal-case placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20"
+                    />
+                    <button
+                      type="submit"
+                      disabled={couponApplied || !couponCode.trim()}
+                      className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                  {couponApplied && (
+                    <div className="mt-3 flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-lg px-3 py-2 text-sm">
+                      <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                        Code {couponCode} applied!
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => { setCouponApplied(false); setCouponDiscount(0); setCouponCode(""); }}
+                        className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 font-semibold underline text-xs"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Cost Breakdown */}
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between text-sm text-slate-600 dark:text-zinc-400">
+                <span>Total MRP</span>
+                <span className="font-medium text-slate-900 dark:text-zinc-100">{formatCurrency(originalTotal)}</span>
+              </div>
+              
               {wellMedsDiscount > 0 && (
-                <div className="flex justify-between items-center text-[#15803d] dark:text-emerald-400 font-bold">
+                <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>WellMeds Discount</span>
                   <span>-{formatCurrency(wellMedsDiscount)}</span>
                 </div>
               )}
 
               {couponApplied && (
-                <div className="flex justify-between items-center text-[#15803d] dark:text-emerald-400 font-bold">
-                  <span>Coupon Discount ({couponCode})</span>
+                <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span>Coupon Discount</span>
                   <span>-{formatCurrency(couponDiscount)}</span>
                 </div>
               )}
-
-              <div className="flex justify-between items-center text-slate-600 dark:text-zinc-400">
-                <span>Cart Total</span>
-                <span className="font-semibold text-slate-800 dark:text-zinc-200">
-                  {formatCurrency(subtotal)}
-                </span>
+              
+              <div className="flex justify-between text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
+                <span>Shipping & Handling</span>
+                <span className="text-slate-900 dark:text-zinc-100">Calculated at checkout</span>
               </div>
 
-              <div className="border-t border-slate-100 dark:border-zinc-800 pt-2.5 flex justify-between items-center text-sm font-extrabold text-slate-800 dark:text-zinc-100">
-                <span>Order Total</span>
-                <span className="text-[#3f257a] dark:text-[#a4c9ff] text-base sm:text-lg">
+              {/* Total Row */}
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-base font-bold text-slate-900 dark:text-white">Order Total</span>
+                <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                   {formatCurrency(finalTotal)}
                 </span>
               </div>
+
+              {totalSavings > 0 && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold px-3 py-2 rounded-lg text-center border border-emerald-100 dark:border-emerald-800/50">
+                  You are saving {formatCurrency(totalSavings)} on this order!
+                </div>
+              )}
             </div>
 
-            {/* Total Savings Pill Card */}
-            {totalSavings > 0 && (
-              <div className="bg-[#e6f9ed] dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-full p-2.5 px-3.5 flex items-center justify-between mt-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-amber-400 text-amber-950 font-black flex items-center justify-center text-[11px] shadow-2xs">
-                    ₹
-                  </div>
-                  <span className="font-extrabold text-xs sm:text-sm text-[#15803d] dark:text-emerald-400">
-                    {formatCurrency(totalSavings)} Saved
-                  </span>
-                </div>
-                <ChevronDown size={16} className="text-[#15803d] dark:text-emerald-400" />
-              </div>
-            )}
+            {/* Checkout Action */}
+            <div className="p-6 pt-0">
+              <button
+                type="button"
+                onClick={() => { user ? navigate("/checkout") : openLoginModal("/checkout"); }}
+                className="w-full bg-[#3f257a] hover:bg-[#321c62] text-white py-4 px-6 rounded-xl font-bold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
+              >
+                {user ? "Proceed to Checkout" : "Login to Checkout"}
+                <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
 
-          {/* Offers Available Accordion Container */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-xs transition-all">
-            <button
-              type="button"
-              onClick={() => setShowOffers(!showOffers)}
-              className="w-full p-3 px-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors select-none text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#22c55e] text-white flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
-                  ₹
-                </div>
-                <span className="font-bold text-slate-800 dark:text-zinc-100 text-sm">Offers available</span>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <ChevronRight size={16} className={`transition-transform duration-200 ${showOffers ? "rotate-90" : ""}`} />
-              </div>
-            </button>
-
-            {showOffers && (
-              <div className="p-4 pt-1 border-t border-slate-100 dark:border-zinc-800 animate-[fade-in_0.2s_ease-out]">
-                <form onSubmit={handleApplyCoupon} className="flex gap-2 mt-2">
-                  <input
-                    type="text"
-                    placeholder="Enter coupon code"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    disabled={couponApplied}
-                    className="flex-grow p-2.5 bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 uppercase placeholder:normal-case"
-                  />
-                  <button
-                    type="submit"
-                    disabled={couponApplied || !couponCode.trim()}
-                    className="bg-[#3f257a] hover:bg-[#321c62] text-white px-4 rounded-xl text-xs font-bold disabled:opacity-50 transition-colors cursor-pointer select-none"
-                  >
-                    Apply
-                  </button>
-                </form>
-                {couponApplied && (
-                  <div className="mt-2.5 p-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center justify-between">
-                    <span>Coupon {couponCode} Applied (-{formatCurrency(couponDiscount)})</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCouponApplied(false);
-                        setCouponDiscount(0);
-                        setCouponCode("");
-                      }}
-                      className="text-rose-600 font-bold hover:underline cursor-pointer ml-2"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Support Footer */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-slate-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1.5"><Info size={14} /> Need help?</span>
+            <a href="tel:+919876543210" className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">Call Us</a>
+            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700"></span>
+            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">WhatsApp</a>
           </div>
-
-          {/* Add Address / Proceed to Checkout Button */}
-          <button
-            type="button"
-            onClick={() => {
-              if (!user) {
-                openLoginModal("/checkout");
-              } else {
-                navigate("/checkout");
-              }
-            }}
-            className="w-full py-3.5 px-6 rounded-full bg-[#3f257a] hover:bg-[#321c62] text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer select-none"
-          >
-            <span>{user ? "Proceed to Checkout" : "Add Address"}</span>
-            <Home size={18} />
-          </button>
 
         </div>
       </div>
