@@ -4,6 +4,7 @@ import { useCart } from "../hooks/useCart";
 import { formatCurrency } from "../utils/currency";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
 const ProductCard = ({ product }) => {
