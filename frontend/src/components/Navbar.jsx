@@ -792,12 +792,21 @@ const Navbar = () => {
                   ))}
                   <hr className="border-slate-100 my-1" />
                   <Link
+                    to="/surgical/categories"
+                    onClick={() => setActiveDropdown(null)}
+                    onKeyDown={(e) => handleLinkKeyDown(e, "surgical")}
+                    className="px-4 py-2 text-xs font-bold text-[#004782] rounded-lg hover:bg-blue-50/50 transition-all flex items-center justify-between"
+                  >
+                    <span>View All Surgical Categories</span>
+                    <span>&rarr;</span>
+                  </Link>
+                  <Link
                     to="/surgical/all"
                     onClick={() => setActiveDropdown(null)}
                     onKeyDown={(e) => handleLinkKeyDown(e, "surgical")}
-                    className="px-4 py-2.5 text-xs font-black text-[#004782] rounded-lg hover:bg-blue-50/50 transition-all flex items-center justify-between"
+                    className="px-4 py-2 text-xs font-extrabold text-slate-700 rounded-lg hover:bg-slate-50 transition-all flex items-center justify-between"
                   >
-                    <span>View All Surgical</span>
+                    <span>View All Surgical Products</span>
                     <span>&rarr;</span>
                   </Link>
                 </div>

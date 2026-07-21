@@ -182,13 +182,22 @@ const SurgicalLandingPage = () => {
 
       {/* Categories Grid Section */}
       <section id="categories-section" className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
-        <div className="text-center space-y-xs mb-12">
-          <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
-            Shop Surgical Categories
-          </h2>
-          <p className="text-slate-400 text-xs font-semibold max-w-md mx-auto">
-            Dynamic, admin-managed clinical categories providing specialized equipment and instruments.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div>
+            <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
+              Shop Surgical Categories
+            </h2>
+            <p className="text-slate-400 text-xs font-semibold max-w-md mt-1">
+              Dynamic, admin-managed clinical categories providing specialized equipment and instruments.
+            </p>
+          </div>
+          <Link
+            to="/surgical/categories"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-[1.5px] border-[#004782] text-[#004782] dark:border-[#a4c9ff] dark:text-[#a4c9ff] hover:bg-[#004782] hover:text-white dark:hover:bg-[#a4c9ff] dark:hover:text-zinc-950 text-xs font-bold transition-all shrink-0 whitespace-nowrap self-start sm:self-auto cursor-pointer"
+          >
+            <span>View All Categories</span>
+            <ChevronRight size={15} />
+          </Link>
         </div>
 
         {loading ? (

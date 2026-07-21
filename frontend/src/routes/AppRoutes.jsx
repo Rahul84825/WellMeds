@@ -31,6 +31,7 @@ import MoleculeDetailPage from "../pages/MoleculeDetailPage";
 import WellnessPage from "../pages/WellnessPage";
 import SurgicalLandingPage from "../pages/SurgicalLandingPage";
 import AllSurgicalProductsPage from "../pages/AllSurgicalProductsPage";
+import AllSurgicalCategoriesPage from "../pages/AllSurgicalCategoriesPage";
 import SurgicalCategoryPage from "../pages/SurgicalCategoryPage";
 import OffersPage from "../pages/OffersPage";
 import SearchResultsPage from "../pages/SearchResultsPage";
@@ -79,6 +80,8 @@ const AppRoutes = () => {
         <Route path="wellness" element={<WellnessPage />} />
         <Route path="surgical" element={<SurgicalLandingPage />} />
         <Route path="surgical/all" element={<AllSurgicalProductsPage />} />
+        <Route path="surgical/categories" element={<AllSurgicalCategoriesPage />} />
+        <Route path="surgical-categories" element={<AllSurgicalCategoriesPage />} />
         <Route path="surgical/:categorySlug" element={<SurgicalCategoryPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />

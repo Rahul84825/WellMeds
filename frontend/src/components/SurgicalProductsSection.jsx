@@ -142,7 +142,7 @@ const SurgicalProductsSection = () => {
 
           {/* View All pill button */}
           <Link
-            to="/surgical/all"
+            to="/surgical/categories"
             aria-label="View all surgical categories"
             className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-[9px] rounded-full border-[1.5px] border-[#0e9f7e] text-[#0e9f7e] dark:text-[#84d6b9] dark:border-[#84d6b9] text-[13px] font-semibold no-underline bg-transparent transition-all duration-200 shrink-0 whitespace-nowrap min-h-[36px] md:min-h-0 hover:bg-[#0e9f7e] hover:text-white dark:hover:bg-[#84d6b9] dark:hover:text-zinc-950"
           >

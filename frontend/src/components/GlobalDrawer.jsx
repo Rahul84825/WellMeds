@@ -461,11 +461,19 @@ const GlobalDrawer = () => {
                   ))}
                   <hr className="border-slate-100 my-1" />
                   <Link
+                    to="/surgical/categories"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="py-2.5 text-[11px] font-bold text-[#004782] block min-h-[44px] flex items-center justify-between"
+                  >
+                    <span>View All Surgical Categories</span>
+                    <span>&rarr;</span>
+                  </Link>
+                  <Link
                     to="/surgical/all"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="py-2.5 text-[11px] font-black text-[#004782] block min-h-[48px] flex items-center justify-between"
+                    className="py-2.5 text-[11px] font-extrabold text-slate-700 block min-h-[44px] flex items-center justify-between"
                   >
-                    <span>View All Surgical</span>
+                    <span>View All Surgical Products</span>
                     <span>&rarr;</span>
                   </Link>
                 </div>
