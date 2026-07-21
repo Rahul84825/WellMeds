@@ -16,7 +16,7 @@ const ProductTabs = ({
             key={sec.id}
             id={sec.id}
             ref={el => sectionRefs.current[sec.id] = el}
-            className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md scroll-mt-28 transition-all hover:shadow-md text-left"
+            className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-lg rounded-3xl shadow-sm space-y-md scroll-mt-28 transition-all hover:shadow-md text-left"
           >
             <h2 className="font-bold text-xs md:text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider">
               {sec.title}
@@ -181,7 +181,7 @@ const ProductTabs = ({
       })}
 
       {/* Manufacturer Information Card */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-lg rounded-3xl shadow-sm space-y-md text-left">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-lg rounded-3xl shadow-sm space-y-md text-left">
         <h2 className="font-bold text-xs md:text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider">
           <Building size={14} className="text-[#004782]" />
           Manufacturer Information

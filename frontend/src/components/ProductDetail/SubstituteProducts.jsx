@@ -109,7 +109,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
   const hasSubstitutes = sortedSubstitutes && sortedSubstitutes.length > 0;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm select-none w-full flex flex-col text-left">
+    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm select-none w-full flex flex-col text-left">
       {!hasSubstitutes ? (
         <div className="text-center py-4 text-xs text-slate-400 font-medium">
           No substitute products available.

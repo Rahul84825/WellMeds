@@ -18,7 +18,7 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
   if (!clinicalItems || clinicalItems.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm md:p-md rounded-2xl shadow-xs w-full transition-all">
+    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-sm md:p-md rounded-2xl shadow-xs w-full transition-all">
       {/* Accordion Trigger for mobile, static header for tablet/desktop */}
       <button
         onClick={() => setIsOpen(!isOpen)}

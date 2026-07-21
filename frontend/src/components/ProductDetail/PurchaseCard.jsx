@@ -57,7 +57,7 @@ const PurchaseCard = ({
     <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24">
       
       {/* Main Card Container */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 p-4 rounded-3xl shadow-lg space-y-3.5 text-left">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-3xl shadow-lg space-y-3.5 text-left">
         
         {/* 1. Price Section */}
         <div className="space-y-1">
@@ -214,7 +214,7 @@ const PurchaseCard = ({
       </div>
 
       {/* 6. Separate Delivery Card Block */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-855/60 p-3 rounded-2xl shadow-sm flex items-center gap-3 w-full mt-3 text-xs text-left">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-2xl shadow-sm flex items-center gap-3 w-full mt-3 text-xs text-left">
         <div className="w-9 h-9 rounded-full bg-slate-55 dark:bg-zinc-800 flex items-center justify-center shrink-0 text-[#038076]">
           <Calendar size={18} />
         </div>

@@ -617,7 +617,7 @@ const ProductDetails = () => {
       <div 
         id="Specifications"
         ref={el => sectionRefs.current["Specifications"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-md scroll-mt-28"
+        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-md scroll-mt-28"
       >
         <h2 className="font-headline-sm text-sm text-[#004782] dark:text-primary-fixed-dim font-extrabold pb-sm border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
           <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
@@ -660,7 +660,7 @@ const ProductDetails = () => {
       <div 
         id="Introduction"
         ref={el => sectionRefs.current["Introduction"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
       >
         <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
           <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
@@ -727,7 +727,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Title Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left">
           <h1 className="font-headline-sm text-lg font-extrabold text-slate-905 dark:text-zinc-100 leading-tight">
             {product.name}
           </h1>
@@ -1326,14 +1326,14 @@ const ProductDetails = () => {
             {/* Center Content Column (Product Info, Gallery, Dispatch/Delivery, Rx/Cold Chain) */}
             <div className="w-full lg:w-[66.6%] space-y-md">
               {/* Combined Product Info & Image Gallery Card */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
+              <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
                 {/* Left: Product Information (60%) */}
                 <div className="w-full lg:w-[60%] flex flex-col justify-between">
                   {memoizedProductInfo}
                 </div>
 
                 {/* Right: Product Image Gallery (40%) */}
-                <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-850 pt-lg lg:pt-0 lg:pl-lg">
+                <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 pt-lg lg:pt-0 lg:pl-lg">
                   {memoizedProductGallery}
                 </div>
               </div>
