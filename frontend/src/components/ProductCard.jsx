@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
-import { formatCurrency } from "../utils/currency";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
@@ -22,12 +21,12 @@ const ProductCard = ({ product }) => {
   const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   const savings = product.originalPrice && product.originalPrice > product.price
-    ? product.originalPrice - product.price : 0;
+    ? product.originalPrice - product.price 
+    : 0;
 
-  const calculateDiscount = () => {
-    if (!product.originalPrice || product.originalPrice <= product.price) return null;
-    return `${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`;
-  };
+  const discountPercent = product.originalPrice && product.originalPrice > product.price
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
 
   React.useEffect(() => {
     if (!activeTooltip) return;
@@ -37,7 +36,6 @@ const ProductCard = ({ product }) => {
   }, [activeTooltip]);
 
   const handleCardClick = (e) => {
-    // Don't navigate if user clicked a button, link, or the molecule area
     if (e.target.closest("button") || e.target.closest("a")) return;
     navigate(productUrl);
   };
@@ -64,70 +62,61 @@ const ProductCard = ({ product }) => {
     setActiveTooltip(activeTooltip === key ? null : key);
   };
 
-  const discount = calculateDiscount();
-
   return (
-    <>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label={`View ${product.name}`}
-        onClick={handleCardClick}
-        onKeyDown={(e) => { if (e.key === "Enter") navigate(productUrl); }}
-        className="group relative flex h-full flex-col justify-between
-                   cursor-pointer select-none rounded-2xl
-                   bg-white dark:bg-zinc-900
-                   focus-visible:outline-none
-                   focus-visible:ring-2 focus-visible:ring-[#038076]
-                   overflow-hidden
-                   wellmeds-product-card"
-      >
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${product.name}`}
+      onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === "Enter") navigate(productUrl); }}
+      className="group relative flex h-full flex-col justify-between
+                 cursor-pointer select-none rounded-3xl
+                 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800
+                 hover:shadow-md transition-all duration-200
+                 focus-visible:outline-none
+                 focus-visible:ring-2 focus-visible:ring-[#038076]
+                 overflow-hidden text-left"
+    >
+      {/* ── Image section with full-width light background and bottom border line ── */}
+      <div className="relative flex items-center justify-center overflow-hidden
+                      bg-[#eef3f7] dark:bg-zinc-955
+                      h-[160px] sm:h-[180px] md:h-[200px] w-full shrink-0
+                      border-b border-slate-200/80 dark:border-zinc-800/80 p-3">
+        <img
+          alt={product.name}
+          src={product.image || DEFAULT_PRODUCT_IMAGE}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = DEFAULT_PRODUCT_IMAGE;
+          }}
+          loading="lazy"
+          className="max-h-[90%] max-w-[90%] object-contain select-none
+                     transition-transform duration-500 group-hover:scale-105"
+        />
 
-        {/* ── Image section ── */}
-        <div className="relative flex items-center justify-center overflow-hidden
-                        bg-slate-50 dark:bg-zinc-950
-                        h-[140px] sm:h-[160px] md:h-[175px] w-full shrink-0 rounded-t-2xl product-card-img-wrap">
-          <img
-            alt={product.name}
-            src={product.image || DEFAULT_PRODUCT_IMAGE}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = DEFAULT_PRODUCT_IMAGE;
-            }}
-            loading="lazy"
-            className="max-h-[88%] max-w-[88%] object-contain p-1
-                       transition-transform duration-500 md:group-hover:scale-105"
-          />
-
-          {/* Left badges */}
-          <div className="pointer-events-none absolute left-2 top-2 z-10
-                          flex flex-col gap-1">
-            {discount && (
-              <span className="w-fit rounded-full bg-rose-600 px-2 py-0.5
-                               text-[9px] font-black uppercase text-white shadow-sm">
-                {discount}
-              </span>
-            )}
-            {isOOS && (
-              <span className="w-fit rounded-full bg-slate-500 px-2 py-0.5
-                               text-[9px] font-black uppercase text-white shadow-sm">
-                Out of Stock
-              </span>
-            )}
-            {product.badge &&
-              !["Rx Required","Top Rated","Low Stock"].includes(product.badge) && (
-              <span className="w-fit rounded-full bg-[#038076] px-2 py-0.5
-                               text-[9px] font-black uppercase text-white shadow-sm">
-                {product.badge}
-              </span>
-            )}
-          </div>
+        {/* Top-left Badges */}
+        <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+          {discountPercent > 0 && (
+            <span className="w-fit rounded-xl bg-[#cbf7cf] dark:bg-emerald-950/80 px-2.5 py-1 text-xs font-bold text-[#15803d] dark:text-emerald-400 shadow-2xs">
+              {discountPercent}% Off
+            </span>
+          )}
+          {isOOS && (
+            <span className="w-fit rounded-xl bg-slate-500 px-2.5 py-1 text-xs font-bold uppercase text-white shadow-2xs">
+              Out of Stock
+            </span>
+          )}
+          {product.badge &&
+            !["Rx Required", "Top Rated", "Low Stock"].includes(product.badge) && (
+            <span className="w-fit rounded-xl bg-[#038076] px-2.5 py-1 text-xs font-bold uppercase text-white shadow-2xs">
+              {product.badge}
+            </span>
+          )}
         </div>
 
-        {/* Right-side Rx / Cold Chain badges */}
+        {/* Top-right Badges (Rx & Cold Chain) */}
         {(isRx || isColdChain) && (
-          <div className="absolute right-3 top-[calc(3px+10px)] z-20
-                          flex flex-col items-center gap-2">
+          <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5">
             {isRx && (
               <div className="relative">
                 <button
@@ -135,13 +124,12 @@ const ProductCard = ({ product }) => {
                   onClick={(e) => toggleTooltip("rx", e)}
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("rx")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center
-                             rounded-full border border-rose-200 bg-rose-50
-                             text-rose-600 shadow-sm transition-all duration-300
-                             hover:scale-110 active:scale-90
-                             dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center
+                             rounded-full bg-[#3f257a] text-white shadow-xs
+                             transition-transform hover:scale-110 active:scale-95"
+                  aria-label="Rx Required"
                 >
-                  <span className="text-[11px] font-extrabold tracking-tight">Rx</span>
+                  <span className="text-[10px] font-black tracking-tight">Rx</span>
                 </button>
                 <MiniTooltip
                   text="Prescription Only"
@@ -158,13 +146,12 @@ const ProductCard = ({ product }) => {
                   onClick={(e) => toggleTooltip("coldChain", e)}
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("coldChain")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center
-                             rounded-full border border-sky-200 bg-sky-50
-                             text-sky-600 shadow-sm transition-all duration-300
-                             hover:scale-110 active:scale-90
-                             dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-400"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center
+                             rounded-full bg-[#009bde] text-white shadow-xs
+                             transition-transform hover:scale-110 active:scale-95"
+                  aria-label="Cold Chain"
                 >
-                  <span className="material-symbols-outlined text-[16px]">ac_unit</span>
+                  <span className="material-symbols-outlined text-[15px]">ac_unit</span>
                 </button>
                 <MiniTooltip
                   text="Store at 2–8°C"
@@ -175,166 +162,86 @@ const ProductCard = ({ product }) => {
             )}
           </div>
         )}
-
-        {/* ── Product details ── */}
-        <div className="flex flex-1 flex-col justify-between px-3 pb-3 pt-2 product-card-details">
-
-          {/* Text block */}
-          <div className="flex flex-col items-center text-center gap-0.5">
-
-            {/* Brand */}
-            <p className={`text-[9px] md:text-[10px] uppercase tracking-widest
-                           font-extrabold truncate product-card-brand
-                           ${product.manufacturer || product.brand
-                             ? "text-slate-400 dark:text-zinc-500"
-                             : "invisible"}`}>
-              {product.manufacturer || product.brand || "—"}
-            </p>
-
-            {/* Product name */}
-            <h3
-              className="mt-0.5 line-clamp-2 h-9 overflow-hidden text-center
-                         text-[13px] font-extrabold leading-snug
-                         text-[#1D2B5C] dark:text-zinc-100
-                         transition-colors group-hover:text-[#038076]
-                         sm:text-[14px] sm:h-10 product-card-title"
-              title={product.name}
-            >
-              {product.name}
-            </h3>
-
-            {/* Molecule — tighter gap, own click zone */}
-            <div className="mt-0.5 flex h-4 items-center justify-center product-card-molecule-wrap">
-              {molecule ? (
-                <Link
-                  to={`/molecules/${molecule.slug}`}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={`Search medicines with ${molecule.name}`}
-                  title={molecule.name}
-                  className="max-w-full truncate text-[9px] font-black uppercase
-                             tracking-wider text-[#038076]/75
-                             hover:text-[#038076] hover:underline
-                             dark:text-[#84d6b9]/75 dark:hover:text-[#84d6b9]
-                             sm:text-[10px] product-card-molecule"
-                >
-                  {molecule.name}
-                </Link>
-              ) : (
-                <span className="invisible text-[9px]">—</span>
-              )}
-            </div>
-          </div>
-
-          {/* Price + CTA */}
-          <div className="mt-2.5 space-y-2 product-card-price-wrap">
-
-            {/* Price row */}
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="flex h-6 items-baseline justify-center gap-1.5 product-card-price-row">
-                <span className="text-[14px] font-black text-[#1D2B5C]
-                                 dark:text-zinc-100 sm:text-[15px] md:text-base product-card-price">
-                  {formatCurrency(product.price)}
-                </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-[10px] font-semibold text-slate-400 line-through md:text-xs product-card-mrp">
-                    {formatCurrency(product.originalPrice)}
-                  </span>
-                )}
-              </div>
-              <div className="flex h-4 items-center justify-center product-card-savings-row">
-                {savings > 0 ? (
-                  <span className="text-[9px] font-bold text-emerald-600
-                                   dark:text-emerald-400 md:text-[10px] product-card-savings">
-                    You Save {formatCurrency(savings)}
-                  </span>
-                ) : (
-                  <span className="invisible text-[9px]">—</span>
-                )}
-              </div>
-            </div>
-
-            {/* Add to cart */}
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={isOOS || isAdding}
-              aria-label={
-                isOOS ? "Out of Stock"
-                : `Add ${product.name} to cart`
-              }
-              className="flex min-h-[40px] w-full cursor-pointer items-center
-                         justify-center gap-1.5 rounded-xl px-4 py-2
-                         text-xs font-bold text-white select-none sm:text-sm
-                         disabled:cursor-not-allowed disabled:opacity-50
-                         wellmeds-product-card-cta product-card-cta-btn"
-            >
-              {isAdding ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : isOOS ? (
-                "Out of Stock"
-              ) : (
-                "Add to Cart"
-              )}
-            </button>
-          </div>
-        </div>
       </div>
 
-      <style>{`
-        /* ── Product Card Mobile Responsiveness Overrides (≤768px) ── */
-        @media (max-width: 768px) {
-          .product-card-img-wrap {
-            height: 105px !important; /* ~25% height reduction */
-          }
-          .product-card-details {
-            padding: 8px 10px !important; /* Tighter padding */
-          }
-          .product-card-brand {
-            font-size: 8px !important;
-          }
-          .product-card-title {
-            font-size: 11.5px !important;
-            line-height: 1.25 !important;
-            height: 30px !important; /* Fits exactly 2 lines */
-            margin-top: 2px !important;
-          }
-          .product-card-molecule-wrap {
-            height: 12px !important;
-            margin-top: 2px !important;
-          }
-          .product-card-molecule {
-            font-size: 8px !important;
-          }
-          .product-card-price-wrap {
-            margin-top: 6px !important;
-            gap: 4px !important;
-          }
-          .product-card-price-row {
-            height: 20px !important;
-            gap: 4px !important;
-          }
-          .product-card-price {
-            font-size: 13px !important;
-          }
-          .product-card-mrp {
-            font-size: 9px !important;
-          }
-          .product-card-savings-row {
-            height: 12px !important;
-          }
-          .product-card-savings {
-            font-size: 8px !important;
-          }
-          .product-card-cta-btn {
-            min-height: 32px !important;
-            font-size: 11px !important;
-            padding: 4px 10px !important;
-            border-radius: 10px !important;
-            margin-top: 6px !important;
-          }
-        }
-      `}</style>
-    </>
+      {/* ── Product details ── */}
+      <div className="flex flex-1 flex-col justify-between p-4 text-center">
+
+        {/* Header: Title & Molecule */}
+        <div className="flex flex-col items-center">
+          <h3
+            className="line-clamp-2 h-10 overflow-hidden text-center text-sm sm:text-base font-bold leading-snug text-slate-800 dark:text-zinc-100 transition-colors group-hover:text-[#038076]"
+            title={product.name}
+          >
+            {product.name}
+          </h3>
+
+          {/* Molecule Subtitle */}
+          <div className="mt-1 h-5 flex items-center justify-center">
+            {molecule ? (
+              <Link
+                to={`/molecules/${molecule.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                title={molecule.name}
+                className="text-[11px] font-semibold text-[#5a6a85] dark:text-zinc-400 uppercase tracking-wider underline hover:text-[#038076]"
+              >
+                {molecule.name}
+              </Link>
+            ) : (
+              <span className="invisible text-[11px]">—</span>
+            )}
+          </div>
+        </div>
+
+        {/* Pricing & Savings */}
+        <div className="mt-3 flex flex-col items-center">
+          {/* Main Price Row */}
+          <div className="flex items-baseline justify-center gap-2">
+            <span className="text-2xl font-extrabold text-[#3f257a] dark:text-[#a4c9ff]">
+              ₹{product.price}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-sm font-normal text-slate-400 dark:text-zinc-500 line-through">
+                ₹{product.originalPrice}
+              </span>
+            )}
+          </div>
+
+          {/* Dashed Border Line */}
+          <div className="w-full border-b border-dashed border-slate-200 dark:border-zinc-800 my-2.5" />
+
+          {/* Savings Line */}
+          <div className="h-5 flex items-center justify-center text-xs font-medium text-slate-500 dark:text-zinc-400">
+            {savings > 0 ? (
+              <span>
+                You Save: <span className="font-bold text-[#00a859] dark:text-emerald-400">₹{savings} ({discountPercent}%)</span>
+              </span>
+            ) : (
+              <span className="invisible">—</span>
+            )}
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isOOS || isAdding}
+            className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#7c75f2] hover:bg-[#6860ee] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+          >
+            {isAdding ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : isOOS ? (
+              "Out of Stock"
+            ) : (
+              <>
+                <ShoppingCart size={16} />
+                <span>Add to cart</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
