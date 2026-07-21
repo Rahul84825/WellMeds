@@ -52,7 +52,7 @@ const WhyChooseWellMeds = () => {
       {/* Background Decorative Element */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#038076]/5 dark:bg-[#038076]/10 blur-[100px] rounded-full pointer-events-none" />
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative home-section-container">
         
         {/* ── Header ── */}
         <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">

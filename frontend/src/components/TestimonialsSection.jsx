@@ -212,7 +212,7 @@ export const TestimonialsSection = () => {
 
   return (
     <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="home-section-container">
         
         {/* Section Header with Top View All Row */}
         <div className="flex justify-between items-end mb-8 md:mb-12 border-b border-slate-100 dark:border-zinc-900 pb-md">
