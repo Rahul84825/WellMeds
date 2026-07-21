@@ -6,6 +6,7 @@ import {
   PackageCheck,
   Stethoscope,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 const benefits = [
@@ -15,6 +16,7 @@ const benefits = [
     description: "Sourced directly from manufacturers with full batch traceability.",
     icon: ShieldCheck,
     accent: "#038076",
+    bgAccent: "bg-[#038076]/10",
   },
   {
     id: "pricing",
@@ -22,6 +24,7 @@ const benefits = [
     description: "Significant savings on long-term and chronic treatment plans.",
     icon: IndianRupee,
     accent: "#004782",
+    bgAccent: "bg-[#004782]/10",
   },
   {
     id: "support",
@@ -29,6 +32,7 @@ const benefits = [
     description: "Licensed pharmacists guide you on dosage, storage, and alternatives.",
     icon: Stethoscope,
     accent: "#038076",
+    bgAccent: "bg-[#038076]/10",
   },
   {
     id: "delivery",
@@ -36,6 +40,7 @@ const benefits = [
     description: "Rapid delivery across Pune and reliable shipping pan-India.",
     icon: Truck,
     accent: "#004782",
+    bgAccent: "bg-[#004782]/10",
   },
   {
     id: "packaging",
@@ -43,139 +48,117 @@ const benefits = [
     description: "Tamper-evident, temperature-conscious packaging on every order.",
     icon: PackageCheck,
     accent: "#038076",
+    bgAccent: "bg-[#038076]/10",
   },
 ];
 
 const WhyChooseWellMeds = () => {
   return (
-    <section className="relative py-10 md:py-12 bg-white dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
-      {/* Background Decorative Element */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#038076]/5 dark:bg-[#038076]/10 blur-[100px] rounded-full pointer-events-none" />
-      
-      <div className="relative home-section-container max-w-full lg:max-w-[82%] mx-auto">
+    <section className="relative py-16 md:py-24 bg-slate-50/50 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-[#038076]/10 to-transparent dark:from-[#038076]/15 blur-[100px] rounded-full pointer-events-none -z-10" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* ── Header ── */}
-        <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="max-w-xl">
-            <span className="inline-block mb-2 text-[10px] font-bold tracking-widest text-[#038076] uppercase">
+        {/* ── Centered Header ── */}
+        <div className="max-w-2xl mx-auto text-center mb-16 md:mb-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-[#038076]" />
+            <span className="text-xs font-bold tracking-widest text-[#038076] uppercase">
               The WellMeds Advantage
             </span>
-            <h2 className="text-2xl md:text-[32px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#004782] to-[#038076]">WellMeds</span>?
-            </h2>
           </div>
-
-          <a
-            href="/about"
-            className="group hidden md:inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 px-4 py-2 text-[13px] font-semibold text-slate-900 dark:text-white shadow-sm transition-all hover:shadow hover:border-[#038076]/50 shrink-0"
-          >
-            Learn More 
-            <ArrowRight className="h-3.5 w-3.5 text-[#038076] transition-transform group-hover:translate-x-0.5" />
-          </a>
+          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+            Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#004782] to-[#038076]">WellMeds</span>?
+          </h2>
+          
+          <p className="text-base md:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">
+            Your trusted partner in health, delivering authentic medicines, professional support, and absolute clinical safety directly to your door.
+          </p>
         </div>
 
-        {/* ── Grid Layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+        {/* ── Benefits Grid (3 Columns) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+          {benefits.map((b) => {
+            const Icon = b.icon;
+            return (
+              <div
+                key={b.id}
+                className="group relative bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-200/80 dark:border-zinc-800 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:border-[#038076]/30 overflow-hidden flex flex-col items-center text-center"
+              >
+                {/* Hover Gradient Overlay */}
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: `radial-gradient(circle at center, ${b.accent}04 0%, transparent 70%)` }}
+                />
 
-          {/* ── Featured Hero Card (Left, Spans 5 cols) ── */}
-          <div className="lg:col-span-5 flex flex-col">
-            <div className="group relative flex-1 w-full rounded-2xl overflow-hidden p-6 md:p-7 shadow-lg transition-transform duration-500 hover:scale-[1.01]"
-                 style={{ background: "radial-gradient(circle at top right, #038076 0%, #004782 100%)" }}>
-              
-              {/* Abstract Background Shapes */}
-              <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-[#004782]/40 blur-xl" />
-
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                  <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 border border-white/20 backdrop-blur-md shadow-sm">
-                    <Hospital className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-bold leading-tight text-white mb-2.5">
-                    Trusted by Patients Across India
-                  </h3>
-                  <p className="text-[13px] leading-relaxed text-white/80">
-                    Families navigating chronic illness, cancer care, and transplant
-                    therapies trust WellMeds for authentic medicines with complete
-                    clinical tracking.
-                  </p>
+                <div className={`relative z-10 w-16 h-16 mb-6 rounded-2xl ${b.bgAccent} flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                  <Icon className="w-7 h-7" style={{ color: b.accent }} strokeWidth={2} />
                 </div>
 
-                {/* Compact Glassy Badge */}
-                <div className="mt-8 flex items-center gap-3.5 rounded-xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md shadow-inner">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl font-black text-white tracking-tighter">
-                      100<span className="text-[#038076] text-xl">%</span>
-                    </span>
-                  </div>
-                  <div className="h-8 w-px bg-white/20" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-white">
-                      Genuine Meds
-                    </p>
-                    <p className="text-[11px] text-white/70 mt-0.5">
-                      Sourced directly from manufacturers
-                    </p>
-                  </div>
-                </div>
+                <h4 className="relative z-10 text-lg font-bold text-slate-900 dark:text-white mb-3 transition-colors group-hover:text-[#038076]">
+                  {b.title}
+                </h4>
+                
+                <p className="relative z-10 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
+                  {b.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Full-Width Horizontal Banner ── */}
+        <div className="relative w-full rounded-[2.5rem] overflow-hidden p-8 md:p-12 shadow-2xl"
+             style={{ background: "linear-gradient(135deg, #004782 0%, #038076 100%)" }}>
+          
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#004782]/40 blur-3xl rounded-full translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
+            
+            {/* Left Content */}
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 lg:max-w-2xl">
+              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
+                <Hospital className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
+                  Trusted by Patients Across India
+                </h3>
+                <p className="text-white/80 leading-relaxed text-sm md:text-base">
+                  Families navigating chronic illness, cancer care, and transplant therapies trust WellMeds for authentic medicines with complete clinical tracking and expert support.
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* ── Benefit Cards (Right, Spans 7 cols) ── */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {benefits.map((b, index) => {
-              const Icon = b.icon;
-              const isLast = index === benefits.length - 1;
-              
-              return (
-                <div
-                  key={b.id}
-                  className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-900/80 p-5 border border-slate-200/60 dark:border-zinc-800/80 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 dark:hover:bg-zinc-900 flex flex-row items-start gap-4
-                    ${isLast ? "sm:col-span-2 sm:max-w-[50%]" : ""}
-                  `}
-                >
-                  {/* Subtle hover gradient background */}
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{ background: `radial-gradient(circle at top right, ${b.accent}06 0%, transparent 70%)` }}
-                  />
-
-                  {/* Icon Wrapper (Left aligned now for compactness) */}
-                  <div
-                    className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
-                    style={{
-                      background: `${b.accent}12`,
-                      color: b.accent,
-                    }}
-                  >
-                    <Icon className="h-5 w-5" strokeWidth={2} />
-                  </div>
-
-                  {/* Text Content */}
-                  <div className="relative z-10 flex-1 pt-0.5">
-                    <h4 className="text-[14px] font-bold text-slate-900 dark:text-white mb-1 transition-colors group-hover:text-[#038076]">
-                      {b.title}
-                    </h4>
-                    <p className="text-[12px] leading-relaxed text-slate-500 dark:text-zinc-400">
-                      {b.description}
-                    </p>
-                  </div>
+            {/* Right Content (Badge & CTA) */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 flex-shrink-0">
+              <div className="flex items-center gap-4 bg-white/10 border border-white/15 backdrop-blur-md rounded-2xl p-4 shadow-inner">
+                <span className="text-3xl font-black text-white tracking-tighter">
+                  100<span className="text-[#038076]">%</span>
+                </span>
+                <div className="w-px h-10 bg-white/20" />
+                <div className="text-left">
+                  <p className="text-xs font-bold uppercase tracking-widest text-white">Genuine Meds</p>
+                  <p className="text-[11px] text-white/70 mt-0.5">Sourced from manufacturers</p>
                 </div>
-              );
-            })}
+              </div>
+
+              <a
+                href="/about"
+                className="group flex items-center gap-2 bg-white text-[#004782] px-6 py-4 rounded-2xl text-sm font-bold shadow-lg hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Learn More
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </a>
+            </div>
+
           </div>
         </div>
 
-        {/* Mobile CTA */}
-        <div className="mt-6 flex justify-center md:hidden">
-          <a
-            href="/about"
-            className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#038076] px-5 py-3 text-[13px] font-semibold text-white shadow transition-all hover:bg-[#02665e] active:scale-95"
-          >
-            Learn More <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-          </a>
-        </div>
       </div>
     </section>
   );
