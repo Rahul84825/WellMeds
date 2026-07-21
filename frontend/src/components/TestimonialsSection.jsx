@@ -212,7 +212,7 @@ export const TestimonialsSection = () => {
 
   return (
     <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
-      <div className="home-section-container">
+      <div className="home-section-container max-w-full lg:max-w-[82%] mx-auto">
         
         {/* Section Header with Top View All Row */}
         <div className="flex justify-between items-end mb-8 md:mb-12 border-b border-slate-100 dark:border-zinc-900 pb-md">
@@ -220,9 +220,6 @@ export const TestimonialsSection = () => {
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
               What Our <span className="text-[#038076]">Customers Say</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
-              Read genuine reviews from patients who rely on WellMeds for chronic care, oncology, surgical products, wellness, and daily healthcare.
-            </p>
           </div>
 
           <div className="shrink-0 pb-xs">

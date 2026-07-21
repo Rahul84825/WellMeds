@@ -52,7 +52,7 @@ const WhyChooseWellMeds = () => {
       {/* Background Decorative Element */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#038076]/5 dark:bg-[#038076]/10 blur-[100px] rounded-full pointer-events-none" />
       
-      <div className="relative home-section-container">
+      <div className="relative home-section-container max-w-full lg:max-w-[82%] mx-auto">
         
         {/* ── Header ── */}
         <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -63,9 +63,6 @@ const WhyChooseWellMeds = () => {
             <h2 className="text-2xl md:text-[32px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
               Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#004782] to-[#038076]">WellMeds</span>?
             </h2>
-            <p className="mt-2.5 text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-              Your trusted partner in health, delivering authentic medicines, professional support, and clinical safety.
-            </p>
           </div>
 
           <a

@@ -69,7 +69,7 @@ const WellnessProductsSection = () => {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-14 home-section-container flex justify-center items-center">
+      <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto flex justify-center items-center">
         <Loader size="md" />
       </section>
     );
@@ -82,13 +82,10 @@ const WellnessProductsSection = () => {
   const displayedProducts = products.slice(0, 8);
 
   return (
-    <section className="py-12 md:py-14 home-section-container bg-white dark:bg-zinc-950">
+    <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-2">
         <div className="text-left">
           <h2 className="font-headline-md text-headline-md text-on-surface">Wellness Products</h2>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            Carefully selected wellness essentials for everyday health.
-          </p>
         </div>
         <Link 
           to="/products?productType=wellness" 
