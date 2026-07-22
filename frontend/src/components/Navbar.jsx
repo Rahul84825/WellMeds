@@ -374,7 +374,7 @@ const Navbar = () => {
               {/* Upload Rx Button */}
               <button
                 onClick={() => navigate("/upload-prescription")}
-                className="bg-[#02665e] hover:bg-[#014d47] text-white px-4 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#02665e] focus:ring-offset-2 flex items-center justify-center gap-1.5 active:scale-[0.98] select-none cursor-pointer text-xs"
+                className="bg-[#02665e] text-white px-4 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#02665e] focus:ring-offset-2 flex items-center justify-center gap-1.5 active:scale-[0.98] select-none cursor-pointer text-xs"
                 aria-label="Upload Doctor Prescription"
               >
                 <FileText className="w-[14px] h-[14px]" />
