@@ -1,137 +1,164 @@
-import { Product } from "../models/Product.js";
-import { Category } from "../models/Category.js";
-import { SurgicalCategory } from "../models/SurgicalCategory.js";
-import { Molecule } from "../models/Molecule.js";
-import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
+import {
+  generateSitemapIndex,
+  generatePagesSitemap,
+  generateProductsSitemap,
+  generateCategoriesSitemap,
+  generateMoleculesSitemap,
+  generateSpecialitiesSitemap,
+  generateSurgicalSitemap,
+  generateBlogSitemap,
+} from "../services/sitemapService.js";
 
-const DEFAULT_SITE_URL = process.env.SITE_URL || "https://wellmeds.com";
+const DEFAULT_SITE_URL = process.env.SITE_URL || "https://wellmeds.in";
 
+const sendXmlResponse = (res, xml, statusCode = 200) => {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  res.status(statusCode).send(xml);
+};
+
+const sendXmlErrorResponse = (res, errorMsg, statusCode = 500) => {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  const xmlError = `<?xml version="1.0" encoding="UTF-8"?>\n<error>\n  <message>${errorMsg}</message>\n</error>`;
+  res.status(statusCode).send(xmlError);
+};
+
+/**
+ * GET /sitemap.xml
+ * Sitemap Index referencing all dynamic sub-sitemaps
+ */
 export const getSitemapXml = async (req, res, next) => {
   try {
     const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
-
-    // Fetch dynamic content slugs & timestamps concurrently
-    const [products, categories, surgicalCategories, molecules, specialities] = await Promise.all([
-      Product.find({}).select("slug updatedAt").lean(),
-      Category.find({}).select("slug updatedAt").lean(),
-      SurgicalCategory.find({}).select("slug updatedAt").lean(),
-      Molecule.find({}).select("slug updatedAt").lean(),
-      MedicalSpeciality.find({}).select("slug updatedAt").lean(),
-    ]);
-
-    const staticRoutes = [
-      { url: "/", priority: "1.0", changefreq: "daily" },
-      { url: "/categories", priority: "0.8", changefreq: "weekly" },
-      { url: "/surgical/all", priority: "0.8", changefreq: "weekly" },
-      { url: "/surgical/categories", priority: "0.8", changefreq: "weekly" },
-      { url: "/molecules", priority: "0.8", changefreq: "weekly" },
-      { url: "/super-speciality", priority: "0.8", changefreq: "weekly" },
-      { url: "/wellness", priority: "0.8", changefreq: "weekly" },
-      { url: "/surgical", priority: "0.8", changefreq: "weekly" },
-      { url: "/imported-medicines", priority: "0.7", changefreq: "weekly" },
-      { url: "/patient-assistance-program", priority: "0.7", changefreq: "monthly" },
-      { url: "/offers", priority: "0.7", changefreq: "daily" },
-      { url: "/how-we-keep-you-safe", priority: "0.6", changefreq: "monthly" },
-      { url: "/about", priority: "0.6", changefreq: "monthly" },
-      { url: "/contact", priority: "0.6", changefreq: "monthly" },
-    ];
-
-    const todayIso = new Date().toISOString().split("T")[0];
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">\n`;
-
-    // 1. Static Routes
-    staticRoutes.forEach((route) => {
-      xml += `  <url>\n`;
-      xml += `    <loc>${siteUrl}${route.url}</loc>\n`;
-      xml += `    <lastmod>${todayIso}</lastmod>\n`;
-      xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
-      xml += `    <priority>${route.priority}</priority>\n`;
-      xml += `  </url>\n`;
-    });
-
-    // 2. Product URLs
-    products.forEach((p) => {
-      if (p.slug) {
-        const lastMod = p.updatedAt ? new Date(p.updatedAt).toISOString().split("T")[0] : todayIso;
-        xml += `  <url>\n`;
-        xml += `    <loc>${siteUrl}/products/${p.slug}</loc>\n`;
-        xml += `    <lastmod>${lastMod}</lastmod>\n`;
-        xml += `    <changefreq>daily</changefreq>\n`;
-        xml += `    <priority>0.9</priority>\n`;
-        xml += `  </url>\n`;
-      }
-    });
-
-    // 3. Category URLs
-    categories.forEach((c) => {
-      if (c.slug) {
-        const lastMod = c.updatedAt ? new Date(c.updatedAt).toISOString().split("T")[0] : todayIso;
-        xml += `  <url>\n`;
-        xml += `    <loc>${siteUrl}/category/${c.slug}</loc>\n`;
-        xml += `    <lastmod>${lastMod}</lastmod>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.8</priority>\n`;
-        xml += `  </url>\n`;
-      }
-    });
-
-    // 4. Surgical Category URLs
-    surgicalCategories.forEach((sc) => {
-      if (sc.slug) {
-        const lastMod = sc.updatedAt ? new Date(sc.updatedAt).toISOString().split("T")[0] : todayIso;
-        xml += `  <url>\n`;
-        xml += `    <loc>${siteUrl}/surgical/${sc.slug}</loc>\n`;
-        xml += `    <lastmod>${lastMod}</lastmod>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.8</priority>\n`;
-        xml += `  </url>\n`;
-      }
-    });
-
-    // 5. Molecule URLs
-    molecules.forEach((m) => {
-      if (m.slug) {
-        const lastMod = m.updatedAt ? new Date(m.updatedAt).toISOString().split("T")[0] : todayIso;
-        xml += `  <url>\n`;
-        xml += `    <loc>${siteUrl}/molecule/${m.slug}</loc>\n`;
-        xml += `    <lastmod>${lastMod}</lastmod>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.7</priority>\n`;
-        xml += `  </url>\n`;
-      }
-    });
-
-    // 6. Speciality URLs
-    specialities.forEach((s) => {
-      if (s.slug) {
-        const lastMod = s.updatedAt ? new Date(s.updatedAt).toISOString().split("T")[0] : todayIso;
-        xml += `  <url>\n`;
-        xml += `    <loc>${siteUrl}/speciality/${s.slug}</loc>\n`;
-        xml += `    <lastmod>${lastMod}</lastmod>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.7</priority>\n`;
-        xml += `  </url>\n`;
-      }
-    });
-
-    xml += `</urlset>`;
-
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400"); // Cache for 24h
-    res.status(200).send(xml);
+    const xml = await generateSitemapIndex(siteUrl);
+    sendXmlResponse(res, xml);
   } catch (error) {
-    next(error);
+    console.error("Error generating Sitemap Index:", error);
+    sendXmlErrorResponse(res, "Internal error generating sitemap index");
   }
 };
 
+/**
+ * GET /sitemap-pages.xml
+ * Static Pages Sitemap
+ */
+export const getPagesSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const xml = await generatePagesSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Pages Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating pages sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-products.xml or GET /sitemap-products-:page.xml
+ * Dynamic Product Sitemap with pagination support & image extensions
+ */
+export const getProductsSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const page = parseInt(req.params.page || "1", 10);
+    const { xml } = await generateProductsSitemap(siteUrl, page);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Products Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating products sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-categories.xml
+ * Dynamic Category Sitemap
+ */
+export const getCategoriesSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const xml = await generateCategoriesSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Categories Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating categories sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-molecules.xml
+ * Dynamic Molecule Sitemap
+ */
+export const getMoleculesSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const xml = await generateMoleculesSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Molecules Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating molecules sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-specialities.xml
+ * Dynamic Medical Speciality Sitemap
+ */
+export const getSpecialitiesSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const xml = await generateSpecialitiesSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Specialities Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating specialities sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-surgical.xml
+ * Dynamic Surgical Category Sitemap
+ */
+export const getSurgicalSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const xml = await generateSurgicalSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Surgical Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating surgical sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-blog.xml
+ * Dynamic Blog Sitemap (returns 404 or empty XML if no blogs exist)
+ */
+export const getBlogSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const { xml, hasBlogs } = await generateBlogSitemap(siteUrl);
+    if (!hasBlogs) {
+      return sendXmlErrorResponse(res, "No blog sitemap available", 404);
+    }
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Blog Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating blog sitemap");
+  }
+};
+
+/**
+ * GET /robots.txt
+ * Production-ready robots.txt file referencing sitemap.xml
+ */
 export const getRobotsTxt = (req, res) => {
   const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
 
   const robots = `# Production Robots.txt for WellMeds
 User-agent: *
 Allow: /
+
+# Exclude Admin, API, and Private Patient Endpoints
 Disallow: /admin
 Disallow: /admin/*
 Disallow: /api/*
@@ -145,6 +172,7 @@ Disallow: /verify-email
 Disallow: /reset-password
 Disallow: /forgot-password
 
+# Sitemap Reference
 Sitemap: ${siteUrl}/sitemap.xml
 `;
 

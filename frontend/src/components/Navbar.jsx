@@ -765,6 +765,9 @@ const Navbar = () => {
                 className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
               >
                 <span>Surgical</span>
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-[#038076]/10 text-[#038076] border border-[#038076]/20 tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
+                  NEW
+                </span>
                 <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
               </button>
 
@@ -878,7 +881,7 @@ const Navbar = () => {
               to="/patient-assistance-program"
               className={({ isActive }) =>
                 `flex h-full items-center text-[14px] font-bold cursor-pointer transition-colors duration-150 outline-none border-none p-0 bg-transparent ${
-                  isActive ? "text-[#038076]" : "text-[#004782] hover:text-[#038076] focus:text-[#038076]"
+                  isActive ? "text-[#038076]" : "text-slate-800 hover:text-[#038076] focus:text-[#038076]"
                 }`
               }
             >

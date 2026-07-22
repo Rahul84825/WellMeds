@@ -444,7 +444,12 @@ const GlobalDrawer = () => {
                 onClick={() => setActiveMobileAccordion(activeMobileAccordion === "surg" ? null : "surg")}
                 className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer"
               >
-                <span>Surgical</span>
+                <div className="flex items-center gap-1.5">
+                  <span>Surgical</span>
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-[#038076]/10 text-[#038076] border border-[#038076]/20 tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
+                    NEW
+                  </span>
+                </div>
                 <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "surg" ? "rotate-180" : ""}`} />
               </button>
               {activeMobileAccordion === "surg" && (
@@ -529,7 +534,7 @@ const GlobalDrawer = () => {
               <Link
                 to="/patient-assistance-program"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-full flex items-center py-3 text-xs font-bold text-[#004782] min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
+                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
                 Patient Assistance Program (PAP)
               </Link>
