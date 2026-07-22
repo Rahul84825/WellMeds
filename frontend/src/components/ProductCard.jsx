@@ -217,20 +217,20 @@ const ProductCard = ({ product }) => {
         {/* Header: Title & Molecule */}
         <div className="flex flex-col items-center">
           <h3
-            className="line-clamp-2 h-9 sm:h-10 overflow-hidden text-center text-xs sm:text-sm md:text-base font-bold leading-snug text-slate-800 dark:text-zinc-100 transition-colors group-hover:text-[#02665e]"
+            className="line-clamp-2 h-11 sm:h-12 flex items-center justify-center text-center text-xs sm:text-sm font-bold leading-snug text-slate-800 dark:text-zinc-100 transition-colors group-hover:text-[#02665e] overflow-hidden px-1"
             title={product.name}
           >
             {product.name}
           </h3>
 
           {/* Molecule Subtitle */}
-          <div className="mt-1 h-4.5 flex items-center justify-center">
+          <div className="mt-1 h-4.5 flex items-center justify-center w-full px-1 overflow-hidden">
             {molecule ? (
               <Link
                 to={`/molecules/${molecule.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 title={molecule.name}
-                className="text-[11px] font-semibold text-[#5a6a85] dark:text-zinc-400 uppercase tracking-wider underline hover:text-[#02665e]"
+                className="text-[11px] font-semibold text-[#5a6a85] dark:text-zinc-400 uppercase tracking-wider underline hover:text-[#02665e] truncate block max-w-full"
               >
                 {molecule.name}
               </Link>

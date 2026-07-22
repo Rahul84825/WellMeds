@@ -727,12 +727,12 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Title Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left">
-          <h1 className="font-headline-sm text-lg font-extrabold text-slate-905 dark:text-zinc-100 leading-tight">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
+          <h1 className="font-headline-sm text-lg font-extrabold text-slate-905 dark:text-zinc-100 leading-tight break-words">
             {product.name}
           </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-xs font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase">
+            <div className="text-xs font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
@@ -873,17 +873,17 @@ const ProductDetails = () => {
         </div>
 
         {/* Salt Composition & Marketer Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5 overflow-hidden max-w-[calc(100vw-2rem)]">
           {/* Salt Composition */}
           {product.molecules && product.molecules.length > 0 && (
-            <div>
+            <div className="max-w-full overflow-hidden">
               <h4 className="text-[10.5px] font-black text-slate-455 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Salt Composition
               </h4>
-              <div className="text-xs font-bold text-[#004782] dark:text-[#a4c9ff] underline uppercase leading-relaxed">
+              <div className="text-xs font-bold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
                 {product.molecules.map((mol, idx) => (
-                  <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="hover:opacity-85 mr-2">
-                    {mol.name}
+                  <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="underline hover:opacity-85 break-words max-w-full inline-block">
+                    {mol.name}{idx < product.molecules.length - 1 ? "," : ""}
                   </Link>
                 ))}
               </div>

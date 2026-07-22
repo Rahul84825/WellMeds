@@ -56,11 +56,11 @@ const ProductInfo = ({ product, handleShare }) => {
       
       {/* Salt Composition */}
       {product.molecules && product.molecules.length > 0 && (
-        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
+        <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs max-w-full overflow-hidden">
           <span className="block text-sm font-bold text-[#111827] dark:text-zinc-100 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 select-none">
             <span className="material-symbols-outlined text-[14px] leading-none text-slate-700 dark:text-zinc-350">science</span> Salt Composition
           </span>
-          <div className="flex flex-wrap items-center text-sm">
+          <div className="flex flex-wrap items-center text-sm break-words max-w-full">
             {product.molecules.map((mol, idx) => (
               <Fragment key={mol.slug || idx}>
                 <MoleculeLink molecule={mol} />
