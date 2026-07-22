@@ -374,19 +374,26 @@ const UploadPrescriptionPage = () => {
                 {uploadedRxRecord ? (
                   // SUCCESS STATE CARD
                   <div className="space-y-md animate-[fade-in_0.2s_ease-out] text-center py-md">
-                    <div className="w-12 h-12 bg-secondary/15 rounded-full flex items-center justify-center text-secondary mx-auto mb-xs">
+                    <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/40 rounded-full flex items-center justify-center text-[#02665e] mx-auto mb-xs">
                       <CheckCircle2 size={24} />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="font-extrabold text-xs text-[#086b53]">Uploaded Successfully</h4>
+                      <h4 className="font-extrabold text-xs text-[#02665e]">Uploaded Successfully</h4>
                       <p className="text-[10px] text-slate-450 truncate max-w-[200px] mx-auto">
                         {uploadedRxRecord.name}
                       </p>
                     </div>
+                    <Link
+                      to={`/prescriptions/${uploadedRxRecord._id}`}
+                      className="bg-[#02665e] hover:bg-[#014d47] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 mx-auto"
+                    >
+                      <span>Track Verification Status</span>
+                      <ArrowRight size={14} />
+                    </Link>
                     <button
                       type="button"
                       onClick={() => setUploadedRxRecord(null)}
-                      className="text-xs text-primary font-bold hover:underline block mx-auto cursor-pointer"
+                      className="text-xs text-slate-500 font-bold hover:underline block mx-auto cursor-pointer"
                     >
                       Upload Another
                     </button>

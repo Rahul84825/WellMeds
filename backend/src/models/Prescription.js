@@ -59,6 +59,38 @@ const prescriptionSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    patientNotes: {
+      type: String,
+      default: "",
+    },
+    pharmacistNotes: {
+      type: String,
+      default: "",
+    },
+    prescribedItems: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          default: null,
+        },
+        name: { type: String, required: true },
+        dosage: { type: String, default: "As prescribed" },
+        quantity: { type: Number, default: 1 },
+        price: { type: Number, default: 0 },
+        originalPrice: { type: Number, default: 0 },
+        isRx: { type: Boolean, default: true },
+        image: { type: String, default: "" },
+      },
+    ],
+    timeline: [
+      {
+        status: { type: String, required: true },
+        title: { type: String, required: true },
+        description: { type: String, default: "" },
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
     cartSnapshot: {
       type: mongoose.Schema.Types.Mixed,
       default: null,

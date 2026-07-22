@@ -2,12 +2,20 @@ import apiInstance from "./api";
 
 export const prescriptionService = {
   /**
-   * Upload a new prescription file.
-   * @param {File} file - the prescription file (PDF/JPG/PNG)
+   * Upload a new prescription file (supports single File or array of Files).
    */
-  async uploadPrescription(file, cartSnapshot) {
+  async uploadPrescription(files, patientNotes = "", cartSnapshot = null) {
     const formData = new FormData();
-    formData.append("prescription", file);
+    const fileList = Array.isArray(files) ? files : [files];
+    
+    fileList.forEach((file) => {
+      formData.append("prescription", file);
+    });
+
+    if (patientNotes) {
+      formData.append("patientNotes", patientNotes);
+    }
+
     if (cartSnapshot) {
       formData.append("cartSnapshot", JSON.stringify(cartSnapshot));
     }
@@ -27,7 +35,7 @@ export const prescriptionService = {
   },
 
   /**
-   * Get a single prescription by ID (patient access).
+   * Get a single prescription by ID.
    */
   async getPrescription(id) {
     const data = await apiInstance.get(`/prescriptions/${id}`);
@@ -35,7 +43,15 @@ export const prescriptionService = {
   },
 
   /**
-   * Delete a prescription by ID (patient access, non-approved only).
+   * Checkout an approved prescription (populates cart with prescribed items).
+   */
+  async checkoutPrescription(id) {
+    const data = await apiInstance.post(`/prescriptions/${id}/checkout`);
+    return data;
+  },
+
+  /**
+   * Delete a prescription by ID.
    */
   async deletePrescription(id) {
     const data = await apiInstance.delete(`/prescriptions/${id}`);
@@ -46,7 +62,6 @@ export const prescriptionService = {
 
   /**
    * Get all prescriptions (admin). Optional filters: status, search.
-   * Routes to /prescriptions/all to avoid conflict with patient /:id
    */
   async getAllPrescriptions(params = {}) {
     const data = await apiInstance.get("/prescriptions/all", { params });
@@ -54,26 +69,36 @@ export const prescriptionService = {
   },
 
   /**
+   * Update prescribed items & notes on a prescription (admin pharmacist).
+   */
+  async updatePrescriptionItems(id, payload = {}) {
+    const data = await apiInstance.put(`/prescriptions/${id}/items`, payload);
+    return data.prescription;
+  },
+
+  /**
    * Approve a prescription (admin).
    */
-  async approvePrescription(id, adminNotes = "") {
-    const data = await apiInstance.put(`/prescriptions/${id}/approve`, { adminNotes });
+  async approvePrescription(id, payload = {}) {
+    const body = typeof payload === "string" ? { adminNotes: payload } : payload;
+    const data = await apiInstance.put(`/prescriptions/${id}/approve`, body);
     return data.prescription;
   },
 
   /**
    * Reject a prescription (admin).
    */
-  async rejectPrescription(id, adminNotes = "") {
-    const data = await apiInstance.put(`/prescriptions/${id}/reject`, { adminNotes });
+  async rejectPrescription(id, payload = {}) {
+    const body = typeof payload === "string" ? { adminNotes: payload } : payload;
+    const data = await apiInstance.put(`/prescriptions/${id}/reject`, body);
     return data.prescription;
   },
 
   /**
    * Update prescription status generically (admin).
    */
-  async updatePrescriptionStatus(id, status, adminNotes = "") {
-    const data = await apiInstance.put(`/prescriptions/${id}/status`, { status, adminNotes });
+  async updatePrescriptionStatus(id, status, adminNotes = "", extra = {}) {
+    const data = await apiInstance.put(`/prescriptions/${id}/status`, { status, adminNotes, ...extra });
     return data.prescription;
   },
 };

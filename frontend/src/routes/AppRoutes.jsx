@@ -25,6 +25,7 @@ const Login = lazy(() => import("../pages/Login"));
 const ProfilePage = lazy(() => import("../pages/Profile"));
 const OrdersPage = lazy(() => import("../pages/OrdersPage"));
 const UploadPrescriptionPage = lazy(() => import("../pages/UploadPrescriptionPage"));
+const PrescriptionTrackerPage = lazy(() => import("../pages/PrescriptionTrackerPage"));
 const ImportedMedicinesPage = lazy(() => import("../pages/ImportedMedicinesPage"));
 const PatientAssistanceProgramPage = lazy(() => import("../pages/PatientAssistanceProgramPage"));
 const SpecialityPage = lazy(() => import("../pages/SpecialityPage"));
@@ -122,6 +123,14 @@ const AppRoutes = () => {
             }
           />
           <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
+          <Route
+            path="prescriptions/:id"
+            element={
+              <ProtectedRoute>
+                <PrescriptionTrackerPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Admin Portal Routes */}
