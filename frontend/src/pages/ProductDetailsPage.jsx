@@ -747,7 +747,7 @@ const ProductDetails = () => {
             {product.name}
           </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
+            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
