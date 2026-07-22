@@ -110,8 +110,10 @@ export const connectDB = async () => {
     });
     console.log(`MongoDB Connected: ${conn.connection.host} (Database: ${conn.connection.name})`);
     
-    // Auto-seed default data if empty in the primary database
-    await seedAllDefaultData();
+    // Auto-seed default data if empty in development or explicitly enabled
+    if (process.env.NODE_ENV === "development" || process.env.ENABLE_AUTO_SEEDING === "true") {
+      await seedAllDefaultData();
+    }
     return conn;
   } catch (error) {
     console.error(`[Database] Connection warning/failure: ${error.message}`);

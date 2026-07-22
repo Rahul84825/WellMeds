@@ -87,7 +87,7 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.COOKIE_SECRET || "default_cookie_secret_wellmeds_123"));
 
 // Input Validation & Sanitization Middlewares (Runs after body parsers)
 app.use(preventMongoInjection);
