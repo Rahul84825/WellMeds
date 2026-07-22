@@ -726,7 +726,7 @@ const ProductDetails = () => {
           </button>
         </div>
 
-        {/* Product Title Card */}
+        {/* Product Title Card with Dynamic Introduction & Sourced From Badge */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
           <h1 className="font-headline-sm text-lg font-extrabold text-slate-905 dark:text-zinc-100 leading-tight break-words">
             {product.name}
@@ -737,6 +737,25 @@ const ProductDetails = () => {
             </div>
           )}
 
+          {/* Dynamic Product Introduction */}
+          {product.description && product.description.trim() && (
+            <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed mt-3 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3">
+              {product.description}
+            </p>
+          )}
+
+          {/* Sourced From Manufacturer Badge */}
+          <div className="mt-3.5 bg-blue-500/[0.04] dark:bg-zinc-800/50 border border-blue-500/10 dark:border-zinc-700/60 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[18px]">verified</span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-zinc-300 font-medium">
+              Sourced from:{" "}
+              <span className="font-extrabold text-[#004782] dark:text-[#a4c9ff]">
+                {product.manufacturer || product.brand || "Direct From Manufacturer"}
+              </span>
+            </p>
+          </div>
         </div>
 
         {/* Product Image Gallery Card */}
