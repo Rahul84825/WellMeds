@@ -856,9 +856,13 @@ const ProductDetails = () => {
         {/* Badges inline row */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
           <div className="flex gap-4 items-center flex-wrap">
-            {product.requiresRx && (
+            {product.requiresRx ? (
               <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
                 <span className="text-[#845ec2] font-black text-xs border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
+              </span>
+            ) : (
+              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-emerald-600 font-black text-xs border border-emerald-500/40 rounded-full w-5 h-5 flex items-center justify-center">✓</span> OTC Medicine
               </span>
             )}
             {product.isColdChain && (
@@ -866,8 +870,16 @@ const ProductDetails = () => {
                 <span className="text-sky-500">❄️</span> Cold Chain
               </span>
             )}
+            <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+              <span className="text-[#038076] font-black text-xs">🛡️</span> 100% Genuine
+            </span>
           </div>
-          <button className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200">
+          <button
+            type="button"
+            onClick={() => toast.info(product.requiresRx ? "Prescription Required: Verified by licensed pharmacists before shipment." : "OTC Medicine: Over-the-counter item. Guaranteed 100% genuine and authentic.")}
+            className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Product Quality Info"
+          >
             <Info size={16} />
           </button>
         </div>
