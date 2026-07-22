@@ -450,9 +450,12 @@ const ProductDetails = () => {
       : [];
 
     const findAndRemoveMedSec = (titles) => {
-      const idx = medicalSecs.findIndex(s => titles.some(t => s.title.toLowerCase() === t.toLowerCase()));
+      const idx = medicalSecs.findIndex(s => s?.title && titles.some(t => s.title.toLowerCase() === t.toLowerCase()));
       if (idx !== -1) {
-        return medicalSecs.splice(idx, 1)[0];
+        const sec = medicalSecs.splice(idx, 1)[0];
+        if (sec && sec.content && typeof sec.content === "string" && sec.content.trim().length > 0) {
+          return sec;
+        }
       }
       return null;
     };
@@ -462,7 +465,6 @@ const ProductDetails = () => {
     if (usesSec) {
       sections.push({ id: "Uses", title: "Uses", content: usesSec.content });
     }
-
 
     // 3. Benefits
     const benefitsSec = findAndRemoveMedSec(["benefits", "key benefits"]);
@@ -520,7 +522,6 @@ const ProductDetails = () => {
       sections.push({ id: "FAQs", title: "FAQs", content: faqsSec.content });
     }
 
-
     // 11. References
     const referencesSec = findAndRemoveMedSec(["references", "citations & references", "citations and references", "sources"]);
     if (product.references && product.references.length > 0) {
@@ -529,15 +530,29 @@ const ProductDetails = () => {
       sections.push({ id: "References", title: "Citations & References", content: referencesSec.content });
     }
 
-    // Add remaining custom sections
+    // Add remaining non-empty custom sections
     medicalSecs.forEach((sec, idx) => {
-      sections.push({
-        ...sec,
-        id: sec.id || `custom-section-${idx}`,
-      });
+      if (sec && sec.content && typeof sec.content === "string" && sec.content.trim().length > 0) {
+        sections.push({
+          ...sec,
+          id: sec.id || `custom-section-${idx}`,
+        });
+      }
     });
 
-    return sections;
+    // Guard: Only return sections that have actual content or populated arrays
+    return sections.filter((sec) => {
+      if (!sec) return false;
+      if (sec.type === "benefits") return product.benefits && product.benefits.length > 0;
+      if (sec.type === "usage") return product.usageInstructions && product.usageInstructions.length > 0;
+      if (sec.type === "warnings") return product.warnings && product.warnings.length > 0;
+      if (sec.type === "sideeffects") return product.sideEffects && product.sideEffects.length > 0;
+      if (sec.type === "storage") return product.storageInstructions && product.storageInstructions.length > 0;
+      if (sec.type === "safety") return product.safetyCards && product.safetyCards.length > 0;
+      if (sec.type === "faqs") return product.faqs && product.faqs.length > 0;
+      if (sec.type === "references") return product.references && product.references.length > 0;
+      return typeof sec.content === "string" && sec.content.trim().length > 0;
+    });
   }, [product]);
 
   const discountPercent = product?.originalPrice && product.originalPrice > product.price
