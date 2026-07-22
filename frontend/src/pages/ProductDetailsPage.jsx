@@ -739,7 +739,7 @@ const ProductDetails = () => {
 
           {/* Dynamic Product Introduction */}
           {product.description && product.description.trim() && (
-            <p className="text-[10pt] text-slate-600 dark:text-zinc-300 leading-relaxed mt-3 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3">
+            <p className="text-[12px] text-slate-600 dark:text-zinc-300 leading-relaxed mt-3 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3">
               {product.description}
             </p>
           )}
