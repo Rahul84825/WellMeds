@@ -268,9 +268,7 @@ const UploadPrescriptionPage = () => {
         <nav className="flex items-center text-xs text-slate-400 gap-xs mb-2 select-none">
           <Link to="/" className="hover:text-primary transition-colors">Home</Link>
           <span className="text-slate-300">&gt;</span>
-          <Link to="/upload-prescription" className="hover:text-primary transition-colors">Upload Prescription</Link>
-          <span className="text-slate-300">&gt;</span>
-          <span className="font-bold text-slate-700 dark:text-zinc-300">Order</span>
+          <span className="font-bold text-slate-700 dark:text-zinc-300">Upload Prescription</span>
         </nav>
       </div>
 
