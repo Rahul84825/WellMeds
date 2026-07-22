@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 export const escapeXml = (str) => {
   if (!str || typeof str !== "string") return "";
   return str
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -101,9 +102,9 @@ export const buildUrlNode = ({ loc, lastmod, changefreq, priority, images = [] }
  */
 export const wrapUrlSet = (urlNodesXml) => {
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-  xml += `<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9"\n`;
+  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
   xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
-  xml += urlNodesXml;
+  xml += urlNodesXml || "";
   xml += `</urlset>`;
   return xml;
 };
@@ -193,15 +194,22 @@ export const generateProductsSitemap = async (siteUrl, page = 1, limit = 50000) 
     visibility: { $ne: "Hidden" },
   };
 
-  const [products, totalProducts] = await Promise.all([
-    Product.find(filter)
-      .select("slug updatedAt createdAt name description image images imagesData")
-      .sort({ updatedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Product.countDocuments(filter),
-  ]);
+  let products = [];
+  let totalProducts = 0;
+
+  try {
+    [products, totalProducts] = await Promise.all([
+      Product.find(filter)
+        .select("slug updatedAt createdAt name description image images imagesData")
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Product.countDocuments(filter),
+    ]);
+  } catch (err) {
+    console.error("Products Sitemap: Error querying DB:", err.message);
+  }
 
   let urlNodes = "";
 
@@ -284,10 +292,15 @@ export const generateCategoriesSitemap = async (siteUrl) => {
     status: { $ne: "Inactive" },
   };
 
-  const categories = await Category.find(filter)
-    .select("slug updatedAt createdAt name description image banner")
-    .sort({ updatedAt: -1 })
-    .lean();
+  let categories = [];
+  try {
+    categories = await Category.find(filter)
+      .select("slug updatedAt createdAt name description image banner")
+      .sort({ updatedAt: -1 })
+      .lean();
+  } catch (err) {
+    console.error("Categories Sitemap: Error querying DB:", err.message);
+  }
 
   let urlNodes = "";
 
@@ -329,10 +342,15 @@ export const generateMoleculesSitemap = async (siteUrl) => {
     isActive: { $ne: false },
   };
 
-  const molecules = await Molecule.find(filter)
-    .select("slug updatedAt createdAt name")
-    .sort({ updatedAt: -1 })
-    .lean();
+  let molecules = [];
+  try {
+    molecules = await Molecule.find(filter)
+      .select("slug updatedAt createdAt name")
+      .sort({ updatedAt: -1 })
+      .lean();
+  } catch (err) {
+    console.error("Molecules Sitemap: Error querying DB:", err.message);
+  }
 
   let urlNodes = "";
 
@@ -363,10 +381,15 @@ export const generateSpecialitiesSitemap = async (siteUrl) => {
     active: { $ne: false },
   };
 
-  const specialities = await MedicalSpeciality.find(filter)
-    .select("slug updatedAt createdAt name shortDescription bannerImage iconImage")
-    .sort({ updatedAt: -1 })
-    .lean();
+  let specialities = [];
+  try {
+    specialities = await MedicalSpeciality.find(filter)
+      .select("slug updatedAt createdAt name shortDescription bannerImage iconImage")
+      .sort({ updatedAt: -1 })
+      .lean();
+  } catch (err) {
+    console.error("Specialities Sitemap: Error querying DB:", err.message);
+  }
 
   let urlNodes = "";
 
@@ -408,10 +431,15 @@ export const generateSurgicalSitemap = async (siteUrl) => {
     isActive: { $ne: false },
   };
 
-  const surgicalCategories = await SurgicalCategory.find(filter)
-    .select("slug updatedAt createdAt name description image bannerImage")
-    .sort({ updatedAt: -1 })
-    .lean();
+  let surgicalCategories = [];
+  try {
+    surgicalCategories = await SurgicalCategory.find(filter)
+      .select("slug updatedAt createdAt name description image bannerImage")
+      .sort({ updatedAt: -1 })
+      .lean();
+  } catch (err) {
+    console.error("Surgical Sitemap: Error querying DB:", err.message);
+  }
 
   let urlNodes = "";
 
@@ -510,7 +538,7 @@ export const generateSitemapIndex = async (siteUrl) => {
     lastmod: new Date(),
   });
 
-  // 2. Product Sitemap(s) - check latest updated timestamp and total count
+  // 2. Product Sitemap(s)
   try {
     const productFilter = {
       slug: { $exists: true, $ne: "" },
@@ -525,26 +553,27 @@ export const generateSitemapIndex = async (siteUrl) => {
 
     const productCount = await Product.countDocuments(productFilter);
 
-    if (productCount > 0) {
+    if (productCount > 50000) {
       const limit = 50000;
       const pageCount = Math.ceil(productCount / limit);
-
-      if (pageCount === 1) {
+      for (let p = 1; p <= pageCount; p++) {
         sitemaps.push({
-          loc: `${cleanSiteUrl}/sitemap-products.xml`,
+          loc: `${cleanSiteUrl}/sitemap-products-${p}.xml`,
           lastmod: latestProduct?.updatedAt || latestProduct?.createdAt || new Date(),
         });
-      } else {
-        for (let p = 1; p <= pageCount; p++) {
-          sitemaps.push({
-            loc: `${cleanSiteUrl}/sitemap-products-${p}.xml`,
-            lastmod: latestProduct?.updatedAt || latestProduct?.createdAt || new Date(),
-          });
-        }
       }
+    } else {
+      sitemaps.push({
+        loc: `${cleanSiteUrl}/sitemap-products.xml`,
+        lastmod: latestProduct?.updatedAt || latestProduct?.createdAt || new Date(),
+      });
     }
   } catch (err) {
     console.error("Sitemap Index: Error checking products", err);
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-products.xml`,
+      lastmod: new Date(),
+    });
   }
 
   // 3. Category Sitemap
@@ -559,14 +588,16 @@ export const generateSitemapIndex = async (siteUrl) => {
       .sort({ updatedAt: -1 })
       .lean();
 
-    if (latestCategory) {
-      sitemaps.push({
-        loc: `${cleanSiteUrl}/sitemap-categories.xml`,
-        lastmod: latestCategory.updatedAt || latestCategory.createdAt,
-      });
-    }
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-categories.xml`,
+      lastmod: latestCategory?.updatedAt || latestCategory?.createdAt || new Date(),
+    });
   } catch (err) {
     console.error("Sitemap Index: Error checking categories", err);
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-categories.xml`,
+      lastmod: new Date(),
+    });
   }
 
   // 4. Molecule Sitemap
@@ -577,14 +608,16 @@ export const generateSitemapIndex = async (siteUrl) => {
       .sort({ updatedAt: -1 })
       .lean();
 
-    if (latestMolecule) {
-      sitemaps.push({
-        loc: `${cleanSiteUrl}/sitemap-molecules.xml`,
-        lastmod: latestMolecule.updatedAt || latestMolecule.createdAt,
-      });
-    }
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-molecules.xml`,
+      lastmod: latestMolecule?.updatedAt || latestMolecule?.createdAt || new Date(),
+    });
   } catch (err) {
     console.error("Sitemap Index: Error checking molecules", err);
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-molecules.xml`,
+      lastmod: new Date(),
+    });
   }
 
   // 5. Speciality Sitemap
@@ -595,14 +628,16 @@ export const generateSitemapIndex = async (siteUrl) => {
       .sort({ updatedAt: -1 })
       .lean();
 
-    if (latestSpeciality) {
-      sitemaps.push({
-        loc: `${cleanSiteUrl}/sitemap-specialities.xml`,
-        lastmod: latestSpeciality.updatedAt || latestSpeciality.createdAt,
-      });
-    }
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-specialities.xml`,
+      lastmod: latestSpeciality?.updatedAt || latestSpeciality?.createdAt || new Date(),
+    });
   } catch (err) {
     console.error("Sitemap Index: Error checking specialities", err);
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-specialities.xml`,
+      lastmod: new Date(),
+    });
   }
 
   // 6. Surgical Category Sitemap
@@ -613,25 +648,24 @@ export const generateSitemapIndex = async (siteUrl) => {
       .sort({ updatedAt: -1 })
       .lean();
 
-    if (latestSurgical) {
-      sitemaps.push({
-        loc: `${cleanSiteUrl}/sitemap-surgical.xml`,
-        lastmod: latestSurgical.updatedAt || latestSurgical.createdAt,
-      });
-    }
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-surgical.xml`,
+      lastmod: latestSurgical?.updatedAt || latestSurgical?.createdAt || new Date(),
+    });
   } catch (err) {
     console.error("Sitemap Index: Error checking surgical categories", err);
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-surgical.xml`,
+      lastmod: new Date(),
+    });
   }
 
-  // 7. Blog Sitemap (if present)
+  // 7. Blog Sitemap
   try {
-    const { hasBlogs } = await generateBlogSitemap(cleanSiteUrl);
-    if (hasBlogs) {
-      sitemaps.push({
-        loc: `${cleanSiteUrl}/sitemap-blog.xml`,
-        lastmod: new Date(),
-      });
-    }
+    sitemaps.push({
+      loc: `${cleanSiteUrl}/sitemap-blog.xml`,
+      lastmod: new Date(),
+    });
   } catch (err) {
     // Ignore blog error
   }

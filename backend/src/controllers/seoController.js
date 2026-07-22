@@ -9,7 +9,22 @@ import {
   generateBlogSitemap,
 } from "../services/sitemapService.js";
 
-const DEFAULT_SITE_URL = process.env.SITE_URL || "https://wellmeds.in";
+const getSiteUrl = (req) => {
+  if (process.env.SITE_URL) {
+    return process.env.SITE_URL.replace(/\/$/, "");
+  }
+  if (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes("localhost")) {
+    return process.env.CLIENT_URL.replace(/\/$/, "");
+  }
+  if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes("localhost")) {
+    return process.env.FRONTEND_URL.replace(/\/$/, "");
+  }
+  if (req && req.headers && req.headers.host && !req.headers.host.includes("localhost")) {
+    const protocol = req.protocol || "https";
+    return `${protocol}://${req.headers.host}`.replace(/\/$/, "");
+  }
+  return "https://wellmeds.in";
+};
 
 const sendXmlResponse = (res, xml, statusCode = 200) => {
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
@@ -29,7 +44,7 @@ const sendXmlErrorResponse = (res, errorMsg, statusCode = 500) => {
  */
 export const getSitemapXml = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generateSitemapIndex(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -44,7 +59,7 @@ export const getSitemapXml = async (req, res, next) => {
  */
 export const getPagesSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generatePagesSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -59,7 +74,7 @@ export const getPagesSitemap = async (req, res, next) => {
  */
 export const getProductsSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const page = parseInt(req.params.page || "1", 10);
     const { xml } = await generateProductsSitemap(siteUrl, page);
     sendXmlResponse(res, xml);
@@ -75,7 +90,7 @@ export const getProductsSitemap = async (req, res, next) => {
  */
 export const getCategoriesSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generateCategoriesSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -90,7 +105,7 @@ export const getCategoriesSitemap = async (req, res, next) => {
  */
 export const getMoleculesSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generateMoleculesSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -105,7 +120,7 @@ export const getMoleculesSitemap = async (req, res, next) => {
  */
 export const getSpecialitiesSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generateSpecialitiesSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -120,7 +135,7 @@ export const getSpecialitiesSitemap = async (req, res, next) => {
  */
 export const getSurgicalSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+    const siteUrl = getSiteUrl(req);
     const xml = await generateSurgicalSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
@@ -131,15 +146,12 @@ export const getSurgicalSitemap = async (req, res, next) => {
 
 /**
  * GET /sitemap-blog.xml
- * Dynamic Blog Sitemap (returns 404 or empty XML if no blogs exist)
+ * Dynamic Blog Sitemap (returns valid XML urlset with HTTP 200)
  */
 export const getBlogSitemap = async (req, res, next) => {
   try {
-    const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
-    const { xml, hasBlogs } = await generateBlogSitemap(siteUrl);
-    if (!hasBlogs) {
-      return sendXmlErrorResponse(res, "No blog sitemap available", 404);
-    }
+    const siteUrl = getSiteUrl(req);
+    const { xml } = await generateBlogSitemap(siteUrl);
     sendXmlResponse(res, xml);
   } catch (error) {
     console.error("Error generating Blog Sitemap:", error);
@@ -152,7 +164,7 @@ export const getBlogSitemap = async (req, res, next) => {
  * Production-ready robots.txt file referencing sitemap.xml
  */
 export const getRobotsTxt = (req, res) => {
-  const siteUrl = DEFAULT_SITE_URL.replace(/\/$/, "");
+  const siteUrl = getSiteUrl(req);
 
   const robots = `# Production Robots.txt for WellMeds
 User-agent: *

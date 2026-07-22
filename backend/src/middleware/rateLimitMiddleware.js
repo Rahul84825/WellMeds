@@ -40,6 +40,10 @@ export const otpVerifyLimiter = rateLimit({
 export const globalLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 200,
+  skip: (req) => {
+    const url = req.originalUrl || req.url || "";
+    return url.includes("sitemap") || url.includes("robots.txt");
+  },
   message: {
     success: false,
     message: "Too many requests, please slow down",
