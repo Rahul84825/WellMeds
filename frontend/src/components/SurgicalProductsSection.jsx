@@ -136,9 +136,12 @@ const SurgicalProductsSection = () => {
         {/* Section Header */}
         <div className="flex items-center md:items-end justify-between mb-4 md:mb-8 surgical-section-header">
           <div>
-            <h2 className="text-[25px] font-bold md:font-extrabold md:text-[40px] text-[#0f172a] dark:text-zinc-100 leading-tight m-0 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-zinc-100 leading-tight m-0">
               Surgical &amp; Medical Supplies
             </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
+              Certified hospital devices, surgical instruments, and clinical care equipment.
+            </p>
           </div>
 
           {/* View All pill button */}

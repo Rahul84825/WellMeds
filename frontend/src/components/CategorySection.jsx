@@ -141,19 +141,12 @@ const CategorySection = () => {
           }}
         >
           <div>
-            <h2
-              className="category-section-title"
-              style={{
-                fontSize: "clamp(32px, 3vw, 40px)",
-                fontWeight: 800,
-                color: "#0f172a",
-                lineHeight: 1.2,
-                margin: 0,
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-zinc-100 leading-tight m-0">
               Shop by Category
             </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
+              Explore genuine medicines and healthcare essentials categorized by medical specialty.
+            </p>
           </div>
 
           {/* View All pill button */}

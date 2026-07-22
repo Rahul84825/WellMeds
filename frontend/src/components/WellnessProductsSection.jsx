@@ -83,9 +83,14 @@ const WellnessProductsSection = () => {
 
   return (
     <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
         <div className="text-left">
-          <h2 className="font-headline-md text-headline-md text-on-surface text-2xl">Wellness Products</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight m-0">
+            Wellness Products
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
+            Daily nutritional supplements, personal hygiene, and preventative care essentials.
+          </p>
         </div>
         <Link 
           to="/products?productType=wellness" 

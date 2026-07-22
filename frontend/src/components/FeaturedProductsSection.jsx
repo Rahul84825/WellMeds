@@ -63,9 +63,16 @@ export const FeaturedProductsSection = () => {
 
   return (
     <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
-      <div className="flex items-center justify-between mb-xl">
-        <h2 className="font-headline-md text-headline-md text-on-surface text-2xl">Best Sellers</h2>
-        <Link to="/products" className="text-primary dark:text-primary-fixed-dim font-label-md hover:underline flex items-center gap-xs">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight m-0">
+            Best Sellers
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
+            Discover our highest rated medicines and customer-favorite healthcare products.
+          </p>
+        </div>
+        <Link to="/products" className="text-primary dark:text-primary-fixed-dim font-label-md hover:underline flex items-center gap-xs shrink-0 self-start md:self-auto">
           <span>Browse Products</span>
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
         </Link>
