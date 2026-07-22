@@ -88,25 +88,34 @@ const seedAllDefaultData = async () => {
 };
 
 export const connectDB = async () => {
+  if (mongoose.connection && mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  if (mongoose.connection && mongoose.connection.readyState === 2) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (mongoose.connection.readyState === 1) return mongoose.connection;
+  }
+
   const dbUrl = process.env.MONGODB_URI;
 
   if (!dbUrl || typeof dbUrl !== "string" || dbUrl.trim().length === 0) {
-    console.error("FATAL: MONGODB_URI environment variable is missing or empty.");
-    process.exit(1);
+    console.warn("MONGODB_URI environment variable is missing or empty.");
+    return null;
   }
   
   try {
     console.log(`[Database] Connecting to MongoDB...`);
     const conn = await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 10000, // 10 seconds timeout for Atlas
+      serverSelectionTimeoutMS: 5000,
     });
     console.log(`MongoDB Connected: ${conn.connection.host} (Database: ${conn.connection.name})`);
     
     // Auto-seed default data if empty in the primary database
     await seedAllDefaultData();
+    return conn;
   } catch (error) {
-    console.error(`[Database] Connection failed: ${error.message}`);
-    process.exit(1);
+    console.error(`[Database] Connection warning/failure: ${error.message}`);
+    return null;
   }
 };
 
