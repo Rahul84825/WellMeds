@@ -1205,7 +1205,8 @@ const ProductDetails = () => {
           )}
 
           {activeMobileTab === "concerns" && (
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
+              {/* Warnings */}
               {((product.warnings && product.warnings.length > 0) || computedSections.find(s => s.id === "Warnings")?.content) && (
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
                   <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
@@ -1224,6 +1225,45 @@ const ProductDetails = () => {
                   )}
                 </div>
               )}
+
+              {/* Side Effects */}
+              {product.sideEffects && product.sideEffects.length > 0 && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
+                    Possible Side Effects
+                  </h3>
+                  <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium">
+                    {product.sideEffects.map((side, idx) => (
+                      <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
+                        <span>{side}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Safety Cards */}
+              {product.safetyCards && product.safetyCards.length > 0 && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
+                    Safety Advice
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {product.safetyCards.map((card, idx) => (
+                      <div key={idx} className="p-2.5 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-800 dark:text-zinc-100">{card.title}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
+                        </div>
+                        {card.description && <p className="text-[12px] text-slate-500 dark:text-zinc-400">{card.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Safety Advice Custom Content */}
               {computedSections.find(s => s.id === "Precautions")?.content && (
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
                   <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
@@ -1234,17 +1274,37 @@ const ProductDetails = () => {
                   </div>
                 </div>
               )}
+
+              {/* Fallback card if no warnings/safety/side-effects registered */}
+              {!((product.warnings && product.warnings.length > 0) || (product.sideEffects && product.sideEffects.length > 0) || (product.safetyCards && product.safetyCards.length > 0) || computedSections.find(s => s.id === "Warnings" || s.id === "Precautions")?.content) && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                    Patient Concerns & Guidance
+                  </h3>
+                  <p className="text-slate-600 dark:text-zinc-300 text-[14px] leading-relaxed font-medium">
+                    No critical precaution warnings or major side effects registered for {product.name}. Always take this medicine as prescribed by your registered medical practitioner.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
           {activeMobileTab === "info" && (
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               {/* Product Specifications */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
                 <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                   Specifications
                 </h3>
                 <div className="flex flex-col text-[14px] divide-y divide-slate-100 dark:divide-zinc-800/40">
+                  <div className="flex py-2 items-center">
+                    <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">Brand / Mfr</span>
+                    <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{product.manufacturer || product.brand || "Verified Vendor"}</span>
+                  </div>
+                  <div className="flex py-2 items-center">
+                    <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">Rx Requirement</span>
+                    <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{product.requiresRx || product.isPrescriptionRequired ? "Rₓ Prescription Required" : "OTC Medicine"}</span>
+                  </div>
                   {product.productSpecifications && Object.entries(product.productSpecifications).map(([key, val]) => {
                     if (!val || typeof val !== "string" || !val.trim()) return null;
                     const label = key.replace(/([A-Z])/g, " $1").trim().replace(/^\w/, c => c.toUpperCase());
