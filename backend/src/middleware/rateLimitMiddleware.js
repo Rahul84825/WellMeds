@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 // Limit overall auth routes
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 100,
   message: {
     success: false,
     message: "Too many authentication requests from this IP, please try again after 15 minutes",
@@ -12,10 +12,10 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// OTP Send: max 5 per hour per IP (matches OTP_RESEND_LIMIT)
+// OTP Send: max 10 per hour per IP (per-mobile limit is enforced in controller)
 export const otpSendLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 at IP level (per-mobile limit is enforced in controller)
+  max: 10,
   message: {
     success: false,
     message: "Too many OTP requests from this IP. Please try again after 1 hour.",
@@ -36,13 +36,14 @@ export const otpVerifyLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// General request limiter for overall system
+// General request limiter for overall system (GET read requests are bypassed to allow seamless catalog browsing)
 export const globalLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 200,
+  max: 1500,
   skip: (req) => {
     const url = req.originalUrl || req.url || "";
-    return url.includes("sitemap") || url.includes("robots.txt");
+    // Allow read-only GET requests, sitemaps, and robots.txt
+    return req.method === "GET" || url.includes("sitemap") || url.includes("robots.txt");
   },
   message: {
     success: false,
@@ -64,10 +65,10 @@ export const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit coupon validation/application to 15 attempts per 10 minutes
+// Limit coupon validation/application to 30 attempts per 10 minutes
 export const couponLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 15,
+  max: 30,
   message: {
     success: false,
     message: "Too many coupon validation attempts, please try again after 10 minutes",
@@ -76,10 +77,10 @@ export const couponLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit heavy catalog searches to 60 queries per minute
+// Limit heavy catalog searches
 export const searchLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 60,
+  max: 300,
   message: {
     success: false,
     message: "Too many search requests, please slow down",

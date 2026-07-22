@@ -25,7 +25,7 @@ import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
 import megaMenuRoutes from "./src/routes/megaMenuRoutes.js";
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", true);
 
 // Mount Response Gzip Compression Middleware (Before Routes)
 app.use(responseCompressor);
