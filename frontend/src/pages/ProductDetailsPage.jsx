@@ -830,88 +830,87 @@ const ProductDetails = () => {
           )}
         </div>
 
-        {/* Price & Packaging Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
+        {/* Single Unified Product Details & Pricing Card (Separated by Divider Lines) */}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4.5 sm:p-5 shadow-sm mx-4 mb-4 text-left divide-y divide-slate-100 dark:divide-zinc-800 overflow-hidden max-w-[calc(100vw-2rem)]">
           {/* Price & Discount Row */}
-          <div className="flex justify-between items-start mb-2 select-none">
-            <div>
-              <span className="text-2xl font-black text-slate-900 dark:text-zinc-100">
-                {formatCurrency(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
-                  MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
-                </p>
-              )}
-              <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
-                Inclusive of all taxes
-              </p>
-            </div>
-            {discountPercent > 0 && (
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                {discountPercent}% OFF
-              </span>
-            )}
-          </div>
-
-          {/* Selected Packaging Capsule */}
-          {(product.packSize || product.productSpecifications?.packSize) && (
-            <div className="mt-3 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3 flex justify-between items-center relative select-none">
+          <div className="pb-4 select-none">
+            <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="text-xs font-black text-slate-805 dark:text-zinc-150">
-                  {product.packSize || product.productSpecifications?.packSize}
-                </p>
-                <p className="text-[10px] text-slate-455 dark:text-zinc-400 mt-1 font-semibold">
-                  {formatCurrency(getUnitPrice())}/Unit
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-zinc-100">
+                  {formatCurrency(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-xs sm:text-sm text-slate-400 font-semibold ml-2">
+                    MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
+                  </span>
+                )}
+                <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium mt-1">
+                  Inclusive of all taxes
                 </p>
               </div>
-              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
-                ✓
+              {discountPercent > 0 && (
+                <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400">
+                  {discountPercent}% OFF
+                </span>
+              )}
+            </div>
+
+            {/* Selected Packaging Capsule */}
+            {(product.packSize || product.productSpecifications?.packSize) && (
+              <div className="mt-3 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3 sm:p-3.5 flex justify-between items-center relative select-none">
+                <div>
+                  <p className="text-xs sm:text-sm font-black text-slate-805 dark:text-zinc-150">
+                    {product.packSize || product.productSpecifications?.packSize}
+                  </p>
+                  <p className="text-xs text-slate-455 dark:text-zinc-400 mt-1 font-semibold">
+                    {formatCurrency(getUnitPrice())}/Unit
+                  </p>
+                </div>
+                <span className="w-5.5 h-5.5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+                  ✓
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Badges inline row */}
+          <div className="py-3.5 flex items-center justify-between text-left select-none">
+            <div className="flex gap-4 items-center flex-wrap">
+              {product.requiresRx ? (
+                <span className="text-xs sm:text-sm font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                  <span className="text-[#845ec2] font-black text-xs sm:text-sm border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
+                </span>
+              ) : (
+                <span className="text-xs sm:text-sm font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                  <span className="text-emerald-600 font-black text-xs sm:text-sm border border-emerald-500/40 rounded-full w-5 h-5 flex items-center justify-center">✓</span> OTC Medicine
+                </span>
+              )}
+              {product.isColdChain && (
+                <span className="text-xs sm:text-sm font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                  <span className="text-sky-500">❄️</span> Cold Chain
+                </span>
+              )}
+              <span className="text-xs sm:text-sm font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-[#038076] font-black text-xs sm:text-sm">🛡️</span> 100% Genuine
               </span>
             </div>
-          )}
-        </div>
-
-        {/* Badges inline row */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
-          <div className="flex gap-4 items-center flex-wrap">
-            {product.requiresRx ? (
-              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-[#845ec2] font-black text-xs border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
-              </span>
-            ) : (
-              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-emerald-600 font-black text-xs border border-emerald-500/40 rounded-full w-5 h-5 flex items-center justify-center">✓</span> OTC Medicine
-              </span>
-            )}
-            {product.isColdChain && (
-              <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-sky-500">❄️</span> Cold Chain
-              </span>
-            )}
-            <span className="text-xs font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-              <span className="text-[#038076] font-black text-xs">🛡️</span> 100% Genuine
-            </span>
+            <button
+              type="button"
+              onClick={() => toast.info(product.requiresRx ? "Prescription Required: Verified by licensed pharmacists before shipment." : "OTC Medicine: Over-the-counter item. Guaranteed 100% genuine and authentic.")}
+              className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+              title="Product Quality Info"
+            >
+              <Info size={18} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => toast.info(product.requiresRx ? "Prescription Required: Verified by licensed pharmacists before shipment." : "OTC Medicine: Over-the-counter item. Guaranteed 100% genuine and authentic.")}
-            className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-            title="Product Quality Info"
-          >
-            <Info size={16} />
-          </button>
-        </div>
 
-        {/* Salt Composition & Marketer Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5 overflow-hidden max-w-[calc(100vw-2rem)]">
           {/* Salt Composition */}
           {product.molecules && product.molecules.length > 0 && (
-            <div className="max-w-full overflow-hidden">
-              <h4 className="text-[10.5px] font-black text-slate-455 dark:text-zinc-400 uppercase tracking-wider mb-1">
+            <div className="py-3.5 max-w-full overflow-hidden">
+              <h4 className="text-xs sm:text-sm font-black text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                 Salt Composition
               </h4>
-              <div className="text-xs font-bold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
+              <div className="text-xs sm:text-sm font-extrabold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
                 {product.molecules.map((mol, idx) => (
                   <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="underline hover:opacity-85 break-words max-w-full inline-block">
                     {mol.name}{idx < product.molecules.length - 1 ? "," : ""}
@@ -923,11 +922,11 @@ const ProductDetails = () => {
 
           {/* Marketer */}
           {(product.manufacturer || product.brand) && (
-            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80">
-              <h4 className="text-[10.5px] font-black text-slate-455 dark:text-zinc-400 uppercase tracking-wider mb-1">
+            <div className="py-3.5">
+              <h4 className="text-xs sm:text-sm font-black text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                 Marketer
               </h4>
-              <p className="text-xs font-extrabold text-slate-805 dark:text-zinc-150 uppercase">
+              <p className="text-xs sm:text-sm font-extrabold text-slate-805 dark:text-zinc-150 uppercase leading-normal">
                 {product.manufacturer || product.brand}
               </p>
             </div>
@@ -935,7 +934,7 @@ const ProductDetails = () => {
 
           {/* Prepaid / Returns */}
           {(product.prepaidOnly || product.isNonRefundable) && (
-            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-sky-700 dark:text-sky-400 select-none">
+            <div className="pt-3.5 flex items-center justify-between text-xs sm:text-sm font-bold text-sky-700 dark:text-sky-400 select-none">
               <span>
                 {product.prepaidOnly && product.isNonRefundable
                   ? "Prepaid Only. Non-Returnable."
@@ -944,8 +943,8 @@ const ProductDetails = () => {
                   : "Non-Returnable."}
               </span>
               <HelpCircle
-                size={15}
-                className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors"
+                size={16}
+                className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors shrink-0"
                 onClick={() => toast.info(product.prepaidOnly ? "Prepaid Only: Cash on Delivery is disabled for this product." : "Non-Returnable: This item cannot be returned after delivery.")}
               />
             </div>
