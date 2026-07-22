@@ -732,7 +732,7 @@ const ProductDetails = () => {
             {product.name}
           </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-[14px] text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
+            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
@@ -907,7 +907,7 @@ const ProductDetails = () => {
               <h4 className="text-[12px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Salt Composition
               </h4>
-              <div className="text-[14px] font-extrabold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
+              <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
                 {product.molecules.map((mol, idx) => (
                   <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="underline hover:opacity-85 break-words max-w-full inline-block">
                     {mol.name}{idx < product.molecules.length - 1 ? "," : ""}
