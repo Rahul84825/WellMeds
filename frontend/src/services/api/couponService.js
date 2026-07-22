@@ -1,4 +1,5 @@
 import apiInstance from "./api";
+import { fetchWithCache, clearCache } from "./cacheUtil";
 
 export const couponService = {
   /**
@@ -23,8 +24,10 @@ export const couponService = {
    * Get all active, non-expired coupons (customer).
    */
   async getCoupons() {
-    const data = await apiInstance.get("/coupons");
-    return data.coupons || [];
+    return fetchWithCache("coupons:all", async () => {
+      const data = await apiInstance.get("/coupons");
+      return data.coupons || [];
+    }, 5 * 60 * 1000);
   },
 
   /**

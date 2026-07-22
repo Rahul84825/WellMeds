@@ -1,14 +1,24 @@
 import apiInstance from "./api";
+import { fetchWithCache, clearCache } from "./cacheUtil";
 
 export const moleculeService = {
   async getMolecules(params = {}) {
+    const isDefault = !params || Object.keys(params).length === 0;
+    if (isDefault) {
+      return fetchWithCache("molecules:all", async () => {
+        const data = await apiInstance.get("/molecules");
+        return data.molecules || [];
+      }, 5 * 60 * 1000);
+    }
     const data = await apiInstance.get("/molecules", { params });
     return data.molecules || [];
   },
 
   async getMolecule(slug) {
-    const data = await apiInstance.get(`/molecules/${slug}`);
-    return data.molecule;
+    return fetchWithCache(`molecule:${slug}`, async () => {
+      const data = await apiInstance.get(`/molecules/${slug}`);
+      return data.molecule;
+    }, 5 * 60 * 1000);
   },
 
   async adminGetMolecules(params = {}) {

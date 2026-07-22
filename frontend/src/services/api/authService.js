@@ -1,4 +1,5 @@
 import apiInstance from "./api";
+import { fetchWithCache, clearCache } from "./cacheUtil";
 
 export const authService = {
   /**
@@ -24,31 +25,37 @@ export const authService = {
         localStorage.setItem("medishop_refresh_token", data.refreshToken);
       }
       localStorage.setItem("medishop_user", JSON.stringify(data.user));
+      clearCache("auth");
     }
     return data.user;
   },
 
   async getCurrentUser() {
-    try {
-      const hasToken = !!localStorage.getItem("medishop_token");
-      const data = await apiInstance.get("/auth/me", {
-        skipAuthRetry: !hasToken,
-      });
-      if (data.success && data.user) {
-        localStorage.setItem("medishop_user", JSON.stringify(data.user));
-        return data.user;
-      }
-      return null;
-    } catch (error) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem("medishop_token");
-        localStorage.removeItem("medishop_refresh_token");
-        localStorage.removeItem("medishop_user");
-        return null;
-      }
-      console.warn("Session check failed (network/server error):", error.message);
+    const hasToken = !!localStorage.getItem("medishop_token");
+    if (!hasToken) {
       return null;
     }
+
+    return fetchWithCache("auth:me", async () => {
+      try {
+        const data = await apiInstance.get("/auth/me");
+        if (data.success && data.user) {
+          localStorage.setItem("medishop_user", JSON.stringify(data.user));
+          return data.user;
+        }
+        return null;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("medishop_token");
+          localStorage.removeItem("medishop_refresh_token");
+          localStorage.removeItem("medishop_user");
+          clearCache("auth");
+          return null;
+        }
+        console.warn("Session check failed (network/server error):", error.message);
+        return null;
+      }
+    }, 15 * 1000);
   },
 
   async logoutUser() {
@@ -60,8 +67,8 @@ export const authService = {
       localStorage.removeItem("medishop_token");
       localStorage.removeItem("medishop_refresh_token");
       localStorage.removeItem("medishop_user");
+      clearCache("auth");
     }
-    return true;
   },
 
   async updateProfile(profileData) {
