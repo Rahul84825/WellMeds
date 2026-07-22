@@ -62,7 +62,7 @@ const PurchaseCard = ({
         {/* 1. Price Section */}
         <div className="space-y-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#004782] dark:text-primary-fixed-dim leading-none">
+            <span className="text-3xl font-black text-[#02665e] dark:text-primary-fixed-dim leading-none">
               {formatCurrency(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (

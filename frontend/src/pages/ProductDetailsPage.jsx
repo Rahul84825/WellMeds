@@ -1239,7 +1239,7 @@ const ProductDetails = () => {
         <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-105 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
           <div className="text-left pl-sm">
             <p className="text-[9px] text-slate-455 font-black uppercase tracking-wider">Total Price</p>
-            <p className="text-base font-black text-[#004782] dark:text-[#a4c9ff]">
+            <p className="text-base font-black text-[#02665e] dark:text-[#52d6c9]">
               {formatCurrency(product.price * (isInCart ? cartQuantity : quantity))}
             </p>
           </div>
@@ -1248,7 +1248,7 @@ const ProductDetails = () => {
               <>
                 <button
                   onClick={() => navigate("/cart")}
-                  className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-[10.5px] outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-0.5 select-none"
+                  className="flex-1 bg-[#02665e] hover:bg-[#014d47] text-white font-black h-11 rounded-xl text-[10.5px] outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-0.5 select-none"
                 >
                   Go To Cart <span className="text-xs font-semibold">↗</span>
                 </button>
@@ -1260,7 +1260,7 @@ const ProductDetails = () => {
                   >
                     -
                   </button>
-                  <span className="w-8 h-8 rounded-full bg-[#3f257a] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
+                  <span className="w-8 h-8 rounded-full bg-[#02665e] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
                     {cartQuantity}
                   </span>
                   <button
@@ -1278,15 +1278,16 @@ const ProductDetails = () => {
                 <button
                   onClick={handleBuyNow}
                   disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-[#3f257a] hover:bg-[#321c62] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+                  className="flex-1 bg-[#02665e] hover:bg-[#014d47] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
                 >
                   Buy Now
                 </button>
                 <button
                   onClick={handleAddToCart}
                   disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#038076] text-[#038076] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
+                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#02665e] text-[#02665e] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
                 >
+                  Add <ShoppingCart size={13} />
                   Add <ShoppingCart size={13} />
                 </button>
               </>

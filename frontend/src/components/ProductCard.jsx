@@ -172,7 +172,7 @@ const ProductCard = ({ product }) => {
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("rx")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-6.5 w-6.5 sm:h-7 sm:w-7 cursor-pointer items-center justify-center
-                             rounded-full bg-[#3f257a] text-white shadow-xs
+                             rounded-full bg-[#02665e] text-white shadow-xs
                              transition-transform hover:scale-110 active:scale-95"
                   aria-label="Rx Required"
                 >
@@ -217,7 +217,7 @@ const ProductCard = ({ product }) => {
         {/* Header: Title & Molecule */}
         <div className="flex flex-col items-center">
           <h3
-            className="line-clamp-2 h-9 sm:h-10 overflow-hidden text-center text-xs sm:text-sm md:text-base font-bold leading-snug text-slate-800 dark:text-zinc-100 transition-colors group-hover:text-[#038076]"
+            className="line-clamp-2 h-9 sm:h-10 overflow-hidden text-center text-xs sm:text-sm md:text-base font-bold leading-snug text-slate-800 dark:text-zinc-100 transition-colors group-hover:text-[#02665e]"
             title={product.name}
           >
             {product.name}
@@ -230,7 +230,7 @@ const ProductCard = ({ product }) => {
                 to={`/molecules/${molecule.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 title={molecule.name}
-                className="text-[11px] font-semibold text-[#5a6a85] dark:text-zinc-400 uppercase tracking-wider underline hover:text-[#038076]"
+                className="text-[11px] font-semibold text-[#5a6a85] dark:text-zinc-400 uppercase tracking-wider underline hover:text-[#02665e]"
               >
                 {molecule.name}
               </Link>
@@ -244,7 +244,7 @@ const ProductCard = ({ product }) => {
         <div className="mt-2.5 flex flex-col items-center">
           {/* Main Price Row */}
           <div className="flex items-baseline justify-center gap-2">
-            <span className="text-xl sm:text-2xl font-extrabold text-[#3f257a] dark:text-[#a4c9ff]">
+            <span className="text-xl sm:text-2xl font-extrabold text-[#02665e] dark:text-[#52d6c9]">
               ₹{product.price}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
@@ -272,11 +272,11 @@ const ProductCard = ({ product }) => {
           {cartQuantity > 0 ? (
             <div className="mt-2.5 flex items-center gap-2 w-full h-[38px] sm:h-[40px]">
               {/* Stepper Control */}
-              <div className="flex items-center justify-between bg-[#f0edfd] dark:bg-purple-950/40 border border-[#3f257a]/30 rounded-xl px-1.5 py-1 min-w-[80px] sm:min-w-[90px] h-full shrink-0">
+              <div className="flex items-center justify-between bg-[#e6f4f2] dark:bg-emerald-950/40 border border-[#02665e]/30 rounded-xl px-1.5 py-1 min-w-[80px] sm:min-w-[90px] h-full shrink-0">
                 <button
                   type="button"
                   onClick={handleDecrement}
-                  className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#3f257a] hover:bg-[#321c62] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#02665e] hover:bg-[#014d47] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
                   aria-label="Decrease quantity"
                 >
                   -
@@ -287,7 +287,7 @@ const ProductCard = ({ product }) => {
                 <button
                   type="button"
                   onClick={handleIncrement}
-                  className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#3f257a] hover:bg-[#321c62] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#02665e] hover:bg-[#014d47] text-white flex items-center justify-center font-bold text-xs shadow-2xs transition-transform active:scale-90 cursor-pointer"
                   aria-label="Increase quantity"
                 >
                   +
@@ -298,7 +298,7 @@ const ProductCard = ({ product }) => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="flex-1 h-full py-2 px-3 rounded-xl bg-[#3f257a] hover:bg-[#321c62] text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                className="flex-1 h-full py-2 px-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
               >
                 Buy Now
               </button>
@@ -308,7 +308,7 @@ const ProductCard = ({ product }) => {
               type="button"
               onClick={handleAddToCart}
               disabled={isOOS || isAdding}
-              className="mt-2.5 w-full py-2 px-3.5 rounded-xl bg-[#3f257a] hover:bg-[#321c62] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-[38px] sm:h-[40px]"
+              className="mt-2.5 w-full py-2 px-3.5 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-50 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-[38px] sm:h-[40px]"
             >
               {isAdding ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />

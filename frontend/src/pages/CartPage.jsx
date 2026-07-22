@@ -106,7 +106,7 @@ const Cart = () => {
         </p>
         <Link
           to="/products"
-          className="bg-[#3f257a] hover:bg-[#321c62] text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-sm active:scale-95"
+          className="bg-[#02665e] hover:bg-[#014d47] text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-sm active:scale-95"
         >
           Continue Shopping
         </Link>
@@ -127,11 +127,11 @@ const Cart = () => {
           </h1>
           <p className="text-slate-500 dark:text-zinc-400 mt-1.5 text-sm">
             {cartCount} {cartCount === 1 ? "Item" : "Items"} • {rxItemsCount > 0 ? (
-              <span className="text-[#3f257a] dark:text-[#a4c9ff] font-medium">{rxItemsCount} Prescription Required</span>
+              <span className="text-[#02665e] dark:text-[#52d6c9] font-medium">{rxItemsCount} Prescription Required</span>
             ) : "No Prescription Required"}
           </p>
         </div>
-        <Link to="/products" className="text-sm font-semibold text-[#3f257a] dark:text-[#a4c9ff] hover:underline flex items-center gap-1.5">
+        <Link to="/products" className="text-sm font-semibold text-[#02665e] dark:text-[#52d6c9] hover:underline flex items-center gap-1.5">
           <Plus size={16} /> Add more items
         </Link>
       </div>
@@ -179,7 +179,7 @@ const Cart = () => {
                       
                       {/* Text Info */}
                       <div className="space-y-1.5 flex-1 pr-4">
-                        <Link to={`/products/${item.slug || item.id}`} className="block font-bold text-base text-slate-900 dark:text-zinc-100 hover:text-[#3f257a] transition-colors leading-tight line-clamp-2">
+                        <Link to={`/products/${item.slug || item.id}`} className="block font-bold text-base text-slate-900 dark:text-zinc-100 hover:text-[#02665e] transition-colors leading-tight line-clamp-2">
                           {item.name}
                         </Link>
                         
@@ -198,8 +198,8 @@ const Cart = () => {
                         {/* Badges */}
                         <div className="flex items-center gap-2 pt-2">
                           {isRxItem && (
-                            <span className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-900/20 text-[#3f257a] dark:text-purple-300 text-[10px] font-bold px-2 py-1 rounded-md border border-purple-100 dark:border-purple-800/50 uppercase tracking-wider">
-                              <span className="w-3 h-3 bg-[#3f257a] text-white rounded-full flex items-center justify-center text-[8px]">Rx</span>
+                            <span className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-900/20 text-[#02665e] dark:text-purple-300 text-[10px] font-bold px-2 py-1 rounded-md border border-purple-100 dark:border-purple-800/50 uppercase tracking-wider">
+                              <span className="w-3 h-3 bg-[#02665e] text-white rounded-full flex items-center justify-center text-[8px]">Rx</span>
                               Prescription Required
                             </span>
                           )}

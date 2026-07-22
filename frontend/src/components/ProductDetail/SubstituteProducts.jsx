@@ -160,7 +160,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
             <button
               ref={viewAllBtnRef}
               onClick={() => setIsModalOpen(true)}
-              className="mt-3 w-full bg-[#3f257a] hover:bg-[#321c62] text-white py-3 px-4 rounded-full font-bold text-xs flex items-center justify-center gap-2 border-2 border-[#2563eb] shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              className="mt-3 w-full bg-[#02665e] hover:bg-[#014d47] text-white py-3 px-4 rounded-full font-bold text-xs flex items-center justify-center gap-2 border-2 border-[#02665e] shadow-sm transition-all active:scale-[0.98] cursor-pointer"
             >
               View All <span className="text-sm">→</span>
             </button>
@@ -183,7 +183,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           >
             {/* Header */}
             <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center text-left">
-              <h3 className="font-extrabold text-lg text-[#3f257a] dark:text-[#a4c9ff]">
+              <h3 className="font-extrabold text-lg text-[#02665e] dark:text-emerald-400">
                 Available Substitutes
               </h3>
               <button

@@ -400,7 +400,7 @@ const Checkout = () => {
             contact: user?.phone || user?.mobile || "",
           },
           theme: {
-            color: "#3f257a", // Updated to match primary brand color
+            color: "#02665e", // Updated to match primary brand color
           },
           modal: {
             ondismiss: function () {
@@ -440,7 +440,7 @@ const Checkout = () => {
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">No items to checkout</h2>
         <Link
           to="/products"
-          className="bg-[#3f257a] hover:bg-[#321c62] text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-sm active:scale-95 mt-4"
+          className="bg-[#02665e] hover:bg-[#014d47] text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-sm active:scale-95 mt-4"
         >
           Continue Shopping
         </Link>
@@ -457,7 +457,7 @@ const Checkout = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <div className="mb-8">
-        <Link to="/cart" className="text-sm font-semibold text-[#3f257a] dark:text-[#a4c9ff] hover:underline flex items-center gap-1.5 w-fit">
+        <Link to="/cart" className="text-sm font-semibold text-[#02665e] dark:text-[#52d6c9] hover:underline flex items-center gap-1.5 w-fit">
           <ArrowLeft size={16} /> Back to Cart
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-4">
@@ -952,7 +952,7 @@ const Checkout = () => {
               {/* Total Row */}
               <div className="flex justify-between items-center pt-2">
                 <span className="text-base font-bold text-slate-900 dark:text-white">Final Total</span>
-                <span className="text-xl font-bold text-[#3f257a] dark:text-[#a4c9ff] tracking-tight">
+                <span className="text-xl font-bold text-[#02665e] dark:text-[#a4c9ff] tracking-tight">
                   {formatCurrency(finalTotal)}
                 </span>
               </div>
@@ -981,8 +981,8 @@ const Checkout = () => {
                     : requiresRx && rxStatus === "Rejected"
                     ? "bg-rose-600 hover:bg-rose-700 text-white cursor-pointer active:scale-[0.98]"
                     : requiresRx && rxStatus !== "Verified"
-                    ? "bg-[#038076] hover:bg-[#02655f] text-white cursor-pointer active:scale-[0.98]"
-                    : "bg-[#3f257a] hover:bg-[#321c62] text-white cursor-pointer active:scale-[0.98]"
+                    ? "bg-[#02665e] hover:bg-[#014d47] text-white cursor-pointer active:scale-[0.98]"
+                    : "bg-[#02665e] hover:bg-[#014d47] text-white cursor-pointer active:scale-[0.98]"
                 }`}
               >
                 {isSubmitting ? (
@@ -1428,7 +1428,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                       />
                     </div>
                   </div>
-                  <button type="submit" disabled={mobile.length < 10} className="w-full py-3 rounded-xl bg-[#3f257a] hover:bg-[#321c62] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
+                  <button type="submit" disabled={mobile.length < 10} className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
                     <span>Continue</span>
                     <ArrowRight size={18} />
                   </button>
@@ -1440,21 +1440,21 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                 <form onSubmit={doSendOtp} className="space-y-6" noValidate>
                   <div className="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2 border border-slate-200 dark:border-zinc-800/50">
                     <span className="font-mono tracking-wider">+91 {mobile}</span>
-                    <button type="button" onClick={() => { setStep("mobile"); setError(""); }} className="text-[#3f257a] dark:text-[#a4c9ff] text-xs font-bold hover:underline">Change</button>
+                    <button type="button" onClick={() => { setStep("mobile"); setError(""); }} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline">Change</button>
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label htmlFor="gate-name" className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Full Name <span className="text-rose-500">*</span></label>
                       <input id="gate-name" type="text" autoFocus required autoComplete="name" value={name} onChange={(e) => { setName(e.target.value); setError(""); }} placeholder="Your full name"
-                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all" />
+                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#02665e]/20 transition-all" />
                     </div>
                     <div className="space-y-1.5">
                       <label htmlFor="gate-email" className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Email Address <span className="font-normal text-slate-400">(optional)</span></label>
                       <input id="gate-email" type="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} placeholder="you@example.com"
-                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all" />
+                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#02665e]/20 transition-all" />
                     </div>
                   </div>
-                  <button type="submit" disabled={busy} className="w-full py-3 rounded-xl bg-[#3f257a] hover:bg-[#321c62] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
+                  <button type="submit" disabled={busy} className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
                     {busy ? <Loader size="sm" color="white" /> : "Send OTP"}
                   </button>
                 </form>
@@ -1465,7 +1465,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2 border border-slate-200 dark:border-zinc-800/50">
                     <span className="font-mono tracking-wider">+91 {mobile}</span>
-                    <button type="button" onClick={() => { setStep("details"); setError(""); }} className="text-[#3f257a] dark:text-[#a4c9ff] text-xs font-bold hover:underline">Edit</button>
+                    <button type="button" onClick={() => { setStep("details"); setError(""); }} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline">Edit</button>
                   </div>
                   
                   <div className="space-y-4">
@@ -1476,7 +1476,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                           type="text" inputMode="numeric" pattern="[0-9]*" maxLength={1} value={d}
                           autoComplete={i === 0 ? "one-time-code" : "off"}
                           onChange={(e) => oChange(i, e.target.value)} onKeyDown={(e) => oKey(i, e)} disabled={verifying}
-                          className={`w-11 h-12 text-center text-lg font-bold font-mono rounded-xl border-2 bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-all focus:outline-none disabled:opacity-60 ${d ? "border-[#3f257a] focus:ring-4 focus:ring-[#3f257a]/20" : "border-slate-200 dark:border-zinc-800 focus:border-[#3f257a] focus:ring-4 focus:ring-[#3f257a]/20"}`}
+                          className={`w-11 h-12 text-center text-lg font-bold font-mono rounded-xl border-2 bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-all focus:outline-none disabled:opacity-60 ${d ? "border-[#02665e] focus:ring-4 focus:ring-[#02665e]/20" : "border-slate-200 dark:border-zinc-800 focus:border-[#02665e] focus:ring-4 focus:ring-[#02665e]/20"}`}
                         />
                       ))}
                     </div>
@@ -1484,7 +1484,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
 
                   {!verifying ? (
                     <button type="button" onClick={() => doVerify()} disabled={otpDigits.join("").length < OTP_LEN}
-                      className="w-full py-3 rounded-xl bg-[#3f257a] hover:bg-[#321c62] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
+                      className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
                       Verify & Continue
                     </button>
                   ) : (
@@ -1498,7 +1498,7 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
                     {resendCount > 0 ? (
                       <p className="text-xs text-slate-500 dark:text-zinc-400">Resend OTP in <strong className="font-mono">{`0:${resendCount.toString().padStart(2, "0")}`}</strong></p>
                     ) : (
-                      <button type="button" onClick={doResend} disabled={busy} className="text-[#3f257a] dark:text-[#a4c9ff] text-xs font-bold hover:underline disabled:opacity-50">
+                      <button type="button" onClick={doResend} disabled={busy} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline disabled:opacity-50">
                         {busy ? "Sending..." : "Resend OTP"}
                       </button>
                     )}
