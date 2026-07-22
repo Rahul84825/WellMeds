@@ -284,8 +284,8 @@ const CategorySection = () => {
               WebkitOverflowScrolling: "touch",
               paddingTop: "16px",
               paddingBottom: "20px",
-              paddingLeft: "8px",
-              paddingRight: "8px",
+              paddingLeft: "16px",
+              paddingRight: "16px",
               cursor: "grab",
             }}
             onMouseDown={handleMouseDown}
