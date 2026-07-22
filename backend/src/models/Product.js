@@ -269,4 +269,15 @@ productSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
+// Database Indexes for High-Performance Queries & Search
+productSchema.index({ category: 1 });
+productSchema.index({ surgicalCategory: 1 });
+productSchema.index({ molecules: 1 });
+productSchema.index({ specialities: 1 });
+productSchema.index({ productType: 1, isSurgical: 1, isTrending: 1 });
+productSchema.index({ isImported: 1 });
+productSchema.index({ displayOrder: 1 });
+productSchema.index({ name: "text", brand: "text", manufacturer: "text" });
+
 export const Product = mongoose.model("Product", productSchema);
+

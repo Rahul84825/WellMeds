@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import SEO from "../components/common/SEO";
+
 const Cart = () => {
   const {
     cartItems,
@@ -115,6 +117,7 @@ const Cart = () => {
   // ── Populated Cart ──
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+      <SEO title="Shopping Cart" noindex={true} />
       
       {/* Header section */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">

@@ -1,14 +1,19 @@
 import apiInstance from "./api";
+import { fetchWithCache, clearCache } from "./cacheUtil";
 
 export const specialityService = {
   async getSpecialities() {
-    const data = await apiInstance.get("/specialities");
-    return data.specialities || [];
+    return fetchWithCache("specialities:all", async () => {
+      const data = await apiInstance.get("/specialities");
+      return data.specialities || [];
+    });
   },
 
   async getSpeciality(slug) {
-    const data = await apiInstance.get(`/specialities/${slug}`);
-    return data.speciality;
+    return fetchWithCache(`speciality:${slug}`, async () => {
+      const data = await apiInstance.get(`/specialities/${slug}`);
+      return data.speciality;
+    });
   },
 
   async adminGetSpecialities(params = {}) {
@@ -29,16 +34,19 @@ export const specialityService = {
 
   async createSpeciality(specialityData) {
     const data = await apiInstance.post("/specialities", specialityData);
+    clearCache("spec");
     return data.speciality;
   },
 
   async updateSpeciality(id, specialityData) {
     const data = await apiInstance.put(`/specialities/${id}`, specialityData);
+    clearCache("spec");
     return data.speciality;
   },
 
   async deleteSpeciality(id) {
     const data = await apiInstance.delete(`/specialities/${id}`);
+    clearCache("spec");
     return data.success;
   }
 };

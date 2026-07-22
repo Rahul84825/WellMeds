@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
@@ -9,151 +9,154 @@ import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 
-// Client Pages
-import HomePage from "../pages/HomePage";
-import ProductsPage from "../pages/ProductsPage";
-import ProductDetailsPage from "../pages/ProductDetailsPage";
-import CartPage from "../pages/CartPage";
-import CheckoutPage from "../pages/CheckoutPage";
-import OrderSuccessPage from "../pages/OrderSuccessPage";
-import AboutPage from "../pages/AboutPage";
-import ContactPage from "../pages/ContactPage";
-import Login from "../pages/Login";
-import ProfilePage from "../pages/Profile";
-import OrdersPage from "../pages/OrdersPage";
-import UploadPrescriptionPage from "../pages/UploadPrescriptionPage";
-import ImportedMedicinesPage from "../pages/ImportedMedicinesPage";
-import PatientAssistanceProgramPage from "../pages/PatientAssistanceProgramPage";
-import SpecialityPage from "../pages/SpecialityPage";
-import SuperSpecialityPage from "../pages/SuperSpecialityPage";
-import MoleculesPage from "../pages/MoleculesPage";
-import MoleculeDetailPage from "../pages/MoleculeDetailPage";
-import WellnessPage from "../pages/WellnessPage";
-import SurgicalLandingPage from "../pages/SurgicalLandingPage";
-import AllSurgicalProductsPage from "../pages/AllSurgicalProductsPage";
-import AllSurgicalCategoriesPage from "../pages/AllSurgicalCategoriesPage";
-import SurgicalCategoryPage from "../pages/SurgicalCategoryPage";
-import OffersPage from "../pages/OffersPage";
-import SearchResultsPage from "../pages/SearchResultsPage";
-import HowWeKeepYouSafePage from "../pages/HowWeKeepYouSafePage";
+// Fallback Loader
+import PageFallback from "../components/common/PageFallback";
 
-// Admin Pages
-import Dashboard from "../admin/AdminDashboard";
-import ManageProducts from "../admin/AdminProducts";
-import AddNewProduct from "../admin/AdminAddNewProduct";
-import ManageOrders from "../admin/AdminOrders";
-import ProductCategories from "../admin/AdminCategories";
-import AdminSurgicalCategories from "../admin/AdminSurgicalCategories";
-import AdminSpecialities from "../admin/AdminSpecialities";
-import AdminMolecules from "../admin/AdminMolecules";
-import AdminAddNewMolecule from "../admin/AdminAddNewMolecule";
-import AdminPrescriptions from "../admin/AdminPrescriptions";
-import AdminCoupons from "../admin/AdminCoupons";
-import AdminUsers from "../admin/AdminUsers";
-import AdminSettings from "../admin/AdminSettings";
-import AdminMegaMenu from "../admin/AdminMegaMenu";
+// Client Pages (Lazy Loaded for Route Code-Splitting)
+const HomePage = lazy(() => import("../pages/HomePage"));
+const ProductsPage = lazy(() => import("../pages/ProductsPage"));
+const ProductDetailsPage = lazy(() => import("../pages/ProductDetailsPage"));
+const CartPage = lazy(() => import("../pages/CartPage"));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
+const OrderSuccessPage = lazy(() => import("../pages/OrderSuccessPage"));
+const AboutPage = lazy(() => import("../pages/AboutPage"));
+const ContactPage = lazy(() => import("../pages/ContactPage"));
+const Login = lazy(() => import("../pages/Login"));
+const ProfilePage = lazy(() => import("../pages/Profile"));
+const OrdersPage = lazy(() => import("../pages/OrdersPage"));
+const UploadPrescriptionPage = lazy(() => import("../pages/UploadPrescriptionPage"));
+const ImportedMedicinesPage = lazy(() => import("../pages/ImportedMedicinesPage"));
+const PatientAssistanceProgramPage = lazy(() => import("../pages/PatientAssistanceProgramPage"));
+const SpecialityPage = lazy(() => import("../pages/SpecialityPage"));
+const SuperSpecialityPage = lazy(() => import("../pages/SuperSpecialityPage"));
+const MoleculesPage = lazy(() => import("../pages/MoleculesPage"));
+const MoleculeDetailPage = lazy(() => import("../pages/MoleculeDetailPage"));
+const WellnessPage = lazy(() => import("../pages/WellnessPage"));
+const SurgicalLandingPage = lazy(() => import("../pages/SurgicalLandingPage"));
+const AllSurgicalProductsPage = lazy(() => import("../pages/AllSurgicalProductsPage"));
+const AllSurgicalCategoriesPage = lazy(() => import("../pages/AllSurgicalCategoriesPage"));
+const SurgicalCategoryPage = lazy(() => import("../pages/SurgicalCategoryPage"));
+const OffersPage = lazy(() => import("../pages/OffersPage"));
+const SearchResultsPage = lazy(() => import("../pages/SearchResultsPage"));
+const HowWeKeepYouSafePage = lazy(() => import("../pages/HowWeKeepYouSafePage"));
+const CategoryDetailPage = lazy(() => import("../pages/CategoryDetailPage"));
+const AllCategoriesPage = lazy(() => import("../pages/AllCategoriesPage"));
 
-import CategoryDetailPage from "../pages/CategoryDetailPage";
-import ConditionsPage from "../pages/ConditionsPage";
-import AllCategoriesPage from "../pages/AllCategoriesPage";
+// Admin Pages (Lazy Loaded)
+const Dashboard = lazy(() => import("../admin/AdminDashboard"));
+const ManageProducts = lazy(() => import("../admin/AdminProducts"));
+const AddNewProduct = lazy(() => import("../admin/AdminAddNewProduct"));
+const ManageOrders = lazy(() => import("../admin/AdminOrders"));
+const ProductCategories = lazy(() => import("../admin/AdminCategories"));
+const AdminSurgicalCategories = lazy(() => import("../admin/AdminSurgicalCategories"));
+const AdminSpecialities = lazy(() => import("../admin/AdminSpecialities"));
+const AdminMolecules = lazy(() => import("../admin/AdminMolecules"));
+const AdminAddNewMolecule = lazy(() => import("../admin/AdminAddNewMolecule"));
+const AdminPrescriptions = lazy(() => import("../admin/AdminPrescriptions"));
+const AdminCoupons = lazy(() => import("../admin/AdminCoupons"));
+const AdminUsers = lazy(() => import("../admin/AdminUsers"));
+const AdminSettings = lazy(() => import("../admin/AdminSettings"));
+const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      {/* Client Portal Routes */}
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="search" element={<SearchResultsPage />} />
-        <Route path="products" element={<ProductsPage />} />
-        <Route path="categories" element={<AllCategoriesPage />} />
-        <Route path="condition" element={<AllCategoriesPage />} />
-        <Route path="conditions" element={<AllCategoriesPage />} />
-        <Route path="category/:categorySlug" element={<CategoryDetailPage />} />
-        <Route path="condition/:categorySlug" element={<CategoryDetailPage />} />
-        <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
-        <Route path="products/:slug" element={<ProductDetailsPage />} />
-        <Route path="speciality/:slug" element={<SpecialityPage />} />
-        <Route path="super-speciality" element={<SuperSpecialityPage />} />
-        <Route path="molecules" element={<MoleculesPage />} />
-        <Route path="molecule/:slug" element={<MoleculeDetailPage />} />
-        <Route path="molecules/:slug" element={<MoleculeDetailPage />} />
-        <Route path="wellness" element={<WellnessPage />} />
-        <Route path="surgical" element={<SurgicalLandingPage />} />
-        <Route path="surgical/all" element={<AllSurgicalProductsPage />} />
-        <Route path="surgical/categories" element={<AllSurgicalCategoriesPage />} />
-        <Route path="surgical-categories" element={<AllSurgicalCategoriesPage />} />
-        <Route path="surgical/:categorySlug" element={<SurgicalCategoryPage />} />
-        <Route path="cart" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="order-success" element={<OrderSuccessPage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
-        <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
-        <Route path="offers" element={<OffersPage />} />
-        <Route path="how-we-keep-you-safe" element={<HowWeKeepYouSafePage />} />
+    <Suspense fallback={<PageFallback />}>
+      <Routes>
+        {/* Client Portal Routes */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="search" element={<SearchResultsPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="categories" element={<AllCategoriesPage />} />
+          <Route path="condition" element={<AllCategoriesPage />} />
+          <Route path="conditions" element={<AllCategoriesPage />} />
+          <Route path="category/:categorySlug" element={<CategoryDetailPage />} />
+          <Route path="condition/:categorySlug" element={<CategoryDetailPage />} />
+          <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
+          <Route path="products/:slug" element={<ProductDetailsPage />} />
+          <Route path="speciality/:slug" element={<SpecialityPage />} />
+          <Route path="super-speciality" element={<SuperSpecialityPage />} />
+          <Route path="molecules" element={<MoleculesPage />} />
+          <Route path="molecule/:slug" element={<MoleculeDetailPage />} />
+          <Route path="molecules/:slug" element={<MoleculeDetailPage />} />
+          <Route path="wellness" element={<WellnessPage />} />
+          <Route path="surgical" element={<SurgicalLandingPage />} />
+          <Route path="surgical/all" element={<AllSurgicalProductsPage />} />
+          <Route path="surgical/categories" element={<AllSurgicalCategoriesPage />} />
+          <Route path="surgical-categories" element={<AllSurgicalCategoriesPage />} />
+          <Route path="surgical/:categorySlug" element={<SurgicalCategoryPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="order-success" element={<OrderSuccessPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
+          <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
+          <Route path="offers" element={<OffersPage />} />
+          <Route path="how-we-keep-you-safe" element={<HowWeKeepYouSafePage />} />
 
-        {/* Primary auth route */}
-        <Route path="login" element={<Login />} />
+          {/* Primary auth route */}
+          <Route path="login" element={<Login />} />
 
-        {/* Legacy auth routes → redirect to /login */}
-        <Route path="register" element={<Navigate to="/login" replace />} />
-        <Route path="verify-email" element={<Navigate to="/login" replace />} />
-        <Route path="forgot-password" element={<Navigate to="/login" replace />} />
-        <Route path="reset-password" element={<Navigate to="/login" replace />} />
+          {/* Legacy auth routes → redirect to /login */}
+          <Route path="register" element={<Navigate to="/login" replace />} />
+          <Route path="verify-email" element={<Navigate to="/login" replace />} />
+          <Route path="forgot-password" element={<Navigate to="/login" replace />} />
+          <Route path="reset-password" element={<Navigate to="/login" replace />} />
 
-        {/* Protected Patient Pages */}
+          {/* Protected Patient Pages */}
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="orders"
+            element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
+        </Route>
+
+        {/* Admin Portal Routes */}
         <Route
-          path="profile"
+          path="/admin"
           element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
           }
-        />
-        <Route
-          path="orders"
-          element={
-            <ProtectedRoute>
-              <OrdersPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
-      </Route>
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<ManageProducts />} />
+          <Route path="products/new" element={<AddNewProduct />} />
+          <Route path="products/:id/edit" element={<AddNewProduct />} />
+          <Route path="orders" element={<ManageOrders />} />
+          <Route path="categories" element={<ProductCategories />} />
+          <Route path="surgical-categories" element={<AdminSurgicalCategories />} />
+          <Route path="specialities" element={<AdminSpecialities />} />
+          <Route path="molecules" element={<AdminMolecules />} />
+          <Route path="molecules/new" element={<AdminAddNewMolecule />} />
+          <Route path="molecules/:id/edit" element={<AdminAddNewMolecule />} />
+          <Route path="prescriptions" element={<AdminPrescriptions />} />
+          <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="megamenu" element={<AdminMegaMenu />} />
+          <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
+          <Route path="cms/pap" element={<Navigate to="/admin" replace />} />
+        </Route>
 
-      {/* Admin Portal Routes */}
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminLayout />
-          </AdminRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="products" element={<ManageProducts />} />
-        <Route path="products/new" element={<AddNewProduct />} />
-        <Route path="products/:id/edit" element={<AddNewProduct />} />
-        <Route path="orders" element={<ManageOrders />} />
-        <Route path="categories" element={<ProductCategories />} />
-        <Route path="surgical-categories" element={<AdminSurgicalCategories />} />
-        <Route path="specialities" element={<AdminSpecialities />} />
-        <Route path="molecules" element={<AdminMolecules />} />
-        <Route path="molecules/new" element={<AdminAddNewMolecule />} />
-        <Route path="molecules/:id/edit" element={<AdminAddNewMolecule />} />
-        <Route path="prescriptions" element={<AdminPrescriptions />} />
-        <Route path="coupons" element={<AdminCoupons />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="settings" element={<AdminSettings />} />
-        <Route path="megamenu" element={<AdminMegaMenu />} />
-        <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
-        <Route path="cms/pap" element={<Navigate to="/admin" replace />} />
-      </Route>
-
-      {/* Fallback Catch-All */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback Catch-All */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

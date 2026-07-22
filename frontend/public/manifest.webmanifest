@@ -1,0 +1,24 @@
+{
+  "name": "WellMeds — Online Pharmacy & Medical Supplies",
+  "short_name": "WellMeds",
+  "description": "Buy authentic medicines, wellness products, and surgical devices online with fast delivery.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#004782",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

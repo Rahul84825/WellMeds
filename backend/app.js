@@ -7,6 +7,7 @@ import { notFound } from "./src/middleware/notFoundMiddleware.js";
 import { errorHandler } from "./src/middleware/errorMiddleware.js";
 import { globalLimiter } from "./src/middleware/rateLimitMiddleware.js";
 import { preventMongoInjection, preventXSS } from "./src/middleware/securityMiddleware.js";
+import { responseCompressor } from "./src/middleware/compressionMiddleware.js";
 
 // Routes Import
 import authRoutes from "./src/routes/authRoutes.js";
@@ -26,6 +27,8 @@ import megaMenuRoutes from "./src/routes/megaMenuRoutes.js";
 const app = express();
 app.set("trust proxy", 1);
 
+// Mount Response Gzip Compression Middleware (Before Routes)
+app.use(responseCompressor);
 
 // Security Middlewares
 app.use(helmet({
@@ -65,7 +68,6 @@ const allowedOrigins = process.env.CLIENT_URL
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or postman)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === "development") {
@@ -95,8 +97,17 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Serve uploaded prescription/product images statically
-app.use("/uploads", express.static("uploads"));
+// Serve uploaded prescription/product images statically with long-term disk cache headers
+app.use("/uploads", express.static("uploads", {
+  maxAge: "30d",
+  immutable: true,
+  etag: true,
+}));
+
+import seoRoutes from "./src/routes/seoRoutes.js";
+
+// Top-level SEO endpoints (/sitemap.xml & /robots.txt)
+app.use("/", seoRoutes);
 
 // Routes Mapping
 app.use("/api/auth", authRoutes);

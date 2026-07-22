@@ -127,6 +127,7 @@ export const getProducts = async (req, res, next) => {
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
+      .select("name brand price originalPrice image stock inStock requiresRx badge category surgicalCategory productType isSurgical strength packSize manufacturer slug molecules")
       .populate("category", "name slug")
       .populate("surgicalCategory", "name slug")
       .populate("molecules", "name slug")
@@ -577,9 +578,12 @@ export const searchProductsResults = async (req, res, next) => {
       ]
     };
 
-    // Fetch matching products and populate relations
+    // Fetch matching products with lightweight field projections to optimize memory & speed
     const allProducts = await Product.find(query)
-      .populate("category specialities molecules");
+      .select("name brand manufacturer description strength composition molecules category surgicalCategory specialities price originalPrice image slug stock inStock requiresRx badge isSurgical productType")
+      .populate("category", "name slug")
+      .populate("specialities", "name slug")
+      .populate("molecules", "name slug");
 
     // Ranking priority:
     // 1. Exact Product Name

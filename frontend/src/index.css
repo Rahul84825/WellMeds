@@ -422,5 +422,170 @@
   font-weight: 400 !important;
 }
 
+/* GPU Acceleration for smooth transforms */
+.gpu-accelerate {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Category Card Styles (Extracted from JSX to prevent repaint thrashing) */
+.category-card-link,
+.category-card-wrapper,
+.surgical-card-wrapper {
+  position: relative;
+  z-index: 1;
+}
+.category-card-link:hover,
+.category-card-wrapper:hover,
+.surgical-card-wrapper:hover {
+  z-index: 10;
+}
+.category-card {
+  width: 170px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 250ms cubic-bezier(0.4,0,0.2,1), box-shadow 250ms ease, border-color 250ms ease;
+  box-sizing: border-box;
+  will-change: transform;
+}
+.category-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(3,128,118,0.13);
+  border-color: #038076;
+}
+.category-img-wrap {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 0;
+  box-sizing: border-box;
+}
+.category-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 280ms ease;
+  will-change: transform;
+}
+.category-card:hover .category-card-img {
+  transform: scale(1.06);
+}
+.category-card-fallback {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.category-card-title {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+  width: 100%;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  transition: color 200ms ease;
+}
+.category-card-link:hover .category-card-title {
+  color: #038076;
+}
+/* Category Section Styles (Extracted from JSX) */
+@media (min-width: 768px) {
+  .category-scroll-dots {
+    display: none !important;
+  }
+  .category-slider-wrap {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 3%,
+      black 97%,
+      transparent 100%
+    );
+  }
+}
+@media (max-width: 640px) {
+  .category-card-wrapper {
+    width: calc((100% - 14px) / 2) !important;
+    min-width: calc((100% - 14px) / 2) !important;
+  }
+}
+@media (max-width: 768px) {
+  .category-section {
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+  .category-section-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 16px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  .category-section-title {
+    font-size: 25px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    color: #0f172a !important;
+  }
+  .category-section-view-all {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 8px 16px !important;
+    border-radius: 999px !important;
+    border: 1.5px solid #0e9f7e !important;
+    color: #0e9f7e !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    background: transparent !important;
+    transition: all 200ms ease !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    min-height: 36px !important;
+  }
+  .category-slider-track {
+    gap: 12px !important;
+    padding-top: 4px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: 12px !important;
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+  .category-card-wrapper {
+    width: auto !important;
+    min-width: auto !important;
+    scroll-snap-align: start !important;
+  }
+  .category-section button {
+    display: none !important;
+  }
+}
+
+
+
 
 

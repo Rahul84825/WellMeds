@@ -18,6 +18,7 @@ import {
   Sparkles,
   ArrowUpDown
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const CategoryDetailPage = () => {
   const { categorySlug } = useParams();
@@ -213,6 +214,16 @@ const CategoryDetailPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title={`${category.name} Medicines & Healthcare Products`}
+        description={category.description || `Browse authentic ${category.name} medicines, healthcare products, and pharmaceutical care online at WellMeds with fast doorstep delivery.`}
+        keywords={`${category.name}, ${category.name} medicines, buy ${category.name} online, WellMeds`}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Medicines", url: "/products" },
+          { name: category.name, url: `/category/${categorySlug}` }
+        ]}
+      />
       
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-md font-semibold select-none">

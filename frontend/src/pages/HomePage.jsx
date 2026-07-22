@@ -13,12 +13,57 @@ import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ConsultationModal from "../components/ConsultationModal";
 import HomeSectionContainer from "../components/layout/HomeSectionContainer";
+import LazySection from "../components/common/LazySection";
+import SEO from "../components/common/SEO";
+
+const homeSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://wellmeds.com/#organization",
+      "name": "WellMeds",
+      "url": "https://wellmeds.com",
+      "logo": "https://wellmeds.com/assets/logos/logo.png",
+      "description": "Online pharmacy and healthcare partner offering genuine prescription medicines, wellness essentials, and surgical supplies across India.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-800-WELLMEDS",
+        "contactType": "customer service",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://wellmeds.com/#website",
+      "url": "https://wellmeds.com",
+      "name": "WellMeds",
+      "description": "Buy Medicines & Healthcare Supplies Online",
+      "publisher": {
+        "@id": "https://wellmeds.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://wellmeds.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+};
 
 const HomePage = () => {
   const [consultModalOpen, setConsultModalOpen] = useState(false);
 
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen animate-[fade-in_0.3s_ease-out]">
+      <SEO
+        title="Online Pharmacy & Medical Supplies | Buy Medicines Online"
+        description="WellMeds is India's trusted online pharmacy delivering authentic prescription medicines, wellness products, surgical devices, and specialty healthcare directly to your doorstep."
+        keywords="online pharmacy, buy medicines online, prescription drugs, surgical supplies, wellness products, medical equipment India"
+        schema={homeSchema}
+      />
+
       {/* Hero Banner (hidden on mobile, visible on desktop) */}
       <div className="hidden lg:block">
         <Hero />
@@ -46,11 +91,14 @@ const HomePage = () => {
       {/* Upload Rx Prescription Banner */}
       <UploadPrescriptionBanner />
 
-      {/* Customer Testimonials & Reviews */}
-      <TestimonialsSection />
+      {/* Below the fold lazy sections */}
+      <LazySection minHeight="250px">
+        <TestimonialsSection />
+      </LazySection>
 
-      {/* Wellness Products Section */}
-      <WellnessProductsSection />
+      <LazySection minHeight="300px">
+        <WellnessProductsSection />
+      </LazySection>
 
       {/* Clinical Excellence Banner */}
       <section className="mt-8 mb-10 md:mt-[48px] md:mb-[56px] home-section-container max-w-full lg:max-w-[82%] mx-auto">
@@ -59,17 +107,19 @@ const HomePage = () => {
             src={clinicalBannerImg}
             alt="Clinical Excellence & Safety Assured"
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-contain sm:object-cover sm:object-[center_60%] rounded-2xl sm:rounded-3xl"
           />
         </div>
       </section>
 
-      {/* Featured Best Sellers Grid */}
-      <FeaturedProductsSection />
+      <LazySection minHeight="350px">
+        <FeaturedProductsSection />
+      </LazySection>
 
-      {/* Brand Value Propositions */}
-      
-      <WhyChooseWellMeds />
+      <LazySection minHeight="200px">
+        <WhyChooseWellMeds />
+      </LazySection>
 
       {/* Pharmacist Consultation Details Form Modal */}
       <ConsultationModal
