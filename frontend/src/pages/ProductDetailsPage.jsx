@@ -1382,38 +1382,40 @@ const ProductDetails = () => {
         )}
 
         {/* Sticky Bottom Bar (Mobile/Tablet only) */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-105 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
-          <div className="text-left pl-sm">
-            <p className="text-[9px] text-slate-455 font-black uppercase tracking-wider">Total Price</p>
-            <p className="text-base font-black text-[#02665e] dark:text-[#52d6c9]">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40 flex items-center justify-between gap-3 animate-[slide-up_0.2s_ease-out]">
+          <div className="text-left shrink-0">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Price</p>
+            <p className="text-base sm:text-lg font-extrabold text-[#038076] dark:text-[#84d6b9] leading-tight">
               {formatCurrency(product.price * (isInCart ? cartQuantity : quantity))}
             </p>
           </div>
-          <div className="flex gap-xs flex-1 max-w-[240px] items-center">
+          <div className="flex gap-2 flex-1 max-w-[260px] items-center">
             {isInCart ? (
               <>
                 <button
                   onClick={() => navigate("/cart")}
-                  className="flex-1 bg-[#02665e] hover:bg-[#014d47] text-white font-black h-11 rounded-xl text-[10.5px] outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-0.5 select-none"
+                  className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center select-none"
                 >
-                  Go To Cart <span className="text-xs font-semibold">↗</span>
+                  Go To Cart
                 </button>
-                <div className="flex-1 flex items-center justify-between p-1 bg-slate-100 dark:bg-zinc-800 rounded-2xl h-11">
+                <div className="flex-1 flex items-center justify-between p-1 bg-slate-100 dark:bg-zinc-800 rounded-full h-11 shadow-inner">
                   <button
                     type="button"
                     onClick={() => updateQuantity(productId, cartQuantity - 1)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 shadow-xs"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs"
+                    aria-label="Decrease quantity"
                   >
                     -
                   </button>
-                  <span className="w-8 h-8 rounded-full bg-[#02665e] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
+                  <span className="w-8 h-8 rounded-full bg-[#038076] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
                     {cartQuantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => updateQuantity(productId, cartQuantity + 1)}
                     disabled={cartQuantity >= (product.stock || 30)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Increase quantity"
                   >
                     +
                   </button>
@@ -1424,17 +1426,17 @@ const ProductDetails = () => {
                 <button
                   onClick={handleBuyNow}
                   disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-[#02665e] hover:bg-[#014d47] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
+                  className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Buy Now
                 </button>
                 <button
                   onClick={handleAddToCart}
                   disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border border-[#02665e] text-[#02665e] font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
+                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border-2 border-[#038076] text-[#038076] dark:text-[#84d6b9] dark:border-[#84d6b9] font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Add <ShoppingCart size={13} />
-                  Add <ShoppingCart size={13} />
+                  <span>Add</span>
+                  <ShoppingCart size={15} className="shrink-0" />
                 </button>
               </>
             )}
@@ -1551,28 +1553,64 @@ const ProductDetails = () => {
       )}
 
       {/* Sticky Bottom Bar (Mobile/Tablet only) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800/80 p-sm shadow-2xl z-40 flex items-center justify-between gap-md animate-[slide-up_0.2s_ease-out]">
-        <div className="text-left pl-sm">
-          <p className="text-[9px] text-slate-455 font-black uppercase tracking-wider">Total Price</p>
-          <p className="text-base font-black text-[#004782] dark:text-primary-fixed-dim">
-            {formatCurrency(product.price * quantity)}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40 flex items-center justify-between gap-3 animate-[slide-up_0.2s_ease-out]">
+        <div className="text-left shrink-0">
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Price</p>
+          <p className="text-base sm:text-lg font-extrabold text-[#038076] dark:text-[#84d6b9] leading-tight">
+            {formatCurrency(product.price * (isInCart ? cartQuantity : quantity))}
           </p>
         </div>
-        <div className="flex gap-xs flex-1 max-w-[240px]">
-          <button
-            onClick={handleBuyNow}
-            disabled={product.inStock === false || product.stock === 0}
-            className="flex-1 bg-[#086b53] hover:bg-[#055746] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
-          >
-            Buy Now
-          </button>
-          <button
-            onClick={handleAddToCart}
-            disabled={product.inStock === false || product.stock === 0}
-            className="flex-1 bg-[#004782] hover:bg-[#003c6e] text-white font-black h-11 rounded-xl text-xs outline-none cursor-pointer transition-all active:scale-95 shadow-sm"
-          >
-            Add
-          </button>
+        <div className="flex gap-2 flex-1 max-w-[260px] items-center">
+          {isInCart ? (
+            <>
+              <button
+                onClick={() => navigate("/cart")}
+                className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center select-none"
+              >
+                Go To Cart
+              </button>
+              <div className="flex-1 flex items-center justify-between p-1 bg-slate-100 dark:bg-zinc-800 rounded-full h-11 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(productId, cartQuantity - 1)}
+                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span className="w-8 h-8 rounded-full bg-[#038076] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
+                  {cartQuantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(productId, cartQuantity + 1)}
+                  disabled={cartQuantity >= (product.stock || 30)}
+                  className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleBuyNow}
+                disabled={product.inStock === false || product.stock === 0}
+                className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Buy Now
+              </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={product.inStock === false || product.stock === 0}
+                className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border-2 border-[#038076] text-[#038076] dark:text-[#84d6b9] dark:border-[#84d6b9] font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>Add</span>
+                <ShoppingCart size={15} className="shrink-0" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
