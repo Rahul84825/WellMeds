@@ -134,7 +134,7 @@ const SurgicalProductsSection = () => {
       <div className="home-section-container">
         
         {/* Section Header */}
-        <div className="flex items-center md:items-end justify-between mb-4 md:mb-8 surgical-section-header">
+        <div className="flex items-center md:items-end justify-between mb-8 md:mb-10 surgical-section-header">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-zinc-100 leading-tight m-0">
               Surgical &amp; Medical Supplies

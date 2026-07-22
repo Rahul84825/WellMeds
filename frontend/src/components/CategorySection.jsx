@@ -137,7 +137,7 @@ const CategorySection = () => {
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "space-between",
-            marginBottom: "32px",
+            marginBottom: "40px",
           }}
         >
           <div>
