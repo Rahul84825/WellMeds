@@ -1351,13 +1351,13 @@ const ProductDetails = () => {
 
         {/* Related Products Section (Mobile Responsive) */}
         {relatedProducts.length > 0 && (
-          <div className="mx-4 mb-6 text-left">
-            <h3 className="font-extrabold text-lg text-slate-900 dark:text-zinc-100 mb-3">
+          <div className="mx-4 mt-8 mb-4 sm:mt-10 sm:mb-6 text-left">
+            <h3 className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-zinc-100 mt-6 mb-5">
               Related Products
             </h3>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-3">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2">
               {relatedProducts.map((p) => (
-                <div key={p.id || p._id} className="snap-start shrink-0 w-[180px] sm:w-[210px]">
+                <div key={p.id || p._id} className="carousel-item shrink-0 w-[calc((100%-16px)/1.48)] sm:w-[230px] md:w-[calc((100%-3*20px)/3.7)] lg:w-[calc((100%-4*20px)/4.5)] snap-start">
                   <ProductCard product={p} />
                 </div>
               ))}
@@ -1367,13 +1367,13 @@ const ProductDetails = () => {
 
         {/* Recently Viewed Products (Mobile Responsive) */}
         {recentlyViewed.length > 0 && (
-          <div className="mx-4 mb-6 text-left">
-            <h3 className="font-extrabold text-lg text-slate-900 dark:text-zinc-100 mb-3">
+          <div className="mx-4 mt-8 mb-2 sm:mt-10 sm:mb-4 text-left">
+            <h3 className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-zinc-100 mt-6 mb-5">
               Recently Viewed Products
             </h3>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-3">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2">
               {recentlyViewed.map((p) => (
-                <div key={p.id || p._id} className="snap-start shrink-0 w-[180px] sm:w-[210px]">
+                <div key={p.id || p._id} className="carousel-item shrink-0 w-[calc((100%-16px)/1.48)] sm:w-[230px] md:w-[calc((100%-3*20px)/3.7)] lg:w-[calc((100%-4*20px)/4.5)] snap-start">
                   <ProductCard product={p} />
                 </div>
               ))}
