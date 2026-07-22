@@ -345,7 +345,7 @@ const Navbar = () => {
               <NavLink
                 to="/"
                 onClick={() => setIsDrawerOpen(false)}
-                className="flex items-center group transition-all duration-150 hover:scale-[1.02] select-none cursor-pointer"
+                className="flex items-center select-none cursor-pointer"
               >
                 <img 
                   src={logoImg}
