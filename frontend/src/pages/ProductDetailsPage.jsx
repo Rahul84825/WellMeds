@@ -1165,9 +1165,37 @@ const ProductDetails = () => {
                     </div>
                   )}
 
+                  {/* FAQs */}
+                  {sec.type === "faqs" && product.faqs && product.faqs.length > 0 && (
+                    <div className="space-y-2 mt-2 font-medium">
+                      {product.faqs.map((faq, idx) => (
+                        <div key={idx} className="p-3 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
+                          <p className="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                            <HelpCircle size={14} className="text-[#004782] shrink-0" />
+                            {faq.question}
+                          </p>
+                          <p className="text-[13px] text-slate-600 dark:text-zinc-300 leading-relaxed pl-5">{faq.answer}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* References */}
+                  {sec.type === "references" && product.references && product.references.length > 0 && (
+                    <ul className="list-decimal pl-5 space-y-2 text-slate-600 dark:text-zinc-300 text-[13px] break-all mt-2 font-medium">
+                      {product.references.map((refLink, i) => (
+                        <li key={i}>
+                          <a href={refLink} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#004782] dark:text-[#a4c9ff]">
+                            {refLink}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
                   {/* Plain / Custom Content */}
-                  {sec.content && !sec.type && (
-                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line mt-2">
+                  {sec.content && (!sec.type || sec.type === "faqs" || sec.type === "references") && (
+                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line mt-2 font-medium">
                       {sec.content}
                     </div>
                   )}
@@ -1178,26 +1206,30 @@ const ProductDetails = () => {
 
           {activeMobileTab === "concerns" && (
             <div className="space-y-4">
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                  Warnings & Precautions
-                </h3>
-                {product.warnings && product.warnings.length > 0 ? (
-                  <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed">
-                    {product.warnings.map((warn, i) => (
-                      <li key={i}>{warn}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-slate-455 text-[14px]">No specific precaution warnings registered.</p>
-                )}
-              </div>
+              {((product.warnings && product.warnings.length > 0) || computedSections.find(s => s.id === "Warnings")?.content) && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
+                    Warnings & Precautions
+                  </h3>
+                  {product.warnings && product.warnings.length > 0 ? (
+                    <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed font-medium">
+                      {product.warnings.map((warn, i) => (
+                        <li key={i}>{warn}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line font-medium">
+                      {computedSections.find(s => s.id === "Warnings")?.content}
+                    </div>
+                  )}
+                </div>
+              )}
               {computedSections.find(s => s.id === "Precautions")?.content && (
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
                   <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
                     Safety Advice
                   </h3>
-                  <div className="text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line">
+                  <div className="text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line font-medium">
                     {computedSections.find(s => s.id === "Precautions").content}
                   </div>
                 </div>
