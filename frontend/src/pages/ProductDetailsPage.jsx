@@ -727,29 +727,29 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Title Card with Dynamic Introduction & Sourced From Badge */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
-          <h1 className="font-headline-sm text-xl sm:text-2xl font-extrabold text-slate-905 dark:text-zinc-100 leading-tight break-words">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
+          <h1 className="font-headline-sm text-lg sm:text-xl font-extrabold text-slate-905 dark:text-zinc-100 leading-tight break-words">
             {product.name}
           </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-sm sm:text-base font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
+            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
 
           {/* Dynamic Product Introduction */}
           {product.description && product.description.trim() && (
-            <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed mt-3.5 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3.5">
+            <p className="text-[14px] text-slate-600 dark:text-zinc-300 leading-relaxed mt-3 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3">
               {product.description}
             </p>
           )}
 
           {/* Sourced From Manufacturer Badge */}
-          <div className="mt-3.5 bg-blue-500/[0.04] dark:bg-zinc-800/50 border border-blue-500/10 dark:border-zinc-700/60 rounded-2xl p-3.5 flex items-center gap-3">
+          <div className="mt-3.5 bg-blue-500/[0.04] dark:bg-zinc-800/50 border border-blue-500/10 dark:border-zinc-700/60 rounded-2xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[20px]">verified</span>
+              <span className="material-symbols-outlined text-[18px]">verified</span>
             </div>
-            <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 font-medium">
+            <p className="text-[14px] text-slate-600 dark:text-zinc-300 font-medium">
               Sourced from:{" "}
               <span className="font-extrabold text-[#004782] dark:text-[#a4c9ff]">
                 {product.manufacturer || product.brand || "Direct From Manufacturer"}
@@ -763,7 +763,7 @@ const ProductDetails = () => {
           <div className="relative w-full aspect-square flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-105 dark:border-zinc-850">
             {/* Discount Percentage Tag */}
             {discountPercent > 0 && (
-              <span className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-black uppercase px-2.5 py-0.5 rounded-full z-10 select-none">
+              <span className="absolute top-3 right-3 bg-emerald-500 text-white text-[12px] font-black uppercase px-2.5 py-0.5 rounded-full z-10 select-none">
                 {discountPercent}% OFF
               </span>
             )}
@@ -788,14 +788,14 @@ const ProductDetails = () => {
           {/* Star Rating below image */}
           <div className="flex items-center justify-between w-full px-2 mt-3 select-none">
             <div className="flex items-center gap-0.5 text-amber-400">
-              <Star size={16} fill="currentColor" stroke="none" />
-              <Star size={16} fill="currentColor" stroke="none" />
-              <Star size={16} fill="currentColor" stroke="none" />
-              <Star size={16} fill="currentColor" stroke="none" />
-              <Star size={16} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
+              <Star size={15} fill="currentColor" stroke="none" />
             </div>
-            <div className="text-xs text-slate-500 font-semibold flex items-center gap-1">
-              <span className="font-extrabold text-sm">4.8</span>
+            <div className="text-[13px] text-slate-500 font-semibold flex items-center gap-1">
+              <span className="font-extrabold text-[14px]">4.8</span>
               <span className="text-amber-400 text-xs">★</span>
               <span>On</span>
               <span>
@@ -831,24 +831,24 @@ const ProductDetails = () => {
         </div>
 
         {/* Price & Packaging Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm mx-4 mb-4 text-left">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
           {/* Price & Discount Row */}
           <div className="flex justify-between items-start mb-2 select-none gap-2">
             <div>
-              <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-zinc-100">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-zinc-100">
                 {formatCurrency(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-sm sm:text-base text-slate-400 font-semibold ml-2">
+                <span className="text-[13px] sm:text-[14px] text-slate-400 font-semibold ml-2">
                   MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
                 </span>
               )}
-              <p className="text-sm sm:text-base text-slate-400 dark:text-zinc-500 font-medium mt-1">
+              <p className="text-[13px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
                 Inclusive of all taxes
               </p>
             </div>
             {discountPercent > 0 && (
-              <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 shrink-0">
+              <span className="text-[13px] sm:text-[14px] font-black text-emerald-600 dark:text-emerald-400 shrink-0">
                 {discountPercent}% OFF
               </span>
             )}
@@ -856,16 +856,16 @@ const ProductDetails = () => {
 
           {/* Selected Packaging Capsule */}
           {(product.packSize || product.productSpecifications?.packSize) && (
-            <div className="mt-3.5 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3.5 sm:p-4 flex justify-between items-center relative select-none">
+            <div className="mt-3 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3 flex justify-between items-center relative select-none">
               <div>
-                <p className="text-sm sm:text-base font-black text-slate-805 dark:text-zinc-150">
+                <p className="text-[14px] font-black text-slate-805 dark:text-zinc-150">
                   {product.packSize || product.productSpecifications?.packSize}
                 </p>
-                <p className="text-sm sm:text-base text-slate-455 dark:text-zinc-400 mt-1 font-semibold">
+                <p className="text-[13px] text-slate-455 dark:text-zinc-400 mt-0.5 font-semibold">
                   {formatCurrency(getUnitPrice())}/Unit
                 </p>
               </div>
-              <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+              <span className="w-5.5 h-5.5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
                 ✓
               </span>
             </div>
@@ -873,24 +873,24 @@ const ProductDetails = () => {
         </div>
 
         {/* Badges inline row */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3.5 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
-          <div className="flex gap-4 items-center flex-wrap">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
+          <div className="flex gap-3.5 items-center flex-wrap">
             {product.requiresRx ? (
-              <span className="text-sm sm:text-base font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-[#845ec2] font-black text-xs sm:text-sm border border-[#845ec2]/40 rounded-full w-5.5 h-5.5 flex items-center justify-center">Rₓ</span> Prescription Required
+              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-[#845ec2] font-black text-xs border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
               </span>
             ) : (
-              <span className="text-sm sm:text-base font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-emerald-600 font-black text-xs sm:text-sm border border-emerald-500/40 rounded-full w-5.5 h-5.5 flex items-center justify-center">✓</span> OTC Medicine
+              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+                <span className="text-emerald-600 font-black text-xs border border-emerald-500/40 rounded-full w-5 h-5 flex items-center justify-center">✓</span> OTC Medicine
               </span>
             )}
             {product.isColdChain && (
-              <span className="text-sm sm:text-base font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
                 <span className="text-sky-500">❄️</span> Cold Chain
               </span>
             )}
-            <span className="text-sm sm:text-base font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-              <span className="text-[#038076] font-black text-xs sm:text-sm">🛡️</span> 100% Genuine
+            <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
+              <span className="text-[#038076] font-black text-xs">🛡️</span> 100% Genuine
             </span>
           </div>
           <button
@@ -899,19 +899,19 @@ const ProductDetails = () => {
             className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
             title="Product Quality Info"
           >
-            <Info size={20} />
+            <Info size={18} />
           </button>
         </div>
 
         {/* Salt Composition & Marketer Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4.5 sm:p-5 shadow-sm mx-4 mb-4 text-left space-y-4 overflow-hidden max-w-[calc(100vw-2rem)]">
+        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5 overflow-hidden max-w-[calc(100vw-2rem)]">
           {/* Salt Composition */}
           {product.molecules && product.molecules.length > 0 && (
             <div className="max-w-full overflow-hidden">
-              <h4 className="text-sm sm:text-base font-black text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+              <h4 className="text-[12px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Salt Composition
               </h4>
-              <div className="text-sm sm:text-base font-extrabold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
+              <div className="text-[14px] font-extrabold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
                 {product.molecules.map((mol, idx) => (
                   <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="underline hover:opacity-85 break-words max-w-full inline-block">
                     {mol.name}{idx < product.molecules.length - 1 ? "," : ""}
@@ -923,11 +923,11 @@ const ProductDetails = () => {
 
           {/* Marketer */}
           {(product.manufacturer || product.brand) && (
-            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80">
-              <h4 className="text-sm sm:text-base font-black text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+            <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80">
+              <h4 className="text-[12px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Marketer
               </h4>
-              <p className="text-sm sm:text-base font-extrabold text-slate-805 dark:text-zinc-150 uppercase leading-normal">
+              <p className="text-[14px] font-extrabold text-slate-805 dark:text-zinc-150 uppercase leading-normal">
                 {product.manufacturer || product.brand}
               </p>
             </div>
@@ -935,7 +935,7 @@ const ProductDetails = () => {
 
           {/* Prepaid / Returns */}
           {(product.prepaidOnly || product.isNonRefundable) && (
-            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-sm sm:text-base font-bold text-sky-700 dark:text-sky-400 select-none">
+            <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-[14px] font-bold text-sky-700 dark:text-sky-400 select-none">
               <span>
                 {product.prepaidOnly && product.isNonRefundable
                   ? "Prepaid Only. Non-Returnable."
@@ -944,7 +944,7 @@ const ProductDetails = () => {
                   : "Non-Returnable."}
               </span>
               <HelpCircle
-                size={18}
+                size={16}
                 className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors shrink-0"
                 onClick={() => toast.info(product.prepaidOnly ? "Prepaid Only: Cash on Delivery is disabled for this product." : "Non-Returnable: This item cannot be returned after delivery.")}
               />
@@ -954,34 +954,34 @@ const ProductDetails = () => {
 
         {/* Dual Delivery Cards */}
         <div className="grid grid-cols-2 gap-3 mx-4 mb-3 text-left">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3.5 flex justify-between items-center shadow-2xs">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
             <div>
-              <p className="text-xs text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Get it by</p>
-              <p className="text-sm sm:text-base font-black text-slate-805 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Get it by</p>
+              <p className="text-[14px] font-black text-slate-805 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
             </div>
-            <span className="material-symbols-outlined text-slate-400 text-[20px]">calendar_today</span>
+            <span className="material-symbols-outlined text-slate-400 text-[18px]">calendar_today</span>
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3.5 flex justify-between items-center shadow-2xs">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
             <div>
-              <p className="text-xs text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Delivering To</p>
-              <p className="text-sm sm:text-base font-black text-[#004782] dark:text-[#a4c9ff] truncate max-w-[100px] mt-0.5">Pune, 411035</p>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Delivering To</p>
+              <p className="text-[14px] font-black text-[#004782] dark:text-[#a4c9ff] truncate max-w-[100px] mt-0.5">Pune, 411035</p>
             </div>
-            <span className="material-symbols-outlined text-slate-400 text-[20px] cursor-pointer">edit</span>
+            <span className="material-symbols-outlined text-slate-400 text-[18px] cursor-pointer">edit</span>
           </div>
         </div>
 
         {/* Cold Chain Ticking Banner */}
         {product.isColdChain && (
-          <div className="mx-4 mb-3 bg-sky-500/[0.03] border border-sky-500/10 rounded-2xl p-4 flex items-start gap-3.5 text-left">
+          <div className="mx-4 mb-3 bg-sky-500/[0.03] border border-sky-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
             <div className="bg-sky-500/10 p-2.5 rounded-2xl text-sky-600 shrink-0">
-              <span className="material-symbols-outlined text-[22px] leading-none animate-bounce">local_shipping</span>
+              <span className="material-symbols-outlined text-[20px] leading-none animate-bounce">local_shipping</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-sm font-black text-sky-700 dark:text-sky-400 uppercase tracking-wider">{formatTimeLeft(timeLeft)}</span>
-                <span className="text-xs text-slate-405 font-bold">• Cold Chain Guaranteed</span>
+                <span className="text-[13px] font-black text-sky-700 dark:text-sky-400 uppercase tracking-wider">{formatTimeLeft(timeLeft)}</span>
+                <span className="text-[12px] text-slate-405 font-bold">• Cold Chain Guaranteed</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-normal">
+              <p className="text-[13px] text-slate-500 dark:text-zinc-400 leading-normal">
                 Your medicine's temperature matters — we pause cold-chain delivery if temperature goes out of range. <span className="text-sky-600 dark:text-sky-400 font-bold underline cursor-pointer">Learn More</span>
               </p>
             </div>
@@ -990,13 +990,13 @@ const ProductDetails = () => {
 
         {/* Prescription Verification Warning */}
         {product.requiresRx && (
-          <div className="mx-4 mb-3 bg-red-500/[0.03] border border-red-500/10 rounded-2xl p-4 flex items-start gap-3.5 text-left">
+          <div className="mx-4 mb-3 bg-red-500/[0.03] border border-red-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
             <div className="bg-red-500/10 p-2.5 rounded-2xl text-red-650 shrink-0">
-              <span className="material-symbols-outlined text-[22px] leading-none">description</span>
+              <span className="material-symbols-outlined text-[20px] leading-none">description</span>
             </div>
-            <div className="space-y-1">
-              <h4 className="font-extrabold text-xs sm:text-sm text-red-650 dark:text-red-400 uppercase tracking-wider">Prescription Verification Required</h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-normal">
+            <div className="space-y-0.5">
+              <h4 className="font-extrabold text-[13px] text-red-650 dark:text-red-400 uppercase tracking-wider">Prescription Verification Required</h4>
+              <p className="text-[13px] text-slate-500 dark:text-zinc-400 leading-normal">
                 A registered pharmacist will verify your prescription before shipment. Upload during checkout.
               </p>
             </div>
@@ -1011,15 +1011,15 @@ const ProductDetails = () => {
         )}
 
         {/* Doctor Care Offer Banner */}
-        <div className="mx-4 mb-4 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-50 to-[#e0f2fe] dark:from-zinc-800/40 dark:to-zinc-850/40 border border-blue-500/10 flex items-center justify-between p-4.5 relative shadow-2xs text-left">
+        <div className="mx-4 mb-4 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-50 to-[#e0f2fe] dark:from-zinc-800/40 dark:to-zinc-850/40 border border-blue-500/10 flex items-center justify-between p-4 relative shadow-2xs text-left">
           <div className="space-y-1.5 max-w-[65%]">
-            <p className="text-xs text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-wider">Every GLP-1 order</p>
-            <h4 className="text-sm sm:text-base font-black text-slate-800 dark:text-zinc-150 leading-tight">Comes with extra care</h4>
-            <div className="bg-[#482b8f] text-white text-xs font-bold px-2.5 py-0.5 rounded-full inline-block">
+            <p className="text-[11px] text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-wider">Every GLP-1 order</p>
+            <h4 className="text-[14px] font-black text-slate-800 dark:text-zinc-150 leading-tight">Comes with extra care</h4>
+            <div className="bg-[#482b8f] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-block">
               Get Free
             </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-405 font-bold leading-relaxed">
-              5X Sterile Needles & 6X Alcohol Swabs <span className="text-slate-400 text-xs font-medium block mt-0.5">(Imported from Ireland)</span>
+            <p className="text-[12px] text-slate-500 dark:text-zinc-405 font-bold leading-relaxed">
+              5X Sterile Needles & 6X Alcohol Swabs <span className="text-slate-400 text-[10px] font-medium block mt-0.5">(Imported from Ireland)</span>
             </p>
           </div>
           <img
@@ -1042,7 +1042,7 @@ const ProductDetails = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveMobileTab(tab.id)}
-                className={`px-4.5 py-2.5 rounded-full text-sm sm:text-base font-extrabold whitespace-nowrap transition-all border ${
+                className={`px-4 py-2 rounded-full text-[13px] font-extrabold whitespace-nowrap transition-all border ${
                   isActive
                     ? "bg-slate-900 text-white border-slate-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
                     : "bg-white text-slate-655 border-slate-205 hover:bg-slate-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800"
@@ -1060,31 +1060,31 @@ const ProductDetails = () => {
             <div className="space-y-4">
               {/* Introduction Card */}
               {product.description && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-                  <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
                     Introduction
                   </h3>
-                  <p className="text-slate-600 dark:text-zinc-305 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                  <p className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line">
                     {product.description}
                   </p>
                 </div>
               )}
               {/* All Clinical Index Sections */}
               {computedSections.map((sec) => (
-                <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm text-left">
-                  <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5 pb-2 border-b border-slate-100 dark:border-zinc-800">
+                <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2 pb-2 border-b border-slate-100 dark:border-zinc-800">
                     {sec.title}
                   </h3>
 
                   {/* Key Benefits */}
                   {sec.type === "benefits" && product.benefits && (
-                    <div className="grid grid-cols-1 gap-3 mt-2.5">
+                    <div className="grid grid-cols-1 gap-2.5 mt-2">
                       {product.benefits.map((b, i) => (
-                        <div key={i} className="p-3 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-2.5 items-start">
-                          <CheckCircle className="text-[#086b53] shrink-0 mt-0.5" size={16} />
+                        <div key={i} className="p-2.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-2.5 items-start">
+                          <CheckCircle className="text-[#086b53] shrink-0 mt-0.5" size={15} />
                           <div>
-                            <p className="font-bold text-sm sm:text-base text-slate-800 dark:text-zinc-200">{b.title}</p>
-                            {b.description && <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">{b.description}</p>}
+                            <p className="font-bold text-[14px] text-slate-800 dark:text-zinc-200">{b.title}</p>
+                            {b.description && <p className="text-[13px] text-slate-400 mt-0.5 leading-relaxed">{b.description}</p>}
                           </div>
                         </div>
                       ))}
@@ -1093,10 +1093,10 @@ const ProductDetails = () => {
 
                   {/* Dosage & Usage */}
                   {sec.type === "usage" && product.usageInstructions && (
-                    <ul className="space-y-2.5 text-sm sm:text-base text-slate-650 dark:text-zinc-300 font-medium mt-2.5">
+                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
                       {product.usageInstructions.map((inst, idx) => (
-                        <li key={idx} className="flex gap-2.5 items-start leading-relaxed">
-                          <Check className="text-[#004782] shrink-0 mt-1" size={14} />
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <Check className="text-[#004782] shrink-0 mt-0.5" size={13} />
                           <span>{inst}</span>
                         </li>
                       ))}
@@ -1105,10 +1105,10 @@ const ProductDetails = () => {
 
                   {/* Side Effects */}
                   {sec.type === "sideeffects" && product.sideEffects && (
-                    <ul className="space-y-2.5 text-sm sm:text-base text-slate-650 dark:text-zinc-300 font-medium mt-2.5">
+                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
                       {product.sideEffects.map((side, idx) => (
-                        <li key={idx} className="flex gap-2.5 items-start leading-relaxed">
-                          <div className="w-2 h-2 rounded-full bg-red-550 shrink-0 mt-2" />
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-550 shrink-0 mt-1.5" />
                           <span>{side}</span>
                         </li>
                       ))}
@@ -1117,10 +1117,10 @@ const ProductDetails = () => {
 
                   {/* Storage */}
                   {sec.type === "storage" && product.storageInstructions && (
-                    <ul className="space-y-2.5 text-sm sm:text-base text-slate-650 dark:text-zinc-300 font-medium mt-2.5">
+                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
                       {product.storageInstructions.map((store, idx) => (
-                        <li key={idx} className="flex gap-2.5 items-start leading-relaxed">
-                          <div className="w-2 h-2 rounded-full bg-[#086b53] shrink-0 mt-2" />
+                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#086b53] shrink-0 mt-1.5" />
                           <span>{store}</span>
                         </li>
                       ))}
@@ -1129,11 +1129,11 @@ const ProductDetails = () => {
 
                   {/* Warnings */}
                   {sec.type === "warnings" && product.warnings && (
-                    <div className="space-y-2.5 mt-2.5">
+                    <div className="space-y-2 mt-2">
                       {product.warnings.map((warn, idx) => (
-                        <div key={idx} className="p-3 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex gap-2.5 items-start">
-                          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-                          <p className="text-sm sm:text-base text-slate-650 dark:text-zinc-300 leading-relaxed">{warn}</p>
+                        <div key={idx} className="p-2.5 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex gap-2 items-start">
+                          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={15} />
+                          <p className="text-[14px] text-slate-650 dark:text-zinc-300 leading-relaxed">{warn}</p>
                         </div>
                       ))}
                     </div>
@@ -1141,14 +1141,14 @@ const ProductDetails = () => {
 
                   {/* Safety */}
                   {sec.type === "safety" && product.safetyCards && (
-                    <div className="grid grid-cols-1 gap-2.5 mt-2.5">
+                    <div className="grid grid-cols-1 gap-2 mt-2">
                       {product.safetyCards.map((card, idx) => (
-                        <div key={idx} className="p-3 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1.5 text-sm sm:text-base">
+                        <div key={idx} className="p-2.5 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
                           <div className="flex justify-between items-center">
                             <span className="font-bold text-slate-800 dark:text-zinc-100">{card.title}</span>
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
                           </div>
-                          {card.description && <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">{card.description}</p>}
+                          {card.description && <p className="text-[12px] text-slate-500 dark:text-zinc-400">{card.description}</p>}
                         </div>
                       ))}
                     </div>
@@ -1156,7 +1156,7 @@ const ProductDetails = () => {
 
                   {/* Plain / Custom Content */}
                   {sec.content && !sec.type && (
-                    <div className="text-slate-600 dark:text-zinc-305 text-sm sm:text-base leading-relaxed whitespace-pre-line mt-2.5">
+                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line mt-2">
                       {sec.content}
                     </div>
                   )}
@@ -1167,26 +1167,26 @@ const ProductDetails = () => {
 
           {activeMobileTab === "concerns" && (
             <div className="space-y-4">
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-                <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                   Warnings & Precautions
                 </h3>
                 {product.warnings && product.warnings.length > 0 ? (
-                  <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-sm sm:text-base leading-relaxed">
+                  <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed">
                     {product.warnings.map((warn, i) => (
                       <li key={i}>{warn}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-slate-455 text-sm sm:text-base">No specific precaution warnings registered.</p>
+                  <p className="text-slate-455 text-[14px]">No specific precaution warnings registered.</p>
                 )}
               </div>
               {computedSections.find(s => s.id === "Precautions")?.content && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-                  <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
                     Safety Advice
                   </h3>
-                  <div className="text-slate-605 dark:text-zinc-305 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                  <div className="text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line">
                     {computedSections.find(s => s.id === "Precautions").content}
                   </div>
                 </div>
@@ -1197,16 +1197,16 @@ const ProductDetails = () => {
           {activeMobileTab === "info" && (
             <div className="space-y-4">
               {/* Product Specifications */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-                <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                   Specifications
                 </h3>
-                <div className="flex flex-col text-sm sm:text-base divide-y divide-slate-100 dark:divide-zinc-800/40">
+                <div className="flex flex-col text-[14px] divide-y divide-slate-100 dark:divide-zinc-800/40">
                   {product.productSpecifications && Object.entries(product.productSpecifications).map(([key, val]) => {
                     if (!val || typeof val !== "string" || !val.trim()) return null;
                     const label = key.replace(/([A-Z])/g, " $1").trim().replace(/^\w/, c => c.toUpperCase());
                     return (
-                      <div key={key} className="flex py-2.5 items-center">
+                      <div key={key} className="flex py-2 items-center">
                         <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">{label}</span>
                         <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{val}</span>
                       </div>
@@ -1216,11 +1216,11 @@ const ProductDetails = () => {
               </div>
               {/* References / Citations */}
               {product.references && product.references.length > 0 && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-                  <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-3">
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                     Citations & References
                   </h3>
-                  <ul className="list-decimal pl-4 space-y-2 text-slate-500 dark:text-zinc-400 text-xs sm:text-sm break-all">
+                  <ul className="list-decimal pl-4 space-y-2 text-slate-500 dark:text-zinc-400 text-[13px] break-all">
                     {product.references.map((refLink, i) => (
                       <li key={i}>
                         <a href={refLink} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#004782] dark:text-[#a4c9ff]">
@@ -1235,11 +1235,11 @@ const ProductDetails = () => {
           )}
 
           {activeMobileTab === "disclaimer" && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
-              <h3 className="font-extrabold text-base sm:text-lg text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
+              <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
                 Disclaimer
               </h3>
-              <p className="text-slate-455 dark:text-zinc-500 text-xs sm:text-sm leading-relaxed">
+              <p className="text-slate-455 dark:text-zinc-500 text-[13px] leading-relaxed">
                 The information provided here is for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Do not disregard professional medical advice or delay in seeking it because of something you have read on this website.
               </p>
             </div>
