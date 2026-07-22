@@ -59,6 +59,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    prepaidOnly: {
+      type: Boolean,
+      default: false,
+    },
     badge: {
       type: String,
       default: "",

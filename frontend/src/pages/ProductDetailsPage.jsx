@@ -915,10 +915,22 @@ const ProductDetails = () => {
           )}
 
           {/* Prepaid / Returns */}
-          <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-sky-700 dark:text-sky-400 select-none">
-            <span>Prepaid Only. Non-Returnable.</span>
-            <HelpCircle size={15} className="text-slate-400 cursor-pointer" />
-          </div>
+          {(product.prepaidOnly || product.isNonRefundable) && (
+            <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-sky-700 dark:text-sky-400 select-none">
+              <span>
+                {product.prepaidOnly && product.isNonRefundable
+                  ? "Prepaid Only. Non-Returnable."
+                  : product.prepaidOnly
+                  ? "Prepaid Only."
+                  : "Non-Returnable."}
+              </span>
+              <HelpCircle
+                size={15}
+                className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors"
+                onClick={() => toast.info(product.prepaidOnly ? "Prepaid Only: Cash on Delivery is disabled for this product." : "Non-Returnable: This item cannot be returned after delivery.")}
+              />
+            </div>
+          )}
         </div>
 
         {/* Dual Delivery Cards */}

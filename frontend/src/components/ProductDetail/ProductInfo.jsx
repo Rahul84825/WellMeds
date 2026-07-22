@@ -83,11 +83,15 @@ const ProductInfo = ({ product, handleShare }) => {
         </div>
       )}
 
-      {/* Non-Refundable Notice */}
-      {(product.isNonRefundable || product.prepaidOnly) && (
+      {/* Policy Notice */}
+      {(product.prepaidOnly || product.isNonRefundable) && (
         <div className="pt-sm border-t border-slate-100 dark:border-zinc-800/80 mt-xs">
           <p className="text-blue-650 dark:text-blue-400 font-bold text-sm">
-            Non-Refundable
+            {product.prepaidOnly && product.isNonRefundable
+              ? "Prepaid Only. Non-Returnable."
+              : product.prepaidOnly
+              ? "Prepaid Only."
+              : "Non-Returnable."}
           </p>
         </div>
       )}

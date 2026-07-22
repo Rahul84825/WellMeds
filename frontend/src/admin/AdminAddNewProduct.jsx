@@ -254,6 +254,7 @@ const AddNewProduct = () => {
   const [originalPrice, setOriginalPrice] = useState("");
   const [inStock, setInStock] = useState(true);
   const [isNonRefundable, setIsNonRefundable] = useState(false);
+  const [prepaidOnly, setPrepaidOnly] = useState(false);
   const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
   const [isColdChain, setIsColdChain] = useState(false);
   const [description, setDescription] = useState("");
@@ -384,7 +385,8 @@ const AddNewProduct = () => {
               initialInStock = product.stock > 0;
             }
             setInStock(initialInStock);
-            setIsNonRefundable(product.isNonRefundable || product.prepaidOnly || false);
+            setIsNonRefundable(product.isNonRefundable || false);
+            setPrepaidOnly(product.prepaidOnly || false);
             setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
             setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
@@ -699,6 +701,7 @@ const AddNewProduct = () => {
       originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
       inStock,
       isNonRefundable,
+      prepaidOnly,
       requiresRx: specPrescription === "Yes",
       isPrescriptionRequired: specPrescription === "Yes",
       isColdChain: specColdChain === "Yes",
@@ -1065,7 +1068,28 @@ const AddNewProduct = () => {
 
                 <div className="flex flex-col gap-xs pt-sm border-t border-slate-100 dark:border-zinc-800/80">
                   <div className="flex items-center gap-md">
-                    <span className="font-semibold text-slate-700 dark:text-zinc-200">Non-Refundable Product:</span>
+                    <span className="font-semibold text-slate-700 dark:text-zinc-200">Prepaid Only (No COD):</span>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={prepaidOnly}
+                        onChange={(e) => setPrepaidOnly(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="relative w-11 h-6 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                      <span className="ml-sm font-bold text-xs text-slate-700 dark:text-zinc-200">
+                        {prepaidOnly ? "Prepaid Only" : "COD Allowed"}
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 dark:text-zinc-500 leading-normal mt-0.5">
+                    When enabled, Cash on Delivery is disabled and 'Prepaid Only' notice appears.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-xs pt-sm border-t border-slate-100 dark:border-zinc-800/80">
+                  <div className="flex items-center gap-md">
+                    <span className="font-semibold text-slate-700 dark:text-zinc-200">Non-Returnable Product:</span>
                     <label className="relative inline-flex items-center cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -1075,12 +1099,12 @@ const AddNewProduct = () => {
                       />
                       <div className="relative w-11 h-6 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                       <span className="ml-sm font-bold text-xs text-slate-700 dark:text-zinc-200">
-                        {isNonRefundable ? "Non-Refundable" : "Refundable"}
+                        {isNonRefundable ? "Non-Returnable" : "Returnable"}
                       </span>
                     </label>
                   </div>
                   <p className="text-[10px] text-slate-400 dark:text-zinc-500 leading-normal mt-0.5">
-                    When enabled, this product cannot be returned or refunded after purchase.
+                    When enabled, this product is marked as Non-Returnable / Non-Refundable.
                   </p>
                 </div>
               </div>
