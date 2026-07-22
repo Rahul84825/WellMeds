@@ -728,11 +728,11 @@ const ProductDetails = () => {
 
         {/* Product Title Card with Dynamic Introduction & Sourced From Badge */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
-          <h1 className="font-headline-sm text-lg sm:text-xl font-extrabold text-slate-905 dark:text-zinc-100 leading-tight break-words">
+          <h1 className="font-headline-sm text-lg sm:text-xl font-semibold text-slate-905 dark:text-zinc-100 leading-tight break-words">
             {product.name}
           </h1>
           {product.molecules && product.molecules.length > 0 && (
-            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
+            <div className="text-[14px] text-[#004782] dark:text-[#a4c9ff] underline mt-1.5 uppercase break-words max-w-full leading-relaxed">
               {product.molecules.map((mol) => mol.name).join(", ")}
             </div>
           )}
@@ -772,17 +772,6 @@ const ProductDetails = () => {
               alt={product.name}
               className="max-h-[90%] max-w-[90%] object-contain select-none"
             />
-            {/* WhatsApp Icon */}
-            <a
-              href="https://wa.me/911234567890"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute bottom-3 right-3 w-10 h-10 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90"
-            >
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.37 5.054L2 22l5.077-1.331a9.92 9.92 0 0 0 4.933 1.314h.005c5.505 0 9.988-4.478 9.99-9.985A9.972 9.972 0 0 0 12.012 2zm5.723 14.12c-.25.706-1.442 1.341-1.986 1.424-.492.077-1.134.14-3.328-.769-2.805-1.162-4.59-4.004-4.73-4.188-.14-.186-1.137-1.513-1.137-2.887 0-1.373.72-2.049.977-2.321.257-.272.565-.34.753-.34H9.5c.189 0 .443-.072.695.529.251.604.858 2.088.932 2.239.076.151.127.327.026.529-.101.202-.152.327-.303.504-.152.176-.32.392-.457.525-.152.151-.31.317-.133.621.176.303.784 1.29 1.684 2.093.9 1.006 1.658 1.318 1.96 1.469.303.151.48.127.656-.076.176-.202.753-.876.953-1.178.201-.302.402-.252.68-.151.278.101 1.764.832 2.067.983.303.151.504.227.58.353.076.126.076.731-.174 1.437z"/>
-              </svg>
-            </a>
           </div>
 
           {/* Star Rating below image */}
@@ -835,15 +824,15 @@ const ProductDetails = () => {
           {/* Price & Discount Row */}
           <div className="flex justify-between items-start mb-2 select-none gap-2">
             <div>
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-zinc-100">
+              <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-zinc-100">
                 {formatCurrency(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-[13px] sm:text-[14px] text-slate-400 font-semibold ml-2">
+                <span className="text-[11px] sm:text-[12px] text-slate-400 ml-2">
                   MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
                 </span>
               )}
-              <p className="text-[13px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
+              <p className="text-[12px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
                 Inclusive of all taxes
               </p>
             </div>
@@ -872,36 +861,43 @@ const ProductDetails = () => {
           )}
         </div>
 
-        {/* Badges inline row */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl px-4 py-3 shadow-sm mx-4 mb-4 flex items-center justify-between text-left select-none">
-          <div className="flex gap-3.5 items-center flex-wrap">
-            {product.requiresRx ? (
-              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-[#845ec2] font-black text-xs border border-[#845ec2]/40 rounded-full w-5 h-5 flex items-center justify-center">Rₓ</span> Prescription Required
-              </span>
-            ) : (
-              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-emerald-600 font-black text-xs border border-emerald-500/40 rounded-full w-5 h-5 flex items-center justify-center">✓</span> OTC Medicine
-              </span>
-            )}
-            {product.isColdChain && (
-              <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-                <span className="text-sky-500">❄️</span> Cold Chain
-              </span>
-            )}
-            <span className="text-[13px] sm:text-[14px] font-extrabold text-slate-700 dark:text-zinc-250 flex items-center gap-1.5">
-              <span className="text-[#038076] font-black text-xs">🛡️</span> 100% Genuine
-            </span>
+        {/* Dynamic Rx & Cold Chain Status Bar (Mobile Only) */}
+        {(product.requiresRx || product.isColdChain) && (
+          <div className="bg-white dark:bg-zinc-900 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-3.5 mx-4 mb-4 flex items-center justify-between text-left select-none">
+            <div className="flex items-center gap-6 flex-wrap">
+              {product.requiresRx && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[#5b32a8] dark:text-[#a78bfa] font-serif font-black text-lg leading-none">R<sub className="text-[10px] font-sans font-black -ml-0.5">x</sub></span>
+                  <span className="text-[13.5px] font-semibold text-[#8b4f1d] dark:text-[#d4a373]">
+                    Prescription Required
+                  </span>
+                </div>
+              )}
+              {product.isColdChain && (
+                <div className="flex items-center gap-2">
+                  <Snowflake size={18} className="text-[#009bd6] shrink-0" strokeWidth={2.2} />
+                  <span className="text-[13.5px] font-semibold text-slate-700 dark:text-zinc-200">
+                    Cold Chain
+                  </span>
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => toast.info(
+                product.requiresRx && product.isColdChain
+                  ? "Prescription Required & Cold Chain: Pharmacist verified and temperature-controlled shipping."
+                  : product.requiresRx
+                  ? "Prescription Required: Verified by licensed pharmacists before shipment."
+                  : "Cold Chain Product: Special temperature-controlled delivery."
+              )}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+              title="Product Information"
+            >
+              <Info size={17} className="text-slate-400 dark:text-zinc-500" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => toast.info(product.requiresRx ? "Prescription Required: Verified by licensed pharmacists before shipment." : "OTC Medicine: Over-the-counter item. Guaranteed 100% genuine and authentic.")}
-            className="text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
-            title="Product Quality Info"
-          >
-            <Info size={18} />
-          </button>
-        </div>
+        )}
 
         {/* Salt Composition & Marketer Card */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5 overflow-hidden max-w-[calc(100vw-2rem)]">
