@@ -525,6 +525,56 @@ const ProductDetails = () => {
     };
   }, [loading, product, computedSections]);
 
+  const handleIncrement = useCallback(() => {
+    setQuantity(prev => (prev < 30 ? prev + 1 : prev));
+  }, []);
+
+  const handleDecrement = useCallback(() => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : prev));
+  }, []);
+
+  const handleAddToCart = useCallback(() => {
+    if (!product || product.inStock === false || product.stock === 0) return;
+    addToCart(product, quantity);
+    toast.success(`${quantity} item(s) added to cart.`);
+  }, [product, quantity, addToCart]);
+
+  const handleBuyNow = useCallback(() => {
+    if (!product || product.inStock === false || product.stock === 0) return;
+    addToCart(product, quantity);
+    navigate("/cart");
+  }, [product, quantity, addToCart, navigate]);
+
+  const handleShare = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Product link copied to clipboard!");
+  }, []);
+
+  // Swipe gesture handlers for mobile image gallery
+  const handleTouchStart = useCallback((e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && activeImageIdx < imagesList.length - 1) {
+      setActiveImageIdx(prev => prev + 1);
+    }
+    if (isRightSwipe && activeImageIdx > 0) {
+      setActiveImageIdx(prev => prev - 1);
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  }, [touchStart, touchEnd, activeImageIdx, imagesList.length]);
+
   // Memoize sub-components to prevent rendering of large DOM trees on scroll
   const memoizedStickySidebar = useMemo(() => {
     if (!product) return null;
