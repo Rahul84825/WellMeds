@@ -19,6 +19,7 @@ import DeliveryCard from "../components/ProductDetail/DeliveryCard";
 import RXCard from "../components/ProductDetail/RXCard";
 import ColdChainCard from "../components/ProductDetail/ColdChainCard";
 import ProductTabs from "../components/ProductDetail/ProductTabs";
+import SafetyAdviceCards from "../components/ProductDetail/SafetyAdviceCards";
 import SubstituteProducts from "../components/ProductDetail/SubstituteProducts";
 import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkeleton";
 
@@ -1152,16 +1153,8 @@ const ProductDetails = () => {
 
                   {/* Safety */}
                   {sec.type === "safety" && product.safetyCards && (
-                    <div className="grid grid-cols-1 gap-2 mt-2">
-                      {product.safetyCards.map((card, idx) => (
-                        <div key={idx} className="p-2.5 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-slate-800 dark:text-zinc-100">{card.title}</span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
-                          </div>
-                          {card.description && <p className="text-[12px] text-slate-500 dark:text-zinc-400">{card.description}</p>}
-                        </div>
-                      ))}
+                    <div className="mt-2">
+                      <SafetyAdviceCards safetyCards={product.safetyCards} />
                     </div>
                   )}
 
@@ -1249,17 +1242,7 @@ const ProductDetails = () => {
                   <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                     Safety Advice
                   </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {product.safetyCards.map((card, idx) => (
-                      <div key={idx} className="p-2.5 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-slate-800 dark:text-zinc-100">{card.title}</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">{card.status}</span>
-                        </div>
-                        {card.description && <p className="text-[12px] text-slate-500 dark:text-zinc-400">{card.description}</p>}
-                      </div>
-                    ))}
-                  </div>
+                  <SafetyAdviceCards safetyCards={product.safetyCards} />
                 </div>
               )}
 

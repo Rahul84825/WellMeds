@@ -21,6 +21,7 @@ import {
   BookOpen,
   FileText
 } from "lucide-react";
+import { SAFETY_CATEGORIES, getSafetyIcon, getSafetyStatusBadge } from "../constants/safetyIcons";
 
 // --- CMS Parsing and Serialization Utilities ---
 
@@ -651,11 +652,44 @@ const AddNewProduct = () => {
 
   // Safety Cards
   const addSafetyCard = () => {
-    setSafetyCards(prev => [...prev, { icon: "Pregnancy", title: "Pregnancy", status: "Consult Doctor", description: "" }]);
+    const usedCategories = new Set(
+      safetyCards.map(c => (c.title || c.icon || "").trim().toLowerCase())
+    );
+    const available = SAFETY_CATEGORIES.find(
+      cat => !usedCategories.has(cat.label.toLowerCase())
+    );
+
+    if (!available) {
+      toast.warning("All predefined safety categories have already been added.");
+      return;
+    }
+
+    setSafetyCards(prev => [
+      ...prev,
+      { icon: available.label, title: available.label, status: "Consult Doctor", description: "" }
+    ]);
   };
+
   const updateSafetyCard = (index, key, val) => {
-    setSafetyCards(prev => prev.map((card, idx) => idx === index ? { ...card, [key]: val } : card));
+    if (key === "title" || key === "icon") {
+      const selectedCat = String(val).trim();
+      const isDuplicate = safetyCards.some(
+        (c, idx) => idx !== index && (c.title || c.icon || "").trim().toLowerCase() === selectedCat.toLowerCase()
+      );
+      if (isDuplicate) {
+        toast.error(`The "${selectedCat}" category is already added. Duplicate categories are not allowed.`);
+        return;
+      }
+      setSafetyCards(prev =>
+        prev.map((card, idx) => (idx === index ? { ...card, icon: selectedCat, title: selectedCat } : card))
+      );
+      return;
+    }
+    setSafetyCards(prev =>
+      prev.map((card, idx) => (idx === index ? { ...card, [key]: val } : card))
+    );
   };
+
   const deleteSafetyCard = (index) => {
     setSafetyCards(prev => prev.filter((_, idx) => idx !== index));
   };
@@ -1733,58 +1767,135 @@ const AddNewProduct = () => {
                 </div>
 
                 <div className="space-y-md">
-                  {safetyCards.map((card, index) => (
-                    <div key={index} className="p-sm bg-slate-50/50 dark:bg-zinc-955/20 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 space-y-sm relative">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                        <div className="space-y-xs">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Card Category / Icon</label>
-                          <select
-                            value={card.icon}
-                            onChange={(e) => {
-                              updateSafetyCard(index, "icon", e.target.value);
-                              updateSafetyCard(index, "title", e.target.value);
-                            }}
-                            className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                          >
-                            {["Pregnancy", "Alcohol", "Driving", "Kidney", "Liver", "Breastfeeding", "Lactation"].map((opt) => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </select>
+                  {safetyCards.map((card, index) => {
+                    const currentCategory = card.title || card.icon || "Pregnancy";
+                    const previewImg = getSafetyIcon(currentCategory);
+                    const isDuplicate = safetyCards.some(
+                      (c, idx) => idx !== index && (c.title || c.icon || "").trim().toLowerCase() === currentCategory.trim().toLowerCase()
+                    );
+                    const statusPresets = ["Safe", "Unsafe", "Consult Doctor", "Use With Caution", "Unknown"];
+
+                    return (
+                      <div
+                        key={index}
+                        className={`p-md bg-slate-50/50 dark:bg-zinc-955/20 rounded-2xl border transition-all space-y-md relative ${
+                          isDuplicate
+                            ? "border-red-400 bg-red-50/30 dark:border-red-900/50"
+                            : "border-slate-200/70 dark:border-zinc-800/70"
+                        }`}
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-start">
+                          {/* Category Selection & Image Preview */}
+                          <div className="md:col-span-5 space-y-xs">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Category Selection
+                            </label>
+                            <div className="flex items-center gap-sm">
+                              {/* Illustration Preview Box */}
+                              <div className="w-10 h-10 shrink-0 rounded-xl bg-white dark:bg-zinc-900 p-1 border border-slate-200 dark:border-zinc-800 flex items-center justify-center shadow-xs">
+                                {previewImg ? (
+                                  <img
+                                    src={previewImg}
+                                    alt={`${currentCategory} preview`}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <AlertTriangle size={16} className="text-amber-500" />
+                                )}
+                              </div>
+                              <select
+                                value={currentCategory}
+                                onChange={(e) => {
+                                  updateSafetyCard(index, "title", e.target.value);
+                                }}
+                                className="w-full p-2.5 text-xs font-bold bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none text-slate-800 dark:text-zinc-100"
+                              >
+                                {SAFETY_CATEGORIES.map((cat) => (
+                                  <option key={cat.id} value={cat.label}>
+                                    {cat.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            {isDuplicate && (
+                              <p className="text-[10px] font-bold text-red-500 mt-1 flex items-center gap-1">
+                                <AlertTriangle size={12} /> Duplicate category selected. Please pick a unique category.
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Status Field & Presets */}
+                          <div className="md:col-span-6 space-y-xs">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Status / Warning Label
+                            </label>
+                            <input
+                              type="text"
+                              value={card.status}
+                              onChange={(e) => updateSafetyCard(index, "status", e.target.value)}
+                              placeholder="e.g. Consult Doctor, Safe, Unsafe"
+                              className="w-full p-2.5 text-xs font-semibold bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none text-slate-800 dark:text-zinc-100"
+                            />
+                            {/* Preset Buttons */}
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {statusPresets.map((preset) => (
+                                <button
+                                  type="button"
+                                  key={preset}
+                                  onClick={() => updateSafetyCard(index, "status", preset)}
+                                  className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold uppercase transition-all ${
+                                    card.status === preset
+                                      ? "bg-[#004782] text-white shadow-xs"
+                                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-400"
+                                  }`}
+                                >
+                                  {preset}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Delete Card Button */}
+                          <div className="md:col-span-1 flex md:justify-end items-center pt-5">
+                            <button
+                              type="button"
+                              onClick={() => deleteSafetyCard(index)}
+                              title="Delete Safety Card"
+                              className="p-2.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 rounded-xl transition-all cursor-pointer"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="space-y-xs">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status / Warning Label</label>
-                          <input
-                            type="text"
-                            value={card.status}
-                            onChange={(e) => updateSafetyCard(index, "status", e.target.value)}
-                            placeholder="e.g. Consult Doctor, Avoid, Safe"
-                            className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
+
+                        {/* Description Textarea */}
+                        <div className="space-y-xs pt-1">
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Description / Medical Advice
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={card.description}
+                            onChange={(e) => updateSafetyCard(index, "description", e.target.value)}
+                            placeholder="e.g. Consult your doctor before taking this medicine during pregnancy..."
+                            className="w-full p-2.5 text-xs font-medium bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none text-slate-700 dark:text-zinc-200 leading-relaxed"
                           />
                         </div>
-                        <div className="flex items-end justify-end">
-                          <button
-                            type="button"
-                            onClick={() => deleteSafetyCard(index)}
-                            className="p-sm bg-red-50 text-red-500 hover:bg-red-100 rounded-xl cursor-pointer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
                       </div>
-                      <div className="space-y-xs">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description</label>
-                        <textarea
-                          rows={2}
-                          value={card.description}
-                          onChange={(e) => updateSafetyCard(index, "description", e.target.value)}
-                          placeholder="e.g. Side effects might occur. Consult your physician before using this medication during pregnancy..."
-                          className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+
                   {safetyCards.length === 0 && (
-                    <p className="text-[10px] text-slate-400 text-center py-sm">No safety parameter cards configured.</p>
+                    <div className="p-md text-center bg-slate-50/50 dark:bg-zinc-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800">
+                      <p className="text-xs text-slate-400 font-medium">No safety advice parameter cards configured yet.</p>
+                      <button
+                        type="button"
+                        onClick={addSafetyCard}
+                        className="mt-2 text-xs font-bold text-[#004782] hover:underline"
+                      >
+                        + Add First Safety Card
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

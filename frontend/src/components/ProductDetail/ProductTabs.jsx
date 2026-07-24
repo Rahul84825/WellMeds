@@ -1,5 +1,6 @@
 import React from "react";
 import { Info, HelpCircle, Building, ShieldCheck, ChevronDown, Check, CheckCircle, AlertTriangle } from "lucide-react";
+import SafetyAdviceCards from "./SafetyAdviceCards";
 
 const ProductTabs = ({
   computedSections,
@@ -92,35 +93,7 @@ const ProductTabs = ({
 
             {/* Safety Cards Grid */}
             {sec.type === "safety" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                {product.safetyCards.map((card, idx) => {
-                  const status = card.status.toLowerCase();
-                  
-                  let badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400";
-                  if (status.includes("avoid") || status.includes("unsafe") || status.includes("dangerous")) {
-                    badgeStyle = "bg-red-100 text-red-800 border-red-200/50 dark:bg-red-950/20 dark:text-red-400";
-                  } else if (status.includes("caution") || status.includes("moderate")) {
-                    badgeStyle = "bg-yellow-100 text-yellow-800 border-yellow-200/50 dark:bg-yellow-950/20 dark:text-yellow-400";
-                  } else if (status.includes("consult") || status.includes("doctor") || status.includes("physician")) {
-                    badgeStyle = "bg-orange-100 text-orange-850 border-orange-200/50 dark:bg-orange-950/20 dark:text-orange-400";
-                  }
-                  
-                  return (
-                    <div key={idx} className="p-md bg-slate-50/30 dark:bg-zinc-955/10 rounded-2xl border border-slate-100 dark:border-zinc-855 space-y-sm text-xs transition-all hover:shadow-xs text-left">
-                      <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-850/80">
-                        <span className="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-                          <Info size={12} className="text-[#004782]" />
-                          {card.title}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase border tracking-wider ${badgeStyle}`}>
-                          {card.status}
-                        </span>
-                      </div>
-                      {card.description && <p className="text-[10px] text-slate-450 leading-relaxed text-left">{card.description}</p>}
-                    </div>
-                  );
-                })}
-              </div>
+              <SafetyAdviceCards safetyCards={product.safetyCards} />
             )}
 
             {/* FAQs Accordion */}
