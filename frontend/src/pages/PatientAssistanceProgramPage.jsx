@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import papHeroBg from "../assets/PAP/PAP_.png";
 
 const PatientAssistanceProgramPage = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -99,17 +100,14 @@ const PatientAssistanceProgramPage = () => {
 
   return (
     <div className="bg-background text-on-surface min-h-screen text-left">
-      {/* Breadcrumbs */}
-      <div className="border-b border-outline-variant/30 bg-surface-container-lowest/50 py-sm">
-        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
-          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-          <span>/</span>
-          <span className="text-primary font-bold">Patient Assistance Program (PAP)</span>
-        </div>
-      </div>
-
       {/* Hero Section */}
-      <section className="py-xxl bg-gradient-to-b from-[#038076]/5 via-background to-background relative overflow-hidden">
+      <section 
+        className="py-xxl md:py-3xl relative overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-300"
+        style={{ backgroundImage: `url(${papHeroBg})` }}
+      >
+        {/* Soft Contrast Overlay for Readability */}
+        <div className="absolute inset-0 bg-white/80 dark:bg-zinc-950/85 backdrop-blur-[1px] pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/40 dark:from-zinc-950/95 dark:via-zinc-950/80 dark:to-zinc-950/40 pointer-events-none z-0"></div>
         <div className="absolute inset-0 opacity-5 pointer-events-none medical-pattern"></div>
 
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
