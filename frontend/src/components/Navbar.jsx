@@ -112,9 +112,10 @@ const Navbar = () => {
     setLocationMenuOpen(false);
   };
 
-  // Search states
+  // Search & Sticky Navbar Scroll states
   const [showNavbarSearch, setShowNavbarSearch] = useState(() => location.pathname !== "/");
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Profile and Prescription Upload states
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -142,27 +143,19 @@ const Navbar = () => {
     return () => { active = false; };
   }, []);
 
-
-  // Sync scroll showing of search input on homepage
+  // Sync scroll state for elevation and search input visibility
   useEffect(() => {
-    if (location.pathname !== "/") {
-      return;
-    }
-
-    // Set initial value based on scroll position asynchronously to avoid sync setState warning
-    window.requestAnimationFrame(() => {
-      setShowNavbarSearch(window.scrollY > 200);
-    });
-
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          if (currentScrollY > 200) {
-            setShowNavbarSearch(true);
+          setIsScrolled(currentScrollY > 10);
+
+          if (location.pathname === "/") {
+            setShowNavbarSearch(currentScrollY > 200);
           } else {
-            setShowNavbarSearch(false);
+            setShowNavbarSearch(true);
           }
           ticking = false;
         });
@@ -170,6 +163,7 @@ const Navbar = () => {
       }
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [location.pathname]);
@@ -332,7 +326,13 @@ const Navbar = () => {
   }, [focusedProfileIndex]);
 
   return (
-    <nav className={`w-full sticky top-0 flex flex-col border-b border-slate-150 bg-white/90 backdrop-blur-md shadow-sm transition-colors duration-200 ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}>
+    <nav
+      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md transition-all duration-300 ${
+        isScrolled
+          ? "shadow-md bg-white/98 dark:bg-zinc-950/98 border-slate-200 dark:border-zinc-800"
+          : "shadow-xs"
+      } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
+    >
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col w-full py-0 lg:py-2">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}

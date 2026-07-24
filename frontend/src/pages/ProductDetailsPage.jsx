@@ -522,7 +522,7 @@ const ProductDetails = () => {
 
     // 7. Precautions / Safety Information
     const safetySec = findAndRemoveMedSec(["precautions", "safety information", "safety advice", "safety cards"]);
-    if (product.safetyCards && product.safetyCards.length > 0) {
+    if (Array.isArray(product.safetyCards)) {
       sections.push({ id: "Precautions", title: "Safety Information", type: "safety" });
     } else if (safetySec) {
       sections.push({ id: "Precautions", title: "Safety Information", content: safetySec.content });
@@ -570,7 +570,7 @@ const ProductDetails = () => {
       if (sec.type === "warnings") return product.warnings && product.warnings.length > 0;
       if (sec.type === "sideeffects") return product.sideEffects && product.sideEffects.length > 0;
       if (sec.type === "storage") return product.storageInstructions && product.storageInstructions.length > 0;
-      if (sec.type === "safety") return product.safetyCards && product.safetyCards.length > 0;
+      if (sec.type === "safety") return Array.isArray(product.safetyCards);
       if (sec.type === "faqs") return product.faqs && product.faqs.length > 0;
       if (sec.type === "references") return product.references && product.references.length > 0;
       return typeof sec.content === "string" && sec.content.trim().length > 0;
@@ -1275,7 +1275,7 @@ const ProductDetails = () => {
               )}
 
               {/* Safety Cards */}
-              {product.safetyCards && product.safetyCards.length > 0 && (
+              {Array.isArray(product.safetyCards) && (
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
                   <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
                     Safety Advice
