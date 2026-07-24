@@ -111,6 +111,13 @@ const ProductDetails = () => {
     return [DEFAULT_PRODUCT_IMAGE];
   }, [product]);
 
+  const discountPercent = useMemo(() => {
+    if (product?.originalPrice && product.originalPrice > product.price) {
+      return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    }
+    return 0;
+  }, [product]);
+
   useEffect(() => {
     let isMounted = true;
     const fetchProductDetails = async () => {
