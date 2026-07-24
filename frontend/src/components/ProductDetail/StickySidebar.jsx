@@ -23,6 +23,7 @@ const StickySidebar = ({
     { label: "Storage", id: "Storage", available: computedSections.some(s => s.id === "Storage") },
     { label: "FAQs", id: "FAQs", available: computedSections.some(s => s.id === "FAQs") },
     { label: "References", id: "References", available: computedSections.some(s => s.id === "References") },
+    { label: "Disclaimer", id: "Disclaimer", available: true },
   ].filter(item => item.available);
 
   return (

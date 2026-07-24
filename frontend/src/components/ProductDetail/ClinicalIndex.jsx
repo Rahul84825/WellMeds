@@ -35,7 +35,7 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
       </button>
 
       {/* List container */}
-      <div className={`mt-sm space-y-[4px] ${isOpen ? "block" : "hidden md:block"}`}>
+      <div className={`mt-sm space-y-[4px] ${isOpen ? "block" : "hidden md:block"}`} role="navigation" aria-label="Clinical Index">
         {clinicalItems.map((item) => {
           const isActive = activeSection === item.id;
           return (
@@ -43,10 +43,11 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
               key={item.id}
               type="button"
               onClick={() => handleScrollTo(item.id)}
-              className={`w-full text-left py-1.5 px-3 rounded-xl text-sm font-semibold transition-all duration-150 flex items-center justify-between cursor-pointer border border-transparent select-none ${
+              aria-current={isActive ? "location" : undefined}
+              className={`w-full text-left py-1.5 px-3 rounded-xl text-sm font-semibold transition-all duration-150 flex items-center justify-between cursor-pointer border border-transparent select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#038076] ${
                 isActive
-                  ? "bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] dark:text-[#40a390] border-l-2 border-l-[#038076] dark:border-l-[#40a390] pl-[10px] font-bold"
-                  : "text-slate-600 dark:text-zinc-400 hover:bg-slate-55/60 dark:hover:bg-zinc-800/40 hover:text-slate-850 dark:hover:text-zinc-200"
+                  ? "bg-[#038076]/10 dark:bg-[#038076]/20 text-[#038076] dark:text-[#40a390] border-l-2 border-l-[#038076] dark:border-l-[#40a390] pl-[10px] font-bold shadow-2xs"
+                  : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 hover:text-slate-850 dark:hover:text-zinc-200"
               }`}
             >
               <span>{item.label}</span>
@@ -54,8 +55,8 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
                 size={12} 
                 className={`transition-all duration-150 ${
                   isActive 
-                    ? "opacity-100 translate-x-0" 
-                    : "opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"
+                    ? "opacity-100 translate-x-0 text-[#038076] dark:text-[#40a390]" 
+                    : "opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 text-slate-400"
                 }`} 
               />
             </button>

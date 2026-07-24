@@ -366,26 +366,47 @@ const ProductDetails = () => {
     };
   }, [product]);
 
-  // --- Scroll Spy for Sticky Sidebar ---
+  // --- Intersection Observer for Sticky Sidebar Active Section Tracking ---
   useEffect(() => {
     if (loading || !product) return;
 
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 160;
-      let active = "";
+    const visibleSections = new Map();
 
-      Object.entries(sectionRefs.current).forEach(([id, ref]) => {
-        if (ref && ref.offsetTop <= scrollPosition) {
-          active = id;
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          visibleSections.set(entry.target.id, entry);
+        } else {
+          visibleSections.delete(entry.target.id);
         }
       });
 
-      if (active) setActiveSection(active);
+      if (visibleSections.size > 0) {
+        const sorted = Array.from(visibleSections.values()).sort((a, b) => {
+          return a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top;
+        });
+        if (sorted[0] && sorted[0].target.id) {
+          setActiveSection(sorted[0].target.id);
+        }
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loading, product]);
+    const observerOptions = {
+      root: null,
+      rootMargin: "-100px 0px -40% 0px", // Top margin accounts for fixed navbar (~96px)
+      threshold: [0, 0.1, 0.3, 0.5, 0.8, 1.0]
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    Object.values(sectionRefs.current).forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loading, product, computedSections]);
 
   const handleIncrement = useCallback(() => {
     setQuantity(prev => (prev < 30 ? prev + 1 : prev));
@@ -700,6 +721,23 @@ const ProductDetails = () => {
       />
     );
   }, [computedSections, openFaqIdx, product]);
+
+  const memoizedDisclaimer = useMemo(() => {
+    return (
+      <div 
+        id="Disclaimer"
+        ref={el => sectionRefs.current["Disclaimer"] = el}
+        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-sm scroll-mt-28"
+      >
+        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[16px] text-amber-500 leading-none">warning</span> Disclaimer
+        </h2>
+        <p className="text-slate-500 dark:text-zinc-400 text-xs leading-relaxed">
+          The information provided here is for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Do not disregard professional medical advice or delay in seeking it because of something you have read on this website.
+        </p>
+      </div>
+    );
+  }, []);
 
   const memoizedPurchaseCard = useMemo(() => {
     if (!product) return null;
@@ -1493,6 +1531,9 @@ const ProductDetails = () => {
 
             {/* Clinical Info sections */}
             {memoizedProductTabs}
+
+            {/* Disclaimer Section */}
+            {memoizedDisclaimer}
           </div>
 
         </div>
