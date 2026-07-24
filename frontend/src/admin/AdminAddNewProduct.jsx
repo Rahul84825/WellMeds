@@ -818,7 +818,7 @@ const AddNewProduct = () => {
   }
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-md sm:space-y-xl animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden">
       
       {/* Back navigation */}
       <div className="flex items-center justify-between">
@@ -829,13 +829,13 @@ const AddNewProduct = () => {
       </div>
 
       {/* Header */}
-      <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-        <Sparkles className="text-[#004782]" size={24} />
-        {isEditMode ? `Product CMS: ${name}` : "Create Catalog Product & Medical Article"}
+      <h1 className="font-bold text-xl sm:text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs flex-wrap">
+        <Sparkles className="text-[#004782] shrink-0" size={24} />
+        <span className="break-words">{isEditMode ? `Product CMS: ${name}` : "Create Catalog Product & Medical Article"}</span>
       </h1>
 
       {/* Custom Tabs Navigation */}
-      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-md scrollbar-none">
+      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-xs sm:gap-md scrollbar-none touch-pan-x px-xs pb-0.5">
         {[
           { id: "basic", label: "Basic Info & Media", icon: Settings },
           { id: "medical", label: "Medical Content Sections", icon: BookOpen },
@@ -849,7 +849,7 @@ const AddNewProduct = () => {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-xs py-sm px-md border-b-2 font-bold text-xs whitespace-nowrap transition-all ${
+              className={`flex items-center gap-xs py-sm px-xs sm:px-md border-b-2 font-bold text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${
                 activeTab === tab.id
                   ? "border-[#004782] text-primary dark:text-[#a4c9ff]"
                   : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
@@ -1165,7 +1165,7 @@ const AddNewProduct = () => {
                 <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
                   Prescription &amp; Medical Rules
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-sm sm:gap-md">
                   
                   {/* Rx Toggle */}
                   <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
@@ -1503,8 +1503,8 @@ const AddNewProduct = () => {
                   isOpen={activeClinicalSection === "productSpecifications"}
                   onToggle={() => setActiveClinicalSection(activeClinicalSection === "productSpecifications" ? null : "productSpecifications")}
                 >
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
-                    <table className="w-full text-xs text-left border-collapse">
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900 scrollbar-none">
+                    <table className="w-full min-w-[320px] text-xs text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-zinc-950 text-[10px] font-bold text-slate-450 dark:text-zinc-400 uppercase tracking-wider border-b border-slate-200 dark:border-zinc-800">
                           <th className="px-md py-sm w-1/3">Specification</th>
@@ -1856,14 +1856,15 @@ const AddNewProduct = () => {
                           </div>
 
                           {/* Delete Card Button */}
-                          <div className="md:col-span-1 flex md:justify-end items-center pt-5">
+                          <div className="md:col-span-1 flex justify-start md:justify-end items-center pt-2 md:pt-5">
                             <button
                               type="button"
                               onClick={() => deleteSafetyCard(index)}
                               title="Delete Safety Card"
-                              className="p-2.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 rounded-xl transition-all cursor-pointer"
+                              className="p-2.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-xs text-xs font-bold md:p-2.5"
                             >
                               <Trash2 size={16} />
+                              <span className="inline md:hidden">Delete Card</span>
                             </button>
                           </div>
                         </div>
@@ -2031,7 +2032,7 @@ const AddNewProduct = () => {
         </div>
 
         {/* Right Media & Publishing Panel */}
-        <div className="w-full lg:w-[350px] space-y-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-2xl shadow-sm text-xs">
+        <div className="w-full lg:w-[350px] shrink-0 space-y-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm sm:p-lg rounded-2xl shadow-sm text-xs lg:sticky lg:top-6">
           
           <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
             <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Product Images</h4>
@@ -2167,7 +2168,7 @@ const AddNewProduct = () => {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold py-sm rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
+              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs min-h-[44px]"
             >
               {isSaving ? (
                 <>
@@ -2183,7 +2184,7 @@ const AddNewProduct = () => {
             </button>
             <Link
               to="/admin/products"
-              className="w-full text-center border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold py-sm rounded-xl text-xs transition-colors select-none"
+              className="w-full text-center border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold py-3 px-4 rounded-xl text-xs transition-colors select-none min-h-[44px] inline-flex items-center justify-center"
             >
               Cancel
             </Link>

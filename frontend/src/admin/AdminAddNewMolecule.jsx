@@ -361,17 +361,17 @@ const AdminAddNewMolecule = () => {
   }
 
   return (
-    <div className="space-y-lg text-left max-w-4xl mx-auto">
+    <div className="space-y-md sm:space-y-lg text-left max-w-4xl w-full mx-auto px-xs sm:px-md overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center gap-md border-b border-slate-100 dark:border-zinc-800 pb-md">
+      <div className="flex items-center gap-sm sm:gap-md border-b border-slate-100 dark:border-zinc-800 pb-md">
         <button
           onClick={() => navigate("/admin/molecules")}
-          className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
+          className="p-2 sm:p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all shrink-0 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
         >
           <ArrowLeft size={16} />
         </button>
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-800 dark:text-zinc-100 tracking-tight">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-800 dark:text-zinc-100 tracking-tight break-words">
             {isEditMode ? `Edit Molecule: ${name}` : "Create New Molecule"}
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">Configure generic active chemical compounds and medical descriptions.</p>
@@ -379,7 +379,7 @@ const AdminAddNewMolecule = () => {
       </div>
 
       {/* Tabs list */}
-      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-sm select-none">
+      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-xs sm:gap-sm select-none scrollbar-none touch-pan-x px-xs pb-0.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -387,7 +387,7 @@ const AdminAddNewMolecule = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-xs px-md py-sm border-b-2 font-bold text-xs transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-xs px-xs sm:px-md py-sm border-b-2 font-bold text-xs transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 isActive
                   ? "border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
                   : "border-transparent text-slate-400 hover:text-slate-600"
@@ -937,11 +937,11 @@ const AdminAddNewMolecule = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-xs bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs hover:opacity-90 transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-xs bg-[#004782] text-white px-lg py-3 rounded-xl font-bold text-xs hover:opacity-90 transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm min-h-[44px]"
           >
             <Save size={14} /> {isSaving ? "Saving Compound..." : "Save Molecule Details"}
           </button>
@@ -949,7 +949,7 @@ const AdminAddNewMolecule = () => {
             type="button"
             onClick={() => navigate("/admin/molecules")}
             disabled={isSaving}
-            className="inline-flex items-center justify-center border border-slate-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 px-lg py-sm rounded-xl font-bold text-xs hover:bg-slate-50 transition-all select-none cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center border border-slate-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 px-lg py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all select-none cursor-pointer min-h-[44px]"
           >
             Cancel
           </button>
