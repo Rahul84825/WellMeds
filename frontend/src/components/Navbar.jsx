@@ -602,8 +602,14 @@ const Navbar = () => {
         </div>
       </div>
 
-        {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only) */}
-        <div className="hidden lg:flex items-center justify-center border-t border-slate-100/60 z-20 relative w-full h-[64px]">
+        {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only - Smart Collapsing on Scroll) */}
+        <div
+          className={`hidden lg:flex items-center justify-center z-20 relative w-full transition-all duration-300 ease-in-out ${
+            isScrolled
+              ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden border-t-0 py-0 border-none"
+              : "max-h-[64px] h-[64px] opacity-100 translate-y-0 pointer-events-auto overflow-visible border-t border-slate-100/60 dark:border-zinc-800/60"
+          }`}
+        >
           <div className="flex h-full items-center justify-center gap-x-[48px] lg:gap-x-[56px]">
             
             {/* 1. MEDICINES (Mega Menu) */}

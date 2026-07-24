@@ -366,100 +366,6 @@ const ProductDetails = () => {
     };
   }, [product]);
 
-  // --- Intersection Observer for Sticky Sidebar Active Section Tracking ---
-  useEffect(() => {
-    if (loading || !product) return;
-
-    const visibleSections = new Map();
-
-    const observerCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          visibleSections.set(entry.target.id, entry);
-        } else {
-          visibleSections.delete(entry.target.id);
-        }
-      });
-
-      if (visibleSections.size > 0) {
-        const sorted = Array.from(visibleSections.values()).sort((a, b) => {
-          return a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top;
-        });
-        if (sorted[0] && sorted[0].target.id) {
-          setActiveSection(sorted[0].target.id);
-        }
-      }
-    };
-
-    const observerOptions = {
-      root: null,
-      rootMargin: "-100px 0px -40% 0px", // Top margin accounts for fixed navbar (~96px)
-      threshold: [0, 0.1, 0.3, 0.5, 0.8, 1.0]
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    Object.values(sectionRefs.current).forEach((el) => {
-      if (el) observer.observe(el);
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [loading, product, computedSections]);
-
-  const handleIncrement = useCallback(() => {
-    setQuantity(prev => (prev < 30 ? prev + 1 : prev));
-  }, []);
-
-  const handleDecrement = useCallback(() => {
-    setQuantity(prev => (prev > 1 ? prev - 1 : prev));
-  }, []);
-
-  const handleAddToCart = useCallback(() => {
-    if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
-    toast.success(`${quantity} item(s) added to cart.`);
-  }, [product, quantity, addToCart]);
-
-  const handleBuyNow = useCallback(() => {
-    if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
-    navigate("/cart");
-  }, [product, quantity, addToCart, navigate]);
-
-  const handleShare = useCallback(() => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Product link copied to clipboard!");
-  }, []);
-
-
-
-  // Swipe gesture handlers for mobile image gallery
-  const handleTouchStart = useCallback((e) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  }, []);
-
-  const handleTouchMove = useCallback((e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-    
-    if (isLeftSwipe && activeImageIdx < imagesList.length - 1) {
-      setActiveImageIdx(prev => prev + 1);
-    }
-    if (isRightSwipe && activeImageIdx > 0) {
-      setActiveImageIdx(prev => prev - 1);
-    }
-    setTouchStart(null);
-    setTouchEnd(null);
-  }, [touchStart, touchEnd, activeImageIdx, imagesList.length]);
-
   // Compile Dynamic Content Sections
   const computedSections = useMemo(() => {
     if (!product) return [];
@@ -577,9 +483,47 @@ const ProductDetails = () => {
     });
   }, [product]);
 
-  const discountPercent = product?.originalPrice && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  // --- Intersection Observer for Sticky Sidebar Active Section Tracking ---
+  useEffect(() => {
+    if (loading || !product) return;
+
+    const visibleSections = new Map();
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          visibleSections.set(entry.target.id, entry);
+        } else {
+          visibleSections.delete(entry.target.id);
+        }
+      });
+
+      if (visibleSections.size > 0) {
+        const sorted = Array.from(visibleSections.values()).sort((a, b) => {
+          return a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top;
+        });
+        if (sorted[0] && sorted[0].target.id) {
+          setActiveSection(sorted[0].target.id);
+        }
+      }
+    };
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "-100px 0px -40% 0px", // Top margin accounts for fixed navbar (~96px)
+      threshold: [0, 0.1, 0.3, 0.5, 0.8, 1.0]
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    Object.values(sectionRefs.current).forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loading, product, computedSections]);
 
   // Memoize sub-components to prevent rendering of large DOM trees on scroll
   const memoizedStickySidebar = useMemo(() => {
