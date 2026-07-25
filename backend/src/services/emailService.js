@@ -41,8 +41,13 @@ export const sendPrescriptionReviewEmail = async (email, customerName, rxFileNam
   return await sendEmail({ to: email, subject: `MediShop Prescription Verification Status: ${status}`, html });
 };
 
+const getFrontendBaseUrl = () => {
+  const urlStr = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://www.wellmeds.in";
+  return urlStr.split(",")[0].trim().replace(/\/$/, "");
+};
+
 export const sendVerificationEmail = async (email, name, token) => {
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const frontendUrl = getFrontendBaseUrl();
   const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
@@ -67,7 +72,7 @@ export const sendVerificationEmail = async (email, name, token) => {
 };
 
 export const sendPasswordResetEmail = async (email, name, token) => {
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const frontendUrl = getFrontendBaseUrl();
   const resetLink = `${frontendUrl}/reset-password?token=${token}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">

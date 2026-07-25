@@ -57,8 +57,9 @@ export const validateEnv = () => {
 
   // 2. CLIENT_URL is valid
   try {
-    const url = process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
-    new URL(url);
+    const rawUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
+    const firstUrl = rawUrl.split(",")[0].trim();
+    new URL(firstUrl);
   } catch (err) {
     console.error("FATAL CONFIGURATION ERROR: CLIENT_URL environment variable must be a valid URL.");
     process.exit(1);

@@ -11,13 +11,13 @@ import {
 
 const getSiteUrl = (req) => {
   if (process.env.SITE_URL) {
-    return process.env.SITE_URL.replace(/\/$/, "");
+    return process.env.SITE_URL.split(",")[0].trim().replace(/\/$/, "");
   }
   if (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes("localhost")) {
-    return process.env.CLIENT_URL.replace(/\/$/, "");
+    return process.env.CLIENT_URL.split(",")[0].trim().replace(/\/$/, "");
   }
   if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes("localhost")) {
-    return process.env.FRONTEND_URL.replace(/\/$/, "");
+    return process.env.FRONTEND_URL.split(",")[0].trim().replace(/\/$/, "");
   }
   if (req && req.headers && req.headers.host && !req.headers.host.includes("localhost")) {
     const protocol = req.protocol || "https";

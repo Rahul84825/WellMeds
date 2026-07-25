@@ -61,22 +61,93 @@ app.use(helmet({
   },
 }));
 
-// Dynamic CORS configuration
-const allowedOrigins = process.env.CLIENT_URL 
-  ? process.env.CLIENT_URL.split(",").map(o => o.trim()) 
-  : ["http://localhost:5173"];
+// Dynamic & Resilient CORS configuration
+const defaultOrigins = [
+  "https://wellmeds.in",
+  "https://www.wellmeds.in",
+  "http://wellmeds.in",
+  "http://www.wellmeds.in",
+  "https://wellmeds.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === "development") {
-      return callback(null, true);
+const parseEnvOrigins = (...envVars) => {
+  const list = [];
+  envVars.forEach((val) => {
+    if (val) {
+      val.split(",").forEach((item) => {
+        const trimmed = item.trim().replace(/\/+$/, "");
+        if (trimmed) {
+          list.push(trimmed);
+          if (trimmed.startsWith("https://www.")) {
+            list.push(trimmed.replace("https://www.", "https://"));
+          } else if (trimmed.startsWith("https://")) {
+            list.push(trimmed.replace("https://", "https://www."));
+          } else if (trimmed.startsWith("http://www.")) {
+            list.push(trimmed.replace("http://www.", "http://"));
+          } else if (trimmed.startsWith("http://")) {
+            list.push(trimmed.replace("http://", "http://www."));
+          }
+        }
+      });
     }
-    return callback(new Error("Not allowed by CORS"));
+  });
+  return list;
+};
+
+const allowedOriginsSet = new Set([
+  ...defaultOrigins,
+  ...parseEnvOrigins(process.env.CLIENT_URL, process.env.FRONTEND_URL),
+]);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Allow non-browser, server-to-server, mobile app, Postman, curl requests
+  const cleanOrigin = origin.trim().replace(/\/+$/, "");
+
+  if (allowedOriginsSet.has(cleanOrigin)) return true;
+
+  // Match wellmeds.in or subdomains
+  if (/^https?:\/\/(.+\.)?wellmeds\.in$/i.test(cleanOrigin)) return true;
+
+  // Match Vercel deployments
+  if (/^https?:\/\/(.+\.)?vercel\.app$/i.test(cleanOrigin)) return true;
+
+  // Match Render deployments
+  if (/^https?:\/\/(.+\.)?onrender\.com$/i.test(cleanOrigin)) return true;
+
+  if (process.env.NODE_ENV === "development") return true;
+
+  return false;
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
   },
   credentials: true,
-}));
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "Access-Control-Allow-Origin",
+    "Access-Control-Allow-Headers",
+  ],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(globalLimiter);
 app.use(express.json({
