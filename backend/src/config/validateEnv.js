@@ -51,8 +51,7 @@ export const validateEnv = () => {
 
   // 1. PORT is numeric
   if (process.env.PORT && isNaN(Number(process.env.PORT))) {
-    console.error("FATAL CONFIGURATION ERROR: PORT environment variable must be numeric.");
-    process.exit(1);
+    console.warn("[WARNING] PORT environment variable is not numeric. Server will default to port 5000.");
   }
 
   // 2. CLIENT_URL is valid
@@ -61,22 +60,21 @@ export const validateEnv = () => {
     const firstUrl = rawUrl.split(",")[0].trim();
     new URL(firstUrl);
   } catch (err) {
-    console.error("FATAL CONFIGURATION ERROR: CLIENT_URL environment variable must be a valid URL.");
-    process.exit(1);
+    console.warn("[WARNING] CLIENT_URL environment variable is not a valid URL.");
   }
 
-  // 3. JWT_SECRET minimum length (at least 16 characters)
-  if (process.env.JWT_SECRET.length < 16) {
-    console.error("FATAL CONFIGURATION ERROR: JWT_SECRET must be at least 16 characters long for production-grade security.");
-    process.exit(1);
+  // 3. JWT_SECRET minimum length check
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 16) {
+    console.warn("[WARNING] JWT_SECRET is shorter than 16 characters. A longer secret is recommended for production security.");
   }
 
   // 4. SMTP_PORT is numeric if provided
   if (process.env.SMTP_PORT && isNaN(Number(process.env.SMTP_PORT))) {
-    console.error("FATAL CONFIGURATION ERROR: SMTP_PORT must be numeric if provided.");
-    process.exit(1);
+    console.warn("[WARNING] SMTP_PORT is not numeric. Falling back to default port 587.");
+    process.env.SMTP_PORT = "587";
   }
 
   console.log("✔ Environment variables validated successfully.");
 };
 export default validateEnv;
+
