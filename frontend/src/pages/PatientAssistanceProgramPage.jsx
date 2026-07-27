@@ -106,8 +106,8 @@ const PatientAssistanceProgramPage = () => {
         style={{ backgroundImage: `url(${papHeroBg})` }}
       >
         {/* Soft Contrast Overlay for Readability */}
-        <div className="absolute inset-0 bg-white/80 dark:bg-zinc-950/85 backdrop-blur-[1px] pointer-events-none z-0"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/40 dark:from-zinc-950/95 dark:via-zinc-950/80 dark:to-zinc-950/40 pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-white/30 dark:bg-zinc-950/50 pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/40 to-transparent dark:from-zinc-950/70 dark:via-zinc-950/50 dark:to-transparent pointer-events-none z-0"></div>
         <div className="absolute inset-0 opacity-5 pointer-events-none medical-pattern"></div>
 
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
@@ -141,7 +141,7 @@ const PatientAssistanceProgramPage = () => {
           {/* Premium Right Side Illustration */}
           <div className="lg:col-span-5 flex justify-center relative">
             <div className="relative w-85 h-80 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-secondary/15 rounded-full blur-3xl animate-pulse-slow"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-secondary/15 rounded-full blur-md animate-pulse-slow"></div>
 
               {/* dossier decoration card 1 */}
               <div className="absolute top-12 left-2 bg-white dark:bg-zinc-900 border border-outline-variant/30 rounded-2xl p-md shadow-lg w-52 transform -rotate-6 transition-transform hover:rotate-0 duration-300 z-20">

@@ -327,13 +327,13 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md transition-all duration-300 ${
+      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-[#f6f7fa] dark:bg-zinc-950 transform-gpu transition-all duration-300 ${
         isScrolled
-          ? "shadow-md bg-white/98 dark:bg-zinc-950/98 border-slate-200 dark:border-zinc-800"
+          ? "shadow-md bg-[#f6f7fa] dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
           : "shadow-xs"
       } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 xl:px-16 flex flex-col w-full py-0 lg:py-2">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 flex flex-col w-full py-0 lg:py-1">
         
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
         <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[76px] lg:h-[64px]">
@@ -356,49 +356,48 @@ const Navbar = () => {
             </div>
 
             {/* Search bar & Location selector container */}
-            <div className="flex items-center justify-center flex-grow flex-1 mx-6 relative z-10">
+            <div className="flex items-center justify-center flex-grow flex-1 mx-4 relative z-10">
               <div 
                 style={{
-                  transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1)",
+                  transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1), max-width 300ms ease",
                   transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                   opacity: showNavbarSearch ? 1 : 0,
                 }}
-                className={`w-full ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
+                className={`w-full transition-all duration-300 ${isScrolled ? "max-w-[420px]" : "max-w-[540px]"} ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
               >
                 <UniversalSearch variant="default" />
               </div>
             </div>
 
             {/* Desktop Right Side Top Actions */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-4 shrink-0">
               {/* Upload Rx Button */}
               <button
                 onClick={() => navigate("/upload-prescription")}
-                className="bg-[#02665e] text-white px-4 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#02665e] focus:ring-offset-2 flex items-center justify-center gap-1.5 active:scale-[0.98] select-none cursor-pointer text-xs"
+                className="bg-[#02665e] hover:bg-[#02564f] text-white px-5 h-[38px] rounded-xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#02665e] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none cursor-pointer text-[14.5px] shadow-xs"
                 aria-label="Upload Doctor Prescription"
               >
-                <FileText className="w-[14px] h-[14px]" />
-                <span>Upload Rx</span>
+                <span>Upload</span>
               </button>
 
               {/* Offer Button */}
               <Link
                 to="/offers"
-                className="w-[34px] h-[34px] rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+                className="p-2 flex items-center justify-center text-slate-700 hover:text-[#02665e] focus:outline-none transition-colors"
                 aria-label="Discounts & Offers"
               >
-                <Percent className="w-[15px] h-[15px] text-gray-700" />
+                <Percent className="w-[20px] h-[20px]" />
               </Link>
 
               {/* Shopping Cart */}
               <Link
                 to="/cart"
-                className="relative w-[34px] h-[34px] rounded-full border border-gray-205 flex items-center justify-center text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] transition-colors"
+                className="relative p-2 flex items-center justify-center text-slate-700 hover:text-[#02665e] focus:outline-none transition-colors"
                 aria-label={`Shopping Cart with ${cartCount} items`}
               >
-                <ShoppingCart className="w-[15px] h-[15px]" />
+                <ShoppingCart className="w-[20px] h-[20px]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-[16px] h-[16px] rounded-full flex items-center justify-center animate-pulse border border-white">
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-bold w-[16px] h-[16px] rounded-full flex items-center justify-center border border-white">
                     {cartCount}
                   </span>
                 )}
@@ -415,17 +414,19 @@ const Navbar = () => {
                     aria-label="User profile menu"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     onKeyDown={handleProfileKeyDown}
-                    className="px-4 h-[34px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-1.5 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] cursor-pointer shrink-0 text-xs font-semibold"
+                    className={`px-5 h-[38px] border border-slate-200/90 rounded-2xl flex items-center justify-center gap-2 text-slate-800 focus:outline-none transition-all duration-150 cursor-pointer shrink-0 text-[14.5px] font-semibold ${
+                      profileDropdownOpen ? "bg-slate-200/80 border-slate-300" : "bg-white hover:bg-slate-50 hover:border-slate-300"
+                    }`}
                   >
-                    <User className="w-[14px] h-[14px] text-gray-500" />
-                    <span className="max-w-[80px] truncate">{user.name}</span>
+                    <User className="w-[18px] h-[18px] text-slate-700" />
+                    <span className="max-w-[100px] truncate">{user.name}</span>
                   </button>
                 ) : (
                   <button
                     onClick={() => openLoginModal()}
-                    className="w-[90px] h-[34px] border border-gray-200 bg-white rounded-full flex items-center justify-center gap-1.5 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#004782] font-semibold cursor-pointer shrink-0 text-xs"
+                    className="px-5 h-[38px] border border-slate-200/90 bg-white rounded-2xl flex items-center justify-center gap-2 text-slate-800 hover:bg-slate-50 hover:border-slate-300 focus:outline-none font-semibold cursor-pointer shrink-0 text-[14.5px] transition-all duration-150"
                   >
-                    <User className="w-[14px] h-[14px] text-gray-500" />
+                    <User className="w-[18px] h-[18px] text-slate-700" />
                     <span>Login</span>
                   </button>
                 )}
@@ -435,19 +436,22 @@ const Navbar = () => {
                     id="user-profile-menu"
                     role="menu"
                     aria-label="User Profile Options"
-                    className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-150 rounded-xl shadow-xl z-[150] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 z-[200] animate-in fade-in slide-in-from-top-2 duration-150"
                   >
-                    <div className="flex items-center gap-2.5 px-4 py-3 border-b border-slate-100 select-none bg-slate-50/50">
-                      <div className="w-8 h-8 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-extrabold text-sm shrink-0">
+                    {/* Top Caret Triangle Arrow */}
+                    <div className="absolute -top-2 right-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
+
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-slate-100 select-none bg-slate-50/80 rounded-xl mb-1.5 relative z-30">
+                      <div className="w-9 h-9 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-extrabold text-sm shrink-0">
                         {user.name ? user.name[0].toUpperCase() : "U"}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <p className="text-xs font-bold text-gray-800 truncate leading-tight">{user.name}</p>
-                        <p className="text-[9px] text-gray-400 truncate mt-[2px] leading-normal">{user.email || user.phone || ""}</p>
+                        <p className="text-sm font-bold text-gray-800 truncate leading-tight">{user.name}</p>
+                        <p className="text-[11px] text-gray-500 truncate mt-[2px] leading-normal">{user.email || user.phone || ""}</p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-0.5 p-1">
+                    <div className="flex flex-col gap-0.5 relative z-30">
                       {profileDropdownItems.map((item, idx) => {
                         const isLink = item.type === "link";
                         const Comp = isLink ? Link : "button";
@@ -461,16 +465,16 @@ const Navbar = () => {
                               ref={(el) => (profileMenuRefs.current[idx] = el)}
                               role="menuitem"
                               {...compProps}
-                              className={`group flex items-center gap-2.5 px-3 py-2 text-[11px] font-semibold rounded-lg select-none transition-all duration-150 w-full text-left cursor-pointer outline-none
+                              className={`group flex items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium rounded-lg select-none transition-all duration-150 w-full text-left cursor-pointer outline-none
                                 ${item.id === "logout"
-                                  ? "text-red-600 hover:bg-red-50 hover:text-red-700"
+                                  ? "text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold"
                                   : isActive
-                                    ? "bg-emerald-50 text-emerald-700"
-                                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-emerald-50 text-emerald-700 font-semibold"
+                                    : "text-slate-800 hover:bg-slate-50 hover:text-[#038076]"
                                 }
                               `}
                             >
-                              <item.icon className={`w-[15px] h-[15px] shrink-0 ${item.id === "logout" ? "text-red-500" : "text-slate-400 group-hover:text-slate-600"}`} />
+                              <item.icon className={`w-4 h-4 shrink-0 ${item.id === "logout" ? "text-red-500" : "text-slate-400 group-hover:text-[#038076]"}`} />
                               <span>{item.label}</span>
                             </Comp>
                           </React.Fragment>
@@ -602,15 +606,9 @@ const Navbar = () => {
         </div>
       </div>
 
-        {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only - Smart Collapsing on Scroll) */}
-        <div
-          className={`hidden lg:flex items-center justify-center z-20 relative w-full transition-all duration-300 ease-in-out ${
-            isScrolled
-              ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden border-t-0 py-0 border-none"
-              : "max-h-[64px] h-[64px] opacity-100 translate-y-0 pointer-events-auto overflow-visible border-t border-slate-100/60 dark:border-zinc-800/60"
-          }`}
-        >
-          <div className="flex h-full items-center justify-center gap-x-[48px] lg:gap-x-[56px]">
+        {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only) */}
+        <div className="hidden lg:flex items-center justify-center z-20 relative w-full border-t border-slate-200/60 dark:border-zinc-800/60 max-h-[54px] h-[54px]">
+          <div className="max-w-[1200px] mx-auto px-6 lg:px-12 flex h-full items-center justify-between w-full">
             
             {/* 1. MEDICINES (Mega Menu) */}
             <div 
@@ -621,10 +619,14 @@ const Navbar = () => {
               <button
                 id="trigger-medicines"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "medicines")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
+                  activeDropdown === "medicines"
+                    ? "bg-slate-200/80 text-slate-900"
+                    : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                }`}
               >
                 <span>Medicines</span>
-                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
               </button>
 
               {/* Medicines Mega Menu Container */}
@@ -632,15 +634,18 @@ const Navbar = () => {
                 id="dropdown-medicines"
                 onMouseEnter={() => handleMouseEnter("medicines")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1.5 w-[820px] max-w-[calc(100vw-3rem)] bg-white border border-slate-150 rounded-2xl shadow-xl p-6 transition-all duration-200 ease-out transform origin-top-left flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-0 top-full z-[200] mt-2 w-[920px] max-w-[calc(100vw-3rem)] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-6 transition-all duration-200 ease-out transform origin-top-left flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "medicines" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
+                {/* Top Caret Triangle Arrow */}
+                <div className="absolute -top-2 left-8 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
+
                 {/* COLUMN 1: BY CONDITION (Limit to first 8 dynamic categories) */}
-                <div className="flex-1 min-w-[280px]">
-                  <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">BY CONDITION</h4>
+                <div className="flex-1 min-w-[290px]">
+                  <h4 className="text-[13.5px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">BY CONDITION</h4>
                   <div className="grid grid-cols-1 gap-0.5">
                     {menuData.conditions.slice(0, 8).map((cond) => (
                       <Link
@@ -648,7 +653,7 @@ const Navbar = () => {
                         to={`/category/${cond.slug || encodeURIComponent(cond.linkedCategory || cond.name)}`}
                         onClick={() => setActiveDropdown(null)}
                         onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                        className="text-[13px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
+                        className="text-[16px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
                       >
                         {cond.name}
                       </Link>
@@ -657,9 +662,9 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 2: SUPER SPECIALITY & SOURCE */}
-                <div className="w-[220px] flex flex-col justify-between shrink-0">
+                <div className="w-[240px] flex flex-col justify-between shrink-0">
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">SUPER SPECIALITY</h4>
+                    <h4 className="text-[13.5px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">SUPER SPECIALITY</h4>
                     <div className="flex flex-col gap-0.5">
                       {menuData.specialities.map((spec) => (
                         <Link
@@ -667,7 +672,7 @@ const Navbar = () => {
                           to={`/products?speciality=${spec.linkedSpeciality || spec.slug}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                          className="text-[13px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
+                          className="text-[16px] font-semibold text-slate-700 py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 hover:text-[#038076] transition-colors leading-snug block"
                         >
                           {spec.name}
                         </Link>
@@ -676,7 +681,7 @@ const Navbar = () => {
                   </div>
 
                   <div className="mt-3 pt-3 border-t border-slate-100">
-                    <h4 className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider mb-2 select-none">SOURCE</h4>
+                    <h4 className="text-[13px] font-black uppercase text-slate-400 tracking-wider mb-2 select-none">SOURCE</h4>
                     <div className="flex flex-col gap-1">
                       {menuData.sources.map((source) => (
                         <Link
@@ -684,9 +689,9 @@ const Navbar = () => {
                           to={`/products?${source.queryParam}`}
                           onClick={() => setActiveDropdown(null)}
                           onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                          className="flex items-center gap-2 text-[13px] font-semibold text-slate-700 hover:text-[#038076] px-2 -mx-2 py-1 rounded-md hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-2 text-[16px] font-semibold text-slate-700 hover:text-[#038076] px-2 -mx-2 py-1 rounded-md hover:bg-slate-50 transition-colors"
                         >
-                          {renderIcon(source.icon || "Globe", "w-3.5 h-3.5 text-slate-400 shrink-0")}
+                          {renderIcon(source.icon || "Globe", "w-4 h-4 text-slate-400 shrink-0")}
                           <span>{source.name}</span>
                         </Link>
                       ))}
@@ -695,9 +700,9 @@ const Navbar = () => {
                 </div>
 
                 {/* COLUMN 3: QUICK LINKS */}
-                <div className="w-[230px] bg-slate-50/70 p-4 rounded-xl border border-slate-100/80 flex flex-col justify-between shrink-0">
+                <div className="w-[260px] bg-slate-50/70 p-4 rounded-xl border border-slate-100/80 flex flex-col justify-between shrink-0">
                   <div>
-                    <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">Quick Links</h4>
+                    <h4 className="text-[13.5px] font-black uppercase text-slate-400 tracking-wider mb-3 select-none pb-1.5 border-b border-slate-100/80">Quick Links</h4>
                     <div className="flex flex-col gap-2">
                       {(() => {
                         const regularQuickLinks = [...menuData.quickLinks.filter(l => !l.isHelpCard)];
@@ -723,9 +728,9 @@ const Navbar = () => {
                               {...props}
                               onClick={() => setActiveDropdown(null)}
                               onKeyDown={(e) => handleLinkKeyDown(e, "medicines")}
-                              className="flex items-center gap-2 text-[13px] font-bold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
+                              className="flex items-center gap-2 text-[16px] font-bold text-slate-700 hover:text-[#038076] transition-colors py-0.5"
                             >
-                              {renderIcon(link.icon || "Link", "w-3.5 h-3.5 shrink-0 text-slate-400")}
+                              {renderIcon(link.icon || "Link", "w-4 h-4 shrink-0 text-slate-400")}
                               <span>{link.name}</span>
                             </Comp>
                           );
@@ -737,20 +742,20 @@ const Navbar = () => {
                   {menuData.quickLinks.filter(l => l.isHelpCard).map((helpCard) => (
                     <div key={helpCard._id || helpCard.id} className="mt-3 pt-2.5 border-t border-slate-200/60">
                       <div className="bg-white p-3 rounded-lg border border-slate-150 shadow-2xs text-xs">
-                        <p className="font-black text-slate-700 uppercase tracking-tight text-[10.5px] mb-1.5 flex items-center gap-1.5">
-                          {renderIcon(helpCard.icon || "HelpCircle", "w-3.5 h-3.5 text-[#038076]")}
+                        <p className="font-black text-slate-700 uppercase tracking-tight text-[12px] mb-1.5 flex items-center gap-1.5">
+                          {renderIcon(helpCard.icon || "HelpCircle", "w-4 h-4 text-[#038076]")}
                           <span>Need Help?</span>
                         </p>
                         <a 
                           href={helpCard.route}
                           target={helpCard.openInNewTab ? "_blank" : undefined}
                           rel={helpCard.openInNewTab ? "noopener noreferrer" : undefined}
-                          className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-[#038076] transition-colors mb-0.5 text-[12.5px]"
+                          className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-[#038076] transition-colors mb-0.5 text-[15.5px]"
                         >
-                          {renderIcon(helpCard.icon || "PhoneCall", "w-3 h-3 text-[#038076]")}
+                          {renderIcon(helpCard.icon || "PhoneCall", "w-3.5 h-3.5 text-[#038076]")}
                           <span>{helpCard.name}</span>
                         </a>
-                        <p className="text-[10px] text-slate-400 font-medium">{helpCard.helpSubtext}</p>
+                        <p className="text-[12px] text-slate-400 font-medium">{helpCard.helpSubtext}</p>
                       </div>
                     </div>
                   ))}
@@ -768,33 +773,40 @@ const Navbar = () => {
               <button
                 id="trigger-surgical"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "surgical")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
+                  activeDropdown === "surgical"
+                    ? "bg-slate-200/80 text-slate-900"
+                    : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                }`}
               >
                 <span>Surgical</span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-[#038076]/10 text-[#038076] border border-[#038076]/20 tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold uppercase bg-[#00a79d] text-white tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
                   NEW
                 </span>
-                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-surgical"
                 onMouseEnter={() => handleMouseEnter("surgical")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1 w-64 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "surgical" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
-                <div className="flex flex-col gap-0.5 text-left">
+                {/* Top Caret Triangle Arrow */}
+                <div className="absolute -top-2 left-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
+
+                <div className="flex flex-col gap-0.5 text-left relative z-30">
                   {surgicalCategories.map((cat) => (
                     <Link
                       key={cat.id || cat._id}
                       to={`/surgical/${cat.slug}`}
                       onClick={() => setActiveDropdown(null)}
                       onKeyDown={(e) => handleLinkKeyDown(e, "surgical")}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all"
+                      className="px-4 py-2.5 text-[15.5px] font-medium text-slate-800 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all whitespace-nowrap block"
                     >
                       {cat.name}
                     </Link>
@@ -804,7 +816,7 @@ const Navbar = () => {
                     to="/surgical/categories"
                     onClick={() => setActiveDropdown(null)}
                     onKeyDown={(e) => handleLinkKeyDown(e, "surgical")}
-                    className="px-4 py-2 text-xs font-bold text-[#004782] rounded-lg hover:bg-blue-50/50 transition-all flex items-center justify-between"
+                    className="px-4 py-2 text-[15px] font-bold text-[#004782] rounded-lg hover:bg-blue-50/50 transition-all flex items-center justify-between"
                   >
                     <span>View All Surgical Categories</span>
                     <span>&rarr;</span>
@@ -813,7 +825,7 @@ const Navbar = () => {
                     to="/surgical/all"
                     onClick={() => setActiveDropdown(null)}
                     onKeyDown={(e) => handleLinkKeyDown(e, "surgical")}
-                    className="px-4 py-2 text-xs font-extrabold text-slate-700 rounded-lg hover:bg-slate-50 transition-all flex items-center justify-between"
+                    className="px-4 py-2 text-[15px] font-extrabold text-slate-700 rounded-lg hover:bg-slate-50 transition-all flex items-center justify-between"
                   >
                     <span>View All Surgical Products</span>
                     <span>&rarr;</span>
@@ -823,16 +835,20 @@ const Navbar = () => {
             </div>
 
             {/* 3. Wellness (Direct Link) */}
-            <NavLink
-              to="/wellness"
-              className={({ isActive }) =>
-                `flex h-full items-center text-[14px] font-bold cursor-pointer transition-colors duration-150 outline-none border-none p-0 bg-transparent ${
-                  isActive ? "text-[#038076]" : "text-slate-800 hover:text-[#038076] focus:text-[#038076]"
-                }`
-              }
-            >
-              Wellness
-            </NavLink>
+            <div className="relative flex h-full items-center">
+              <NavLink
+                to="/wellness"
+                className={({ isActive }) =>
+                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
+                    isActive
+                      ? "bg-slate-200/80 text-[#038076] font-semibold"
+                      : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                  }`
+                }
+              >
+                Wellness
+              </NavLink>
+            </div>
 
             {/* 4. HEALTH LIBRARY (Dropdown) */}
             <div 
@@ -843,23 +859,30 @@ const Navbar = () => {
               <button
                 id="trigger-library"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className="flex h-full items-center gap-1.5 text-[14px] font-bold text-slate-800 cursor-pointer transition-colors duration-150 hover:text-[#038076] focus:text-[#038076] outline-none border-none p-0 bg-transparent"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
+                  activeDropdown === "library"
+                    ? "bg-slate-200/80 text-slate-900"
+                    : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                }`}
               >
                 <span>Health Library</span>
-                <ChevronDown className={`h-[14px] w-[14px] text-slate-400 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
               </button>
 
               <div 
                 id="dropdown-library"
                 onMouseEnter={() => handleMouseEnter("library")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-1 w-60 bg-white border border-slate-150 rounded-xl shadow-xl p-2 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
+                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
                   activeDropdown === "library" 
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 }`}
               >
-                <div className="flex flex-col gap-0.5 text-left">
+                {/* Top Caret Triangle Arrow */}
+                <div className="absolute -top-2 left-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
+
+                <div className="flex flex-col gap-0.5 text-left relative z-30">
                   {[
                     { label: "Articles", to: "/library/articles" },
                     { label: "Health Guides", to: "/library/health-guides" },
@@ -873,7 +896,7 @@ const Navbar = () => {
                       to={item.to}
                       onClick={() => setActiveDropdown(null)}
                       onKeyDown={(e) => handleLinkKeyDown(e, "library")}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all"
+                      className="px-4 py-2.5 text-[15.5px] font-medium text-slate-800 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all whitespace-nowrap block"
                     >
                       {item.label}
                     </Link>
@@ -882,17 +905,21 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* 5. Patient Assistance Program (PAP) (Direct Link) */}
-            <NavLink
-              to="/patient-assistance-program"
-              className={({ isActive }) =>
-                `flex h-full items-center text-[14px] font-bold cursor-pointer transition-colors duration-150 outline-none border-none p-0 bg-transparent ${
-                  isActive ? "text-[#038076]" : "text-slate-800 hover:text-[#038076] focus:text-[#038076]"
-                }`
-              }
-            >
-              Patient Assistance Program (PAP)
-            </NavLink>
+            {/* 5. Patient Assistance Program (Direct Link) */}
+            <div className="relative flex h-full items-center">
+              <NavLink
+                to="/patient-assistance-program"
+                className={({ isActive }) =>
+                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
+                    isActive
+                      ? "bg-slate-200/80 text-[#038076] font-semibold"
+                      : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                  }`
+                }
+              >
+                Patient Assistance Program
+              </NavLink>
+            </div>
 
         </div>
       </div>

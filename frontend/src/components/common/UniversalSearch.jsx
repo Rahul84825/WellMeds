@@ -183,52 +183,10 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     >
       {/* SEARCH BAR CONTAINER */}
       <div 
-        className={`flex items-center bg-white border border-slate-200 rounded-full flex-row relative shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
+        className={`flex items-center bg-white border border-slate-200 rounded-xl flex-row relative shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
           isHero ? "p-2 md:p-2.5" : "p-1 gap-2"
         }`}
       >
-        {/* Left: Delivery location selector (hide in simple search overlays / mobile) */}
-        {!isMobile && (
-          <div className="relative shrink-0 flex items-center">
-            <button
-              type="button"
-              onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-slate-700 hover:bg-slate-50 rounded-full transition-all focus:outline-none text-left cursor-pointer"
-              aria-label="Select delivery location"
-            >
-              <MapPin className="w-[16px] h-[16px] text-[#038076] shrink-0" />
-              <div className="flex flex-col leading-none select-none">
-                <span className="text-[7.5px] text-slate-400 uppercase font-black tracking-wider">Deliver to</span>
-                <span className="text-[11px] font-extrabold text-slate-800 mt-[1.5px] flex items-center gap-0.5">
-                  {selectedLocation} 
-                  <ChevronDown className={`w-[10px] h-[10px] text-slate-500 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
-                </span>
-              </div>
-            </button>
-
-            {locationMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
-                <div className="absolute left-0 top-full mt-2.5 w-48 bg-white rounded-xl shadow-xl border border-slate-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
-                    <button
-                      key={loc}
-                      type="button"
-                      onClick={() => handleLocationSelect(loc)}
-                      className="w-full px-4 py-2.5 hover:bg-slate-50 hover:text-[#038076] font-bold text-left transition-colors focus:outline-none cursor-pointer"
-                    >
-                      {loc}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Separator */}
-        {!isMobile && <div className="w-px h-6 bg-slate-200 shrink-0"></div>}
-
         {/* Center: Search input */}
         <div className="flex-1 flex items-center relative gap-2 pl-2">
           <Search className="text-slate-400 shrink-0" size={isHero ? 18 : 15} />
@@ -252,7 +210,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                 setResults({});
                 setActiveIndex(-1);
               }}
-              className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors shrink-0"
               aria-label="Clear Search Input"
             >
               <X size={14} />
@@ -267,8 +225,8 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         <button 
           type="button"
           onClick={handleSearchSubmit}
-          className={`bg-[#038076] text-white rounded-full font-bold hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer ${
-            isHero ? "px-6 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
+          className={`bg-[#038076] text-white rounded-xl font-bold hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer ${
+            isHero ? "px-6 py-2.5 text-sm" : "px-4 py-2 text-xs"
           }`}
         >
           Search

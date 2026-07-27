@@ -87,37 +87,15 @@ const MoleculesPage = () => {
         <span className="text-[#038076] dark:text-[#a4c9ff] font-semibold">Molecules</span>
       </nav>
 
-      {/* Page Title & Search Bar Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">
-            Find medicine by molecules
-          </h1>
-        </div>
-
-        {/* Live Filter Search Input */}
-        <div className="relative w-full md:w-80">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search Medicines..."
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            className="w-full pl-10 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#038076]/20 focus:border-[#038076] transition-all text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 font-normal"
-          />
-          {searchVal && (
-            <button
-              onClick={() => setSearchVal("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 font-bold"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+      {/* Page Title Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">
+          Find medicine by molecules
+        </h1>
       </div>
 
       {/* Alphabet Selector Subbar */}
-      <div className="sticky top-16 bg-slate-50/90 dark:bg-zinc-950/90 backdrop-blur-md z-30 py-3 mb-8 border-b border-slate-200/60 dark:border-zinc-800/60 flex flex-wrap items-center gap-1 sm:gap-1.5 select-none">
+      <div className="sticky top-16 bg-slate-50/90 dark:bg-zinc-950/90 backdrop-blur-md z-30 py-3.5 mb-8 border-b border-slate-200/60 dark:border-zinc-800/60 flex flex-wrap items-center gap-1.5 sm:gap-2 select-none">
         {alphabetFilterOptions.map((letter) => {
           const isAll = letter === "ALL";
           const isActive = activeLetter === letter;
@@ -127,10 +105,10 @@ const MoleculesPage = () => {
               key={letter}
               type="button"
               onClick={() => handleLetterClick(letter)}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer select-none flex items-center justify-center shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-xl text-[15px] sm:text-[16px] transition-all cursor-pointer select-none flex items-center justify-center shrink-0 ${
                 isActive
-                  ? "bg-[#038076] text-white font-semibold shadow-xs"
-                  : "bg-transparent text-slate-600 dark:text-zinc-300 hover:bg-slate-200/50 dark:hover:bg-zinc-800 hover:text-[#038076] dark:hover:text-[#84d6b9] font-normal"
+                  ? "bg-[#038076] text-white font-medium shadow-xs"
+                  : "bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-200/60 dark:hover:bg-zinc-800 hover:text-[#038076] dark:hover:text-[#84d6b9] font-normal"
               }`}
             >
               {isAll ? "All" : letter}
