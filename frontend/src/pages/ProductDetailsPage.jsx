@@ -88,10 +88,10 @@ const ProductDetails = () => {
     date1.setDate(today.getDate() + 3);
     const date2 = new Date(today);
     date2.setDate(today.getDate() + 4);
-    
+
     const options1 = { day: "numeric", month: "short" };
     const options2 = { day: "numeric", month: "short" };
-    
+
     return `${date1.toLocaleDateString("en-IN", options1)} - ${date2.toLocaleDateString("en-IN", options2)}`;
   };
 
@@ -128,7 +128,7 @@ const ProductDetails = () => {
         setProduct(prod);
         setActiveImageIdx(0);
         setQuantity(1);
-        
+
         // Fetch remaining data in parallel
         const [substitutes, allProds] = await Promise.all([
           api.getSimilarProducts(prod._id || prod.id).catch(() => []),
@@ -376,9 +376,9 @@ const ProductDetails = () => {
   // Compile Dynamic Content Sections
   const computedSections = useMemo(() => {
     if (!product) return [];
-    
+
     const sections = [];
-    
+
     // Normalize standard medical sections to match standard IDs
     const medicalSecs = product.medicalSections && product.medicalSections.length > 0
       ? JSON.parse(JSON.stringify(product.medicalSections))
@@ -571,7 +571,7 @@ const ProductDetails = () => {
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
-    
+
     if (isLeftSwipe && activeImageIdx < imagesList.length - 1) {
       setActiveImageIdx(prev => prev + 1);
     }
@@ -652,7 +652,7 @@ const ProductDetails = () => {
   const memoizedSpecifications = useMemo(() => {
     if (!product || !product.productSpecifications || !Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) return null;
     return (
-      <div 
+      <div
         id="Specifications"
         ref={el => sectionRefs.current["Specifications"] = el}
         className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-md scroll-mt-28"
@@ -674,8 +674,8 @@ const ProductDetails = () => {
             const val = product.productSpecifications[spec.key];
             if (!val || !val.trim()) return null;
             return (
-              <div 
-                key={spec.key} 
+              <div
+                key={spec.key}
                 className="flex flex-col sm:flex-row py-3 border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 items-start sm:items-center text-left"
               >
                 <div className="w-full sm:w-[30%] font-semibold text-slate-550 dark:text-zinc-400">
@@ -695,7 +695,7 @@ const ProductDetails = () => {
   const memoizedIntroduction = useMemo(() => {
     if (!product || !product.description || !product.description.trim()) return null;
     return (
-      <div 
+      <div
         id="Introduction"
         ref={el => sectionRefs.current["Introduction"] = el}
         className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
@@ -725,7 +725,7 @@ const ProductDetails = () => {
 
   const memoizedDisclaimer = useMemo(() => {
     return (
-      <div 
+      <div
         id="Disclaimer"
         ref={el => sectionRefs.current["Disclaimer"] = el}
         className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-sm scroll-mt-28"
@@ -860,11 +860,10 @@ const ProductDetails = () => {
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`relative w-11 h-11 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${
-                    activeImageIdx === idx
+                  className={`relative w-11 h-11 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${activeImageIdx === idx
                       ? "border-[#038076] scale-[1.02]"
                       : "border-slate-100 dark:border-zinc-800"
-                  }`}
+                    }`}
                   aria-label={`Select image ${idx + 1}`}
                 >
                   <img src={img} alt="" className="max-h-full max-w-full object-contain" />
@@ -943,8 +942,8 @@ const ProductDetails = () => {
                 product.requiresRx && product.isColdChain
                   ? "Prescription Required & Cold Chain: Pharmacist verified and temperature-controlled shipping."
                   : product.requiresRx
-                  ? "Prescription Required: Verified by licensed pharmacists before shipment."
-                  : "Cold Chain Product: Special temperature-controlled delivery."
+                    ? "Prescription Required: Verified by licensed pharmacists before shipment."
+                    : "Cold Chain Product: Special temperature-controlled delivery."
               )}
               className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
               title="Product Information"
@@ -991,8 +990,8 @@ const ProductDetails = () => {
                 {product.prepaidOnly && product.isNonRefundable
                   ? "Prepaid Only. Non-Returnable."
                   : product.prepaidOnly
-                  ? "Prepaid Only."
-                  : "Non-Returnable."}
+                    ? "Prepaid Only."
+                    : "Non-Returnable."}
               </span>
               <HelpCircle
                 size={16}
@@ -1093,11 +1092,10 @@ const ProductDetails = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveMobileTab(tab.id)}
-                className={`px-4 py-2 rounded-full text-[13px] font-extrabold whitespace-nowrap transition-all border ${
-                  isActive
+                className={`px-4 py-2 rounded-full text-[13px] font-extrabold whitespace-nowrap transition-all border ${isActive
                     ? "bg-slate-900 text-white border-slate-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
                     : "bg-white text-slate-655 border-slate-205 hover:bg-slate-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -1471,7 +1469,7 @@ const ProductDetails = () => {
   // Desktop View
   return (
     <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Breadcrumbs */}
       <nav className="mb-lg text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">
         <Link to="/" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Home</Link>
@@ -1485,13 +1483,13 @@ const ProductDetails = () => {
 
       {/* 2-COLUMN ROOT LAYOUT: LEFT SIDEBAR & RIGHT CONTAINER */}
       <div className="flex flex-col md:flex-row gap-lg mb-xl items-start w-full">
-        
+
         {/* LEFT SIDEBAR (22% on desktop, 30% on tablet, 100% on mobile) */}
         {memoizedStickySidebar}
 
         {/* RIGHT CONTAINER (78% on desktop, 70% on tablet, 100% on mobile) */}
         <div className="w-full md:w-[68%] lg:w-[78%] flex flex-col gap-md order-1 md:order-2 lg:order-2">
-          
+
           {/* Top Row: Center Content & Purchase Card */}
           <div className="flex flex-col lg:flex-row gap-lg items-start w-full">
             {/* Center Content Column (Product Info, Gallery, Dispatch/Delivery, Rx/Cold Chain) */}
@@ -1641,7 +1639,7 @@ const ProductDetails = () => {
 
       {/* Premium Floating Image Viewer Modal */}
       {isFullscreenOpen && createPortal(
-        <div 
+        <div
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsFullscreenOpen(false);
@@ -1650,12 +1648,12 @@ const ProductDetails = () => {
           className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[9999] flex items-center justify-center p-md animate-[fade-in_0.25s_ease-out] select-none cursor-default"
         >
           {/* Modal Container Card */}
-          <div 
+          <div
             className="bg-white dark:bg-zinc-900 w-[95vw] md:w-[70vw] max-w-[900px] h-auto max-h-[80vh] md:max-h-[85vh] rounded-3xl shadow-2xl relative flex flex-col items-center justify-center p-lg animate-[scale-up_0.25s_ease-out] border border-slate-100 dark:border-zinc-800/40"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
-            <button 
+            <button
               type="button"
               onClick={() => setIsFullscreenOpen(false)}
               className="absolute top-4 right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-850 dark:hover:bg-zinc-750 text-slate-800 dark:text-zinc-200 rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer z-20"
@@ -1678,9 +1676,9 @@ const ProductDetails = () => {
 
             {/* Image Viewer */}
             <div className="w-full flex items-center justify-center p-md md:p-lg overflow-hidden h-[65vh] md:h-[70vh]">
-              <img 
-                src={imagesList[activeImageIdx]} 
-                alt={product.name} 
+              <img
+                src={imagesList[activeImageIdx]}
+                alt={product.name}
                 className="max-w-full max-h-full object-contain rounded-2xl transition-all duration-200 ease-in-out select-none"
               />
             </div>
