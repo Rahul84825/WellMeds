@@ -415,11 +415,11 @@ const MoleculeDetailPage = () => {
       {/* FLOATING MODAL: ALL AVAILABLE BRANDS */}
       {showAllBrandsModal && (
         <div 
-          className="fixed inset-0 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-[fade-in_0.2s_ease-out]"
+          className="fixed inset-0 bg-slate-900/50 dark:bg-black/75 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6 animate-[fade-in_0.2s_ease-out]"
           onClick={() => setShowAllBrandsModal(false)}
         >
           <div 
-            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col relative z-50 animate-[scale-up_0.2s_ease-out]"
+            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col relative z-[100000] animate-[scale-up_0.2s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
