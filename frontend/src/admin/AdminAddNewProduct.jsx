@@ -914,7 +914,7 @@ const AddNewProduct = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="space-y-xs col-span-2">
+                  <div className="space-y-xs sm:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manufacturer *</label>
                     <input
                       type="text"

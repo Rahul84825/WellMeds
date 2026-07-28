@@ -666,7 +666,7 @@ const AdminAddNewMolecule = () => {
               {references.length > 0 ? (
                 <div className="space-y-sm">
                   {references.map((ref, idx) => (
-                    <div key={idx} className="flex gap-sm items-center">
+                    <div key={idx} className="flex flex-col sm:flex-row gap-sm items-stretch sm:items-center">
                       <input
                         type="text"
                         required
