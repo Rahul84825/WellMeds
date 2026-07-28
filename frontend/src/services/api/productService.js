@@ -12,11 +12,12 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}) {
-    const { search, category, speciality, page, limit, productType, isSurgical, surgicalCategory, isImported } = params;
+    const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isImported } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
     if (speciality) cleanParams.speciality = speciality;
+    if (molecule) cleanParams.molecule = molecule;
     if (page) cleanParams.page = page;
     if (limit) cleanParams.limit = limit;
     if (productType) cleanParams.productType = productType;

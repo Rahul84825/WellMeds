@@ -71,13 +71,20 @@ export const getProducts = async (req, res, next) => {
       query.isImported = isImported === "true";
     }
     // Filter by molecule slug or ID
+    // Filter by molecule slug, ID, or name
     if (molecule && molecule.trim()) {
       const queryVal = molecule.trim();
-      let matchedMolecule;
+      let matchedMolecule = null;
       if (mongoose.Types.ObjectId.isValid(queryVal)) {
         matchedMolecule = await Molecule.findById(queryVal);
-      } else {
-        matchedMolecule = await Molecule.findOne({ slug: queryVal });
+      }
+      if (!matchedMolecule) {
+        matchedMolecule = await Molecule.findOne({
+          $or: [
+            { slug: queryVal.toLowerCase() },
+            { name: { $regex: `^${queryVal}$`, $options: "i" } }
+          ]
+        });
       }
 
       if (matchedMolecule) {

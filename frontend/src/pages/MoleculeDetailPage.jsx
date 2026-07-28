@@ -265,9 +265,11 @@ const MoleculeDetailPage = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 py-5 text-center">
-                  No products currently available for this molecule.
-                </p>
+                <div className="py-6 px-3 text-center space-y-1">
+                  <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">
+                    No brands containing this molecule are currently available.
+                  </p>
+                </div>
               )}
             </div>
           </div>
