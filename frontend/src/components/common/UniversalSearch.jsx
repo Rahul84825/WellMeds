@@ -272,35 +272,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                 /* RESULTS GROUPS LIST: PRODUCTS FIRST, THEN MOLECULES */
                 <div className="p-2 md:p-3 space-y-4">
                   
-                  {/* GROUP 1: MEDICINES & PRODUCTS */}
-                  {results.products?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
-                        <ShoppingBag className="w-3.5 h-3.5 text-[#038076]" />
-                        <span>Medicines & Products</span>
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        {results.products.map((prod) => {
-                          const flatItems = getFlatSelectableItems();
-                          const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.slug === prod.slug || i.value.id === prod.id || i.value._id === prod._id));
-                          const active = activeIndex === flatIndex;
-                          return (
-                            <ProductListItem
-                              key={prod.id || prod._id}
-                              product={prod}
-                              active={active}
-                              onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                              onAddToCart={(p) => {
-                                addToCart(p, 1);
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* GROUP 2: MOLECULES */}
+                  {/* GROUP 1: MOLECULES */}
                   {results.molecules?.length > 0 && (
                     <div>
                       <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
@@ -325,6 +297,34 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                             >
                               <span className="text-xs font-bold">{mol.name}</span>
                             </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* GROUP 2: MEDICINES & PRODUCTS */}
+                  {results.products?.length > 0 && (
+                    <div className="border-b border-slate-50 pb-3">
+                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
+                        <ShoppingBag className="w-3.5 h-3.5 text-[#038076]" />
+                        <span>Medicines & Products</span>
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        {results.products.map((prod) => {
+                          const flatItems = getFlatSelectableItems();
+                          const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.slug === prod.slug || i.value.id === prod.id || i.value._id === prod._id));
+                          const active = activeIndex === flatIndex;
+                          return (
+                            <ProductListItem
+                              key={prod.id || prod._id}
+                              product={prod}
+                              active={active}
+                              onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                              onAddToCart={(p) => {
+                                addToCart(p, 1);
+                              }}
+                            />
                           );
                         })}
                       </div>
