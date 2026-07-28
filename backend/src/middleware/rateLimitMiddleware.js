@@ -89,3 +89,16 @@ export const subscribeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Limit heavy catalog searches
+export const searchLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 300,
+  message: {
+    success: false,
+    message: "Too many search requests, please slow down",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+
