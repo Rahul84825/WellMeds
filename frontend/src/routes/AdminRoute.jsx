@@ -5,6 +5,10 @@ import Loader from "../components/Loader";
 
 import { toast } from "sonner";
 
+const isMaintenanceMode =
+  import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
+  import.meta.env.MAINTENANCE_MODE === "true";
+
 const AdminRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
@@ -18,7 +22,8 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    const loginPath = isMaintenanceMode ? "/admin/login" : "/login";
+    return <Navigate to={loginPath} state={{ from: location.pathname }} replace />;
   }
 
   if (!isAdmin) {
@@ -30,3 +35,4 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
+

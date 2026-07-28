@@ -61,8 +61,9 @@ const AdminUsers = lazy(() => import("../admin/AdminUsers"));
 const AdminSettings = lazy(() => import("../admin/AdminSettings"));
 const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
 
-// Maintenance Page Component (Lazy Loaded)
+// Maintenance Mode Pages (Lazy Loaded)
 const MaintenancePage = lazy(() => import("../pages/MaintenancePage"));
+const AdminLoginPage = lazy(() => import("../pages/AdminLoginPage"));
 
 const isMaintenanceMode =
   import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
@@ -76,9 +77,10 @@ const AppRoutes = () => {
           {/* Public Maintenance Landing Page */}
           <Route path="/" element={<MaintenancePage />} />
 
-          {/* Login Routes for Admin Authentication */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin/login" element={<Login />} />
+          {/* Admin-only login during Maintenance Mode — renders full auth flow inline */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          {/* Redirect /login to /admin/login so unauthenticated admin redirects land correctly */}
+          <Route path="/login" element={<Navigate to="/admin/login" replace />} />
 
           {/* Admin Portal Routes — Unrestricted for Administrators */}
           <Route
