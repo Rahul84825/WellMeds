@@ -60,6 +60,7 @@ const AdminCoupons = lazy(() => import("../admin/AdminCoupons"));
 const AdminUsers = lazy(() => import("../admin/AdminUsers"));
 const AdminSettings = lazy(() => import("../admin/AdminSettings"));
 const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
+const AdminWaitlist = lazy(() => import("../admin/AdminWaitlist"));
 
 // Maintenance Mode Pages (Lazy Loaded)
 const MaintenancePage = lazy(() => import("../pages/MaintenancePage"));
@@ -105,6 +106,7 @@ const AppRoutes = () => {
             <Route path="prescriptions" element={<AdminPrescriptions />} />
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="waitlist" element={<AdminWaitlist />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="megamenu" element={<AdminMegaMenu />} />
             <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
@@ -216,6 +218,7 @@ const AppRoutes = () => {
           <Route path="prescriptions" element={<AdminPrescriptions />} />
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="megamenu" element={<AdminMegaMenu />} />
           <Route path="cms/imported" element={<Navigate to="/admin" replace />} />

@@ -23,7 +23,8 @@ import {
   FileText,
   HeartPulse,
   FlaskConical,
-  Scissors
+  Scissors,
+  MailSearch
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -85,6 +86,7 @@ const AdminLayout = () => {
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/users", label: "Users", icon: Users },
+    { to: "/admin/waitlist", label: "Waitlist", icon: MailSearch },
     ...(ENABLE_MEGA_MENU_ADMIN ? [{ to: "/admin/megamenu", label: "Mega Menu", icon: Globe }] : []),
     { to: "/admin/settings", label: "Settings", icon: Settings }
   ];

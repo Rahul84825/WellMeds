@@ -6,7 +6,12 @@ import { Notification } from "../models/Notification.js";
 import { Cart } from "../models/Cart.js";
 import { WebhookLog } from "../models/WebhookLog.js";
 import { Transaction } from "../models/Transaction.js";
-import { sendOrderStatusEmail } from "../services/emailService.js";
+import {
+  sendOrderConfirmation,
+  sendOrderStatusUpdate,
+  sendOrderCancelled,
+  sendOrderStatusEmail,
+} from "../services/emailService.js";
 
 // Helper to compute order details from product database prices
 const computeOrderTotals = async (items, couponCode, userId) => {
@@ -287,12 +292,8 @@ export const placeOrder = async (req, res, next) => {
           link: "/orders",
         });
 
-        // Email
-        try {
-          await sendOrderStatusEmail(existingOrder.email, existingOrder.customer, existingOrder.orderId, existingOrder.status);
-        } catch (err) {
-          console.warn("Order email notification failed:", err.message);
-        }
+        // Send itemized Order Confirmation email
+        sendOrderConfirmation(existingOrder);
 
         return res.status(200).json({ success: true, order: existingOrder });
       }
@@ -374,11 +375,8 @@ export const placeOrder = async (req, res, next) => {
         link: "/orders",
       });
 
-      try {
-        await sendOrderStatusEmail(order.email, order.customer, order.orderId, order.status);
-      } catch (err) {
-        console.warn("COD Order email notification failed:", err.message);
-      }
+      // Send itemized Order Confirmation email
+      sendOrderConfirmation(order);
 
       return res.status(201).json({ success: true, order });
     }
@@ -541,11 +539,7 @@ export const handleWebhook = async (req, res, next) => {
       });
 
       // Send confirmation email
-      try {
-        await sendOrderStatusEmail(order.email, order.customer, order.orderId, order.status);
-      } catch (err) {
-        console.warn("[Webhook] Confirmation email failed:", err.message);
-      }
+      sendOrderConfirmation(order);
 
       log.processingStatus = "Success";
       await log.save();
@@ -699,12 +693,8 @@ export const updateOrderStatus = async (req, res, next) => {
       link: "/orders",
     });
 
-    // Trigger status email
-    try {
-      await sendOrderStatusEmail(order.email, order.customer, order.orderId, order.status);
-    } catch (err) {
-      console.warn("Order status update email failed:", err.message);
-    }
+    // Trigger status update email
+    sendOrderStatusUpdate(order, status);
 
     res.status(200).json({ success: true, order });
   } catch (error) {
@@ -746,14 +736,8 @@ export const cancelOrder = async (req, res, next) => {
 
     await order.save();
 
-    // Create Notification
-    await Notification.create({
-      user: order.user,
-      title: "Order Cancelled",
-      message: `Your order "${order.orderId}" was cancelled.`,
-      type: "order",
-      link: "/orders",
-    });
+    // Send cancellation email
+    sendOrderCancelled(order);
 
     res.status(200).json({ success: true, order });
   } catch (error) {

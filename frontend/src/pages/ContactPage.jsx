@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { api } from "../services/api";
 import { toast } from "sonner";
 
 const Contact = () => {
@@ -9,19 +9,26 @@ const Contact = () => {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !message) return;
+    if (!name || !email || !message) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
     
     setSubmitted(true);
-    setTimeout(() => {
-      toast.success("Thank you for contacting MediShop! Our support agents will reach out to you shortly.");
+    try {
+      const res = await api.submitContactForm({ name, email, subject, message });
+      toast.success(res.message || "Thank you for contacting WellMeds! Our support agents will reach out to you shortly.");
       setName("");
       setEmail("");
       setSubject("Support");
       setMessage("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit enquiry. Please try again.");
+    } finally {
       setSubmitted(false);
-    }, 1000);
+    }
   };
 
   return (

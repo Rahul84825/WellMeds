@@ -21,6 +21,19 @@ const subscriberSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    status: {
+      type: String,
+      enum: ["Subscribed", "Unsubscribed"],
+      default: "Subscribed",
+    },
+    notified: {
+      type: Boolean,
+      default: false,
+    },
+    notifiedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

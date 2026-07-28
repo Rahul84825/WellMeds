@@ -1,6 +1,12 @@
 import { Prescription } from "../models/Prescription.js";
 import { uploadToCloudinary } from "../services/cloudinaryService.js";
-import { sendPrescriptionReviewEmail } from "../services/emailService.js";
+import {
+  sendPrescriptionReceivedCustomer,
+  sendPrescriptionReceivedAdmin,
+  sendPrescriptionApproved,
+  sendPrescriptionRejected,
+  sendPrescriptionReviewEmail,
+} from "../services/emailService.js";
 import { Notification } from "../models/Notification.js";
 import { Cart } from "../models/Cart.js";
 import { Product } from "../models/Product.js";
@@ -60,6 +66,19 @@ export const uploadPrescription = async (req, res, next) => {
       type: "prescription",
       link: `/prescriptions/${prescription._id}`,
     });
+
+    // Send emails (Customer confirmation & Admin alert)
+    sendPrescriptionReceivedCustomer(
+      req.user.email,
+      req.user.name,
+      prescription._id,
+      prescription.name
+    );
+    sendPrescriptionReceivedAdmin(
+      req.user.name,
+      prescription._id,
+      prescription.name
+    );
 
     res.status(201).json({
       success: true,
@@ -424,18 +443,14 @@ export const approvePrescription = async (req, res, next) => {
       link: `/prescriptions/${id}`,
     });
 
-    // Notify patient
-    try {
-      await sendPrescriptionReviewEmail(
-        prescription.user.email,
-        prescription.user.name,
-        prescription.name,
-        "Approved",
-        prescription.adminNotes
-      );
-    } catch (err) {
-      console.warn("Approval email failed:", err.message);
-    }
+    // Send Approval Email to patient
+    sendPrescriptionApproved(
+      prescription.user.email,
+      prescription.user.name,
+      prescription._id,
+      prescription.prescribedItems,
+      prescription.adminNotes
+    );
 
     res.status(200).json({ success: true, prescription });
   } catch (error) {
@@ -489,17 +504,13 @@ export const rejectPrescription = async (req, res, next) => {
       link: `/prescriptions/${id}`,
     });
 
-    try {
-      await sendPrescriptionReviewEmail(
-        prescription.user.email,
-        prescription.user.name,
-        prescription.name,
-        "Rejected",
-        adminNotes || "Your prescription did not meet our verification requirements."
-      );
-    } catch (err) {
-      console.warn("Rejection email failed:", err.message);
-    }
+    // Send Rejection Email to patient
+    sendPrescriptionRejected(
+      prescription.user.email,
+      prescription.user.name,
+      prescription._id,
+      prescription.adminNotes
+    );
 
     res.status(200).json({ success: true, prescription });
   } catch (error) {

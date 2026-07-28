@@ -14,6 +14,14 @@ import {
   adminUpdateCoupon, 
   adminDeleteCoupon 
 } from "../controllers/couponController.js";
+import {
+  getSubscribers,
+  markAsNotified,
+  deleteSubscriber,
+  bulkNotifySubscribers,
+  bulkDeleteSubscribers,
+  exportSubscribersCSV
+} from "../controllers/subscriberController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 import { uploadImage } from "../middleware/uploadMiddleware.js";
@@ -31,7 +39,6 @@ router.get("/stats", protect, admin, getDashboardStats);
 router.get("/reports/sales", protect, admin, getSalesReport);
 router.get("/reports/customers", protect, admin, getCustomersReport);
 
-
 // User management
 router.get("/users", protect, admin, getUsers);
 router.put("/users/:id/role", protect, admin, updateUserRole);
@@ -46,5 +53,13 @@ router.get("/coupons", protect, admin, adminGetCoupons);
 router.post("/coupons", protect, admin, adminCreateCoupon);
 router.put("/coupons/:id", protect, admin, adminUpdateCoupon);
 router.delete("/coupons/:id", protect, admin, adminDeleteCoupon);
+
+// Waitlist / Subscriber management (admin only)
+router.get("/subscribers", protect, admin, getSubscribers);
+router.get("/subscribers/export", protect, admin, exportSubscribersCSV);
+router.put("/subscribers/:id/notified", protect, admin, markAsNotified);
+router.delete("/subscribers/:id", protect, admin, deleteSubscriber);
+router.post("/subscribers/bulk-notify", protect, admin, bulkNotifySubscribers);
+router.post("/subscribers/bulk-delete", protect, admin, bulkDeleteSubscribers);
 
 export default router;

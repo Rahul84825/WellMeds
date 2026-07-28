@@ -1,5 +1,6 @@
 import { Notification } from "../models/Notification.js";
 import { Subscriber } from "../models/Subscriber.js";
+import { sendWaitlistConfirmation } from "../services/emailService.js";
 
 // Fetch notifications for logged in user
 export const getNotifications = async (req, res, next) => {
@@ -50,7 +51,7 @@ export const markAllAsRead = async (req, res, next) => {
   }
 };
 
-// Subscribe email from Maintenance / Coming Soon page (Hardened & Secured)
+// Subscribe email from Maintenance / Coming Soon page (Hardened & Secured with Email Dispatch)
 export const subscribeEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -70,7 +71,7 @@ export const subscribeEmail = async (req, res, next) => {
     if (existing) {
       return res.status(200).json({
         success: true,
-        message: "You are already on our notification list!",
+        message: "You are already on our waitlist.",
         duplicate: true,
       });
     }
@@ -78,23 +79,28 @@ export const subscribeEmail = async (req, res, next) => {
     // Persist new subscriber
     await Subscriber.create({
       email: normalizedEmail,
-      source: "maintenance_page",
+      source: req.body.source || "maintenance_page",
+      subscribedAt: new Date(),
+      status: "Subscribed",
+      notified: false,
     });
+
+    // Send confirmation email in background
+    sendWaitlistConfirmation(normalizedEmail);
 
     return res.status(200).json({
       success: true,
-      message: "Subscription registered successfully.",
+      message: "Thank you for joining the WellMeds waitlist! A confirmation email has been sent.",
     });
   } catch (error) {
     // Handle MongoDB duplicate key race condition gracefully
     if (error.code === 11000) {
       return res.status(200).json({
         success: true,
-        message: "You are already on our notification list!",
+        message: "You are already on our waitlist.",
         duplicate: true,
       });
     }
     next(error);
   }
 };
-

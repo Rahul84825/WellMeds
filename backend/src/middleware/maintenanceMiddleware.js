@@ -18,11 +18,12 @@ export const maintenanceMiddleware = async (req, res, next) => {
 
   const path = req.originalUrl || req.path || "";
 
-  // 1. Always allow Admin endpoints, Auth endpoints, Subscribe, Uploads, and Top-level SEO
+  // 1. Always allow Admin endpoints, Auth endpoints, Subscribe, Contact, Uploads, and Top-level SEO
   if (
     path.startsWith("/api/admin") ||
     path.startsWith("/api/auth") ||
     path === "/api/notifications/subscribe" ||
+    path.startsWith("/api/contact") ||
     path.startsWith("/uploads") ||
     path === "/robots.txt" ||
     path === "/sitemap.xml" ||
