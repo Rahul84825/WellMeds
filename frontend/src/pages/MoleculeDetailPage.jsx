@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
-import WhyChooseWellMeds from "../components/WhyChooseWellMeds";
-import LazySection from "../components/common/LazySection";
 import { 
   ChevronDown, 
   ChevronRight,
@@ -153,10 +150,7 @@ const MoleculeDetailPage = () => {
   };
 
   const scrollToProducts = () => {
-    const el = document.getElementById("all-products-section");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
+    navigate(`/products?search=${encodeURIComponent(molecule.name)}`);
   };
 
   return (
@@ -407,30 +401,7 @@ const MoleculeDetailPage = () => {
 
         </div>
 
-        {/* PRODUCTS CONTAINING MOLECULE SECTION */}
-        {products.length > 0 && (
-          <section id="all-products-section" className="mt-12 pt-8 border-t border-slate-200 dark:border-zinc-800">
-            <div className="mb-6">
-              <h2 className="font-extrabold text-xl md:text-2xl text-slate-900 dark:text-zinc-100 tracking-tight">
-                Products Containing {molecule.name}
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">Browse commercial brand formulations and generic options</p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {products.map((prod) => (
-                <ProductCard key={prod.id || prod._id} product={prod} />
-              ))}
-            </div>
-          </section>
-        )}
-
       </div>
-
-      {/* HOMEPAGE TRUST SECTION (Why WellMeds) */}
-      <LazySection minHeight="200px">
-        <WhyChooseWellMeds />
-      </LazySection>
     </div>
   );
 };
