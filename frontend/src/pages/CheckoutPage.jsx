@@ -75,12 +75,6 @@ const Checkout = () => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("upi");
-
-  // Card details
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCVC, setCardCVC] = useState("");
 
   // Rx prescription uploads
   const [rxAttached, setRxAttached] = useState(false);
@@ -316,107 +310,106 @@ const Checkout = () => {
         rxUploaded: requiresRx ? (rxStatus === "Verified") : false,
         rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
         shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
-        paymentMethod,
+        paymentMethod: "razorpay",
       };
 
-      if (paymentMethod === "cod") {
-        const completedOrder = await api.placeOrder(baseOrderData);
-        clearCart();
-        navigate("/order-success", { state: { order: completedOrder } });
-      } else {
-        // Online Payment Flow via Razorpay
-        const orderSession = await api.createRazorpayOrder({
-          items: orderItems,
-          couponCode: couponApplied?.code || null,
-          customer: fullName,
-          email: email,
-          shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
-          rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
-          requiresRx
-        });
-        
-        if (!orderSession.success || !orderSession.razorpayOrder) {
-          throw new Error(orderSession.message || "Failed to initialize payment order session.");
-        }
+      // Create Razorpay Order Session
+      const orderSession = await api.createRazorpayOrder({
+        items: orderItems,
+        couponCode: couponApplied?.code || null,
+        customer: fullName,
+        email: email,
+        shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
+        rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
+        requiresRx,
+      });
 
-        const isScriptLoaded = await loadRazorpayScript();
-        if (!isScriptLoaded) {
-          throw new Error("Unable to load payment gateway script. Please check your connection.");
-        }
-
-        const razorpayOrder = orderSession.razorpayOrder;
-
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_mockkeyid123",
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-          name: "WellMeds Pharmacy",
-          description: "Online Medicine Checkout",
-          order_id: razorpayOrder.id,
-          handler: async function (response) {
-            setPaymentProcessing(true);
-            setIsSubmitting(true);
-            
-            const orderData = {
-              ...baseOrderData,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            };
-            
-            api.placeOrder(orderData).catch(err => {
-              console.warn("Client-side placeOrder fallback failed (will rely on Webhook):", err.message);
-            });
-
-            let attempts = 0;
-            const maxAttempts = 30;
-            
-            const interval = setInterval(async () => {
-              attempts++;
-              try {
-                const statusRes = await api.getOrderStatus(response.razorpay_order_id);
-                if (statusRes.success && statusRes.paymentStatus === "Paid") {
-                  clearInterval(interval);
-                  setPaymentProcessing(false);
-                  setPollingTimeout(false);
-                  setIsSubmitting(false);
-                  clearCart();
-                  navigate("/order-success", { state: { order: statusRes.order } });
-                }
-              } catch (err) {
-                console.warn("Polling order status failed attempt:", attempts, err.message);
-              }
-
-              if (attempts >= maxAttempts) {
-                clearInterval(interval);
-                setPollingTimeout(true);
-                clearCart();
-              }
-            }, 2000);
-          },
-          prefill: {
-            name: fullName,
-            email: email,
-            contact: user?.phone || user?.mobile || "",
-          },
-          theme: {
-            color: "#02665e", // Updated to match primary brand color
-          },
-          modal: {
-            ondismiss: function () {
-              setIsSubmitting(false);
-              toast.info("Payment cancelled.");
-            }
-          }
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.on("payment.failed", function (response) {
-          toast.error(`Payment transaction failed: ${response.error.description}`);
-          setIsSubmitting(false);
-        });
-        rzp.open();
+      if (!orderSession.success || !orderSession.razorpayOrder) {
+        throw new Error(orderSession.message || "Failed to initialize payment session.");
       }
+
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error("Unable to load payment gateway SDK. Please check your network connection.");
+      }
+
+      const razorpayOrder = orderSession.razorpayOrder;
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+      if (!razorpayKey) {
+        console.warn("[Razorpay] VITE_RAZORPAY_KEY_ID is unconfigured in environment variables.");
+      }
+
+      const options = {
+        key: razorpayKey || "",
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "WellMeds Super Speciality Pharmacy",
+        description: "Online Medicine Checkout",
+        order_id: razorpayOrder.id,
+        handler: async function (response) {
+          setPaymentProcessing(true);
+          setIsSubmitting(true);
+
+          const orderData = {
+            ...baseOrderData,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+
+          api.placeOrder(orderData).catch((err) => {
+            console.warn("Client-side signature callback notice (handled by Webhook):", err.message);
+          });
+
+          let attempts = 0;
+          const maxAttempts = 30;
+
+          const interval = setInterval(async () => {
+            attempts++;
+            try {
+              const statusRes = await api.getOrderStatus(response.razorpay_order_id);
+              if (statusRes.success && statusRes.paymentStatus === "Paid") {
+                clearInterval(interval);
+                setPaymentProcessing(false);
+                setPollingTimeout(false);
+                setIsSubmitting(false);
+                clearCart();
+                navigate("/order-success", { state: { order: statusRes.order } });
+              }
+            } catch (err) {
+              console.warn("Order status poll attempt:", attempts, err.message);
+            }
+
+            if (attempts >= maxAttempts) {
+              clearInterval(interval);
+              setPollingTimeout(true);
+              clearCart();
+            }
+          }, 2000);
+        },
+        prefill: {
+          name: fullName,
+          email: email,
+          contact: user?.phone || user?.mobile || "",
+        },
+        theme: {
+          color: "#038076",
+        },
+        modal: {
+          ondismiss: function () {
+            setIsSubmitting(false);
+            toast.info("Payment cancelled.");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        toast.error(`Payment transaction failed: ${response.error?.description || "Transaction declined"}`);
+        setIsSubmitting(false);
+      });
+      rzp.open();
     } catch (err) {
       console.error("Failed to place order", err);
       const msg = err?.response?.data?.message || err?.message || "Something went wrong placing your order. Please try again.";
@@ -697,123 +690,33 @@ const Checkout = () => {
           )}
 
           {/* Payment Method Selector Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-4">
-              Payment Method
-            </h3>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <label
-                className={`relative flex-1 p-4 border rounded-xl flex flex-col gap-2 cursor-pointer transition-all select-none ${
-                  paymentMethod === "upi"
-                    ? "border-[#3f257a] bg-[#3f257a]/5 dark:bg-[#3f257a]/10 ring-1 ring-[#3f257a]/20"
-                    : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/40 text-slate-500"
-                } ${requiresRx && rxStatus !== "Verified" ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
-              >
-                <div className="flex items-center justify-between">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="upi"
-                    disabled={requiresRx && rxStatus !== "Verified"}
-                    checked={paymentMethod === "upi"}
-                    onChange={() => setPaymentMethod("upi")}
-                    className="text-[#3f257a] focus:ring-[#3f257a] h-4 w-4 disabled:opacity-50"
-                  />
-                  <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
-                </div>
-                <span className={`text-sm font-semibold mt-1 ${paymentMethod === 'upi' ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-zinc-400'}`}>UPI</span>
-                <span className="text-[11px] text-slate-500 dark:text-zinc-500 leading-tight">PhonePe, GPay, Paytm</span>
-              </label>
-
-              <label
-                className={`relative flex-1 p-4 border rounded-xl flex flex-col gap-2 cursor-pointer transition-all select-none ${
-                  paymentMethod === "card"
-                    ? "border-[#3f257a] bg-[#3f257a]/5 dark:bg-[#3f257a]/10 ring-1 ring-[#3f257a]/20"
-                    : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/40 text-slate-500"
-                } ${requiresRx && rxStatus !== "Verified" ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
-              >
-                <div className="flex items-center justify-between">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    disabled={requiresRx && rxStatus !== "Verified"}
-                    checked={paymentMethod === "card"}
-                    onChange={() => setPaymentMethod("card")}
-                    className="text-[#3f257a] focus:ring-[#3f257a] h-4 w-4 disabled:opacity-50"
-                  />
-                  <span className="material-symbols-outlined text-xl">credit_card</span>
-                </div>
-                <span className={`text-sm font-semibold mt-1 ${paymentMethod === 'card' ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-zinc-400'}`}>Card</span>
-                <span className="text-[11px] text-slate-500 dark:text-zinc-500 leading-tight">Credit or Debit Card</span>
-              </label>
-
-              <label
-                className={`relative flex-1 p-4 border rounded-xl flex flex-col gap-2 cursor-pointer transition-all select-none ${
-                  paymentMethod === "cod"
-                    ? "border-[#3f257a] bg-[#3f257a]/5 dark:bg-[#3f257a]/10 ring-1 ring-[#3f257a]/20"
-                    : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/40 text-slate-500"
-                } ${requiresRx && rxStatus !== "Verified" ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
-              >
-                <div className="flex items-center justify-between">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    disabled={requiresRx && rxStatus !== "Verified"}
-                    checked={paymentMethod === "cod"}
-                    onChange={() => setPaymentMethod("cod")}
-                    className="text-[#3f257a] focus:ring-[#3f257a] h-4 w-4 disabled:opacity-50"
-                  />
-                  <span className="material-symbols-outlined text-xl">local_shipping</span>
-                </div>
-                <span className={`text-sm font-semibold mt-1 ${paymentMethod === 'cod' ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-zinc-400'}`}>Cash on Delivery</span>
-                <span className="text-[11px] text-slate-500 dark:text-zinc-500 leading-tight">Pay when you receive</span>
-              </label>
+          {/* Payment Method Section (Razorpay Exclusive) */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                Payment Gateway
+              </h3>
+              <span className="text-xs font-semibold px-2.5 py-1 bg-teal-50 dark:bg-teal-900/30 text-[#038076] dark:text-teal-400 rounded-full border border-[#038076]/20">
+                Razorpay Secure
+              </span>
             </div>
 
-            {/* Card Input Details */}
-            {paymentMethod === "card" && (
-              <div className="space-y-4 bg-slate-50 dark:bg-zinc-950 p-5 rounded-xl border border-slate-200 dark:border-zinc-800 animate-[fade-in_0.2s_ease-out]">
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Card Number</label>
-                  <input
-                    type="text"
-                    required
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all"
-                    placeholder="0000 0000 0000 0000"
-                  />
+            <div className="p-4 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/70 dark:border-zinc-700/60 flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-[#038076]" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Instant & Secure Payment
+                  </span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Expiry Date</label>
-                    <input
-                      type="text"
-                      required
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
-                      className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all"
-                      placeholder="MM/YY"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">CVC</label>
-                    <input
-                      type="password"
-                      required
-                      maxLength={4}
-                      value={cardCVC}
-                      onChange={(e) => setCardCVC(e.target.value)}
-                      className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all"
-                      placeholder="***"
-                    />
-                  </div>
-                </div>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Pay using UPI (GPay, PhonePe, Paytm), Credit & Debit Cards, Netbanking, or Cred.
+                </p>
               </div>
-            )}
+              <div className="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono font-bold text-[#038076]">
+                <span>Razorpay</span>
+              </div>
+            </div>
           </div>
         </form>
 

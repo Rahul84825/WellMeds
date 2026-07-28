@@ -103,7 +103,123 @@ const computeOrderTotals = async (items, couponCode, userId) => {
   };
 };
 
-// Create Razorpay Order & Save DRAFT Order in DB
+/**
+ * Shared Idempotent Payment Finalization Function
+ * Executed by both placeOrder (client callback signature check) and handleWebhook (Razorpay Webhook).
+ * Ensures stock deduction, coupon consumption, cart clearing, and email triggers happen EXACTLY ONCE.
+ */
+export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySignature = "", paymentMethod = "razorpay", source = "callback") => {
+  // Idempotency check: if already marked Paid, skip duplicate side effects
+  if (order.paymentStatus === "Paid") {
+    return { success: true, order, duplicate: true };
+  }
+
+  order.paymentStatus = "Paid";
+  order.status = order.requiresRx ? "Prescription Review" : "Confirmed";
+  order.razorpayPaymentId = razorpayPaymentId;
+  if (razorpaySignature) {
+    order.razorpaySignature = razorpaySignature;
+  }
+
+  // Update Order Timeline
+  order.timeline.push({
+    status: "Payment Captured",
+    message: `Payment verified via ${source}: ${razorpayPaymentId}`,
+    timestamp: new Date(),
+  });
+
+  if (order.requiresRx) {
+    order.timeline.push(
+      { status: "Prescription Uploaded", message: "Rx prescription document linked.", timestamp: new Date() },
+      { status: "Prescription Under Review", message: "Pharmacist verification queue.", timestamp: new Date() }
+    );
+  } else {
+    order.timeline.push(
+      { status: "Confirmed", message: "Order confirmed and being prepared for packing.", timestamp: new Date() }
+    );
+  }
+
+  await order.save();
+
+  // 1. Safely Decrement Product Stock Inventory (if stockQuantity is tracked)
+  if (order.items && Array.isArray(order.items)) {
+    for (const item of order.items) {
+      try {
+        const prodId = item.product || item.id;
+        if (prodId) {
+          const product = await Product.findById(prodId);
+          if (product && typeof product.stockQuantity === "number") {
+            product.stockQuantity = Math.max(0, product.stockQuantity - (item.quantity || 1));
+            if (product.stockQuantity === 0) {
+              product.inStock = false;
+            }
+            await product.save();
+          }
+        }
+      } catch (stockErr) {
+        console.warn(`[Inventory] Stock update warning for product ${item.name}:`, stockErr.message);
+      }
+    }
+  }
+
+  // 2. Log Payment Transaction
+  await Transaction.findOneAndUpdate(
+    { razorpayOrderId: order.razorpayOrderId },
+    {
+      paymentId: razorpayPaymentId,
+      orderId: order.orderId,
+      paymentMethod: paymentMethod || "razorpay",
+      amount: order.total || order.finalAmount,
+      currency: "INR",
+      status: "Captured",
+      webhookProcessedTime: new Date(),
+    },
+    { upsert: true, new: true }
+  );
+
+  // 3. Record Coupon Usage (Only once upon verified payment)
+  if (order.couponCode) {
+    const coupon = await Coupon.findOne({ code: order.couponCode });
+    if (coupon) {
+      const existingUsage = await CouponUsage.findOne({ order: order._id });
+      if (!existingUsage) {
+        await CouponUsage.create({
+          coupon: coupon._id,
+          user: order.user,
+          order: order._id,
+          discountAmount: order.discountAmount,
+        });
+        coupon.usedCount += 1;
+        await coupon.save();
+      }
+    }
+  }
+
+  // 4. Clear Customer's Active Cart
+  const cart = await Cart.findOne({ user: order.user });
+  if (cart) {
+    cart.items = [];
+    cart.prescription = null;
+    cart.prescriptionStatus = "Pending";
+    await cart.save();
+  }
+
+  // 5. In-App Notification
+  await Notification.create({
+    user: order.user,
+    title: "Payment Confirmed",
+    message: `Your payment was verified. Order "${order.orderId}" has been confirmed!`,
+    type: "order",
+    link: "/orders",
+  });
+
+  // 6. Trigger Itemized Order Confirmation Email
+  sendOrderConfirmation(order);
+
+  return { success: true, order, duplicate: false };
+};
+
+// Create Razorpay Order & Save DRAFT Order in DB (Exclusive Razorpay Gateway)
 export const createRazorpayOrder = async (req, res, next) => {
   const { items, couponCode, customer, email, shippingAddress, rxFile, requiresRx } = req.body;
 
@@ -114,7 +230,7 @@ export const createRazorpayOrder = async (req, res, next) => {
 
     const totals = await computeOrderTotals(items, couponCode, req.user._id);
 
-    // Initialise Razorpay Order
+    // Initialise Razorpay Order Session
     let razorpayOrder;
     if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
       const Razorpay = (await import("razorpay")).default;
@@ -131,7 +247,7 @@ export const createRazorpayOrder = async (req, res, next) => {
 
       razorpayOrder = await razorpay.orders.create(options);
     } else {
-      console.warn("Razorpay credentials missing. Generating dev mock order...");
+      console.warn("Razorpay credentials missing in environment. Generating dev fallback session...");
       razorpayOrder = {
         id: `mock_order_${Math.floor(100000 + Math.random() * 900000)}`,
         amount: Math.round(totals.finalAmount * 100),
@@ -142,8 +258,8 @@ export const createRazorpayOrder = async (req, res, next) => {
     // Save DRAFT Order in DB
     const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
     const timeline = [
-      { status: "Order Created", message: "Draft order has been initialized on checkout click.", timestamp: new Date() },
-      { status: "Payment Pending", message: "Razorpay payment checkout session created.", timestamp: new Date() },
+      { status: "Order Created", message: "Draft order initialized on checkout click.", timestamp: new Date() },
+      { status: "Payment Pending", message: "Razorpay payment checkout session initialized.", timestamp: new Date() },
     ];
 
     await Order.create({
@@ -164,9 +280,9 @@ export const createRazorpayOrder = async (req, res, next) => {
       rxUploaded: totals.orderRequiresRx,
       rxFile: rxFile || null,
       shippingAddress: shippingAddress || "N/A",
-      paymentMethod: "card",
+      paymentMethod: "razorpay",
       paymentStatus: "Pending",
-      status: "Pending", // Draft state
+      status: "Pending", // Draft state until payment verified
       razorpayOrderId: razorpayOrder.id,
       timeline,
     });
@@ -185,209 +301,59 @@ export const createRazorpayOrder = async (req, res, next) => {
   }
 };
 
-// Complete/Finalise Order (Frontend Callback Handler)
+// Complete/Finalise Order (Client Signature Verification Callback Handler)
 export const placeOrder = async (req, res, next) => {
   const orderData = req.body;
 
   try {
-    const {
-      items,
-      couponCode,
-      shippingAddress,
-      paymentMethod,
-      razorpayOrderId,
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = orderData;
+
+    if (!razorpayOrderId || !razorpayPaymentId) {
+      return res.status(400).json({ success: false, message: "Razorpay Order ID and Payment ID are required." });
+    }
+
+    const existingOrder = await Order.findOne({ razorpayOrderId });
+    if (!existingOrder) {
+      return res.status(404).json({ success: false, message: "Draft order record not found." });
+    }
+
+    if (existingOrder.paymentStatus === "Paid") {
+      return res.status(200).json({ success: true, order: existingOrder });
+    }
+
+    // Signature Verification
+    if (razorpayOrderId.startsWith("mock_order_")) {
+      console.warn("Dev mode fallback: payment signature bypass for mock order session");
+    } else {
+      if (!razorpaySignature) {
+        return res.status(400).json({ success: false, message: "Payment signature is missing." });
+      }
+      const crypto = await import("crypto");
+      const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
+      hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
+      const generatedSignature = hmac.digest("hex");
+
+      if (generatedSignature !== razorpaySignature) {
+        return res.status(400).json({ success: false, message: "Payment signature validation failed." });
+      }
+    }
+
+    // Finalize payment idempotently
+    const result = await finalizeOrderPayment(
+      existingOrder,
       razorpayPaymentId,
       razorpaySignature,
-    } = orderData;
+      "razorpay",
+      "client_callback"
+    );
 
-    // Check if order was already completed (Idempotency)
-    if (paymentMethod !== "cod" && razorpayOrderId) {
-      const existingOrder = await Order.findOne({ razorpayOrderId });
-      if (existingOrder) {
-        if (existingOrder.paymentStatus === "Paid") {
-          return res.status(200).json({ success: true, order: existingOrder });
-        }
-        
-        // Complete the existing draft order
-        if (razorpayOrderId.startsWith("mock_order_")) {
-          console.warn("Dev mode fallback: verified payment signature bypass");
-        } else {
-          const crypto = await import("crypto");
-          const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
-          hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
-          const generatedSignature = hmac.digest("hex");
-
-          if (generatedSignature !== razorpaySignature) {
-            return res.status(400).json({ success: false, message: "Payment signature validation failed." });
-          }
-        }
-
-        existingOrder.paymentStatus = "Paid";
-        existingOrder.status = existingOrder.requiresRx ? "Prescription Review" : "Confirmed";
-        existingOrder.razorpayPaymentId = razorpayPaymentId;
-        existingOrder.razorpaySignature = razorpaySignature;
-
-        // Timeline Updates
-        existingOrder.timeline.push(
-          { status: "Payment Captured", message: `Transaction verified via callback: ${razorpayPaymentId}`, timestamp: new Date() }
-        );
-        if (existingOrder.requiresRx) {
-          existingOrder.timeline.push(
-            { status: "Prescription Uploaded", message: "Rx prescription document linked.", timestamp: new Date() },
-            { status: "Prescription Under Review", message: "Pharmacist verification queue.", timestamp: new Date() }
-          );
-        } else {
-          existingOrder.timeline.push(
-            { status: "Confirmed", message: "Order has been confirmed and is being packed.", timestamp: new Date() }
-          );
-        }
-
-        await existingOrder.save();
-
-        // Create transaction logs
-        await Transaction.findOneAndUpdate(
-          { razorpayOrderId },
-          {
-            paymentId: razorpayPaymentId,
-            orderId: existingOrder.orderId,
-            paymentMethod: "card",
-            amount: existingOrder.total,
-            currency: "INR",
-            status: "Captured",
-            webhookProcessedTime: new Date(),
-          },
-          { upsert: true, new: true }
-        );
-
-        // Record Coupon Usage
-        if (existingOrder.couponCode) {
-          const coupon = await Coupon.findOne({ code: existingOrder.couponCode });
-          if (coupon) {
-            await CouponUsage.create({
-              coupon: coupon._id,
-              user: req.user._id,
-              order: existingOrder._id,
-              discountAmount: existingOrder.discountAmount,
-            });
-            coupon.usedCount += 1;
-            await coupon.save();
-          }
-        }
-
-        // Clear Cart (cart document itself remains)
-        const cart = await Cart.findOne({ user: req.user._id });
-        if (cart) {
-          cart.items = [];
-          cart.prescription = null;
-          cart.prescriptionStatus = "Pending";
-          await cart.save();
-        }
-
-        // Trigger Notification
-        await Notification.create({
-          user: req.user._id,
-          title: "Order Placed Successfully",
-          message: `Your order "${existingOrder.orderId}" has been confirmed!`,
-          type: "order",
-          link: "/orders",
-        });
-
-        // Send itemized Order Confirmation email
-        sendOrderConfirmation(existingOrder);
-
-        return res.status(200).json({ success: true, order: existingOrder });
-      }
-    }
-
-    // Cash on Delivery direct placement
-    if (paymentMethod === "cod") {
-      if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ success: false, message: "Order items are required" });
-      }
-      const totals = await computeOrderTotals(items, couponCode, req.user._id);
-
-      const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
-      const timeline = [
-        { status: "Order Created", message: "COD order registered successfully.", timestamp: new Date() },
-      ];
-      if (totals.orderRequiresRx) {
-        timeline.push(
-          { status: "Prescription Uploaded", message: "Prescription linked.", timestamp: new Date() },
-          { status: "Prescription Under Review", message: "Pharmacist verification queue.", timestamp: new Date() }
-        );
-      } else {
-        timeline.push(
-          { status: "Confirmed", message: "COD order confirmed and is being packed.", timestamp: new Date() }
-        );
-      }
-
-      const order = await Order.create({
-        orderId,
-        user: req.user._id,
-        customer: req.user.name,
-        email: req.user.email,
-        items: totals.validatedItems,
-        coupon: totals.couponObj ? totals.couponObj._id : null,
-        couponCode: totals.couponObj ? totals.couponObj.code : null,
-        discountAmount: totals.discountAmount,
-        subtotal: totals.subtotal,
-        shipping: totals.shipping,
-        tax: totals.tax,
-        total: totals.finalAmount,
-        finalAmount: totals.finalAmount,
-        requiresRx: totals.orderRequiresRx,
-        rxUploaded: totals.orderRequiresRx,
-        rxFile: orderData.rxFile || null,
-        shippingAddress,
-        paymentMethod,
-        paymentStatus: "Pending",
-        status: totals.orderRequiresRx ? "Prescription Review" : "Confirmed",
-        timeline,
-      });
-
-      // Record Coupon Usage
-      if (totals.couponObj) {
-        await CouponUsage.create({
-          coupon: totals.couponObj._id,
-          user: req.user._id,
-          order: order._id,
-          discountAmount: totals.discountAmount,
-        });
-        totals.couponObj.usedCount += 1;
-        await totals.couponObj.save();
-      }
-
-      // Clear Cart
-      const cart = await Cart.findOne({ user: req.user._id });
-      if (cart) {
-        cart.items = [];
-        cart.prescription = null;
-        cart.prescriptionStatus = "Pending";
-        await cart.save();
-      }
-
-      // Notification
-      await Notification.create({
-        user: req.user._id,
-        title: "Order Placed Successfully",
-        message: `Your COD order "${orderId}" has been registered!`,
-        type: "order",
-        link: "/orders",
-      });
-
-      // Send itemized Order Confirmation email
-      sendOrderConfirmation(order);
-
-      return res.status(201).json({ success: true, order });
-    }
-
-    res.status(400).json({ success: false, message: "Invalid payment configurations." });
+    return res.status(200).json({ success: true, order: result.order });
   } catch (error) {
     next(error);
   }
 };
 
-// Webhook Handler (Authoritative payment processing)
+// Webhook Handler (Authoritative payment processing via Razorpay Server Events)
 export const handleWebhook = async (req, res, next) => {
   const signature = req.headers["x-razorpay-signature"];
   console.log(`[Webhook] Received webhook signature header: ${signature}`);
@@ -460,86 +426,8 @@ export const handleWebhook = async (req, res, next) => {
         return res.status(200).json({ success: true, message: "Draft order not found, skipping." });
       }
 
-      // Idempotency check 3: if order is already processed as Paid
-      if (order.paymentStatus === "Paid") {
-        log.processingStatus = "Duplicate";
-        await log.save();
-        return res.status(200).json({ success: true, message: "Order was already marked paid." });
-      }
-
-      // Complete order parameters
-      order.paymentStatus = "Paid";
-      order.status = order.requiresRx ? "Prescription Review" : "Confirmed";
-      order.razorpayPaymentId = rzpPaymentId;
-
-      // Update Order Timeline
-      order.timeline.push(
-        { status: "Payment Captured", message: `Payment verified via webhook event: ${rzpPaymentId}`, timestamp: new Date() }
-      );
-      if (order.requiresRx) {
-        order.timeline.push(
-          { status: "Prescription Uploaded", message: "Rx prescription document linked.", timestamp: new Date() },
-          { status: "Prescription Under Review", message: "Pharmacist verification queue.", timestamp: new Date() }
-        );
-      } else {
-        order.timeline.push(
-          { status: "Confirmed", message: "Order confirmed and being prepared.", timestamp: new Date() }
-        );
-      }
-
-      await order.save();
-
-      // Log Payment Transaction
-      await Transaction.findOneAndUpdate(
-        { razorpayOrderId: rzpOrderId },
-        {
-          paymentId: rzpPaymentId,
-          orderId: order.orderId,
-          paymentMethod: paymentEntity?.method || "card",
-          amount: order.total,
-          currency: paymentEntity?.currency || "INR",
-          status: "Captured",
-          webhookProcessedTime: new Date(),
-          refundStatus: paymentEntity?.refund_status || null,
-        },
-        { upsert: true, new: true }
-      );
-
-      // Record coupon count
-      if (order.couponCode) {
-        const coupon = await Coupon.findOne({ code: order.couponCode });
-        if (coupon) {
-          await CouponUsage.create({
-            coupon: coupon._id,
-            user: order.user,
-            order: order._id,
-            discountAmount: order.discountAmount,
-          });
-          coupon.usedCount += 1;
-          await coupon.save();
-        }
-      }
-
-      // Clear User Cart (maintain document architecture)
-      const cart = await Cart.findOne({ user: order.user });
-      if (cart) {
-        cart.items = [];
-        cart.prescription = null;
-        cart.prescriptionStatus = "Pending";
-        await cart.save();
-      }
-
-      // Trigger In-app notifications
-      await Notification.create({
-        user: order.user,
-        title: "Payment Confirmed",
-        message: `Your payment was verified via Webhook. Order "${order.orderId}" has been confirmed!`,
-        type: "order",
-        link: "/orders",
-      });
-
-      // Send confirmation email
-      sendOrderConfirmation(order);
+      // Idempotent finalization of payment
+      await finalizeOrderPayment(order, rzpPaymentId, "", paymentEntity?.method || "razorpay", "webhook");
 
       log.processingStatus = "Success";
       await log.save();
@@ -571,7 +459,7 @@ export const handleWebhook = async (req, res, next) => {
         { razorpayOrderId: rzpOrderId },
         {
           paymentId: rzpPaymentId,
-          paymentMethod: paymentEntity?.method || "card",
+          paymentMethod: paymentEntity?.method || "razorpay",
           amount: paymentEntity?.amount ? paymentEntity.amount / 100 : 0,
           currency: paymentEntity?.currency || "INR",
           status: "Failed",
@@ -675,7 +563,6 @@ export const updateOrderStatus = async (req, res, next) => {
     }
 
     order.status = status;
-    // Push status event to order timeline
     order.timeline.push({
       status,
       message: `Order marked as ${status} by system operator.`,
@@ -684,7 +571,6 @@ export const updateOrderStatus = async (req, res, next) => {
 
     await order.save();
 
-    // Create in-app Notification
     await Notification.create({
       user: order.user,
       title: `Order Status: ${status}`,
@@ -693,7 +579,6 @@ export const updateOrderStatus = async (req, res, next) => {
       link: "/orders",
     });
 
-    // Trigger status update email
     sendOrderStatusUpdate(order, status);
 
     res.status(200).json({ success: true, order });
@@ -727,7 +612,6 @@ export const cancelOrder = async (req, res, next) => {
     order.status = "Cancelled";
     order.paymentStatus = "Cancelled";
 
-    // Push cancelled status event to timeline
     order.timeline.push({
       status: "Cancelled",
       message: "Order was cancelled by the customer.",
@@ -736,7 +620,6 @@ export const cancelOrder = async (req, res, next) => {
 
     await order.save();
 
-    // Send cancellation email
     sendOrderCancelled(order);
 
     res.status(200).json({ success: true, order });
