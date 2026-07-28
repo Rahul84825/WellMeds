@@ -185,7 +185,7 @@ const MoleculeDetailPage = () => {
           
           {/* LEFT COLUMN: Available Brands Card (Sticky Sidebar / Clinical Index) */}
           <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-xs sticky top-20">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-xs sticky top-20 bg-[#f6f7fa]">
               <h3 className="font-bold text-slate-900 dark:text-zinc-100 text-base mb-3">
                 Available Brands
               </h3>
