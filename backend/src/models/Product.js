@@ -226,15 +226,15 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    displayOrder: {
-      type: Number,
-      default: 0,
-    },
     similarMedicinePriority: {
       type: Number,
       default: 0,
     },
-    isImported: {
+    isGLP1Medicine: {
+      type: Boolean,
+      default: false,
+    },
+    isHealthSupplement: {
       type: Boolean,
       default: false,
     },
@@ -256,10 +256,6 @@ const productSchema = new mongoose.Schema(
         "Surgical Category is required if product is surgical",
       ],
     },
-    isTrending: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
@@ -278,9 +274,9 @@ productSchema.index({ category: 1 });
 productSchema.index({ surgicalCategory: 1 });
 productSchema.index({ molecules: 1 });
 productSchema.index({ specialities: 1 });
-productSchema.index({ productType: 1, isSurgical: 1, isTrending: 1 });
-productSchema.index({ isImported: 1 });
-productSchema.index({ displayOrder: 1 });
+productSchema.index({ productType: 1, isSurgical: 1 });
+productSchema.index({ isGLP1Medicine: 1 });
+productSchema.index({ isHealthSupplement: 1 });
 productSchema.index({ name: "text", brand: "text", manufacturer: "text" });
 
 export const Product = mongoose.model("Product", productSchema);

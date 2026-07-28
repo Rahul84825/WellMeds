@@ -32,9 +32,6 @@ const ProductsPage = () => {
   // Speciality filter from URL (?speciality=...)
   const specialityParam = searchParams.get("speciality") || "";
 
-  // Source filter from URL (?isImported=...)
-  const isImportedParam = searchParams.get("isImported") || "";
-
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") || "");
@@ -65,10 +62,6 @@ const ProductsPage = () => {
       titleStr = `${categoryParam} | WellMeds`;
     } else if (specialityParam) {
       titleStr = `${specialityParam} | WellMeds`;
-    } else if (isImportedParam === "true") {
-      titleStr = "Imported Medicines | WellMeds";
-    } else if (isImportedParam === "false") {
-      titleStr = "Indian Generics | WellMeds";
     }
     document.title = titleStr;
     let metaDesc = document.querySelector("meta[name='description']");
@@ -78,7 +71,7 @@ const ProductsPage = () => {
       document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute("content", "Shop authentic prescription medicines and healthcare products online at WellMeds.");
-  }, [categoryParam, specialityParam, isImportedParam]);
+  }, [categoryParam, specialityParam]);
 
   // Debounce search input
   useEffect(() => {
@@ -89,11 +82,10 @@ const ProductsPage = () => {
       if (searchVal.trim()) newParams.search = searchVal;
       if (categoryParam) newParams.category = categoryParam;
       if (specialityParam) newParams.speciality = specialityParam;
-      if (isImportedParam) newParams.isImported = isImportedParam;
       setSearchParams(Object.keys(newParams).length ? newParams : {});
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchVal, setSearchParams, categoryParam, specialityParam, isImportedParam]);
+  }, [searchVal, setSearchParams, categoryParam, specialityParam]);
 
   // Fetch Products
   const fetchProducts = useCallback(async () => {
@@ -105,7 +97,6 @@ const ProductsPage = () => {
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
         speciality: specialityParam || undefined,
-        isImported: isImportedParam !== "" ? isImportedParam : undefined,
         productType: "medicine",
       });
       setProducts(data.products || []);
@@ -115,16 +106,16 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, categoryParam, specialityParam, isImportedParam]);
+  }, [currentPage, debouncedSearch, categoryParam, specialityParam]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Reset to page 1 when search query, category, speciality, or isImported changes
+  // Reset to page 1 when search query, category, or speciality changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, categoryParam, specialityParam, isImportedParam]);
+  }, [debouncedSearch, categoryParam, specialityParam]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -132,8 +123,6 @@ const ProductsPage = () => {
   }, [currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
-  const showingStart = totalProducts > 0 ? (currentPage - 1) * limit + 1 : 0;
-  const showingEnd = Math.min(currentPage * limit, totalProducts);
 
   // Generate page numbers to show
   const getPageNumbers = () => {
@@ -178,14 +167,6 @@ const ProductsPage = () => {
               <span className="text-[#038076] dark:text-[#a4c9ff]">{specialityParam}</span>
             </>
           )}
-          {isImportedParam && (
-            <>
-              <span className="text-slate-300">/</span>
-              <span className="text-[#038076] dark:text-[#a4c9ff]">
-                {isImportedParam === "true" ? "Imported Medicines" : "Indian Generics"}
-              </span>
-            </>
-          )}
         </nav>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
           <div>
@@ -194,10 +175,6 @@ const ProductsPage = () => {
                 ? categoryParam
                 : specialityParam
                 ? specialityParam
-                : isImportedParam === "true"
-                ? "Imported Medicines"
-                : isImportedParam === "false"
-                ? "Indian Generics"
                 : "All Products"}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
@@ -205,14 +182,10 @@ const ProductsPage = () => {
                 ? `Showing all products in the "${categoryParam}" category.`
                 : specialityParam
                 ? `Showing all products in the "${specialityParam}" speciality.`
-                : isImportedParam === "true"
-                ? "Showing our verified global imported medicines."
-                : isImportedParam === "false"
-                ? "Showing authentic Indian generic medicines."
                 : "Secure prescription verification, authentic formulations, and express doorstep delivery."}
             </p>
           </div>
-          {(categoryParam || specialityParam || isImportedParam) && (
+          {(categoryParam || specialityParam) && (
             <button
               onClick={() => navigate("/products")}
               className="inline-flex items-center gap-xs text-[11px] font-bold text-[#038076] border border-[#038076]/30 bg-[#038076]/5 hover:bg-[#038076]/10 px-md py-xs rounded-full transition-all select-none cursor-pointer"

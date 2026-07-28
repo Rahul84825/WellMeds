@@ -12,7 +12,7 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}) {
-    const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isImported } = params;
+    const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
@@ -23,7 +23,8 @@ export const productService = {
     if (productType) cleanParams.productType = productType;
     if (isSurgical) cleanParams.isSurgical = isSurgical;
     if (surgicalCategory) cleanParams.surgicalCategory = surgicalCategory;
-    if (isImported !== undefined) cleanParams.isImported = isImported;
+    if (isGLP1Medicine !== undefined) cleanParams.isGLP1Medicine = isGLP1Medicine;
+    if (isHealthSupplement !== undefined) cleanParams.isHealthSupplement = isHealthSupplement;
 
     const data = await apiInstance.get("/products", { params: cleanParams });
     return {

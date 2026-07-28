@@ -272,10 +272,9 @@ const AddNewProduct = () => {
   const [moleculeDropdownOpen, setMoleculeDropdownOpen] = useState(false);
 
   // V2 Display & custom routing states
-  const [displayOrder, setDisplayOrder] = useState("");
-  const [isImported, setIsImported] = useState(false);
   const [slug, setSlug] = useState("");
-  const [isTrending, setIsTrending] = useState(false);
+  const [isGLP1Medicine, setIsGLP1Medicine] = useState(false);
+  const [isHealthSupplement, setIsHealthSupplement] = useState(false);
   
   // Images
   const [images, setImages] = useState([]);
@@ -394,10 +393,9 @@ const AddNewProduct = () => {
             
             // V2 Fields
             setManufacturer(product.manufacturer || product.brand || "");
-            setDisplayOrder(product.displayOrder !== undefined ? product.displayOrder : "");
-            setIsImported(product.isImported || false);
             setSlug(product.slug || "");
-            setIsTrending(product.isTrending || false);
+            setIsGLP1Medicine(product.isGLP1Medicine || false);
+            setIsHealthSupplement(product.isHealthSupplement || false);
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -751,10 +749,9 @@ const AddNewProduct = () => {
       // V2 Fields
       manufacturer: specManufacturer.trim() || manufacturer.trim(),
       strength: specStrength.trim(),
-      displayOrder: displayOrder !== "" ? parseInt(displayOrder) : 0,
-      isImported,
       slug: slug.trim() || undefined,
-      isTrending,
+      isGLP1Medicine,
+      isHealthSupplement,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -914,7 +911,7 @@ const AddNewProduct = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="space-y-xs col-span-2">
+                  <div className="space-y-xs sm:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manufacturer *</label>
                     <input
                       type="text"
@@ -1143,24 +1140,7 @@ const AddNewProduct = () => {
                 </div>
               </div>
 
-              {/* Section 4: Display Settings */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
-                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  Display Settings
-                </h3>
-                <div className="max-w-xs space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Order</label>
-                  <input
-                    type="number"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="0 (Lower shows first)"
-                  />
-                </div>
-              </div>
-
-              {/* Section 5: Prescription & Medical */}
+              {/* Section 4: Prescription & Medical Rules */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
                 <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
                   Prescription &amp; Medical Rules
@@ -1195,31 +1175,31 @@ const AddNewProduct = () => {
                     </label>
                   </div>
 
-                  {/* Imported Toggle */}
+                  {/* GLP-1 Medicines Toggle */}
                   <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
                     <input
                       type="checkbox"
-                      id="isImportedToggle"
-                      checked={isImported}
-                      onChange={(e) => setIsImported(e.target.checked)}
+                      id="isGLP1MedicineToggle"
+                      checked={isGLP1Medicine}
+                      onChange={(e) => setIsGLP1Medicine(e.target.checked)}
                       className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
                     />
-                    <label htmlFor="isImportedToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
-                      Imported Medicine
+                    <label htmlFor="isGLP1MedicineToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      GLP-1 Medicines for Diabetes &amp; Weight Loss
                     </label>
                   </div>
 
-                  {/* Trending Toggle */}
+                  {/* Health Supplements Toggle */}
                   <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
                     <input
                       type="checkbox"
-                      id="isTrendingToggle"
-                      checked={isTrending}
-                      onChange={(e) => setIsTrending(e.target.checked)}
+                      id="isHealthSupplementToggle"
+                      checked={isHealthSupplement}
+                      onChange={(e) => setIsHealthSupplement(e.target.checked)}
                       className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
                     />
-                    <label htmlFor="isTrendingToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
-                      Trending Product (Storefront Search Recommendation)
+                    <label htmlFor="isHealthSupplementToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Health Supplements
                     </label>
                   </div>
 

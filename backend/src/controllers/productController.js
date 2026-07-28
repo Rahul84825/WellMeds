@@ -7,7 +7,7 @@ import slugify from "slugify";
 import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isImported } = req.query;
+  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement } = req.query;
 
   try {
     const query = {};
@@ -66,9 +66,14 @@ export const getProducts = async (req, res, next) => {
       }
     }
 
-    // Filter by isImported (source)
-    if (isImported !== undefined && isImported !== "") {
-      query.isImported = isImported === "true";
+    // Filter by isGLP1Medicine
+    if (isGLP1Medicine !== undefined && isGLP1Medicine !== "") {
+      query.isGLP1Medicine = isGLP1Medicine === "true";
+    }
+
+    // Filter by isHealthSupplement
+    if (isHealthSupplement !== undefined && isHealthSupplement !== "") {
+      query.isHealthSupplement = isHealthSupplement === "true";
     }
     // Filter by molecule slug or ID
     // Filter by molecule slug, ID, or name
@@ -396,9 +401,9 @@ export const getSimilarProducts = async (req, res, next) => {
       _id: { $ne: currentProduct._id },
       molecules: { $in: currentProduct.molecules }
     })
-    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired isNonRefundable badge molecules brand similarMedicinePriority displayOrder")
+    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired isNonRefundable badge molecules brand similarMedicinePriority")
     .populate("molecules", "name slug")
-    .sort({ similarMedicinePriority: -1, displayOrder: 1 })
+    .sort({ similarMedicinePriority: -1 })
     .limit(3);
 
     res.status(200).json({ success: true, products: similar });
@@ -518,18 +523,11 @@ export const searchAll = async (req, res, next) => {
 
 export const getTrendingProducts = async (req, res, next) => {
   try {
-    let trending = await Product.find({ isTrending: true })
+    const trending = await Product.find({})
       .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
       .populate("category", "name slug")
+      .sort({ createdAt: -1 })
       .limit(6);
-
-    if (trending.length === 0) {
-      trending = await Product.find({})
-        .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
-        .populate("category", "name slug")
-        .sort({ displayOrder: 1 })
-        .limit(6);
-    }
 
     res.status(200).json({ success: true, products: trending });
   } catch (error) {

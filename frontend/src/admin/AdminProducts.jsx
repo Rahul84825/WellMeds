@@ -244,7 +244,7 @@ const ManageProducts = () => {
       </div>
 
       {/* Prescription Filter toggle options bar */}
-      <div className="flex gap-md text-xs font-semibold text-slate-400 items-center pl-sm">
+      <div className="flex flex-wrap gap-xs sm:gap-md text-xs font-semibold text-slate-400 items-center pl-sm">
         <span>Prescription Filter:</span>
         <button 
           onClick={() => setRxFilter("All")}

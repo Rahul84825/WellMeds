@@ -218,7 +218,7 @@ const AdminMolecules = () => {
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 p-md select-none text-xs font-bold text-slate-400 bg-slate-50/50 dark:bg-zinc-950/20">
+            <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-sm border-t border-slate-100 dark:border-zinc-800 p-md select-none text-xs font-bold text-slate-400 bg-slate-50/50 dark:bg-zinc-950/20">
               <div className="flex items-center gap-xs">
                 <button
                   onClick={() => setCurrentPage(1)}
