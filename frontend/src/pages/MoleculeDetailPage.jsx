@@ -181,17 +181,17 @@ const MoleculeDetailPage = () => {
         </nav>
 
         {/* TWO-COLUMN LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           
           {/* LEFT COLUMN: Available Brands Card (Sticky Sidebar / Clinical Index) */}
-          <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-sm sticky top-20">
-              <h3 className="font-semibold text-slate-900 dark:text-zinc-100 text-base sm:text-lg mb-3">
+          <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
+            <div className="bg-white bg-[#f6f7fa] dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs sticky top-20 max-w-[300px] w-full mx-auto lg:mx-0">
+              <h3 className="font-semibold text-slate-900 dark:text-zinc-100 text-base sm:text-lg mb-5 sm:mb-6">
                 Available Brands
               </h3>
 
               {productsLoading ? (
-                <div className="py-8 flex justify-center">
+                <div className="py-6 flex justify-center">
                   <Loader size="sm" />
                 </div>
               ) : products.length > 0 ? (
@@ -209,42 +209,42 @@ const MoleculeDetailPage = () => {
                       <div
                         key={prod.id || prod._id || idx}
                         onClick={() => navigate(`/products/${prod.slug}`)}
-                        className="py-3.5 first:pt-1 last:pb-1 group cursor-pointer transition-all"
+                        className="py-2.5 first:pt-1 last:pb-1 group cursor-pointer transition-all"
                       >
-                        {/* Top Row: Title & Price (using font-semibold and matching font sizes) */}
-                        <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-zinc-100 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] transition-colors leading-snug">
+                        {/* Top Row: Title & Price (23% smaller typography) */}
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold text-[11px] sm:text-xs text-slate-800 dark:text-zinc-100 group-hover:text-[#038076] dark:group-hover:text-[#84d6b9] transition-colors leading-snug">
                             {prod.name}
                           </h4>
-                          <span className="font-semibold text-base sm:text-lg text-slate-900 dark:text-zinc-50 shrink-0 text-right">
+                          <span className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-zinc-50 shrink-0 text-right">
                             ₹{price.toLocaleString('en-IN')}
                           </span>
                         </div>
 
-                        {/* Second Row: Custom Rx Prescription Required Badge & Per-Capsule/Unit Price */}
-                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                        {/* Second Row: Rx Badge & Per-Capsule/Unit Price */}
+                        <div className="flex items-center justify-between gap-1.5 mt-1">
                           {prod.requiresPrescription ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-[#038076] dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 text-[11px] font-semibold select-none shadow-2xs">
-                              <span className="w-3.5 h-3.5 rounded-full bg-[#038076] text-white text-[9px] font-black flex items-center justify-center leading-none">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-[#038076] dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 text-[9.5px] font-semibold select-none shadow-2xs">
+                              <span className="w-3 h-3 rounded-full bg-[#038076] text-white text-[7.5px] font-black flex items-center justify-center leading-none">
                                 Rx
                               </span>
                               <span>Prescription Required</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 text-[11px] font-medium">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 text-[9.5px] font-medium">
                               OTC Product
                             </span>
                           )}
 
                           {unitPrice && (
-                            <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold shrink-0">
+                            <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 font-semibold shrink-0">
                               {unitPrice}
                             </span>
                           )}
                         </div>
 
                         {/* Third Row: Manufacturer */}
-                        <p className="text-xs text-slate-400 dark:text-zinc-500 font-normal truncate mt-1">
+                        <p className="text-[9.5px] text-slate-400 dark:text-zinc-500 font-normal truncate mt-0.5">
                           by {prod.manufacturer || prod.brand || "NATCO PHARMA LTD..."}
                         </p>
                       </div>
@@ -252,18 +252,18 @@ const MoleculeDetailPage = () => {
                   })}
 
                   {/* Bottom Full-Width Action Button */}
-                  <div className="pt-4 mt-2 border-t border-slate-150 dark:border-zinc-800">
+                  <div className="pt-3 mt-1.5 border-t border-slate-150 dark:border-zinc-800">
                     <button
                       onClick={scrollToProducts}
-                      className="w-full py-3 px-4 rounded-xl sm:rounded-2xl bg-[#038076] hover:bg-[#02675f] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs hover:shadow-md active:scale-[0.99]"
+                      className="w-full py-2 px-3 rounded-xl bg-[#038076] hover:bg-[#02675f] text-white text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md active:scale-[0.99]"
                     >
                       <span>View All Brands({products.length})</span>
-                      <ArrowRight size={16} />
+                      <ArrowRight size={13} />
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 py-6 text-center">
+                <p className="text-xs text-slate-400 py-5 text-center">
                   No products currently available for this molecule.
                 </p>
               )}
@@ -271,7 +271,7 @@ const MoleculeDetailPage = () => {
           </div>
 
           {/* RIGHT COLUMN: Molecule Title & Detailed Information Card */}
-          <div className="lg:col-span-8 space-y-6 order-1 lg:order-2">
+          <div className="lg:col-span-9 space-y-6 order-1 lg:order-2">
             
             {/* Main Title */}
             <div>
