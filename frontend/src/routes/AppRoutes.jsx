@@ -61,7 +61,61 @@ const AdminUsers = lazy(() => import("../admin/AdminUsers"));
 const AdminSettings = lazy(() => import("../admin/AdminSettings"));
 const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
 
+// Maintenance Page Component (Lazy Loaded)
+const MaintenancePage = lazy(() => import("../pages/MaintenancePage"));
+
+const isMaintenanceMode =
+  import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
+  import.meta.env.MAINTENANCE_MODE === "true";
+
 const AppRoutes = () => {
+  if (isMaintenanceMode) {
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          {/* Public Maintenance Landing Page */}
+          <Route path="/" element={<MaintenancePage />} />
+
+          {/* Login Routes for Admin Authentication */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<Login />} />
+
+          {/* Admin Portal Routes — Unrestricted for Administrators */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<ManageProducts />} />
+            <Route path="products/new" element={<AddNewProduct />} />
+            <Route path="products/:id/edit" element={<AddNewProduct />} />
+            <Route path="orders" element={<ManageOrders />} />
+            <Route path="categories" element={<ProductCategories />} />
+            <Route path="surgical-categories" element={<AdminSurgicalCategories />} />
+            <Route path="specialities" element={<AdminSpecialities />} />
+            <Route path="molecules" element={<AdminMolecules />} />
+            <Route path="molecules/new" element={<AdminAddNewMolecule />} />
+            <Route path="molecules/:id/edit" element={<AdminAddNewMolecule />} />
+            <Route path="prescriptions" element={<AdminPrescriptions />} />
+            <Route path="coupons" element={<AdminCoupons />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="megamenu" element={<AdminMegaMenu />} />
+            <Route path="cms/imported" element={<Navigate to="/admin" replace />} />
+            <Route path="cms/pap" element={<Navigate to="/admin" replace />} />
+          </Route>
+
+          {/* Redirect all other public routes directly to '/' (Maintenance Page) */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>

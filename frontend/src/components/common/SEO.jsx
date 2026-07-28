@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const DEFAULT_SITE_NAME = "WellMeds";
-const DEFAULT_DOMAIN = "https://wellmeds.com";
+const DEFAULT_DOMAIN = "https://wellmeds.in";
 const DEFAULT_TITLE = "WellMeds — Online Pharmacy & Medical Supplies | Buy Medicines Online";
 const DEFAULT_DESCRIPTION = "WellMeds is India's trusted online pharmacy delivering authentic prescription medicines, wellness products, surgical devices, and specialty healthcare directly to your doorstep.";
 const DEFAULT_IMAGE = `${DEFAULT_DOMAIN}/assets/logos/logo.png`;

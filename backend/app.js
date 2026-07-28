@@ -176,10 +176,14 @@ app.use("/uploads", express.static("uploads", {
 }));
 
 import seoRoutes from "./src/routes/seoRoutes.js";
+import { maintenanceMiddleware } from "./src/middleware/maintenanceMiddleware.js";
 
 // Top-level SEO endpoints (/sitemap.xml, /robots.txt, and /api/sitemap.xml, /api/robots.txt)
 app.use("/", seoRoutes);
 app.use("/api", seoRoutes);
+
+// Global Maintenance Mode Protection Middleware
+app.use(maintenanceMiddleware);
 
 // Routes Mapping
 app.use("/api/auth", authRoutes);

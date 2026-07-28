@@ -77,14 +77,15 @@ export const couponLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit heavy catalog searches
-export const searchLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 300,
+// Limit coming-soon / maintenance page email subscription attempts (max 10 per 15 minutes per IP)
+export const subscribeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: {
     success: false,
-    message: "Too many search requests, please slow down",
+    message: "Too many subscription requests from this IP. Please try again after 15 minutes.",
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
+
