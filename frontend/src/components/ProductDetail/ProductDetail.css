@@ -230,3 +230,26 @@
   color: var(--pdp-ink-soft);
   line-height: 1.6;
 }
+
+/* Mobile Responsive Specifications Alignment */
+@media (max-width: 640px) {
+  .pdp-spec-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+  }
+  .pdp-spec-label {
+    width: 100%;
+    font-size: 11px;
+    color: #5f776e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pdp-spec-value {
+    width: 100%;
+    font-size: 13px;
+    color: #172b26;
+    word-break: break-word;
+  }
+}

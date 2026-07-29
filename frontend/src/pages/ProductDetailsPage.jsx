@@ -767,7 +767,7 @@ const ProductDetails = () => {
           {/* RIGHT CONTAINER */}
           <div className="w-full md:w-[68%] lg:w-[78%] flex flex-col gap-6 order-1 md:order-2 lg:order-2">
 
-            {/* Top Row: Center Content & Purchase Card */}
+            {/* Top Row: Center Content & Right Purchase Column */}
             <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
               {/* Center Content Column */}
               <div className="w-full lg:w-[66.6%] space-y-5">
@@ -784,25 +784,27 @@ const ProductDetails = () => {
                   </div>
                 </div>
 
-                  {/* Right Column: Purchase Panel */}
-              <div className="w-full lg:w-[33.4%]">
-                {memoizedPurchaseCard}
-              </div>
+                {/* Mobile Purchase Card (Aligned Directly Under Image Card on Mobile Only) */}
+                <div className="lg:hidden">
+                  {memoizedPurchaseCard}
+                </div>
 
                 {/* Dispatch Banner / Cards */}
                 {memoizedDispatchDelivery}
 
-              
                 {/* Prescription and Cold Chain Cards */}
                 {memoizedRxColdChain}
 
-              {/* Mobile Substitute Products Card (Aligned Directly Under Delivery Card on Mobile Only) */}
+                {/* Mobile Substitute Products Card (Aligned Directly Under Delivery Card on Mobile Only) */}
                 <div className="lg:hidden">
                   <SubstituteProducts substituteProducts={substituteProducts} product={product} />
                 </div>
               </div>
-              
-              
+
+              {/* Right Column: Sticky Purchase Panel (Desktop Only) */}
+              <div className="hidden lg:block lg:w-[33.4%] lg:sticky lg:top-24">
+                {memoizedPurchaseCard}
+              </div>
             </div>
 
             {/* Bottom Area: Combined Center + Right Column space */}
