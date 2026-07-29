@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SEO from "../components/common/SEO";
+import api from "../services/api";
 import "./MaintenancePage.css";
 
 const LOGO_BASE64 =
@@ -8,11 +9,29 @@ const LOGO_BASE64 =
 const TOTAL_PILLS = 14;
 
 const MaintenancePage = () => {
+  const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmMsg, setConfirmMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    if (!email || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const { data } = await api.post("/notifications/subscribe", { email });
+      if (data.duplicate) {
+        setConfirmMsg("You're already on our waitlist!");
+      } else {
+        setConfirmMsg("Noted. We'll reach out the moment we open.");
+      }
+      setIsSubmitted(true);
+    } catch (err) {
+      setConfirmMsg("Something went wrong. Please try again.");
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -87,18 +106,20 @@ const MaintenancePage = () => {
         <form className="notify-form" onSubmit={handleSubmit}>
           <input
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com"
             required
-            disabled={isSubmitted}
+            disabled={isSubmitted || isSubmitting}
           />
-          <button type="submit" disabled={isSubmitted}>
-            {isSubmitted ? "Added ✓" : "Notify me"}
+          <button type="submit" disabled={isSubmitted || isSubmitting}>
+            {isSubmitted ? "Added ✓" : isSubmitting ? "Adding..." : "Notify me"}
           </button>
         </form>
 
-        {isSubmitted && (
+        {isSubmitted && confirmMsg && (
           <div className="confirm-msg" style={{ display: "block" }}>
-            Noted. We'll reach out the moment we open.
+            {confirmMsg}
           </div>
         )}
 
