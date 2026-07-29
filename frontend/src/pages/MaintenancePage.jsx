@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import SEO from "../components/common/SEO";
-import api from "../services/api";
+import apiInstance from "../services/api/api";
 import "./MaintenancePage.css";
 
 const LOGO_BASE64 =
@@ -18,17 +18,27 @@ const MaintenancePage = () => {
     e.preventDefault();
     if (!email || isSubmitting) return;
     setIsSubmitting(true);
+    setConfirmMsg("");
     try {
-      const result = await api.post("/notifications/subscribe", { email });
+      const result = await apiInstance.post("/notifications/subscribe", { email });
       if (result?.duplicate) {
-        setConfirmMsg("You're already on our waitlist!");
+        setConfirmMsg("You\u2019re already on our waitlist!");
       } else {
-        setConfirmMsg("Noted. We'll reach out the moment we open.");
+        setConfirmMsg("Noted. We\u2019ll reach out the moment we open.");
       }
       setIsSubmitted(true);
     } catch (err) {
-      setConfirmMsg("Something went wrong. Please try again.");
-      setIsSubmitted(true);
+      const status = err?.response?.status;
+      if (status === 429) {
+        setConfirmMsg("Too many requests. Please try again in a few minutes.");
+      } else if (status === 400) {
+        setConfirmMsg("Please enter a valid email address.");
+      } else if (status === 503) {
+        setConfirmMsg("Service temporarily unavailable. Please try again shortly.");
+      } else {
+        setConfirmMsg("Unable to subscribe right now. Please try again.");
+      }
+      // Do NOT set isSubmitted — let user retry
     } finally {
       setIsSubmitting(false);
     }
