@@ -35,7 +35,7 @@
 /* faint pharmacy cross grid texture */
 .maintenance-page::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   background-image:
     linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
@@ -57,13 +57,10 @@
 }
 
 .maintenance-page .logo {
-  font-family: 'Zilla Slab', serif;
-  font-weight: 700;
-  font-size: 26px;
-  color: var(--card-cream);
-  letter-spacing: -0.5px;
+  height: 34px;
+  width: auto;
+  display: block;
 }
-.maintenance-page .logo span { color: var(--teal-bright); }
 
 .maintenance-page .topbar .tag {
   font-size: 11.5px;

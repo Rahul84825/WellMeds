@@ -3,50 +3,14 @@ import SEO from "../components/common/SEO";
 import api from "../services/api";
 import "./MaintenancePage.css";
 
+import logo from "../assets/logos/logo.png";
+
 const TOTAL_DAYS = 14;
 
 const MaintenancePage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [countText, setCountText] = useState("calculating…");
-  const [poppedPills, setPoppedPills] = useState(new Array(TOTAL_DAYS).fill(false));
-
-  useEffect(() => {
-    // Launch target date: 14 days from initial load
-    const launchDate = new Date();
-    launchDate.setDate(launchDate.getDate() + TOTAL_DAYS);
-    launchDate.setHours(23, 0, 0, 0);
-
-    const updateCountdown = () => {
-      const now = new Date();
-      const msLeft = launchDate - now;
-
-      if (msLeft <= 0) {
-        setCountText("launch day is here");
-        setPoppedPills(new Array(TOTAL_DAYS).fill(true));
-        return;
-      }
-
-      const totalMsCourse = TOTAL_DAYS * 24 * 60 * 60 * 1000;
-      const elapsedMs = totalMsCourse - msLeft;
-      const daysPassed = Math.floor(elapsedMs / (24 * 60 * 60 * 1000));
-
-      const newPopped = new Array(TOTAL_DAYS).fill(false).map((_, idx) => idx < daysPassed);
-      setPoppedPills(newPopped);
-
-      const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((msLeft / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((msLeft / (1000 * 60)) % 60);
-
-      setCountText(`${days}d ${hours}h ${mins}m left`);
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleNotifySubmit = async (e) => {
     e.preventDefault();
@@ -54,12 +18,8 @@ const MaintenancePage = () => {
 
     setIsSubmitting(true);
     try {
-      // Integration point with backend notification API if present
-      await api.post("/notifications/subscribe", { email }).catch(() => {
-        // Graceful fallback if subscription backend endpoint is not configured yet
-      });
+      await api.post("/notifications/subscribe", { email }).catch(() => {});
     } catch (err) {
-      // Suppress network errors for frontend integration
     } finally {
       setIsSubmitted(true);
       setIsSubmitting(false);
@@ -75,9 +35,7 @@ const MaintenancePage = () => {
       />
 
       <div className="topbar">
-        <div className="logo">
-          wm<span>.</span>
-        </div>
+        <img className="logo" src={logo} alt="WellMeds" />
         <div className="tag">
           Specialty Pharmacy
           <br />
@@ -116,7 +74,7 @@ const MaintenancePage = () => {
           <div className="field">
             <div className="k">Directions</div>
             <div className="v">
-              Check back in 2 weeks. Do not skip a dose of patience.
+              Launching soon. Do not skip a dose of patience.
             </div>
           </div>
           <div className="field">
@@ -126,17 +84,12 @@ const MaintenancePage = () => {
 
           <div className="blister-section">
             <div className="blister-label">
-              <span>Refill schedule — 14 day course</span>
-              <span className="count-text" id="countText">
-                {countText}
-              </span>
+              <span>Your refills, ready when we open</span>
+              <span className="count-text">Coming Soon</span>
             </div>
             <div className="blister" id="blister">
-              {poppedPills.map((isPopped, idx) => (
-                <div
-                  key={idx}
-                  className={`pill ${isPopped ? "popped" : ""}`}
-                />
+              {new Array(TOTAL_DAYS).fill(0).map((_, idx) => (
+                <div key={idx} className="pill" />
               ))}
             </div>
           </div>
