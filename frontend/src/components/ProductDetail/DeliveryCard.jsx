@@ -3,11 +3,11 @@ import { Truck } from "lucide-react";
 
 const DeliveryCard = () => {
   return (
-    <div className="bg-[#004782]/[0.03] border border-[#004782]/10 rounded-2xl p-md flex items-center gap-sm text-left shadow-2xs hover:shadow-xs transition-all select-none">
-      <Truck size={18} className="text-[#004782] shrink-0" />
+    <div className="pdp-paper-card p-3.5 flex items-center gap-3 text-left font-mono select-none">
+      <Truck size={18} className="text-[#157a6d] shrink-0" />
       <div>
-        <p className="text-[11px] font-black text-[#004782] dark:text-[#a4c9ff] uppercase tracking-wider">Express Delivery</p>
-        <p className="text-[10px] text-slate-505 dark:text-zinc-400 mt-0.5 leading-snug">Get it delivered tomorrow by 2:00 PM. Free shipping on orders above ₹500.</p>
+        <p className="text-[11px] font-bold text-[#157a6d] uppercase tracking-wider">Express Delivery</p>
+        <p className="text-[11px] text-[#3f544d] mt-0.5 leading-snug">Fast cold-chain verified delivery to your doorstep.</p>
       </div>
     </div>
   );

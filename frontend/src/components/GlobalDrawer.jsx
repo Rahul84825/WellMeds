@@ -229,18 +229,18 @@ const GlobalDrawer = () => {
                 navigate("/profile");
               }
             }}
-            className="m-4 p-4 border border-slate-150 dark:border-zinc-800 rounded-3xl flex items-center gap-3.5 bg-slate-50/[0.05] dark:bg-zinc-900/30 hover:bg-slate-50 dark:hover:bg-zinc-800/40 cursor-pointer shadow-2xs select-none"
+            className="m-4 p-4 border border-[#dde8e3] rounded-2xl flex items-center gap-3.5 bg-[#f0f8f5] hover:bg-[#e3f2ed] cursor-pointer shadow-2xs select-none"
           >
-            <div className="w-11 h-11 rounded-full bg-[#845ec2]/10 dark:bg-[#845ec2]/20 border border-[#845ec2]/35 flex items-center justify-center shrink-0">
-              <div className="w-8.5 h-8.5 rounded-full bg-[#845ec2] text-white flex items-center justify-center shadow-xs">
-                <User className="w-4.5 h-4.5 text-white/95" />
+            <div className="w-10 h-10 rounded-full bg-[#157a6d]/10 border border-[#157a6d]/30 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#157a6d] text-white flex items-center justify-center shadow-xs">
+                <User className="w-4 h-4 text-white" />
               </div>
             </div>
             <div className="text-left space-y-0.5">
-              <p className="text-[10px] text-slate-400 font-extrabold flex items-center gap-1 uppercase tracking-wider">
+              <p className="text-[10px] text-[#5f776e] font-bold flex items-center gap-1 uppercase tracking-wider">
                 👋 Hello
               </p>
-              <p className="text-sm font-black text-slate-805 dark:text-zinc-100">
+              <p className="text-sm font-bold text-[#172b26]">
                 {user ? user.name : "Login"}
               </p>
             </div>
@@ -262,7 +262,7 @@ const GlobalDrawer = () => {
                   navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
                 }
               }}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary font-semibold"
+              className="w-full pl-9 pr-4 py-2 bg-[#f0f8f5] border border-[#c3d4cc] rounded-xl text-xs outline-none focus:ring-1 focus:ring-[#157a6d] focus:border-[#157a6d] font-mono font-semibold"
             />
           </div>
 
@@ -272,7 +272,7 @@ const GlobalDrawer = () => {
               setIsDrawerOpen(false);
               navigate("/upload-prescription");
             }}
-            className="w-full bg-[#004782] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm min-h-[48px] cursor-pointer"
+            className="w-full bg-[#157a6d] hover:bg-[#0f6157] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm min-h-[48px] cursor-pointer font-mono uppercase tracking-wider"
           >
             <FileText className="w-4 h-4" />
             <span>Upload Doctor Rx</span>

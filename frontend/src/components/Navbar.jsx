@@ -60,6 +60,8 @@ const Navbar = () => {
 
   // Navigation states
   const [activeDropdown, setActiveDropdown] = useState(null); // 'medicines' | 'surgical' | 'wellness' | 'library' | 'pap'
+  const [showLowerNavbar, setShowLowerNavbar] = useState(true);
+  const lastScrollY = useRef(0);
 
   // Hover timer state for desktop mega menus and dropdowns
   const timeoutRef = useRef(null);
@@ -105,17 +107,91 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleLocationSelect = (loc) => {
+  const handleSelectLocation = (loc) => {
     setSelectedLocation(loc);
     localStorage.setItem("wellmeds_location", loc);
     window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
     setLocationMenuOpen(false);
   };
 
-  // Search & Sticky Navbar Scroll states
-  const [showNavbarSearch, setShowNavbarSearch] = useState(() => location.pathname !== "/");
+  // Mobile search drawer expansion state
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
+
+  // Scroll search bar visibility state (For Homepage scroll)
+  const [showNavbarSearch, setShowNavbarSearch] = useState(location.pathname !== "/");
+
+  // Discrete State Machine Engine Refs
+  const isNavVisibleRef = useRef(true);
+  const isScrolledRef = useRef(false);
+  const showSearchRef = useRef(location.pathname !== "/");
+  const [isNavVisible, setIsNavVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Single Discrete State Machine Scroll Engine (Passive & RAF Throttled)
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const prevScrollY = lastScrollY.current;
+          const delta = currentScrollY - prevScrollY;
+
+          // 1. Elevation Shadow State (Threshold: 10px)
+          const nextIsScrolled = currentScrollY > 10;
+          if (nextIsScrolled !== isScrolledRef.current) {
+            isScrolledRef.current = nextIsScrolled;
+            setIsScrolled(nextIsScrolled);
+          }
+
+          // 2. Search Bar Visibility State
+          const nextShowSearch = location.pathname === "/" ? currentScrollY > 180 : true;
+          if (nextShowSearch !== showSearchRef.current) {
+            showSearchRef.current = nextShowSearch;
+            setShowNavbarSearch(nextShowSearch);
+          }
+
+          // 3. Unified Header State Machine Thresholds:
+          // Near top (<= 80px): Strictly visible in initial position
+          // Scroll DOWN (delta > 30px & scrollY > 150px): Unified translate up by 54px
+          // Scroll UP (delta < -25px): Unified translate down back to 0
+          let nextNavVisible = isNavVisibleRef.current;
+          if (currentScrollY <= 80) {
+            nextNavVisible = true;
+          } else if (delta < -25) {
+            nextNavVisible = true;
+          } else if (delta > 30 && currentScrollY > 150) {
+            nextNavVisible = false;
+          }
+
+          if (nextNavVisible !== isNavVisibleRef.current) {
+            isNavVisibleRef.current = nextNavVisible;
+            setIsNavVisible(nextNavVisible);
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [location.pathname]);
+
+  // Click outside to close location & profile menus
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Profile and Prescription Upload states
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -141,42 +217,6 @@ const Navbar = () => {
     };
     fetchSurg();
     return () => { active = false; };
-  }, []);
-
-  // Sync scroll state for elevation and search input visibility
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          setIsScrolled(currentScrollY > 10);
-
-          if (location.pathname === "/") {
-            setShowNavbarSearch(currentScrollY > 180);
-          } else {
-            setShowNavbarSearch(true);
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [location.pathname]);
-
-  // Click outside to close location & profile menus
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close menus on Escape key
@@ -327,17 +367,16 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-all duration-300 ${
-        isScrolled
+      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-shadow duration-200 ${isScrolled
           ? "shadow-md bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
           : "shadow-xs"
-      } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
+        } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 flex flex-col w-full py-0 lg:py-1">
-        
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 flex flex-col w-full py-0 lg:py-1 overflow-visible">
+
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
         <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[76px] lg:h-[64px]">
-          
+
           {/* Desktop Only Header (Visible on desktop only) */}
           <div className="hidden lg:flex items-center justify-between w-full h-full">
             {/* Logo */}
@@ -347,17 +386,17 @@ const Navbar = () => {
                 onClick={() => setIsDrawerOpen(false)}
                 className="flex items-center select-none cursor-pointer"
               >
-                <img 
+                <img
                   src={logoImg}
                   alt="WellMeds Logo"
                   className="h-[60px] lg:h-[70px] object-contain"
                 />
-              </NavLink>  
+              </NavLink>
             </div>
 
             {/* Search bar & Location selector container */}
             <div className="flex items-center justify-center flex-grow flex-1 mx-4 relative z-10">
-              <div 
+              <div
                 style={{
                   transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1), max-width 300ms ease",
                   transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
@@ -374,7 +413,7 @@ const Navbar = () => {
               {/* Upload Rx Button */}
               <button
                 onClick={() => navigate("/upload-prescription")}
-                className="bg-[#02665e] hover:bg-[#02564f] text-white px-5 h-[38px] rounded-xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#02665e] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none cursor-pointer text-[14.5px] shadow-xs"
+                className="bg-[#157a6d] hover:bg-[#0f6157] text-white px-5 h-[38px] rounded-xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#157a6d] focus:ring-offset-2 flex items-center justify-center active:scale-[0.98] select-none cursor-pointer text-[14.5px] shadow-xs font-mono uppercase tracking-wider"
                 aria-label="Upload Doctor Prescription"
               >
                 <span>Upload</span>
@@ -414,9 +453,8 @@ const Navbar = () => {
                     aria-label="User profile menu"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     onKeyDown={handleProfileKeyDown}
-                    className={`px-5 h-[38px] border border-slate-200/90 rounded-2xl flex items-center justify-center gap-2 text-slate-800 focus:outline-none transition-all duration-150 cursor-pointer shrink-0 text-[14.5px] font-semibold ${
-                      profileDropdownOpen ? "bg-slate-200/80 border-slate-300" : "bg-white hover:bg-slate-50 hover:border-slate-300"
-                    }`}
+                    className={`px-5 h-[38px] border border-slate-200/90 rounded-2xl flex items-center justify-center gap-2 text-slate-800 focus:outline-none transition-all duration-150 cursor-pointer shrink-0 text-[14.5px] font-semibold ${profileDropdownOpen ? "bg-slate-200/80 border-slate-300" : "bg-white hover:bg-slate-50 hover:border-slate-300"
+                      }`}
                   >
                     <User className="w-[18px] h-[18px] text-slate-700" />
                     <span className="max-w-[100px] truncate">{user.name}</span>
@@ -506,7 +544,7 @@ const Navbar = () => {
                 onClick={() => setIsDrawerOpen(false)}
                 className="flex items-center cursor-pointer"
               >
-                <img 
+                <img
                   src={logoImg}
                   alt="WellMeds Logo"
                   className="h-[72px] object-contain"
@@ -533,7 +571,7 @@ const Navbar = () => {
           {mobileSearchExpanded && (
             <div className="flex flex-col w-full h-[100vh] bg-white z-[300] fixed inset-0 p-4 animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center gap-2 mb-4 shrink-0">
-                <button 
+                <button
                   onClick={() => setMobileSearchExpanded(false)}
                   className="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-50 transition-colors"
                   aria-label="Close Search"
@@ -543,9 +581,9 @@ const Navbar = () => {
                 <div className="text-sm font-black text-slate-800">Search WellMeds</div>
               </div>
               <div className="flex-grow overflow-y-auto">
-                <UniversalSearch 
-                  variant="mobile" 
-                  onCloseMobile={() => setMobileSearchExpanded(false)} 
+                <UniversalSearch
+                  variant="mobile"
+                  onCloseMobile={() => setMobileSearchExpanded(false)}
                 />
               </div>
             </div>
@@ -555,11 +593,10 @@ const Navbar = () => {
 
       {/* Mobile Sub-Navbar: Search bar (Visible on scroll in mobile/tablet) */}
       <div
-        className={`w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-300 ease-in-out border-slate-200 ${
-          showNavbarSearch
+        className={`w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-300 ease-in-out border-slate-200 ${showNavbarSearch
             ? "grid-rows-[1fr] opacity-100 px-6 py-2.5 border-t pointer-events-auto"
             : "grid-rows-[0fr] opacity-0 px-6 py-0 border-t-0 pointer-events-none"
-        }`}
+          }`}
       >
         <div className="overflow-hidden">
           <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
@@ -582,12 +619,23 @@ const Navbar = () => {
         </div>
       </div>
 
-        {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only) */}
-        <div className="hidden lg:flex items-center justify-center z-20 relative w-full border-t border-slate-200/60 dark:border-zinc-800/60 max-h-[54px] h-[54px]">
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-12 flex h-full items-center justify-between w-full">
-            
+      {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only - GPU Slide Behind Stationary Upper Row) */}
+      <div
+        style={{
+          willChange: "transform, opacity, max-height",
+          transition: "transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out, max-height 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+        className={`hidden lg:flex items-center justify-center z-20 relative w-full border-slate-200/60 dark:border-zinc-800/60 transform-gpu ${
+          isNavVisible
+            ? "translate-y-0 opacity-100 max-h-[54px] border-t pointer-events-auto overflow-visible"
+            : "-translate-y-full opacity-0 max-h-0 border-t-0 pointer-events-none overflow-hidden"
+        }`}
+      >
+        <div className={`flex items-center justify-center w-full ${isNavVisible ? "overflow-visible" : "overflow-hidden"}`}>
+          <div className="max-w-[1200px] mx-auto px-6 lg:px-12 flex h-[54px] items-center justify-between w-full relative overflow-visible">
+
             {/* 1. MEDICINES (Mega Menu) */}
-            <div 
+            <div
               className="relative flex h-full items-center"
               onMouseEnter={() => handleMouseEnter("medicines")}
               onMouseLeave={handleMouseLeave}
@@ -595,26 +643,24 @@ const Navbar = () => {
               <button
                 id="trigger-medicines"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "medicines")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
-                  activeDropdown === "medicines"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "medicines"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
-                }`}
+                  }`}
               >
                 <span>Medicines</span>
                 <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "medicines" ? "rotate-180" : ""}`} />
               </button>
 
               {/* Medicines Mega Menu Container */}
-              <div 
+              <div
                 id="dropdown-medicines"
                 onMouseEnter={() => handleMouseEnter("medicines")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-2 w-[920px] max-w-[calc(100vw-3rem)] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-6 transition-all duration-200 ease-out transform origin-top-left flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
-                  activeDropdown === "medicines" 
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
+                className={`absolute left-0 top-full z-[200] mt-2 w-[920px] max-w-[calc(100vw-3rem)] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-6 transition-all duration-200 ease-out transform origin-top-left flex gap-8 text-left before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${activeDropdown === "medicines"
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                }`}
+                  }`}
               >
                 {/* Top Caret Triangle Arrow */}
                 <div className="absolute -top-2 left-8 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
@@ -694,7 +740,7 @@ const Navbar = () => {
                         return regularQuickLinks.map((link) => {
                           const isLinkExternal = link.isExternal || link.route?.startsWith("tel:") || link.route?.startsWith("mailto:");
                           const Comp = isLinkExternal ? "a" : Link;
-                          const props = isLinkExternal 
+                          const props = isLinkExternal
                             ? { href: link.route, target: link.openInNewTab ? "_blank" : undefined, rel: link.openInNewTab ? "noopener noreferrer" : undefined }
                             : { to: link.route };
 
@@ -722,7 +768,7 @@ const Navbar = () => {
                           {renderIcon(helpCard.icon || "HelpCircle", "w-4 h-4 text-[#038076]")}
                           <span>Need Help?</span>
                         </p>
-                        <a 
+                        <a
                           href={helpCard.route}
                           target={helpCard.openInNewTab ? "_blank" : undefined}
                           rel={helpCard.openInNewTab ? "noopener noreferrer" : undefined}
@@ -741,7 +787,7 @@ const Navbar = () => {
             </div>
 
             {/* 2. SURGICAL (Simple Dropdown) */}
-            <div 
+            <div
               className="relative flex h-full items-center"
               onMouseEnter={() => handleMouseEnter("surgical")}
               onMouseLeave={handleMouseLeave}
@@ -749,11 +795,10 @@ const Navbar = () => {
               <button
                 id="trigger-surgical"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "surgical")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
-                  activeDropdown === "surgical"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "surgical"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
-                }`}
+                  }`}
               >
                 <span>Surgical</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold uppercase bg-[#00a79d] text-white tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
@@ -762,15 +807,14 @@ const Navbar = () => {
                 <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "surgical" ? "rotate-180" : ""}`} />
               </button>
 
-              <div 
+              <div
                 id="dropdown-surgical"
                 onMouseEnter={() => handleMouseEnter("surgical")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
-                  activeDropdown === "surgical" 
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
+                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${activeDropdown === "surgical"
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                }`}
+                  }`}
               >
                 {/* Top Caret Triangle Arrow */}
                 <div className="absolute -top-2 left-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
@@ -815,10 +859,9 @@ const Navbar = () => {
               <NavLink
                 to="/wellness"
                 className={({ isActive }) =>
-                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
-                    isActive
-                      ? "bg-slate-200/80 text-[#038076] font-semibold"
-                      : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
+                    ? "bg-slate-200/80 text-[#038076] font-semibold"
+                    : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`
                 }
               >
@@ -827,7 +870,7 @@ const Navbar = () => {
             </div>
 
             {/* 4. HEALTH LIBRARY (Dropdown) */}
-            <div 
+            <div
               className="relative flex h-full items-center"
               onMouseEnter={() => handleMouseEnter("library")}
               onMouseLeave={handleMouseLeave}
@@ -835,25 +878,23 @@ const Navbar = () => {
               <button
                 id="trigger-library"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
-                  activeDropdown === "library"
+                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "library"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
-                }`}
+                  }`}
               >
                 <span>Health Library</span>
                 <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
               </button>
 
-              <div 
+              <div
                 id="dropdown-library"
                 onMouseEnter={() => handleMouseEnter("library")}
                 onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${
-                  activeDropdown === "library" 
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
+                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${activeDropdown === "library"
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                }`}
+                  }`}
               >
                 {/* Top Caret Triangle Arrow */}
                 <div className="absolute -top-2 left-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
@@ -886,10 +927,9 @@ const Navbar = () => {
               <NavLink
                 to="/patient-assistance-program"
                 className={({ isActive }) =>
-                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${
-                    isActive
-                      ? "bg-slate-200/80 text-[#038076] font-semibold"
-                      : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
+                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
+                    ? "bg-slate-200/80 text-[#038076] font-semibold"
+                    : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`
                 }
               >
@@ -897,6 +937,7 @@ const Navbar = () => {
               </NavLink>
             </div>
 
+          </div>
         </div>
       </div>
 

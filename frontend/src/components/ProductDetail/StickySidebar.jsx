@@ -27,14 +27,14 @@ const StickySidebar = ({
   ].filter(item => item.available);
 
   return (
-    <aside className="w-full md:w-[30%] lg:w-[22%] shrink-0 self-stretch order-2 lg:order-1 select-none text-left space-y-md">
-      {/* Component 1 (Upper): Related Products / Alternative Medicines Card (Normal Component) */}
+    <aside className="w-full md:w-[30%] lg:w-[22%] shrink-0 self-stretch order-2 lg:order-1 select-none text-left hidden lg:block space-y-md">
+      {/* Component 1 (Upper): Alternative Medicines Card */}
       <div className="w-full">
         <SubstituteProducts substituteProducts={substituteProducts} product={product} />
       </div>
 
-      {/* Component 2 (Lower): Clinical Index (Independent Sticky Component) */}
-      <div className="w-full md:sticky md:top-24">
+      {/* Component 2 (Lower): Clinical Index */}
+      <div className="w-full sticky top-24">
         <ClinicalIndex clinicalItems={clinicalItems} activeSection={activeSection} />
       </div>
     </aside>

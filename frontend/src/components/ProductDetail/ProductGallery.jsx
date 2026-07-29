@@ -28,41 +28,43 @@ const ProductGallery = ({
     setActiveImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
 
-  // Thumbnail rendering logic: cap at 4, show +N count on the 4th if there's more
   const maxThumbnails = 4;
   const visibleThumbnails = imagesList.slice(0, maxThumbnails);
   const showRemainingOverlay = imagesList.length > maxThumbnails;
 
   return (
     <div className="w-full flex flex-col items-center select-none relative group/gallery-main">
-      {/* Discount Badge */}
-      {discountPercent > 0 && (
-        <span className="absolute top-4 left-4 z-10 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs animate-bounce">
-          {discountPercent}% OFF
-        </span>
-      )}
+      {/* Tape Accent */}
+      <div className="pdp-rx-tape" aria-hidden="true" />
 
-      {/* Main Image Container */}
+      {/* Main Image Container (Prescription Paper Frame) */}
       <div 
-        className="w-[95%] aspect-square rounded-3xl bg-white dark:bg-zinc-900 overflow-hidden relative cursor-zoom-in flex items-center justify-center p-[20px] shadow-sm border border-slate-100 dark:border-zinc-800/40 transition-shadow duration-200 hover:shadow-md"
+        className="w-full aspect-square pdp-paper-card overflow-hidden relative cursor-zoom-in flex items-center justify-center p-6 transition-all duration-300"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onClick={() => setIsFullscreenOpen(true)}
       >
+        {/* Discount Badge */}
+        {discountPercent > 0 && (
+          <span className="absolute top-4 left-4 z-10 bg-[#b08d3e] text-white font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs">
+            SAVE {discountPercent}%
+          </span>
+        )}
+
         {isImageLoading && (
-          <div className="absolute inset-0 bg-slate-50 dark:bg-zinc-955 animate-pulse flex items-center justify-center rounded-3xl z-10">
+          <div className="absolute inset-0 bg-[#f4f8f6] animate-pulse flex items-center justify-center rounded-xl z-10">
             <Loader size="sm" />
           </div>
         )}
         
-        {/* Main Product Image (Hero) */}
+        {/* Main Product Image */}
         <img 
           src={imagesList[activeImageIdx] || DEFAULT_PRODUCT_IMAGE} 
           alt={productName} 
           loading="eager"
           fetchpriority="high"
-          className="w-auto h-auto max-w-[92%] max-h-[92%] object-contain select-none transition-transform duration-[250ms] ease-in-out" 
+          className="w-auto h-auto max-w-[90%] max-h-[90%] object-contain select-none transition-transform duration-[250ms] ease-in-out hover:scale-105" 
           onLoad={() => setIsImageLoading(false)}
           onError={(e) => {
             setIsImageLoading(false);
@@ -71,7 +73,7 @@ const ProductGallery = ({
           }}
         />
         
-        {/* Navigation Arrows for slide selection */}
+        {/* Navigation Arrows */}
         {imagesList.length > 1 && (
           <>
             <button
@@ -80,10 +82,10 @@ const ProductGallery = ({
                 e.stopPropagation(); 
                 handlePrev(); 
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 w-10 h-10 rounded-full shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#172b26] w-9 h-9 rounded-full border border-[#c3d4cc] shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
               aria-label="Previous Image"
             >
-              <ChevronLeft size={20} className="stroke-[2.5]" />
+              <ChevronLeft size={18} className="stroke-[2.5]" />
             </button>
             <button
               type="button"
@@ -91,16 +93,16 @@ const ProductGallery = ({
                 e.stopPropagation(); 
                 handleNext(); 
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/60 hover:bg-white dark:hover:bg-black text-slate-800 dark:text-slate-200 w-10 h-10 rounded-full shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#172b26] w-9 h-9 rounded-full border border-[#c3d4cc] shadow-md z-10 flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/gallery-main:opacity-100 cursor-pointer"
               aria-label="Next Image"
             >
-              <ChevronRight size={20} className="stroke-[2.5]" />
+              <ChevronRight size={18} className="stroke-[2.5]" />
             </button>
           </>
         )}
       </div>
 
-      {/* Simplified Thumbnails centered below the image */}
+      {/* Thumbnails below main image */}
       {imagesList.length > 1 && (
         <div 
           ref={scrollRef}
@@ -121,18 +123,17 @@ const ProductGallery = ({
                     setActiveImageIdx(idx);
                   }
                 }}
-                className={`relative w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${
+                className={`relative w-14 h-14 rounded-lg bg-white border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${
                   activeImageIdx === idx && !(isLastThumbnail && showRemainingOverlay)
-                    ? "border-[#038076] dark:border-primary-fixed-dim scale-[1.03] shadow-xs" 
-                    : "border-slate-100 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-750"
+                    ? "border-[#157a6d] scale-[1.03] shadow-xs" 
+                    : "border-[#dde8e3] hover:border-[#c3d4cc]"
                 }`}
                 aria-label={`View thumbnail ${idx + 1}`}
               >
-                <img src={img} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
+                <img src={img} alt="" loading="lazy" className="max-h-full max-w-full object-contain p-1" />
                 
-                {/* +N Counter Overlay for remaining images */}
                 {isLastThumbnail && showRemainingOverlay && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xs transition-colors hover:bg-black/50">
+                  <div className="absolute inset-0 bg-[#172b26]/75 flex items-center justify-center text-white font-mono font-bold text-xs">
                     +{remainingCount}
                   </div>
                 )}

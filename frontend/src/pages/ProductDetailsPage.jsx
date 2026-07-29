@@ -9,6 +9,9 @@ import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, In
 import { formatCurrency } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
+// Prescription Design System Stylesheet
+import "../components/ProductDetail/ProductDetail.css";
+
 // V2 Modular Components
 import StickySidebar from "../components/ProductDetail/StickySidebar";
 import ProductInfo from "../components/ProductDetail/ProductInfo";
@@ -56,31 +59,7 @@ const ProductDetails = () => {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
-  const [isMobile, setIsMobile] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(25649); // 7h 7m 29s
-  const [activeMobileTab, setActiveMobileTab] = useState("overview");
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 25649));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isMobile]);
-
-  const formatTimeLeft = (sec) => {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return `${h}h ${m}m ${s}s`;
-  };
 
   const getDeliveryDateRange = () => {
     const today = new Date();
@@ -655,10 +634,10 @@ const ProductDetails = () => {
       <div
         id="Specifications"
         ref={el => sectionRefs.current["Specifications"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-md scroll-mt-28"
+        className="pdp-paper-card p-6 md:p-8 space-y-4 scroll-mt-28 font-mono text-left"
       >
-        <h2 className="font-headline-sm text-sm text-[#004782] dark:text-primary-fixed-dim font-extrabold pb-sm border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[16px] leading-none">list_alt</span> Product Specifications
+        <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
+          <span className="material-symbols-outlined text-[18px] text-[#157a6d]">list_alt</span> Product Specifications
         </h2>
         <div className="flex flex-col w-full text-xs">
           {[
@@ -676,12 +655,12 @@ const ProductDetails = () => {
             return (
               <div
                 key={spec.key}
-                className="flex flex-col sm:flex-row py-3 border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 items-start sm:items-center text-left"
+                className="pdp-spec-row"
               >
-                <div className="w-full sm:w-[30%] font-semibold text-slate-550 dark:text-zinc-400">
+                <div className="pdp-spec-label">
                   {spec.label}
                 </div>
-                <div className="w-full sm:w-[70%] font-extrabold text-slate-800 dark:text-zinc-150 mt-1 sm:mt-0">
+                <div className="pdp-spec-value">
                   {val}
                 </div>
               </div>
@@ -698,12 +677,12 @@ const ProductDetails = () => {
       <div
         id="Introduction"
         ref={el => sectionRefs.current["Introduction"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-lg shadow-xs text-left space-y-sm scroll-mt-28"
+        className="pdp-paper-card p-6 md:p-8 space-y-3 scroll-mt-28 text-left"
       >
-        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[16px] leading-none">info</span> Introduction
+        <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
+          <span className="material-symbols-outlined text-[18px] text-[#157a6d]">info</span> Product Overview & Introduction
         </h2>
-        <p className="text-slate-655 dark:text-zinc-300 text-xs leading-relaxed whitespace-pre-line">
+        <p className="font-mono text-xs text-[#3f544d] leading-relaxed whitespace-pre-line">
           {product.description}
         </p>
       </div>
@@ -728,12 +707,12 @@ const ProductDetails = () => {
       <div
         id="Disclaimer"
         ref={el => sectionRefs.current["Disclaimer"] = el}
-        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xs text-left space-y-sm scroll-mt-28"
+        className="pdp-paper-card p-6 md:p-8 space-y-3 scroll-mt-28 text-left font-mono"
       >
-        <h2 className="font-headline-sm text-sm text-slate-800 dark:text-zinc-100 font-extrabold pb-xs border-b border-slate-100 dark:border-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[16px] text-amber-500 leading-none">warning</span> Disclaimer
+        <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
+          <span className="material-symbols-outlined text-[18px] text-amber-600">warning</span> Medical Disclaimer
         </h2>
-        <p className="text-slate-500 dark:text-zinc-400 text-xs leading-relaxed">
+        <p className="text-xs text-[#5f776e] leading-relaxed">
           The information provided here is for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Do not disregard professional medical advice or delay in seeking it because of something you have read on this website.
         </p>
       </div>
@@ -761,822 +740,109 @@ const ProductDetails = () => {
 
   if (!product) return null;
 
-  if (isMobile) {
-    return (
-      <div className="bg-slate-50 dark:bg-zinc-950 min-h-screen pb-24 text-left animate-[fade-in_0.3s_ease-out] relative">
-        {/* Mobile Header / Breadcrumbs */}
-        <div className="pt-4 px-4 flex justify-between items-center select-none">
-          <nav className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 flex-wrap">
-            <Link to="/" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Home</Link>
-            <span>/</span>
-            <Link to="/products" className="hover:text-primary dark:hover:text-[#a4c9ff] transition-colors">Products</Link>
-            <span>/</span>
-            <span className="text-slate-600 dark:text-zinc-305 truncate max-w-[120px]">{product.name}</span>
-          </nav>
-          <button
-            onClick={handleShare}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 border border-slate-100 dark:border-zinc-800 rounded-full bg-white dark:bg-zinc-900 shadow-2xs cursor-pointer animate-[fade-in_0.2s_ease-out]"
-          >
-            <Share2 size={14} />
-          </button>
-        </div>
 
-        {/* Product Title Card with Dynamic Introduction & Sourced From Badge */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mt-3 mb-4 text-left overflow-hidden max-w-[calc(100vw-2rem)]">
-          <h1 className="font-headline-sm text-lg sm:text-xl font-semibold text-slate-905 dark:text-zinc-100 leading-tight break-words">
-            {product.name}
-          </h1>
-          {product.molecules && product.molecules.length > 0 && (
-            <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
-              {product.molecules.map((mol) => mol.name).join(", ")}
-            </div>
-          )}
-
-          {/* Dynamic Product Introduction */}
-          {product.description && product.description.trim() && (
-            <p className="text-[12px] text-slate-600 dark:text-zinc-300 leading-relaxed mt-3 whitespace-pre-line border-t border-slate-100 dark:border-zinc-800/80 pt-3">
-              {product.description}
-            </p>
-          )}
-
-          {/* Sourced From Manufacturer Badge */}
-          <div className="mt-3.5 bg-blue-500/[0.04] dark:bg-zinc-800/50 border border-blue-500/10 dark:border-zinc-700/60 rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[18px]">verified</span>
-            </div>
-            <p className="text-[14px] text-slate-600 dark:text-zinc-300 font-medium">
-              Sourced from:{" "}
-              <span className="font-extrabold text-[#004782] dark:text-[#a4c9ff]">
-                {product.manufacturer || product.brand || "Direct From Manufacturer"}
-              </span>
-            </p>
-          </div>
-        </div>
-
-        {/* Product Image Gallery Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 relative flex flex-col items-center justify-center">
-          <div className="relative w-full aspect-square flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-105 dark:border-zinc-850">
-            {/* Discount Percentage Tag */}
-            {discountPercent > 0 && (
-              <span className="absolute top-3 right-3 bg-emerald-500 text-white text-[12px] font-black uppercase px-2.5 py-0.5 rounded-full z-10 select-none">
-                {discountPercent}% OFF
-              </span>
-            )}
-            <img
-              src={imagesList[activeImageIdx]}
-              alt={product.name}
-              className="max-h-[90%] max-w-[90%] object-contain select-none"
-            />
-          </div>
-
-          {/* Star Rating below image */}
-          <div className="flex items-center justify-between w-full px-2 mt-3 select-none">
-            <div className="flex items-center gap-0.5 text-amber-400">
-              <Star size={15} fill="currentColor" stroke="none" />
-              <Star size={15} fill="currentColor" stroke="none" />
-              <Star size={15} fill="currentColor" stroke="none" />
-              <Star size={15} fill="currentColor" stroke="none" />
-              <Star size={15} fill="currentColor" stroke="none" />
-            </div>
-            <div className="text-[13px] text-slate-500 font-semibold flex items-center gap-1">
-              <span className="font-extrabold text-[14px]">4.8</span>
-              <span className="text-amber-400 text-xs">★</span>
-              <span>On</span>
-              <span>
-                <span className="font-black text-[#4285F4]">G</span>
-                <span className="font-black text-[#EA4335]">o</span>
-                <span className="font-black text-[#FBBC05]">o</span>
-                <span className="font-black text-[#4285F4]">g</span>
-                <span className="font-black text-[#34A853]">l</span>
-                <span className="font-black text-[#EA4335]">e</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Thumbnails below rating */}
-          {imagesList.length > 1 && (
-            <div className="flex gap-2 justify-start w-full mt-3 overflow-x-auto no-scrollbar pb-1 px-2 select-none">
-              {imagesList.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImageIdx(idx)}
-                  className={`relative w-11 h-11 rounded-xl bg-white dark:bg-zinc-900 border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer overflow-hidden ${activeImageIdx === idx
-                      ? "border-[#038076] scale-[1.02]"
-                      : "border-slate-100 dark:border-zinc-800"
-                    }`}
-                  aria-label={`Select image ${idx + 1}`}
-                >
-                  <img src={img} alt="" className="max-h-full max-w-full object-contain" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Price & Packaging Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left">
-          {/* Price & Discount Row */}
-          <div className="flex justify-between items-start mb-2 select-none gap-2">
-            <div>
-              <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-zinc-100">
-                {formatCurrency(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-[11px] sm:text-[12px] text-slate-400 ml-2">
-                  MRP: <span className="line-through">{formatCurrency(product.originalPrice)}</span>
-                </span>
-              )}
-              <p className="text-[12px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
-                Inclusive of all taxes
-              </p>
-            </div>
-            {discountPercent > 0 && (
-              <span className="text-[13px] sm:text-[14px] font-black text-emerald-600 dark:text-emerald-400 shrink-0">
-                {discountPercent}% OFF
-              </span>
-            )}
-          </div>
-
-          {/* Selected Packaging Capsule */}
-          {(product.packSize || product.productSpecifications?.packSize) && (
-            <div className="mt-3 bg-blue-500/[0.03] border border-blue-500/20 rounded-2xl p-3 flex justify-between items-center relative select-none">
-              <div>
-                <p className="text-[14px] font-black text-slate-805 dark:text-zinc-150">
-                  {product.packSize || product.productSpecifications?.packSize}
-                </p>
-                <p className="text-[13px] text-slate-455 dark:text-zinc-400 mt-0.5 font-semibold">
-                  {formatCurrency(getUnitPrice())}/Unit
-                </p>
-              </div>
-              <span className="w-5.5 h-5.5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                ✓
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Dynamic Rx & Cold Chain Status Bar (Mobile Only) */}
-        {(product.requiresRx || product.isColdChain) && (
-          <div className="bg-white dark:bg-zinc-900 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-3.5 mx-4 mb-4 flex items-center justify-between text-left select-none">
-            <div className="flex items-center gap-6 flex-wrap">
-              {product.requiresRx && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[#5b32a8] dark:text-[#a78bfa] font-serif font-black text-lg leading-none">R<sub className="text-[10px] font-sans font-black -ml-0.5">x</sub></span>
-                  <span className="text-[13.5px] font-semibold text-[#8b4f1d] dark:text-[#d4a373]">
-                    Prescription Required
-                  </span>
-                </div>
-              )}
-              {product.isColdChain && (
-                <div className="flex items-center gap-2">
-                  <Snowflake size={18} className="text-[#009bd6] shrink-0" strokeWidth={2.2} />
-                  <span className="text-[13.5px] font-semibold text-slate-700 dark:text-zinc-200">
-                    Cold Chain
-                  </span>
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => toast.info(
-                product.requiresRx && product.isColdChain
-                  ? "Prescription Required & Cold Chain: Pharmacist verified and temperature-controlled shipping."
-                  : product.requiresRx
-                    ? "Prescription Required: Verified by licensed pharmacists before shipment."
-                    : "Cold Chain Product: Special temperature-controlled delivery."
-              )}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
-              title="Product Information"
-            >
-              <Info size={17} className="text-slate-400 dark:text-zinc-500" />
-            </button>
-          </div>
-        )}
-
-        {/* Salt Composition & Marketer Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-105 dark:border-zinc-800 rounded-3xl p-4 shadow-sm mx-4 mb-4 text-left space-y-3.5 overflow-hidden max-w-[calc(100vw-2rem)]">
-          {/* Salt Composition */}
-          {product.molecules && product.molecules.length > 0 && (
-            <div className="max-w-full overflow-hidden">
-              <h4 className="text-[12px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                Salt Composition
-              </h4>
-              <div className="text-[14px] font-semibold text-[#004782] dark:text-[#a4c9ff] uppercase leading-relaxed flex flex-wrap gap-x-2 gap-y-1 break-words max-w-full">
-                {product.molecules.map((mol, idx) => (
-                  <Link key={mol.slug || idx} to={`/molecules/${mol.slug}`} className="underline hover:opacity-85 break-words max-w-full inline-block">
-                    {mol.name}{idx < product.molecules.length - 1 ? "," : ""}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Marketer */}
-          {(product.manufacturer || product.brand) && (
-            <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80">
-              <h4 className="text-[12px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                Marketer
-              </h4>
-              <p className="text-[14px] font-extrabold text-slate-805 dark:text-zinc-150 uppercase leading-normal">
-                {product.manufacturer || product.brand}
-              </p>
-            </div>
-          )}
-
-          {/* Prepaid / Returns */}
-          {(product.prepaidOnly || product.isNonRefundable) && (
-            <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-[14px] font-bold text-sky-700 dark:text-sky-400 select-none">
-              <span>
-                {product.prepaidOnly && product.isNonRefundable
-                  ? "Prepaid Only. Non-Returnable."
-                  : product.prepaidOnly
-                    ? "Prepaid Only."
-                    : "Non-Returnable."}
-              </span>
-              <HelpCircle
-                size={16}
-                className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors shrink-0"
-                onClick={() => toast.info(product.prepaidOnly ? "Prepaid Only: Cash on Delivery is disabled for this product." : "Non-Returnable: This item cannot be returned after delivery.")}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Dual Delivery Cards */}
-        <div className="grid grid-cols-2 gap-3 mx-4 mb-3 text-left">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
-            <div>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Get it by</p>
-              <p className="text-[14px] font-black text-slate-805 dark:text-zinc-200 mt-0.5">{getDeliveryDateRange()}</p>
-            </div>
-            <span className="material-symbols-outlined text-slate-400 text-[18px]">calendar_today</span>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center shadow-2xs">
-            <div>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Delivering To</p>
-              <p className="text-[14px] font-black text-[#004782] dark:text-[#a4c9ff] truncate max-w-[100px] mt-0.5">Pune, 411035</p>
-            </div>
-            <span className="material-symbols-outlined text-slate-400 text-[18px] cursor-pointer">edit</span>
-          </div>
-        </div>
-
-        {/* Cold Chain Ticking Banner */}
-        {product.isColdChain && (
-          <div className="mx-4 mb-3 bg-sky-500/[0.03] border border-sky-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
-            <div className="bg-sky-500/10 p-2.5 rounded-2xl text-sky-600 shrink-0">
-              <span className="material-symbols-outlined text-[20px] leading-none animate-bounce">local_shipping</span>
-            </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[13px] font-black text-sky-700 dark:text-sky-400 uppercase tracking-wider">{formatTimeLeft(timeLeft)}</span>
-                <span className="text-[12px] text-slate-405 font-bold">• Cold Chain Guaranteed</span>
-              </div>
-              <p className="text-[13px] text-slate-500 dark:text-zinc-400 leading-normal">
-                Your medicine's temperature matters — we pause cold-chain delivery if temperature goes out of range. <span className="text-sky-600 dark:text-sky-400 font-bold underline cursor-pointer">Learn More</span>
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Prescription Verification Warning */}
-        {product.requiresRx && (
-          <div className="mx-4 mb-3 bg-red-500/[0.03] border border-red-500/10 rounded-2xl p-3.5 flex items-start gap-3.5 text-left">
-            <div className="bg-red-500/10 p-2.5 rounded-2xl text-red-650 shrink-0">
-              <span className="material-symbols-outlined text-[20px] leading-none">description</span>
-            </div>
-            <div className="space-y-0.5">
-              <h4 className="font-extrabold text-[13px] text-red-650 dark:text-red-400 uppercase tracking-wider">Prescription Verification Required</h4>
-              <p className="text-[13px] text-slate-500 dark:text-zinc-400 leading-normal">
-                A registered pharmacist will verify your prescription before shipment. Upload during checkout.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Substitutes Section */}
-        {substituteProducts.length > 0 && (
-          <div className="mx-4 mb-4">
-            <SubstituteProducts substituteProducts={substituteProducts} product={product} />
-          </div>
-        )}
-
-        {/* Doctor Care Offer Banner */}
-        <div className="mx-4 mb-4 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-50 to-[#e0f2fe] dark:from-zinc-800/40 dark:to-zinc-850/40 border border-blue-500/10 flex items-center justify-between p-4 relative shadow-2xs text-left">
-          <div className="space-y-1.5 max-w-[65%]">
-            <p className="text-[11px] text-[#004782] dark:text-[#a4c9ff] font-extrabold uppercase tracking-wider">Every GLP-1 order</p>
-            <h4 className="text-[14px] font-black text-slate-800 dark:text-zinc-150 leading-tight">Comes with extra care</h4>
-            <div className="bg-[#482b8f] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-block">
-              Get Free
-            </div>
-            <p className="text-[12px] text-slate-500 dark:text-zinc-405 font-bold leading-relaxed">
-              5X Sterile Needles & 6X Alcohol Swabs <span className="text-slate-400 text-[10px] font-medium block mt-0.5">(Imported from Ireland)</span>
-            </p>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=150"
-            alt="Professional Doctor"
-            className="w-20 h-20 object-cover rounded-full border-2 border-white dark:border-zinc-700 shadow-md shrink-0 self-end"
-          />
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="mx-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
-          {[
-            { id: "overview", label: "Medicine Overview" },
-            { id: "concerns", label: "Patient Concerns" },
-            { id: "info", label: "In Depth Info" },
-            { id: "disclaimer", label: "Disclaimer" }
-          ].map((tab) => {
-            const isActive = activeMobileTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveMobileTab(tab.id)}
-                className={`px-4 py-2 rounded-full text-[13px] font-extrabold whitespace-nowrap transition-all border ${isActive
-                    ? "bg-slate-900 text-white border-slate-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                    : "bg-white text-slate-655 border-slate-205 hover:bg-slate-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800"
-                  }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Tabs Content rendering */}
-        <div className="mx-4 mb-4 text-left">
-          {activeMobileTab === "overview" && (
-            <div className="space-y-4">
-              {/* Introduction Card */}
-              {product.description && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
-                    Introduction
-                  </h3>
-                  <p className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line">
-                    {product.description}
-                  </p>
-                </div>
-              )}
-              {/* All Clinical Index Sections */}
-              {computedSections.map((sec) => (
-                <div key={sec.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm text-left">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2 pb-2 border-b border-slate-100 dark:border-zinc-800">
-                    {sec.title}
-                  </h3>
-
-                  {/* Key Benefits */}
-                  {sec.type === "benefits" && product.benefits && (
-                    <div className="grid grid-cols-1 gap-2.5 mt-2">
-                      {product.benefits.map((b, i) => (
-                        <div key={i} className="p-2.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] rounded-2xl border border-emerald-500/10 flex gap-2.5 items-start">
-                          <CheckCircle className="text-[#086b53] shrink-0 mt-0.5" size={15} />
-                          <div>
-                            <p className="font-bold text-[14px] text-slate-800 dark:text-zinc-200">{b.title}</p>
-                            {b.description && <p className="text-[13px] text-slate-400 mt-0.5 leading-relaxed">{b.description}</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Dosage & Usage */}
-                  {sec.type === "usage" && product.usageInstructions && (
-                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
-                      {product.usageInstructions.map((inst, idx) => (
-                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
-                          <Check className="text-[#004782] shrink-0 mt-0.5" size={13} />
-                          <span>{inst}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Side Effects */}
-                  {sec.type === "sideeffects" && product.sideEffects && (
-                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
-                      {product.sideEffects.map((side, idx) => (
-                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-550 shrink-0 mt-1.5" />
-                          <span>{side}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Storage */}
-                  {sec.type === "storage" && product.storageInstructions && (
-                    <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium mt-2">
-                      {product.storageInstructions.map((store, idx) => (
-                        <li key={idx} className="flex gap-2 items-start leading-relaxed">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#086b53] shrink-0 mt-1.5" />
-                          <span>{store}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Warnings */}
-                  {sec.type === "warnings" && product.warnings && (
-                    <div className="space-y-2 mt-2">
-                      {product.warnings.map((warn, idx) => (
-                        <div key={idx} className="p-2.5 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex gap-2 items-start">
-                          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={15} />
-                          <p className="text-[14px] text-slate-650 dark:text-zinc-300 leading-relaxed">{warn}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Safety */}
-                  {sec.type === "safety" && product.safetyCards && (
-                    <div className="mt-2">
-                      <SafetyAdviceCards safetyCards={product.safetyCards} />
-                    </div>
-                  )}
-
-                  {/* FAQs */}
-                  {sec.type === "faqs" && product.faqs && product.faqs.length > 0 && (
-                    <div className="space-y-2 mt-2 font-medium">
-                      {product.faqs.map((faq, idx) => (
-                        <div key={idx} className="p-3 bg-slate-50/50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-1 text-[14px]">
-                          <p className="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
-                            <HelpCircle size={14} className="text-[#004782] shrink-0" />
-                            {faq.question}
-                          </p>
-                          <p className="text-[13px] text-slate-600 dark:text-zinc-300 leading-relaxed pl-5">{faq.answer}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* References */}
-                  {sec.type === "references" && product.references && product.references.length > 0 && (
-                    <ul className="list-decimal pl-5 space-y-2 text-slate-600 dark:text-zinc-300 text-[13px] break-all mt-2 font-medium">
-                      {product.references.map((refLink, i) => (
-                        <li key={i}>
-                          <a href={refLink} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#004782] dark:text-[#a4c9ff]">
-                            {refLink}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Plain / Custom Content */}
-                  {sec.content && (!sec.type || sec.type === "faqs" || sec.type === "references") && (
-                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line mt-2 font-medium">
-                      {sec.content}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeMobileTab === "concerns" && (
-            <div className="space-y-4 text-left">
-              {/* Warnings */}
-              {((product.warnings && product.warnings.length > 0) || computedSections.find(s => s.id === "Warnings")?.content) && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                    Warnings & Precautions
-                  </h3>
-                  {product.warnings && product.warnings.length > 0 ? (
-                    <ul className="list-disc pl-4 space-y-2 text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed font-medium">
-                      {product.warnings.map((warn, i) => (
-                        <li key={i}>{warn}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="text-slate-600 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line font-medium">
-                      {computedSections.find(s => s.id === "Warnings")?.content}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Side Effects */}
-              {product.sideEffects && product.sideEffects.length > 0 && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                    Possible Side Effects
-                  </h3>
-                  <ul className="space-y-2 text-[14px] text-slate-650 dark:text-zinc-300 font-medium">
-                    {product.sideEffects.map((side, idx) => (
-                      <li key={idx} className="flex gap-2 items-start leading-relaxed">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                        <span>{side}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Safety Cards */}
-              {Array.isArray(product.safetyCards) && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                    Safety Advice
-                  </h3>
-                  <SafetyAdviceCards safetyCards={product.safetyCards} />
-                </div>
-              )}
-
-              {/* Safety Advice Custom Content */}
-              {computedSections.find(s => s.id === "Precautions")?.content && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
-                    Safety Advice
-                  </h3>
-                  <div className="text-slate-605 dark:text-zinc-305 text-[14px] leading-relaxed whitespace-pre-line font-medium">
-                    {computedSections.find(s => s.id === "Precautions").content}
-                  </div>
-                </div>
-              )}
-
-              {/* Fallback card if no warnings/safety/side-effects registered */}
-              {!((product.warnings && product.warnings.length > 0) || (product.sideEffects && product.sideEffects.length > 0) || (product.safetyCards && product.safetyCards.length > 0) || computedSections.find(s => s.id === "Warnings" || s.id === "Precautions")?.content) && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
-                    Patient Concerns & Guidance
-                  </h3>
-                  <p className="text-slate-600 dark:text-zinc-300 text-[14px] leading-relaxed font-medium">
-                    No critical precaution warnings or major side effects registered for {product.name}. Always take this medicine as prescribed by your registered medical practitioner.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeMobileTab === "info" && (
-            <div className="space-y-4 text-left">
-              {/* Product Specifications */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                  Specifications
-                </h3>
-                <div className="flex flex-col text-[14px] divide-y divide-slate-100 dark:divide-zinc-800/40">
-                  <div className="flex py-2 items-center">
-                    <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">Brand / Mfr</span>
-                    <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{product.manufacturer || product.brand || "Verified Vendor"}</span>
-                  </div>
-                  <div className="flex py-2 items-center">
-                    <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">Rx Requirement</span>
-                    <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{product.requiresRx || product.isPrescriptionRequired ? "Rₓ Prescription Required" : "OTC Medicine"}</span>
-                  </div>
-                  {product.productSpecifications && Object.entries(product.productSpecifications).map(([key, val]) => {
-                    if (!val || typeof val !== "string" || !val.trim()) return null;
-                    const label = key.replace(/([A-Z])/g, " $1").trim().replace(/^\w/, c => c.toUpperCase());
-                    return (
-                      <div key={key} className="flex py-2 items-center">
-                        <span className="w-1/3 font-semibold text-slate-500 dark:text-zinc-400">{label}</span>
-                        <span className="w-2/3 font-bold text-slate-805 dark:text-zinc-150 pl-2">{val}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              {/* References / Citations */}
-              {product.references && product.references.length > 0 && (
-                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-                  <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2.5">
-                    Citations & References
-                  </h3>
-                  <ul className="list-decimal pl-4 space-y-2 text-slate-500 dark:text-zinc-400 text-[13px] break-all">
-                    {product.references.map((refLink, i) => (
-                      <li key={i}>
-                        <a href={refLink} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#004782] dark:text-[#a4c9ff]">
-                          {refLink}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeMobileTab === "disclaimer" && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 shadow-sm">
-              <h3 className="font-extrabold text-[15px] text-slate-800 dark:text-zinc-150 uppercase tracking-wider mb-2">
-                Disclaimer
-              </h3>
-              <p className="text-slate-455 dark:text-zinc-500 text-[13px] leading-relaxed">
-                The information provided here is for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Do not disregard professional medical advice or delay in seeking it because of something you have read on this website.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Related Products Section (Mobile Responsive) */}
-        {relatedProducts.length > 0 && (
-          <div className="mx-4 mt-8 mb-4 sm:mt-10 sm:mb-6 text-left">
-            <h3 className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-zinc-100 mt-6 mb-5">
-              Related Products
-            </h3>
-            <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2">
-              {relatedProducts.map((p) => (
-                <div key={p.id || p._id} className="carousel-item shrink-0 w-[calc((100%-16px)/1.48)] sm:w-[230px] md:w-[calc((100%-3*20px)/3.7)] lg:w-[calc((100%-4*20px)/4.5)] snap-start">
-                  <ProductCard product={p} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recently Viewed Products (Mobile Responsive) */}
-        {recentlyViewed.length > 0 && (
-          <div className="mx-4 mt-8 mb-2 sm:mt-10 sm:mb-4 text-left">
-            <h3 className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-zinc-100 mt-6 mb-5">
-              Recently Viewed Products
-            </h3>
-            <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2">
-              {recentlyViewed.map((p) => (
-                <div key={p.id || p._id} className="carousel-item shrink-0 w-[calc((100%-16px)/1.48)] sm:w-[230px] md:w-[calc((100%-3*20px)/3.7)] lg:w-[calc((100%-4*20px)/4.5)] snap-start">
-                  <ProductCard product={p} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Sticky Bottom Bar (Mobile/Tablet only) */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40 flex items-center justify-between gap-3 animate-[slide-up_0.2s_ease-out]">
-          <div className="text-left shrink-0">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Price</p>
-            <p className="text-base sm:text-lg font-extrabold text-[#038076] dark:text-[#84d6b9] leading-tight">
-              {formatCurrency(product.price * (isInCart ? cartQuantity : quantity))}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-1 max-w-[260px] items-center">
-            {isInCart ? (
-              <>
-                <button
-                  onClick={() => navigate("/cart")}
-                  className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center select-none"
-                >
-                  Go To Cart
-                </button>
-                <div className="flex-1 flex items-center justify-between p-1 bg-slate-100 dark:bg-zinc-800 rounded-full h-11 shadow-inner">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(productId, cartQuantity - 1)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs"
-                    aria-label="Decrease quantity"
-                  >
-                    -
-                  </button>
-                  <span className="w-8 h-8 rounded-full bg-[#038076] text-white flex items-center justify-center font-extrabold text-xs select-none shadow-xs">
-                    {cartQuantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(productId, cartQuantity + 1)}
-                    disabled={cartQuantity >= (product.stock || 30)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 font-extrabold text-sm select-none cursor-pointer hover:bg-slate-50 active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={handleBuyNow}
-                  disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-[#038076] hover:bg-[#02665e] active:scale-95 text-white font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Buy Now
-                </button>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={product.inStock === false || product.stock === 0}
-                  className="flex-1 bg-white hover:bg-slate-50 dark:bg-zinc-900 border-2 border-[#038076] text-[#038076] dark:text-[#84d6b9] dark:border-[#84d6b9] font-bold h-11 rounded-full text-xs sm:text-sm outline-none cursor-pointer transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span>Add</span>
-                  <ShoppingCart size={15} className="shrink-0" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Desktop View
   return (
-    <div className="max-w-[1550px] mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 px-4 md:px-10 animate-[fade-in_0.3s_ease-out] text-left">
+      <div className="max-w-[1440px] mx-auto space-y-6">
 
-      {/* Breadcrumbs */}
-      <nav className="mb-lg text-xs font-semibold text-slate-400 dark:text-zinc-500 flex items-center gap-xs flex-wrap select-none">
-        <Link to="/" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Home</Link>
-        <span>/</span>
-        <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">Products</Link>
-        <span>/</span>
-        <Link to="/products" className="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors">{product.category?.name || product.category}</Link>
-        <span>/</span>
-        <span className="text-slate-655 dark:text-zinc-300 font-bold truncate max-w-xs">{product.name}</span>
-      </nav>
+        {/* Breadcrumbs */}
+        <nav className="text-xs font-mono font-semibold text-[#5f776e] flex items-center gap-2 flex-wrap select-none mb-4">
+          <Link to="/" className="hover:text-[#157a6d] transition-colors">Home</Link>
+          <span>/</span>
+          <Link to="/products" className="hover:text-[#157a6d] transition-colors">Products</Link>
+          <span>/</span>
+          <Link to="/products" className="hover:text-[#157a6d] transition-colors">{product.category?.name || product.category}</Link>
+          <span>/</span>
+          <span className="text-[#172b26] font-bold truncate max-w-xs">{product.name}</span>
+        </nav>
 
-      {/* 2-COLUMN ROOT LAYOUT: LEFT SIDEBAR & RIGHT CONTAINER */}
-      <div className="flex flex-col md:flex-row gap-lg mb-xl items-start w-full">
+        {/* 2-COLUMN ROOT LAYOUT: LEFT SIDEBAR & RIGHT CONTAINER */}
+        <div className="flex flex-col md:flex-row gap-6 items-start w-full">
 
-        {/* LEFT SIDEBAR (22% on desktop, 30% on tablet, 100% on mobile) */}
-        {memoizedStickySidebar}
+          {/* LEFT SIDEBAR */}
+          {memoizedStickySidebar}
 
-        {/* RIGHT CONTAINER (78% on desktop, 70% on tablet, 100% on mobile) */}
-        <div className="w-full md:w-[68%] lg:w-[78%] flex flex-col gap-md order-1 md:order-2 lg:order-2">
+          {/* RIGHT CONTAINER */}
+          <div className="w-full md:w-[68%] lg:w-[78%] flex flex-col gap-6 order-1 md:order-2 lg:order-2">
 
-          {/* Top Row: Center Content & Purchase Card */}
-          <div className="flex flex-col lg:flex-row gap-lg items-start w-full">
-            {/* Center Content Column (Product Info, Gallery, Dispatch/Delivery, Rx/Cold Chain) */}
-            <div className="w-full lg:w-[66.6%] space-y-md">
-              {/* Combined Product Info & Image Gallery Card */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-xs p-lg flex flex-col lg:flex-row gap-lg items-stretch">
-                {/* Left: Product Information (60%) */}
-                <div className="w-full lg:w-[60%] flex flex-col justify-between">
-                  {memoizedProductInfo}
+            {/* Top Row: Center Content & Purchase Card */}
+            <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+              {/* Center Content Column */}
+              <div className="w-full lg:w-[66.6%] space-y-5">
+                {/* Combined Product Info & Image Gallery Card */}
+                <div className="pdp-paper-card p-6 md:p-8 flex flex-col lg:flex-row gap-8 items-stretch">
+                  {/* Left: Product Information (60%) */}
+                  <div className="w-full lg:w-[60%] flex flex-col justify-between">
+                    {memoizedProductInfo}
+                  </div>
+
+                  {/* Right: Product Image Gallery (40%) */}
+                  <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-dashed border-[#c3d4cc] pt-6 lg:pt-0 lg:pl-6">
+                    {memoizedProductGallery}
+                  </div>
                 </div>
 
-                {/* Right: Product Image Gallery (40%) */}
-                <div className="w-full lg:w-[40%] flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 pt-lg lg:pt-0 lg:pl-lg">
-                  {memoizedProductGallery}
-                </div>
+                  {/* Right Column: Purchase Panel */}
+              <div className="w-full lg:w-[33.4%]">
+                {memoizedPurchaseCard}
               </div>
 
-              {/* Dispatch Banner / Cards */}
-              {memoizedDispatchDelivery}
+                {/* Dispatch Banner / Cards */}
+                {memoizedDispatchDelivery}
 
-              {/* Prescription and Cold Chain Cards */}
-              {memoizedRxColdChain}
+              
+                {/* Prescription and Cold Chain Cards */}
+                {memoizedRxColdChain}
+
+              {/* Mobile Substitute Products Card (Aligned Directly Under Delivery Card on Mobile Only) */}
+                <div className="lg:hidden">
+                  <SubstituteProducts substituteProducts={substituteProducts} product={product} />
+                </div>
+              </div>
+              
+              
             </div>
 
-            {/* Right Column: Purchase Panel */}
-            <div className="w-full lg:w-[33.4%]">
-              {memoizedPurchaseCard}
+            {/* Bottom Area: Combined Center + Right Column space */}
+            <div className="w-full space-y-md mt-md">
+              {/* Product Specifications Section */}
+              {memoizedSpecifications}
+
+              {/* Introduction Card */}
+              {memoizedIntroduction}
+
+              {/* Clinical Info sections */}
+              {memoizedProductTabs}
+
+              {/* Disclaimer Section */}
+              {memoizedDisclaimer}
             </div>
-          </div>
 
-          {/* Bottom Area: Combined Center + Right Column space */}
-          <div className="w-full space-y-md mt-md">
-            {/* Product Specifications Section */}
-            {memoizedSpecifications}
-
-            {/* Introduction Card */}
-            {memoizedIntroduction}
-
-            {/* Clinical Info sections */}
-            {memoizedProductTabs}
-
-            {/* Disclaimer Section */}
-            {memoizedDisclaimer}
           </div>
 
         </div>
 
+        {/* Bottom carousels */}
+        {relatedProducts.length > 0 && (
+          <section className="pt-8 border-t border-[#c8dad3] mt-8 text-left font-mono">
+            <h2 className="pdp-serif-title text-xl font-bold text-[#0f172a] mb-4">Related Products (Same Brand)</h2>
+
+            {/* Mobile horizontal touch carousel / Desktop grid */}
+            <div className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+              {relatedProducts.map((p) => (
+                <div key={p.id || p._id} className="min-w-[220px] w-[220px] sm:min-w-[240px] sm:w-[240px] md:min-w-0 md:w-auto shrink-0 md:shrink snap-start">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
-      {/* Bottom carousels */}
-      {substituteProducts.length > 0 && (
-        <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xxl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Substitute Products (Same Category)</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
-            {substituteProducts.map((p) => (
-              <ProductCard key={p.id || p._id} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {relatedProducts.length > 0 && (
-        <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Related Products (Same Brand)</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[10px] md:gap-lg">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id || p._id} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {recentlyViewed.length > 0 && (
-        <section className="pt-xxl border-t border-outline-variant/30 dark:border-outline/20 mt-xl">
-          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-xl font-black text-left">Recently Viewed Products</h2>
-          <div className="flex gap-sm md:gap-lg overflow-x-auto pb-md scroll-smooth snap-x snap-mandatory scrollbar-none">
-            {recentlyViewed.map((p) => (
-              <div key={p.id || p._id} className="snap-start shrink-0 w-[calc((100%-8px)/1.45)] md:w-[calc(33.33%-8px)] lg:w-[calc(25%-18px)]">
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Sticky Bottom Bar (Mobile/Tablet only) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40 flex items-center justify-between gap-3 animate-[slide-up_0.2s_ease-out]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-slate-200/80 dark:border-zinc-800/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40 flex items-center justify-between gap-3 animate-[slide-up_0.2s_ease-out]">
         <div className="text-left shrink-0">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Price</p>
           <p className="text-base sm:text-lg font-extrabold text-[#038076] dark:text-[#84d6b9] leading-tight">

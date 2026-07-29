@@ -102,22 +102,24 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
     return [...substituteProducts].sort((a, b) => {
       const compA = getSubstituteComparison(a, product).diffPercent;
       const compB = getSubstituteComparison(b, product).diffPercent;
-      return compA - compB; // Cheaper substitutes (-20%) before costlier (+5%)
+      return compA - compB;
     });
   }, [substituteProducts, product]);
 
   const hasSubstitutes = sortedSubstitutes && sortedSubstitutes.length > 0;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm select-none w-full flex flex-col text-left">
+    <div className="pdp-paper-card p-4 rounded-xl select-none w-full flex flex-col text-left font-mono">
+      <h3 className="pdp-serif-title text-sm font-bold text-[#172b26] pb-2 pdp-dashed-line mb-2">
+        Alternative Substitutes
+      </h3>
       {!hasSubstitutes ? (
-        <div className="text-center py-4 text-xs text-slate-400 font-medium">
-          No substitute products available.
+        <div className="text-center py-3 text-xs text-[#5f776e] font-medium">
+          No substitute products recorded.
         </div>
       ) : (
         <>
-          {/* Display ONLY 2 items */}
-          <div className="flex flex-col divide-y divide-slate-100 dark:divide-zinc-800/80">
+          <div className="flex flex-col divide-y divide-[#dde8e3]">
             {sortedSubstitutes.slice(0, 2).map((item, idx) => {
               const { diffPercent, isCostlier, comparisonLabel, dosageForm } = getSubstituteComparison(item, product);
 
@@ -126,26 +128,26 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                   key={item.slug || item._id || idx}
                   to={`/products/${item.slug}`}
                   onClick={() => window.scrollTo(0, 0)}
-                  className="py-3.5 first:pt-0 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer min-w-0"
+                  className="py-3 first:pt-0 flex items-start justify-between gap-3 hover:bg-[#f0f8f5] px-1.5 rounded-lg transition-all cursor-pointer min-w-0"
                 >
                   <div className="flex-1 min-w-0 pr-1">
-                    <h4 className="font-bold text-xs sm:text-sm text-slate-700 dark:text-zinc-200 truncate leading-snug" title={item.name}>
+                    <h4 className="pdp-serif-title font-bold text-xs text-[#172b26] truncate leading-snug" title={item.name}>
                       {item.name}
                     </h4>
-                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">
+                    <p className="text-[10px] text-[#5f776e] font-bold uppercase mt-0.5 truncate">
                       {item.manufacturer || item.brand || "WellMeds"}
                     </p>
                   </div>
                   <div className="text-right shrink-0 whitespace-nowrap">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
+                    <p className="text-xs font-semibold text-[#172b26]">
                       ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                     </p>
                     <p className={`text-[11px] font-bold mt-0.5 ${
                       diffPercent === 0 
-                        ? "text-slate-500" 
+                        ? "text-[#5f776e]" 
                         : isCostlier 
-                          ? "text-red-500" 
-                          : "text-emerald-600 dark:text-emerald-400"
+                          ? "text-red-600" 
+                          : "text-[#157a6d]"
                     }`}>
                       {comparisonLabel}
                     </p>
@@ -155,48 +157,45 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
             })}
           </div>
 
-          {/* View All Button if substituteProducts.length > 2 */}
           {sortedSubstitutes.length > 2 && (
             <button
               ref={viewAllBtnRef}
               onClick={() => setIsModalOpen(true)}
-              className="mt-3 w-full bg-[#02665e] hover:bg-[#014d47] text-white py-3 px-4 rounded-full font-bold text-xs flex items-center justify-center gap-2 border-2 border-[#02665e] shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              className="pdp-btn-primary mt-3 w-full py-2.5 text-xs"
             >
-              View All <span className="text-sm">→</span>
+              View All Substitutes <span className="text-sm">→</span>
             </button>
           )}
         </>
       )}
 
-      {/* Centered / Bottom Sheet Portal Modal */}
+      {/* Centered Modal */}
       {isModalOpen && createPortal(
         <div 
           onClick={handleBackdropClick}
           aria-modal="true"
           role="dialog"
-          className="fixed inset-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none animate-[fade-in_0.2s_ease-out]"
+          className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-mono"
         >
           <div 
             ref={modalContainerRef}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-zinc-900 w-full sm:w-[92vw] max-w-[500px] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-zinc-800 animate-[slide-up_0.25s_ease-out] flex flex-col max-h-[85vh] cursor-default"
+            className="w-full sm:w-[92vw] max-w-[500px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 text-left z-[100000]"
           >
-            {/* Header */}
-            <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center text-left">
-              <h3 className="font-extrabold text-lg text-[#02665e] dark:text-emerald-400">
+            <div className="p-4 bg-[#f0f8f5] dark:bg-zinc-800/90 border-b border-[#dde8e3] dark:border-zinc-700 flex justify-between items-center text-left">
+              <h3 className="pdp-serif-title text-base font-bold text-[#157a6d] dark:text-[#84d6b9]">
                 Available Substitutes
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 aria-label="Close substitutes modal"
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="p-1.5 text-[#5f776e] hover:text-[#172b26] dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-white/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
               >
-                <X size={20} className="stroke-[2.5]" />
+                <X size={18} className="stroke-[2.5]" />
               </button>
             </div>
 
-            {/* List of All Substitutes */}
-            <div className="p-5 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-zinc-800 text-left">
+            <div className="p-4 bg-white dark:bg-zinc-900 overflow-y-auto custom-scrollbar divide-y divide-[#dde8e3] dark:divide-zinc-800 text-left">
               {sortedSubstitutes.map((item, idx) => {
                 const { diffPercent, isCostlier, comparisonLabel, dosageForm } = getSubstituteComparison(item, product);
 
@@ -208,26 +207,26 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                       setIsModalOpen(false);
                       window.scrollTo(0, 0);
                     }}
-                    className="py-3.5 first:pt-0 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800/40 px-1 rounded-xl transition-all cursor-pointer min-w-0"
+                    className="py-3 first:pt-0 flex items-start justify-between gap-3 hover:bg-[#f0f8f5] dark:hover:bg-zinc-800/50 px-2 rounded-lg transition-all cursor-pointer min-w-0"
                   >
                     <div className="flex-1 min-w-0 pr-1">
-                      <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100 truncate leading-snug" title={item.name}>
+                      <h4 className="pdp-serif-title font-bold text-sm text-[#172b26] dark:text-zinc-100 truncate leading-snug" title={item.name}>
                         {item.name}
                       </h4>
-                      <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase mt-0.5 truncate">
+                      <p className="text-[10px] text-[#5f776e] dark:text-zinc-400 font-bold uppercase mt-0.5 truncate">
                         {item.manufacturer || item.brand || "WellMeds"}
                       </p>
                     </div>
                     <div className="text-right shrink-0 whitespace-nowrap">
-                      <p className="text-xs font-semibold text-slate-500 dark:text-zinc-300">
+                      <p className="text-xs font-semibold text-[#172b26] dark:text-zinc-200">
                         ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                       </p>
                       <p className={`text-[11px] font-bold mt-0.5 ${
                         diffPercent === 0 
-                          ? "text-slate-500" 
+                          ? "text-[#5f776e] dark:text-zinc-400" 
                           : isCostlier 
-                            ? "text-red-500" 
-                            : "text-emerald-600 dark:text-emerald-400"
+                            ? "text-red-600 dark:text-red-400" 
+                            : "text-[#157a6d] dark:text-[#84d6b9]"
                       }`}>
                         {comparisonLabel}
                       </p>

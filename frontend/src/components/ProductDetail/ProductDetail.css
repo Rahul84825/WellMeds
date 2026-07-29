@@ -1,0 +1,232 @@
+/* ==========================================================================
+   WELLMEDS PRESCRIPTION DESIGN SYSTEM — PRODUCT DETAILS PAGE (PAP/PDP)
+   Identity: Premium Editorial Specialty Pharmacy & Prescription Pad Aesthetic
+   ========================================================================== */
+
+.pdp-theme-container {
+  --pdp-card: #ffffff;
+  --pdp-card-pure: #ffffff;
+  --pdp-card-edge: #c8dad3;
+  --pdp-ink: #0f172a;
+  --pdp-ink-soft: #1e293b;
+  --pdp-teal: #157a6d;
+  --pdp-teal-hover: #0f6157;
+  --pdp-teal-light: #f0f8f5;
+  --pdp-mustard: #b08d3e;
+  --pdp-mustard-dark: #9c7a34;
+  --pdp-label: #334155;
+  --pdp-line: #b0c4ba;
+  --pdp-bg: #f4f8f6;
+  --pdp-grid-line: rgba(15, 59, 52, 0.05);
+
+  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  color: var(--pdp-ink);
+}
+
+/* Background Prescription Grid (GPU-Cached Tiled Grid for 60 FPS Scrolling) */
+.pdp-grid-bg {
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(to right, var(--pdp-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--pdp-grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Prescription Paper Card Frame */
+.pdp-paper-card {
+  background: var(--pdp-card);
+  border: 1px solid var(--pdp-card-edge);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(23, 43, 38, 0.07), 0 2px 6px rgba(23, 43, 38, 0.04);
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.pdp-paper-card:hover {
+  box-shadow: 0 16px 40px rgba(23, 43, 38, 0.1), 0 4px 10px rgba(23, 43, 38, 0.05);
+}
+
+/* Prescription Tape Accent */
+.pdp-rx-tape {
+  position: absolute;
+  top: -10px;
+  left: 36px;
+  width: 70px;
+  height: 20px;
+  background: repeating-linear-gradient(45deg, var(--pdp-mustard), var(--pdp-mustard) 6px, var(--pdp-mustard-dark) 6px, var(--pdp-mustard-dark) 12px);
+  border-radius: 2px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.85;
+  transform: rotate(-1.5deg);
+}
+
+/* Editorial Typography */
+.pdp-serif-title {
+  font-family: 'Fraunces', 'Liberation Serif', Georgia, serif;
+  font-weight: 600;
+  color: var(--pdp-ink);
+  letter-spacing: -0.01em;
+}
+
+.pdp-serif-title em {
+  font-style: italic;
+  color: var(--pdp-teal);
+}
+
+.pdp-mono-text {
+  font-family: 'IBM Plex Mono', 'Liberation Mono', monospace;
+}
+
+.pdp-mono-eyebrow {
+  font-family: 'IBM Plex Mono', 'Liberation Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--pdp-teal);
+}
+
+/* Dashed Divider Line */
+.pdp-dashed-line {
+  border-bottom: 2px dashed var(--pdp-line);
+}
+
+/* Prescription Pill Badge */
+.pdp-rx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f8f5;
+  border: 1px solid var(--pdp-line);
+  color: var(--pdp-teal);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* Prescription Specification Sheet Layout */
+.pdp-spec-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--pdp-line);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  transition: background-color 0.15s ease;
+}
+
+.pdp-spec-row:last-child {
+  border-bottom: none;
+}
+
+.pdp-spec-row:hover {
+  background: var(--pdp-teal-light);
+}
+
+.pdp-spec-label {
+  width: 32%;
+  color: var(--pdp-label);
+  font-weight: 600;
+}
+
+.pdp-spec-value {
+  width: 68%;
+  color: var(--pdp-ink);
+  font-weight: 700;
+}
+
+/* Button & Action Styling */
+.pdp-btn-primary {
+  background: var(--pdp-teal);
+  color: #ffffff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pdp-btn-primary:hover {
+  background: var(--pdp-teal-hover);
+  box-shadow: 0 4px 16px rgba(21, 122, 109, 0.25);
+  transform: translateY(-1px);
+}
+
+.pdp-btn-primary:active {
+  transform: translateY(0);
+}
+
+.pdp-btn-secondary {
+  background: transparent;
+  color: var(--pdp-teal);
+  border: 1.5px solid var(--pdp-teal);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  padding: 11px 22px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pdp-btn-secondary:hover {
+  background: var(--pdp-teal-light);
+  border-color: var(--pdp-teal-hover);
+  color: var(--pdp-teal-hover);
+}
+
+/* Accordion FAQs styling */
+.pdp-faq-item {
+  border: 1px solid var(--pdp-card-edge);
+  border-radius: 8px;
+  background: #ffffff;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.pdp-faq-item:hover {
+  border-color: var(--pdp-line);
+}
+
+.pdp-faq-button {
+  width: 100%;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pdp-ink);
+}
+
+.pdp-faq-content {
+  padding: 0 20px 16px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--pdp-ink-soft);
+  line-height: 1.6;
+}
