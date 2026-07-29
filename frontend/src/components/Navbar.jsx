@@ -553,65 +553,31 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Sub-Navbar: Location & Search (Visible on mobile/tablet only) */}
-      <div className="w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden flex flex-col px-6 py-2 relative border-t border-slate-200">
-        {/* Top: Location selector */}
-        <div className="relative flex items-center">
-          <button
-            type="button"
-            onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-            className="flex items-center gap-1 text-slate-700 dark:text-zinc-300 text-[11px] font-bold bg-transparent border-none outline-none cursor-pointer select-none"
-          >
-            <MapPin className="w-3.5 h-3.5 text-[#038076] shrink-0" />
-            <span>Deliver to <span className="font-extrabold">{selectedLocation}</span></span>
-            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
-          </button>
-
-          {locationMenuOpen && (
-            <>
-              <div className="fixed inset-0 z-[105]" onClick={() => setLocationMenuOpen(false)} />
-              <div className="absolute left-0 top-full mt-1.5 w-48 bg-white rounded-xl shadow-xl border border-slate-150 py-1.5 z-[110] text-left text-xs text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
-                {["Pune, 411021", "Mumbai, 400001", "Delhi, 110001", "Bangalore, 560001", "Chennai, 600001"].map((loc) => (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => handleLocationSelect(loc)}
-                    className="w-full px-4 py-2 hover:bg-slate-50 hover:text-[#038076] font-bold text-left transition-colors focus:outline-none cursor-pointer"
-                  >
-                    {loc}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Bottom: Search + Upload prescription */}
-        <div
-          className={`grid transition-all duration-300 ease-in-out ${
-            showNavbarSearch
-              ? "grid-rows-[1fr] opacity-100 mt-2 pointer-events-auto"
-              : "grid-rows-[0fr] opacity-0 mt-0 pointer-events-none"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
-              <Search className="text-slate-400 w-4 h-4 shrink-0" />
-              <input
-                type="text"
-                placeholder="Search Medicines..."
-                readOnly
-                onClick={() => setMobileSearchExpanded(true)}
-                className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-4 py-1.5 flex-grow cursor-pointer placeholder-slate-400 animate-none"
-              />
-              <button
-                onClick={() => navigate("/upload-prescription")}
-                className="bg-[#086b53] hover:bg-[#055746] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
-              >
-                <span>Upload</span>
-                <FileText className="w-[11px] h-[11px]" />
-              </button>
-            </div>
+      {/* Mobile Sub-Navbar: Search bar (Visible on scroll in mobile/tablet) */}
+      <div
+        className={`w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-300 ease-in-out border-slate-200 ${
+          showNavbarSearch
+            ? "grid-rows-[1fr] opacity-100 px-6 py-2.5 border-t pointer-events-auto"
+            : "grid-rows-[0fr] opacity-0 px-6 py-0 border-t-0 pointer-events-none"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
+            <Search className="text-slate-400 w-4 h-4 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search Medicines..."
+              readOnly
+              onClick={() => setMobileSearchExpanded(true)}
+              className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-4 py-1.5 flex-grow cursor-pointer placeholder-slate-400 animate-none"
+            />
+            <button
+              onClick={() => navigate("/upload-prescription")}
+              className="bg-[#086b53] hover:bg-[#055746] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
+            >
+              <span>Upload</span>
+              <FileText className="w-[11px] h-[11px]" />
+            </button>
           </div>
         </div>
       </div>
