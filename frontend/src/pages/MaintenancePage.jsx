@@ -19,8 +19,8 @@ const MaintenancePage = () => {
     if (!email || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const { data } = await api.post("/notifications/subscribe", { email });
-      if (data.duplicate) {
+      const result = await api.post("/notifications/subscribe", { email });
+      if (result?.duplicate) {
         setConfirmMsg("You're already on our waitlist!");
       } else {
         setConfirmMsg("Noted. We'll reach out the moment we open.");
