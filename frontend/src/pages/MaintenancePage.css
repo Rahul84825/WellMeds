@@ -1,4 +1,6 @@
-.maintenance-page {
+@import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
   --bg-deep: #0A2E27;
   --bg-deep-2: #0B3D33;
   --card-cream: #FAF6EC;
@@ -9,37 +11,32 @@
   --ink: #1C2B27;
   --ink-soft: #5B6D67;
   --foil: #C7D2CE;
-  --line: rgba(28,43,39,0.16);
+  --line: rgba(28, 43, 39, 0.16);
+}
 
+.maintenance-page {
   background:
-    radial-gradient(1200px 700px at 15% -10%, rgba(20,160,136,0.18), transparent 60%),
-    radial-gradient(900px 600px at 100% 110%, rgba(224,160,61,0.10), transparent 55%),
+    radial-gradient(1200px 700px at 15% -10%, rgba(20, 160, 136, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgba(224, 160, 61, 0.10), transparent 55%),
     var(--bg-deep);
   color: var(--ink);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 32px 18px 20px;
   overflow-x: hidden;
   position: relative;
-  box-sizing: border-box;
 }
 
-.maintenance-page * {
-  box-sizing: border-box;
-}
-
-/* faint pharmacy cross grid texture */
 .maintenance-page::before {
   content: "";
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 42px 42px;
   pointer-events: none;
   z-index: 0;
@@ -64,14 +61,13 @@
 
 .maintenance-page .topbar .tag {
   font-size: 11.5px;
-  color: rgba(250,246,236,0.55);
+  color: rgba(250, 246, 236, 0.55);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: right;
   line-height: 1.4;
 }
 
-/* ===== The Label Card ===== */
 .maintenance-page .label-wrap {
   position: relative;
   z-index: 1;
@@ -89,7 +85,7 @@
   height: 22px;
   background: repeating-linear-gradient(45deg, #8a6d1f, #8a6d1f 4px, #6e560f 4px, #6e560f 8px);
   border-radius: 3px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.35);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
   z-index: 3;
 }
 
@@ -97,14 +93,13 @@
   background: var(--card-cream);
   border-radius: 6px;
   padding: 30px 26px 24px;
-  box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.4) inset;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(255, 255, 255, 0.4) inset;
   transform: rotate(-1.1deg);
   position: relative;
-  border: 1px solid rgba(28,43,39,0.08);
+  border: 1px solid rgba(28, 43, 39, 0.08);
 }
 
 .maintenance-page .card::after {
-  /* torn/perforated bottom edge */
   content: "";
   position: absolute;
   left: 0;
@@ -161,7 +156,9 @@
   border-bottom: 1px dashed var(--line);
 }
 
-.maintenance-page .field:last-of-type { border-bottom: none; }
+.maintenance-page .field:last-of-type {
+  border-bottom: none;
+}
 
 .maintenance-page .field .k {
   color: var(--ink-soft);
@@ -200,7 +197,6 @@
   opacity: 0.85;
 }
 
-/* ===== Blister pack countdown ===== */
 .maintenance-page .blister-section {
   margin-top: 18px;
   padding-top: 16px;
@@ -232,12 +228,12 @@
 
 .maintenance-page .pill {
   flex: 1;
-  aspect-ratio: 1/1.15;
+  aspect-ratio: 1 / 1.15;
   border-radius: 50% / 46%;
   position: relative;
   background: linear-gradient(160deg, #ffffff, var(--card-cream-2) 65%);
-  border: 1px solid rgba(28,43,39,0.15);
-  box-shadow: inset 0 2px 3px rgba(255,255,255,0.8), inset 0 -3px 4px rgba(28,43,39,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  border: 1px solid rgba(28, 43, 39, 0.15);
+  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.8), inset 0 -3px 4px rgba(28, 43, 39, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .maintenance-page .pill::before {
@@ -252,13 +248,13 @@
 .maintenance-page .pill.popped {
   background: transparent;
   box-shadow: none;
-  border: 1.5px dashed rgba(28,43,39,0.28);
+  border: 1.5px dashed rgba(28, 43, 39, 0.28);
 }
 
 .maintenance-page .pill.popped::before {
   content: "";
   background: transparent;
-  border: 1px solid rgba(28,43,39,0.2);
+  border: 1px solid rgba(28, 43, 39, 0.2);
   inset: 30%;
   opacity: 1;
 }
@@ -272,10 +268,9 @@
   justify-content: center;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
-  color: rgba(28,43,39,0.35);
+  color: rgba(28, 43, 39, 0.35);
 }
 
-/* ===== CTA ===== */
 .maintenance-page .cta-wrap {
   max-width: 460px;
   width: 100%;
@@ -294,13 +289,15 @@
   line-height: 1.5;
 }
 
-.maintenance-page .cta-lead strong { color: var(--teal-bright); }
+.maintenance-page .cta-lead strong {
+  color: var(--teal-bright);
+}
 
 .maintenance-page .notify-form {
   display: flex;
   gap: 8px;
-  background: rgba(250,246,236,0.06);
-  border: 1px solid rgba(250,246,236,0.18);
+  background: rgba(250, 246, 236, 0.06);
+  border: 1px solid rgba(250, 246, 236, 0.18);
   border-radius: 10px;
   padding: 6px;
   backdrop-filter: blur(6px);
@@ -317,7 +314,9 @@
   font-size: 14px;
 }
 
-.maintenance-page .notify-form input::placeholder { color: rgba(250,246,236,0.4); }
+.maintenance-page .notify-form input::placeholder {
+  color: rgba(250, 246, 236, 0.4);
+}
 
 .maintenance-page .notify-form button {
   background: var(--teal-bright);
@@ -333,16 +332,18 @@
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
-.maintenance-page .notify-form button:hover { background: #18BC9E; transform: translateY(-1px); }
+.maintenance-page .notify-form button:hover {
+  background: #18BC9E;
+  transform: translateY(-1px);
+}
 
-.maintenance-page .notify-form button:focus-visible, 
+.maintenance-page .notify-form button:focus-visible,
 .maintenance-page .notify-form input:focus-visible {
   outline: 2px solid var(--teal-bright);
   outline-offset: 2px;
 }
 
 .maintenance-page .confirm-msg {
-  display: block;
   margin-top: 10px;
   font-size: 13px;
   color: var(--teal-bright);
@@ -352,7 +353,7 @@
 .maintenance-page .whatsapp-alt {
   margin-top: 14px;
   font-size: 12.5px;
-  color: rgba(250,246,236,0.55);
+  color: rgba(250, 246, 236, 0.55);
 }
 
 .maintenance-page .whatsapp-alt a {
@@ -361,26 +362,25 @@
   text-underline-offset: 3px;
 }
 
-/* ===== Footer ===== */
 .maintenance-page footer {
   margin-top: 40px;
   width: 100%;
   max-width: 620px;
   text-align: center;
   padding: 18px 10px 4px;
-  border-top: 1px solid rgba(250,246,236,0.1);
+  border-top: 1px solid rgba(250, 246, 236, 0.1);
   position: relative;
   z-index: 1;
 }
 
 .maintenance-page footer .row {
   font-size: 12px;
-  color: rgba(250,246,236,0.5);
+  color: rgba(250, 246, 236, 0.5);
   line-height: 1.9;
 }
 
 .maintenance-page footer .row b {
-  color: rgba(250,246,236,0.75);
+  color: rgba(250, 246, 236, 0.75);
   font-weight: 500;
 }
 
@@ -394,12 +394,28 @@
 }
 
 @media (max-width: 420px) {
-  .maintenance-page .card { padding: 24px 18px 20px; }
-  .maintenance-page .stamp { top: 20px; right: 14px; font-size: 8.5px; padding: 3px 6px; }
-  .maintenance-page .notify-form { flex-direction: column; }
-  .maintenance-page .notify-form button { width: 100%; }
+  .maintenance-page .card {
+    padding: 24px 18px 20px;
+  }
+
+  .maintenance-page .stamp {
+    top: 20px;
+    right: 14px;
+    font-size: 8.5px;
+    padding: 3px 6px;
+  }
+
+  .maintenance-page .notify-form {
+    flex-direction: column;
+  }
+
+  .maintenance-page .notify-form button {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .maintenance-page * { transition: none !important; }
+  .maintenance-page * {
+    transition: none !important;
+  }
 }
