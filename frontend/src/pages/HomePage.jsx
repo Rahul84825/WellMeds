@@ -64,10 +64,8 @@ const HomePage = () => {
         schema={homeSchema}
       />
 
-      {/* Hero Banner (hidden on mobile, visible on desktop) */}
-      <div className="hidden lg:block">
-        <Hero />
-      </div>
+      {/* Hero Banner */}
+      <Hero />
 
       {/* Quick Action Cards Section */}
       <HomeSectionContainer className="mt-7 md:mt-9">

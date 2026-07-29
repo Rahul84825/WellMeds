@@ -153,7 +153,7 @@ const Navbar = () => {
           setIsScrolled(currentScrollY > 10);
 
           if (location.pathname === "/") {
-            setShowNavbarSearch(currentScrollY > 200);
+            setShowNavbarSearch(currentScrollY > 180);
           } else {
             setShowNavbarSearch(true);
           }
@@ -327,9 +327,9 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-[#f6f7fa] dark:bg-zinc-950 transform-gpu transition-all duration-300 ${
+      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-all duration-300 ${
         isScrolled
-          ? "shadow-md bg-[#f6f7fa] dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
+          ? "shadow-md bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
           : "shadow-xs"
       } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
     >
@@ -350,9 +350,9 @@ const Navbar = () => {
                 <img 
                   src={logoImg}
                   alt="WellMeds Logo"
-                  className="h-[48px] lg:h-[110px] object-contain"
+                  className="h-[60px] lg:h-[70px] object-contain"
                 />
-              </NavLink>
+              </NavLink>  
             </div>
 
             {/* Search bar & Location selector container */}
@@ -363,7 +363,7 @@ const Navbar = () => {
                   transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
                   opacity: showNavbarSearch ? 1 : 0,
                 }}
-                className={`w-full transition-all duration-300 ${isScrolled ? "max-w-[420px]" : "max-w-[540px]"} ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
+                className={`w-full max-w-[560px] transition-all duration-300 ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
               >
                 <UniversalSearch variant="default" />
               </div>
@@ -554,17 +554,17 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Sub-Navbar: Location & Search (Visible on mobile/tablet only) */}
-      <div className="w-full bg-[#004782] dark:bg-zinc-950 text-white lg:hidden flex flex-col gap-2 px-6 py-2.5 relative border-t border-[#ffffff]/10">
+      <div className="w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden flex flex-col px-6 py-2 relative border-t border-slate-200">
         {/* Top: Location selector */}
         <div className="relative flex items-center">
           <button
             type="button"
             onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-            className="flex items-center gap-1 text-white/90 text-[11px] font-bold bg-transparent border-none outline-none cursor-pointer select-none"
+            className="flex items-center gap-1 text-slate-700 dark:text-zinc-300 text-[11px] font-bold bg-transparent border-none outline-none cursor-pointer select-none"
           >
-            <MapPin className="w-3.5 h-3.5 text-white/80 shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-[#038076] shrink-0" />
             <span>Deliver to <span className="font-extrabold">{selectedLocation}</span></span>
-            <ChevronDown className={`w-3 h-3 text-white/60 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${locationMenuOpen ? "rotate-180" : ""}`} />
           </button>
 
           {locationMenuOpen && (
@@ -587,22 +587,32 @@ const Navbar = () => {
         </div>
 
         {/* Bottom: Search + Upload prescription */}
-        <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
-          <Search className="text-slate-400 w-4 h-4 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search Medicines..."
-            readOnly
-            onClick={() => setMobileSearchExpanded(true)}
-            className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-4 py-1.5 flex-grow cursor-pointer placeholder-slate-400 animate-none"
-          />
-          <button
-            onClick={() => navigate("/upload-prescription")}
-            className="bg-[#086b53] hover:bg-[#055746] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
-          >
-            <span>Upload</span>
-            <FileText className="w-[11px] h-[11px]" />
-          </button>
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            showNavbarSearch
+              ? "grid-rows-[1fr] opacity-100 mt-2 pointer-events-auto"
+              : "grid-rows-[0fr] opacity-0 mt-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
+              <Search className="text-slate-400 w-4 h-4 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search Medicines..."
+                readOnly
+                onClick={() => setMobileSearchExpanded(true)}
+                className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-4 py-1.5 flex-grow cursor-pointer placeholder-slate-400 animate-none"
+              />
+              <button
+                onClick={() => navigate("/upload-prescription")}
+                className="bg-[#086b53] hover:bg-[#055746] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
+              >
+                <span>Upload</span>
+                <FileText className="w-[11px] h-[11px]" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -221,7 +221,7 @@ export const createProduct = async (req, res, next) => {
     const inStock = productData.inStock !== undefined ? !!productData.inStock : true;
     productData.inStock = inStock;
     productData.stock = inStock ? 99 : 0;
-    
+
     // Auto badges based on inventory levels
     let badge = productData.badge || "";
     if (!inStock) {
@@ -305,7 +305,7 @@ export const updateProduct = async (req, res, next) => {
     if (updateData.inStock !== undefined) {
       const inStock = !!updateData.inStock;
       updateData.stock = inStock ? 99 : 0;
-      
+
       // Auto badges based on inventory levels
       if (!inStock) {
         updateData.badge = "Out of Stock";
@@ -401,10 +401,10 @@ export const getSimilarProducts = async (req, res, next) => {
       _id: { $ne: currentProduct._id },
       molecules: { $in: currentProduct.molecules }
     })
-    .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired isNonRefundable badge molecules brand similarMedicinePriority")
-    .populate("molecules", "name slug")
-    .sort({ similarMedicinePriority: -1 })
-    .limit(3);
+      .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired isNonRefundable badge molecules brand similarMedicinePriority")
+      .populate("molecules", "name slug")
+      .sort({ similarMedicinePriority: -1 })
+      .limit(3);
 
     res.status(200).json({ success: true, products: similar });
   } catch (error) {
@@ -416,95 +416,118 @@ export const getSimilarProducts = async (req, res, next) => {
 export const searchAll = async (req, res, next) => {
   const { q } = req.query;
   if (!q || q.trim().length < 2) {
-    return res.status(200).json({ success: true, results: {} });
+    return res.status(200).json({ success: true, results: { molecules: [], products: [] } });
   }
 
   const queryStr = q.trim();
-  const regex = new RegExp(queryStr, "i");
+  const escapedQ = queryStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escapedQ, "i");
+  const wordBoundaryRegex = new RegExp(`\\b${escapedQ}`, "i");
+  const qLower = queryStr.toLowerCase();
 
   try {
-    // 1. Query Molecules (limit to 6 as in original)
-    const molecules = await Molecule.find({ name: regex })
+    // 1. Query Molecules (fetch up to 50 matches so we can rank before returning top 6)
+    const allMolecules = await Molecule.find({ name: regex })
       .select("name slug")
-      .limit(6);
+      .limit(50);
 
-    // 2. Query Products (Medicines, Wellness, Surgical)
-    const products = await Product.find({
-      $or: [
-        { name: regex },
-        { brand: regex },
-        { manufacturer: regex },
-        { description: regex }
-      ]
-    })
-    .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category")
-    .populate("category", "name slug")
-    .limit(20);
+    // Rank Molecules strictly: Exact > Name Starts With > Word Boundary Starts With > Name Contains
+    const sortedMolecules = [...allMolecules].sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
 
-    // Search Priority logic
-    // Sort results in this order:
-    // 1. Exact Product Match
-    // 2. Product Prefix Match
-    // 3. Partial Product Match
-    const prioritizeProducts = (list) => {
-      const qLower = queryStr.toLowerCase();
-      return [...list].sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
+      const aExact = aName === qLower;
+      const bExact = bName === qLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
 
-        const aExact = aName === qLower;
-        const bExact = bName === qLower;
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
+      const aStart = aName.startsWith(qLower);
+      const bStart = bName.startsWith(qLower);
+      if (aStart && !bStart) return -1;
+      if (!aStart && bStart) return 1;
 
-        const aStart = aName.startsWith(qLower);
-        const bStart = bName.startsWith(qLower);
-        if (aStart && !bStart) return -1;
-        if (!aStart && bStart) return 1;
+      const aWordStart = wordBoundaryRegex.test(a.name);
+      const bWordStart = wordBoundaryRegex.test(b.name);
+      if (aWordStart && !bWordStart) return -1;
+      if (!aWordStart && bWordStart) return 1;
 
-        const aPartial = aName.includes(qLower);
-        const bPartial = bName.includes(qLower);
-        if (aPartial && !bPartial) return -1;
-        if (!aPartial && bPartial) return 1;
+      return aName.localeCompare(bName);
+    }).slice(0, 6);
 
-        return aName.localeCompare(bName);
-      });
-    };
+    // 2. Query Products
+    // For short queries (<=3 chars e.g. "as"), do not search description paragraph text to prevent false positives like "fast", "has", "dosage"
+    const productQueryFields = [
+      { name: regex },
+      { brand: regex },
+      { manufacturer: regex },
+      { strength: regex },
+      { "composition.ingredient": regex }
+    ];
 
-    // Sort molecules:
-    // 4. Exact Molecule Match
-    // 5. Partial Molecule Match
-    const prioritizeMolecules = (list) => {
-      const qLower = queryStr.toLowerCase();
-      return [...list].sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
+    if (queryStr.length > 3) {
+      productQueryFields.push({ description: regex });
+    }
 
-        const aExact = aName === qLower;
-        const bExact = bName === qLower;
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
+    const rawProducts = await Product.find({ $or: productQueryFields })
+      .select("name brand price originalPrice image slug stock inStock requiresRx isPrescriptionRequired strength packSize manufacturer isSurgical productType category composition")
+      .populate("category", "name slug")
+      .limit(60);
 
-        const aStart = aName.startsWith(qLower);
-        const bStart = bName.startsWith(qLower);
-        if (aStart && !bStart) return -1;
-        if (!aStart && bStart) return 1;
+    // Sort Products strictly by relevance
+    const sortedProducts = [...rawProducts].sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
 
-        const aPartial = aName.includes(qLower);
-        const bPartial = bName.includes(qLower);
-        if (aPartial && !bPartial) return -1;
-        if (!aPartial && bPartial) return 1;
+      // Priority 1: Exact Name
+      const aExact = aName === qLower;
+      const bExact = bName === qLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
 
-        return aName.localeCompare(bName);
-      });
-    };
+      // Priority 2: Name Starts With Query
+      const aStart = aName.startsWith(qLower);
+      const bStart = bName.startsWith(qLower);
+      if (aStart && !bStart) return -1;
+      if (!aStart && bStart) return 1;
+
+      // Priority 3: Word Boundary in Name Starts With Query (e.g. "Bayer Aspirin")
+      const aWordStart = wordBoundaryRegex.test(a.name);
+      const bWordStart = wordBoundaryRegex.test(b.name);
+      if (aWordStart && !bWordStart) return -1;
+      if (!aWordStart && bWordStart) return 1;
+
+      // Priority 4: Brand or composition ingredient starts with query
+      const aBrandStart = a.brand?.toLowerCase().startsWith(qLower) || a.composition?.some(c => c.ingredient.toLowerCase().startsWith(qLower));
+      const bBrandStart = b.brand?.toLowerCase().startsWith(qLower) || b.composition?.some(c => c.ingredient.toLowerCase().startsWith(qLower));
+      if (aBrandStart && !bBrandStart) return -1;
+      if (!aBrandStart && bBrandStart) return 1;
+
+      // Priority 5: Name Contains Query
+      const aNameContains = aName.includes(qLower);
+      const bNameContains = bName.includes(qLower);
+      if (aNameContains && !bNameContains) return -1;
+      if (!aNameContains && bNameContains) return 1;
+
+      return aName.localeCompare(bName);
+    });
+
+    // Filter out items that have no name/brand/composition match for short queries <= 3 chars
+    const finalProducts = sortedProducts.filter(p => {
+      if (queryStr.length <= 3) {
+        const pName = p.name.toLowerCase();
+        const pBrand = (p.brand || "").toLowerCase();
+        const pMfg = (p.manufacturer || "").toLowerCase();
+        const pComp = p.composition?.some(c => c.ingredient.toLowerCase().includes(qLower));
+        return pName.includes(qLower) || pBrand.includes(qLower) || pMfg.includes(qLower) || pComp;
+      }
+      return true;
+    }).slice(0, 12);
 
     res.status(200).json({
       success: true,
       results: {
-        molecules: prioritizeMolecules(molecules),
-        products: prioritizeProducts(products),
-        // Empty placeholders for backward-compatibility
+        molecules: sortedMolecules,
+        products: finalProducts,
         medicines: [],
         wellness: [],
         surgical: [],

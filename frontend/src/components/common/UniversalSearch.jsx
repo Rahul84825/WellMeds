@@ -175,21 +175,197 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
   const isHero = variant === "hero";
   const isMobile = variant === "mobile";
+  const isPrescription = variant === "prescription";
+
+  if (isPrescription) {
+    return (
+      <div ref={containerRef} className="relative w-full">
+        <div className="search-row">
+          <div className="search-rx">℞</div>
+          <div className="flex-1 flex items-center relative gap-1 min-w-0">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search Atorvastatin, Insulin, Metformin..."
+              value={query}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setFocused(true)}
+              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none"
+              style={{ outline: "none", border: "none", boxShadow: "none" }}
+            />
+            {!query && <span className="cursor" />}
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setResults({});
+                  setActiveIndex(-1);
+                }}
+                className="p-1 hover:bg-[#e7dfc9]/40 rounded text-[#3f544d] transition-colors shrink-0"
+                aria-label="Clear Search Input"
+              >
+                <X size={16} />
+              </button>
+            )}
+            {loading && (
+              <Loader2 className="animate-spin text-[#157a6d] shrink-0" size={16} />
+            )}
+          </div>
+          <button 
+            type="button"
+            onClick={handleSearchSubmit}
+            className="search-btn"
+          >
+            SEARCH
+          </button>
+        </div>
+
+        <div className="search-hint">
+          {["Oncology", "HIV", "Transplant", "Cardiac", "Rare disease"].map((tag) => (
+            <span
+              key={tag}
+              onClick={() => {
+                setQuery(tag);
+                setActiveIndex(-1);
+                triggerSearch(tag);
+                navigate(`/search?q=${encodeURIComponent(tag)}`);
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setQuery(tag);
+                  setActiveIndex(-1);
+                  triggerSearch(tag);
+                  navigate(`/search?q=${encodeURIComponent(tag)}`);
+                }
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* DROPDOWN AUTOCOMPLETE PANEL (PRESCRIPTION THEMED) */}
+        {focused && query.trim().length >= 2 && (
+          <div 
+            ref={dropdownRef}
+            className="rx-dropdown-panel absolute -left-3.5 -right-3.5 sm:-left-5 sm:-right-5 md:-left-8 md:-right-8 top-full mt-3 z-[300] overflow-y-auto max-h-[310px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
+          >
+            {/* Prescription Catalog Header Strip */}
+            <div className="rx-dropdown-header select-none">
+              <span>℞ WellMeds Catalog Matches</span>
+              <span className="opacity-75 font-normal text-[10px]">Specialty Care</span>
+            </div>
+
+            {loading ? (
+              <div className="p-8 text-center flex items-center justify-center gap-2.5 select-none">
+                <Loader2 className="animate-spin text-[#157a6d] w-5 h-5" />
+                <span className="text-xs font-semibold text-[#3f544d] font-mono">Searching 3,000+ specialty SKUs...</span>
+              </div>
+            ) : (
+              <div className="flex flex-col text-left">
+                {!hasResults() ? (
+                  <div className="rx-dropdown-empty">
+                    <div className="rx-empty-icon">
+                      <span>℞</span>
+                    </div>
+                    <h3>No specialty medicines found</h3>
+                    <p>No results matching "{query}". Check spelling or explore our complete catalog.</p>
+                    <button
+                      onClick={() => {
+                        setFocused(false);
+                        if (onCloseMobile) onCloseMobile();
+                        navigate("/products");
+                      }}
+                    >
+                      BROWSE ALL MEDICINES
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3 space-y-4">
+                    {/* MOLECULES */}
+                    {results.molecules?.length > 0 && (
+                      <div>
+                        <div className="rx-section-title select-none">
+                          <Search className="w-3.5 h-3.5 text-[#157a6d]" />
+                          <span>Chemical Molecules & Composition</span>
+                        </div>
+                        <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {results.molecules.map((mol) => {
+                            const flatItems = getFlatSelectableItems();
+                            const flatIndex = flatItems.findIndex(i => i.type === "molecule" && i.value.slug === mol.slug);
+                            const active = activeIndex === flatIndex;
+                            return (
+                              <div
+                                key={mol.slug}
+                                onClick={() => handleSelectItem({ type: "molecule", value: mol })}
+                                data-active={active}
+                                className="rx-molecule-badge group"
+                              >
+                                <span>{mol.name}</span>
+                                <span className="rx-arrow text-[12px] font-bold ml-1.5 transition-colors">&rarr;</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* MEDICINES & PRODUCTS */}
+                    {results.products?.length > 0 && (
+                      <div>
+                        <div className="rx-section-title select-none">
+                          <ShoppingBag className="w-3.5 h-3.5 text-[#157a6d]" />
+                          <span>Prescription Medicines & Care Products</span>
+                        </div>
+                        <div className="flex flex-col gap-1.5 mt-1.5">
+                          {results.products.map((prod) => {
+                            const flatItems = getFlatSelectableItems();
+                            const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.slug === prod.slug || i.value.id === prod.id || i.value._id === prod._id));
+                            const active = activeIndex === flatIndex;
+                            return (
+                              <RxProductListItem
+                                key={prod.id || prod._id}
+                                product={prod}
+                                active={active}
+                                onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                                onAddToCart={(p) => addToCart(p, 1)}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div 
       ref={containerRef} 
       className={`relative w-full ${isHero ? "max-w-2xl mx-auto" : ""}`}
     >
-      {/* SEARCH BAR CONTAINER */}
+      {/* SEARCH BAR CONTAINER (NAVBAR PRESCRIPTION THEMED) */}
       <div 
-        className={`flex items-center bg-white border border-slate-200 rounded-xl flex-row relative shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/10 transition-all duration-300 w-full ${
-          isHero ? "p-2 md:p-2.5" : "p-1 gap-2"
-        }`}
+        className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_4px_16px_rgba(23,43,38,0.06)] focus-within:border-[#157a6d] focus-within:ring-2 focus-within:ring-[#157a6d]/15 transition-all duration-300 w-full p-2 gap-3"
       >
-        {/* Center: Search input */}
-        <div className="flex-1 flex items-center relative gap-2 pl-2">
-          <Search className="text-slate-400 shrink-0" size={isHero ? 18 : 15} />
+        {/* Left: Rx Symbol */}
+        <div className="font-serif font-bold text-[#157a6d] text-2xl select-none pl-1 leading-none">
+          ℞
+        </div>
+
+        {/* Input */}
+        <div className="flex-1 flex items-center relative gap-2">
           <input
             ref={inputRef}
             type="text"
@@ -198,9 +374,8 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
-            className={`w-full bg-transparent border-none text-xs outline-none text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none p-0 font-semibold ${
-              isHero ? "text-sm" : ""
-            }`}
+            className="w-full bg-transparent border-none text-xs outline-none text-[#3f544d] placeholder:text-slate-400 focus:ring-0 focus:outline-none p-0 font-mono font-semibold"
+            style={{ outline: "none", border: "none", boxShadow: "none" }}
           />
           {query && (
             <button
@@ -210,14 +385,14 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                 setResults({});
                 setActiveIndex(-1);
               }}
-              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              className="p-1 hover:bg-[#e7dfc9]/40 rounded text-[#3f544d] transition-colors shrink-0"
               aria-label="Clear Search Input"
             >
               <X size={14} />
             </button>
           )}
           {loading && (
-            <Loader2 className="animate-spin text-[#038076] shrink-0" size={14} />
+            <Loader2 className="animate-spin text-[#157a6d] shrink-0" size={14} />
           )}
         </div>
 
@@ -225,61 +400,58 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         <button 
           type="button"
           onClick={handleSearchSubmit}
-          className={`bg-[#038076] text-white rounded-xl font-bold hover:bg-[#02665e] active:scale-[0.97] transition-all shrink-0 shadow-sm cursor-pointer ${
-            isHero ? "px-6 py-2.5 text-sm" : "px-4 py-2 text-xs"
-          }`}
+          className="bg-[#157a6d] hover:bg-[#0f6157] text-white font-mono font-bold text-xs letter-spacing-[1.5px] px-5 py-2 rounded-full uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer"
         >
-          Search
+          SEARCH
         </button>
       </div>
 
-      {/* DROPDOWN AUTOCOMPLETE PANEL */}
+      {/* DROPDOWN AUTOCOMPLETE PANEL (NAVBAR PRESCRIPTION THEMED) */}
       {focused && query.trim().length >= 2 && (
         <div 
           ref={dropdownRef}
-          className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-[250] overflow-y-auto max-h-[500px] md:max-h-[600px] animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
+          className="rx-dropdown-panel absolute left-0 right-0 top-full mt-2 z-[300] overflow-y-auto max-h-[350px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
         >
+          {/* Prescription Catalog Header Strip */}
+          <div className="rx-dropdown-header select-none">
+            <span>℞ WellMeds Catalog Matches</span>
+            <span className="opacity-75 font-normal text-[10px]">Specialty Care</span>
+          </div>
+
           {loading ? (
-            <div className="p-8 text-center flex items-center justify-center gap-2 select-none">
-              <Loader2 className="animate-spin text-[#038076] w-4 h-4" />
-              <span className="text-xs font-semibold text-slate-500">Searching catalog...</span>
+            <div className="p-6 text-center flex items-center justify-center gap-2 select-none">
+              <Loader2 className="animate-spin text-[#157a6d] w-4 h-4" />
+              <span className="text-xs font-semibold text-[#3f544d] font-mono">Searching catalog...</span>
             </div>
           ) : (
             <div className="flex flex-col text-left">
-              {/* NO RESULTS FALLBACK */}
               {!hasResults() ? (
-                <div className="p-8 text-center flex flex-col items-center justify-center gap-4">
-                  <div className="w-14 h-14 bg-slate-50 border border-slate-100 text-slate-400 rounded-full flex items-center justify-center shadow-inner">
-                    <Search size={22} />
+                <div className="rx-dropdown-empty">
+                  <div className="rx-empty-icon">
+                    <span>℞</span>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-700 text-sm">No products or molecules found.</h3>
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-2 w-full max-w-xs select-none">
-                    <button
-                      onClick={() => {
-                        setFocused(false);
-                        if (onCloseMobile) onCloseMobile();
-                        navigate("/products");
-                      }}
-                      className="w-full flex items-center justify-center gap-2 bg-[#038076] hover:bg-[#02665e] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer"
-                    >
-                      <span>View All Products</span>
-                    </button>
-                  </div>
+                  <h3>No specialty medicines found</h3>
+                  <p>No results matching "{query}". Check spelling or explore our complete catalog.</p>
+                  <button
+                    onClick={() => {
+                      setFocused(false);
+                      if (onCloseMobile) onCloseMobile();
+                      navigate("/products");
+                    }}
+                  >
+                    BROWSE ALL MEDICINES
+                  </button>
                 </div>
               ) : (
-                /* RESULTS GROUPS LIST: PRODUCTS FIRST, THEN MOLECULES */
-                <div className="p-2 md:p-3 space-y-4">
-                  
-                  {/* GROUP 1: MOLECULES */}
+                <div className="p-3 space-y-4">
+                  {/* MOLECULES */}
                   {results.molecules?.length > 0 && (
                     <div>
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5">
-                        <Search className="w-3.5 h-3.5 text-[#038076]" />
-                        <span>Molecules</span>
-                      </span>
-                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                      <div className="rx-section-title select-none">
+                        <Search className="w-3.5 h-3.5 text-[#157a6d]" />
+                        <span>Chemical Molecules & Composition</span>
+                      </div>
+                      <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-2">
                         {results.molecules.map((mol) => {
                           const flatItems = getFlatSelectableItems();
                           const flatIndex = flatItems.findIndex(i => i.type === "molecule" && i.value.slug === mol.slug);
@@ -289,48 +461,42 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                               key={mol.slug}
                               onClick={() => handleSelectItem({ type: "molecule", value: mol })}
                               data-active={active}
-                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all border duration-250 ${
-                                active 
-                                  ? "border-[#038076] bg-[#e6f6f4]/20 text-[#038076]" 
-                                  : "border-transparent text-slate-700 hover:text-[#038076] hover:bg-slate-50"
-                              }`}
+                              className="rx-molecule-badge group"
                             >
-                              <span className="text-xs font-bold">{mol.name}</span>
+                              <span>{mol.name}</span>
+                              <span className="rx-arrow text-[12px] font-bold ml-1.5 transition-colors">&rarr;</span>
                             </div>
                           );
                         })}
                       </div>
                     </div>
                   )}
-                  
-                  {/* GROUP 2: MEDICINES & PRODUCTS */}
+
+                  {/* MEDICINES & PRODUCTS */}
                   {results.products?.length > 0 && (
-                    <div className="border-b border-slate-50 pb-3">
-                      <span className="text-[10.5px] font-black uppercase text-slate-400 tracking-wider px-3 select-none flex items-center gap-1.5 mb-2">
-                        <ShoppingBag className="w-3.5 h-3.5 text-[#038076]" />
-                        <span>Medicines & Products</span>
-                      </span>
-                      <div className="flex flex-col gap-1">
+                    <div>
+                      <div className="rx-section-title select-none">
+                        <ShoppingBag className="w-3.5 h-3.5 text-[#157a6d]" />
+                        <span>Prescription Medicines & Care Products</span>
+                      </div>
+                      <div className="flex flex-col gap-1.5 mt-1.5">
                         {results.products.map((prod) => {
                           const flatItems = getFlatSelectableItems();
                           const flatIndex = flatItems.findIndex(i => i.type === "product" && (i.value.slug === prod.slug || i.value.id === prod.id || i.value._id === prod._id));
                           const active = activeIndex === flatIndex;
                           return (
-                            <ProductListItem
+                            <RxProductListItem
                               key={prod.id || prod._id}
                               product={prod}
                               active={active}
                               onSelect={() => handleSelectItem({ type: "product", value: prod })}
-                              onAddToCart={(p) => {
-                                addToCart(p, 1);
-                              }}
+                              onAddToCart={(p) => addToCart(p, 1)}
                             />
                           );
                         })}
                       </div>
                     </div>
                   )}
-
                 </div>
               )}
             </div>
@@ -438,6 +604,82 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
             <ShoppingBag className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Prescription styled product list item for Hero search
+const RxProductListItem = ({ product, onSelect, onAddToCart, active }) => {
+  const navigate = useNavigate();
+  const discount = product.originalPrice && product.originalPrice > product.price
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  const handleRowClick = (e) => {
+    if (e.target.closest("button")) return;
+    onSelect();
+    navigate(`/products/${product.slug || product._id || product.id}`);
+  };
+
+  return (
+    <div 
+      onClick={handleRowClick}
+      data-active={active}
+      className="rx-product-item select-none"
+    >
+      {/* Product Image */}
+      <div className="w-11 h-11 bg-white border border-[#dde8e3] rounded-lg flex items-center justify-center shrink-0 p-1">
+        <img 
+          src={product.image || DEFAULT_PRODUCT_IMAGE} 
+          alt={product.name} 
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = DEFAULT_PRODUCT_IMAGE;
+          }}
+          className="w-full h-full object-contain"
+        />
+      </div>
+
+      {/* Info */}
+      <div className="flex-grow min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="product-title truncate">
+            {product.name}
+          </span>
+          {product.requiresRx && (
+            <span className="rx-tag">Rx</span>
+          )}
+        </div>
+        <p className="product-subtitle truncate">
+          {product.strength && <span>{product.strength}</span>}
+          {product.strength && product.packSize && <span> &bull; </span>}
+          {product.packSize && <span>{product.packSize}</span>}
+          {product.manufacturer && <span> &bull; {product.manufacturer}</span>}
+        </p>
+      </div>
+
+      {/* Price & Action */}
+      <div className="flex items-center gap-3 shrink-0 ml-2">
+        <div className="text-right">
+          <div className="price-tag">₹{product.price}</div>
+          {discount > 0 && (
+            <span className="text-[10px] text-[#157a6d] font-bold">-{discount}%</span>
+          )}
+        </div>
+        <button
+          type="button"
+          disabled={!(product.stock > 0 && product.inStock !== false)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAddToCart(product);
+          }}
+          className="add-btn disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Add to cart"
+        >
+          Add
+        </button>
       </div>
     </div>
   );
