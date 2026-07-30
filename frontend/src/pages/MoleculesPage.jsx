@@ -192,48 +192,52 @@ const MoleculesPage = () => {
 };
 
 /* ─── Molecule Card ─────────────────────────────────────────────────────── */
-const MoleculeCard = ({ mol, navigate }) => (
-  <button
-    type="button"
-    onClick={() => navigate(`/molecules/${mol.slug}`)}
-    className="group bg-white hover:bg-[#f4f9f7] transition-colors text-left p-6 w-full flex flex-col gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#157a6d] focus-visible:z-10 relative cursor-pointer"
-    aria-label={`View details for ${mol.name}`}
-  >
-    {/* Category eyebrow */}
-    {mol.category && (
-      <span
-        className="text-xs font-mono font-bold uppercase tracking-[2px] text-[#b08d3e]"
-      >
-        {mol.category}
-      </span>
-    )}
+const MoleculeCard = ({ mol, navigate }) => {
+  const formattedName = mol.name ? mol.name.replace(/,/g, ", ") : "";
 
-    {/* Name */}
-    <h3
-      className="text-base sm:text-lg font-bold text-black group-hover:text-[#157a6d] transition-colors leading-snug"
-      style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(`/molecules/${mol.slug}`)}
+      className="group bg-white hover:bg-[#f4f9f7] transition-colors text-left p-6 w-full flex flex-col gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#157a6d] focus-visible:z-10 relative cursor-pointer overflow-hidden"
+      aria-label={`View details for ${mol.name}`}
     >
-      {mol.name}
-    </h3>
+      {/* Category eyebrow */}
+      {mol.category && (
+        <span
+          className="text-xs font-mono font-bold uppercase tracking-[2px] text-[#b08d3e]"
+        >
+          {mol.category}
+        </span>
+      )}
 
-    {/* Short description */}
-    {mol.shortDescription && (
-      <p className="text-xs font-mono text-black font-medium line-clamp-2 leading-relaxed">
-        {mol.shortDescription}
-      </p>
-    )}
+      {/* Name */}
+      <h3
+        className="text-base sm:text-lg font-bold text-black group-hover:text-[#157a6d] transition-colors leading-snug break-words [word-break:break-word] w-full"
+        style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+      >
+        {formattedName}
+      </h3>
 
-    {/* Footer row */}
-    <div className="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-[#dde8e3]">
-      <span className="text-xs font-mono text-black font-bold uppercase tracking-widest group-hover:text-[#157a6d] transition-colors">
-        View monograph
-      </span>
-      <ArrowRight
-        size={14}
-        className="text-black group-hover:text-[#157a6d] group-hover:translate-x-1 transition-all"
-      />
-    </div>
-  </button>
-);
+      {/* Short description */}
+      {mol.shortDescription && (
+        <p className="text-xs font-mono text-black font-medium line-clamp-2 leading-relaxed break-words">
+          {mol.shortDescription}
+        </p>
+      )}
+
+      {/* Footer row */}
+      <div className="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-[#dde8e3] w-full">
+        <span className="text-xs font-mono text-black font-bold uppercase tracking-widest group-hover:text-[#157a6d] transition-colors">
+          View monograph
+        </span>
+        <ArrowRight
+          size={14}
+          className="text-black group-hover:text-[#157a6d] group-hover:translate-x-1 transition-all shrink-0"
+        />
+      </div>
+    </button>
+  );
+};
 
 export default MoleculesPage;
