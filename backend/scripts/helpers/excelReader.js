@@ -6,13 +6,17 @@ export const readExcelFile = (customPath) => {
   let filePath = customPath;
   if (!filePath) {
     const possiblePaths = [
+      path.resolve("scripts/data/WellMeds MOLECULES PART 1.xlsx"),
+      path.resolve("scripts/data/wellmeds-molecules-part1.xlsx"),
       path.resolve("scripts/data/wellmeds-molecules.xlsx"),
       path.resolve("scripts/data/wellmeds molecules list.xlsx"),
+      path.resolve("backend/scripts/data/WellMeds MOLECULES PART 1.xlsx"),
+      path.resolve("backend/scripts/data/wellmeds-molecules-part1.xlsx"),
       path.resolve("backend/scripts/data/wellmeds-molecules.xlsx"),
       path.resolve("backend/scripts/data/wellmeds molecules list.xlsx"),
+      path.resolve("../scripts/data/WellMeds MOLECULES PART 1.xlsx"),
       path.resolve("../scripts/data/wellmeds-molecules.xlsx"),
       path.resolve("../scripts/data/wellmeds molecules list.xlsx"),
-      path.resolve("backend/scripts/data/wellmeds-molecules.xlsx"),
     ];
     for (const p of possiblePaths) {
       if (fs.existsSync(p)) {

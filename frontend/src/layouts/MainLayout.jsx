@@ -30,6 +30,9 @@ const MainLayout = () => {
     // product details pages: matches "/products/:slug" (but not exactly "/products")
     if (pathname.startsWith("/products/") && pathname !== "/products") return true;
 
+    // molecule detail pages
+    if (pathname.startsWith("/molecules/") || pathname.startsWith("/molecule/")) return true;
+
     // library / blog pages
     if (pathname.startsWith("/library") || pathname.startsWith("/blog")) return true;
 

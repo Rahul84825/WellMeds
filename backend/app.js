@@ -26,7 +26,7 @@ import megaMenuRoutes from "./src/routes/megaMenuRoutes.js";
 import contactRoutes from "./src/routes/contactRoutes.js";
 
 const app = express();
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
 
 // Mount Response Gzip Compression Middleware (Before Routes)
 app.use(responseCompressor);

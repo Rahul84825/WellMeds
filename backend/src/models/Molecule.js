@@ -67,6 +67,8 @@ const moleculeSchema = new mongoose.Schema(
       seoKeywords: { type: [String], default: [] },
       openGraphTitle: { type: String, default: "" },
       openGraphDescription: { type: String, default: "" },
+      twitterTitle: { type: String, default: "" },
+      twitterDescription: { type: String, default: "" },
       searchTags: { type: [String], default: [] }
     },
     isActive: {
@@ -89,6 +91,10 @@ const moleculeSchema = new mongoose.Schema(
     references: {
       type: [String],
       default: []
+    },
+    relatedMoleculesText: {
+      type: String,
+      default: "",
     },
     relatedMolecules: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Molecule" }],

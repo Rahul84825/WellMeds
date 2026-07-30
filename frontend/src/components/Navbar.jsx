@@ -154,14 +154,14 @@ const Navbar = () => {
 
           // 3. Unified Header State Machine Thresholds:
           // Near top (<= 80px): Strictly visible in initial position
-          // Scroll DOWN (delta > 30px & scrollY > 150px): Unified translate up by 54px
-          // Scroll UP (delta < -25px): Unified translate down back to 0
+          // Scroll DOWN (delta > 40px & scrollY > 200px): Hide lower navbar
+          // Scroll UP (delta < -50px): Reveal lower navbar (requires intentional scroll up)
           let nextNavVisible = isNavVisibleRef.current;
           if (currentScrollY <= 80) {
             nextNavVisible = true;
-          } else if (delta < -25) {
+          } else if (delta < -50) {
             nextNavVisible = true;
-          } else if (delta > 30 && currentScrollY > 150) {
+          } else if (delta > 40 && currentScrollY > 200) {
             nextNavVisible = false;
           }
 
@@ -622,8 +622,8 @@ const Navbar = () => {
       {/* ROW 2: Primary Bottom Navigation Bar (Desktop Only - GPU Slide Behind Stationary Upper Row) */}
       <div
         style={{
-          willChange: "transform, opacity, max-height",
-          transition: "transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out, max-height 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+          willChange: "transform, opacity",
+          transition: "transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out",
         }}
         className={`hidden lg:flex items-center justify-center z-20 relative w-full border-slate-200/60 dark:border-zinc-800/60 transform-gpu ${
           isNavVisible

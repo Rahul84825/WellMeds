@@ -744,18 +744,18 @@ const ProductDetails = () => {
 
   // Desktop View
   return (
-    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 px-4 md:px-10 animate-[fade-in_0.3s_ease-out] text-left">
-      <div className="max-w-[1440px] mx-auto space-y-6">
+    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black animate-[fade-in_0.3s_ease-out] text-left" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 space-y-6">
 
         {/* Breadcrumbs */}
-        <nav className="text-xs font-mono font-semibold text-[#5f776e] flex items-center gap-2 flex-wrap select-none mb-4">
+        <nav className="text-xs font-mono font-bold text-black flex items-center gap-2 flex-wrap select-none mb-4">
           <Link to="/" className="hover:text-[#157a6d] transition-colors">Home</Link>
-          <span>/</span>
+          <span className="text-[#888888]">/</span>
           <Link to="/products" className="hover:text-[#157a6d] transition-colors">Products</Link>
-          <span>/</span>
+          <span className="text-[#888888]">/</span>
           <Link to="/products" className="hover:text-[#157a6d] transition-colors">{product.category?.name || product.category}</Link>
-          <span>/</span>
-          <span className="text-[#172b26] font-bold truncate max-w-xs">{product.name}</span>
+          <span className="text-[#888888]">/</span>
+          <span className="text-[#157a6d] font-extrabold truncate max-w-xs">{product.name}</span>
         </nav>
 
         {/* 2-COLUMN ROOT LAYOUT: LEFT SIDEBAR & RIGHT CONTAINER */}

@@ -1,7 +1,7 @@
-# WellMeds – Import Utilities
+# WellMeds – Import & Enrichment Utilities
 
-Two production-grade import utilities for safely inserting data into MongoDB from Excel files.
-Both utilities are **ADD ONLY** — they never delete, update, overwrite, or modify existing documents.
+Three production-grade utilities for safely managing Molecule and Product data in MongoDB from Excel files.
+All utilities are **non-destructive** — they never drop, truncate, or remove existing documents.
 
 ---
 
@@ -53,7 +53,62 @@ Place the file at `backend/scripts/data/wellmeds-molecules.xlsx`.
 
 ---
 
-## 2 — Product Import Utility  (ADD ONLY)
+## 2 — Molecule Enrichment Utility  (NON-DESTRUCTIVE MERGE)
+
+### Purpose
+- Merges additional molecule content from an Excel file into **existing** MongoDB documents.
+- Never deletes, drops, recreates, or duplicates any molecule.
+- Existing `_id`, `slug`, `category`, `createdAt`, `relatedMolecules` are **always preserved**.
+- Blank Excel cells are silently skipped — existing DB values are never overwritten with empty.
+- Inserts genuinely new molecules (not found in DB) as brand-new documents.
+
+### How to Run
+```bash
+# From backend/ directory
+npm run enrich:molecules
+
+# Or directly
+node scripts/enrichMolecules.js
+```
+
+### Excel File
+Place the file at `backend/scripts/data/WellMeds MOLECULES PART 1.xlsx`.
+
+### Column Mapping
+
+| Excel Column                                  | Molecule Field            | Behaviour               |
+|-----------------------------------------------|---------------------------|-------------------------|
+| `Generic Name` / `Name` / `Molecule Name`     | `name` (match key)        | Required for every row  |
+| `Description` / `Introduction`                | `description`             | Set if non-empty        |
+| `Short Description`                           | `shortDescription`        | Set if non-empty        |
+| `Uses`                                        | `uses`                    | Set if non-empty        |
+| `Benefits`                                    | `benefits`                | Set if non-empty        |
+| `How It Works` / `Mechanism`                  | `howItWorks`              | Set if non-empty        |
+| `Dosage` / `Dosage & Administration`          | `dosage`                  | Set if non-empty        |
+| `Side Effects` / `Common Side Effects`        | `sideEffects`             | Set if non-empty        |
+| `Warnings`                                    | `warnings`                | Set if non-empty        |
+| `Precautions`                                 | `precautions`             | Set if non-empty        |
+| `Storage`                                     | `storage`                 | Set if non-empty        |
+| `Aliases` / `Other Names`                     | `aliases[]`               | Append-unique           |
+| `FAQs` / `Patient FAQs`                       | `faqs[]`                  | Set only if DB is empty |
+| `References` / `Medical References`           | `references[]`            | Append-unique           |
+| `Meta Title` / `SEO Title`                    | `seo.metaTitle`           | Set if non-empty        |
+| `Meta Description`                            | `seo.metaDescription`     | Set if non-empty        |
+| `Focus Keyword`                               | `seo.focusKeyword`        | Set if non-empty        |
+| `OG Title` / `Open Graph Title`               | `seo.openGraphTitle`      | Set if non-empty        |
+| `OG Description`                              | `seo.openGraphDescription`| Set if non-empty        |
+| `Search Tags`                                 | `seo.searchTags[]`        | Set if non-empty        |
+| `SEO Keywords` / `Keywords`                   | `seo.seoKeywords[]`       | Set if non-empty        |
+
+### Safety Guarantees
+- **NO** `deleteMany`, `deleteOne`, `drop`, `remove`, `truncate`, `findOneAndReplace`, or `replaceOne` calls.
+- `_id`, `slug`, `letter`, `createdAt`, and `relatedMolecules` are **never patched** on existing documents.
+- A pre/post import count check confirms no documents were deleted.
+- Per-row audit log shows exactly which fields were updated or skipped.
+
+---
+
+## 3 — Product Import Utility  (ADD ONLY)
 
 ### Purpose
 - Bulk import products from a client-supplied Excel template.

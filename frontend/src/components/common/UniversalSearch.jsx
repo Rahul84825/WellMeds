@@ -141,7 +141,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     if (onCloseMobile) onCloseMobile();
 
     if (item.type === "molecule") {
-      navigate(`/products?molecule=${encodeURIComponent(item.value.slug || item.value.name)}`);
+      navigate(`/molecules/${encodeURIComponent(item.value.slug || item.value.name)}`);
     } else if (item.type === "product") {
       // Track recently viewed product locally for the details page carousel
       let viewed = JSON.parse(localStorage.getItem("wellmeds_recently_viewed") || "[]");

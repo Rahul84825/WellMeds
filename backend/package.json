@@ -12,7 +12,8 @@
     "seed:product-info": "node src/seeds/seedProductInformation.js",
     "import:molecules": "node scripts/importMolecules.js",
     "import:products": "node scripts/importProducts.js",
-    "replace:molecules": "node scripts/replaceMolecules.js"
+    "replace:molecules": "node scripts/replaceMolecules.js",
+    "enrich:molecules": "node scripts/enrichMolecules.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

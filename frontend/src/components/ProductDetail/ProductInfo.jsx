@@ -17,27 +17,30 @@ const ProductAttributeIcon = ({ type }) => {
 
 const ProductInfo = ({ product, handleShare }) => {
   return (
-    <div className="space-y-4 text-left flex-1 flex flex-col justify-start h-full">
+    <div className="space-y-4 text-left flex-1 flex flex-col justify-start h-full text-black" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
       {/* Eyebrow / Category Specialty Tag */}
-      <div className="flex items-center gap-2">
-        <span className="pdp-rx-badge">
-          {product.category?.name || "Specialty Medicine"}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="text-xs font-mono font-bold uppercase tracking-[2.5px] text-[#b08d3e]">
+          {product.category?.name || product.category || "Specialty Medicine"}
         </span>
         {product.requiresRx && (
-          <span className="bg-[#157a6d] text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
-            Prescription Required
+          <span className="inline-flex items-center gap-1.5 border border-[#157a6d] rounded-sm px-2.5 py-0.5 text-xs font-mono font-bold uppercase tracking-widest text-[#157a6d]">
+            <span className="font-serif font-black">℞</span> Prescription Required
           </span>
         )}
       </div>
 
       {/* Product Name & Share Button Row */}
       <div className="flex justify-between items-start gap-4">
-        <h1 className="pdp-serif-title text-2xl md:text-3xl text-[#0f172a] leading-snug font-bold">
+        <h1
+          className="text-3xl sm:text-4xl font-bold text-black leading-tight"
+          style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+        >
           {product.name}
         </h1>
         <button
           onClick={handleShare}
-          className="p-2.5 text-[#334155] hover:text-[#157a6d] hover:bg-[#f0f8f5] rounded-full border border-[#dde8e3] transition-all cursor-pointer shrink-0 shadow-2xs"
+          className="p-2.5 text-black hover:text-[#157a6d] hover:bg-[#f4f9f7] rounded-sm border border-[#c3d4cc] transition-all cursor-pointer shrink-0 shadow-2xs"
           title="Share Product"
           aria-label="Share Product"
         >
@@ -48,16 +51,16 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Attribute Badges */}
       <div className="flex flex-wrap gap-3 items-center font-mono text-xs">
         {product.requiresRx ? (
-          <span className="text-[#0f172a] font-semibold flex items-center gap-2 bg-[#f4f8f6] px-3 py-1.5 rounded-lg border border-[#c3d4cc]">
+          <span className="text-black font-bold flex items-center gap-2 bg-[#f4f9f7] px-3 py-1.5 rounded-sm border border-[#c3d4cc]">
             <ProductAttributeIcon type="rx" /> Rx Required
           </span>
         ) : (
-          <span className="text-[#0f172a] font-semibold flex items-center gap-2 bg-[#f4f8f6] px-3 py-1.5 rounded-lg border border-[#c3d4cc]">
+          <span className="text-black font-bold flex items-center gap-2 bg-[#f4f9f7] px-3 py-1.5 rounded-sm border border-[#c3d4cc]">
             <ProductAttributeIcon type="otc" /> OTC Medicine
           </span>
         )}
         {product.isColdChain && (
-          <span className="text-sky-800 font-semibold flex items-center gap-2 bg-sky-50 px-3 py-1.5 rounded-lg border border-sky-200">
+          <span className="text-sky-900 font-bold flex items-center gap-2 bg-sky-50 px-3 py-1.5 rounded-sm border border-sky-200">
             <ProductAttributeIcon type="coldChain" /> Cold Chain Storage
           </span>
         )}
@@ -66,27 +69,27 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Salt Composition */}
       {product.molecules && product.molecules.length > 0 && (
         <div className="pt-3.5 border-t border-dashed border-[#c3d4cc] mt-1">
-          <span className="block font-mono text-xs font-bold text-[#334155] uppercase tracking-wider mb-2 flex items-center gap-1.5 select-none">
+          <span className="block font-mono text-xs font-bold text-black uppercase tracking-wider mb-2 flex items-center gap-1.5 select-none">
             <span className="material-symbols-outlined text-[15px] leading-none text-[#157a6d]">science</span> Active Molecule Composition
           </span>
-          <div className="flex flex-wrap items-center font-mono text-sm break-words max-w-full gap-y-1">
+          <div className="flex flex-wrap items-center font-mono text-sm font-bold text-black break-words max-w-full gap-y-1">
             {product.molecules.map((mol, idx) => (
               <Fragment key={mol.slug || idx}>
                 <MoleculeLink molecule={mol} />
-                {idx < product.molecules.length - 1 && <span className="text-[#334155] mr-2">,&nbsp;</span>}
+                {idx < product.molecules.length - 1 && <span className="text-black mr-2">,&nbsp;</span>}
               </Fragment>
             ))}
           </div>
         </div>
       )}
 
-      {/* Manufacturer Prescription Stamp */}
+      {/* Manufacturer Stamp */}
       {(product.manufacturer || product.brand) && (
         <div className="pt-3.5 border-t border-dashed border-[#c3d4cc] mt-1">
-          <span className="block font-mono text-[11px] font-bold text-[#334155] uppercase tracking-widest mb-1 select-none">
+          <span className="block font-mono text-[11px] font-bold text-black uppercase tracking-widest mb-1 select-none">
             Manufactured / Marketed By
           </span>
-          <p className="font-mono text-sm font-black text-[#157a6d] uppercase tracking-wider">
+          <p className="font-mono text-sm font-extrabold text-[#157a6d] uppercase tracking-wider">
             {product.manufacturer || product.brand}
           </p>
         </div>
@@ -95,12 +98,12 @@ const ProductInfo = ({ product, handleShare }) => {
       {/* Policy Notice */}
       {(product.prepaidOnly || product.isNonRefundable) && (
         <div className="pt-3 border-t border-dashed border-[#c3d4cc] mt-1">
-          <p className="font-mono text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 inline-block">
+          <p className="font-mono text-xs font-bold text-amber-900 bg-amber-50 px-3 py-1.5 rounded-sm border border-amber-300 inline-block">
             {product.prepaidOnly && product.isNonRefundable
               ? "Prepaid Only · Non-Returnable Medicine"
               : product.prepaidOnly
               ? "Prepaid Orders Only"
-              : "Non-Returnable Medical Product"}
+              : "Non-Returnable Medicine"}
           </p>
         </div>
       )}

@@ -52,7 +52,7 @@ const PurchaseCard = ({
   };
 
   return (
-    <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24 font-mono">
+    <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24 font-mono text-black">
       {/* Main Prescription Purchase Card */}
       <div className="pdp-paper-card p-5 space-y-4 text-left">
         {/* 1. Price Section */}
@@ -62,15 +62,15 @@ const PurchaseCard = ({
               {formatCurrency(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-[#5f776e] line-through text-xs font-semibold">
+              <span className="text-black line-through text-xs font-bold">
                 MRP {formatCurrency(product.originalPrice)}
               </span>
             )}
           </div>
-          <div className="flex justify-between items-center text-[11px] font-mono">
-            <span className="text-[#5f776e]">Inclusive of all taxes & GST</span>
+          <div className="flex justify-between items-center text-[11px] font-mono font-bold">
+            <span className="text-black">Inclusive of all taxes & GST</span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-[#157a6d] font-extrabold bg-[#f0f8f5] px-2 py-0.5 rounded">
+              <span className="text-[#157a6d] font-extrabold bg-[#f4f9f7] px-2 py-0.5 rounded-sm border border-[#dde8e3]">
                 SAVE {discountPercent}%
               </span>
             )}
@@ -83,7 +83,7 @@ const PurchaseCard = ({
         {/* 2. Choose Pack Size (Variants Selector) */}
         {variants.length > 0 && (
           <div className="space-y-2 text-left">
-            <span className="block text-[10px] font-bold text-[#5f776e] uppercase tracking-wider">Select Packaging Option</span>
+            <span className="block text-[10px] font-bold text-black uppercase tracking-wider">Select Packaging Option</span>
             <div className="grid grid-cols-2 gap-2">
               {variants.map((v, idx) => {
                 const isSelected = selectedVariantIdx === idx;
@@ -92,14 +92,14 @@ const PurchaseCard = ({
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVariantIdx(idx)}
-                    className={`w-full rounded-xl border text-left cursor-pointer transition-all flex flex-col overflow-hidden ${
+                    className={`w-full rounded-sm border text-left cursor-pointer transition-all flex flex-col overflow-hidden ${
                       isSelected
-                        ? "border-[#157a6d] bg-[#f0f8f5] ring-1 ring-[#157a6d]"
+                        ? "border-[#157a6d] bg-[#f4f9f7] ring-1 ring-[#157a6d]"
                         : "border-[#dde8e3] hover:border-[#c3d4cc] bg-white"
                     }`}
                   >
                     <div className="p-2.5 flex justify-between items-center border-b border-[#dde8e3] w-full">
-                      <span className="font-bold text-xs text-[#172b26] truncate max-w-[80%]">
+                      <span className="font-bold text-xs text-black truncate max-w-[80%]">
                         {v.name}
                       </span>
                       {isSelected ? (
@@ -111,7 +111,7 @@ const PurchaseCard = ({
                       )}
                     </div>
                     <div className="p-2.5 text-left w-full">
-                      <span className="font-medium text-[11px] text-[#5f776e]">
+                      <span className="font-bold text-[11px] text-black">
                         {formatCurrency(v.price)}/Unit
                       </span>
                     </div>
@@ -123,7 +123,7 @@ const PurchaseCard = ({
         )}
 
         {/* 3. Pack Description */}
-        <div className="text-center font-bold text-[#3f544d] uppercase tracking-wider text-[11px] py-1 bg-[#f4f8f6] rounded-md border border-[#dde8e3]">
+        <div className="text-center font-bold text-black uppercase tracking-wider text-[11px] py-1 bg-[#f4f9f7] rounded-sm border border-[#dde8e3]">
           {packDescription}
         </div>
 
@@ -134,30 +134,30 @@ const PurchaseCard = ({
               {/* Go To Cart ↗ */}
               <button
                 onClick={handleGoToCart}
-                className="pdp-btn-primary w-full h-11"
+                className="pdp-btn-primary w-full h-11 text-xs tracking-widest font-bold uppercase rounded-sm"
               >
                 Go To Cart <span className="text-sm font-semibold">↗</span>
               </button>
 
               {/* Quantity selector */}
-              <div className="flex items-center justify-center bg-[#f4f8f6] h-11 w-full rounded-xl p-1 gap-6 border border-[#dde8e3] animate-[fade-in_0.20s_ease-out]">
+              <div className="flex items-center justify-center bg-[#f4f9f7] h-11 w-full rounded-sm p-1 gap-6 border border-[#dde8e3] animate-[fade-in_0.20s_ease-out]">
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity - 1)}
-                  className="w-8 h-8 rounded-full bg-white border border-[#c3d4cc] flex items-center justify-center text-[#172b26] hover:bg-[#f0f8f5] cursor-pointer shadow-2xs transition-colors"
+                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold"
                 >
-                  <span className="material-symbols-outlined text-[16px] leading-none">remove</span>
+                  -
                 </button>
-                <span className="w-8 h-8 rounded-full bg-[#157a6d] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                <span className="w-8 h-8 rounded-sm bg-[#157a6d] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
                   {cartItem.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity + 1)}
                   disabled={cartItem.quantity >= (product.stock || 30)}
-                  className="w-8 h-8 rounded-full bg-white border border-[#c3d4cc] flex items-center justify-center text-[#172b26] hover:bg-[#f0f8f5] cursor-pointer shadow-2xs transition-colors"
+                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold"
                 >
-                  <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                  +
                 </button>
               </div>
             </>
@@ -186,34 +186,17 @@ const PurchaseCard = ({
       </div>
 
       {/* 6. Fulfillment / Delivery Summary Card */}
-      <div className="pdp-paper-card p-3.5 rounded-xl flex items-center gap-3 w-full mt-3 text-xs text-left">
-        <div className="w-9 h-9 rounded-full bg-[#f0f8f5] border border-[#c3d4cc] flex items-center justify-center shrink-0 text-[#157a6d]">
+      <div className="pdp-paper-card p-3.5 rounded-sm flex items-center gap-3 w-full mt-3 text-xs text-left">
+        <div className="w-9 h-9 rounded-sm bg-[#f4f9f7] border border-[#c3d4cc] flex items-center justify-center shrink-0 text-[#157a6d]">
           <Calendar size={18} />
         </div>
-        <div className="space-y-0.5 font-mono">
-          <p className="text-[#5f776e] font-medium">
-            Delivering to: <span className="text-[#172b26] font-bold">Pune, 411035</span>
-            <span className="inline-block align-middle ml-1 text-[#5f776e] text-[10px]">▼</span>
+        <div className="space-y-0.5 font-mono text-black font-bold">
+          <p className="text-black font-bold">
+            Delivering to: <span className="text-[#157a6d] font-bold">Pune, 411035</span>
           </p>
-          <p className="text-[#5f776e] font-medium">
+          <p className="text-black font-bold">
             Estimated Delivery: <span className="text-[#157a6d] font-bold">3 - 4 Business Days</span>
           </p>
-        </div>
-      </div>
-
-      {/* 7. Prescription Trust Guarantees */}
-      <div className="flex justify-around items-center gap-2 pt-3 text-[10px] font-bold text-[#5f776e] w-full px-1">
-        <div className="flex items-center gap-1">
-          <Check size={12} className="text-[#157a6d] shrink-0" />
-          <span>100% Genuine</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Lock size={11} className="text-[#157a6d] shrink-0" />
-          <span>Licensed Rx</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <ShieldCheck size={12} className="text-[#157a6d] shrink-0" />
-          <span>Cold Chain</span>
         </div>
       </div>
     </aside>
