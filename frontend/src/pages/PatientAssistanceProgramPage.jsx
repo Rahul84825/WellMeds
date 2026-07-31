@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import papHeroBg from "../assets/PAP/PAP_.png";
+import SEO from "../components/common/SEO";
 
 const PatientAssistanceProgramPage = () => {
   const [activeFaq, setActiveFaq] = useState(null);
   const { hash } = useLocation();
 
   useEffect(() => {
-    document.title = "Patient Assistance Program (PAP) | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Access manufacturer-backed subsidies for high-cost specialty therapies through the Patient Assistance Program.");
-
     if (hash) {
       const element = document.getElementById(hash.replace("#", ""));
       if (element) {
@@ -98,8 +90,19 @@ const PatientAssistanceProgramPage = () => {
     }
   ];
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Patient Assistance Program", url: "/patient-assistance-program" },
+  ];
+
   return (
     <div className="bg-background text-on-surface min-h-screen text-left">
+      <SEO
+        title="Patient Assistance Program (PAP) | WellMeds Subsidized Healthcare"
+        description="Access manufacturer-backed subsidies and co-pay support for high-cost specialty therapies through WellMeds Patient Assistance Program."
+        canonical="/patient-assistance-program"
+        breadcrumbs={breadcrumbs}
+      />
       {/* Hero Section */}
       <section 
         className="py-xxl md:py-3xl relative overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-300"

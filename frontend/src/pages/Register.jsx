@@ -107,7 +107,7 @@ const Register = () => {
     try {
       const loggedUser = await loginWithGoogle(credential);
       setSuccessMessage("Registration successful! Redirecting...");
-      
+
       setTimeout(() => {
         if (loggedUser.role === "admin") {
           navigate("/admin");
@@ -118,7 +118,7 @@ const Register = () => {
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         "Google Sign-Up failed. Please check your account and try again."
       );
     } finally {
@@ -166,7 +166,7 @@ const Register = () => {
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         "Registration failed. Please check your details and try again."
       );
     } finally {
@@ -179,7 +179,7 @@ const Register = () => {
       <div className="absolute inset-0 medical-pattern"></div>
 
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-left">
-        
+
         {/* Brand Header */}
         <div className="text-center space-y-sm mb-lg">
           <div className="inline-flex p-sm rounded-full bg-primary/10 text-primary mb-xs">

@@ -125,6 +125,7 @@ const generatePagesSitemap = (siteUrl) => {
   const pages = [
     { url: "/", priority: "1.0", changefreq: "daily" },
     { url: "/categories", priority: "0.9", changefreq: "daily" },
+    { url: "/brands", priority: "0.9", changefreq: "daily" },
     { url: "/super-speciality", priority: "0.8", changefreq: "weekly" },
     { url: "/molecules", priority: "0.8", changefreq: "weekly" },
     { url: "/wellness", priority: "0.8", changefreq: "weekly" },
@@ -245,12 +246,48 @@ const generateSurgicalSitemap = async (siteUrl) => {
   return wrapUrlSet(urlNodes);
 };
 
+const generateBrandsSitemap = async (siteUrl) => {
+  const cleanSiteUrl = siteUrl.replace(/\/$/, "");
+  let brands = [];
+  try {
+    const products = await Product.find({
+      isDeleted: { $ne: true },
+      status: { $ne: "Disabled" },
+      visibility: { $ne: "Hidden" },
+    }).select("brand manufacturer updatedAt createdAt").lean();
+
+    const brandMap = new Map();
+    products.forEach((p) => {
+      let brandName = "";
+      if (typeof p.brand === "string" && p.brand.trim()) brandName = p.brand.trim();
+      else if (p.brand && typeof p.brand === "object" && p.brand.name) brandName = p.brand.name.trim();
+      else if (typeof p.manufacturer === "string" && p.manufacturer.trim()) brandName = p.manufacturer.trim();
+      
+      if (brandName) {
+        const slug = brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        if (slug && !brandMap.has(slug)) {
+          brandMap.set(slug, { name: brandName, slug, lastmod: p.updatedAt || p.createdAt });
+        }
+      }
+    });
+    brands = Array.from(brandMap.values());
+  } catch (err) {}
+
+  let urlNodes = "";
+  urlNodes += buildUrlNode({ loc: `${cleanSiteUrl}/brands`, lastmod: new Date(), changefreq: "daily", priority: 0.9 });
+  brands.forEach((b) => {
+    urlNodes += buildUrlNode({ loc: `${cleanSiteUrl}/brands/${b.slug}`, lastmod: b.lastmod, changefreq: "weekly", priority: 0.8 });
+  });
+  return wrapUrlSet(urlNodes);
+};
+
 const generateSitemapIndex = async (siteUrl) => {
   const cleanSiteUrl = siteUrl.replace(/\/$/, "");
   const sitemaps = [
     { loc: `${cleanSiteUrl}/sitemap-pages.xml`, lastmod: new Date() },
     { loc: `${cleanSiteUrl}/sitemap-products.xml`, lastmod: new Date() },
     { loc: `${cleanSiteUrl}/sitemap-categories.xml`, lastmod: new Date() },
+    { loc: `${cleanSiteUrl}/sitemap-brands.xml`, lastmod: new Date() },
     { loc: `${cleanSiteUrl}/sitemap-molecules.xml`, lastmod: new Date() },
     { loc: `${cleanSiteUrl}/sitemap-specialities.xml`, lastmod: new Date() },
     { loc: `${cleanSiteUrl}/sitemap-surgical.xml`, lastmod: new Date() },
@@ -329,6 +366,9 @@ export default async function handler(req, res) {
   }
   if (pathname === "/sitemap-categories.xml" || pathname === "/api/sitemap-categories.xml") {
     return sendXml(await generateCategoriesSitemap(siteUrl));
+  }
+  if (pathname === "/sitemap-brands.xml" || pathname === "/api/sitemap-brands.xml") {
+    return sendXml(await generateBrandsSitemap(siteUrl));
   }
   if (pathname === "/sitemap-molecules.xml" || pathname === "/api/sitemap-molecules.xml") {
     return sendXml(await generateMoleculesSitemap(siteUrl));

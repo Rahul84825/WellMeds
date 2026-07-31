@@ -10,10 +10,15 @@ import LoginRequiredModal from "../components/LoginRequiredModal";
 import { 
   UploadCloud, CheckCircle2, ClipboardList, Stethoscope, Clock, 
   ArrowLeft, Tag, Info, ArrowRight, ShieldCheck, Lock, Trash2, 
-  RefreshCcw, AlertTriangle, AlertCircle
+  RefreshCcw, AlertTriangle, AlertCircle, MapPin, Navigation, Compass
 } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
 import { toast } from "sonner";
+import { useAddress } from "../context/AddressContext";
+import UniversalAddressForm from "../components/address/UniversalAddressForm";
+import AddressCard from "../components/address/AddressCard";
+import AddressSelectorModal from "../components/address/AddressSelectorModal";
+
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -68,15 +73,47 @@ const Checkout = () => {
     }
   }, [user, cartItems, navigate, clearCart]);
 
-  // Form states
-  const [fullName, setFullName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [pincode, setPincode] = useState("");
+  const {
+    addresses,
+    selectedAddress,
+    selectedAddressId,
+    addAddress,
+    selectAddress,
+    loading: addressLoading,
+  } = useAddress();
 
-  // Rx prescription uploads
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  // Dynamic Shipping calculation
+  const [dynamicShipping, setDynamicShipping] = useState(0);
+  const [shippingMsg, setShippingMsg] = useState("");
+
+  useEffect(() => {
+    const calcShipping = async () => {
+      if (selectedAddress) {
+        try {
+          const res = await api.calculateDeliveryFee({
+            subtotal,
+            pincode: selectedAddress.pincode,
+            state: selectedAddress.state,
+          });
+          setDynamicShipping(res.charge);
+          setShippingMsg(res.message);
+        } catch (e) {
+          setDynamicShipping(subtotal >= 500 ? 0 : 50);
+        }
+      } else {
+        setDynamicShipping(subtotal >= 500 ? 0 : 50);
+      }
+    };
+    calcShipping();
+  }, [subtotal, selectedAddress]);
+
+  // Derived totals with coupon
+  const discountAmount = couponDiscount;
+  const activeShipping = couponApplied?.freeDelivery ? 0 : dynamicShipping;
+  const finalTotal = Math.max(0, subtotal - discountAmount + activeShipping + tax);
   const [rxAttached, setRxAttached] = useState(false);
   const [rxFileName, setRxFileName] = useState("");
   const [rxModalOpen, setRxModalOpen] = useState(false);
@@ -113,11 +150,6 @@ const Checkout = () => {
     };
     fetchAvailableCoupons();
   }, []);
-
-  // Derived totals with coupon
-  const discountAmount = couponDiscount;
-  const activeShipping = couponApplied?.freeDelivery ? 0 : shipping;
-  const finalTotal = Math.max(0, subtotal - discountAmount + activeShipping + tax);
 
   // Checks if all prescription products have Rx attached
   const rxAttachedCheck = !requiresRx || rxAttached || cartItems.every((i) => !i.requiresRx || i.rxUploaded);
@@ -262,8 +294,8 @@ const Checkout = () => {
   const handlePlaceOrder = async (e) => {
     if (e) e.preventDefault();
 
-    if (!address || !city || !state || !pincode || !fullName || !email) {
-      toast.warning("Please fill in all shipping details.");
+    if (!selectedAddress) {
+      toast.warning("Please select or add a valid delivery address.");
       return;
     }
 
@@ -296,9 +328,34 @@ const Checkout = () => {
         price: item.price,
       }));
 
+      const shippingAddressObj = {
+        fullName: selectedAddress.fullName,
+        mobile: selectedAddress.mobile,
+        altMobile: selectedAddress.altMobile || "",
+        houseNo: selectedAddress.houseNo,
+        building: selectedAddress.building,
+        street: selectedAddress.street,
+        landmark: selectedAddress.landmark || "",
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        country: selectedAddress.country || "India",
+        pincode: selectedAddress.pincode,
+        type: selectedAddress.type || "Home",
+        deliveryInstructions: selectedAddress.deliveryInstructions || "",
+      };
+
+      const formattedAddressStr = [
+        selectedAddress.houseNo,
+        selectedAddress.building,
+        selectedAddress.street,
+        selectedAddress.landmark ? `Near ${selectedAddress.landmark}` : null,
+        `${selectedAddress.city}, ${selectedAddress.state} - ${selectedAddress.pincode}`,
+        selectedAddress.country || "India",
+      ].filter(Boolean).join(", ");
+
       const baseOrderData = {
-        customer: fullName,
-        email,
+        customer: selectedAddress.fullName || user?.name || "Valued Customer",
+        email: user?.email || "",
         items: orderItems,
         subtotal,
         shipping: activeShipping,
@@ -309,7 +366,8 @@ const Checkout = () => {
         requiresRx,
         rxUploaded: requiresRx ? (rxStatus === "Verified") : false,
         rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
-        shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
+        shippingAddress: formattedAddressStr,
+        shippingAddressObject: shippingAddressObj,
         paymentMethod: "razorpay",
       };
 
@@ -317,12 +375,14 @@ const Checkout = () => {
       const orderSession = await api.createRazorpayOrder({
         items: orderItems,
         couponCode: couponApplied?.code || null,
-        customer: fullName,
-        email: email,
-        shippingAddress: `${address}, ${city}, ${state} - ${pincode}`,
+        customer: selectedAddress.fullName || user?.name || "Valued Customer",
+        email: user?.email || "",
+        shippingAddress: formattedAddressStr,
+        shippingAddressObject: shippingAddressObj,
         rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
         requiresRx,
       });
+
 
       if (!orderSession.success || !orderSession.razorpayOrder) {
         throw new Error(orderSession.message || "Failed to initialize payment session.");
@@ -465,9 +525,20 @@ const Checkout = () => {
           
           {/* Shipping Card */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-4">
-              Shipping Information
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                Shipping Information
+              </h3>
+              {addresses.length > 0 && !showAddForm && (
+                <button
+                  type="button"
+                  onClick={() => setAddressModalOpen(true)}
+                  className="text-xs font-bold text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <MapPin size={14} /> Change Address ({addresses.length} Saved)
+                </button>
+              )}
+            </div>
 
             {requiresRx && rxStatus !== "Verified" && (
               <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300 select-none animate-[fade-in_0.2s_ease-out]">
@@ -481,95 +552,40 @@ const Checkout = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  disabled={requiresRx && rxStatus !== "Verified"}
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                  placeholder="Enter full name"
+            {/* Address Display or Inline Universal Form */}
+            {selectedAddress && !showAddForm ? (
+              <div className="space-y-3">
+                <AddressCard
+                  address={selectedAddress}
+                  isSelected={true}
+                  showActions={false}
+                />
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-1">
+                  <span>{shippingMsg || "Pan-India Express Delivery"}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(true)}
+                    className="text-[#038076] dark:text-[#84d6b9] font-bold hover:underline cursor-pointer"
+                  >
+                    + Add New Address
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-50/50 dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800">
+                <p className="text-xs font-bold text-slate-700 dark:text-zinc-200 mb-3">
+                  {addresses.length === 0 ? "Enter Delivery Address (Will be saved automatically)" : "Add New Delivery Address"}
+                </p>
+                <UniversalAddressForm
+                  onSubmit={async (cleanData) => {
+                    const newAddr = await addAddress(cleanData);
+                    setShowAddForm(false);
+                  }}
+                  onCancel={addresses.length > 0 ? () => setShowAddForm(false) : null}
+                  submitLabel="Save & Use Address"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  disabled={requiresRx && rxStatus !== "Verified"}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Street Address</label>
-              <input
-                type="text"
-                required
-                disabled={requiresRx && rxStatus !== "Verified"}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                placeholder="Enter street address"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">City</label>
-                <input
-                  type="text"
-                  required
-                  disabled={requiresRx && rxStatus !== "Verified"}
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                  placeholder="City"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">State</label>
-                <select
-                  required
-                  disabled={requiresRx && rxStatus !== "Verified"}
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                >
-                  <option value="">Select State</option>
-                  {[
-                    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
-                    "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-                    "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra",
-                    "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-                    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-                    "Uttar Pradesh", "Uttarakhand", "West Bengal",
-                    "Delhi", "Chandigarh", "Puducherry"
-                  ].map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Pincode</label>
-                <input
-                  type="text"
-                  required
-                  disabled={requiresRx && rxStatus !== "Verified"}
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all disabled:opacity-60"
-                  placeholder="6-digit PIN"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Rx Verification Card */}
@@ -1417,6 +1433,11 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
           </div>
         )}
       </div>
+
+      <AddressSelectorModal
+        isOpen={addressModalOpen}
+        onClose={() => setAddressModalOpen(false)}
+      />
     </div>
   );
 };

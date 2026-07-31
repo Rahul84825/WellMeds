@@ -12,6 +12,8 @@ import {
   sendOrderCancelled,
   sendOrderStatusEmail,
 } from "../services/emailService.js";
+import { validateDeliveryRadius } from "../services/locationService.js";
+
 
 // Helper to compute order details from product database prices
 const computeOrderTotals = async (items, couponCode, userId) => {
@@ -221,11 +223,32 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
 
 // Create Razorpay Order & Save DRAFT Order in DB (Exclusive Razorpay Gateway)
 export const createRazorpayOrder = async (req, res, next) => {
-  const { items, couponCode, customer, email, shippingAddress, rxFile, requiresRx } = req.body;
+  const { items, couponCode, customer, email, shippingAddress, rxFile, requiresRx, deliveryCoordinates } = req.body;
 
   try {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Order items are required" });
+    }
+
+    // Backend Delivery Radius Validation
+    let checkedCoordinates = null;
+    if (deliveryCoordinates && deliveryCoordinates.latitude && deliveryCoordinates.longitude) {
+      const lat = parseFloat(deliveryCoordinates.latitude);
+      const lng = parseFloat(deliveryCoordinates.longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const deliveryCheck = validateDeliveryRadius(lat, lng);
+        if (!deliveryCheck.isEligible) {
+          return res.status(400).json({
+            success: false,
+            message: deliveryCheck.message || "Sorry, this address is outside our delivery area.",
+          });
+        }
+        checkedCoordinates = {
+          latitude: lat,
+          longitude: lng,
+          distanceKm: deliveryCheck.distanceKm,
+        };
+      }
     }
 
     const totals = await computeOrderTotals(items, couponCode, req.user._id);
@@ -280,12 +303,14 @@ export const createRazorpayOrder = async (req, res, next) => {
       rxUploaded: totals.orderRequiresRx,
       rxFile: rxFile || null,
       shippingAddress: shippingAddress || "N/A",
+      deliveryCoordinates: checkedCoordinates,
       paymentMethod: "razorpay",
       paymentStatus: "Pending",
       status: "Pending", // Draft state until payment verified
       razorpayOrderId: razorpayOrder.id,
       timeline,
     });
+
 
     res.status(200).json({
       success: true,

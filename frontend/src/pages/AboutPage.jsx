@@ -1,6 +1,28 @@
 import React from "react";
+import SEO from "../components/common/SEO";
 
 const About = () => {
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "About Us", url: "/about" },
+  ];
+
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "MedicalOrganization",
+    "name": "WellMeds Specialty Pharmacy",
+    "url": "https://wellmeds.in/about",
+    "logo": "https://wellmeds.in/favicon.png",
+    "description": "WellMeds is India's specialty digital pharmacy committed to authentic prescription drugs, cold-chain biologicals, and expert pharmacist consultations.",
+    "telephone": "+91-800-WELLMEDS",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Baner, Pune",
+      "addressRegion": "Maharashtra",
+      "postalCode": "411045",
+      "addressCountry": "IN"
+    }
+  };
   const leaders = [
     {
       name: "Dr. Elizabeth Vance, MD",
@@ -24,6 +46,13 @@ const About = () => {
 
   return (
     <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] space-y-xxl text-left">
+      <SEO
+        title="About WellMeds | Precision Healthcare & Licensed Pharmacy"
+        description="Learn about WellMeds mission, licensed clinical leadership, cold-chain storage facilities, and commitment to authentic medicine distribution across India."
+        canonical="/about"
+        breadcrumbs={breadcrumbs}
+        schema={aboutSchema}
+      />
       {/* Intro Header */}
       <section className="text-center space-y-md max-w-3xl mx-auto py-xl">
         <span className="bg-primary-container text-on-primary-container border border-primary/20 px-md py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">

@@ -4,6 +4,7 @@ import {
   getPagesSitemap,
   getProductsSitemap,
   getCategoriesSitemap,
+  getBrandsSitemap,
   getMoleculesSitemap,
   getSpecialitiesSitemap,
   getSurgicalSitemap,
@@ -21,6 +22,7 @@ router.get("/sitemap-pages.xml", getPagesSitemap);
 router.get("/sitemap-products.xml", getProductsSitemap);
 router.get("/sitemap-products-:page.xml", getProductsSitemap);
 router.get("/sitemap-categories.xml", getCategoriesSitemap);
+router.get("/sitemap-brands.xml", getBrandsSitemap);
 router.get("/sitemap-molecules.xml", getMoleculesSitemap);
 router.get("/sitemap-specialities.xml", getSpecialitiesSitemap);
 router.get("/sitemap-surgical.xml", getSurgicalSitemap);

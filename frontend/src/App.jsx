@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { DrawerProvider } from "./context/DrawerContext";
+import { AddressProvider } from "./context/AddressContext";
 
 import { Toaster } from "sonner";
 
@@ -42,16 +43,18 @@ const SyncBridge = () => {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <DrawerProvider>
-            <Toaster position="top-right" richColors closeButton />
-            <ScrollToTop />
-            <SyncBridge />
-            <AppRoutes />
-          </DrawerProvider>
-        </BrowserRouter>
-      </CartProvider>
+      <AddressProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <DrawerProvider>
+              <Toaster position="top-right" richColors closeButton />
+              <ScrollToTop />
+              <SyncBridge />
+              <AppRoutes />
+            </DrawerProvider>
+          </BrowserRouter>
+        </CartProvider>
+      </AddressProvider>
     </AuthProvider>
   );
 }

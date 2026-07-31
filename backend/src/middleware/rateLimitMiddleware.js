@@ -1,9 +1,17 @@
 import rateLimit from "express-rate-limit";
 
+// Helper to skip rate limiting during development & local testing
+const isDevOrLocal = (req) => {
+  if (process.env.NODE_ENV === "development") return true;
+  const ip = req.ip || req.connection?.remoteAddress || "";
+  return ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
+};
+
 // Limit overall auth routes
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many authentication requests from this IP, please try again after 15 minutes",
@@ -12,10 +20,11 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// OTP Send: max 10 per hour per IP (per-mobile limit is enforced in controller)
+// OTP Send: max 30 per hour per IP (per-mobile limit is enforced in controller)
 export const otpSendLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  max: 30,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many OTP requests from this IP. Please try again after 1 hour.",
@@ -24,10 +33,11 @@ export const otpSendLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// OTP Verify: max 15 attempts per 15 minutes per IP
+// OTP Verify: max 30 attempts per 15 minutes per IP
 export const otpVerifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,
+  max: 30,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many OTP verification attempts. Please try again after 15 minutes.",
@@ -36,11 +46,12 @@ export const otpVerifyLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// General request limiter for overall system (GET read requests are bypassed to allow seamless catalog browsing)
+// General request limiter for overall system (GET read requests & local requests are bypassed)
 export const globalLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 1500,
+  max: 3000,
   skip: (req) => {
+    if (isDevOrLocal(req)) return true;
     const url = req.originalUrl || req.url || "";
     // Allow read-only GET requests, sitemaps, and robots.txt
     return req.method === "GET" || url.includes("sitemap") || url.includes("robots.txt");
@@ -53,10 +64,11 @@ export const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit file uploads to 100 uploads per 10 minutes to prevent resource abuse
+// Limit file uploads
 export const uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 100,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many file upload requests from this IP, please try again after 10 minutes",
@@ -65,10 +77,11 @@ export const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit coupon validation/application to 30 attempts per 10 minutes
+// Limit coupon validation/application
 export const couponLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 30,
+  max: 50,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many coupon validation attempts, please try again after 10 minutes",
@@ -77,10 +90,11 @@ export const couponLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limit coming-soon / maintenance page email subscription attempts (max 10 per 15 minutes per IP)
+// Limit coming-soon / maintenance page email subscription attempts
 export const subscribeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many subscription requests from this IP. Please try again after 15 minutes.",
@@ -92,7 +106,8 @@ export const subscribeLimiter = rateLimit({
 // Limit heavy catalog searches
 export const searchLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 300,
+  max: 500,
+  skip: isDevOrLocal,
   message: {
     success: false,
     message: "Too many search requests, please slow down",
@@ -100,5 +115,3 @@ export const searchLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-

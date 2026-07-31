@@ -128,8 +128,23 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2.5 font-sans text-xs text-[#a3c2b8]">
               <li>
-                <Link to="/products?category=Prescription" className="hover:text-white transition-colors">
-                  Prescription Medicines
+                <Link to="/products" className="hover:text-white transition-colors">
+                  All Prescription Medicines
+                </Link>
+              </li>
+              <li>
+                <Link to="/brands" className="hover:text-white transition-colors">
+                  Pharmaceutical Brands
+                </Link>
+              </li>
+              <li>
+                <Link to="/molecules" className="hover:text-white transition-colors">
+                  Molecule Reference Index
+                </Link>
+              </li>
+              <li>
+                <Link to="/categories" className="hover:text-white transition-colors">
+                  Therapeutic Categories
                 </Link>
               </li>
               <li>
@@ -140,11 +155,6 @@ const Footer = () => {
               <li>
                 <Link to="/wellness" className="hover:text-white transition-colors">
                   Wellness & Daily Supplements
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=Vitamins" className="hover:text-white transition-colors">
-                  Vitamins & Nutrition
                 </Link>
               </li>
               <li>
@@ -177,14 +187,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#faq" className="hover:text-white transition-colors">
-                  Help Center & FAQs
-                </a>
+                <Link to="/patient-assistance-program" className="hover:text-white transition-colors">
+                  Patient Assistance Program (PAP)
+                </Link>
               </li>
               <li>
-                <a href="#locations" className="hover:text-white transition-colors">
-                  Store & Delivery Network
-                </a>
+                <Link to="/offers" className="hover:text-white transition-colors">
+                  Specialty Health Offers
+                </Link>
               </li>
             </ul>
           </div>
@@ -196,29 +206,29 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2.5 font-sans text-xs text-[#a3c2b8]">
               <li>
-                <a href="#terms" className="hover:text-white transition-colors">
+                <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#privacy" className="hover:text-white transition-colors">
+                <Link to="/privacy-policy" className="hover:text-white transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#return" className="hover:text-white transition-colors">
+                <Link to="/refund-policy" className="hover:text-white transition-colors">
                   Return & Refund Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#shipping" className="hover:text-white transition-colors">
+                <Link to="/shipping-policy" className="hover:text-white transition-colors">
                   Cold-Chain Shipping Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#disclaimer" className="hover:text-white transition-colors">
+                <Link to="/how-we-keep-you-safe" className="hover:text-white transition-colors">
                   Medical & Regulatory Disclaimer
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

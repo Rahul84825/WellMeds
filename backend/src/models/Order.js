@@ -112,6 +112,22 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    shippingAddressObject: {
+      fullName: { type: String, default: "" },
+      mobile: { type: String, default: "" },
+      altMobile: { type: String, default: "" },
+      houseNo: { type: String, default: "" },
+      building: { type: String, default: "" },
+      street: { type: String, default: "" },
+      landmark: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      country: { type: String, default: "India" },
+      pincode: { type: String, default: "" },
+      type: { type: String, default: "Home" },
+      deliveryInstructions: { type: String, default: "" }
+    },
+
     paymentMethod: {
       type: String,
       default: "Card",

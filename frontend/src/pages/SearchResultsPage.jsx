@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
-import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FlaskConical, PhoneCall } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const SearchResultsPage = () => {
   const navigate = useNavigate();
@@ -74,6 +74,11 @@ const SearchResultsPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl text-left min-h-[70vh] animate-[fade-in_0.3s_ease-out]">
+      <SEO
+        title={`Search Results for "${query}" | WellMeds`}
+        description={`Search results for "${query}" on WellMeds online pharmacy.`}
+        noindex={true}
+      />
       {/* Search page header */}
       <div className="mb-lg">
         <h1 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-150 tracking-tight">

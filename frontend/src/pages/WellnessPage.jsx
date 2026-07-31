@@ -15,6 +15,7 @@ import {
   Heart,
   Droplet
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const WellnessPage = () => {
   const navigate = useNavigate();
@@ -46,18 +47,6 @@ const WellnessPage = () => {
     { name: "First Aid", icon: ShieldCheck },
     { name: "Medical Devices", icon: Heart }
   ];
-
-  // SEO Setup
-  useEffect(() => {
-    document.title = "Premium Wellness Storefront | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Explore our dedicated wellness storefront. Shop authentic vitamins, natural supplements, premium personal care, and certified health devices.");
-  }, []);
 
   // Fetch Featured Wellness Products
   useEffect(() => {
@@ -150,8 +139,19 @@ const WellnessPage = () => {
     return pages;
   };
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Wellness Storefront", url: "/wellness" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title="Premium Wellness Storefront | WellMeds Healthcare"
+        description="Explore WellMeds dedicated wellness storefront. Shop authentic vitamins, natural supplements, premium personal care, and certified health devices online."
+        canonical="/wellness"
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">

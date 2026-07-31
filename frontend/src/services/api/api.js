@@ -71,8 +71,9 @@ export const refreshSessionToken = async () => {
       refreshPromise = null;
       processQueue(error, null);
 
-      const isAuthError = error.response && (error.response.status === 401 || error.response.status === 400 || error.response.status === 429);
-      if (isAuthError) {
+      // Only purge session credentials if the refresh endpoint explicitly returns 401 Unauthorized (token revoked/expired)
+      const isSessionRevoked = error.response && error.response.status === 401;
+      if (isSessionRevoked) {
         localStorage.removeItem("medishop_token");
         localStorage.removeItem("medishop_refresh_token");
         localStorage.removeItem("medishop_user");

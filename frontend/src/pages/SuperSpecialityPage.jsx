@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { ShieldAlert, HeartPulse, ChevronRight, Activity } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const SuperSpecialityPage = () => {
   const navigate = useNavigate();
@@ -10,15 +10,6 @@ const SuperSpecialityPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "Browse By Super Speciality | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Explore our extensive medical specialities and find prescription medicines cataloged for specific clinical areas.");
-
     const fetchSpecialities = async () => {
       try {
         const data = await api.getSpecialities();
@@ -32,8 +23,19 @@ const SuperSpecialityPage = () => {
     fetchSpecialities();
   }, []);
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Super Specialities", url: "/super-speciality" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title="Browse By Super Speciality | WellMeds Specialty Therapeutics"
+        description="Explore WellMeds extensive medical specialities index and buy prescription medicines categorized by clinical treatment areas."
+        canonical="/super-speciality"
+        breadcrumbs={breadcrumbs}
+      />
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">
         <span className="cursor-pointer hover:text-[#038076] transition-colors" onClick={() => navigate("/")}>Home</span>

@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/common/SEO";
 
 const ImportedMedicinesPage = () => {
   const [activeFaq, setActiveFaq] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Imported Medicines Made Accessible | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Source genuine imported medicines under clinical supervision from trusted global manufacturers with WellMeds.");
   }, []);
 
   const handleBrowseClick = () => {
@@ -136,8 +129,19 @@ const ImportedMedicinesPage = () => {
     }
   ];
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Imported Medicines", url: "/imported-medicines" },
+  ];
+
   return (
     <div className="bg-background text-on-surface min-h-screen text-left">
+      <SEO
+        title="Imported Medicines Made Accessible | WellMeds Global Access"
+        description="Source genuine imported medicines under clinical supervision from trusted global manufacturers with WellMeds. CDSCO compliant personal use import assistance."
+        canonical="/imported-medicines"
+        breadcrumbs={breadcrumbs}
+      />
       {/* Breadcrumbs */}
       <div className="border-b border-outline-variant/30 bg-surface-container-lowest/50 py-sm">
         <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">

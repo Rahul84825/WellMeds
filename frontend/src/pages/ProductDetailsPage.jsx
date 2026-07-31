@@ -278,54 +278,94 @@ const ProductDetails = () => {
       }
     }));
 
+    const canonicalUrl = `https://wellmeds.in/products/${product.slug}`;
+    const brandNameStr = typeof product.brand === "object" ? (product.brand?.name || "WellMeds") : (product.brand || product.manufacturer || "WellMeds");
+
     const jsonLd = {
       "@context": "https://schema.org",
       "@graph": [
         {
           "@type": "Product",
-          "@id": `${window.location.origin}/products/${product.slug}#product`,
+          "@id": `${canonicalUrl}#product`,
           "name": product.name,
-          "image": product.images && product.images.length > 0 ? product.images : [product.image],
-          "description": product.seo?.metaDescription || product.description,
-          "sku": product.sku,
+          "image": product.images && product.images.length > 0 ? product.images : [product.image || "https://wellmeds.in/og-default.jpg"],
+          "description": product.seo?.metaDescription || product.description || `Buy ${product.name} online from WellMeds. Genuine prescription medicines and fast delivery.`,
+          "sku": product.sku || product._id,
           "brand": {
             "@type": "Brand",
-            "name": product.manufacturer || product.brand
+            "name": brandNameStr
           },
           "offers": {
             "@type": "Offer",
             "priceCurrency": "INR",
-            "price": product.price,
+            "price": product.price || 0,
+            "priceValidUntil": "2027-12-31",
             "itemCondition": "https://schema.org/NewCondition",
             "availability": (product.inStock !== false && product.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            "url": window.location.href,
+            "url": canonicalUrl,
             "seller": {
               "@type": "Organization",
-              "name": "WellMeds"
+              "name": "WellMeds",
+              "url": "https://wellmeds.in"
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 3,
+                  "unitCode": "DAY"
+                }
+              }
             }
           }
         },
         {
           "@type": "BreadcrumbList",
-          "@id": `${window.location.origin}/products/${product.slug}#breadcrumb`,
+          "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": [
             {
               "@type": "ListItem",
               "position": 1,
               "name": "Home",
-              "item": window.location.origin
+              "item": "https://wellmeds.in"
             },
             {
               "@type": "ListItem",
               "position": 2,
               "name": "Products",
-              "item": `${window.location.origin}/products`
+              "item": "https://wellmeds.in/products"
             },
             {
               "@type": "ListItem",
               "position": 3,
               "name": product.name,
-              "item": window.location.href
+              "item": canonicalUrl
             }
           ]
         }
@@ -335,7 +375,7 @@ const ProductDetails = () => {
     if (faqSchemaList.length > 0) {
       jsonLd["@graph"].push({
         "@type": "FAQPage",
-        "@id": `${window.location.origin}/products/${product.slug}#faq`,
+        "@id": `${canonicalUrl}#faq`,
         "mainEntity": faqSchemaList
       });
     }

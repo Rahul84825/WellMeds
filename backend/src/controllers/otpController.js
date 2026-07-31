@@ -101,8 +101,8 @@ export const sendOtp = async (req, res, next) => {
         otpDoc.windowStart = now;
         otpDoc.sendCount = 1;
       } else {
-        // 2. Enforce max OTP/hour limit (e.g. 5 sends)
-        if (otpDoc.sendCount >= otpConfig.resendLimitPerHour) {
+        // 2. Enforce max OTP/hour limit in production (e.g. 5 sends)
+        if (otpDoc.sendCount >= otpConfig.resendLimitPerHour && !isDevBypass && process.env.NODE_ENV === "production") {
           const waitMs = 60 * 60 * 1000 - (now.getTime() - firstSendTime.getTime());
           const waitMinutes = Math.ceil(waitMs / 60000);
           secLog("[RATE_LIMIT]", { mobile: maskMobile(normalizedMobile), sendCount: otpDoc.sendCount });

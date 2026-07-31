@@ -14,6 +14,7 @@ import {
   Activity,
   HeartPulse
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const SpecialityPage = () => {
   const { slug } = useParams();
@@ -241,8 +242,20 @@ const SpecialityPage = () => {
     );
   }
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Specialities", url: "/super-speciality" },
+    { name: speciality.name, url: `/speciality/${slug}` },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto py-lg px-md space-y-lg text-left animate-[fade-in_0.3s_ease-out]">
+      <SEO
+        title={speciality.seoTitle || `${speciality.name} Medications & Supplies | WellMeds`}
+        description={speciality.seoDescription || speciality.shortDescription || `Shop authentic ${speciality.name} medications, formulations, and medical equipment at WellMeds.`}
+        canonical={`/speciality/${slug}`}
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-xs text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">

@@ -23,6 +23,7 @@ import {
   Award,
   ShieldCheck
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 // Helper icon mapping utility
 const getSurgicalIcon = (iconName) => {
@@ -113,8 +114,19 @@ const SurgicalLandingPage = () => {
     }
   ];
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Surgical Equipment", url: "/surgical" },
+  ];
+
   return (
-    <div className="bg-slate-50/30 dark:bg-zinc-950/20 text-left">
+    <div className="min-h-screen text-slate-800 dark:text-zinc-100 bg-white dark:bg-zinc-950 font-sans text-left">
+      <SEO
+        title="Surgical Products & Clinical Supplies | WellMeds"
+        description="Purchase premium clinical-grade surgical instruments, sterile dressings, diagnostics, and patient care equipment online at WellMeds."
+        canonical="/surgical"
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Hero Banner Section */}
       <section className="relative bg-gradient-to-br from-[#001f3f] via-[#004782] to-[#086b53] text-white py-16 md:py-24 overflow-hidden border-b border-slate-100 dark:border-zinc-800">

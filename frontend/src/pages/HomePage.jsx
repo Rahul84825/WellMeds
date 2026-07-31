@@ -21,31 +21,58 @@ const homeSchema = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://wellmeds.com/#organization",
+      "@id": "https://wellmeds.in/#organization",
       "name": "WellMeds",
-      "url": "https://wellmeds.com",
-      "logo": "https://wellmeds.com/assets/logos/logo.png",
-      "description": "Online pharmacy and healthcare partner offering genuine prescription medicines, wellness essentials, and surgical supplies across India.",
+      "url": "https://wellmeds.in",
+      "logo": "https://wellmeds.in/favicon.png",
+      "description": "India's trusted online pharmacy delivering authentic prescription medicines, cold-chain biologicals, surgical supplies, and specialty healthcare directly to your doorstep.",
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+91-800-WELLMEDS",
         "contactType": "customer service",
         "areaServed": "IN",
-        "availableLanguage": ["English", "Hindi"]
+        "availableLanguage": ["English", "Hindi", "Marathi"]
+      }
+    },
+    {
+      "@type": "Pharmacy",
+      "@id": "https://wellmeds.in/#pharmacy",
+      "name": "WellMeds Specialty Pharmacy",
+      "url": "https://wellmeds.in",
+      "telephone": "+91-800-WELLMEDS",
+      "priceRange": "₹₹",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Baner Main Road, High Street",
+        "addressLocality": "Baner, Pune",
+        "addressRegion": "Maharashtra",
+        "postalCode": "411045",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 18.5590,
+        "longitude": 73.7868
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "00:00",
+        "closes": "23:59"
       }
     },
     {
       "@type": "WebSite",
-      "@id": "https://wellmeds.com/#website",
-      "url": "https://wellmeds.com",
+      "@id": "https://wellmeds.in/#website",
+      "url": "https://wellmeds.in",
       "name": "WellMeds",
       "description": "Buy Medicines & Healthcare Supplies Online",
       "publisher": {
-        "@id": "https://wellmeds.com/#organization"
+        "@id": "https://wellmeds.in/#organization"
       },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://wellmeds.com/search?q={search_term_string}",
+        "target": "https://wellmeds.in/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }

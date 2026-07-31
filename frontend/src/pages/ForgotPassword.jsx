@@ -33,7 +33,7 @@ const ForgotPassword = () => {
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         "An error occurred while dispatching the recovery email. Please try again."
       );
     } finally {
@@ -46,7 +46,7 @@ const ForgotPassword = () => {
       <div className="absolute inset-0 medical-pattern"></div>
 
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-left">
-        
+
         {/* Success Card */}
         {successMessage ? (
           <div className="text-center space-y-md py-md animate-fade-in">

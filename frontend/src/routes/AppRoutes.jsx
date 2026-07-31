@@ -44,6 +44,12 @@ const SearchResultsPage = lazy(() => import("../pages/SearchResultsPage"));
 const HowWeKeepYouSafePage = lazy(() => import("../pages/HowWeKeepYouSafePage"));
 const CategoryDetailPage = lazy(() => import("../pages/CategoryDetailPage"));
 const AllCategoriesPage = lazy(() => import("../pages/AllCategoriesPage"));
+const BrandsPage = lazy(() => import("../pages/BrandsPage"));
+const BrandDetailPage = lazy(() => import("../pages/BrandDetailPage"));
+const PrivacyPolicyPage = lazy(() => import("../pages/PrivacyPolicyPage"));
+const TermsAndConditionsPage = lazy(() => import("../pages/TermsAndConditionsPage"));
+const RefundPolicyPage = lazy(() => import("../pages/RefundPolicyPage"));
+const ShippingPolicyPage = lazy(() => import("../pages/ShippingPolicyPage"));
 
 // Admin Pages (Lazy Loaded)
 const Dashboard = lazy(() => import("../admin/AdminDashboard"));
@@ -133,7 +139,8 @@ const AppRoutes = () => {
           <Route path="conditions" element={<AllCategoriesPage />} />
           <Route path="category/:categorySlug" element={<CategoryDetailPage />} />
           <Route path="condition/:categorySlug" element={<CategoryDetailPage />} />
-          <Route path="brands/:brandSlug" element={<Navigate to="/products" replace />} />
+          <Route path="brands" element={<BrandsPage />} />
+          <Route path="brands/:brandSlug" element={<BrandDetailPage />} />
           <Route path="products/:slug" element={<ProductDetailsPage />} />
           <Route path="speciality/:slug" element={<SpecialityPage />} />
           <Route path="super-speciality" element={<SuperSpecialityPage />} />
@@ -157,6 +164,10 @@ const AppRoutes = () => {
           <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
           <Route path="offers" element={<OffersPage />} />
           <Route path="how-we-keep-you-safe" element={<HowWeKeepYouSafePage />} />
+          <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="terms-and-conditions" element={<TermsAndConditionsPage />} />
+          <Route path="refund-policy" element={<RefundPolicyPage />} />
+          <Route path="shipping-policy" element={<ShippingPolicyPage />} />
 
           {/* Primary auth route */}
           <Route path="login" element={<Login />} />

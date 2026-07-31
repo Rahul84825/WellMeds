@@ -3,6 +3,7 @@ import {
   generatePagesSitemap,
   generateProductsSitemap,
   generateCategoriesSitemap,
+  generateBrandsSitemap,
   generateMoleculesSitemap,
   generateSpecialitiesSitemap,
   generateSurgicalSitemap,
@@ -96,6 +97,21 @@ export const getCategoriesSitemap = async (req, res, next) => {
   } catch (error) {
     console.error("Error generating Categories Sitemap:", error);
     sendXmlErrorResponse(res, "Internal error generating categories sitemap");
+  }
+};
+
+/**
+ * GET /sitemap-brands.xml
+ * Dynamic Brand Sitemap
+ */
+export const getBrandsSitemap = async (req, res, next) => {
+  try {
+    const siteUrl = getSiteUrl(req);
+    const xml = await generateBrandsSitemap(siteUrl);
+    sendXmlResponse(res, xml);
+  } catch (error) {
+    console.error("Error generating Brands Sitemap:", error);
+    sendXmlErrorResponse(res, "Internal error generating brands sitemap");
   }
 };
 

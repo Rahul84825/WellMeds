@@ -63,7 +63,8 @@ const SEO = ({
   breadcrumbs,
 }) => {
   const location = useLocation();
-  const currentUrl = `${DEFAULT_DOMAIN}${location.pathname}`;
+  const cleanPath = location.pathname !== "/" && location.pathname.endsWith("/") ? location.pathname.slice(0, -1) : location.pathname;
+  const currentUrl = `${DEFAULT_DOMAIN}${cleanPath}`;
 
   const metaTitle = title ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_TITLE;
   const metaDescription = description || DEFAULT_DESCRIPTION;

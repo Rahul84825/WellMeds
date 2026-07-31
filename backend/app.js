@@ -24,6 +24,10 @@ import moleculeRoutes from "./src/routes/moleculeRoutes.js";
 import surgicalCategoryRoutes from "./src/routes/surgicalCategoryRoutes.js";
 import megaMenuRoutes from "./src/routes/megaMenuRoutes.js";
 import contactRoutes from "./src/routes/contactRoutes.js";
+import locationRoutes from "./src/routes/locationRoutes.js";
+import addressRoutes from "./src/routes/addressRoutes.js";
+import deliveryRuleRoutes from "./src/routes/deliveryRuleRoutes.js";
+
 
 const app = express();
 app.set("trust proxy", 1);
@@ -37,11 +41,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
-      connectSrc: ["'self'", "https://api.razorpay.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com", "https://api.mapbox.com"],
+      workerSrc: ["'self'", "blob:"],
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://*.mapbox.com", "https://events.mapbox.com"],
       frameSrc: ["'self'", "https://api.razorpay.com"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://lh3.googleusercontent.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://lh3.googleusercontent.com", "https://*.mapbox.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://api.mapbox.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
@@ -61,6 +66,7 @@ app.use(helmet({
     policy: "strict-origin-when-cross-origin",
   },
 }));
+
 
 // Dynamic & Resilient CORS configuration
 const defaultOrigins = [
@@ -201,6 +207,10 @@ app.use("/api/molecules", moleculeRoutes);
 app.use("/api/surgical-categories", surgicalCategoryRoutes);
 app.use("/api/megamenu", megaMenuRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/location", locationRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/delivery-rules", deliveryRuleRoutes);
+
 
 // Unmatched catches & Error boundaries
 app.use(notFound);

@@ -15,21 +15,22 @@ import {
   ShieldAlert
 } from "lucide-react";
 
+import SEO from "../components/common/SEO";
+
 const HowWeKeepYouSafePage = () => {
-  // SEO Setup
-  useEffect(() => {
-    document.title = "How We Keep You Safe | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Learn about WellMeds' safety procedures. From cold-chain shipping and verified sourcing to licensed pharmacist reviews, we ensure your medicines are 100% authentic and safe.");
-  }, []);
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "How We Keep You Safe", url: "/how-we-keep-you-safe" },
+  ];
 
   return (
     <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] space-y-xxl text-left">
+      <SEO
+        title="How We Keep You Safe | WellMeds Safety Standards"
+        description="Learn about WellMeds safety procedures. Cold-chain logistics, CDSCO compliance, batch tracking, and licensed pharmacist prescription verification."
+        canonical="/how-we-keep-you-safe"
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Hero Section */}
       <section className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#e6f7f0] via-[#edf8f5] to-[#f7f9fb] dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 border border-[#c3efdb] dark:border-zinc-800 p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm">

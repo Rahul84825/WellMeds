@@ -815,30 +815,56 @@ const AddNewProduct = () => {
   }
 
   return (
-    <div className="space-y-md sm:space-y-xl animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden">
+    <div className="space-y-md sm:space-y-xl animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-6">
       
-      {/* Back navigation */}
-      <div className="flex items-center justify-between">
+      {/* Mobile Compact Sticky Top Header (Positioned below 64px Admin Navbar) */}
+      <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-xs">
+        <Link to="/admin/products" className="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all">
+          <ArrowLeft size={20} />
+        </Link>
+
+        <div className="text-center truncate px-2">
+          <h2 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+            {isEditMode ? (name || "Edit Product") : "New Product"}
+          </h2>
+          <span className="text-[10px] text-[#038076] dark:text-[#84d6b9] font-bold uppercase tracking-wider block">
+            {isEditMode ? "Editing Catalog" : "Draft Creation"}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="bg-[#038076] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+        >
+          {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+          <span>{isSaving ? "Saving..." : "Save"}</span>
+        </button>
+      </div>
+
+      {/* Desktop Back navigation */}
+      <div className="hidden md:flex items-center justify-between">
         <Link to="/admin/products" className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 flex items-center gap-xs font-semibold">
           <ArrowLeft size={16} />
           <span>Back to Products</span>
         </Link>
       </div>
 
-      {/* Header */}
-      <h1 className="font-bold text-xl sm:text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs flex-wrap">
-        <Sparkles className="text-[#004782] shrink-0" size={24} />
+      {/* Desktop Header */}
+      <h1 className="hidden md:flex font-bold text-xl sm:text-2xl text-slate-800 dark:text-zinc-100 items-center gap-xs flex-wrap">
+        <Sparkles className="text-[#038076] shrink-0" size={24} />
         <span className="break-words">{isEditMode ? `Product CMS: ${name}` : "Create Catalog Product & Medical Article"}</span>
       </h1>
 
-      {/* Custom Tabs Navigation */}
-      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-xs sm:gap-md scrollbar-none touch-pan-x px-xs pb-0.5">
+      {/* Custom Tabs Navigation — Sticky below mobile header (top-[120px]) */}
+      <div className="sticky top-[120px] md:relative md:top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-0 bg-white/95 dark:bg-zinc-900/95 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border-b border-slate-200 dark:border-zinc-800 flex overflow-x-auto gap-xs sm:gap-md no-scrollbar touch-pan-x pb-0.5 shadow-xs md:shadow-none">
         {[
           { id: "basic", label: "Basic Info & Media", icon: Settings },
-          { id: "medical", label: "Medical Content Sections", icon: BookOpen },
-          { id: "clinical", label: "Clinical & Specifications", icon: FileText },
-          { id: "safety", label: "Safety & Instructions", icon: AlertTriangle },
-          { id: "seo", label: "FAQs & SEO Metadata", icon: Bookmark }
+          { id: "medical", label: "Medical Content", icon: BookOpen },
+          { id: "clinical", label: "Clinical & Specs", icon: FileText },
+          { id: "safety", label: "Safety & Use", icon: AlertTriangle },
+          { id: "seo", label: "FAQs & SEO", icon: Bookmark }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -846,13 +872,13 @@ const AddNewProduct = () => {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-xs py-sm px-xs sm:px-md border-b-2 font-bold text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 py-3 sm:py-2.5 px-3 sm:px-4 border-b-2 font-bold text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer min-h-[44px] ${
                 activeTab === tab.id
-                  ? "border-[#004782] text-primary dark:text-[#a4c9ff]"
-                  : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
+                  ? "border-[#038076] text-[#038076] dark:text-[#84d6b9]"
+                  : "border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900"
               }`}
             >
-              <Icon size={14} />
+              <Icon size={15} />
               {tab.label}
             </button>
           );
@@ -2012,7 +2038,7 @@ const AddNewProduct = () => {
         </div>
 
         {/* Right Media & Publishing Panel */}
-        <div className="w-full lg:w-[350px] shrink-0 space-y-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm sm:p-lg rounded-2xl shadow-sm text-xs lg:sticky lg:top-6">
+        <div className={`w-full lg:w-[350px] shrink-0 space-y-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm sm:p-lg rounded-2xl shadow-sm text-xs lg:sticky lg:top-6 ${activeTab === "basic" ? "block" : "hidden lg:block"}`}>
           
           <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
             <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Product Images</h4>
@@ -2143,12 +2169,12 @@ const AddNewProduct = () => {
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex flex-col gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
+          {/* Form Actions (Desktop Sidebar) */}
+          <div className="hidden md:flex flex-col gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full bg-[#086b53] hover:bg-[#055746] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs min-h-[44px]"
+              className="w-full bg-[#038076] hover:bg-[#026860] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs min-h-[44px]"
             >
               {isSaving ? (
                 <>
@@ -2172,6 +2198,29 @@ const AddNewProduct = () => {
 
         </div>
       </form>
+
+      {/* Sticky Mobile Bottom Save Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800 p-3 shadow-lg flex items-center justify-between gap-3 pb-safe">
+        <Link
+          to="/admin/products"
+          className="flex-1 text-center border border-slate-250 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold py-2.5 rounded-xl text-xs hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all min-h-[44px] inline-flex items-center justify-center"
+        >
+          Discard
+        </Link>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="flex-1 bg-[#038076] hover:bg-[#026860] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          {isSaving ? (
+            <RefreshCw size={15} className="animate-spin" />
+          ) : (
+            <PackageCheck size={15} />
+          )}
+          <span>{isSaving ? "Saving..." : (isEditMode ? "Save Changes" : "Publish Product")}</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -361,10 +361,42 @@ const AdminAddNewMolecule = () => {
   }
 
   return (
-    <div className="space-y-md sm:space-y-lg text-left max-w-4xl w-full mx-auto px-xs sm:px-md overflow-x-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-sm sm:gap-md border-b border-slate-100 dark:border-zinc-800 pb-md">
+    <div className="space-y-md sm:space-y-lg text-left max-w-4xl w-full mx-auto px-xs sm:px-md overflow-x-hidden pb-24 lg:pb-6">
+      
+      {/* Mobile Compact Sticky Top Header (Positioned below 64px Admin Navbar) */}
+      <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-xs">
         <button
+          type="button"
+          onClick={() => navigate("/admin/molecules")}
+          className="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
+        >
+          <ArrowLeft size={20} />
+        </button>
+
+        <div className="text-center truncate px-2">
+          <h2 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+            {isEditMode ? (name || "Edit Molecule") : "New Molecule"}
+          </h2>
+          <span className="text-[10px] text-[#038076] dark:text-[#84d6b9] font-bold uppercase tracking-wider block">
+            {isEditMode ? "Chemical Compound" : "Draft Creation"}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="bg-[#038076] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+        >
+          <Save size={14} />
+          <span>{isSaving ? "Saving..." : "Save"}</span>
+        </button>
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden md:flex items-center gap-sm sm:gap-md border-b border-slate-100 dark:border-zinc-800 pb-md">
+        <button
+          type="button"
           onClick={() => navigate("/admin/molecules")}
           className="p-2 sm:p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all shrink-0 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
         >
@@ -378,22 +410,23 @@ const AdminAddNewMolecule = () => {
         </div>
       </div>
 
-      {/* Tabs list */}
-      <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto gap-xs sm:gap-sm select-none scrollbar-none touch-pan-x px-xs pb-0.5">
+      {/* Tabs list — Sticky below mobile header (top-[120px]) */}
+      <div className="sticky top-[120px] md:relative md:top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-0 bg-white/95 dark:bg-zinc-900/95 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border-b border-slate-200 dark:border-zinc-800 flex overflow-x-auto gap-xs sm:gap-sm select-none no-scrollbar touch-pan-x pb-0.5 shadow-xs md:shadow-none">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-xs px-xs sm:px-md py-sm border-b-2 font-bold text-xs transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 sm:py-2.5 border-b-2 font-bold text-xs transition-all whitespace-nowrap shrink-0 cursor-pointer min-h-[44px] ${
                 isActive
-                  ? "border-[#004782] text-[#004782] dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
+                  ? "border-[#038076] text-[#038076] dark:text-[#84d6b9]"
+                  : "border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900"
               }`}
             >
-              <Icon size={14} />
+              <Icon size={15} />
               {tab.label}
             </button>
           );
@@ -936,12 +969,12 @@ const AdminAddNewMolecule = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
+        {/* Action Buttons (Desktop) */}
+        <div className="hidden md:flex flex-row items-center gap-sm pt-md border-t border-slate-100 dark:border-zinc-800">
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-xs bg-[#004782] text-white px-lg py-3 rounded-xl font-bold text-xs hover:opacity-90 transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm min-h-[44px]"
+            className="inline-flex items-center justify-center gap-xs bg-[#038076] text-white px-lg py-3 rounded-xl font-bold text-xs hover:bg-[#026860] transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm min-h-[44px]"
           >
             <Save size={14} /> {isSaving ? "Saving Compound..." : "Save Molecule Details"}
           </button>
@@ -949,11 +982,31 @@ const AdminAddNewMolecule = () => {
             type="button"
             onClick={() => navigate("/admin/molecules")}
             disabled={isSaving}
-            className="w-full sm:w-auto inline-flex items-center justify-center border border-slate-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 px-lg py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all select-none cursor-pointer min-h-[44px]"
+            className="inline-flex items-center justify-center border border-slate-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 px-lg py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all select-none cursor-pointer min-h-[44px]"
           >
             Cancel
           </button>
         </div>
+
+      {/* Sticky Mobile Bottom Save Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800 p-3 shadow-lg flex items-center justify-between gap-3 pb-safe">
+        <button
+          type="button"
+          onClick={() => navigate("/admin/molecules")}
+          className="flex-1 text-center border border-slate-250 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold py-2.5 rounded-xl text-xs hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all min-h-[44px] inline-flex items-center justify-center"
+        >
+          Discard
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="flex-1 bg-[#038076] hover:bg-[#026860] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <Save size={15} />
+          <span>{isSaving ? "Saving..." : (isEditMode ? "Save Changes" : "Create Molecule")}</span>
+        </button>
+      </div>
 
       </form>
     </div>

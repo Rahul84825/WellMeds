@@ -2,49 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import CategoryCard from "../components/CategoryCard";
-import { Search, X, FolderOpen, ChevronRight } from "lucide-react";
-
-// Icon mapping utility for surgical categories
-const getSurgicalIcon = (iconName) => {
-  const mapping = {
-    scissors: Scissors,
-    shield: Shield,
-    bandage: Bandage,
-    syringe: Syringe,
-    bed: Bed,
-    stethoscope: Stethoscope,
-    activity: Activity,
-    heart: Heart,
-    thermometer: Thermometer,
-    layers: Layers,
-    wheelchair: Activity,
-    walking: Activity,
-    lungs: Activity,
-    bone: Activity,
-    band_aid: Bandage,
-  };
-  return mapping[String(iconName).toLowerCase()] || Activity;
-};
+import SEO from "../components/common/SEO";
 
 const AllSurgicalCategoriesPage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchVal, setSearchVal] = useState("");
-
-  useEffect(() => {
-    document.title = "Surgical & Medical Supply Categories | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute(
-      "content",
-      "Browse clinical-grade surgical instruments, diagnostic equipment, and medical supplies by category at WellMeds."
-    );
-  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -78,8 +42,20 @@ const AllSurgicalCategoriesPage = () => {
     return nameMatch || descMatch;
   });
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Surgical", url: "/surgical" },
+    { name: "Surgical Categories", url: "/surgical/categories" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 md:py-12 animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title="Surgical & Medical Supply Categories | WellMeds"
+        description="Browse clinical-grade surgical instruments, diagnostic equipment, sterile dressings, and medical supplies by category at WellMeds."
+        canonical="/surgical/categories"
+        breadcrumbs={breadcrumbs}
+      />
       {/* Breadcrumb */}
       <nav className="flex items-center text-[12px] text-slate-500 gap-1.5 mb-6 font-medium select-none">
         <Link to="/" className="hover:text-[#038076] transition-colors">

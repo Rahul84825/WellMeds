@@ -67,14 +67,14 @@ const ResetPassword = () => {
     try {
       const res = await authService.resetPassword(token, password);
       setSuccessMessage(res.message || "Your password has been reset successfully! Redirecting to login...");
-      
+
       setTimeout(() => {
         navigate("/login");
       }, 2500);
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         "Failed to reset password. The link may have expired or is invalid."
       );
     } finally {
@@ -87,7 +87,7 @@ const ResetPassword = () => {
       <div className="absolute inset-0 medical-pattern"></div>
 
       <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-left">
-        
+
         {/* Success Card */}
         {successMessage ? (
           <div className="text-center space-y-md py-md animate-fade-in">

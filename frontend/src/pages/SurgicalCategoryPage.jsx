@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   FolderOpen
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const SurgicalCategoryPage = () => {
   const { categorySlug } = useParams();
@@ -137,8 +138,20 @@ const SurgicalCategoryPage = () => {
   const totalPages = Math.ceil(totalProducts / LIMIT) || 1;
   const sortedProducts = getSortedProducts();
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Surgical", url: "/surgical" },
+    { name: category.name, url: `/surgical/${categorySlug}` },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title={category.seoTitle || `${category.name} Surgical Supplies & Equipment | WellMeds`}
+        description={category.seoDescription || category.description || `Browse quality clinical ${category.name} products at WellMeds.`}
+        canonical={`/surgical/${categorySlug}`}
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">

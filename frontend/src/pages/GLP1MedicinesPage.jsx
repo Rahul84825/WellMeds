@@ -11,6 +11,7 @@ import {
   PackageX,
   Sparkles
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const GLP1MedicinesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,43 +27,6 @@ const GLP1MedicinesPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    // Document Title
-    document.title = "GLP-1 Medicines for Diabetes & Weight Loss | WellMeds";
-
-    // Meta Description
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.name = "description";
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.content = "Browse GLP-1 medicines for diabetes and weight management available at WellMeds.";
-
-    // Canonical URL
-    let canonicalLink = document.querySelector('link[rel="canonical"]');
-    if (!canonicalLink) {
-      canonicalLink = document.createElement("link");
-      canonicalLink.rel = "canonical";
-      document.head.appendChild(canonicalLink);
-    }
-    canonicalLink.href = window.location.href;
-
-    // Open Graph Tags
-    const setOgTag = (property, value) => {
-      let tag = document.querySelector(`meta[property="${property}"]`);
-      if (!tag) {
-        tag = document.createElement("meta");
-        tag.setAttribute("property", property);
-        document.head.appendChild(tag);
-      }
-      tag.content = value;
-    };
-
-    setOgTag("og:title", "GLP-1 Medicines for Diabetes & Weight Loss | WellMeds");
-    setOgTag("og:description", "Browse GLP-1 medicines for diabetes and weight management available at WellMeds.");
-    setOgTag("og:url", window.location.href);
-    setOgTag("og:type", "website");
   }, []);
 
   const fetchProducts = useCallback(async () => {
@@ -107,8 +71,19 @@ const GLP1MedicinesPage = () => {
     return pages;
   };
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "GLP-1 Medicines", url: "/glp-1-medicines" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title="GLP-1 Medicines for Diabetes & Weight Loss | WellMeds"
+        description="Browse GLP-1 medicines for diabetes management and weight loss available at WellMeds. Authentic prescription formulations and cold-chain shipping."
+        canonical="/glp-1-medicines"
+        breadcrumbs={breadcrumbs}
+      />
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">
         <Link to="/" className="hover:text-[#004782] transition-colors">Home</Link>

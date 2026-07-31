@@ -4,6 +4,8 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { FlaskConical, ChevronRight, ArrowRight } from "lucide-react";
 
+import SEO from "../components/common/SEO";
+
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
 const BG_STYLE = {
   background: `
@@ -22,15 +24,6 @@ const MoleculesPage = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   useEffect(() => {
-    document.title = "Molecule Reference Index | WellMeds Specialty Pharmacy";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Browse WellMeds complete molecule reference library. Active pharmaceutical ingredients, mechanisms of action, clinical uses, and available brands.");
-
     const fetchMolecules = async () => {
       try {
         const list = await api.getMolecules();
@@ -66,8 +59,28 @@ const MoleculesPage = () => {
 
   const displayLetters = activeLetter === "ALL" ? availableLetters : availableLetters.filter((l) => l === activeLetter);
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Molecule Index", url: "/molecules" },
+  ];
+
+  const moleculesSchema = {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    "name": "Molecule Reference Index",
+    "url": "https://wellmeds.in/molecules",
+    "description": "Browse WellMeds complete molecule reference library. Active pharmaceutical ingredients, mechanisms of action, clinical uses, and available brands."
+  };
+
   return (
     <div className="min-h-screen text-black" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+      <SEO
+        title="Molecule Reference Index | WellMeds Specialty Pharmacy"
+        description="Browse WellMeds complete molecule reference library. Active pharmaceutical ingredients, mechanisms of action, clinical uses, and available brand formulations."
+        canonical="/molecules"
+        breadcrumbs={breadcrumbs}
+        schema={moleculesSchema}
+      />
 
       {/* ── HERO HEADER (Aligned with Navbar max-w-[1400px] & px-6 lg:px-10) ── */}
       <div

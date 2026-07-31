@@ -12,6 +12,7 @@ import {
   ChevronsRight,
   FlaskConical
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -149,8 +150,26 @@ const ProductsPage = () => {
     return pages;
   };
 
+  const pageTitle = categoryParam
+    ? `${categoryParam} Medicines & Formulations | WellMeds`
+    : specialityParam
+    ? `${specialityParam} Medications | WellMeds`
+    : "Shop Prescription Medicines & Healthcare Catalog | WellMeds";
+
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Products", url: "/products" },
+  ];
+  if (categoryParam) breadcrumbs.push({ name: categoryParam, url: `/products?category=${encodeURIComponent(categoryParam)}` });
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title={pageTitle}
+        description="Browse authentic prescription medicines, chronic disease care, vitamins, and healthcare products online at WellMeds. Licensed pharmacy fulfillment and express delivery across India."
+        canonical="/products"
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Breadcrumbs & Header */}
       <div className="mb-lg">

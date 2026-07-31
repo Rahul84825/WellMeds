@@ -140,6 +140,7 @@ export const generatePagesSitemap = async (siteUrl) => {
   const pages = [
     { url: "/", priority: "1.0", changefreq: "daily" },
     { url: "/categories", priority: "0.9", changefreq: "daily" },
+    { url: "/brands", priority: "0.9", changefreq: "daily" },
     { url: "/super-speciality", priority: "0.8", changefreq: "weekly" },
     { url: "/molecules", priority: "0.8", changefreq: "weekly" },
     { url: "/wellness", priority: "0.8", changefreq: "weekly" },
@@ -525,6 +526,77 @@ export const generateBlogSitemap = async (siteUrl) => {
 };
 
 /**
+ * Generate Brands Sitemap XML.
+ * @param {string} siteUrl 
+ * @returns {Promise<string>}
+ */
+export const generateBrandsSitemap = async (siteUrl) => {
+  const cleanSiteUrl = siteUrl.replace(/\/$/, "");
+
+  let brands = [];
+  try {
+    const products = await Product.find({
+      isDeleted: { $ne: true },
+      status: { $ne: "Disabled" },
+      visibility: { $ne: "Hidden" },
+    })
+      .select("brand manufacturer updatedAt createdAt")
+      .lean();
+
+    const brandMap = new Map();
+    products.forEach((p) => {
+      let brandName = "";
+      if (typeof p.brand === "string" && p.brand.trim()) {
+        brandName = p.brand.trim();
+      } else if (p.brand && typeof p.brand === "object" && p.brand.name) {
+        brandName = p.brand.name.trim();
+      } else if (typeof p.manufacturer === "string" && p.manufacturer.trim()) {
+        brandName = p.manufacturer.trim();
+      }
+
+      if (brandName) {
+        const slug = brandName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+
+        if (slug && !brandMap.has(slug)) {
+          brandMap.set(slug, {
+            name: brandName,
+            slug,
+            lastmod: p.updatedAt || p.createdAt,
+          });
+        }
+      }
+    });
+
+    brands = Array.from(brandMap.values());
+  } catch (err) {
+    console.error("Brands Sitemap: Error querying DB:", err.message);
+  }
+
+  let urlNodes = "";
+
+  urlNodes += buildUrlNode({
+    loc: `${cleanSiteUrl}/brands`,
+    lastmod: new Date(),
+    changefreq: "daily",
+    priority: 0.9,
+  });
+
+  brands.forEach((b) => {
+    urlNodes += buildUrlNode({
+      loc: `${cleanSiteUrl}/brands/${b.slug}`,
+      lastmod: b.lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    });
+  });
+
+  return wrapUrlSet(urlNodes);
+};
+
+/**
  * Generate Sitemap Index XML referencing all available dynamic sitemaps.
  * @param {string} siteUrl 
  * @returns {Promise<string>}
@@ -601,7 +673,13 @@ export const generateSitemapIndex = async (siteUrl) => {
     });
   }
 
-  // 4. Molecule Sitemap
+  // 4. Brand Sitemap
+  sitemaps.push({
+    loc: `${cleanSiteUrl}/sitemap-brands.xml`,
+    lastmod: new Date(),
+  });
+
+  // 5. Molecule Sitemap
   try {
     const moleculeFilter = { slug: { $exists: true, $ne: "" }, isActive: { $ne: false } };
     const latestMolecule = await Molecule.findOne(moleculeFilter)
@@ -621,7 +699,7 @@ export const generateSitemapIndex = async (siteUrl) => {
     });
   }
 
-  // 5. Speciality Sitemap
+  // 6. Speciality Sitemap
   try {
     const specialityFilter = { slug: { $exists: true, $ne: "" }, active: { $ne: false } };
     const latestSpeciality = await MedicalSpeciality.findOne(specialityFilter)
@@ -641,7 +719,7 @@ export const generateSitemapIndex = async (siteUrl) => {
     });
   }
 
-  // 6. Surgical Category Sitemap
+  // 7. Surgical Category Sitemap
   try {
     const surgicalFilter = { slug: { $exists: true, $ne: "" }, isActive: { $ne: false } };
     const latestSurgical = await SurgicalCategory.findOne(surgicalFilter)
@@ -661,7 +739,7 @@ export const generateSitemapIndex = async (siteUrl) => {
     });
   }
 
-  // 7. Blog Sitemap
+  // 8. Blog Sitemap
   try {
     sitemaps.push({
       loc: `${cleanSiteUrl}/sitemap-blog.xml`,
@@ -673,3 +751,4 @@ export const generateSitemapIndex = async (siteUrl) => {
 
   return wrapSitemapIndex(sitemaps);
 };
+

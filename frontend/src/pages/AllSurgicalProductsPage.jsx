@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ShieldAlert
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 
 const AllSurgicalProductsPage = () => {
   const navigate = useNavigate();
@@ -22,26 +23,6 @@ const AllSurgicalProductsPage = () => {
   const [sortBy, setSortBy] = useState("name_asc");
 
   const LIMIT = 24;
-
-  // SEO configuration
-  useEffect(() => {
-    document.title = "Shop All Surgical Products & Clinic Equipment | WellMeds";
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", "Browse and purchase from our comprehensive clinical grade catalog of surgical instruments, dressings, needles, diagnostics, and patient monitors.");
-
-    let canonical = document.querySelector("link[rel='canonical']");
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      document.head.appendChild(canonical);
-    }
-    canonical.href = window.location.href;
-  }, []);
 
   // Debounce search value
   useEffect(() => {
@@ -92,8 +73,20 @@ const AllSurgicalProductsPage = () => {
   const totalPages = Math.ceil(totalProducts / LIMIT) || 1;
   const sortedProducts = getSortedProducts();
 
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Surgical", url: "/surgical" },
+    { name: "All Surgical Products", url: "/surgical/all" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+      <SEO
+        title="Shop All Surgical Products & Clinic Equipment | WellMeds"
+        description="Browse and purchase from our comprehensive clinical grade catalog of surgical instruments, dressings, needles, diagnostics, and patient monitors."
+        canonical="/surgical/all"
+        breadcrumbs={breadcrumbs}
+      />
       
       {/* Breadcrumbs */}
       <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">
