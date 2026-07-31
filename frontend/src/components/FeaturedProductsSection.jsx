@@ -62,18 +62,27 @@ export const FeaturedProductsSection = () => {
   const displayedProducts = featuredProducts.slice(0, 8);
 
   return (
-    <section className="py-12 md:py-14 home-section-container max-w-full lg:max-w-[82%] mx-auto bg-white dark:bg-zinc-950">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-10 gap-2">
+    <section className="py-12 md:py-14 w-full bg-white dark:bg-zinc-950">
+      <div className="home-section-container">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight m-0">
-            Best Sellers
+          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <span>MOST REQUESTED</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+            <span>BEST SELLERS & CHRONIC THERAPIES</span>
+          </div>
+          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+            Best Sellers & Patient Favorites
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
-            Discover our highest rated medicines and customer-favorite healthcare products.
+          <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
+            Discover our highest rated medicines, chronic therapy plans, and customer-favorite healthcare products.
           </p>
         </div>
-        <Link to="/products" className="text-primary dark:text-primary-fixed-dim font-label-md hover:underline flex items-center gap-xs shrink-0 self-start md:self-auto">
-          <span>Browse Products</span>
+        <Link 
+          to="/products" 
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto shrink-0"
+        >
+          <span>BROWSE ALL PRODUCTS</span>
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
         </Link>
       </div>
@@ -82,18 +91,18 @@ export const FeaturedProductsSection = () => {
         {/* Left Arrow Button */}
         <button
           onClick={() => handleScroll("left")}
-          className={`absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-md text-[#038076] hover:scale-105 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#038076] cursor-pointer ${
+          className={`absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] hover:bg-[#157a6d] hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#157a6d] cursor-pointer ${
             canScrollLeft ? "md:flex" : "md:hidden"
           } hidden`}
           aria-label="Previous Products"
         >
-          <ChevronLeft size={24} className="stroke-[3]" />
+          <ChevronLeft size={20} />
         </button>
 
         {/* Right Arrow Button */}
         <button
           onClick={() => handleScroll("right")}
-          className={`absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-md text-[#038076] hover:scale-105 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#038076] cursor-pointer ${
+          className={`absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] hover:bg-[#157a6d] hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#157a6d] cursor-pointer ${
             canScrollRight ? "md:flex" : "md:hidden"
           } hidden`}
           aria-label="Next Products"
@@ -123,7 +132,8 @@ export const FeaturedProductsSection = () => {
           ))}
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   );
 };
 

@@ -830,69 +830,25 @@ const CouponCarousel = () => {
       <div className="home-section-container">
 
         {/* ── Section Header ──────────────────────────────────── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            marginBottom: "32px",
-          }}
-        >
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "#038076",
-                marginBottom: "6px",
-              }}
-            >
-              Exclusive Deals
-            </p>
-            <h2
-              style={{
-                fontSize: "clamp(22px, 3vw, 30px)",
-                fontWeight: 800,
-                color: "#0f172a",
-                lineHeight: 1.2,
-                margin: 0,
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+              <span>SPECIALTY DISCOUNTS</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+              <span>VERIFIED VOUCHERS</span>
+            </div>
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
               Active Offers & Coupons
             </h2>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#64748b",
-                marginTop: "6px",
-                fontWeight: 400,
-              }}
-            >
+            <p className="font-sans text-xs text-[#3f544d] dark:text-zinc-400 mt-1">
               Copy a coupon code and apply it at checkout for instant savings.
             </p>
           </div>
 
           {/* Dot count badge */}
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              fontSize: "12px",
-              fontWeight: 700,
-              color: "#038076",
-              background: "rgba(3,128,118,0.08)",
-              border: "1px solid rgba(3,128,118,0.20)",
-              padding: "6px 14px",
-              borderRadius: "999px",
-              flexShrink: 0,
-            }}
-          >
-            <Zap size={12} />
-            {coupons.length} Active Offer{coupons.length !== 1 ? "s" : ""}
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e7f0ea] dark:bg-zinc-800 border border-[#c3d4cc] dark:border-zinc-700 font-clinical-mono text-xs font-bold text-[#157a6d]">
+            <Zap size={13} />
+            {coupons.length} ACTIVE OFFERS
           </span>
         </div>
 

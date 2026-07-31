@@ -134,21 +134,26 @@ const SurgicalProductsSection = () => {
       <div className="home-section-container">
         
         {/* Section Header */}
-        <div className="flex items-center md:items-end justify-between mb-8 md:mb-10 surgical-section-header">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-zinc-100 leading-tight m-0">
-              Surgical Supplies
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+              <span>MEDICAL DEVICES</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+              <span>SURGICAL EQUIPMENT</span>
+            </div>
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+              Surgical & Clinical Supplies
             </h2>
           </div>
 
-          {/* View All pill button */}
+          {/* View All button */}
           <Link
             to="/surgical/categories"
             aria-label="View all surgical categories"
-            className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-[9px] rounded-full border-[1.5px] border-[#0e9f7e] text-[#0e9f7e] dark:text-[#84d6b9] dark:border-[#84d6b9] text-[13px] font-semibold no-underline bg-transparent transition-all duration-200 shrink-0 whitespace-nowrap min-h-[36px] md:min-h-0 hover:bg-[#0e9f7e] hover:text-white dark:hover:bg-[#84d6b9] dark:hover:text-zinc-950"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto"
           >
-            View All
-            <ChevronRight size={15} />
+            <span>VIEW SURGICAL CATALOG</span>
+            <ChevronRight size={14} />
           </Link>
         </div>
 
@@ -160,9 +165,9 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollLeft}
               aria-label="Scroll categories left"
-              className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={20} />
             </button>
           )}
 
@@ -171,9 +176,9 @@ const SurgicalProductsSection = () => {
             <button
               onClick={scrollRight}
               aria-label="Scroll categories right"
-              className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-slate-200 dark:border-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.10)] flex items-center justify-center cursor-pointer text-slate-700 dark:text-zinc-300 transition-all duration-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-[1.08] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#038076] focus-visible:ring-offset-3"
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={20} />
             </button>
           )}
 

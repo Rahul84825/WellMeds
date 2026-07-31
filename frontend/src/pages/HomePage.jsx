@@ -3,13 +3,13 @@ import Hero from "../components/HeroBanner";
 import QuickActionCards from "../components/QuickActionCards";
 import PromoCarousel from "../components/home/PromoCarousel";
 import CategorySection from "../components/CategorySection";
-import FeaturedProductsSection from "../components/FeaturedProductsSection";
 import CouponCarousel from "../components/CouponCarousel";
 import WhyChooseWellMeds from "../components/WhyChooseWellMeds";
-import clinicalBannerImg from "../assets/clinical/clinical_Excellence.png";
 import UploadPrescriptionBanner from "../components/UploadPrescriptionBanner";
 import WellnessProductsSection from "../components/WellnessProductsSection";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
+import HealthSupplementsSection from "../components/HealthSupplementsSection";
+import GLP1ProductsSection from "../components/GLP1ProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ConsultationModal from "../components/ConsultationModal";
 import HomeSectionContainer from "../components/layout/HomeSectionContainer";
@@ -58,13 +58,13 @@ const HomePage = () => {
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title="Online Pharmacy & Medical Supplies | Buy Medicines Online"
+        title="WellMeds Specialty Pharmacy | Authentic Medicines & Medical Supplies"
         description="WellMeds is India's trusted online pharmacy delivering authentic prescription medicines, wellness products, surgical devices, and specialty healthcare directly to your doorstep."
         keywords="online pharmacy, buy medicines online, prescription drugs, surgical supplies, wellness products, medical equipment India"
         schema={homeSchema}
       />
 
-      {/* Hero Banner */}
+      {/* Hero Banner — UNCHANGED (Design System Source of Truth) */}
       <Hero />
 
       {/* Quick Action Cards Section */}
@@ -72,7 +72,7 @@ const HomePage = () => {
         <QuickActionCards />
       </HomeSectionContainer>
 
-      {/* NEW Promotional Carousel */}
+      {/* Promotional Banners Carousel */}
       <HomeSectionContainer className="mt-8 md:mt-10">
         <PromoCarousel />
       </HomeSectionContainer>
@@ -88,31 +88,23 @@ const HomePage = () => {
 
       {/* Upload Rx Prescription Banner */}
       <UploadPrescriptionBanner />
+      
+      <LazySection minHeight="300px">
+        <WellnessProductsSection />
+      </LazySection>
 
       {/* Below the fold lazy sections */}
       <LazySection minHeight="250px">
         <TestimonialsSection />
       </LazySection>
 
+
       <LazySection minHeight="300px">
-        <WellnessProductsSection />
+        <HealthSupplementsSection />
       </LazySection>
 
-      {/* Clinical Excellence Banner */}
-      <section className="mt-8 mb-10 md:mt-[48px] md:mb-[56px] home-section-container max-w-full lg:max-w-[82%] mx-auto">
-        <div className="w-full h-auto aspect-[3072/1408] sm:h-[320px] sm:aspect-none md:h-[380px] lg:h-[480px] relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-md sm:shadow-lg bg-[#d5f3ec] dark:bg-zinc-900 group hover:scale-[1.01] transition-all duration-300">
-          <img
-            src={clinicalBannerImg}
-            alt="Clinical Excellence & Safety Assured"
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-contain sm:object-cover sm:object-[center_60%] rounded-2xl sm:rounded-3xl"
-          />
-        </div>
-      </section>
-
-      <LazySection minHeight="350px">
-        <FeaturedProductsSection />
+      <LazySection minHeight="300px">
+        <GLP1ProductsSection />
       </LazySection>
 
       <LazySection minHeight="200px">

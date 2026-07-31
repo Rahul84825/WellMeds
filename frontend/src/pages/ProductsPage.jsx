@@ -91,13 +91,21 @@ const ProductsPage = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
+      const isGLP1Param = searchParams.get("isGLP1Medicine");
+      const isSuppParam = searchParams.get("isHealthSupplement");
+      const isSurgParam = searchParams.get("isSurgical");
+      const prodTypeParam = searchParams.get("productType");
+
       const data = await api.getProducts({
         page: currentPage,
         limit,
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
         speciality: specialityParam || undefined,
-        productType: "medicine",
+        productType: prodTypeParam || undefined,
+        isGLP1Medicine: isGLP1Param === "true" ? true : undefined,
+        isHealthSupplement: isSuppParam === "true" ? true : undefined,
+        isSurgical: isSurgParam === "true" ? true : undefined,
       });
       setProducts(data.products || []);
       setTotalProducts(data.total || 0);
@@ -106,7 +114,7 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, categoryParam, specialityParam]);
+  }, [currentPage, debouncedSearch, categoryParam, specialityParam, searchParams]);
 
   useEffect(() => {
     fetchProducts();

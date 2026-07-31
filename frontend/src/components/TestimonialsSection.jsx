@@ -211,23 +211,28 @@ export const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
-      <div className="home-section-container max-w-full lg:max-w-[82%] mx-auto">
+    <section className="py-12 md:py-16 w-full bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
+      <div className="home-section-container">
         
-        {/* Section Header with Top View All Row */}
-        <div className="flex justify-between items-end mb-8 md:mb-12 border-b border-slate-100 dark:border-zinc-900 pb-md">
-          <div className="text-left max-w-2xl space-y-xs">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
-              What Our <span className="text-[#038076]">Customers Say</span>
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
+          <div>
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+              <span>CLINICAL TRUST</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+              <span>PATIENT REVIEWS</span>
+            </div>
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+              Patient & Customer Experiences
             </h2>
           </div>
 
-          <div className="shrink-0 pb-xs">
+          <div className="shrink-0">
             <a
               href="/about"
-              className="inline-flex items-center justify-center px-lg h-9 rounded-full border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-900 dark:text-zinc-200 hover:bg-[#038076] hover:text-white hover:border-[#038076] transition-all duration-200 select-none cursor-pointer"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200"
             >
-              View All Reviews
+              <span>VIEW ALL REVIEWS</span>
             </a>
           </div>
         </div>

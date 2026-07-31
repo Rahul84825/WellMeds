@@ -1,5 +1,5 @@
+import React from "react";
 import {
-  Hospital,
   ShieldCheck,
   IndianRupee,
   Truck,
@@ -7,161 +7,131 @@ import {
   Stethoscope,
   ArrowRight,
   Sparkles,
+  Hospital,
 } from "lucide-react";
 
+/**
+ * WhyChooseWellMeds — WellMeds Design System V2
+ * Clinical trust and specialty pharmacy advantage cards.
+ */
 const benefits = [
   {
+    num: "01",
     id: "genuine",
     title: "100% Genuine Medicines",
-    description: "Sourced directly from manufacturers with full batch traceability.",
+    description: "Sourced directly from verified pharmaceutical manufacturers with full batch traceability.",
     icon: ShieldCheck,
-    accent: "#038076",
-    bgAccent: "bg-[#038076]/10",
   },
   {
+    num: "02",
     id: "pricing",
-    title: "Affordable Pricing",
-    description: "Significant savings on long-term and chronic treatment plans.",
+    title: "Affordable Chronic Care",
+    description: "Significant savings and transparent pricing on long-term specialty and chronic treatment plans.",
     icon: IndianRupee,
-    accent: "#004782",
-    bgAccent: "bg-[#004782]/10",
   },
   {
+    num: "03",
     id: "support",
-    title: "Pharmacist Support",
-    description: "Licensed pharmacists guide you on dosage, storage, and alternatives.",
+    title: "Licensed Pharmacist Support",
+    description: "24/7 certified pharmacists guide you on dosage, cold-chain storage, and therapeutic alternatives.",
     icon: Stethoscope,
-    accent: "#038076",
-    bgAccent: "bg-[#038076]/10",
   },
   {
+    num: "04",
     id: "delivery",
-    title: "Fast Delivery",
-    description: "Rapid delivery across Pune and reliable shipping pan-India.",
+    title: "Express & Cold-Chain Logistics",
+    description: "Rapid local dispatch in Pune and temperature-controlled shipping across pan-India.",
     icon: Truck,
-    accent: "#004782",
-    bgAccent: "bg-[#004782]/10",
   },
   {
+    num: "05",
     id: "packaging",
-    title: "Safe Packaging",
-    description: "Tamper-evident, temperature-conscious packaging on every order.",
+    title: "Tamper-Evident Packaging",
+    description: "Multi-layer thermal insulated packaging for sensitive biologicals and hospital supplies.",
     icon: PackageCheck,
-    accent: "#038076",
-    bgAccent: "bg-[#038076]/10",
   },
 ];
 
 const WhyChooseWellMeds = () => {
   return (
-    <section className="relative py-16 md:py-24 bg-slate-50/50 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
-      {/* Subtle Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-[#038076]/10 to-transparent dark:from-[#038076]/15 blur-[100px] rounded-full pointer-events-none -z-10" />
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 md:py-20 w-full bg-white dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
+      <div className="home-section-container">
         
-        {/* ── Centered Header ── */}
-        <div className="max-w-2xl mx-auto text-center mb-16 md:mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-[#038076]" />
-            <span className="text-xs font-bold tracking-widest text-[#038076] uppercase">
-              The WellMeds Advantage
-            </span>
+        {/* Header */}
+        <div className="max-w-2xl mx-auto text-center mb-12 md:mb-16">
+          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-2 flex items-center justify-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>THE WELLMEDS ADVANTAGE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+            <span>CLINICAL STANDARDS</span>
           </div>
-          
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
-            Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#004782] to-[#038076]">WellMeds</span>?
+
+          <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight mb-3">
+            Why Choose WellMeds Specialty Pharmacy?
           </h2>
-          
-          <p className="text-base md:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">
-            Your trusted partner in health, delivering authentic medicines, professional support, and absolute clinical safety directly to your door.
+
+          <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 leading-relaxed max-w-xl mx-auto">
+            Combining certified clinical excellence, cold-chain integrity, and compassionate patient care.
           </p>
         </div>
 
-        {/* ── Benefits Grid (3 Columns) ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {/* 5 Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
           {benefits.map((b) => {
             const Icon = b.icon;
             return (
               <div
                 key={b.id}
-                className="group relative bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-200/80 dark:border-zinc-800 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:border-[#038076]/30 overflow-hidden flex flex-col items-center text-center"
+                className="group relative bg-[#f4f9f7] dark:bg-zinc-900 p-6 rounded-xl border border-[#dde8e3] dark:border-zinc-800 hover:border-[#157a6d]/50 hover:bg-white dark:hover:bg-zinc-850 hover:shadow-[0_10px_28px_rgba(23,43,38,0.06)] transition-all duration-300 text-left flex flex-col justify-between"
               >
-                {/* Hover Gradient Overlay */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: `radial-gradient(circle at center, ${b.accent}04 0%, transparent 70%)` }}
-                />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-[#e7f0ea] dark:bg-zinc-800 border border-[#c3d4cc] dark:border-zinc-700 flex items-center justify-center text-[#157a6d] group-hover:bg-[#157a6d] group-hover:text-white transition-colors">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="font-clinical-mono text-xs font-bold text-[#b08d3e] bg-[#fdf8ee] dark:bg-amber-950/40 border border-[#e8d2a5] px-2 py-0.5 rounded">
+                      {b.num}
+                    </span>
+                  </div>
 
-                <div className={`relative z-10 w-16 h-16 mb-6 rounded-2xl ${b.bgAccent} flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                  <Icon className="w-7 h-7" style={{ color: b.accent }} strokeWidth={2} />
+                  <h3 className="font-editorial text-base font-semibold text-[#172b26] dark:text-zinc-100 mb-2 group-hover:text-[#157a6d] transition-colors">
+                    {b.title}
+                  </h3>
+
+                  <p className="font-sans text-xs text-[#3f544d] dark:text-zinc-400 leading-relaxed">
+                    {b.description}
+                  </p>
                 </div>
-
-                <h4 className="relative z-10 text-lg font-bold text-slate-900 dark:text-white mb-3 transition-colors group-hover:text-[#038076]">
-                  {b.title}
-                </h4>
-                
-                <p className="relative z-10 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
-                  {b.description}
-                </p>
               </div>
             );
           })}
-        </div>
 
-        {/* ── Full-Width Horizontal Banner ── */}
-        <div className="relative w-full rounded-[2.5rem] overflow-hidden p-8 md:p-12 shadow-2xl"
-             style={{ background: "linear-gradient(135deg, #004782 0%, #038076 100%)" }}>
-          
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#004782]/40 blur-3xl rounded-full translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
-            
-            {/* Left Content */}
-            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 lg:max-w-2xl">
-              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-                <Hospital className="w-8 h-8 text-white" />
+          {/* 6th Card: Trusted Healthcare Banner Tile */}
+          <div className="group relative bg-[#157a6d] p-6 rounded-xl text-white flex flex-col justify-between shadow-sm">
+            <div>
+              <div className="font-clinical-mono text-[10px] font-bold tracking-widest uppercase text-[#e7f0ea] mb-2 flex items-center gap-1.5">
+                <Hospital className="w-3.5 h-3.5" />
+                <span>SPECIALTY THERAPIES</span>
               </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
-                  Trusted by Patients Across India
-                </h3>
-                <p className="text-white/80 leading-relaxed text-sm md:text-base">
-                  Families navigating chronic illness, cancer care, and transplant therapies trust WellMeds for authentic medicines with complete clinical tracking and expert support.
-                </p>
-              </div>
+              <h3 className="font-editorial text-lg font-semibold text-white mb-2 leading-snug">
+                Trusted by 50,000+ Chronic & Specialty Patients
+              </h3>
+              <p className="font-sans text-xs text-white/90 leading-relaxed">
+                Dedicated support for oncology, nephrology, cardiology, and rare disease treatment plans.
+              </p>
             </div>
-
-            {/* Right Content (Badge & CTA) */}
-            <div className="flex flex-col sm:flex-row items-center gap-5 flex-shrink-0">
-              <div className="flex items-center gap-4 bg-white/10 border border-white/15 backdrop-blur-md rounded-2xl p-4 shadow-inner">
-                <span className="text-3xl font-black text-white tracking-tighter">
-                  100<span className="text-[#038076]">%</span>
-                </span>
-                <div className="w-px h-10 bg-white/20" />
-                <div className="text-left">
-                  <p className="text-xs font-bold uppercase tracking-widest text-white">Genuine Meds</p>
-                  <p className="text-[11px] text-white/70 mt-0.5">Sourced from manufacturers</p>
-                </div>
-              </div>
-
-              <a
-                href="/about"
-                className="group flex items-center gap-2 bg-white text-[#004782] px-6 py-4 rounded-2xl text-sm font-bold shadow-lg hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:translate-y-0"
-              >
-                Learn More
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </a>
-            </div>
-
+            <a
+              href="/about"
+              className="mt-4 inline-flex items-center gap-1.5 font-clinical-mono text-xs font-bold uppercase tracking-wider text-white hover:underline"
+            >
+              <span>LEARN MORE ABOUT US</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </a>
           </div>
         </div>
-
       </div>
     </section>
   );
 };
 
-export default WhyChooseWellMeds;
+export default React.memo(WhyChooseWellMeds);

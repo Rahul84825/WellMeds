@@ -212,10 +212,10 @@ const PromoSlide = ({ slide, isActive }) => {
         <div className={`w-full lg:w-[48%] space-y-md text-left ${
           isActive ? "animate-slide-in-left" : ""
         }`}>
-          <h2 className="font-headline-lg text-2xl sm:text-3xl md:text-4xl font-black leading-tight bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
+          <h2 className="font-editorial text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-white drop-shadow-xs">
             {slide.title}
           </h2>
-          <p className="font-body-md text-sm md:text-base text-white/85 leading-relaxed font-medium">
+          <p className="font-sans text-sm md:text-base text-white/90 leading-relaxed font-medium">
             {slide.subtitle}
           </p>
 
@@ -230,10 +230,10 @@ const PromoSlide = ({ slide, isActive }) => {
                     href={btn.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`h-12 px-xl rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all shadow-md select-none cursor-pointer outline-none ${
+                    className={`h-11 px-6 rounded-lg font-clinical-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-xs active:scale-95 transition-all shadow-sm select-none cursor-pointer outline-none ${
                       isPrimary
-                        ? "bg-[#038076] hover:bg-[#038076]/90 text-white shadow-emerald-900/20"
-                        : "border border-white/30 hover:bg-white/10 text-white"
+                        ? "bg-[#157a6d] hover:bg-[#0f6157] text-white"
+                        : "border border-white/40 hover:bg-white/10 text-white"
                     }`}
                   >
                     {btn.label === "Request via WhatsApp" && <MessageCircle size={16} />}
@@ -246,10 +246,10 @@ const PromoSlide = ({ slide, isActive }) => {
                 <Link
                   key={bIdx}
                   to={btn.to}
-                  className={`h-12 px-xl rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-xs active:scale-95 transition-all shadow-md select-none cursor-pointer outline-none ${
+                  className={`h-11 px-6 rounded-lg font-clinical-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-xs active:scale-95 transition-all shadow-sm select-none cursor-pointer outline-none ${
                     isPrimary
-                      ? "bg-[#038076] hover:bg-[#038076]/90 text-white shadow-emerald-900/20"
-                      : "border border-white/30 hover:bg-white/10 text-white"
+                      ? "bg-[#157a6d] hover:bg-[#0f6157] text-white"
+                      : "border border-white/40 hover:bg-white/10 text-white"
                   }`}
                 >
                   {btn.label}

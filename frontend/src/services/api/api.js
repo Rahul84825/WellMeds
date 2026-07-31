@@ -71,7 +71,7 @@ export const refreshSessionToken = async () => {
       refreshPromise = null;
       processQueue(error, null);
 
-      const isAuthError = error.response && (error.response.status === 401 || error.response.status === 400);
+      const isAuthError = error.response && (error.response.status === 401 || error.response.status === 400 || error.response.status === 429);
       if (isAuthError) {
         localStorage.removeItem("medishop_token");
         localStorage.removeItem("medishop_refresh_token");

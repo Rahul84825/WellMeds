@@ -130,141 +130,53 @@ const CategorySection = () => {
     >
       <div className="home-section-container">
 
-        {/* ── Section Header ─────────────────────────────────────── */}
-        <div
-          className="category-section-header"
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            marginBottom: "40px",
-          }}
-        >
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-zinc-100 leading-tight m-0">
-              Shop by Category
-            </h2>
+      {/* ── Section Header ─────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div>
+          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <span>SPECIALTY PHARMACY</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+            <span>CLINICAL CATALOG</span>
           </div>
-
-          {/* View All pill button */}
-          <Link
-            to="/categories"
-            className="category-section-view-all"
-            aria-label="View all product categories"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "9px 20px",
-              borderRadius: "999px",
-              border: "1.5px solid #0e9f7e",
-              color: "#0e9f7e",
-              fontSize: "13px",
-              fontWeight: 600,
-              textDecoration: "none",
-              background: "transparent",
-              transition: "all 200ms ease",
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#0e9f7e";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#0e9f7e";
-            }}
-          >
-            View All
-            <ChevronRight size={15} />
-          </Link>
+          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+            Shop by Category
+          </h2>
         </div>
 
-        {/* ── Slider Wrapper (position relative for arrows) ──────── */}
-        <div style={{ position: "relative" }}>
+        {/* View All button */}
+        <Link
+          to="/categories"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto"
+          aria-label="View all product categories"
+        >
+          <span>VIEW ALL CATEGORIES</span>
+          <ChevronRight size={14} />
+        </Link>
+      </div>
 
-          {/* Left Arrow */}
-          {canScrollLeft && (
-            <button
-              onClick={scrollLeft}
-              aria-label="Scroll categories left"
-              style={{
-                position: "absolute",
-                left: "-20px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                zIndex: 10,
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "#ffffff",
-                border: "1.5px solid #e2e8f0",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: "#334155",
-                transition: "all 200ms ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#038076";
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "#038076";
-                e.currentTarget.style.transform = "translateY(-50%) scale(1.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.color = "#334155";
-                e.currentTarget.style.borderColor = "#e2e8f0";
-                e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-              }}
-            >
-              <ChevronLeft size={18} />
-            </button>
-          )}
+      {/* ── Slider Wrapper ──────── */}
+      <div className="relative">
+        {/* Left Arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={scrollLeft}
+            aria-label="Scroll categories left"
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
 
-          {/* Right Arrow */}
-          {canScrollRight && (
-            <button
-              onClick={scrollRight}
-              aria-label="Scroll categories right"
-              style={{
-                position: "absolute",
-                right: "-20px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                zIndex: 10,
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "#ffffff",
-                border: "1.5px solid #e2e8f0",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: "#334155",
-                transition: "all 200ms ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#038076";
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "#038076";
-                e.currentTarget.style.transform = "translateY(-50%) scale(1.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.color = "#334155";
-                e.currentTarget.style.borderColor = "#e2e8f0";
-                e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-              }}
-            >
-              <ChevronRight size={18} />
-            </button>
-          )}
+        {/* Right Arrow */}
+        {canScrollRight && (
+          <button
+            onClick={scrollRight}
+            aria-label="Scroll categories right"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
 
           {/* ── Scrollable Track ─────────────────────────────────── */}
           <div
