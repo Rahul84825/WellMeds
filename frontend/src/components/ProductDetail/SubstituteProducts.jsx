@@ -23,17 +23,17 @@ const getSubstituteComparison = (item, baseProduct) => {
   const basePrice = hasUnitCalc ? baseUnit : baseProduct.price;
   const itemPrice = hasUnitCalc ? itemUnit : item.price;
 
-  const diffPercent = basePrice > 0 
-    ? Math.round(((itemPrice - basePrice) / basePrice) * 100) 
+  const diffPercent = basePrice > 0
+    ? Math.round(((itemPrice - basePrice) / basePrice) * 100)
     : 0;
 
   const isCostlier = diffPercent > 0;
   const isCheaper = diffPercent < 0;
 
-  const comparisonLabel = diffPercent === 0 
-    ? "Same price" 
-    : isCostlier 
-      ? `${diffPercent}% costlier` 
+  const comparisonLabel = diffPercent === 0
+    ? "Same price"
+    : isCostlier
+      ? `${diffPercent}% costlier`
       : `${Math.abs(diffPercent)}% cheaper`;
 
   const dosageForm = item.productSpecifications?.dosageForm || item.productSpecifications?.packSize || item.packSize || "Injection";
@@ -142,13 +142,12 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                     <p className="text-xs font-semibold text-[#172b26]">
                       ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                     </p>
-                    <p className={`text-[11px] font-bold mt-0.5 ${
-                      diffPercent === 0 
-                        ? "text-[#5f776e]" 
-                        : isCostlier 
-                          ? "text-red-600" 
-                          : "text-[#157a6d]"
-                    }`}>
+                    <p className={`text-[11px] font-bold mt-0.5 ${diffPercent === 0
+                      ? "text-[#5f776e]"
+                      : isCostlier
+                        ? "text-red-600"
+                        : "text-[#157a6d]"
+                      }`}>
                       {comparisonLabel}
                     </p>
                   </div>
@@ -171,13 +170,13 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
 
       {/* Centered Modal */}
       {isModalOpen && createPortal(
-        <div 
+        <div
           onClick={handleBackdropClick}
           aria-modal="true"
           role="dialog"
           className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-mono"
         >
-          <div 
+          <div
             ref={modalContainerRef}
             onClick={(e) => e.stopPropagation()}
             className="w-full sm:w-[92vw] max-w-[500px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 text-left z-[100000]"
@@ -221,13 +220,12 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                       <p className="text-xs font-semibold text-[#172b26] dark:text-zinc-200">
                         ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
                       </p>
-                      <p className={`text-[11px] font-bold mt-0.5 ${
-                        diffPercent === 0 
-                          ? "text-[#5f776e] dark:text-zinc-400" 
-                          : isCostlier 
-                            ? "text-red-600 dark:text-red-400" 
-                            : "text-[#157a6d] dark:text-[#84d6b9]"
-                      }`}>
+                      <p className={`text-[11px] font-bold mt-0.5 ${diffPercent === 0
+                        ? "text-[#5f776e] dark:text-zinc-400"
+                        : isCostlier
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-[#157a6d] dark:text-[#84d6b9]"
+                        }`}>
                         {comparisonLabel}
                       </p>
                     </div>

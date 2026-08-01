@@ -18,7 +18,7 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }
-            if (id.includes('axios') || id.includes('sonner')) {
+            if (id.includes('axios')) {
               return 'vendor-utils';
             }
           }

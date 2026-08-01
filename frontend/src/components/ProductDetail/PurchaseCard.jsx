@@ -52,13 +52,13 @@ const PurchaseCard = ({
   };
 
   return (
-    <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24 font-mono text-black">
+    <aside className="w-full max-w-[380px] mx-auto text-xs select-none lg:sticky lg:top-24 font-sans text-black">
       {/* Main Prescription Purchase Card */}
       <div className="pdp-paper-card p-5 space-y-4 text-left">
         {/* 1. Price Section */}
         <div className="space-y-1">
           <div className="flex items-baseline gap-2">
-            <span className="pdp-serif-title text-3xl font-bold text-[#157a6d] leading-none">
+            <span className="pdp-serif-title text-3xl font-bold text-[#157a6d] leading-none font-sans">
               {formatCurrency(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
@@ -67,7 +67,7 @@ const PurchaseCard = ({
               </span>
             )}
           </div>
-          <div className="flex justify-between items-center text-[11px] font-mono font-bold">
+          <div className="flex justify-between items-center text-[11px] font-sans font-bold">
             <span className="text-black">Inclusive of all taxes & GST</span>
             {product.originalPrice && product.originalPrice > product.price && (
               <span className="text-[#157a6d] font-extrabold bg-[#f4f9f7] px-2 py-0.5 rounded-sm border border-[#dde8e3]">
@@ -83,7 +83,7 @@ const PurchaseCard = ({
         {/* 2. Choose Pack Size (Variants Selector) */}
         {variants.length > 0 && (
           <div className="space-y-2 text-left">
-            <span className="block text-[10px] font-bold text-black uppercase tracking-wider">Select Packaging Option</span>
+            <span className="block text-[10px] font-bold text-black uppercase tracking-wider font-sans">Select Packaging Option</span>
             <div className="grid grid-cols-2 gap-2">
               {variants.map((v, idx) => {
                 const isSelected = selectedVariantIdx === idx;
@@ -99,7 +99,7 @@ const PurchaseCard = ({
                     }`}
                   >
                     <div className="p-2.5 flex justify-between items-center border-b border-[#dde8e3] w-full">
-                      <span className="font-bold text-xs text-black truncate max-w-[80%]">
+                      <span className="font-bold text-xs text-black truncate max-w-[80%] font-sans">
                         {v.name}
                       </span>
                       {isSelected ? (
@@ -111,7 +111,7 @@ const PurchaseCard = ({
                       )}
                     </div>
                     <div className="p-2.5 text-left w-full">
-                      <span className="font-bold text-[11px] text-black">
+                      <span className="font-bold text-[11px] text-black font-sans">
                         {formatCurrency(v.price)}/Unit
                       </span>
                     </div>
@@ -123,7 +123,7 @@ const PurchaseCard = ({
         )}
 
         {/* 3. Pack Description */}
-        <div className="text-center font-bold text-black uppercase tracking-wider text-[11px] py-1 bg-[#f4f9f7] rounded-sm border border-[#dde8e3]">
+        <div className="text-center font-bold text-black uppercase tracking-wider text-[11px] py-1 bg-[#f4f9f7] rounded-sm border border-[#dde8e3] font-sans">
           {packDescription}
         </div>
 
@@ -144,18 +144,18 @@ const PurchaseCard = ({
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity - 1)}
-                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold"
+                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold font-sans"
                 >
                   -
                 </button>
-                <span className="w-8 h-8 rounded-sm bg-[#157a6d] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                <span className="w-8 h-8 rounded-sm bg-[#157a6d] text-white flex items-center justify-center font-bold text-xs shadow-2xs font-sans">
                   {cartItem.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateQuantity(productId, cartItem.quantity + 1)}
                   disabled={cartItem.quantity >= (product.stock || 30)}
-                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold"
+                  className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold font-sans"
                 >
                   +
                 </button>
@@ -183,20 +183,17 @@ const PurchaseCard = ({
             </>
           )}
         </div>
-      </div>
 
-      {/* 6. Fulfillment / Delivery Summary Card */}
-      <div className="pdp-paper-card p-3.5 rounded-sm flex items-center gap-3 w-full mt-3 text-xs text-left">
-        <div className="w-9 h-9 rounded-sm bg-[#f4f9f7] border border-[#c3d4cc] flex items-center justify-center shrink-0 text-[#157a6d]">
-          <Calendar size={18} />
-        </div>
-        <div className="space-y-0.5 font-mono text-black font-bold">
-          <p className="text-black font-bold">
-            Delivering to: <span className="text-[#157a6d] font-bold">Pune, 411035</span>
-          </p>
-          <p className="text-black font-bold">
-            Estimated Delivery: <span className="text-[#157a6d] font-bold">3 - 4 Business Days</span>
-          </p>
+        {/* 5. Trust Badges Footer */}
+        <div className="pt-2 space-y-2 text-left font-sans text-xs text-black font-bold border-t border-dashed border-[#c3d4cc]">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={16} className="text-[#157a6d] shrink-0" />
+            <span>100% Genuine Pharmacy Stock</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Lock size={16} className="text-[#157a6d] shrink-0" />
+            <span>Encrypted Checkout & Secure Payment</span>
+          </div>
         </div>
       </div>
     </aside>

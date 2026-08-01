@@ -8,7 +8,6 @@ import AddressCard from "../components/address/AddressCard";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import SEO from "../components/common/SEO";
-import { toast } from "sonner";
 import { 
   UploadCloud, 
   FileText, 
@@ -109,8 +108,6 @@ const UploadPrescriptionPage = () => {
     const validFiles = files.filter((f) => {
       const isValidType = ["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(f.type) || f.name.endsWith(".pdf");
       const isValidSize = f.size <= 10 * 1024 * 1024; // 10MB
-      if (!isValidType) toast.error(`File "${f.name}" format not supported. Use JPG, PNG, or PDF.`);
-      if (!isValidSize) toast.error(`File "${f.name}" exceeds 10MB limit.`);
       return isValidType && isValidSize;
     });
 
@@ -131,12 +128,10 @@ const UploadPrescriptionPage = () => {
     }
 
     if (uploadFiles.length === 0) {
-      toast.warning("Please upload at least one prescription image or PDF file.");
       return;
     }
 
     if (!selectedAddress) {
-      toast.warning("Please select or add a delivery address.");
       setAddressModalOpen(true);
       return;
     }
@@ -162,11 +157,8 @@ const UploadPrescriptionPage = () => {
 
       setCreatedRxRecord(response.prescription || response);
       setSubmitSuccess(true);
-      toast.success("Prescription submitted for verification!");
     } catch (err) {
       console.error("Upload error:", err);
-      const msg = err?.response?.data?.message || err?.message || "Failed to submit prescription. Please try again.";
-      toast.error(msg);
     } finally {
       setUploading(false);
     }

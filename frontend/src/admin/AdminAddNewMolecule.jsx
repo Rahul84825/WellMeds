@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { 
   ArrowLeft, 
   Save, 
@@ -276,7 +275,6 @@ const AdminAddNewMolecule = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.warning("Molecule name is required.");
       return;
     }
 
@@ -330,15 +328,12 @@ const AdminAddNewMolecule = () => {
     try {
       if (isEditMode) {
         await api.updateMolecule(id, moleculeData);
-        toast.success("Molecule updated successfully!");
       } else {
         await api.createMolecule(moleculeData);
-        toast.success("Molecule created successfully!");
       }
       navigate("/admin/molecules");
     } catch (err) {
       console.error("Save molecule failed", err);
-      toast.error(err.response?.data?.message || "Failed to save molecule.");
     } finally {
       setIsSaving(false);
     }

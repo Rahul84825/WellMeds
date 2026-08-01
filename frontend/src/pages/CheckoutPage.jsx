@@ -13,7 +13,6 @@ import {
   RefreshCcw, AlertTriangle, AlertCircle, MapPin, Navigation, Compass
 } from "lucide-react";
 import { formatCurrency, roundPrice } from "../utils/currency";
-import { toast } from "sonner";
 import { useAddress } from "../context/AddressContext";
 import UniversalAddressForm from "../components/address/UniversalAddressForm";
 import AddressCard from "../components/address/AddressCard";
@@ -59,7 +58,6 @@ const Checkout = () => {
         });
 
         if (recentPaidOrder) {
-          toast.success("Recovered successfully paid order!");
           clearCart();
           navigate("/order-success", { state: { order: recentPaidOrder }, replace: true });
         }
@@ -315,13 +313,11 @@ const Checkout = () => {
     if (e) e.preventDefault();
 
     if (!selectedAddress) {
-      toast.warning("Please select or add a valid delivery address.");
       return;
     }
 
     if (requiresRx) {
       if (loadingRxCheck) {
-        toast.info("Verifying prescription status, please wait...");
         return;
       }
       if (rxStatus === "Prescription Required" || rxStatus === "Needs Re-verification") {
@@ -333,7 +329,6 @@ const Checkout = () => {
         return;
       }
       if (rxStatus === "Pending Verification") {
-        toast.info("Waiting for pharmacist verification. Please wait until approved.");
         return;
       }
     }
@@ -479,21 +474,17 @@ const Checkout = () => {
         modal: {
           ondismiss: function () {
             setIsSubmitting(false);
-            toast.info("Payment cancelled.");
           },
         },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", function (response) {
-        toast.error(`Payment transaction failed: ${response.error?.description || "Transaction declined"}`);
         setIsSubmitting(false);
       });
       rzp.open();
     } catch (err) {
       console.error("Failed to place order", err);
-      const msg = err?.response?.data?.message || err?.message || "Something went wrong placing your order. Please try again.";
-      toast.error(msg);
       setIsSubmitting(false);
     }
   };

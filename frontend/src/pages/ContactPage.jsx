@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
-import { toast } from "sonner";
 import SEO from "../components/common/SEO";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
@@ -35,23 +34,18 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !message) {
-      toast.error("Please fill in all required fields.");
       return;
     }
 
     setSubmitted(true);
     try {
-      const res = await api.submitContactForm({ name, email, subject, message });
-      toast.success(
-        res.message ||
-        "Thank you for contacting WellMeds! Our healthcare team will reach out to you shortly."
-      );
+      await api.submitContactForm({ name, email, subject, message });
       setName("");
       setEmail("");
       setSubject("Support");
       setMessage("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to submit inquiry. Please try again.");
+      console.warn("Failed to submit contact inquiry:", err.message);
     } finally {
       setSubmitted(false);
     }

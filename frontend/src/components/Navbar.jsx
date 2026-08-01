@@ -28,7 +28,6 @@ import { useDrawer } from "../context/DrawerContext";
 import Modal from "./Modal";
 import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
-import { toast } from "sonner";
 import { api } from "../services/api";
 import { UniversalSearch } from "./common/UniversalSearch";
 

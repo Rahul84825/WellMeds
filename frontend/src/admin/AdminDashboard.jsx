@@ -4,7 +4,6 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatCurrency } from "../utils/currency";
 import { formatDate } from "../utils/date";
-import { toast } from "sonner";
 import { 
   DollarSign, 
   ShoppingBag, 

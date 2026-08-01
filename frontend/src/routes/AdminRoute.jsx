@@ -3,8 +3,6 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
-import { toast } from "sonner";
-
 const isMaintenanceMode =
   import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
   import.meta.env.MAINTENANCE_MODE === "true";
@@ -27,7 +25,6 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!isAdmin) {
-    toast.error("Access Denied: Administrative privileges required.");
     return <Navigate to="/" replace />;
   }
 
@@ -35,4 +32,3 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
-

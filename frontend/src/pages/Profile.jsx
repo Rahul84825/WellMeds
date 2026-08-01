@@ -32,7 +32,6 @@ import {
   ArrowRight
 } from "lucide-react";
 import { formatCurrency } from "../utils/currency";
-import { toast } from "sonner";
 
 const formatMemberSince = (isoString) => {
   if (!isoString) return "—";
@@ -140,7 +139,6 @@ const Profile = () => {
       setPrescriptions((prev) => [data.prescription, ...prev]);
     }
     setUploadOpen(false);
-    toast.success("Prescription uploaded successfully!");
   };
 
   const handleSaveProfile = async (e) => {
@@ -151,9 +149,8 @@ const Profile = () => {
         name: editName.trim(),
         email: editEmail.trim() || undefined,
       });
-      toast.success("Profile updated successfully!");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to save profile changes.");
+      console.warn("Failed to save profile changes:", err.message);
     } finally {
       setIsSavingProfile(false);
     }

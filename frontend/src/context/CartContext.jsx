@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { cartService } from "../services/api/cartService";
 import { checkoutSessionService } from "../services/api/checkoutSessionService";
 import { roundPrice } from "../utils/currency";
-import { toast } from "sonner";
 
 export const CartContext = createContext();
 
@@ -189,7 +188,6 @@ export const CartProvider = ({ children }) => {
       setCheckoutSessionStatus(err.response.data?.status || "LOCKED");
       setLockReason(err.response.data?.message || "Cart is locked under prescription verification.");
       broadcastLockSync();
-      toast.error(err.response.data?.message || "Cart is currently locked because your prescription is under verification.");
       syncCartForUser();
       return true;
     }
@@ -199,7 +197,6 @@ export const CartProvider = ({ children }) => {
   const addToCart = useCallback(async (product, quantity = 1) => {
     if (!product) return;
     if (isCartLocked) {
-      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
       return;
     }
 
@@ -241,7 +238,6 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = useCallback(async (id) => {
     if (!id) return;
     if (isCartLocked) {
-      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
       return;
     }
 
@@ -264,7 +260,6 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = useCallback(async (id, quantity) => {
     if (!id) return;
     if (isCartLocked) {
-      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
       return;
     }
 
@@ -294,7 +289,6 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = useCallback(async () => {
     if (isCartLocked) {
-      toast.error("Cart is locked under prescription verification.");
       return;
     }
 
@@ -334,11 +328,10 @@ export const CartProvider = ({ children }) => {
         setCheckoutSessionStatus("CANCELLED");
         setLockReason("");
         broadcastLockSync();
-        toast.info("Cart unlocked. Current prescription verification has been cancelled.");
         await syncCartForUser();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to modify cart. Please try again.");
+      console.warn("Modify cart failed:", err.message);
     } finally {
       setIsSyncing(false);
     }

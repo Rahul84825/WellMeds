@@ -6,7 +6,6 @@ import { api } from "../services/api";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
-import { toast } from "sonner";
 import {
   Tag,
   Calendar,
@@ -50,7 +49,6 @@ const OffersPage = () => {
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    toast.success(`Coupon code ${code} copied to clipboard!`);
     setTimeout(() => setCopiedCode(""), 3000);
   };
 

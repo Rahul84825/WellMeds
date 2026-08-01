@@ -7,7 +7,7 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
   const handleScrollTo = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -110; 
+      const yOffset = -110;
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
       setIsOpen(false);
@@ -17,12 +17,12 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
   if (!clinicalItems || clinicalItems.length === 0) return null;
 
   return (
-    <div className="pdp-paper-card rounded-sm overflow-hidden w-full text-left font-mono shadow-sm border border-[#dde8e3]">
+    <div className="pdp-paper-card rounded-sm overflow-hidden w-full text-left font-sans shadow-sm border border-[#dde8e3]">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full md:cursor-default flex items-center justify-between text-left focus:outline-none md:pointer-events-none px-4 py-3.5 border-b border-dashed border-[#c3d4cc] bg-[#f4f9f7]"
       >
-        <h3 className="text-xs font-mono font-bold uppercase tracking-[2px] text-black flex items-center gap-2">
+        <h3 className="text-xs font-sans font-bold uppercase tracking-[2px] text-black flex items-center gap-2">
           <BookOpen size={16} className="text-[#157a6d]" />
           Clinical Index
         </h3>
@@ -40,20 +40,20 @@ const ClinicalIndex = ({ clinicalItems, activeSection }) => {
               type="button"
               onClick={() => handleScrollTo(item.id)}
               aria-current={isActive ? "location" : undefined}
-              className={`w-full text-left py-2.5 px-3.5 rounded-sm text-xs font-mono transition-all duration-150 flex items-center justify-between cursor-pointer border border-transparent select-none ${
+              className={`w-full text-left py-2.5 px-3.5 rounded-sm text-xs font-sans transition-all duration-150 flex items-center justify-between cursor-pointer border border-transparent select-none ${
                 isActive
                   ? "bg-[#157a6d] text-white font-bold"
                   : "text-black hover:bg-[#f4f9f7] hover:text-[#157a6d] font-semibold"
               }`}
             >
               <span>{item.label}</span>
-              <ChevronRight 
-                size={12} 
+              <ChevronRight
+                size={12}
                 className={`transition-all duration-150 ${
-                  isActive 
-                    ? "opacity-100 translate-x-0 text-white" 
+                  isActive
+                    ? "opacity-100 translate-x-0 text-white"
                     : "opacity-0 -translate-x-1 text-black"
-                }`} 
+                }`}
               />
             </button>
           );

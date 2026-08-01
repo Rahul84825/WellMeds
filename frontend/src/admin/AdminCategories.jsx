@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { 
   FolderOpen, 
   Plus, 

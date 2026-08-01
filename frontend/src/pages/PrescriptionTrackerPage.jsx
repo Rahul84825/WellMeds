@@ -6,7 +6,6 @@ import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import { formatCurrency } from "../utils/currency";
 import { useCart } from "../hooks/useCart";
-import { toast } from "sonner";
 import {
   FileText,
   Clock,
@@ -64,11 +63,9 @@ const PrescriptionTrackerPage = () => {
       setSubmitting(true);
       await api.checkoutPrescription(id);
       await fetchCart();
-      toast.success("Prescribed medicines loaded into cart!");
       navigate("/checkout");
     } catch (err) {
       console.error("Failed to checkout prescription:", err);
-      toast.error(err.response?.data?.message || "Failed to proceed to checkout.");
     } finally {
       setSubmitting(false);
     }

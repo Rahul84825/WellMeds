@@ -10,8 +10,6 @@ import {
   Trash2, ShoppingCart, Phone, Mail, ChevronRight, ChevronDown, 
   Home, Plus, Minus, ArrowRight, ShieldCheck, Tag, Info, Lock, AlertTriangle
 } from "lucide-react";
-import { toast } from "sonner";
-
 import SEO from "../components/common/SEO";
 
 const Cart = () => {
@@ -54,13 +52,9 @@ const Cart = () => {
             if (res.success) {
               setCouponApplied(true);
               setCouponDiscount(res.discountAmount || 0);
-              toast.success(res.message || "Coupon applied successfully!");
-            } else {
-              toast.error(res.message || "Invalid coupon code.");
             }
           } catch (err) {
-            const msg = err.response?.data?.message || "Failed to validate coupon.";
-            toast.error(msg);
+            console.warn("Failed to validate promo coupon:", err.message);
           }
         };
         applyPromo();
@@ -77,13 +71,9 @@ const Cart = () => {
       if (res.success) {
         setCouponApplied(true);
         setCouponDiscount(res.discountAmount || 0);
-        toast.success(res.message || "Coupon applied successfully!");
-      } else {
-        toast.error(res.message || "Invalid coupon code.");
       }
     } catch (err) {
-      const msg = err.response?.data?.message || "Failed to validate coupon.";
-      toast.error(msg);
+      console.warn("Failed to validate coupon:", err.message);
     }
   };
 

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
-import { toast } from "sonner";
 
 const AddressContext = createContext();
 
@@ -49,15 +48,12 @@ export const AddressProvider = ({ children }) => {
   const addAddress = async (addressData) => {
     try {
       const newAddress = await api.addAddress(addressData);
-      toast.success("Address saved successfully!");
       await fetchAddresses();
       if (newAddress) {
         setSelectedAddressId(newAddress._id || newAddress.id);
       }
       return newAddress;
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to save address.";
-      toast.error(msg);
       throw err;
     }
   };
@@ -65,12 +61,9 @@ export const AddressProvider = ({ children }) => {
   const updateAddress = async (id, addressData) => {
     try {
       const updated = await api.updateAddress(id, addressData);
-      toast.success("Address updated successfully!");
       await fetchAddresses();
       return updated;
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to update address.";
-      toast.error(msg);
       throw err;
     }
   };
@@ -78,11 +71,8 @@ export const AddressProvider = ({ children }) => {
   const deleteAddress = async (id) => {
     try {
       await api.deleteAddress(id);
-      toast.success("Address deleted.");
       await fetchAddresses();
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to delete address.";
-      toast.error(msg);
       throw err;
     }
   };
@@ -90,35 +80,28 @@ export const AddressProvider = ({ children }) => {
   const setDefaultAddress = async (id) => {
     try {
       const updated = await api.setDefaultAddress(id);
-      toast.success("Default address updated!");
       await fetchAddresses();
       setSelectedAddressId(id);
       return updated;
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to set default address.";
-      toast.error(msg);
       throw err;
     }
-  };
-
-  const selectAddress = (id) => {
-    setSelectedAddressId(id);
   };
 
   return (
     <AddressContext.Provider
       value={{
         addresses,
-        defaultAddress,
-        selectedAddress,
-        selectedAddressId,
         loading,
+        selectedAddressId,
+        setSelectedAddressId,
+        selectedAddress,
+        defaultAddress,
         fetchAddresses,
         addAddress,
         updateAddress,
         deleteAddress,
         setDefaultAddress,
-        selectAddress,
       }}
     >
       {children}
@@ -133,3 +116,5 @@ export const useAddress = () => {
   }
   return context;
 };
+
+export default AddressContext;

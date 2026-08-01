@@ -4,7 +4,6 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
-import { toast } from "sonner";
 import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle, CheckCircle, AlertTriangle, Check } from "lucide-react";
 import { formatCurrency, calculateDiscountPercent } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
@@ -562,7 +561,6 @@ const ProductDetails = () => {
   const handleAddToCart = useCallback(() => {
     if (!product || product.inStock === false || product.stock === 0) return;
     addToCart(product, quantity);
-    toast.success(`${quantity} item(s) added to cart.`);
   }, [product, quantity, addToCart]);
 
   const handleBuyNow = useCallback(() => {
@@ -573,7 +571,6 @@ const ProductDetails = () => {
 
   const handleShare = useCallback(() => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Product link copied to clipboard!");
   }, []);
 
   // Swipe gesture handlers for mobile image gallery

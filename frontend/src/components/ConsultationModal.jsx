@@ -2,13 +2,10 @@ import React, { useState } from "react";
 import { Stethoscope, ShieldCheck, HeartPulse } from "lucide-react";
 import Modal from "./Modal";
 
-import { toast } from "sonner";
-
 export const ConsultationModal = ({ isOpen, onClose }) => {
   const [queryType, setQueryType] = useState("dosage");
 
   const handleSubmit = () => {
-    toast.success("Consultation request sent! A licensed pharmacist will reach out to you shortly.");
     onClose();
   };
 

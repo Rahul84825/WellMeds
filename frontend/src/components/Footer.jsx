@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Lock,
 } from "lucide-react";
-import { toast } from "sonner";
 
 /**
  * Footer — WellMeds Design System V2 (Editorial Identity)
@@ -26,11 +25,9 @@ const Footer = () => {
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address.");
       return;
     }
     setSubscribed(true);
-    toast.success("Thank you for subscribing to WellMeds Health Updates!");
     setEmail("");
   };
 

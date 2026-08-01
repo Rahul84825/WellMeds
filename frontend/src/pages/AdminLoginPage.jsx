@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import PhoneLogin from "../components/auth/PhoneLogin";
 import OTPVerification from "../components/auth/OTPVerification";
 import NewUserDetails from "../components/auth/NewUserDetails";
-import { toast } from "sonner";
 import SEO from "../components/common/SEO";
 
 const STEP_PHONE = "phone";
@@ -42,7 +41,6 @@ const AdminLoginPage = () => {
       setMobile(phoneVal);
       if (result.devOtp) setDevOtpHint(result.devOtp);
       setStep(STEP_OTP);
-      toast.success(`OTP sent to +91 ${phoneVal}`);
     } catch (err) {
       setErrorMsg(
         err.response?.data?.message || err.message || "Failed to send OTP. Please try again."
@@ -65,7 +63,7 @@ const AdminLoginPage = () => {
         setStep(STEP_PHONE);
         setMobile("");
         setDevOtpHint("");
-        toast.error("Access restricted. Only administrators can log in during maintenance.");
+        setErrorMsg("Access restricted. Only administrators can log in during maintenance.");
         return;
       }
 
@@ -73,7 +71,6 @@ const AdminLoginPage = () => {
       if (isNew) {
         setStep(STEP_ONBOARDING);
       } else {
-        toast.success(`Welcome back, ${loggedUser.name}!`);
         navigate("/admin", { replace: true });
       }
     } catch (err) {
@@ -91,7 +88,6 @@ const AdminLoginPage = () => {
     try {
       const result = await sendOtp(mobile);
       if (result.devOtp) setDevOtpHint(result.devOtp);
-      toast.success("OTP resent successfully!");
       return true;
     } catch (err) {
       setErrorMsg(err.response?.data?.message || err.message || "Failed to resend OTP.");
@@ -110,14 +106,13 @@ const AdminLoginPage = () => {
       if (updatedUser.role !== "admin") {
         await logout();
         setStep(STEP_PHONE);
-        toast.error("Access restricted. Only administrators can log in during maintenance.");
+        setErrorMsg("Access restricted. Only administrators can log in during maintenance.");
         return;
       }
 
-      toast.success(`Account setup complete! Welcome, ${updatedUser.name}.`);
       navigate("/admin", { replace: true });
     } catch (err) {
-      toast.error(
+      setErrorMsg(
         err.response?.data?.message || err.message || "Failed to complete onboarding."
       );
     } finally {

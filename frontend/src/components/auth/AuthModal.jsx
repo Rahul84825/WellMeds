@@ -5,7 +5,6 @@ import { useAuth } from "../../hooks/useAuth";
 import PhoneLogin from "./PhoneLogin";
 import OTPVerification from "./OTPVerification";
 import NewUserDetails from "./NewUserDetails";
-import { toast } from "sonner";
 
 const STEP_PHONE = "phone";
 const STEP_OTP = "otp";

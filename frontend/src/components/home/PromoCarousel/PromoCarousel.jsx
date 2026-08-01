@@ -10,290 +10,172 @@ import glp1Img from "../../../assets/PromoCarousel/GlP-1.png";
 
 const promoBanners = [
   {
-    id: "glp1",
-    img: glp1Img,
-    alt: "GLP-1 Medicines for Diabetes & Weight Loss Promo Banner"
+    id: "fever",
+    img: savingImg,
+    alt: "1 in 3 fever cases isn't just viral — Get Tested",
+    link: "/products",
   },
   {
     id: "cancer",
     img: cancerImg,
-    alt: "Cancer Care Promo Banner"
+    alt: "Here to support your cancer care journey — Upto 80% OFF on Genuine Medicines",
+    link: "/category/cancer-care",
+  },
+  {
+    id: "sunhalt",
+    img: healthImg,
+    alt: "Sunhalt Gold — Your Ultimate Skin Protection",
+    link: "/wellness",
   },
   {
     id: "delivery",
     img: deliveryImg,
-    alt: "WellMeds Express 3-Hour Emergency Delivery with certified cold-chain bags in Pune, Hinjawadi and PCMC"
+    alt: "WellMeds Express Emergency Delivery — Cold Chain Certified",
+    link: "/products",
   },
   {
-    id: "saving",
-    img: savingImg,
-    alt: "Affordable Healthcare: Direct-from-Manufacturer pricing delivering up to 85% savings on Patient Assistance Program (PAP) therapies"
+    id: "glp1",
+    img: glp1Img,
+    alt: "GLP-1 Medicines for Diabetes & Weight Management",
+    link: "/glp1-medicines",
   },
-  {
-    id: "health",
-    img: healthImg,
-    alt: "Health Promo Banner"
-  }
 ];
 
 const PromoCarousel = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollRef = useRef(null);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const totalSlides = promoBanners.length;
+  const totalBanners = promoBanners.length;
+
+  const updateScrollState = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+
+    const card = scrollRef.current.querySelector(".promo-card-item");
+    if (card) {
+      const cardWidth = card.offsetWidth;
+      const gap = 16;
+      const index = Math.round(scrollLeft / (cardWidth + gap));
+      setActiveSlide(Math.min(Math.max(0, index), totalBanners - 1));
+    }
+  }, [totalBanners]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    updateScrollState();
+    return () => el.removeEventListener("scroll", updateScrollState);
+  }, [updateScrollState]);
+
+  const scrollToSlide = useCallback((index) => {
+    if (!scrollRef.current) return;
+    const card = scrollRef.current.querySelector(".promo-card-item");
+    if (!card) return;
+    const cardWidth = card.offsetWidth;
+    const gap = 16;
+    scrollRef.current.scrollTo({
+      left: index * (cardWidth + gap),
+      behavior: "smooth",
+    });
+  }, []);
 
   const handleNext = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
-  }, [totalSlides]);
+    const nextIndex = (activeSlide + 1) % totalBanners;
+    scrollToSlide(nextIndex);
+  }, [activeSlide, totalBanners, scrollToSlide]);
 
   const handlePrev = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-  }, [totalSlides]);
+    const prevIndex = (activeSlide - 1 + totalBanners) % totalBanners;
+    scrollToSlide(prevIndex);
+  }, [activeSlide, totalBanners, scrollToSlide]);
 
-  // Autoplay effect - 5 seconds interval
+  // Autoplay effect - 5 seconds
   useEffect(() => {
     if (isPaused) return;
-
     const timer = setInterval(() => {
       handleNext();
     }, 5000);
-
     return () => clearInterval(timer);
   }, [isPaused, handleNext]);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      handlePrev();
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      handleNext();
-    }
-  };
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    const swipeThreshold = 50;
-    if (diff > swipeThreshold) {
-      handleNext();
-    } else if (diff < -swipeThreshold) {
-      handlePrev();
-    }
-  };
+  // Calculate progress fill ratio & offset
+  const progressRatio = (activeSlide / (totalBanners - 1)) * 100;
 
   return (
-    <div className="w-full">
+    <div className="w-full relative select-none">
+      {/* Carousel Track Container */}
       <div
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Promotional Banners"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
+        className="relative group"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="promo-banner-container focus-visible:ring-2 focus-visible:ring-[#038076] outline-none"
       >
-        {/* Navigation Arrows */}
-        <button
-          onClick={handlePrev}
-          className="promo-nav-btn promo-nav-btn-left"
-          aria-label="Previous Banner"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-
-        <button
-          onClick={handleNext}
-          className="promo-nav-btn promo-nav-btn-right"
-          aria-label="Next Banner"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-
-        {/* Slides Track */}
         <div
-          className="promo-slider-track"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          ref={scrollRef}
+          className="flex overflow-x-auto scrollbar-none gap-4 sm:gap-5 scroll-smooth py-1 px-0.5 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {promoBanners.map((banner) => (
-            <div key={banner.id} className="promo-slide">
+            <div
+              key={banner.id}
+              onClick={() => banner.link && window.location.assign(banner.link)}
+              className="promo-card-item shrink-0 snap-start cursor-pointer rounded-2xl sm:rounded-[22px] overflow-hidden border border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-xs
+                         w-[88%] sm:w-[58%] lg:w-[calc((100%-20px)/2.25)]
+                         aspect-[2.35/1]"
+            >
               <img
                 src={banner.img}
                 alt={banner.alt}
                 loading="lazy"
                 draggable={false}
-                className="w-full h-full object-contain object-center block"
+                className="w-full h-full object-cover object-center"
               />
             </div>
           ))}
         </div>
+
+        {/* Navigation Arrow — Left */}
+        {canScrollLeft && (
+          <button
+            type="button"
+            onClick={handlePrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer"
+            aria-label="Previous Banner"
+          >
+            <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+          </button>
+        )}
+
+        {/* Navigation Arrow — Right */}
+        {canScrollRight && (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer"
+            aria-label="Next Banner"
+          >
+            <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+          </button>
+        )}
       </div>
 
-      {/* Elegant Dot Indicators */}
-      <div className="promo-dots-container">
-        {promoBanners.map((_, idx) => {
-          const isActive = idx === currentSlide;
-          return (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              className={`promo-dot ${isActive ? "promo-dot-active" : ""}`}
-              aria-label={`Go to banner ${idx + 1}`}
-            />
-          );
-        })}
+      {/* Progress Indicator Line (Bottom Left - Reference Image Identity) */}
+      <div className="flex items-center justify-start mt-3.5 px-1">
+        <div className="w-20 sm:w-24 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
+          <div
+            className="h-full bg-[#157a6d] dark:bg-emerald-400 rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: "35%",
+              transform: `translateX(${(progressRatio * 1.85)}%)`,
+            }}
+          />
+        </div>
       </div>
-
-      <style>{`
-        /* ── Promo Banner Shell ── */
-        .promo-banner-container {
-          width: 100%;
-          max-width: 1400px;
-          aspect-ratio: 3200 / 1312;
-          height: auto;
-          position: relative;
-          overflow: hidden;
-          border-radius: 24px;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-          background: #ffffff;
-          box-sizing: border-box;
-        }
-
-        /* ── Slider Track ── */
-        .promo-slider-track {
-          display: flex;
-          width: 100%;
-          height: 100%;
-          transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .promo-slide {
-          width: 100%;
-          height: 100%;
-          flex-shrink: 0;
-          overflow: hidden;
-        }
-
-        /* ── Premium Navigation Arrows ── */
-        .promo-nav-btn {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 52px;
-          height: 52px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.65);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          box-shadow: 0 4px 15px rgba(15, 23, 42, 0.08);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #1e293b;
-          cursor: pointer;
-          z-index: 20;
-          transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-          opacity: 0;
-          visibility: hidden;
-          outline: none;
-        }
-
-        .promo-banner-container:hover .promo-nav-btn {
-          opacity: 1;
-          visibility: visible;
-        }
-
-        .promo-nav-btn:hover {
-          background: rgba(255, 255, 255, 0.95);
-          transform: translateY(-50%) scale(1.08);
-          box-shadow: 0 8px 25px rgba(3, 128, 118, 0.16);
-          color: #038076;
-        }
-
-        .promo-nav-btn:active {
-          transform: translateY(-50%) scale(0.95);
-        }
-
-        .promo-nav-btn-left {
-          left: 20px;
-        }
-
-        .promo-nav-btn-right {
-          right: 20px;
-        }
-
-        /* ── Dots Indicators ── */
-        .promo-dots-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-          margin-top: 16px;
-        }
-
-        .promo-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 9999px;
-          background: #cbd5e1;
-          border: none;
-          cursor: pointer;
-          transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-          padding: 0;
-          outline: none;
-        }
-
-        .promo-dot:hover {
-          background: #94a3b8;
-        }
-
-        .promo-dot-active {
-          width: 24px;
-          background: linear-gradient(135deg, #038076 0%, #086b53 100%);
-          box-shadow: 0 2px 8px rgba(3, 128, 118, 0.25);
-        }
-
-        /* ── Responsive Scaling ── */
-        @media (max-width: 1024px) {
-          .promo-banner-container {
-            height: auto;                         /* use aspect ratio scaling */
-          }
-        }
-
-        @media (max-width: 640px) {
-          .promo-banner-container {
-            aspect-ratio: 3200 / 1312;            /* maintain exact banner aspect ratio on mobile */
-            height: auto;
-            border-radius: 18px;
-          }
-          .promo-nav-btn {
-            width: 42px;
-            height: 42px;
-            opacity: 0.85;
-            visibility: visible;
-          }
-          .promo-nav-btn-left {
-            left: 12px;
-          }
-          .promo-nav-btn-right {
-            right: 12px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

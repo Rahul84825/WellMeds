@@ -7,8 +7,6 @@ import { CartProvider, useCart } from "./context/CartContext";
 import { DrawerProvider } from "./context/DrawerContext";
 import { AddressProvider } from "./context/AddressContext";
 
-import { Toaster } from "sonner";
-
 // Routes
 import AppRoutes from "./routes/AppRoutes";
 import ScrollToTop from "./components/ScrollToTop";
@@ -47,7 +45,6 @@ function App() {
         <CartProvider>
           <BrowserRouter>
             <DrawerProvider>
-              <Toaster position="top-right" richColors closeButton />
               <ScrollToTop />
               <SyncBridge />
               <AppRoutes />

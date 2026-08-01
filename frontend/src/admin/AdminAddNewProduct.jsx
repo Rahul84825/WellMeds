@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { calculateDiscountPercent, calculateSavings, formatPrice } from "../utils/currency";
 import { 
   ArrowLeft, 

@@ -5,7 +5,6 @@ import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
-import { toast } from "sonner";
 import {
   ChevronRight,
   ChevronLeft,

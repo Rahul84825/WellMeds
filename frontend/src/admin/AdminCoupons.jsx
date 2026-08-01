@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { 
   Tag, 

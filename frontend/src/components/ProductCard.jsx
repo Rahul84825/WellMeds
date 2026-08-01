@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { RefreshCw, ShoppingCart, Plus, Minus, ShieldCheck, Thermometer } from "lucide-react";
-import { toast } from "sonner";
 import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { calculateSavings, calculateDiscountPercent, formatPrice } from "../utils/currency";
