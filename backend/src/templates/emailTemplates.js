@@ -314,13 +314,20 @@ export const renderPrescriptionRejected = ({ customerName, rxId, adminNotes }) =
 };
 
 // ─── 7. Order Confirmation Template ─────────────────────────────────────────
+const fmtMoney = (val) => {
+  const num = Number(val);
+  if (isNaN(num)) return "0.00";
+  const rounded = Math.round((num + Number.EPSILON) * 100) / 100;
+  return Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(2);
+};
+
 export const renderOrderConfirmation = ({ order }) => {
   const itemsHtml = (order.items || []).map(item => `
     <tr>
       <td>${item.name}</td>
       <td style="text-align:center;">${item.quantity}</td>
-      <td style="text-align:right;">₹${item.price}</td>
-      <td style="text-align:right; font-weight:600;">₹${item.quantity * item.price}</td>
+      <td style="text-align:right;">₹${fmtMoney(item.price)}</td>
+      <td style="text-align:right; font-weight:600;">₹${fmtMoney(item.quantity * item.price)}</td>
     </tr>
   `).join("");
 
@@ -350,11 +357,11 @@ export const renderOrderConfirmation = ({ order }) => {
     </table>
 
     <table style="width:100%; margin-top:15px; font-size:14px; line-height:1.8;">
-      <tr><td style="color:#64748b;">Subtotal</td><td style="text-align:right;">₹${order.subtotal || 0}</td></tr>
-      ${order.discountAmount ? `<tr><td style="color:#16a34a;">Discount</td><td style="text-align:right; color:#16a34a;">-₹${order.discountAmount}</td></tr>` : ""}
-      <tr><td style="color:#64748b;">Shipping Fee</td><td style="text-align:right;">₹${order.shipping || 0}</td></tr>
-      <tr><td style="color:#64748b;">Estimated GST (12%)</td><td style="text-align:right;">₹${Math.round(order.tax || 0)}</td></tr>
-      <tr style="font-size:16px; font-weight:700; border-top:2px solid #e2e8f0;"><td style="padding-top:8px;">Final Amount Paid</td><td style="text-align:right; padding-top:8px; color:#038076;">₹${order.finalAmount || order.total}</td></tr>
+      <tr><td style="color:#64748b;">Subtotal</td><td style="text-align:right;">₹${fmtMoney(order.subtotal)}</td></tr>
+      ${order.discountAmount ? `<tr><td style="color:#16a34a;">Discount</td><td style="text-align:right; color:#16a34a;">-₹${fmtMoney(order.discountAmount)}</td></tr>` : ""}
+      <tr><td style="color:#64748b;">Shipping Fee</td><td style="text-align:right;">₹${fmtMoney(order.shipping)}</td></tr>
+      <tr><td style="color:#64748b;">Estimated GST (12%)</td><td style="text-align:right;">₹${fmtMoney(order.tax)}</td></tr>
+      <tr style="font-size:16px; font-weight:700; border-top:2px solid #e2e8f0;"><td style="padding-top:8px;">Final Amount Paid</td><td style="text-align:right; padding-top:8px; color:#038076;">₹${fmtMoney(order.finalAmount || order.total)}</td></tr>
     </table>
 
     <div style="text-align: center; margin-top:30px;">

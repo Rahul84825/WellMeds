@@ -5,6 +5,7 @@ import { RefreshCw, ShoppingCart, Plus, Minus, ShieldCheck, Thermometer } from "
 import { toast } from "sonner";
 import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
+import { calculateSavings, calculateDiscountPercent, formatPrice } from "../utils/currency";
 
 /**
  * Global ProductCard — WellMeds Design System V2 (Editorial Identity)
@@ -37,15 +38,8 @@ const ProductCard = ({ product }) => {
   });
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
-  const savings =
-    product.originalPrice && product.originalPrice > product.price
-      ? product.originalPrice - product.price
-      : 0;
-
-  const discountPercent =
-    product.originalPrice && product.originalPrice > product.price
-      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-      : 0;
+  const savings = calculateSavings(product.originalPrice, product.price);
+  const discountPercent = calculateDiscountPercent(product.originalPrice, product.price);
 
   React.useEffect(() => {
     if (!activeTooltip) return;
@@ -273,17 +267,17 @@ const ProductCard = ({ product }) => {
           <div className="flex items-baseline justify-between gap-2">
             <div className="flex items-baseline gap-1.5">
               <span className="font-clinical-mono text-lg sm:text-xl font-bold text-[#172b26] dark:text-zinc-100">
-                ₹{product.price}
+                ₹{formatPrice(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="font-clinical-mono text-xs text-[#5f776e] line-through">
-                  ₹{product.originalPrice}
+                  ₹{formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
             {savings > 0 && (
               <span className="font-clinical-mono text-[10px] font-bold text-[#157a6d]">
-                SAVE ₹{savings}
+                SAVE ₹{formatPrice(savings)}
               </span>
             )}
           </div>

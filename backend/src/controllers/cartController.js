@@ -47,18 +47,21 @@ const cleanCartPrescription = async (cart) => {
     }
     
     if (rx) {
-      const isMatching = isSnapshotMatchingCart(rx.cartSnapshot, cart.items);
-      if (!isMatching) {
-        cart.prescription = null;
-        cart.prescriptionStatus = "Pending";
+      if (rx.status === "Approved") {
+        cart.prescriptionStatus = "Approved";
       } else {
-        // Sync status
-        const rxStatus = rx.status;
-        if (rxStatus === "Pending Review") cart.prescriptionStatus = "Uploaded";
-        else if (rxStatus === "Under Verification") cart.prescriptionStatus = "Under Review";
-        else if (rxStatus === "Approved") cart.prescriptionStatus = "Approved";
-        else if (rxStatus === "Rejected") cart.prescriptionStatus = "Rejected";
-        else if (rxStatus === "Expired") cart.prescriptionStatus = "Expired";
+        const isMatching = isSnapshotMatchingCart(rx.cartSnapshot, cart.items);
+        if (!isMatching) {
+          cart.prescription = null;
+          cart.prescriptionStatus = "Pending";
+        } else {
+          // Sync status
+          const rxStatus = rx.status;
+          if (rxStatus === "Pending Review") cart.prescriptionStatus = "Uploaded";
+          else if (rxStatus === "Under Verification") cart.prescriptionStatus = "Under Review";
+          else if (rxStatus === "Rejected") cart.prescriptionStatus = "Rejected";
+          else if (rxStatus === "Expired") cart.prescriptionStatus = "Expired";
+        }
       }
     } else {
       cart.prescription = null;

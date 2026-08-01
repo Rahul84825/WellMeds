@@ -84,60 +84,65 @@ const WellnessProductsSection = () => {
   return (
     <section className="py-12 md:py-14 w-full bg-white dark:bg-zinc-950">
       <div className="home-section-container">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-        <div className="text-left">
-          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
-            <span>PREVENTATIVE HEALTH</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
-            <span>WELLNESS ESSENTIALS</span>
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+          <div className="text-left">
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+              <span>PREVENTATIVE HEALTH</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+              <span>WELLNESS ESSENTIALS</span>
+            </div>
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+              Wellness & Supplements
+            </h2>
+            <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
+              Daily nutritional supplements, personal hygiene, and preventative care essentials.
+            </p>
           </div>
-          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
-            Wellness & Supplements
-          </h2>
-          <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
-            Daily nutritional supplements, personal hygiene, and preventative care essentials.
-          </p>
+
+          {/* Right Header Navigation Controls: ( ← ) [ BROWSE ] ( → ) */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {/* Left Navigation Arrow */}
+            <button
+              type="button"
+              onClick={() => handleScroll("left")}
+              disabled={!canScrollLeft}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollLeft
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+              aria-label="Previous Products"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            <Link
+              to="/wellness"
+              aria-label="View all wellness products"
+              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+            >
+              <span>View all</span>
+            </Link>
+
+            {/* Right Navigation Arrow */}
+            <button
+              type="button"
+              onClick={() => handleScroll("right")}
+              disabled={!canScrollRight}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollRight
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+              aria-label="Next Products"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
-        <Link 
-          to="/wellness" 
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto shrink-0"
-        >
-          <span>BROWSE WELLNESS</span>
-          <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </Link>
-      </div>
 
-      <div className="relative w-full">
-        {/* Left Arrow Button */}
-        <button
-          onClick={() => handleScroll("left")}
-          className={`absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] hover:bg-[#157a6d] hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#157a6d] cursor-pointer ${
-            canScrollLeft ? "md:flex" : "md:hidden"
-          } hidden`}
-          aria-label="Previous Products"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        {/* Right Arrow Button */}
-        <button
-          onClick={() => handleScroll("right")}
-          className={`absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] hover:bg-[#157a6d] hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#157a6d] cursor-pointer ${
-            canScrollRight ? "md:flex" : "md:hidden"
-          } hidden`}
-          aria-label="Next Products"
-        >
-          <ChevronRight size={24} className="stroke-[3]" />
-        </button>
-
-        {/* Right Gradient Mask Overlay */}
-        <div
-          className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-r from-transparent to-white dark:to-zinc-950 pointer-events-none z-10 transition-opacity duration-300 ${
-            canScrollRight ? "opacity-100" : "opacity-0"
-          }`}
-        />
-
-        {/* Scroll Container */}
+        {/* Product Carousel Container (Full Width, Zero Overlay) */}
         <div
           ref={sliderRef}
           className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4"
@@ -152,8 +157,7 @@ const WellnessProductsSection = () => {
           ))}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 };
 

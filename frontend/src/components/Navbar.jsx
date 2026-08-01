@@ -276,21 +276,21 @@ const Navbar = () => {
       profileDropdownItems.push({
         id: "my-profile",
         type: "link",
-        to: "/profile",
+        to: "/profile?tab=settings",
         label: "My Profile",
         icon: User
       });
       profileDropdownItems.push({
         id: "order-history",
         type: "link",
-        to: "/orders",
+        to: "/profile?tab=orders",
         label: "Orders",
         icon: History
       });
       profileDropdownItems.push({
         id: "my-prescriptions",
         type: "link",
-        to: "/upload-prescription",
+        to: "/profile?tab=prescriptions",
         label: "Prescriptions",
         icon: FileText
       });

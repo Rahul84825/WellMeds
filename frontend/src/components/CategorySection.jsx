@@ -130,89 +130,94 @@ const CategorySection = () => {
     >
       <div className="home-section-container">
 
-      {/* ── Section Header ─────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-        <div>
-          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
-            <span>SPECIALTY PHARMACY</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
-            <span>CLINICAL CATALOG</span>
+        {/* ── Section Header ─────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+          <div>
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+              <span>SPECIALTY PHARMACY</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+              <span>CLINICAL CATALOG</span>
+            </div>
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
+              Shop by Category
+            </h2>
           </div>
-          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
-            Shop by Category
-          </h2>
+
+          {/* Right Header Navigation Controls: ( ← ) [ VIEW ALL ] ( → ) */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {/* Left Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              aria-label="Scroll categories left"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollLeft
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* View All button */}
+            <Link
+              to="/categories"
+              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+              aria-label="View all categories"
+            >
+              <span>View all</span>
+            </Link>
+
+            {/* Right Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              aria-label="Scroll categories right"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollRight
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* View All button */}
-        <Link
-          to="/categories"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto"
-          aria-label="View all product categories"
+        {/* ── Scrollable Track (Full Width, Zero Overlay) ─────────────────── */}
+        <div
+          ref={sliderRef}
+          role="list"
+          aria-label="Category carousel"
+          className="category-slider-track no-scrollbar"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: "14px",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            paddingTop: "16px",
+            paddingBottom: "20px",
+            cursor: "grab",
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
         >
-          <span>VIEW ALL CATEGORIES</span>
-          <ChevronRight size={14} />
-        </Link>
-      </div>
-
-      {/* ── Slider Wrapper ──────── */}
-      <div className="relative">
-        {/* Left Arrow */}
-        {canScrollLeft && (
-          <button
-            onClick={scrollLeft}
-            aria-label="Scroll categories left"
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
-
-        {/* Right Arrow */}
-        {canScrollRight && (
-          <button
-            onClick={scrollRight}
-            aria-label="Scroll categories right"
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
-
-          {/* ── Scrollable Track ─────────────────────────────────── */}
-          <div
-            ref={sliderRef}
-            role="list"
-            aria-label="Category carousel"
-            className="category-slider-track no-scrollbar"
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "14px",
-              overflowX: "auto",
-              scrollSnapType: "x mandatory",
-              WebkitOverflowScrolling: "touch",
-              paddingTop: "16px",
-              paddingBottom: "20px",
-              paddingLeft: "16px",
-              paddingRight: "16px",
-              cursor: "grab",
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={stopDragging}
-            onMouseLeave={stopDragging}
-          >
-            {activeCategories.map((cat, idx) => (
-              <div
-                key={(cat._id || cat.id)?.toString()}
-                role="listitem"
-                className="category-card-wrapper"
-                style={{ scrollSnapAlign: "start", flexShrink: 0 }}
-              >
-                <CategoryCard category={cat} index={idx} />
-              </div>
-            ))}
-          </div>
+          {activeCategories.map((cat, idx) => (
+            <div
+              key={(cat._id || cat.id)?.toString()}
+              role="listitem"
+              className="category-card-wrapper"
+              style={{ scrollSnapAlign: "start", flexShrink: 0 }}
+            >
+              <CategoryCard category={cat} index={idx} />
+            </div>
+          ))}
         </div>
 
         {/* ── Mobile scroll hint (dots) ─────────────────────────── */}

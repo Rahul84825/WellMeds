@@ -12,6 +12,7 @@ import { searchService } from "./searchService";
 import { megaMenuService } from "./megaMenuService";
 import { addressService } from "./addressService";
 import { deliveryRuleService } from "./deliveryRuleService";
+import { checkoutSessionService } from "./checkoutSessionService";
 
 
 import apiInstance from "./api";
@@ -133,6 +134,7 @@ export const api = {
   ...orderService,
   ...prescriptionService,
   ...cartService,
+  ...checkoutSessionService,
   ...couponService,
   ...adminService,
   ...specialityService,

@@ -126,11 +126,10 @@ const MoleculesPage = () => {
         <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-3.5 flex flex-wrap items-center gap-1.5 select-none">
           <button
             onClick={() => handleLetterClick("ALL")}
-            className={`px-4 py-2 text-xs sm:text-sm font-mono font-bold tracking-widest uppercase rounded-sm transition-all cursor-pointer ${
-              activeLetter === "ALL"
+            className={`px-4 py-2 text-xs sm:text-sm font-mono font-bold tracking-widest uppercase rounded-sm transition-all cursor-pointer ${activeLetter === "ALL"
                 ? "bg-[#157a6d] text-white shadow-sm"
                 : "text-black hover:text-[#157a6d] hover:bg-[#157a6d]/10 font-bold"
-            }`}
+              }`}
           >
             ALL
           </button>
@@ -143,13 +142,12 @@ const MoleculesPage = () => {
                 key={letter}
                 onClick={() => hasItems && handleLetterClick(letter)}
                 disabled={!hasItems}
-                className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-base font-mono rounded-sm transition-all ${
-                  !hasItems
+                className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-base font-mono rounded-sm transition-all ${!hasItems
                     ? "text-[#c3d4cc] cursor-default"
                     : isActive
-                    ? "bg-[#157a6d] text-white font-extrabold cursor-pointer shadow-sm"
-                    : "text-black hover:text-[#157a6d] hover:bg-[#157a6d]/10 cursor-pointer font-bold"
-                }`}
+                      ? "bg-[#157a6d] text-white font-extrabold cursor-pointer shadow-sm"
+                      : "text-black hover:text-[#157a6d] hover:bg-[#157a6d]/10 cursor-pointer font-bold"
+                  }`}
               >
                 {letter}
               </button>

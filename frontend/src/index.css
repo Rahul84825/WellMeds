@@ -25,6 +25,22 @@
   }
 }
 
+/* WellMeds Clinical Grid Background */
+.bg-clinical-grid {
+  background-color: #f4f9f7;
+  background-image: url('./assets/clinical-grid-bg.png');
+  background-repeat: repeat;
+  background-size: 280px 560px;
+}
+
+.dark .bg-clinical-grid {
+  background-color: #090e0c;
+  background-image:
+    linear-gradient(to right, rgba(21, 122, 109, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(21, 122, 109, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
 /* WellMeds Editorial V2 Design Tokens & Utilities */
 .wellmeds-editorial-bg,
 .bg-editorial-grid {

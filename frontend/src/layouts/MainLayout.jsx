@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import FloatingWhatsApp from "../components/FloatingWhatsApp";
 import HealthcareInformation from "../components/layout/HealthcareInformation";
-import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import AuthModal from "../components/auth/AuthModal";
 import GlobalDrawer from "../components/GlobalDrawer";
 
@@ -49,7 +48,6 @@ const MainLayout = () => {
       </main>
       {isSEOEnabled && (
         <>
-          <WhyWellMedsBar />
           <HealthcareInformation />
         </>
       )}

@@ -15,7 +15,7 @@ const SurgicalProductsSection = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const sliderRef = useRef(null);
 
   // Arrow visibility state
@@ -62,7 +62,7 @@ const SurgicalProductsSection = () => {
     if (!el) return;
     updateArrows();
     el.addEventListener("scroll", updateArrows, { passive: true });
-    
+
     // ResizeObserver for dynamic width changes
     const ro = new ResizeObserver(updateArrows);
     ro.observe(el);
@@ -132,9 +132,9 @@ const SurgicalProductsSection = () => {
       className="surgical-section bg-white dark:bg-zinc-950 pt-9 pb-11 border-t border-slate-100 dark:border-zinc-900/60"
     >
       <div className="home-section-container">
-        
+
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
           <div>
             <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
               <span>MEDICAL DEVICES</span>
@@ -146,66 +146,72 @@ const SurgicalProductsSection = () => {
             </h2>
           </div>
 
-          {/* View All button */}
-          <Link
-            to="/surgical/categories"
-            aria-label="View all surgical categories"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200 self-start sm:self-auto"
-          >
-            <span>VIEW SURGICAL CATALOG</span>
-            <ChevronRight size={14} />
-          </Link>
+          {/* Right Header Navigation Controls: ( ← ) [ VIEW CATALOG ] ( → ) */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {/* Left Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              aria-label="Scroll categories left"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollLeft
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* View All button */}
+            <Link
+              to="/surgical/categories"
+              aria-label="View all surgical categories"
+              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+            >
+              <span>View all</span>
+            </Link>
+
+            {/* Right Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              aria-label="Scroll categories right"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollRight
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Slider Wrapper */}
-        <div className="relative">
-          
-          {/* Left Arrow */}
-          {canScrollLeft && (
-            <button
-              onClick={scrollLeft}
-              aria-label="Scroll categories left"
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-
-          {/* Right Arrow */}
-          {canScrollRight && (
-            <button
-              onClick={scrollRight}
-              aria-label="Scroll categories right"
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 shadow-md text-[#157a6d] flex items-center justify-center cursor-pointer hover:bg-[#157a6d] hover:text-white transition-all duration-200"
-            >
-              <ChevronRight size={20} />
-            </button>
-          )}
-
-          {/* Scrollable Track */}
-          <div
-            ref={sliderRef}
-            role="list"
-            aria-label="Surgical categories carousel"
-            className="surgical-slider-track no-scrollbar flex flex-row gap-3 md:gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pt-4 pb-5 px-2 cursor-grab active:cursor-grabbing select-none"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={stopDragging}
-            onMouseLeave={stopDragging}
-          >
-            {categories.map((cat, idx) => {
-              const categoryId = cat.id || cat._id;
-              return (
-                <div
-                  key={categoryId?.toString()}
-                  role="listitem"
-                  className="snap-start shrink-0 surgical-card-wrapper"
-                >
-                  <CategoryCard category={cat} isSurgical={true} index={idx} />
-                </div>
-              );
-            })}
-          </div>
+        {/* ── Scrollable Track (Full Width, Zero Overlay) ─────────────────── */}
+        <div
+          ref={sliderRef}
+          role="list"
+          aria-label="Surgical categories carousel"
+          className="surgical-slider-track no-scrollbar flex flex-row gap-3 md:gap-[14px] overflow-x-auto snap-x snap-mandatory scroll-smooth pt-4 pb-5 cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
+        >
+          {categories.map((cat, idx) => {
+            const categoryId = cat.id || cat._id;
+            return (
+              <div
+                key={categoryId?.toString()}
+                role="listitem"
+                className="snap-start shrink-0 surgical-card-wrapper"
+              >
+                <CategoryCard category={cat} isSurgical={true} index={idx} />
+              </div>
+            );
+          })}
         </div>
 
         {/* Mobile scroll hint (dots) */}
@@ -216,9 +222,8 @@ const SurgicalProductsSection = () => {
           {categories.slice(0, Math.min(8, categories.length)).map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === 0 ? "w-5 bg-[#038076] dark:bg-[#84d6b9]" : "w-1.5 bg-slate-300 dark:bg-zinc-700"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? "w-5 bg-[#038076] dark:bg-[#84d6b9]" : "w-1.5 bg-slate-300 dark:bg-zinc-700"
+                }`}
             />
           ))}
         </div>

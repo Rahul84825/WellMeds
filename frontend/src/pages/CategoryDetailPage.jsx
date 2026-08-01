@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
-import Loader from "../components/Loader";
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
+import SEO from "../components/common/SEO";
 import {
   Search,
   X,
@@ -10,15 +12,14 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  SlidersHorizontal,
-  FolderOpen,
   Pill,
   ShieldCheck,
-  CheckCircle2,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  Phone,
+  FileText,
+  Package
 } from "lucide-react";
-import SEO from "../components/common/SEO";
 
 const CategoryDetailPage = () => {
   const { categorySlug } = useParams();
@@ -30,22 +31,17 @@ const CategoryDetailPage = () => {
   const [relatedCategories, setRelatedCategories] = useState([]);
   const [loadingCategory, setLoadingCategory] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+
   // Filtering, Search & Sorting States
   const [searchVal, setSearchVal] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
-  const [rxFilter, setRxFilter] = useState("all"); // 'all' | 'rx' | 'otc'
-  const [stockFilter, setStockFilter] = useState("all"); // 'all' | 'instock'
-  const [selectedBrand, setSelectedBrand] = useState("all");
-  
+  const [rxFilter, setRxFilter] = useState("all");
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const LIMIT = 24;
-
-  // Available brands extracted from returned products
-  const [availableBrands, setAvailableBrands] = useState([]);
 
   // 1. Fetch Category Details & Related Categories
   useEffect(() => {
@@ -62,24 +58,10 @@ const CategoryDetailPage = () => {
 
         if (catData) {
           setCategory(catData);
-
-          // SEO Setup
-          document.title = `${catData.name} Medicines & Formulations | WellMeds`;
-          let metaDesc = document.querySelector("meta[name='description']");
-          if (!metaDesc) {
-            metaDesc = document.createElement("meta");
-            metaDesc.setAttribute("name", "description");
-            document.head.appendChild(metaDesc);
-          }
-          metaDesc.setAttribute(
-            "content",
-            catData.description || `Browse authentic clinical ${catData.name} prescription medicines and therapeutic treatments at WellMeds.`
-          );
         } else {
           setCategory(null);
         }
 
-        // Filter related active categories excluding current one
         const activeCats = (allCats || []).filter(
           (c) => c.status === "Active" || c.isActive === true
         );
@@ -98,344 +80,221 @@ const CategoryDetailPage = () => {
     fetchCategoryAndRelated();
     setCurrentPage(1);
     setSearchVal("");
-    setDebouncedSearch("");
+    return () => {
+      isMounted = false;
+    };
   }, [categorySlug]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchVal);
-      setCurrentPage(1);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchVal]);
-
   // 2. Fetch Products for this Category
-  const fetchProducts = useCallback(async () => {
-    if (!category) return;
+  const fetchCategoryProducts = useCallback(async () => {
     setLoadingProducts(true);
     try {
       const data = await api.getProducts({
+        category: category?.name || undefined,
         page: currentPage,
         limit: LIMIT,
-        category: category.name || category.slug,
-        search: debouncedSearch || undefined,
       });
 
-      const fetchedList = data.products || [];
-      setProducts(fetchedList);
-      setTotalProducts(data.total || 0);
-
-      // Extract unique brands for filter sidebar
-      const brands = Array.from(
-        new Set(fetchedList.map((p) => p.brand || p.manufacturer).filter(Boolean))
-      );
-      setAvailableBrands(brands);
+      setProducts(data.products || []);
+      setTotalProducts(data.total || (data.products ? data.products.length : 0));
     } catch (err) {
       console.error("Failed to fetch category products", err);
-      setProducts([]);
-      setTotalProducts(0);
     } finally {
       setLoadingProducts(false);
     }
-  }, [category, currentPage, debouncedSearch]);
+  }, [category, currentPage]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // Client-side Filtering & Sorting
-  const getFilteredAndSortedProducts = () => {
-    let list = [...products];
-
-    // Filter Rx / OTC
-    if (rxFilter === "rx") {
-      list = list.filter((p) => p.requiresRx === true || p.isPrescriptionRequired === true);
-    } else if (rxFilter === "otc") {
-      list = list.filter((p) => !p.requiresRx && !p.isPrescriptionRequired);
+    if (category) {
+      fetchCategoryProducts();
     }
+  }, [category, fetchCategoryProducts]);
 
-    // Filter In-Stock
-    if (stockFilter === "instock") {
-      list = list.filter((p) => p.inStock !== false && (p.stock === undefined || p.stock > 0));
-    }
+  // 3. Client-side filtering & sorting
+  const filteredProducts = products
+    .filter((p) => {
+      if (searchVal.trim()) {
+        const q = searchVal.toLowerCase();
+        const nameMatch = p.name?.toLowerCase().includes(q);
+        const brandMatch = p.brandName?.toLowerCase().includes(q);
+        const moleculeMatch = p.moleculeName?.toLowerCase().includes(q);
+        if (!nameMatch && !brandMatch && !moleculeMatch) return false;
+      }
+      if (rxFilter === "rx") {
+        if (!p.rxRequired) return false;
+      } else if (rxFilter === "otc") {
+        if (p.rxRequired) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "price_asc") return (a.price || 0) - (b.price || 0);
+      if (sortBy === "price_desc") return (b.price || 0) - (a.price || 0);
+      if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
+      return (a.name || "").localeCompare(b.name || "");
+    });
 
-    // Filter Brand
-    if (selectedBrand !== "all") {
-      list = list.filter((p) => (p.brand || p.manufacturer) === selectedBrand);
-    }
-
-    // Sorting
-    if (sortBy === "price_asc") {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sortBy === "price_desc") {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
-    } else if (sortBy === "name_asc") {
-      list.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "name_desc") {
-      list.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sortBy === "newest") {
-      list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    }
-
-    return list;
-  };
-
-  const filteredProducts = getFilteredAndSortedProducts();
   const totalPages = Math.max(1, Math.ceil(totalProducts / LIMIT));
+
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Categories", url: "/categories" },
+    { name: category?.name || "Category", url: `/category/${categorySlug}` },
+  ];
 
   if (loadingCategory) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader size="lg" />
+      <div className="min-h-screen bg-clinical-grid py-12 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-[#157a6d] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (!category) {
     return (
-      <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-md text-slate-400">
-          <FolderOpen size={32} />
+      <div className="min-h-screen bg-clinical-grid py-12">
+        <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 text-center space-y-4">
+          <Pill size={40} className="mx-auto text-slate-400" />
+          <h2 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">Category Not Found</h2>
+          <p className="text-xs text-slate-500 font-sans">The requested therapeutic category does not exist or has been moved.</p>
+          <Link to="/categories" className="bg-[#157a6d] text-white px-6 py-2.5 rounded-full text-xs font-semibold inline-block">
+            Browse All Categories
+          </Link>
         </div>
-        <h2 className="font-extrabold text-2xl text-slate-800 dark:text-zinc-100">Category Not Found</h2>
-        <p className="text-xs text-slate-400 mt-xs mb-lg max-w-md mx-auto">
-          The requested medicine category could not be located or may have been updated.
-        </p>
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-xs bg-[#038076] text-white px-xl py-sm rounded-full font-bold text-xs shadow-md hover:bg-[#02665e] transition-colors"
-        >
-          Explore All Medicines
-        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title={`${category.name} Medicines & Healthcare Products`}
-        description={category.description || `Browse authentic ${category.name} medicines, healthcare products, and pharmaceutical care online at WellMeds with fast doorstep delivery.`}
-        keywords={`${category.name}, ${category.name} medicines, buy ${category.name} online, WellMeds`}
-        breadcrumbs={[
-          { name: "Home", url: "/" },
-          { name: "Medicines", url: "/products" },
-          { name: category.name, url: `/category/${categorySlug}` }
-        ]}
+        title={`${category.name} Medicines & Formulations | WellMeds`}
+        description={category.description || `Browse authentic clinical ${category.name} prescription medicines and therapeutic treatments at WellMeds.`}
+        canonical={`/category/${categorySlug}`}
+        breadcrumbs={breadcrumbs}
       />
-      
-      {/* Breadcrumbs */}
-      <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-md font-semibold select-none">
-        <span className="cursor-pointer hover:text-[#038076] transition-colors" onClick={() => navigate("/")}>Home</span>
-        <span className="text-slate-300">/</span>
-        <span className="cursor-pointer hover:text-[#038076] transition-colors" onClick={() => navigate("/products")}>Medicines</span>
-        <span className="text-slate-300">/</span>
-        <span className="text-[#038076] dark:text-[#a4c9ff]">{category.name}</span>
-      </nav>
 
-      {/* Hero Header Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#04332c] via-[#038076] to-[#004782] text-white p-lg sm:p-xl md:p-xxl shadow-xl border border-[#038076]/20 mb-xl select-none">
-        <div className="relative z-10 max-w-3xl space-y-md text-left">
-          <div className="inline-flex items-center gap-xs text-[10px] font-extrabold uppercase tracking-widest bg-white/10 px-md py-1 rounded-full border border-white/15">
-            <Pill size={13} className="text-emerald-300" />
-            Specialty Medicine Category
-          </div>
-          
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-white">
-            {category.name}
-          </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
+        {/* ── HERO HEADER ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {category.description && (
-            <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed max-w-2xl opacity-95">
-              {category.description}
-            </p>
-          )}
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
+              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <Link to="/categories" className="hover:text-[#157a6d]">Categories</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{category.name}</span>
+            </nav>
 
-          <div className="flex flex-wrap items-center gap-md pt-xs text-xs font-semibold text-slate-200">
-            <div className="flex items-center gap-1.5 bg-black/20 px-md py-1.5 rounded-xl border border-white/10">
-              <Sparkles size={14} className="text-emerald-300" />
-              <span>{totalProducts} Verified Formulations</span>
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
+                <Sparkles size={14} className="text-[#b08d3e]" />
+                <span>THERAPEUTIC CATEGORY</span>
+              </div>
+
+              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
+                {category.name}
+              </h1>
+
+              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
+                {category.description || `Browse verified clinical formulations, prescription drugs, and chronic care medications for ${category.name}.`}
+              </p>
             </div>
-            <div className="flex items-center gap-1.5 bg-black/20 px-md py-1.5 rounded-xl border border-white/10">
-              <ShieldCheck size={14} className="text-emerald-300" />
-              <span>100% Genuine Clinical Guarantee</span>
+
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/upload-prescription"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+              >
+                <FileText size={15} />
+                <span>Upload Prescription</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsConsultationOpen(true)}
+                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              >
+                <Phone size={15} />
+                <span>Talk to Pharmacist</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Decorative subtle background pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.08),_transparent_60%)] pointer-events-none" />
-      </div>
-
-      {/* Control Bar: Search & Sort */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-md mb-lg">
-        
-        {/* Search within Category */}
-        <div className="flex items-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-md py-2.5 w-full max-w-md shadow-xs">
-          <Search size={16} className="text-slate-400 shrink-0" />
-          <input
-            type="text"
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            placeholder={`Search within ${category.name}...`}
-            className="bg-transparent border-none outline-none w-full text-xs ml-xs dark:text-zinc-200 placeholder-slate-400 font-medium"
-          />
-          {searchVal && (
-            <button onClick={() => setSearchVal("")} className="text-slate-400 hover:text-slate-600">
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Badges & Sort Dropdown */}
-        <div className="flex items-center gap-sm flex-wrap shrink-0">
-          {/* Rx Filter Toggle */}
+        {/* ── FILTER CONTROLS ── */}
+        <div className="flex justify-end gap-3">
           <select
             value={rxFilter}
             onChange={(e) => setRxFilter(e.target.value)}
-            className="p-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-bold text-slate-700 dark:text-zinc-200 outline-none cursor-pointer hover:border-[#038076] transition-colors"
+            className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-full px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none cursor-pointer shadow-xs"
           >
             <option value="all">All Types (Rx & OTC)</option>
             <option value="rx">Prescription Required (Rx)</option>
             <option value="otc">Over The Counter (OTC)</option>
           </select>
-
-          {/* Sort Option */}
-          <div className="flex items-center gap-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5">
-            <ArrowUpDown size={14} className="text-slate-400" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent border-none outline-none text-xs font-bold text-slate-700 dark:text-zinc-200 cursor-pointer"
-            >
-              <option value="name_asc">Sort: Name (A to Z)</option>
-              <option value="name_desc">Sort: Name (Z to A)</option>
-              <option value="price_asc">Sort: Price (Low to High)</option>
-              <option value="price_desc">Sort: Price (High to Low)</option>
-              <option value="newest">Sort: Newest First</option>
-            </select>
-          </div>
         </div>
 
-      </div>
-
-      {/* Main Grid & Sidebar Layout */}
-      {loadingProducts ? (
-        <div className="min-h-[40vh] flex items-center justify-center bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl shadow-xs">
-          <Loader size="lg" />
-        </div>
-      ) : filteredProducts.length > 0 ? (
-        <div className="space-y-xl">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-md w-full">
-            {filteredProducts.map((prod) => (
-              <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-lg select-none text-xs font-bold text-slate-400 mt-lg">
-              <div className="flex items-center gap-xs">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="flex items-center justify-center w-8 h-8 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  title="First Page"
-                >
-                  <ChevronsLeft size={14} />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="flex items-center justify-center w-8 h-8 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  title="Previous Page"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-              </div>
-
-              <span>Page {currentPage} of {totalPages} ({totalProducts} Formulations)</span>
-
-              <div className="flex items-center gap-xs">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center justify-center w-8 h-8 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  title="Next Page"
-                >
-                  <ChevronRight size={14} />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center justify-center w-8 h-8 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-950 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  title="Last Page"
-                >
-                  <ChevronsRight size={14} />
-                </button>
-              </div>
+        {/* ── PRODUCT GRID OR SKELETONS ── */}
+        <div>
+          {loadingProducts ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(8)].map((_, idx) => (
+                <div key={idx} className="bg-white dark:bg-zinc-900 rounded-[24px] border border-slate-200 dark:border-zinc-800 p-4 space-y-3 animate-pulse">
+                  <div className="w-full h-40 bg-slate-100 dark:bg-zinc-800 rounded-2xl" />
+                  <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 dark:bg-zinc-800 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {filteredProducts.map((prod) => (
+                <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
+              <Package size={36} className="mx-auto text-slate-400" />
+              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">No Formulations Available</h3>
+              <p className="text-xs text-slate-500 font-sans">No products currently match your active search filter in this category.</p>
             </div>
           )}
         </div>
-      ) : (
-        /* Professional Empty State */
-        <div className="text-center py-xxl bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-3xl shadow-xs p-xl">
-          <div className="w-16 h-16 bg-[#038076]/10 text-[#038076] rounded-full flex items-center justify-center mx-auto mb-md">
-            <Pill size={32} />
-          </div>
-          <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100">No Formulations Available in {category.name}</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto mt-xs mb-lg">
-            We are continuously expanding our licensed pharmaceutical catalog. Check back soon or request a custom fulfillment.
-          </p>
-          <div className="flex items-center justify-center gap-sm">
-            <Link
-              to="/products"
-              className="bg-[#038076] text-white px-lg py-2.5 rounded-full font-bold text-xs hover:bg-[#02665e] transition-colors"
-            >
-              Browse All Medicines
-            </Link>
-            <Link
-              to="/upload-prescription"
-              className="border border-[#038076] text-[#038076] px-lg py-2.5 rounded-full font-bold text-xs hover:bg-[#038076]/5 transition-colors"
-            >
-              Upload Prescription
-            </Link>
-          </div>
-        </div>
-      )}
 
-      {/* Related Categories Grid */}
-      {relatedCategories.length > 0 && (
-        <section className="mt-2xl pt-xl border-t border-slate-150 dark:border-zinc-800">
-          <div className="mb-lg">
-            <h3 className="font-extrabold text-xl text-slate-800 dark:text-zinc-100 tracking-tight">
+        {/* ── RELATED MEDICAL CONDITIONS ── */}
+        {relatedCategories.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-sm space-y-4">
+            <h3 className="font-editorial text-xl sm:text-2xl font-semibold text-[#172b26] dark:text-white">
               Related Medical Conditions
             </h3>
-            <p className="text-xs text-slate-400 mt-1">Explore complementary therapeutic areas and specialist medicines.</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-sm">
-            {relatedCategories.map((relCat) => (
-              <Link
-                key={relCat._id || relCat.id}
-                to={`/category/${relCat.slug}`}
-                className="flex items-center gap-sm p-md bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl hover:border-[#038076] hover:shadow-md transition-all group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#038076]/10 text-[#038076] flex items-center justify-center shrink-0 group-hover:bg-[#038076] group-hover:text-white transition-colors">
-                  <Pill size={18} />
-                </div>
-                <div className="min-w-0 text-left">
-                  <h4 className="font-bold text-xs text-slate-800 dark:text-zinc-200 group-hover:text-[#038076] transition-colors truncate">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {relatedCategories.map((relCat) => (
+                <Link
+                  key={relCat._id || relCat.id}
+                  to={`/category/${relCat.slug}`}
+                  className="flex items-center gap-3 p-3 bg-[#f4f9f7] dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl hover:border-[#157a6d] transition-all group"
+                >
+                  <Pill size={18} className="text-[#157a6d] shrink-0" />
+                  <span className="font-bold text-xs text-[#172b26] dark:text-zinc-200 truncate group-hover:text-[#157a6d]">
                     {relCat.name}
-                  </h4>
-                  <span className="text-[10px] text-slate-400">View Category &rarr;</span>
-                </div>
-              </Link>
-            ))}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
-        </section>
-      )}
+        )}
 
+        {/* ── WHY WELLMEDS BAR ── */}
+        <WhyWellMedsBar />
+      </div>
+
+      {/* ── CONSULTATION MODAL ── */}
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+      />
     </div>
   );
 };

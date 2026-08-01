@@ -63,6 +63,9 @@ export const validateCouponCode = async (req, res, next) => {
       discount = Math.min(discountVal, subtotal);
     }
 
+    const roundMoney = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+    const roundedDiscount = roundMoney(discount);
+
     res.status(200).json({
       success: true,
       message: "Coupon validated successfully",
@@ -77,8 +80,8 @@ export const validateCouponCode = async (req, res, next) => {
         maximumDiscount: coupon.maximumDiscount,
         freeDelivery: coupon.freeDelivery
       },
-      discountAmount: discount,
-      finalAmount: Math.max(0, subtotal - discount)
+      discountAmount: roundedDiscount,
+      finalAmount: roundMoney(Math.max(0, subtotal - roundedDiscount))
     });
   } catch (error) {
     next(error);

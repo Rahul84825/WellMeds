@@ -238,6 +238,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isBestSeller: {
+      type: Boolean,
+      default: false,
+    },
     medicineCategory: {
       type: String,
       default: "",
@@ -277,6 +281,7 @@ productSchema.index({ specialities: 1 });
 productSchema.index({ productType: 1, isSurgical: 1 });
 productSchema.index({ isGLP1Medicine: 1 });
 productSchema.index({ isHealthSupplement: 1 });
+productSchema.index({ isBestSeller: 1 });
 productSchema.index({ name: "text", brand: "text", manufacturer: "text" });
 
 export const Product = mongoose.model("Product", productSchema);

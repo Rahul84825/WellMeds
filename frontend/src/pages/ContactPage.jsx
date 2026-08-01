@@ -1,8 +1,14 @@
-import { useState } from "react";
-
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import { toast } from "sonner";
 import SEO from "../components/common/SEO";
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
+import { Sparkles, Phone, FileText, ChevronRight, Mail, MapPin, Clock, Send } from "lucide-react";
+
+const DEFAULT_PHARMACY_LAT = 18.5590;
+const DEFAULT_PHARMACY_LNG = 73.7868;
 
 const wellmedsStoreData = {
   name: "WellMeds Pharmacy",
@@ -24,6 +30,7 @@ const Contact = () => {
   const [subject, setSubject] = useState("Support");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +44,7 @@ const Contact = () => {
       const res = await api.submitContactForm({ name, email, subject, message });
       toast.success(
         res.message ||
-          "Thank you for contacting WellMeds! Our healthcare team will reach out to you shortly."
+        "Thank you for contacting WellMeds! Our healthcare team will reach out to you shortly."
       );
       setName("");
       setEmail("");
@@ -55,203 +62,190 @@ const Contact = () => {
     { name: "Contact Us", url: "/contact" },
   ];
 
-  const contactPharmacySchema = {
-    "@context": "https://schema.org",
-    "@type": "Pharmacy",
-    "name": "WellMeds Specialty Pharmacy",
-    "url": "https://wellmeds.in/contact",
-    "logo": "https://wellmeds.in/favicon.png",
-    "telephone": "+91-7798795353",
-    "email": "info@wellmeds.in",
-    "priceRange": "₹₹",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Shop No 3, Echelon Apartment, Baner - Pashan Link Rd, Baner",
-      "addressLocality": "Baner, Pune",
-      "addressRegion": "Maharashtra",
-      "postalCode": "411021",
-      "addressCountry": "IN"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 18.5590,
-      "longitude": 73.7868
-    },
-    "openingHoursSpecification": {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      "opens": "08:00",
-      "closes": "23:00"
-    }
-  };
-
   return (
-    <>
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
         title="Contact Us & Store Location | WellMeds Pharmacy Baner Pune"
-        description="Visit WellMeds Pharmacy at Baner, Pune or contact our registered clinical pharmacists. Toll-free support, interactive store map, prescription inquiries."
+        description="Visit WellMeds Pharmacy at Baner, Pune or contact our registered clinical pharmacists. Toll-free support, store map, prescription inquiries."
         canonical="/contact"
         breadcrumbs={breadcrumbs}
-        schema={contactPharmacySchema}
       />
-      <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
-        {/* Header Title */}
-        <div className="text-center space-y-sm max-w-2xl mx-auto mb-lg">
-          <span className="bg-primary-container text-on-primary-container border border-primary/20 px-md py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">
-            Get in Touch
-          </span>
-          <h1 className="font-headline-lg text-headline-lg md:text-5xl font-bold text-primary dark:text-primary-fixed-dim">
-            We are here to help
-          </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant leading-relaxed">
-            Visit our licensed retail pharmacy in Pune or submit a message below. We generally respond within 15 minutes.
-          </p>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
+        {/* ── HERO HEADER ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
+              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">Contact Us</span>
+            </nav>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
+                <Sparkles size={14} className="text-[#b08d3e]" />
+                <span>24/7 PATIENT SUPPORT & PHARMACY DESK</span>
+              </div>
+
+              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
+                We Are Here to Help
+              </h1>
+
+              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
+                Have a query regarding prescriptions, cold-chain delivery, or specialized formulations? Contact our licensed medical team.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/upload-prescription"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+              >
+                <FileText size={15} />
+                <span>Upload Prescription</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsConsultationOpen(true)}
+                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              >
+                <Phone size={15} />
+                <span>Talk to Pharmacist</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Top Retail Store Overview Banner */}
-        <div className="bg-[#038076] text-white rounded-2xl p-8 shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-left">
-            <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-              Licensed Retail Store
-            </span>
-            <h2 className="text-2xl font-extrabold text-white">WellMeds Super Speciality Pharmacy</h2>
-            <p className="text-sm opacity-90 leading-relaxed max-w-xl">
-              Shop No 3, Echelon Apartment, Baner - Pashan Link Rd, Baner, Pune, Maharashtra 411021. Pan-India Express Delivery & In-store pickup available.
-            </p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 text-xs space-y-1.5 shrink-0 text-left">
-            <p className="font-bold text-white">📞 Hotline: +91 7798795353</p>
-            <p className="font-bold text-white">✉️ Email: info@wellmeds.in</p>
-            <p className="text-white/80">🕒 Hours: 08:00 AM - 11:00 PM (Daily)</p>
-          </div>
-        </div>
-
-        {/* Lower Section: Contact Info & Form */}
-        <div className="flex flex-col lg:flex-row gap-xl pt-md">
-          {/* Left Side: Contact Information & Hours */}
-          <div className="w-full lg:w-96 space-y-lg flex-shrink-0">
-            <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg space-y-md shadow-sm">
-              <h3 className="font-label-md text-label-md text-on-surface font-bold pb-md border-b border-outline-variant dark:border-outline/40 mb-lg">
-                Contact Details
-              </h3>
-
-              <div className="space-y-md text-body-sm text-on-surface-variant dark:text-surface-variant">
-                <div className="flex gap-sm items-start">
-                  <span className="material-symbols-outlined text-primary dark:text-primary-fixed-dim">call</span>
-                  <div>
-                    <h4 className="font-label-sm text-label-sm font-bold text-on-surface">Phone Support</h4>
-                    <p className="mt-xs font-semibold text-on-surface">+91 7798795353</p>
-                    <p className="text-[12px] opacity-75">Order & consultation hotline</p>
-                  </div>
+        {/* ── CONTACT GRID: CARDS & FORM ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Store Info Cards */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 space-y-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200 shrink-0">
+                  <MapPin size={20} />
                 </div>
-
-                <div className="flex gap-sm items-start">
-                  <span className="material-symbols-outlined text-primary dark:text-primary-fixed-dim">mail</span>
-                  <div>
-                    <h4 className="font-label-sm text-label-sm font-bold text-on-surface">Email Address</h4>
-                    <p className="mt-xs font-semibold text-on-surface">info@wellmeds.in</p>
-                    <p className="text-[12px] opacity-75">General & regulatory inquiries</p>
-                  </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#172b26] dark:text-white">Store Address</h4>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">{wellmedsStoreData.address}, {wellmedsStoreData.city}, {wellmedsStoreData.state} {wellmedsStoreData.pincode}</p>
                 </div>
+              </div>
 
-                <div className="flex gap-sm items-start">
-                  <span className="material-symbols-outlined text-primary dark:text-primary-fixed-dim">location_on</span>
-                  <div>
-                    <h4 className="font-label-sm text-label-sm font-bold text-on-surface">Pharmacy Address</h4>
-                    <p className="mt-xs font-medium text-on-surface">Shop No 3, Echelon Apartment</p>
-                    <p>Baner - Pashan Link Rd, Baner</p>
-                    <p>Pune, Maharashtra - 411021</p>
-                  </div>
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200 shrink-0">
+                  <Phone size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#172b26] dark:text-white">Phone Support</h4>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">{wellmedsStoreData.phone}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200 shrink-0">
+                  <Mail size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#172b26] dark:text-white">Email Inquiries</h4>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">{wellmedsStoreData.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200 shrink-0">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#172b26] dark:text-white">Working Hours</h4>
+                  <p className="text-xs text-slate-500 font-sans mt-0.5">{wellmedsStoreData.workingHours}</p>
                 </div>
               </div>
             </div>
-
-            {/* Operating Hours */}
-            <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg space-y-md shadow-sm">
-              <h3 className="font-label-md text-label-md text-on-surface font-bold pb-md border-b border-outline-variant dark:border-outline/40 mb-lg">
-                Operating Hours
-              </h3>
-              <div className="space-y-sm text-body-sm text-on-surface-variant dark:text-surface-variant">
-                <div className="flex justify-between">
-                  <span>Monday - Sunday</span>
-                  <span className="text-on-surface font-semibold">08:00 AM - 11:00 PM</span>
-                </div>
-                <div className="bg-secondary-container/20 text-secondary p-sm rounded-lg text-[12px] font-medium text-center mt-sm">
-                  ⚡ Express local delivery within 15 km radius in Pune.
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Right Side: Message Submission Form */}
-          <div className="flex-grow bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg shadow-sm">
-            <h3 className="font-label-md text-label-md text-on-surface font-bold pb-md border-b border-outline-variant dark:border-outline/40 mb-lg">
-              Send a Message
+          {/* Contact Inquiry Form */}
+          <div className="lg:col-span-7 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 sm:p-8 shadow-sm space-y-6">
+            <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">
+              Send Us a Message
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-md">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-label-sm font-semibold text-on-surface">Name</label>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1">Your Name *</label>
                   <input
                     type="text"
-                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
-                    placeholder="Your Name"
+                    required
+                    placeholder="Enter your full name"
+                    className="w-full bg-[#f4f9f7] dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-xs text-[#172b26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#157a6d]"
                   />
                 </div>
-                <div className="space-y-xs">
-                  <label className="block text-label-sm font-semibold text-on-surface">Email</label>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1">Email Address *</label>
                   <input
                     type="email"
-                    required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
-                    placeholder="Your Email"
+                    required
+                    placeholder="name@domain.com"
+                    className="w-full bg-[#f4f9f7] dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-xs text-[#172b26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#157a6d]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-xs">
-                <label className="block text-label-sm font-semibold text-on-surface">Subject</label>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1">Subject</label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm dark:bg-inverse-surface"
+                  className="w-full bg-[#f4f9f7] dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-xs text-[#172b26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#157a6d]"
                 >
-                  <option value="Support">General Customer Support</option>
-                  <option value="Prescription">Prescription/Rx Queries</option>
-                  <option value="Orders">Order Tracking & Shipping</option>
+                  <option value="Support">Prescription & Order Inquiry</option>
+                  <option value="Imported Medicine">Imported Medicine Request</option>
+                  <option value="Doctor Consultation">Pharmacist Consultation</option>
                   <option value="Feedback">Feedback & Suggestions</option>
                 </select>
               </div>
 
-              <div className="space-y-xs">
-                <label className="block text-label-sm font-semibold text-on-surface">Message</label>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1">Your Message *</label>
                 <textarea
-                  required
-                  rows={5}
+                  rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full p-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-on-surface focus:ring-1 focus:ring-primary text-sm"
-                  placeholder="Type your concern..."
+                  required
+                  placeholder="Describe your query in detail..."
+                  className="w-full bg-[#f4f9f7] dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-xs text-[#172b26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#157a6d]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitted}
-                className="bg-primary text-on-primary font-bold px-xl py-sm rounded-lg font-label-md hover:bg-primary-container active:scale-95 transition-all inline-block disabled:opacity-50 shadow-xs"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-8 py-3 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer disabled:opacity-50"
               >
-                {submitted ? "Sending..." : "Submit Message"}
+                <Send size={15} />
+                <span>{submitted ? "Sending..." : "Submit Inquiry"}</span>
               </button>
             </form>
           </div>
         </div>
+
+        {/* ── WHY WELLMEDS BAR ── */}
+        <WhyWellMedsBar />
       </div>
-    </>
+
+      {/* ── CONSULTATION MODAL ── */}
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+      />
+    </div>
   );
 };
 

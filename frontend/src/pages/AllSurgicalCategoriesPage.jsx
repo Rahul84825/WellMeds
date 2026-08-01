@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ChevronRight, Search } from "lucide-react";
 import { api } from "../services/api";
 import CategoryCard from "../components/CategoryCard";
 import SEO from "../components/common/SEO";
@@ -71,37 +72,14 @@ const AllSurgicalCategoriesPage = () => {
         </span>
       </nav>
 
-      {/* Page Title & Search */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 md:mb-10 pb-6 border-b border-slate-100 dark:border-zinc-800">
-        <div>
-          <h1 className="font-extrabold text-3xl md:text-4xl text-slate-900 dark:text-zinc-100 tracking-tight">
-            Surgical & Medical Supply Categories
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2 max-w-2xl leading-relaxed">
-            Browse clinical-grade surgical instruments, diagnostic equipment, sterile dressings, and medical supplies by category.
-          </p>
-        </div>
-
-        {/* Dynamic Category Search */}
-        <div className="flex items-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-2.5 w-full md:w-80 shadow-xs focus-within:border-[#004782] transition-colors">
-          <Search size={18} className="text-slate-400 shrink-0 mr-2" />
-          <input
-            type="text"
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            placeholder="Search surgical categories..."
-            className="bg-transparent border-none outline-none w-full text-xs sm:text-sm text-slate-800 dark:text-zinc-200 placeholder-slate-400 font-medium"
-          />
-          {searchVal && (
-            <button
-              onClick={() => setSearchVal("")}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-0.5"
-              aria-label="Clear category search"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
+      {/* Page Title */}
+      <div className="mb-8 md:mb-10 pb-6 border-b border-slate-100 dark:border-zinc-800">
+        <h1 className="font-extrabold text-3xl md:text-4xl text-slate-900 dark:text-zinc-100 tracking-tight">
+          Surgical & Medical Supply Categories
+        </h1>
+        <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2 max-w-2xl leading-relaxed">
+          Browse clinical-grade surgical instruments, diagnostic equipment, sterile dressings, and medical supplies by category.
+        </p>
       </div>
 
       {/* Surgical Categories Grid */}

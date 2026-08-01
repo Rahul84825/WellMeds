@@ -118,7 +118,7 @@ const OTPVerification = ({
     <div className="w-full">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-xs font-bold text-slate-400 dark:text-zinc-550 hover:text-[#038076] transition-all mb-4 select-none cursor-pointer outline-none"
+        className="flex items-center gap-1.5 font-clinical-mono text-xs font-bold text-slate-400 dark:text-zinc-500 hover:text-[#157a6d] transition-all mb-4 select-none cursor-pointer outline-none"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         <span>Change Number</span>
@@ -142,7 +142,7 @@ const OTPVerification = ({
               value={digit}
               onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-14 text-center text-xl font-bold border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/50 rounded-xl text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#038076]/25 focus:border-[#038076] transition-all duration-200"
+              className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold border border-slate-200 dark:border-zinc-800 bg-[#f4f9f7] dark:bg-zinc-800/60 rounded-2xl text-[#172b26] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#157a6d]/20 focus:border-[#157a6d] transition-all duration-200"
               autoFocus={index === 0}
             />
           ))}
@@ -150,7 +150,7 @@ const OTPVerification = ({
 
         {/* Development Helper hint */}
         {devOtpHint && (
-          <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold py-2.5 px-4 rounded-xl text-center select-none tracking-wide max-w-sm mx-auto">
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold py-2.5 px-4 rounded-2xl text-center select-none tracking-wide max-w-sm mx-auto">
             🛠️ Dev OTP Hint: <span className="underline decoration-2">{devOtpHint}</span>
           </div>
         )}
@@ -163,10 +163,10 @@ const OTPVerification = ({
         )}
 
         {/* Timer countdown and resend options */}
-        <div className="flex flex-col items-center gap-3 select-none">
-          <div className="text-xs text-slate-400 dark:text-zinc-550 font-semibold flex items-center gap-1.5">
+        <div className="flex flex-col items-center gap-2 select-none">
+          <div className="text-xs text-slate-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
             <span>Code expires in:</span>
-            <span className="text-[#038076] font-bold font-mono">
+            <span className="text-[#157a6d] dark:text-emerald-400 font-bold font-clinical-mono">
               {formatTime(expiryTimer)}
             </span>
           </div>
@@ -176,8 +176,8 @@ const OTPVerification = ({
             disabled={resendTimer > 0 || isResending}
             className={`text-xs font-bold transition-all duration-200 outline-none
               ${resendTimer > 0 
-                ? "text-slate-350 dark:text-zinc-600 cursor-not-allowed" 
-                : "text-[#038076] hover:text-[#02655f] cursor-pointer hover:underline"
+                ? "text-slate-400 dark:text-zinc-600 cursor-not-allowed" 
+                : "text-[#157a6d] hover:text-[#0f5c52] cursor-pointer hover:underline"
               }
             `}
           >
@@ -197,7 +197,7 @@ const OTPVerification = ({
         <button
           onClick={() => onVerify(digits.join(""))}
           disabled={isLoading || digits.some((d) => !d) || expiryTimer <= 0}
-          className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-3 px-4 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2 select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+          className="w-full bg-[#157a6d] hover:bg-[#0f5c52] text-white py-3 px-4 rounded-2xl text-sm font-bold shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2 select-none disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
         >
           {isLoading ? (
             <>

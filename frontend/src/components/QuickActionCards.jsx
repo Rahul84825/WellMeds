@@ -2,6 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FileText, Stethoscope, ShieldCheck, FlaskConical, ChevronRight } from "lucide-react";
 
+import surgicalImg from "../assets/QuickActionCards/surgical.png";
+import uploadImg from "../assets/QuickActionCards/upload.png";
+import keepSafeImg from "../assets/QuickActionCards/howwekeepsafe.png";
+import wellnessImg from "../assets/QuickActionCards/wellness.png";
+
 const QuickActionCards = () => {
   const cards = [
     {
@@ -9,6 +14,7 @@ const QuickActionCards = () => {
       title: "Essential Recovery Kits",
       actionText: "EXPLORE NOW",
       icon: FileText,
+      img: surgicalImg,
       to: "/surgical",
       ariaLabel: "Essential Recovery Kits. EXPLORE NOW.",
       orderClass: "order-2 md:order-none",
@@ -24,6 +30,7 @@ const QuickActionCards = () => {
       title: "Upload Your Medical Prescription",
       actionText: "UPLOAD NOW",
       icon: Stethoscope,
+      img: uploadImg,
       to: "/upload-prescription",
       ariaLabel: "Upload Prescription. Upload Now.",
       orderClass: "order-3 md:order-none",
@@ -38,8 +45,8 @@ const QuickActionCards = () => {
       id: 3,
       title: "How We Keep You Safe",
       actionText: "LEARN MORE",
-      badge: "New",
       icon: ShieldCheck,
+      img: keepSafeImg,
       to: "/how-we-keep-you-safe",
       ariaLabel: "Keep You Safe. LEARN MORE.",
       orderClass: "order-1 md:order-none",
@@ -55,6 +62,7 @@ const QuickActionCards = () => {
       title: "Get 30% off on Wellness Products",
       actionText: "EXPLORE NOW",
       icon: FlaskConical,
+      img: wellnessImg,
       to: "/wellness",
       ariaLabel: "Get 30% off on Wellness Products. EXPLORE NOW.",
       orderClass: "order-4 md:order-none",
@@ -80,13 +88,17 @@ const QuickActionCards = () => {
               aria-label={card.ariaLabel}
             >
               {/* Left: Icon Container with subtle background */}
-              <div className="relative flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/70 flex items-center justify-center shadow-sm quick-action-icon-wrap">
+              <div className="relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden shadow-xs flex items-center justify-center quick-action-icon-wrap">
                 {card.badge && (
-                  <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 text-[8px] font-extrabold text-white bg-[#ba1a1a] rounded uppercase tracking-wider leading-none select-none z-10">
+                  <span className="absolute -top-1 -left-1 px-1.5 py-0.5 text-[8px] font-extrabold text-white bg-[#ba1a1a] rounded uppercase tracking-wider leading-none select-none z-10">
                     {card.badge}
                   </span>
                 )}
-                <IconComponent className={`w-5 h-5 sm:w-7 sm:h-7 ${card.colors.iconColor}`} />
+                {card.img ? (
+                  <img src={card.img} alt={card.title} className="w-full h-full object-cover rounded-2xl scale-120 transition-transform duration-300 group-hover:scale-125" />
+                ) : (
+                  <IconComponent className={`w-6 h-6 sm:w-8 sm:h-8 ${card.colors.iconColor}`} />
+                )}
               </div>
 
               {/* Center: Title and Action Label */}

@@ -4,15 +4,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // Import local promotional banner assets
 import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
 import savingImg from "../../../assets/PromoCarousel/saving.png";
-import surgicalImg from "../../../assets/PromoCarousel/surgical.png";
 import cancerImg from "../../../assets/PromoCarousel/cancer.png";
-import coldChainImg from "../../../assets/PromoCarousel/cold-chain.png";
+import healthImg from "../../../assets/PromoCarousel/health.png";
+import glp1Img from "../../../assets/PromoCarousel/GlP-1.png";
 
 const promoBanners = [
   {
-    id: "surgical",
-    img: surgicalImg,
-    alt: "Surgical Promo Banner"
+    id: "glp1",
+    img: glp1Img,
+    alt: "GLP-1 Medicines for Diabetes & Weight Loss Promo Banner"
   },
   {
     id: "cancer",
@@ -30,9 +30,9 @@ const promoBanners = [
     alt: "Affordable Healthcare: Direct-from-Manufacturer pricing delivering up to 85% savings on Patient Assistance Program (PAP) therapies"
   },
   {
-    id: "cold-chain",
-    img: coldChainImg,
-    alt: "Cold Chain Promo Banner"
+    id: "health",
+    img: healthImg,
+    alt: "Health Promo Banner"
   }
 ];
 

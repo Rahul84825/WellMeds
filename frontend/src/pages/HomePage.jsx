@@ -4,11 +4,11 @@ import QuickActionCards from "../components/QuickActionCards";
 import PromoCarousel from "../components/home/PromoCarousel";
 import CategorySection from "../components/CategorySection";
 import CouponCarousel from "../components/CouponCarousel";
-import WhyChooseWellMeds from "../components/WhyChooseWellMeds";
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import UploadPrescriptionBanner from "../components/UploadPrescriptionBanner";
 import WellnessProductsSection from "../components/WellnessProductsSection";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
-import HealthSupplementsSection from "../components/HealthSupplementsSection";
+import BestSellerSection from "../components/BestSellerSection";
 import GLP1ProductsSection from "../components/GLP1ProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ConsultationModal from "../components/ConsultationModal";
@@ -115,7 +115,7 @@ const HomePage = () => {
 
       {/* Upload Rx Prescription Banner */}
       <UploadPrescriptionBanner />
-      
+
       <LazySection minHeight="300px">
         <WellnessProductsSection />
       </LazySection>
@@ -127,7 +127,7 @@ const HomePage = () => {
 
 
       <LazySection minHeight="300px">
-        <HealthSupplementsSection />
+        <BestSellerSection />
       </LazySection>
 
       <LazySection minHeight="300px">
@@ -135,7 +135,7 @@ const HomePage = () => {
       </LazySection>
 
       <LazySection minHeight="200px">
-        <WhyChooseWellMeds />
+        <WhyWellMedsBar />
       </LazySection>
 
       {/* Pharmacist Consultation Details Form Modal */}

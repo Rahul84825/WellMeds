@@ -192,6 +192,8 @@ app.use("/api", seoRoutes);
 // Global Maintenance Mode Protection Middleware
 app.use(maintenanceMiddleware);
 
+import checkoutSessionRoutes from "./src/routes/checkoutSessionRoutes.js";
+
 // Routes Mapping
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
@@ -200,6 +202,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/checkout-session", checkoutSessionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/specialities", specialityRoutes);

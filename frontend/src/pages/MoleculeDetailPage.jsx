@@ -30,15 +30,15 @@ const PAGE_BG = {
 
 /* ─── Clinical sections definition ─────────────────────────────────────── */
 const SECTIONS = [
-  { id: "background",   label: "Background",         icon: BookOpen,    field: (m) => m.description || m.shortDescription },
-  { id: "mechanism",    label: "Mechanism of Action", icon: Atom,        field: (m) => m.howItWorks },
-  { id: "uses",         label: "Clinical Uses",       icon: FlaskConical,field: (m) => m.uses || m.benefits },
-  { id: "dosage",       label: "Dosage",              icon: Pill,        field: (m) => m.dosage },
-  { id: "sideeffects",  label: "Side Effects",        icon: Thermometer, field: (m) => m.sideEffects },
-  { id: "warnings",     label: "Warnings & Precautions", icon: ShieldCheck, field: (m) => m.warnings || m.precautions },
-  { id: "storage",      label: "Storage",             icon: BookMarked,  field: (m) => m.storage },
-  { id: "faqs",         label: "FAQs",                icon: HelpCircle,  field: (m) => m.faqs?.length > 0 },
-  { id: "references",   label: "References",          icon: BookMarked,  field: (m) => m.references?.length > 0 },
+  { id: "background", label: "Background", icon: BookOpen, field: (m) => m.description || m.shortDescription },
+  { id: "mechanism", label: "Mechanism of Action", icon: Atom, field: (m) => m.howItWorks },
+  { id: "uses", label: "Clinical Uses", icon: FlaskConical, field: (m) => m.uses || m.benefits },
+  { id: "dosage", label: "Dosage", icon: Pill, field: (m) => m.dosage },
+  { id: "sideeffects", label: "Side Effects", icon: Thermometer, field: (m) => m.sideEffects },
+  { id: "warnings", label: "Warnings & Precautions", icon: ShieldCheck, field: (m) => m.warnings || m.precautions },
+  { id: "storage", label: "Storage", icon: BookMarked, field: (m) => m.storage },
+  { id: "faqs", label: "FAQs", icon: HelpCircle, field: (m) => m.faqs?.length > 0 },
+  { id: "references", label: "References", icon: BookMarked, field: (m) => m.references?.length > 0 },
 ];
 
 /* ─── Main Component ────────────────────────────────────────────────────── */
@@ -258,11 +258,10 @@ const MoleculeDetailPage = () => {
                     <button
                       key={s.id}
                       onClick={() => scrollToSection(s.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors text-xs font-mono border-b border-[#dde8e3]/60 last:border-0 group cursor-pointer ${
-                        activeSection === s.id
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors text-xs font-mono border-b border-[#dde8e3]/60 last:border-0 group cursor-pointer ${activeSection === s.id
                           ? "bg-[#157a6d] text-white font-bold"
                           : "text-black hover:bg-[#f4f9f7] hover:text-[#157a6d] font-semibold"
-                      }`}
+                        }`}
                     >
                       <Icon size={14} className={activeSection === s.id ? "text-white" : "text-[#157a6d] group-hover:text-[#157a6d]"} />
                       <span>{s.label}</span>
@@ -462,31 +461,31 @@ const MoleculeDetailPage = () => {
                   <div className="flex flex-wrap gap-2.5">
                     {molecule.relatedMolecules?.length > 0
                       ? molecule.relatedMolecules.map((rel, idx) => {
-                          const relName = typeof rel === "object" ? rel.name : rel;
-                          const relSlug = typeof rel === "object" ? rel.slug : rel;
-                          return (
-                            <button
-                              key={idx}
-                              onClick={() => navigate(`/molecules/${relSlug}`)}
-                              className="text-xs sm:text-sm font-mono font-bold px-3.5 py-2 border border-[#157a6d] text-black hover:bg-[#157a6d] hover:text-white rounded-sm transition-all cursor-pointer"
-                            >
-                              {relName}
-                            </button>
-                          );
-                        })
+                        const relName = typeof rel === "object" ? rel.name : rel;
+                        const relSlug = typeof rel === "object" ? rel.slug : rel;
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => navigate(`/molecules/${relSlug}`)}
+                            className="text-xs sm:text-sm font-mono font-bold px-3.5 py-2 border border-[#157a6d] text-black hover:bg-[#157a6d] hover:text-white rounded-sm transition-all cursor-pointer"
+                          >
+                            {relName}
+                          </button>
+                        );
+                      })
                       : molecule.relatedMoleculesText
-                          .split(/\n/)
-                          .map((line) => line.replace(/^[•\-\*\s]+/, "").trim())
-                          .filter(Boolean)
-                          .map((relName, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => navigate(`/molecules/${relName.toLowerCase().replace(/\s+/g, "-")}`)}
-                              className="text-xs sm:text-sm font-mono font-bold px-3.5 py-2 border border-[#157a6d] text-black hover:bg-[#157a6d] hover:text-white rounded-sm transition-all cursor-pointer"
-                            >
-                              {relName}
-                            </button>
-                          ))}
+                        .split(/\n/)
+                        .map((line) => line.replace(/^[•\-\*\s]+/, "").trim())
+                        .filter(Boolean)
+                        .map((relName, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => navigate(`/molecules/${relName.toLowerCase().replace(/\s+/g, "-")}`)}
+                            className="text-xs sm:text-sm font-mono font-bold px-3.5 py-2 border border-[#157a6d] text-black hover:bg-[#157a6d] hover:text-white rounded-sm transition-all cursor-pointer"
+                          >
+                            {relName}
+                          </button>
+                        ))}
                   </div>
                 </ClinicalSection>
               )}

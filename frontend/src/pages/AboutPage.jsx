@@ -1,142 +1,166 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import SEO from "../components/common/SEO";
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
+import { Sparkles, Phone, FileText, ChevronRight, ShieldCheck, HeartPulse, Award, Users } from "lucide-react";
 
 const About = () => {
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+
   const breadcrumbs = [
     { name: "Home", url: "/" },
     { name: "About Us", url: "/about" },
   ];
 
-  const aboutSchema = {
-    "@context": "https://schema.org",
-    "@type": "MedicalOrganization",
-    "name": "WellMeds Specialty Pharmacy",
-    "url": "https://wellmeds.in/about",
-    "logo": "https://wellmeds.in/favicon.png",
-    "description": "WellMeds is India's specialty digital pharmacy committed to authentic prescription drugs, cold-chain biologicals, and expert pharmacist consultations.",
-    "telephone": "+91-800-WELLMEDS",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Baner, Pune",
-      "addressRegion": "Maharashtra",
-      "postalCode": "411045",
-      "addressCountry": "IN"
-    }
-  };
   const leaders = [
     {
       name: "Dr. Elizabeth Vance, MD",
       role: "Chief Medical Officer",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBU-rD_DhET0glsjROzxuQOJ4UxSl3ZjzvTW6BCqF1Ytd-zayFaACSoBY12NKbSSijmeu85DOsRPGhyS0iGfGxYQEJcpP-vuC6A-H-Z5GYd-bWI64XWotJEqpBd6RBoR21x86HFUIIyvuIdDiYUwgICJfkUp1kco9-ANVkx19Tdp7dj_ydLhxULRmMYlUjicJF7hS1gPiQLpHyEGcexE1asXkDGFlCcZczPRo__wmeDOQ7Y_gpO3HIHr-74NcuBa6Xe579pjnf_dq8I",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
       desc: "Cardiologist with 15+ years of clinical practice, supervising health quality and prescription review controls."
     },
     {
       name: "Marcus Thorne, PharmD",
       role: "Lead Pharmacist",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCxr9a9BZ7uZjIAgex8m212dSE8oZZ378LNCU61QGXYiMVdzxsG7VdTm6Rz8IBPUYF4QDggHvH8mNE7T9JJ0xU_KRS4rGJxd9ALF41K5WOQ10jORgrxEpdL3g31lRZ4h2wVw90K3eRqgUj81M3CfGZnZlmZx_lCfqZQh1zFwQZ0QwJ_RJ4cgnuvYFdI8p6wrgDYk84FNG-ScPB4TEzFpsIfMP-cwpsWk1DJbBYIUlwY0vXhXeVslg_ayRcNmBJONkn4LOG2mm31M7fi",
+      image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80",
       desc: "Specialized in pharmacology and clinical interactions, managing our state-of-the-art dispensing systems."
     },
     {
       name: "Sanjay Patel",
       role: "Operations Director",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAphcqGx1fnNXyk5p_UtWhj_s54is7crJPOrdv-bdBBDjM48or3uFwhmUtrwjHBoS1DJjVoeJj_btREqdZQp1g8-Lbe94PGnvb7v74XRz3Aj5VYtoE_hsUmosd8fMoqz5B1wG6_vhc7YoDq_71RmIVWjnpqzvXZxpze9TDRNG6lLxdGwlgGCRNwIxQYR4QhQxhmRZ83e3lkrp7IfWJFRkhX5qm5siC1CD7CtiAQWlmqIP7k1wOHo5Oz12fYUEJvrtFjgc-vKMHgMYEb",
+      image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80",
       desc: "Directs logistics operations to guarantee safe transit and temperature-controlled next-day delivery."
     }
   ];
 
   return (
-    <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] space-y-xxl text-left">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
         title="About WellMeds | Precision Healthcare & Licensed Pharmacy"
-        description="Learn about WellMeds mission, licensed clinical leadership, cold-chain storage facilities, and commitment to authentic medicine distribution across India."
+        description="Learn about WellMeds specialty pharmacy mission, licensed medical leadership, cold-chain storage standards, and commitment to authentic healthcare."
         canonical="/about"
         breadcrumbs={breadcrumbs}
-        schema={aboutSchema}
       />
-      {/* Intro Header */}
-      <section className="text-center space-y-md max-w-3xl mx-auto py-xl">
-        <span className="bg-primary-container text-on-primary-container border border-primary/20 px-md py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">
-          Our Story
-        </span>
-        <h1 className="font-headline-lg text-headline-lg md:text-5xl font-bold text-primary dark:text-primary-fixed-dim leading-tight">
-          Redefining Healthcare Delivery
-        </h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant dark:text-surface-variant leading-relaxed">
-          MediShop is a licensed pharmacy provider merging professional medical security with direct e-commerce simplicity.
-        </p>
-      </section>
 
-      {/* Grid: Vision & Mission */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-lg pt-lg">
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg space-y-md shadow-sm">
-          <div className="w-12 h-12 bg-primary-fixed text-primary rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-2xl">visibility</span>
-          </div>
-          <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Our Vision</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant leading-relaxed">
-            To create a frictionless, secure, and compassionate digital clinical channel where consumers can consult, order prescription therapies, and manage their health essentials without administrative burden.
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
+        {/* ── HERO HEADER ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-lg space-y-md shadow-sm">
-          <div className="w-12 h-12 bg-secondary-fixed text-secondary rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-2xl">assignment</span>
-          </div>
-          <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Our Mission</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant leading-relaxed">
-            We operate with clinical precision, verifying all patient prescription documents securely, selecting FDA-approved manufacturers directly, and providing prompt clinical assistance to support treatment compliance.
-          </p>
-        </div>
-      </section>
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
+              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">About Us</span>
+            </nav>
 
-      {/* Stats Board */}
-      <section className="bg-surface-container dark:bg-surface-container-high rounded-2xl p-xl grid grid-cols-2 md:grid-cols-4 gap-lg text-center transition-colors duration-300">
-        <div>
-          <h3 className="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">100k+</h3>
-          <p className="text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider mt-xs">
-            Customers Served
-          </p>
-        </div>
-        <div>
-          <h3 className="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">120+</h3>
-          <p className="text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider mt-xs">
-            Licensed Pharmacists
-          </p>
-        </div>
-        <div>
-          <h3 className="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">99.8%</h3>
-          <p className="text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider mt-xs">
-            On-time Delivery
-          </p>
-        </div>
-        <div>
-          <h3 className="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">10M+</h3>
-          <p className="text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider mt-xs">
-            Doses Distributed
-          </p>
-        </div>
-      </section>
-
-      {/* Experts section */}
-      <section className="space-y-xl">
-        <h2 className="font-headline-md text-headline-md font-bold text-on-surface text-center">Meet Our Medical Leadership</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-          {leaders.map((leader, index) => (
-            <div key={index} className="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant dark:border-outline/40 rounded-xl p-md shadow-sm flex flex-col items-center text-center space-y-md">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/25 bg-surface-container">
-                <img alt={leader.name} className="w-full h-full object-cover" src={leader.image} />
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
+                <Sparkles size={14} className="text-[#b08d3e]" />
+                <span>CLINICAL EXCELLENCE & TRUST</span>
               </div>
-              <div>
-                <h4 className="font-label-md text-label-md font-bold text-on-surface">{leader.name}</h4>
-                <p className="text-body-sm text-secondary font-medium mt-xs">{leader.role}</p>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant leading-relaxed">
-                {leader.desc}
+
+              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
+                About WellMeds
+              </h1>
+
+              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
+                India’s trusted specialty digital pharmacy committed to authentic prescription drugs, cold-chain biologicals, and expert pharmacist consultations.
               </p>
             </div>
-          ))}
+
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/upload-prescription"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+              >
+                <FileText size={15} />
+                <span>Upload Prescription</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsConsultationOpen(true)}
+                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              >
+                <Phone size={15} />
+                <span>Talk to Pharmacist</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
+
+        {/* ── CORE PILLARS SECTION ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 space-y-3 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200">
+              <ShieldCheck size={24} />
+            </div>
+            <h3 className="font-bold text-lg text-[#172b26] dark:text-white">100% Genuine Sourcing</h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-sans">
+              Direct partnership with licensed pharma manufacturers ensures zero counterfeit risk for every formulation.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 space-y-3 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200">
+              <HeartPulse size={24} />
+            </div>
+            <h3 className="font-bold text-lg text-[#172b26] dark:text-white">Cold-Chain Assurance</h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-sans">
+              Strict 2°C – 8°C temperature monitoring for insulin, biologicals, and GLP-1 medications during transit.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 space-y-3 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200">
+              <Award size={24} />
+            </div>
+            <h3 className="font-bold text-lg text-[#172b26] dark:text-white">Pharmacist Supervision</h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-sans">
+              Every prescription undergoes rigorous dual verification by registered clinical pharmacists before dispatch.
+            </p>
+          </div>
+        </div>
+
+        {/* ── LEADERSHIP SECTION ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm space-y-6">
+          <div className="flex items-center gap-2">
+            <Users size={20} className="text-[#157a6d]" />
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-white">
+              Medical Leadership
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {leaders.map((leader, idx) => (
+              <div key={idx} className="bg-[#f4f9f7] dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl p-5 space-y-3 text-left">
+                <img
+                  src={leader.image}
+                  alt={leader.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-[#157a6d]"
+                />
+                <div>
+                  <h4 className="font-bold text-base text-[#172b26] dark:text-white">{leader.name}</h4>
+                  <p className="text-xs font-semibold text-[#157a6d] font-clinical-mono">{leader.role}</p>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-sans">
+                  {leader.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── WHY WELLMEDS BAR ── */}
+        <WhyWellMedsBar />
+      </div>
+
+      {/* ── CONSULTATION MODAL ── */}
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+      />
     </div>
   );
 };

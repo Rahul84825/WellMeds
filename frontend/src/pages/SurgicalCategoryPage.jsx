@@ -2,16 +2,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
-import Loader from "../components/Loader";
-import { 
-  Search, 
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
+import SEO from "../components/common/SEO";
+import {
+  Search,
   X,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert,
-  FolderOpen
+  Sparkles,
+  Phone,
+  FileText,
+  Package,
+  Scissors
 } from "lucide-react";
-import SEO from "../components/common/SEO";
 
 const SurgicalCategoryPage = () => {
   const { categorySlug } = useParams();
@@ -25,47 +29,26 @@ const SurgicalCategoryPage = () => {
   const [searchVal, setSearchVal] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   const LIMIT = 24;
 
-  // Fetch Category Details
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       setLoadingCategory(true);
       try {
         const cat = await api.getSurgicalCategory(categorySlug);
         setCategory(cat);
-
-        // Dynamic SEO Optimization
-        if (cat) {
-          document.title = cat.seoTitle || `${cat.name} Surgical Supplies & Equipment | WellMeds`;
-          let metaDesc = document.querySelector("meta[name='description']");
-          if (!metaDesc) {
-            metaDesc = document.createElement("meta");
-            metaDesc.setAttribute("name", "description");
-            document.head.appendChild(metaDesc);
-          }
-          metaDesc.setAttribute("content", cat.seoDescription || cat.description || `Browse quality clinical ${cat.name} products at WellMeds.`);
-          
-          let canonical = document.querySelector("link[rel='canonical']");
-          if (!canonical) {
-            canonical = document.createElement("link");
-            canonical.rel = "canonical";
-            document.head.appendChild(canonical);
-          }
-          canonical.href = window.location.href;
-        }
       } catch (err) {
         console.error("Failed to load category details", err);
       } finally {
         setLoadingCategory(false);
       }
     };
+
     fetchCategoryDetails();
-    setCurrentPage(1); // Reset pagination on category change
   }, [categorySlug]);
 
-  // Debounce search value
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchVal);
@@ -74,205 +57,170 @@ const SurgicalCategoryPage = () => {
     return () => clearTimeout(timer);
   }, [searchVal]);
 
-  // Fetch products
   const fetchProducts = useCallback(async () => {
-    if (!category) return;
     setLoadingProducts(true);
     try {
       const data = await api.getProducts({
         page: currentPage,
         limit: LIMIT,
-        isSurgical: "true",
-        surgicalCategory: category.id || category._id,
-        search: debouncedSearch || undefined
+        isSurgical: true,
+        surgicalCategory: categorySlug,
+        search: debouncedSearch || undefined,
       });
-      setProducts(data.products || []);
+
+      let list = data.products || [];
+
+      if (sortBy === "price_asc") {
+        list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
+      } else if (sortBy === "price_desc") {
+        list = [...list].sort((a, b) => (b.price || 0) - (a.price || 0));
+      } else if (sortBy === "name_desc") {
+        list = [...list].sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+      } else {
+        list = [...list].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      }
+
+      setProducts(list);
       setTotalProducts(data.total || 0);
     } catch (err) {
-      console.error("Failed to load category products", err);
+      console.error("Failed to fetch surgical category products", err);
     } finally {
       setLoadingProducts(false);
     }
-  }, [currentPage, debouncedSearch, category]);
+  }, [categorySlug, currentPage, debouncedSearch, sortBy]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // Client-side sorting
-  const getSortedProducts = () => {
-    const sorted = [...products];
-    if (sortBy === "price_asc") {
-      sorted.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price_desc") {
-      sorted.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "name_asc") {
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "name_desc") {
-      sorted.sort((a, b) => b.name.localeCompare(a.name));
+    if (category) {
+      fetchProducts();
     }
-    return sorted;
-  };
+  }, [category, fetchProducts]);
+
+  const totalPages = Math.max(1, Math.ceil(totalProducts / LIMIT));
+
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Surgical", url: "/surgical" },
+    { name: "Categories", url: "/surgical/categories" },
+    { name: category?.name || "Category", url: `/surgical/${categorySlug}` },
+  ];
 
   if (loadingCategory) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader size="lg" />
+      <div className="min-h-screen bg-clinical-grid py-12 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-[#157a6d] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (!category) {
     return (
-      <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xxl text-center">
-        <ShieldAlert className="mx-auto text-red-500 mb-md" size={48} />
-        <h2 className="font-extrabold text-xl text-slate-800 dark:text-zinc-100">Category Not Found</h2>
-        <p className="text-xs text-slate-400 mt-xs mb-lg">The surgical category you are looking for does not exist or has been disabled.</p>
-        <Link to="/surgical" className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs">
-          Back to Surgical Landing
-        </Link>
+      <div className="min-h-screen bg-clinical-grid py-12">
+        <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 text-center space-y-4">
+          <Scissors size={40} className="mx-auto text-slate-400" />
+          <h2 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">Category Not Found</h2>
+          <Link to="/surgical/categories" className="bg-[#157a6d] text-white px-6 py-2.5 rounded-full text-xs font-semibold inline-block">
+            Browse Surgical Categories
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const totalPages = Math.ceil(totalProducts / LIMIT) || 1;
-  const sortedProducts = getSortedProducts();
-
-  const breadcrumbs = [
-    { name: "Home", url: "/" },
-    { name: "Surgical", url: "/surgical" },
-    { name: category.name, url: `/surgical/${categorySlug}` },
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title={category.seoTitle || `${category.name} Surgical Supplies & Equipment | WellMeds`}
+        title={category.seoTitle || `${category.name} Surgical Supplies | WellMeds`}
         description={category.seoDescription || category.description || `Browse quality clinical ${category.name} products at WellMeds.`}
         canonical={`/surgical/${categorySlug}`}
         breadcrumbs={breadcrumbs}
       />
-      
-      {/* Breadcrumbs */}
-      <nav className="flex items-center text-[11px] text-slate-400 gap-xs mb-sm font-semibold select-none">
-        <span className="cursor-pointer hover:text-[#004782] transition-colors" onClick={() => navigate("/")}>Home</span>
-        <span className="text-slate-300">/</span>
-        <span className="cursor-pointer hover:text-[#004782] transition-colors" onClick={() => navigate("/surgical")}>Surgical</span>
-        <span className="text-slate-300">/</span>
-        <span className="text-[#004782] dark:text-[#a4c9ff]">{category.name}</span>
-      </nav>
 
-      {/* Category Header with Banner Image */}
-      <div 
-        className="relative rounded-3xl overflow-hidden bg-cover bg-center text-white p-lg sm:p-xl md:p-xxl shadow-lg border border-slate-100 dark:border-zinc-800 mb-xl select-none"
-        style={{ 
-          backgroundImage: category.bannerImage 
-            ? `url(${category.bannerImage})` 
-            : "linear-gradient(to bottom right, #001f3f, #004782, #086b53)" 
-        }}
-      >
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-0"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
+        {/* ── HERO HEADER ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-2xl space-y-md text-left">
-          <div className="inline-flex items-center gap-xs text-[10px] font-extrabold uppercase tracking-widest bg-white/10 px-md py-1 rounded-full border border-white/15">
-            <FolderOpen size={12} className="text-white" />
-            Surgical Department
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            {category.name}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
-            {category.description || `Quality products and equipment categorized under our ${category.name} section.`}
-          </p>
-        </div>
-      </div>
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
+              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <Link to="/surgical" className="hover:text-[#157a6d]">Surgical</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{category.name}</span>
+            </nav>
 
-      {/* Catalog Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-md mb-xl">
-        
-        {/* Search */}
-        <div className="flex items-center bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-xl px-sm py-2 w-full max-w-md">
-          <Search size={16} className="text-slate-400 shrink-0" />
-          <input
-            type="text"
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            placeholder={`Search within ${category.name}...`}
-            className="bg-transparent border-none outline-none w-full text-xs ml-xs dark:text-zinc-200"
-          />
-          {searchVal && (
-            <button onClick={() => setSearchVal("")} className="text-slate-400 hover:text-slate-600">
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        {/* Sort Select */}
-        <div className="flex items-center gap-xs shrink-0">
-          <span className="text-slate-400 text-xs font-bold whitespace-nowrap">Sort By:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="p-sm bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 focus:border-primary rounded-xl outline-none text-xs dark:text-zinc-200 font-semibold"
-          >
-            <option value="name_asc">Name: A to Z</option>
-            <option value="name_desc">Name: Z to A</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-          </select>
-        </div>
-
-      </div>
-
-      {/* Products Grid */}
-      {loadingProducts ? (
-        <div className="min-h-[30vh] flex items-center justify-center bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl shadow-sm">
-          <Loader size="lg" />
-        </div>
-      ) : sortedProducts.length > 0 ? (
-        <div className="space-y-xl">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-md">
-            {sortedProducts.map((prod) => (
-              <ProductCard key={prod.id || prod._id} product={prod} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 pt-md select-none">
-              <div className="text-slate-400 text-xs font-semibold">
-                Showing Page {currentPage} of {totalPages} ({totalProducts} items found)
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
+                <Sparkles size={14} className="text-[#b08d3e]" />
+                <span>SURGICAL CATEGORY</span>
               </div>
-              <div className="flex items-center gap-xs">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="p-xs rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 disabled:opacity-50 transition-colors"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="p-xs rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 disabled:opacity-50 transition-colors"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
+
+              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
+                {category.name}
+              </h1>
+
+              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
+                {category.description || `Browse clinical-grade ${category.name} instruments, diagnostic equipment, and medical supplies.`}
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/upload-prescription"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+              >
+                <FileText size={15} />
+                <span>Upload Prescription</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsConsultationOpen(true)}
+                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              >
+                <Phone size={15} />
+                <span>Talk to Pharmacist</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+
+        {/* ── PRODUCT GRID OR SKELETONS ── */}
+        <div>
+          {loadingProducts ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(8)].map((_, idx) => (
+                <div key={idx} className="bg-white dark:bg-zinc-900 rounded-[24px] border border-slate-200 dark:border-zinc-800 p-4 space-y-3 animate-pulse">
+                  <div className="w-full h-40 bg-slate-100 dark:bg-zinc-800 rounded-2xl" />
+                  <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
+                </div>
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {products.map((prod) => (
+                <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
+              <Package size={36} className="mx-auto text-slate-400" />
+              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">No Products Available</h3>
+              <p className="text-xs text-slate-500 font-sans">No products currently match your active search filter in this category.</p>
             </div>
           )}
         </div>
-      ) : (
-        <div className="text-center py-xxl bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-2xl shadow-sm">
-          <ShieldAlert className="mx-auto text-slate-350 dark:text-zinc-700 mb-md" size={48} />
-          <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-100">No Products in Category</h3>
-          <p className="text-xs text-slate-450 max-w-sm mx-auto mt-xs">
-            There are currently no surgical products assigned to this category. Check back later or explore other sections.
-          </p>
-        </div>
-      )}
 
+        {/* ── WHY WELLMEDS BAR ── */}
+        <WhyWellMedsBar />
+      </div>
+
+      {/* ── CONSULTATION MODAL ── */}
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+      />
     </div>
   );
 };

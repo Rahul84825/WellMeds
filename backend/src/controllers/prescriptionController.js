@@ -10,6 +10,7 @@ import {
 import { Notification } from "../models/Notification.js";
 import { Cart } from "../models/Cart.js";
 import { Product } from "../models/Product.js";
+import { CheckoutSession } from "../models/CheckoutSession.js";
 
 // ─────────────────────────────────────────────
 // PATIENT — Upload a new prescription
@@ -50,12 +51,41 @@ export const uploadPrescription = async (req, res, next) => {
       timeline: initialTimeline,
     });
 
-    // Link prescription to user's active cart
-    const cart = await Cart.findOne({ user: req.user._id });
+    // Link prescription to user's active cart and lock checkout session
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
     if (cart) {
       cart.prescription = prescription._id;
       cart.prescriptionStatus = "Uploaded";
       await cart.save();
+
+      // Create or update CheckoutSession
+      const itemsSnapshot = cart.items.map((i) => ({
+        productId: (i.product._id || i.product.id || i.product).toString(),
+        name: i.product?.name || "",
+        quantity: i.quantity,
+        price: i.product?.price || 0,
+        requiresRx: !!(i.product?.requiresRx || i.product?.isPrescriptionRequired),
+      }));
+
+      const subtotal = itemsSnapshot.reduce((acc, i) => acc + i.price * i.quantity, 0);
+
+      await CheckoutSession.findOneAndUpdate(
+        { user: req.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+        {
+          user: req.user._id,
+          cartSnapshot: {
+            items: itemsSnapshot,
+            subtotal,
+            requiresRx: true,
+          },
+          prescription: prescription._id,
+          status: "PENDING_VERIFICATION",
+          isLocked: true,
+          lockReason: "Prescription is under pharmacist verification. Cart is locked.",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+        { upsert: true, new: true }
+      );
     }
 
     // Create Notification
@@ -404,8 +434,8 @@ export const approvePrescription = async (req, res, next) => {
 
     await prescription.save();
 
-    // Auto-sync Cart
-    let cart = await Cart.findOne({ user: prescription.user._id });
+    // Sync Cart & Prescription snapshot
+    let cart = await Cart.findOne({ user: prescription.user._id }).populate("items.product");
     if (!cart) {
       cart = new Cart({ user: prescription.user._id, items: [] });
     }
@@ -416,7 +446,7 @@ export const approvePrescription = async (req, res, next) => {
         const prodId = pItem.product?._id || pItem.product;
         if (!prodId) continue;
         const existingIdx = cart.items.findIndex(
-          (ci) => ci.product.toString() === prodId.toString()
+          (ci) => ci.product && ci.product.toString() === prodId.toString()
         );
         if (existingIdx > -1) {
           cart.items[existingIdx].quantity = pItem.quantity || 1;
@@ -433,6 +463,38 @@ export const approvePrescription = async (req, res, next) => {
     cart.prescription = prescription._id;
     cart.prescriptionStatus = "Approved";
     await cart.save();
+
+    // Re-populate cart items for snapshot consistency
+    const updatedCart = await Cart.findOne({ user: prescription.user._id }).populate("items.product");
+    if (updatedCart) {
+      const itemsSnapshot = updatedCart.items.map((i) => ({
+        productId: (i.product?._id || i.product?.id || i.product).toString(),
+        name: i.product?.name || "",
+        quantity: i.quantity,
+        price: i.product?.price || 0,
+        requiresRx: !!(i.product?.requiresRx || i.product?.isPrescriptionRequired),
+      }));
+
+      prescription.cartSnapshot = {
+        items: itemsSnapshot,
+        subtotal: itemsSnapshot.reduce((acc, i) => acc + i.price * i.quantity, 0),
+        requiresRx: true,
+      };
+      await prescription.save();
+    }
+
+    // Update CheckoutSession to VERIFIED
+    await CheckoutSession.findOneAndUpdate(
+      { user: prescription.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+      {
+        user: prescription.user._id,
+        prescription: prescription._id,
+        status: "VERIFIED",
+        isLocked: true,
+        lockReason: "Prescription verified by pharmacist. Cart is ready for checkout payment.",
+      },
+      { upsert: true, new: true }
+    );
 
     // Create Notification
     await Notification.create({
@@ -494,6 +556,16 @@ export const rejectPrescription = async (req, res, next) => {
       cart.prescriptionStatus = "Rejected";
       await cart.save();
     }
+
+    // Update CheckoutSession to CANCELLED and unlock
+    await CheckoutSession.findOneAndUpdate(
+      { user: prescription.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+      {
+        status: "CANCELLED",
+        isLocked: false,
+        lockReason: "Prescription rejected by pharmacist.",
+      }
+    );
 
     // Create Notification
     await Notification.create({

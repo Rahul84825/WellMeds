@@ -35,6 +35,7 @@ const MoleculeDetailPage = lazy(() => import("../pages/MoleculeDetailPage"));
 const WellnessPage = lazy(() => import("../pages/WellnessPage"));
 const GLP1MedicinesPage = lazy(() => import("../pages/GLP1MedicinesPage"));
 const HealthSupplementsPage = lazy(() => import("../pages/HealthSupplementsPage"));
+const BestSellersPage = lazy(() => import("../pages/BestSellersPage"));
 const SurgicalLandingPage = lazy(() => import("../pages/SurgicalLandingPage"));
 const AllSurgicalProductsPage = lazy(() => import("../pages/AllSurgicalProductsPage"));
 const AllSurgicalCategoriesPage = lazy(() => import("../pages/AllSurgicalCategoriesPage"));
@@ -160,7 +161,8 @@ const AppRoutes = () => {
           <Route path="contact" element={<ContactPage />} />
           <Route path="imported-medicines" element={<ImportedMedicinesPage />} />
           <Route path="glp-1-medicines" element={<GLP1MedicinesPage />} />
-          <Route path="health-supplements" element={<HealthSupplementsPage />} />
+          <Route path="health-supplements" element={<BestSellersPage />} />
+          <Route path="best-sellers" element={<BestSellersPage />} />
           <Route path="patient-assistance-program" element={<PatientAssistanceProgramPage />} />
           <Route path="offers" element={<OffersPage />} />
           <Route path="how-we-keep-you-safe" element={<HowWeKeepYouSafePage />} />
@@ -189,11 +191,7 @@ const AppRoutes = () => {
           />
           <Route
             path="orders"
-            element={
-              <ProtectedRoute>
-                <OrdersPage />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/profile?tab=orders" replace />}
           />
           <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
           <Route

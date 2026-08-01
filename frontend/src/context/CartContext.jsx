@@ -1,18 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { cartService } from "../services/api/cartService";
+import { checkoutSessionService } from "../services/api/checkoutSessionService";
+import { roundPrice } from "../utils/currency";
+import { toast } from "sonner";
 
 export const CartContext = createContext();
 
-/**
- * CartProvider — Hybrid strategy:
- * - Guests: cart stored in localStorage only.
- * - Logged-in users: cart synced to backend. localStorage acts as a local cache.
- *
- * Pass `user` prop (from AuthContext) to enable backend sync.
- * CartProvider is intentionally kept user-agnostic; the sync is triggered
- * externally via the `syncCartForUser` and `clearServerCart` helpers exposed
- * through context, called by AuthContext on login / logout.
- */
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -26,10 +19,74 @@ export const CartProvider = ({ children }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingRxFile, setPendingRxFile] = useState(null);
 
+  // Cart Lock & Session states
+  const [isCartLocked, setIsCartLocked] = useState(false);
+  const [checkoutSessionStatus, setCheckoutSessionStatus] = useState("ACTIVE"); // ACTIVE | LOCKED | PENDING_VERIFICATION | VERIFIED | PAYMENT_PENDING | PAYMENT_SUCCESS | EXPIRED | CANCELLED
+  const [lockReason, setLockReason] = useState("");
+
   // Persist to localStorage on every change
   useEffect(() => {
     localStorage.setItem("medishop_cart", JSON.stringify(cartItems));
   }, [cartItems]);
+
+  const hasToken = () => !!localStorage.getItem("medishop_token");
+
+  // Fetch Checkout Session & Lock Status
+  const refreshCartLockStatus = useCallback(async () => {
+    if (!hasToken()) {
+      setIsCartLocked(false);
+      setCheckoutSessionStatus("ACTIVE");
+      setLockReason("");
+      return;
+    }
+
+    try {
+      const res = await checkoutSessionService.getSessionStatus();
+      if (res && res.success) {
+        setIsCartLocked(!!res.isLocked);
+        setCheckoutSessionStatus(res.status || "ACTIVE");
+        setLockReason(res.session?.lockReason || "");
+      }
+    } catch (err) {
+      console.warn("Failed to fetch checkout session status:", err.message);
+    }
+  }, []);
+
+  // Multi-tab sync & tab focus refresh
+  useEffect(() => {
+    refreshCartLockStatus();
+
+    const handleStorageChange = (e) => {
+      if (e.key === "wellmeds_cart_lock_sync") {
+        refreshCartLockStatus();
+      }
+      if (e.key === "wellmeds_cart_cleared") {
+        setCartItems([]);
+        setIsCartLocked(false);
+        setCheckoutSessionStatus("PAYMENT_SUCCESS");
+        setLockReason("");
+        setPendingRxFile(null);
+        localStorage.removeItem("medishop_cart");
+      }
+    };
+
+    const handleFocus = () => {
+      refreshCartLockStatus();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refreshCartLockStatus]);
+
+  // Broadcast lock state change to other tabs
+  const broadcastLockSync = () => {
+    localStorage.setItem("wellmeds_cart_lock_sync", Date.now().toString());
+  };
 
   // ─────────────────────────────────────────────────────
   // Helpers to normalize backend cart items → local shape
@@ -126,10 +183,26 @@ export const CartProvider = ({ children }) => {
   // ─────────────────────────────────────────────────────
   // Cart operations — optimistic update + server sync
   // ─────────────────────────────────────────────────────
-  const hasToken = () => !!localStorage.getItem("medishop_token");
+  const handleLockError = (err) => {
+    if (err.response && (err.response.status === 409 || err.response.data?.code === "CART_LOCKED")) {
+      setIsCartLocked(true);
+      setCheckoutSessionStatus(err.response.data?.status || "LOCKED");
+      setLockReason(err.response.data?.message || "Cart is locked under prescription verification.");
+      broadcastLockSync();
+      toast.error(err.response.data?.message || "Cart is currently locked because your prescription is under verification.");
+      syncCartForUser();
+      return true;
+    }
+    return false;
+  };
 
   const addToCart = useCallback(async (product, quantity = 1) => {
     if (!product) return;
+    if (isCartLocked) {
+      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
+      return;
+    }
+
     const productId = (product._id || product.id)?.toString();
 
     // Optimistic local update
@@ -158,13 +231,20 @@ export const CartProvider = ({ children }) => {
           setCartItems(normalizeBackendItems(serverItems));
         }
       } catch (err) {
-        console.warn("Backend addToCart failed:", err.message);
+        if (!handleLockError(err)) {
+          console.warn("Backend addToCart failed:", err.message);
+        }
       }
     }
-  }, []);
+  }, [isCartLocked]);
 
   const removeFromCart = useCallback(async (id) => {
     if (!id) return;
+    if (isCartLocked) {
+      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
+      return;
+    }
+
     setCartItems((prev) => prev.filter((i) => i.id !== id));
 
     if (hasToken()) {
@@ -174,13 +254,20 @@ export const CartProvider = ({ children }) => {
           setCartItems(normalizeBackendItems(serverItems));
         }
       } catch (err) {
-        console.warn("Backend removeFromCart failed:", err.message);
+        if (!handleLockError(err)) {
+          console.warn("Backend removeFromCart failed:", err.message);
+        }
       }
     }
-  }, []);
+  }, [isCartLocked]);
 
   const updateQuantity = useCallback(async (id, quantity) => {
     if (!id) return;
+    if (isCartLocked) {
+      toast.error("Cart is locked under prescription verification. Click 'Modify Cart' to edit medicines.");
+      return;
+    }
+
     if (quantity <= 0) {
       removeFromCart(id);
       return;
@@ -198,12 +285,19 @@ export const CartProvider = ({ children }) => {
           setCartItems(normalizeBackendItems(serverItems));
         }
       } catch (err) {
-        console.warn("Backend updateQuantity failed:", err.message);
+        if (!handleLockError(err)) {
+          console.warn("Backend updateQuantity failed:", err.message);
+        }
       }
     }
-  }, [removeFromCart]);
+  }, [isCartLocked, removeFromCart]);
 
   const clearCart = useCallback(async () => {
+    if (isCartLocked) {
+      toast.error("Cart is locked under prescription verification.");
+      return;
+    }
+
     setCartItems([]);
     localStorage.removeItem("medishop_cart");
 
@@ -211,21 +305,55 @@ export const CartProvider = ({ children }) => {
       try {
         await cartService.clearCart();
       } catch (err) {
-        console.warn("Backend clearCart failed:", err.message);
+        if (!handleLockError(err)) {
+          console.warn("Backend clearCart failed:", err.message);
+        }
       }
     }
+  }, [isCartLocked]);
+
+  // Production Post-Order Reset: Safely bypasses locks, resets state, and syncs tabs
+  const resetCartPostOrder = useCallback(() => {
+    setCartItems([]);
+    setIsCartLocked(false);
+    setCheckoutSessionStatus("PAYMENT_SUCCESS");
+    setLockReason("");
+    setPendingRxFile(null);
+    localStorage.removeItem("medishop_cart");
+    localStorage.setItem("wellmeds_cart_cleared", Date.now().toString());
+    broadcastLockSync();
   }, []);
+
+  const modifyCart = useCallback(async () => {
+    if (!hasToken()) return;
+    setIsSyncing(true);
+    try {
+      const res = await checkoutSessionService.modifyCart();
+      if (res && res.success) {
+        setIsCartLocked(false);
+        setCheckoutSessionStatus("CANCELLED");
+        setLockReason("");
+        broadcastLockSync();
+        toast.info("Cart unlocked. Current prescription verification has been cancelled.");
+        await syncCartForUser();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to modify cart. Please try again.");
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [syncCartForUser]);
 
   // ─────────────────────────────────────────────────────
   // Derived values
   // ─────────────────────────────────────────────────────
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = roundPrice(cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * item.quantity, 0));
   // Indian shipping: free above ₹499, else ₹49 flat fee
   const shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
   // GST 12%
-  const tax = subtotal * 0.12;
-  const total = subtotal + shipping + tax;
+  const tax = roundPrice(subtotal * 0.12);
+  const total = roundPrice(subtotal + shipping + tax);
   const requiresRx = cartItems.some((item) => item.requiresRx);
 
   return (
@@ -239,10 +367,16 @@ export const CartProvider = ({ children }) => {
         total,
         requiresRx,
         isSyncing,
+        isCartLocked,
+        checkoutSessionStatus,
+        lockReason,
+        modifyCart,
+        refreshCartLockStatus,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
+        resetCartPostOrder,
         syncCartForUser,
         saveCartToLocalOnLogout,
         pendingRxFile,

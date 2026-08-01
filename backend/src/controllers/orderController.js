@@ -6,6 +6,7 @@ import { Notification } from "../models/Notification.js";
 import { Cart } from "../models/Cart.js";
 import { WebhookLog } from "../models/WebhookLog.js";
 import { Transaction } from "../models/Transaction.js";
+import { CheckoutSession } from "../models/CheckoutSession.js";
 import {
   sendOrderConfirmation,
   sendOrderStatusUpdate,
@@ -90,14 +91,17 @@ const computeOrderTotals = async (items, couponCode, userId) => {
     }
   }
 
-  const tax = subtotal * 0.12;
-  const finalAmount = Math.max(0, subtotal - discountAmount + shipping + tax);
+  const roundMoney = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+  const roundedSubtotal = roundMoney(subtotal);
+  const roundedDiscountAmount = roundMoney(discountAmount);
+  const tax = roundMoney(roundedSubtotal * 0.12);
+  const finalAmount = roundMoney(Math.max(0, roundedSubtotal - roundedDiscountAmount + shipping + tax));
 
   return {
-    subtotal,
+    subtotal: roundedSubtotal,
     shipping,
     tax,
-    discountAmount,
+    discountAmount: roundedDiscountAmount,
     finalAmount,
     orderRequiresRx,
     validatedItems,
@@ -111,9 +115,18 @@ const computeOrderTotals = async (items, couponCode, userId) => {
  * Ensures stock deduction, coupon consumption, cart clearing, and email triggers happen EXACTLY ONCE.
  */
 export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySignature = "", paymentMethod = "razorpay", source = "callback") => {
-  // Idempotency check: if already marked Paid, skip duplicate side effects
+  // Idempotency check 1: if order is already marked Paid, return existing order
   if (order.paymentStatus === "Paid") {
     return { success: true, order, duplicate: true };
+  }
+
+  // Idempotency check 2: if another order document already processed this razorpayPaymentId, return that paid order
+  if (razorpayPaymentId) {
+    const existingPaymentOrder = await Order.findOne({ razorpayPaymentId });
+    if (existingPaymentOrder && existingPaymentOrder._id.toString() !== order._id.toString()) {
+      console.log(`[Order Payment] Payment ID ${razorpayPaymentId} already assigned to order ${existingPaymentOrder.orderId}. Reusing.`);
+      return { success: true, order: existingPaymentOrder, duplicate: true };
+    }
   }
 
   order.paymentStatus = "Paid";
@@ -197,7 +210,7 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
     }
   }
 
-  // 4. Clear Customer's Active Cart
+  // 4. Clear Customer's Active Cart & Archive CheckoutSession
   const cart = await Cart.findOne({ user: order.user });
   if (cart) {
     cart.items = [];
@@ -205,6 +218,15 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
     cart.prescriptionStatus = "Pending";
     await cart.save();
   }
+
+  await CheckoutSession.findOneAndUpdate(
+    { user: order.user, status: { $ne: "PAYMENT_SUCCESS" } },
+    {
+      status: "PAYMENT_SUCCESS",
+      isLocked: false,
+      lockReason: "Order completed successfully.",
+    }
+  );
 
   // 5. In-App Notification
   await Notification.create({
@@ -278,38 +300,74 @@ export const createRazorpayOrder = async (req, res, next) => {
       };
     }
 
-    // Save DRAFT Order in DB
-    const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
-    const timeline = [
-      { status: "Order Created", message: "Draft order initialized on checkout click.", timestamp: new Date() },
-      { status: "Payment Pending", message: "Razorpay payment checkout session initialized.", timestamp: new Date() },
-    ];
-
-    await Order.create({
-      orderId,
+    // Reuse or create single DRAFT Order document in DB
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    let existingDraft = await Order.findOne({
       user: req.user._id,
-      customer: customer || req.user.name,
-      email: email || req.user.email,
-      items: totals.validatedItems,
-      coupon: totals.couponObj ? totals.couponObj._id : null,
-      couponCode: totals.couponObj ? totals.couponObj.code : null,
-      discountAmount: totals.discountAmount,
-      subtotal: totals.subtotal,
-      shipping: totals.shipping,
-      tax: totals.tax,
-      total: totals.finalAmount,
-      finalAmount: totals.finalAmount,
-      requiresRx: totals.orderRequiresRx,
-      rxUploaded: totals.orderRequiresRx,
-      rxFile: rxFile || null,
-      shippingAddress: shippingAddress || "N/A",
-      deliveryCoordinates: checkedCoordinates,
-      paymentMethod: "razorpay",
       paymentStatus: "Pending",
-      status: "Pending", // Draft state until payment verified
-      razorpayOrderId: razorpayOrder.id,
-      timeline,
+      status: "Pending",
+      createdAt: { $gte: twoHoursAgo },
     });
+
+    let draftOrder;
+    if (existingDraft) {
+      existingDraft.customer = customer || req.user.name;
+      existingDraft.email = email || req.user.email;
+      existingDraft.items = totals.validatedItems;
+      existingDraft.coupon = totals.couponObj ? totals.couponObj._id : null;
+      existingDraft.couponCode = totals.couponObj ? totals.couponObj.code : null;
+      existingDraft.discountAmount = totals.discountAmount;
+      existingDraft.subtotal = totals.subtotal;
+      existingDraft.shipping = totals.shipping;
+      existingDraft.tax = totals.tax;
+      existingDraft.total = totals.finalAmount;
+      existingDraft.finalAmount = totals.finalAmount;
+      existingDraft.requiresRx = totals.orderRequiresRx;
+      existingDraft.rxUploaded = totals.orderRequiresRx;
+      existingDraft.rxFile = rxFile || null;
+      existingDraft.shippingAddress = shippingAddress || "N/A";
+      existingDraft.deliveryCoordinates = checkedCoordinates;
+      existingDraft.paymentMethod = "razorpay";
+      existingDraft.razorpayOrderId = razorpayOrder.id;
+      existingDraft.timeline.push({
+        status: "Payment Retry",
+        message: `Checkout modal re-opened. Updated Razorpay Session: ${razorpayOrder.id}`,
+        timestamp: new Date(),
+      });
+      draftOrder = await existingDraft.save();
+    } else {
+      const orderId = `ord-${Math.floor(1000 + Math.random() * 9000)}`;
+      const timeline = [
+        { status: "Order Created", message: "Draft order initialized on checkout click.", timestamp: new Date() },
+        { status: "Payment Pending", message: "Razorpay payment checkout session initialized.", timestamp: new Date() },
+      ];
+
+      draftOrder = await Order.create({
+        orderId,
+        user: req.user._id,
+        customer: customer || req.user.name,
+        email: email || req.user.email,
+        items: totals.validatedItems,
+        coupon: totals.couponObj ? totals.couponObj._id : null,
+        couponCode: totals.couponObj ? totals.couponObj.code : null,
+        discountAmount: totals.discountAmount,
+        subtotal: totals.subtotal,
+        shipping: totals.shipping,
+        tax: totals.tax,
+        total: totals.finalAmount,
+        finalAmount: totals.finalAmount,
+        requiresRx: totals.orderRequiresRx,
+        rxUploaded: totals.orderRequiresRx,
+        rxFile: rxFile || null,
+        shippingAddress: shippingAddress || "N/A",
+        deliveryCoordinates: checkedCoordinates,
+        paymentMethod: "razorpay",
+        paymentStatus: "Pending",
+        status: "Pending",
+        razorpayOrderId: razorpayOrder.id,
+        timeline,
+      });
+    }
 
 
     res.status(200).json({
@@ -556,10 +614,18 @@ export const getOrderStatus = async (req, res, next) => {
   }
 };
 
-// Get User's Orders
+// Get User's Orders (Returns completed orders & recent active checkout attempts, excluding abandoned drafts)
 export const getMyOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const orders = await Order.find({
+      user: req.user._id,
+      $or: [
+        { paymentStatus: { $in: ["Paid", "Refunded", "Failed", "Cancelled"] } },
+        { paymentStatus: "Pending", createdAt: { $gte: thirtyMinutesAgo } },
+      ],
+    }).sort({ createdAt: -1 });
+
     res.status(200).json({ success: true, orders });
   } catch (error) {
     next(error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useAddress } from "../context/AddressContext";
 import AddressCard from "../components/address/AddressCard";
@@ -66,7 +66,24 @@ const Profile = () => {
     setDefaultAddress,
   } = useAddress();
 
-  const [activeTab, setActiveTab] = useState("addresses"); // "addresses" | "orders" | "prescriptions" | "settings"
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const validTabs = ["addresses", "orders", "prescriptions", "settings"];
+
+  const [activeTab, setActiveTab] = useState(() => {
+    return validTabs.includes(tabParam) ? tabParam : "addresses";
+  });
+
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId }, { replace: true });
+  };
 
   // Data states
   const [prescriptions, setPrescriptions] = useState([]);
@@ -241,48 +258,48 @@ const Profile = () => {
         {/* ── QUICK DASHBOARD STATS BAR ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div 
-            onClick={() => setActiveTab("addresses")}
-            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#038076] transition-all shadow-xs"
+            onClick={() => handleTabChange("addresses")}
+            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#157a6d] transition-all shadow-xs"
           >
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Addresses</span>
-              <MapPin size={18} className="text-[#038076]" />
+              <MapPin size={18} className="text-[#157a6d]" />
             </div>
             <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{addresses.length}</p>
             <p className="text-[11px] text-slate-500 mt-1">Saved delivery locations</p>
           </div>
 
           <div 
-            onClick={() => setActiveTab("orders")}
-            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#038076] transition-all shadow-xs"
+            onClick={() => handleTabChange("orders")}
+            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#157a6d] transition-all shadow-xs"
           >
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">My Orders</span>
-              <Package size={18} className="text-[#038076]" />
+              <Package size={18} className="text-[#157a6d]" />
             </div>
             <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{orders.length}</p>
             <p className="text-[11px] text-slate-500 mt-1">Total orders placed</p>
           </div>
 
           <div 
-            onClick={() => setActiveTab("prescriptions")}
-            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#038076] transition-all shadow-xs"
+            onClick={() => handleTabChange("prescriptions")}
+            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#157a6d] transition-all shadow-xs"
           >
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Prescriptions</span>
-              <FileText size={18} className="text-[#038076]" />
+              <FileText size={18} className="text-[#157a6d]" />
             </div>
             <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{prescriptions.length}</p>
             <p className="text-[11px] text-slate-500 mt-1">Rx records uploaded</p>
           </div>
 
           <div 
-            onClick={() => setActiveTab("settings")}
-            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#038076] transition-all shadow-xs"
+            onClick={() => handleTabChange("settings")}
+            className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-4 cursor-pointer hover:border-[#157a6d] transition-all shadow-xs"
           >
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Settings</span>
-              <User size={18} className="text-[#038076]" />
+              <User size={18} className="text-[#157a6d]" />
             </div>
             <p className="text-2xl font-extrabold text-slate-900 dark:text-white">Account</p>
             <p className="text-[11px] text-slate-500 mt-1">Edit profile & contact</p>
@@ -302,10 +319,10 @@ const Profile = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 py-3 px-4 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? "border-[#038076] text-[#038076] dark:text-[#84d6b9]"
+                    ? "border-[#157a6d] text-[#157a6d] dark:text-emerald-400"
                     : "border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900"
                 }`}
               >

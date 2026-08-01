@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
+import { calculateDiscountPercent, calculateSavings, formatPrice } from "../utils/currency";
 import { 
   ArrowLeft, 
   Upload, 
@@ -275,6 +276,7 @@ const AddNewProduct = () => {
   const [slug, setSlug] = useState("");
   const [isGLP1Medicine, setIsGLP1Medicine] = useState(false);
   const [isHealthSupplement, setIsHealthSupplement] = useState(false);
+  const [isBestSeller, setIsBestSeller] = useState(false);
   
   // Images
   const [images, setImages] = useState([]);
@@ -396,6 +398,7 @@ const AddNewProduct = () => {
             setSlug(product.slug || "");
             setIsGLP1Medicine(product.isGLP1Medicine || false);
             setIsHealthSupplement(product.isHealthSupplement || false);
+            setIsBestSeller(product.isBestSeller || product.isHealthSupplement || false);
             
             if (product.images && product.images.length > 0) {
               setImages(product.images);
@@ -752,6 +755,7 @@ const AddNewProduct = () => {
       slug: slug.trim() || undefined,
       isGLP1Medicine,
       isHealthSupplement,
+      isBestSeller,
       
       // CMS Arrays
       medicalSections: cleanMedicalSections,
@@ -1095,7 +1099,7 @@ const AddNewProduct = () => {
                     <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Discount Calculator</span>
                     <span className="font-bold text-emerald-600 dark:text-emerald-450 mt-1">
                       {price && originalPrice && parseFloat(originalPrice) > parseFloat(price)
-                        ? `${(((parseFloat(originalPrice) - parseFloat(price)) / parseFloat(originalPrice)) * 100).toFixed(2)}% Discount`
+                        ? `${calculateDiscountPercent(originalPrice, price)}% Discount (Save ₹${formatPrice(calculateSavings(originalPrice, price))})`
                         : "No Discount"}
                     </span>
                   </div>
@@ -1212,6 +1216,24 @@ const AddNewProduct = () => {
                     />
                     <label htmlFor="isGLP1MedicineToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
                       GLP-1 Medicines for Diabetes &amp; Weight Loss
+                    </label>
+                  </div>
+
+                  {/* Best Seller Toggle */}
+                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="isBestSellerToggle"
+                      checked={isBestSeller}
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setIsBestSeller(val);
+                        setIsHealthSupplement(val);
+                      }}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isBestSellerToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Best Seller Product
                     </label>
                   </div>
 

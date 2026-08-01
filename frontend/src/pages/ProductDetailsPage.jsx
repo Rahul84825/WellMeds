@@ -6,7 +6,7 @@ import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import { toast } from "sonner";
 import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle, CheckCircle, AlertTriangle, Check } from "lucide-react";
-import { formatCurrency } from "../utils/currency";
+import { formatCurrency, calculateDiscountPercent } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 
 // Prescription Design System Stylesheet
@@ -92,7 +92,7 @@ const ProductDetails = () => {
 
   const discountPercent = useMemo(() => {
     if (product?.originalPrice && product.originalPrice > product.price) {
-      return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+      return calculateDiscountPercent(product.originalPrice, product.price);
     }
     return 0;
   }, [product]);

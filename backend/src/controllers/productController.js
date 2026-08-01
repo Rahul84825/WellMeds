@@ -7,7 +7,7 @@ import slugify from "slugify";
 import mongoose from "mongoose";
 
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement } = req.query;
+  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller } = req.query;
 
   try {
     const query = {};
@@ -74,6 +74,18 @@ export const getProducts = async (req, res, next) => {
     // Filter by isHealthSupplement
     if (isHealthSupplement !== undefined && isHealthSupplement !== "") {
       query.isHealthSupplement = isHealthSupplement === "true";
+    }
+
+    // Filter by isBestSeller
+    if (isBestSeller !== undefined && isBestSeller !== "") {
+      if (isBestSeller === "true") {
+        query.$or = [
+          { isBestSeller: true },
+          { isHealthSupplement: true }
+        ];
+      } else {
+        query.isBestSeller = false;
+      }
     }
     // Filter by molecule slug or ID
     // Filter by molecule slug, ID, or name

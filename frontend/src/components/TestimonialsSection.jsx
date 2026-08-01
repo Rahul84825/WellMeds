@@ -215,7 +215,7 @@ export const TestimonialsSection = () => {
       <div className="home-section-container">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
           <div>
             <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
               <span>CLINICAL TRUST</span>
@@ -227,13 +227,36 @@ export const TestimonialsSection = () => {
             </h2>
           </div>
 
-          <div className="shrink-0">
+          {/* Right Header Navigation Controls: ( ← ) [ View all ] ( → ) */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {/* Left Navigation Arrow */}
+            <button
+              type="button"
+              onClick={() => scroll("left")}
+              aria-label="Previous testimonials"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] cursor-pointer"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* View All button */}
             <a
               href="/about"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-full border border-[#157a6d] text-[#157a6d] font-clinical-mono text-xs font-bold tracking-wider hover:bg-[#157a6d] hover:text-white transition-all duration-200"
+              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+              aria-label="View all patient reviews"
             >
-              <span>VIEW ALL REVIEWS</span>
+              <span>View all</span>
             </a>
+
+            {/* Right Navigation Arrow */}
+            <button
+              type="button"
+              onClick={() => scroll("right")}
+              aria-label="Next testimonials"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] cursor-pointer"
+            >
+              <ChevronRight size={18} />
+            </button>
           </div>
         </div>
 
@@ -241,7 +264,7 @@ export const TestimonialsSection = () => {
         <div className="relative w-full overflow-hidden">
           <div
             ref={scrollRef}
-            className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6"
+            className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -251,25 +274,6 @@ export const TestimonialsSection = () => {
               <TestimonialCard key={item.id} item={item} />
             ))}
           </div>
-        </div>
-
-        {/* Separated Carousel Navigation Controls */}
-        <div className="flex items-center justify-center gap-md mt-md">
-          <button
-            onClick={() => scroll("left")}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
-            aria-label="Previous testimonials"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <button
-            onClick={() => scroll("right")}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-[#038076] hover:text-white hover:border-[#038076] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
-            aria-label="Next testimonials"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
 
       </div>

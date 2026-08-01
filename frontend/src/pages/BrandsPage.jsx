@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/common/SEO";
 import { api } from "../services/api";
-import { Building2, Search, ArrowRight, ShieldCheck, Pill } from "lucide-react";
+import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
+import { Building2, Search, ArrowRight, ShieldCheck, Sparkles, Phone, FileText, ChevronRight, X } from "lucide-react";
 
-// Curated list of premier pharmaceutical brands
 const FEATURED_BRANDS = [
   { name: "Cipla", slug: "cipla", origin: "India", description: "Global leader in respiratory, anti-infective, and specialty pharmaceutical formulations." },
   { name: "Sun Pharma", slug: "sun-pharma", origin: "India", description: "India's largest pharmaceutical manufacturer specializing in cardiology, neurology, and oncology." },
@@ -24,6 +25,7 @@ const BrandsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dynamicBrands, setDynamicBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   useEffect(() => {
     const loadBrands = async () => {
@@ -31,7 +33,7 @@ const BrandsPage = () => {
         const res = await api.getProducts({ limit: 200 });
         const productsList = res?.products || res?.data || (Array.isArray(res) ? res : []);
         const brandSet = new Set();
-        
+
         FEATURED_BRANDS.forEach(b => brandSet.add(JSON.stringify(b)));
 
         productsList.forEach((p) => {
@@ -48,7 +50,7 @@ const BrandsPage = () => {
                 name: bName,
                 slug: bSlug,
                 origin: "Authorized Partner",
-                description: `Browse authentic medical formulations and prescription products manufactured by ${bName}.`
+                description: `Authorized manufacturer of prescription formulations and healthcare products available on WellMeds.`
               }));
             }
           }
@@ -57,6 +59,7 @@ const BrandsPage = () => {
         const list = Array.from(brandSet).map(s => JSON.parse(s));
         setDynamicBrands(list);
       } catch (err) {
+        console.error("Error building dynamic brands:", err);
         setDynamicBrands(FEATURED_BRANDS);
       } finally {
         setLoading(false);
@@ -73,86 +76,122 @@ const BrandsPage = () => {
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
-    { name: "Pharmaceutical Brands", url: "/brands" },
+    { name: "Brands", url: "/brands" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-16">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title="Pharmaceutical Brands Index | Authentic Medicines & Manufacturers"
-        description="Browse India's top pharmaceutical manufacturers and global healthcare brands at WellMeds. Buy authentic medicines from Cipla, Sun Pharma, Dr. Reddy's, Lupin, Abbott, Mankind, and more."
+        title="Pharmaceutical Manufacturers & Brands | WellMeds"
+        description="Browse authentic prescription formulations by top pharmaceutical manufacturers including Cipla, Sun Pharma, Dr. Reddy's, Abbott, and Pfizer at WellMeds."
         canonical="/brands"
         breadcrumbs={breadcrumbs}
       />
 
-      {/* Hero */}
-      <section className="bg-[#172b26] text-white py-16 px-4 border-b border-[#26453d]">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#203a34] text-[#84d6b9] text-xs font-mono font-semibold uppercase tracking-wider mb-4 border border-[#2e5249]">
-            <Building2 className="w-3.5 h-3.5" />
-            <span>100% Genuine Direct Brand Sourcing</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif leading-tight">
-            Trusted Pharmaceutical Manufacturers & Brands
-          </h1>
-          <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Explore authentic medications, specialized biologicals, and medical formulations sourced directly from WHO-GMP certified pharmaceutical leaders.
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
+        {/* ── HERO HEADER ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Search Box */}
-          <div className="mt-8 max-w-xl mx-auto relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search pharmaceutical brands (e.g. Cipla, Sun Pharma, Abbott)..."
-              className="w-full h-12 pl-12 pr-4 rounded-xl bg-white text-slate-900 placeholder-slate-400 text-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-[#84d6b9]"
-            />
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
+              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">Brands</span>
+            </nav>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
+                <Sparkles size={14} className="text-[#b08d3e]" />
+                <span>AUTHORIZED PHARMA PARTNERS</span>
+              </div>
+
+              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
+                Pharmaceutical Brands
+              </h1>
+
+              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
+                Explore prescription formulations and specialty medicines directly sourced from globally recognized pharmaceutical manufacturers.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/upload-prescription"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+              >
+                <FileText size={15} />
+                <span>Upload Prescription</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsConsultationOpen(true)}
+                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              >
+                <Phone size={15} />
+                <span>Talk to Pharmacist</span>
+              </button>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Main Grid */}
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold font-serif text-slate-900 flex items-center gap-2">
-            <Pill className="w-5 h-5 text-[#157a6d]" />
-            <span>All Partner Brands ({filteredBrands.length})</span>
-          </h2>
-          <span className="text-xs font-mono text-slate-500">WHO-GMP Certified</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBrands.map((brand) => (
-            <Link
-              key={brand.slug}
-              to={`/brands/${brand.slug}`}
-              className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#157a6d] transition-all flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-mono font-bold uppercase text-[#157a6d] bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
-                    {brand.origin}
-                  </span>
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+        {/* ── BRANDS GRID ── */}
+        <div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, idx) => (
+                <div key={idx} className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 space-y-3 animate-pulse">
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 rounded-2xl" />
+                  <div className="h-5 bg-slate-100 dark:bg-zinc-800 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-[#157a6d] transition-colors">
-                  {brand.name}
-                </h3>
-                <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-3">
-                  {brand.description}
-                </p>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#157a6d] group-hover:translate-x-1 transition-transform">
-                <span>View All Medicines</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </Link>
-          ))}
+              ))}
+            </div>
+          ) : filteredBrands.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBrands.map((brand, idx) => (
+                <Link
+                  key={idx}
+                  to={`/brands/${brand.slug}`}
+                  className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 shadow-sm flex items-start gap-4 hover:shadow-md hover:-translate-y-1 transition-all group text-left"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#f4f9f7] dark:bg-emerald-950/40 border border-emerald-200 text-[#157a6d] flex items-center justify-center shrink-0 group-hover:bg-[#157a6d] group-hover:text-white transition-colors">
+                    <Building2 size={22} />
+                  </div>
+                  <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-bold text-base text-[#172b26] dark:text-white group-hover:text-[#157a6d] transition-colors truncate">
+                        {brand.name}
+                      </h3>
+                      <span className="bg-[#f4f9f7] text-[#157a6d] font-clinical-mono text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                        {brand.origin}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-sans">
+                      {brand.description}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
+              <Building2 size={36} className="mx-auto text-slate-400" />
+              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">No Brands Found</h3>
+              <p className="text-xs text-slate-500 font-sans">We couldn't find any pharma brand matching "{searchTerm}".</p>
+            </div>
+          )}
         </div>
-      </main>
+
+        {/* ── WHY WELLMEDS BAR ── */}
+        <WhyWellMedsBar />
+      </div>
+
+      {/* ── CONSULTATION MODAL ── */}
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+      />
     </div>
   );
 };

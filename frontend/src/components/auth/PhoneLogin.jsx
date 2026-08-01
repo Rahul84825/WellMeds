@@ -51,15 +51,15 @@ const PhoneLogin = ({ onSubmit, isLoading, initialMobile = "" }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-550 mb-2 select-none">
+          <label className="block font-clinical-mono text-xs font-bold uppercase tracking-wider text-[#157a6d] dark:text-emerald-400 mb-2 select-none">
             Mobile Number
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <span className="text-sm font-bold text-slate-400 dark:text-zinc-550 select-none pr-1">
+              <span className="text-sm font-bold text-slate-400 dark:text-zinc-500 select-none pr-1">
                 +91
               </span>
-              <Phone className="w-4 h-4 text-slate-400 dark:text-zinc-550 pl-1" />
+              <Phone className="w-4 h-4 text-slate-400 dark:text-zinc-500 pl-1" />
             </div>
             <input
               type="text"
@@ -70,11 +70,11 @@ const PhoneLogin = ({ onSubmit, isLoading, initialMobile = "" }) => {
               value={mobile}
               onChange={handleChange}
               onPaste={handlePaste}
-              placeholder="Enter 10-digit number"
-              className={`w-full pl-16 pr-4 py-3 bg-slate-50 dark:bg-zinc-800/50 border rounded-xl text-sm font-semibold tracking-wide text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-550 focus:outline-none focus:ring-2 focus:ring-[#038076]/25 transition-all duration-200
+              placeholder="Enter 10-digit mobile number"
+              className={`w-full pl-16 pr-4 py-3 bg-[#f4f9f7] dark:bg-zinc-800/60 border rounded-2xl text-sm font-semibold tracking-wide text-[#172b26] dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#157a6d]/20 transition-all duration-200
                 ${error 
                   ? "border-red-500 focus:border-red-500" 
-                  : "border-slate-100 dark:border-zinc-800 focus:border-[#038076]"
+                  : "border-slate-200 dark:border-zinc-800 focus:border-[#157a6d]"
                 }
               `}
               autoFocus
@@ -90,7 +90,7 @@ const PhoneLogin = ({ onSubmit, isLoading, initialMobile = "" }) => {
         <button
           type="submit"
           disabled={isLoading || mobile.length !== 10}
-          className="w-full bg-[#038076] hover:bg-[#02655f] text-white py-3 px-4 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2 select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+          className="w-full bg-[#157a6d] hover:bg-[#0f5c52] text-white py-3 px-4 rounded-2xl text-sm font-bold shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2 select-none disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
         >
           {isLoading ? (
             <>

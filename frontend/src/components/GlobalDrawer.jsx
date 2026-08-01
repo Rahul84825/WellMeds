@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   User,
   History,
+  MapPin,
   LogOut,
   PhoneCall,
   HelpCircle,
@@ -578,7 +579,7 @@ const GlobalDrawer = () => {
                 ) : (
                   <>
                     <Link
-                      to="/profile"
+                      to="/profile?tab=settings"
                       onClick={() => setIsDrawerOpen(false)}
                       className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
                     >
@@ -586,7 +587,7 @@ const GlobalDrawer = () => {
                       <span>My Profile</span>
                     </Link>
                     <Link
-                      to="/orders"
+                      to="/profile?tab=orders"
                       onClick={() => setIsDrawerOpen(false)}
                       className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
                     >
@@ -594,12 +595,20 @@ const GlobalDrawer = () => {
                       <span>Orders</span>
                     </Link>
                     <Link
-                      to="/upload-prescription"
+                      to="/profile?tab=prescriptions"
                       onClick={() => setIsDrawerOpen(false)}
                       className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
                     >
                       <FileText className="w-4 h-4 text-slate-400" />
                       <span>Prescriptions</span>
+                    </Link>
+                    <Link
+                      to="/profile?tab=addresses"
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                    >
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span>Addresses</span>
                     </Link>
                   </>
                 )}

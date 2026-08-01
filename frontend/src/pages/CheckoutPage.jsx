@@ -12,7 +12,7 @@ import {
   ArrowLeft, Tag, Info, ArrowRight, ShieldCheck, Lock, Trash2, 
   RefreshCcw, AlertTriangle, AlertCircle, MapPin, Navigation, Compass
 } from "lucide-react";
-import { formatCurrency } from "../utils/currency";
+import { formatCurrency, roundPrice } from "../utils/currency";
 import { toast } from "sonner";
 import { useAddress } from "../context/AddressContext";
 import UniversalAddressForm from "../components/address/UniversalAddressForm";
@@ -35,7 +35,7 @@ const loadRazorpayScript = () => {
 };
 
 const Checkout = () => {
-  const { cartItems, subtotal, shipping, tax, total, requiresRx, clearCart } = useCart();
+  const { cartItems, subtotal, shipping, tax, total, requiresRx, isCartLocked, modifyCart, clearCart, resetCartPostOrder } = useCart();
   const { user, loading: authLoading, openLoginModal } = useAuth();
   const navigate = useNavigate();
 
@@ -110,10 +110,18 @@ const Checkout = () => {
     calcShipping();
   }, [subtotal, selectedAddress]);
 
+  // Coupon states
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [couponApplied, setCouponApplied] = useState(null); 
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+
   // Derived totals with coupon
-  const discountAmount = couponDiscount;
+  const discountAmount = roundPrice(couponDiscount);
   const activeShipping = couponApplied?.freeDelivery ? 0 : dynamicShipping;
-  const finalTotal = Math.max(0, subtotal - discountAmount + activeShipping + tax);
+  const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeShipping + tax));
   const [rxAttached, setRxAttached] = useState(false);
   const [rxFileName, setRxFileName] = useState("");
   const [rxModalOpen, setRxModalOpen] = useState(false);
@@ -125,14 +133,6 @@ const Checkout = () => {
   const [rxMessage, setRxMessage] = useState("");
   const [myPrescriptions, setMyPrescriptions] = useState([]);
   const [matchingRxDoc, setMatchingRxDoc] = useState(null);
-
-  // Coupon
-  const [couponCode, setCouponCode] = useState("");
-  const [couponDiscount, setCouponDiscount] = useState(0);
-  const [couponError, setCouponError] = useState("");
-  const [couponApplied, setCouponApplied] = useState(null); 
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [availableCoupons, setAvailableCoupons] = useState([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
@@ -191,31 +191,40 @@ const Checkout = () => {
   const checkRxStatus = useCallback(async () => {
     if (requiresRx && user) {
       try {
-        const data = await api.getMyPrescriptions();
-        setMyPrescriptions(data);
-        
-        // Find if there is any prescription matching the current cart snapshot
-        const match = data.find(rx => isSnapshotMatchingCart(rx.cartSnapshot, cartItems));
-        setMatchingRxDoc(match);
-        
-        if (match) {
-          if (match.status === "Approved") {
-            setRxStatus("Verified");
-            setHasApprovedRx(true);
-          } else if (match.status === "Pending Review" || match.status === "Under Verification") {
-            setRxStatus("Pending Verification");
-            setHasApprovedRx(false);
-          } else if (match.status === "Rejected") {
-            setRxStatus("Rejected");
-            setRxMessage(match.adminNotes || "Your prescription was rejected by our pharmacist.");
-            setHasApprovedRx(false);
-          } else {
-            setRxStatus("Prescription Required");
-            setHasApprovedRx(false);
+        // Query CheckoutSession status from backend
+        let sessionStatus = "ACTIVE";
+        try {
+          const sessionRes = await api.getCheckoutSessionStatus();
+          if (sessionRes && sessionRes.success) {
+            sessionStatus = sessionRes.status || "ACTIVE";
           }
+        } catch (sErr) {
+          console.warn("Could not fetch checkout session status:", sErr.message);
+        }
+
+        const data = await api.getMyPrescriptions();
+        setMyPrescriptions(data || []);
+        
+        // Single Authoritative Priority Decision Hierarchy
+        const approvedRx = (data || []).find((rx) => rx.status === "Approved");
+        const matchingRx = (data || []).find((rx) => isSnapshotMatchingCart(rx.cartSnapshot, cartItems));
+        
+        const targetRx = approvedRx || matchingRx || (data && data.length > 0 ? data[0] : null);
+        setMatchingRxDoc(targetRx);
+        
+        if (sessionStatus === "VERIFIED" || approvedRx || (matchingRx && matchingRx.status === "Approved")) {
+          setRxStatus("Verified");
+          setHasApprovedRx(true);
+        } else if (sessionStatus === "PENDING_VERIFICATION" || (targetRx && (targetRx.status === "Pending Review" || targetRx.status === "Under Verification"))) {
+          setRxStatus("Pending Verification");
+          setHasApprovedRx(false);
+        } else if (targetRx && targetRx.status === "Rejected") {
+          setRxStatus("Rejected");
+          setRxMessage(targetRx.adminNotes || "Your prescription was rejected by our pharmacist.");
+          setHasApprovedRx(false);
         } else {
           setHasApprovedRx(false);
-          const hasAnyRx = data.length > 0;
+          const hasAnyRx = data && data.length > 0;
           if (hasAnyRx) {
             setRxStatus("Needs Re-verification");
           } else {
@@ -236,16 +245,27 @@ const Checkout = () => {
     checkRxStatus();
   }, [checkRxStatus]);
 
-  // Dynamic automatic status checking (polling every 8 seconds when Pending Verification)
+  // Dynamic automatic status checking (polling every 4 seconds when Pending Verification & multi-tab sync)
   useEffect(() => {
     if (!requiresRx || !user) return;
     let interval;
     if (rxStatus === "Pending Verification") {
       interval = setInterval(() => {
         checkRxStatus();
-      }, 8000);
+      }, 4000);
     }
-    return () => clearInterval(interval);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "wellmeds_cart_lock_sync") {
+        checkRxStatus();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [requiresRx, user, rxStatus, checkRxStatus]);
 
   // Coupon application
@@ -434,8 +454,8 @@ const Checkout = () => {
                 setPaymentProcessing(false);
                 setPollingTimeout(false);
                 setIsSubmitting(false);
-                clearCart();
-                navigate("/order-success", { state: { order: statusRes.order } });
+                resetCartPostOrder();
+                navigate(`/order-success?orderId=${statusRes.order.orderId || statusRes.order.razorpayOrderId}`, { state: { order: statusRes.order } });
               }
             } catch (err) {
               console.warn("Order status poll attempt:", attempts, err.message);
@@ -444,14 +464,14 @@ const Checkout = () => {
             if (attempts >= maxAttempts) {
               clearInterval(interval);
               setPollingTimeout(true);
-              clearCart();
+              resetCartPostOrder();
             }
           }, 2000);
         },
         prefill: {
-          name: fullName,
-          email: email,
-          contact: user?.phone || user?.mobile || "",
+          name: selectedAddress?.fullName || user?.name || "Valued Customer",
+          email: user?.email || "",
+          contact: selectedAddress?.phone || user?.phone || user?.mobile || "",
         },
         theme: {
           color: "#038076",
@@ -508,12 +528,18 @@ const Checkout = () => {
 
   // ── Main Checkout UI ──
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <Link to="/cart" className="text-sm font-semibold text-[#02665e] dark:text-[#52d6c9] hover:underline flex items-center gap-1.5 w-fit">
+        <Link to="/cart" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5 w-fit">
           <ArrowLeft size={16} /> Back to Cart
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-4">
+        <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mt-4 mb-1 flex items-center gap-2">
+          <span>SECURE CHECKOUT</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
+          <span>CLINICAL DISPATCH</span>
+        </div>
+        <h1 className="font-editorial text-2xl sm:text-4xl font-semibold text-[#172b26] dark:text-white tracking-tight">
           Checkout
         </h1>
       </div>
@@ -521,19 +547,19 @@ const Checkout = () => {
       <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
         
         {/* ── LEFT COLUMN: Shipping & Payment Forms ── */}
-        <form onSubmit={handlePlaceOrder} className="flex-1 w-full space-y-6">
+        <div className="flex-1 w-full space-y-6">
           
           {/* Shipping Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-6 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+              <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white">
                 Shipping Information
               </h3>
               {addresses.length > 0 && !showAddForm && (
                 <button
                   type="button"
                   onClick={() => setAddressModalOpen(true)}
-                  className="text-xs font-bold text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <MapPin size={14} /> Change Address ({addresses.length} Saved)
                 </button>
@@ -541,11 +567,11 @@ const Checkout = () => {
             </div>
 
             {requiresRx && rxStatus !== "Verified" && (
-              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300 select-none animate-[fade-in_0.2s_ease-out]">
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 flex items-start gap-3 text-amber-800 dark:text-amber-300 select-none animate-[fade-in_0.2s_ease-out]">
                 <Lock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <h4 className="font-bold">Shipping Locked</h4>
-                  <p className="text-amber-700/80 dark:text-amber-400/80 mt-1 leading-relaxed">
+                  <p className="text-amber-700/80 dark:text-amber-400/80 mt-1 leading-relaxed text-xs">
                     Please upload a valid prescription and wait for pharmacist verification to unlock checkout details.
                   </p>
                 </div>
@@ -565,15 +591,15 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={() => setShowAddForm(true)}
-                    className="text-[#038076] dark:text-[#84d6b9] font-bold hover:underline cursor-pointer"
+                    className="text-[#157a6d] dark:text-emerald-400 font-bold hover:underline cursor-pointer"
                   >
                     + Add New Address
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-50/50 dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800">
-                <p className="text-xs font-bold text-slate-700 dark:text-zinc-200 mb-3">
+              <div className="bg-[#f4f9f7] dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800">
+                <p className="text-xs font-bold text-[#172b26] dark:text-zinc-200 mb-3">
                   {addresses.length === 0 ? "Enter Delivery Address (Will be saved automatically)" : "Add New Delivery Address"}
                 </p>
                 <UniversalAddressForm
@@ -590,15 +616,15 @@ const Checkout = () => {
 
           {/* Rx Verification Card */}
           {requiresRx && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-4">
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-6 shadow-sm space-y-6">
+              <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-4">
                 Prescription Verification
               </h3>
 
               {loadingRxCheck ? (
                 <div className="py-6 flex justify-center"><Loader size="sm" /></div>
               ) : rxStatus === "Verified" ? (
-                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-4 flex items-center justify-between text-emerald-800 dark:text-emerald-300">
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-4 flex items-center justify-between text-emerald-800 dark:text-emerald-300">
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
                     <div>
@@ -611,13 +637,13 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={() => setRxModalOpen(true)}
-                    className="text-[#038076] dark:text-[#84d6b9] font-bold text-xs hover:underline cursor-pointer"
+                    className="text-[#157a6d] dark:text-emerald-400 font-bold text-xs hover:underline cursor-pointer"
                   >
                     Change
                   </button>
                 </div>
               ) : rxStatus === "Pending Verification" ? (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-amber-800 dark:text-amber-300">
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-amber-800 dark:text-amber-300">
                   <div className="flex items-start gap-3">
                     <RefreshCcw className="w-6 h-6 text-amber-500 shrink-0 animate-spin" />
                     <div>
@@ -630,13 +656,13 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={() => checkRxStatus()}
-                    className="bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+                    className="bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer"
                   >
                     Check Status
                   </button>
                 </div>
               ) : rxStatus === "Rejected" ? (
-                <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-xl p-4 space-y-3 text-left">
+                <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 space-y-3 text-left">
                   <div className="flex items-start gap-3 text-rose-800 dark:text-rose-300">
                     <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0" />
                     <div>
@@ -651,14 +677,14 @@ const Checkout = () => {
                     <button
                       type="button"
                       onClick={() => setRxModalOpen(true)}
-                      className="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all cursor-pointer w-full sm:w-auto"
+                      className="bg-rose-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-rose-700 transition-all cursor-pointer w-full sm:w-auto"
                     >
                       Upload Prescription
                     </button>
                   </div>
                 </div>
               ) : rxStatus === "Needs Re-verification" ? (
-                <div className="bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/50 rounded-xl p-4 space-y-3 text-left">
+                <div className="bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/50 rounded-2xl p-4 space-y-3 text-left">
                   <div className="flex items-start gap-3 text-sky-800 dark:text-sky-300">
                     <AlertCircle className="w-6 h-6 text-sky-500 shrink-0" />
                     <div>
@@ -673,14 +699,14 @@ const Checkout = () => {
                     <button
                       type="button"
                       onClick={() => setRxInfoModalOpen(true)}
-                      className="bg-[#038076] hover:bg-[#02655f] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
+                      className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
                     >
                       Upload Prescription
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 space-y-3 text-left">
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 space-y-3 text-left">
                   <div className="flex items-start gap-3 text-amber-800 dark:text-amber-300">
                     <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
                     <div>
@@ -695,7 +721,7 @@ const Checkout = () => {
                     <button
                       type="button"
                       onClick={() => setRxInfoModalOpen(true)}
-                      className="bg-[#3f257a] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#321c62] transition-all cursor-pointer w-full sm:w-auto"
+                      className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
                     >
                       Upload Prescription
                     </button>
@@ -706,22 +732,21 @@ const Checkout = () => {
           )}
 
           {/* Payment Method Selector Card */}
-          {/* Payment Method Section (Razorpay Exclusive) */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+              <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white">
                 Payment Gateway
               </h3>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-teal-50 dark:bg-teal-900/30 text-[#038076] dark:text-teal-400 rounded-full border border-[#038076]/20">
+              <span className="text-xs font-bold px-3 py-1 bg-[#f4f9f7] dark:bg-teal-900/30 text-[#157a6d] dark:text-teal-400 rounded-full border border-[#157a6d]/20">
                 Razorpay Secure
               </span>
             </div>
 
-            <div className="p-4 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/70 dark:border-zinc-700/60 flex items-center justify-between">
+            <div className="p-4 bg-[#f4f9f7] dark:bg-zinc-800/60 rounded-2xl border border-slate-200/70 dark:border-zinc-700/60 flex items-center justify-between">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <ShieldCheck className="w-4 h-4 text-[#038076]" />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <ShieldCheck className="w-4 h-4 text-[#157a6d]" />
+                  <span className="text-xs font-bold text-[#172b26] dark:text-slate-200">
                     Instant & Secure Payment
                   </span>
                 </div>
@@ -729,19 +754,19 @@ const Checkout = () => {
                   Pay using UPI (GPay, PhonePe, Paytm), Credit & Debit Cards, Netbanking, or Cred.
                 </p>
               </div>
-              <div className="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono font-bold text-[#038076]">
+              <div className="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-full border border-slate-200 dark:border-zinc-700 text-xs font-mono font-bold text-[#157a6d]">
                 <span>Razorpay</span>
               </div>
             </div>
           </div>
-        </form>
+        </div>
 
         {/* ── RIGHT COLUMN: Order Summary ── */}
         <div className="w-full lg:w-[380px] shrink-0 sticky top-24">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col text-left">
+          <div className="bg-white dark:bg-zinc-900 rounded-[24px] border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col text-left">
             
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Order Summary</h3>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 bg-[#f4f9f7]/50 dark:bg-zinc-900/50">
+              <h3 className="font-editorial text-lg font-semibold text-[#172b26] dark:text-white">Order Summary</h3>
             </div>
 
             {/* Item List Scrollable */}
@@ -749,10 +774,10 @@ const Checkout = () => {
               {cartItems.map((item) => (
                 <div key={(item._id || item.id)?.toString()} className="py-3 flex items-start justify-between gap-3 text-sm">
                   <div className="truncate pr-2">
-                    <span className="font-bold text-slate-900 dark:text-white mr-2 text-xs bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">{item.quantity}x</span>
+                    <span className="font-bold text-[#172b26] dark:text-white mr-2 text-xs bg-[#f4f9f7] dark:bg-zinc-800 px-2 py-0.5 rounded-full border border-slate-200/60">{item.quantity}x</span>
                     <span className="text-slate-600 dark:text-zinc-300 font-medium">{item.name}</span>
                   </div>
-                  <span className="font-bold text-slate-900 dark:text-white shrink-0">
+                  <span className="font-bold text-[#172b26] dark:text-white shrink-0">
                     {formatCurrency(item.price * item.quantity)}
                   </span>
                 </div>
@@ -760,12 +785,12 @@ const Checkout = () => {
             </div>
 
             {/* Coupons Section */}
-            <div className="p-6 border-y border-slate-100 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-900/30">
-              <p className="text-sm font-semibold text-slate-900 dark:text-zinc-200 mb-3">Apply Coupon</p>
+            <div className="p-6 border-y border-slate-100 dark:border-zinc-800 bg-[#f4f9f7]/30 dark:bg-zinc-900/30">
+              <p className="text-xs font-bold font-clinical-mono text-[#157a6d] uppercase mb-3">Apply Coupon</p>
               
               {couponApplied ? (
-                <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-lg px-3 py-2 animate-[fade-in_0.2s_ease-out]">
-                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-full px-4 py-2 animate-[fade-in_0.2s_ease-out]">
+                  <div className="flex items-center gap-2 text-[#157a6d] dark:text-emerald-400">
                     <Tag size={14} />
                     <span className="font-bold font-mono text-sm">{couponApplied.code}</span>
                     <span className="text-xs font-medium">
@@ -777,7 +802,7 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 font-semibold underline text-xs"
+                    className="text-[#157a6d] dark:text-emerald-400 hover:underline font-bold text-xs"
                   >
                     Remove
                   </button>
@@ -786,18 +811,18 @@ const Checkout = () => {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Enter code here"
+                    placeholder="Enter promo code"
                     value={couponCode}
                     onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyCoupon(couponCode))}
                     disabled={couponLoading}
-                    className="flex-1 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium uppercase placeholder:normal-case placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20"
+                    className="flex-1 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-full px-4 py-2 text-xs font-mono uppercase placeholder:normal-case placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#157a6d]/20"
                   />
                   <button
                     type="button"
                     onClick={() => handleApplyCoupon(couponCode)}
                     disabled={couponLoading || !couponCode.trim()}
-                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors"
+                    className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-4 py-2 rounded-full text-xs font-bold disabled:opacity-40 transition-colors"
                   >
                     {couponLoading ? "..." : "Apply"}
                   </button>
@@ -807,19 +832,19 @@ const Checkout = () => {
                 <p className="text-rose-500 text-xs font-medium mt-2">{couponError}</p>
               )}
 
-              {/* Available Coupons List (Expandable style) */}
+              {/* Available Coupons List */}
               {!couponApplied && availableCoupons.length > 0 && (
                 <div className="mt-4 space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1">
                   {availableCoupons.map((coupon) => (
                     <div 
                       key={coupon.id} 
-                      className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg p-3 flex items-center justify-between text-left"
+                      className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-3 flex items-center justify-between text-left"
                     >
                       <div>
-                        <span className="inline-block bg-[#3f257a]/10 text-[#3f257a] dark:text-[#a4c9ff] font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#3f257a]/20 mb-1">
+                        <span className="inline-block bg-[#f4f9f7] text-[#157a6d] dark:text-emerald-400 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#157a6d]/20 mb-1">
                           {coupon.code}
                         </span>
-                        <p className="font-bold text-xs text-slate-900 dark:text-white leading-tight">
+                        <p className="font-bold text-xs text-[#172b26] dark:text-white leading-tight">
                           {coupon.discountType === "percentage" 
                             ? `${coupon.discountValue || coupon.discountAmount}% OFF` 
                             : `₹${coupon.discountValue || coupon.discountAmount} OFF`}
@@ -832,7 +857,7 @@ const Checkout = () => {
                           setCouponCode(coupon.code);
                           handleApplyCoupon(coupon.code);
                         }}
-                        className="bg-[#038076]/10 text-[#038076] dark:text-[#84d6b9] hover:bg-[#038076] hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer select-none"
+                        className="bg-[#f4f9f7] text-[#157a6d] hover:bg-[#157a6d] hover:text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer select-none border border-[#157a6d]/20"
                       >
                         Apply
                       </button>
@@ -844,34 +869,34 @@ const Checkout = () => {
 
             {/* Cost Breakdown */}
             <div className="p-6 space-y-4">
-              <div className="flex justify-between text-sm text-slate-600 dark:text-zinc-400">
+              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
                 <span>Subtotal</span>
-                <span className="font-medium text-slate-900 dark:text-zinc-100">{formatCurrency(subtotal)}</span>
+                <span className="font-medium text-[#172b26] dark:text-zinc-100">{formatCurrency(subtotal)}</span>
               </div>
               
               {couponApplied && discountAmount > 0 && (
-                <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                <div className="flex justify-between text-xs sm:text-sm text-[#157a6d] dark:text-emerald-400 font-medium">
                   <span>Coupon Discount</span>
                   <span>-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
               
-              <div className="flex justify-between text-sm text-slate-600 dark:text-zinc-400">
+              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
                 <span>Shipping {subtotal >= 499 && subtotal > 0 ? "(Free > ₹499)" : ""}</span>
-                <span className="text-slate-900 dark:text-zinc-100 font-medium">
+                <span className="text-[#172b26] dark:text-zinc-100 font-medium">
                   {activeShipping === 0 ? "FREE" : formatCurrency(activeShipping)}
                 </span>
               </div>
 
-              <div className="flex justify-between text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
+              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
                 <span>GST (12%)</span>
-                <span className="text-slate-900 dark:text-zinc-100 font-medium">{formatCurrency(tax)}</span>
+                <span className="text-[#172b26] dark:text-zinc-100 font-medium">{formatCurrency(tax)}</span>
               </div>
 
               {/* Total Row */}
               <div className="flex justify-between items-center pt-2">
-                <span className="text-base font-bold text-slate-900 dark:text-white">Final Total</span>
-                <span className="text-xl font-bold text-[#02665e] dark:text-[#a4c9ff] tracking-tight">
+                <span className="text-base font-bold text-[#172b26] dark:text-white">Final Total</span>
+                <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
                   {formatCurrency(finalTotal)}
                 </span>
               </div>
@@ -894,14 +919,12 @@ const Checkout = () => {
                     : handlePlaceOrder
                 }
                 disabled={isSubmitting || (requiresRx && rxStatus === "Pending Verification")}
-                className={`w-full py-4 px-6 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-sm ${
+                className={`w-full py-3.5 px-6 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-xs ${
                   requiresRx && rxStatus === "Pending Verification"
                     ? "bg-slate-100 text-slate-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed"
                     : requiresRx && rxStatus === "Rejected"
                     ? "bg-rose-600 hover:bg-rose-700 text-white cursor-pointer active:scale-[0.98]"
-                    : requiresRx && rxStatus !== "Verified"
-                    ? "bg-[#02665e] hover:bg-[#014d47] text-white cursor-pointer active:scale-[0.98]"
-                    : "bg-[#02665e] hover:bg-[#014d47] text-white cursor-pointer active:scale-[0.98]"
+                    : "bg-[#157a6d] hover:bg-[#0f5c52] text-white cursor-pointer active:scale-[0.98]"
                 }`}
               >
                 {isSubmitting ? (
@@ -1106,6 +1129,13 @@ const Checkout = () => {
           </div>
         </div>
       )}
+
+      {/* Address Selector Modal */}
+      <AddressSelectorModal
+        isOpen={addressModalOpen}
+        onClose={() => setAddressModalOpen(false)}
+      />
+      </div>
     </div>
   );
 };
@@ -1433,11 +1463,6 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
           </div>
         )}
       </div>
-
-      <AddressSelectorModal
-        isOpen={addressModalOpen}
-        onClose={() => setAddressModalOpen(false)}
-      />
     </div>
   );
 };
