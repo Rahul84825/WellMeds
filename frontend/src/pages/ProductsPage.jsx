@@ -358,8 +358,8 @@ const ProductsPage = () => {
                   type="button"
                   onClick={() => setCurrentPage(pNum)}
                   className={`w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === pNum
-                      ? "bg-[#157a6d] text-white shadow-xs"
-                      : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                    ? "bg-[#157a6d] text-white shadow-xs"
+                    : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
                     }`}
                 >
                   {pNum}

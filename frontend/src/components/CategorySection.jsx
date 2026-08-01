@@ -131,9 +131,9 @@ const CategorySection = () => {
       <div className="home-section-container">
 
         {/* ── Section Header ─────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+        <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4">
           <div>
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 hidden sm:flex items-center gap-2">
               <span>SPECIALTY PHARMACY</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
               <span>CLINICAL CATALOG</span>
@@ -144,7 +144,7 @@ const CategorySection = () => {
           </div>
 
           {/* Right Header Navigation Controls: ( ← ) [ VIEW ALL ] ( → ) */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Left Arrow Button */}
             <button
               type="button"
@@ -217,31 +217,6 @@ const CategorySection = () => {
             >
               <CategoryCard category={cat} index={idx} />
             </div>
-          ))}
-        </div>
-
-        {/* ── Mobile scroll hint (dots) ─────────────────────────── */}
-        <div
-          aria-hidden="true"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "6px",
-            marginTop: "20px",
-          }}
-          className="category-scroll-dots"
-        >
-          {activeCategories.slice(0, Math.min(8, activeCategories.length)).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === 0 ? "20px" : "6px",
-                height: "6px",
-                borderRadius: "3px",
-                background: i === 0 ? "#038076" : "#cbd5e1",
-                transition: "all 300ms ease",
-              }}
-            />
           ))}
         </div>
       </div>

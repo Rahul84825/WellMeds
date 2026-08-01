@@ -134,9 +134,9 @@ const SurgicalProductsSection = () => {
       <div className="home-section-container">
 
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+        <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4">
           <div>
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 hidden sm:flex items-center gap-2">
               <span>MEDICAL DEVICES</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
               <span>SURGICAL EQUIPMENT</span>
@@ -147,7 +147,7 @@ const SurgicalProductsSection = () => {
           </div>
 
           {/* Right Header Navigation Controls: ( ← ) [ VIEW CATALOG ] ( → ) */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Left Arrow Button */}
             <button
               type="button"
@@ -212,20 +212,6 @@ const SurgicalProductsSection = () => {
               </div>
             );
           })}
-        </div>
-
-        {/* Mobile scroll hint (dots) */}
-        <div
-          aria-hidden="true"
-          className="flex justify-center gap-1.5 mt-5 md:hidden"
-        >
-          {categories.slice(0, Math.min(8, categories.length)).map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? "w-5 bg-[#038076] dark:bg-[#84d6b9]" : "w-1.5 bg-slate-300 dark:bg-zinc-700"
-                }`}
-            />
-          ))}
         </div>
       </div>
 

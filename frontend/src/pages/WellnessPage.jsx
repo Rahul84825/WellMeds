@@ -275,8 +275,8 @@ const WellnessPage = () => {
                     setCurrentPage(1);
                   }}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-xs font-semibold transition-all cursor-pointer ${isSelected
-                      ? "bg-[#157a6d] border-[#157a6d] text-white shadow-xs"
-                      : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                    ? "bg-[#157a6d] border-[#157a6d] text-white shadow-xs"
+                    : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
                     }`}
                 >
                   <Icon size={14} className={isSelected ? "text-white" : "text-[#157a6d]"} />
@@ -373,8 +373,8 @@ const WellnessPage = () => {
                   type="button"
                   onClick={() => setCurrentPage(pNum)}
                   className={`w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === pNum
-                      ? "bg-[#157a6d] text-white shadow-xs"
-                      : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                    ? "bg-[#157a6d] text-white shadow-xs"
+                    : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
                     }`}
                 >
                   {pNum}
