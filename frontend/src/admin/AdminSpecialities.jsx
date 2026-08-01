@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { 
   Plus, 
   Search, 
@@ -67,7 +66,6 @@ const AdminSpecialities = () => {
       setTotalCount(data.total);
     } catch (err) {
       console.error("Failed to load specialities", err);
-      toast.error("Failed to load specialities list.");
     } finally {
       setLoading(false);
     }
@@ -153,7 +151,6 @@ const AdminSpecialities = () => {
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.warning(`File size must not exceed ${MAX_FILE_SIZE_MB}MB.`);
       return;
     }
 
@@ -164,15 +161,11 @@ const AdminSpecialities = () => {
       const secureUrl = await api.uploadImage(file);
       if (type === "icon") {
         setIconImage(secureUrl);
-        toast.success("Icon uploaded successfully!");
       } else {
         setBannerImage(secureUrl);
-        toast.success("Banner image uploaded successfully!");
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to upload image.";
-      toast.error(errMsg);
     } finally {
       setUploadingIcon(false);
       setUploadingBanner(false);
@@ -248,7 +241,6 @@ const AdminSpecialities = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!name.trim() || !slug.trim()) {
-      toast.warning("Please provide both Name and Slug.");
       return;
     }
 
@@ -274,16 +266,13 @@ const AdminSpecialities = () => {
     try {
       if (editingSpec) {
         await api.updateSpeciality(editingSpec.id || editingSpec._id, payload);
-        toast.success("Speciality updated successfully!");
       } else {
         await api.createSpeciality(payload);
-        toast.success("Speciality created successfully!");
       }
       setIsModalOpen(false);
       fetchSpecialities();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save speciality.");
     }
   };
 
@@ -294,30 +283,19 @@ const AdminSpecialities = () => {
       setSpecialities(prev =>
         prev.map(s => (s._id === spec._id ? { ...s, active: !s.active } : s))
       );
-      toast.success(`Speciality ${!spec.active ? "activated" : "deactivated"} successfully.`);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to toggle status.");
     }
   };
 
   // Delete Speciality
   const handleDelete = async (id, name) => {
-    toast.warning(`Are you sure you want to permanently delete Speciality "${name}"? This removes its reference from all tagged products.`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteSpeciality(id);
-            setSpecialities(prev => prev.filter(s => s._id !== id && s.id !== id));
-            toast.success("Speciality deleted successfully.");
-          } catch (err) {
-            console.error("Failed to delete speciality", err);
-            toast.error("Failed to delete speciality.");
-          }
-        }
-      }
-    });
+    try {
+      await api.deleteSpeciality(id);
+      setSpecialities(prev => prev.filter(s => s._id !== id && s.id !== id));
+    } catch (err) {
+      console.error("Failed to delete speciality", err);
+    }
   };
 
   return (

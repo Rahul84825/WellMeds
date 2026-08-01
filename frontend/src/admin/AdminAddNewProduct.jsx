@@ -464,7 +464,6 @@ const AddNewProduct = () => {
           }
         } catch (err) {
           console.error("Failed to load product data", err);
-          toast.error("Failed to load product details.");
         } finally {
           setLoading(false);
         }
@@ -535,7 +534,6 @@ const AddNewProduct = () => {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.size > MAX_FILE_SIZE) {
-          toast.warning(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
           continue;
         }
 
@@ -553,8 +551,6 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error("Image upload failed", err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to upload image. Please verify local environment.";
-      toast.error(errMsg);
     } finally {
       setUploadProgress(null);
     }
@@ -571,7 +567,6 @@ const AddNewProduct = () => {
       const uploadedUrls = [];
       for (const file of files) {
         if (file.size > MAX_FILE_SIZE) {
-          toast.warning(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
           continue;
         }
         const secureUrl = await api.uploadImage(file);
@@ -582,8 +577,6 @@ const AddNewProduct = () => {
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to drop and upload image.";
-      toast.error(errMsg);
     } finally {
       setUploadProgress(null);
     }
@@ -652,15 +645,11 @@ const AddNewProduct = () => {
 
   // Safety Cards
   const addSafetyCard = () => {
-    const usedCategories = new Set(
-      safetyCards.map(c => (c.title || c.icon || "").trim().toLowerCase())
-    );
     const available = SAFETY_CATEGORIES.find(
-      cat => !usedCategories.has(cat.label.toLowerCase())
+      cat => !safetyCards.some(c => (c.title || c.icon || "").trim().toLowerCase() === cat.label.toLowerCase())
     );
 
     if (!available) {
-      toast.warning("All predefined safety categories have already been added.");
       return;
     }
 
@@ -677,7 +666,6 @@ const AddNewProduct = () => {
         (c, idx) => idx !== index && (c.title || c.icon || "").trim().toLowerCase() === selectedCat.toLowerCase()
       );
       if (isDuplicate) {
-        toast.error(`The "${selectedCat}" category is already added. Duplicate categories are not allowed.`);
         return;
       }
       setSafetyCards(prev =>
@@ -697,19 +685,16 @@ const AddNewProduct = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!name || !name.trim() || !category || !price || !manufacturer || !manufacturer.trim()) {
-      toast.warning("Please fill in all required fields (Name, Category, Selling Price, Manufacturer).");
       return;
     }
 
     const primaryImageUrl = images[primaryImageIdx] || images[0] || "";
 
     if (originalPrice && parseFloat(originalPrice) < parseFloat(price)) {
-      toast.warning("Original Price cannot be less than Selling Price.");
       return;
     }
 
     if (specStrength && specStrength.length > 50) {
-      toast.warning("Strength specification value should not exceed 50 characters.");
       return;
     }
 
@@ -795,15 +780,12 @@ const AddNewProduct = () => {
     try {
       if (isEditMode) {
         await api.updateProduct(id, productData);
-        toast.success("Product content updated successfully!");
       } else {
         await api.createProduct(productData);
-        toast.success("Product content published successfully!");
       }
       navigate("/admin/products");
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save product.");
     } finally {
       setIsSaving(false);
     }

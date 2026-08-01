@@ -85,33 +85,32 @@ const WellnessProductsSection = () => {
     <section className="py-12 md:py-14 w-full bg-white dark:bg-zinc-950">
       <div className="home-section-container">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+        <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4">
           <div className="text-left">
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <div className="hidden sm:flex font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 items-center gap-2">
               <span>PREVENTATIVE HEALTH</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
               <span>WELLNESS ESSENTIALS</span>
             </div>
             <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
-              Wellness & Supplements
+              Health & Wellness
             </h2>
-            <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
+            <p className="hidden sm:block font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
               Daily nutritional supplements, personal hygiene, and preventative care essentials.
             </p>
           </div>
 
-          {/* Right Header Navigation Controls: ( ← ) [ BROWSE ] ( → ) */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {/* Right Header Navigation Controls */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Left Navigation Arrow */}
             <button
               type="button"
               onClick={() => handleScroll("left")}
               disabled={!canScrollLeft}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
-                canScrollLeft
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${canScrollLeft
                   ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
                   : "opacity-30 cursor-not-allowed"
-              }`}
+                }`}
               aria-label="Previous Products"
             >
               <ChevronLeft size={18} />
@@ -120,7 +119,7 @@ const WellnessProductsSection = () => {
             <Link
               to="/wellness"
               aria-label="View all wellness products"
-              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
             >
               <span>View all</span>
             </Link>
@@ -130,11 +129,10 @@ const WellnessProductsSection = () => {
               type="button"
               onClick={() => handleScroll("right")}
               disabled={!canScrollRight}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
-                canScrollRight
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${canScrollRight
                   ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
                   : "opacity-30 cursor-not-allowed"
-              }`}
+                }`}
               aria-label="Next Products"
             >
               <ChevronRight size={18} />

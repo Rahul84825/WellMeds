@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import {
   Users,
   Search,
@@ -57,7 +56,6 @@ const AdminWaitlist = () => {
       setTotalSubscribers(data.total || 0);
     } catch (err) {
       console.error("Failed to load waitlist subscribers:", err);
-      toast.error(err.response?.data?.message || "Failed to load subscribers.");
     } finally {
       setLoading(false);
     }
@@ -75,32 +73,23 @@ const AdminWaitlist = () => {
 
   const handleToggleNotified = async (id, currentStatus, email) => {
     try {
-      const res = await api.markSubscriberNotified(id);
+      await api.markSubscriberNotified(id);
       setSubscribers((prev) =>
         prev.map((sub) => (sub._id === id ? { ...sub, notified: !currentStatus } : sub))
       );
-      toast.success(res.message || `Notification status updated for ${email}`);
     } catch (err) {
-      toast.error("Failed to update subscriber status.");
+      console.error("Failed to update subscriber status:", err);
     }
   };
 
   const handleDeleteSubscriber = async (id, email) => {
-    toast.warning(`Are you sure you want to remove "${email}" from the waitlist?`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteSubscriber(id);
-            setSubscribers((prev) => prev.filter((sub) => sub._id !== id));
-            setSelectedIds((prev) => prev.filter((sId) => sId !== id));
-            toast.success(`Subscriber ${email} removed.`);
-          } catch (err) {
-            toast.error("Failed to delete subscriber.");
-          }
-        },
-      },
-    });
+    try {
+      await api.deleteSubscriber(id);
+      setSubscribers((prev) => prev.filter((sub) => sub._id !== id));
+      setSelectedIds((prev) => prev.filter((sId) => sId !== id));
+    } catch (err) {
+      console.error("Failed to delete subscriber:", err);
+    }
   };
 
   const handleSelectAll = () => {
@@ -117,48 +106,34 @@ const AdminWaitlist = () => {
     );
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    toast.warning(`Delete ${selectedIds.length} selected subscriber(s)?`, {
-      action: {
-        label: "Confirm Bulk Delete",
-        onClick: async () => {
-          try {
-            await api.bulkDeleteSubscribers(selectedIds);
-            toast.success(`Successfully removed ${selectedIds.length} subscribers.`);
-            setSelectedIds([]);
-            fetchSubscribers();
-          } catch (err) {
-            toast.error("Failed to delete selected subscribers.");
-          }
-        },
-      },
-    });
+    try {
+      await api.bulkDeleteSubscribers(selectedIds);
+      setSelectedIds([]);
+      fetchSubscribers();
+    } catch (err) {
+      console.error("Failed to delete selected subscribers:", err);
+    }
   };
 
   const handleSendBroadcast = async () => {
-    if (selectedIds.length === 0) {
-      toast.error("Please select at least one subscriber.");
-      return;
-    }
-    if (!broadcastSubject || !broadcastMessage) {
-      toast.error("Subject and message content are required.");
+    if (selectedIds.length === 0 || !broadcastSubject || !broadcastMessage) {
       return;
     }
 
     setSendingBroadcast(true);
     try {
-      const res = await api.bulkNotifySubscribers({
+      await api.bulkNotifySubscribers({
         ids: selectedIds,
         subject: broadcastSubject,
         message: broadcastMessage,
       });
-      toast.success(res.message || `Broadcast email sent to ${selectedIds.length} subscribers!`);
       setIsNotifyModalOpen(false);
       setSelectedIds([]);
       fetchSubscribers();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send broadcast emails.");
+      console.error("Failed to send broadcast emails:", err);
     } finally {
       setSendingBroadcast(false);
     }
@@ -167,9 +142,8 @@ const AdminWaitlist = () => {
   const handleExportCSV = async () => {
     try {
       await api.exportSubscribersCSV();
-      toast.success("Subscriber CSV download started.");
     } catch (err) {
-      toast.error("Failed to export subscribers CSV.");
+      console.error("Failed to export subscribers CSV:", err);
     }
   };
 

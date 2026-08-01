@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { 
   Plus, 
   Search, 
@@ -53,7 +52,6 @@ const AdminMolecules = () => {
       setTotalPages(data.pages || 1);
     } catch (err) {
       console.error("Failed to load molecules", err);
-      toast.error("Failed to load molecules list.");
     } finally {
       setLoading(false);
     }
@@ -79,11 +77,9 @@ const AdminMolecules = () => {
     if (!window.confirm("Are you sure you want to delete this molecule? This will remove its association from all products.")) return;
     try {
       await api.deleteMolecule(id);
-      toast.success("Molecule deleted successfully!");
       fetchMolecules();
     } catch (err) {
       console.error("Failed to delete molecule", err);
-      toast.error("Failed to delete molecule.");
     }
   };
 

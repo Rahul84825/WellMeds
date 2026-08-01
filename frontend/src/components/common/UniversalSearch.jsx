@@ -186,7 +186,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             <input
               ref={inputRef}
               type="text"
-              placeholder="Search Atorvastatin, Insulin, Metformin..."
+              placeholder="Search medicines, molecules or products..."
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
@@ -194,7 +194,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
             />
-            {!query && <span className="cursor" />}
             {query && (
               <button
                 type="button"

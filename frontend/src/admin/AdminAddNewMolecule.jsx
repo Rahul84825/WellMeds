@@ -232,7 +232,6 @@ const AdminAddNewMolecule = () => {
         }
       } catch (err) {
         console.error("Failed to load form config or molecule details", err);
-        toast.error("Failed to load molecule information.");
       } finally {
         setLoading(false);
       }

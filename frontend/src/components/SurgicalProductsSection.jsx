@@ -136,13 +136,8 @@ const SurgicalProductsSection = () => {
         {/* Section Header */}
         <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4">
           <div>
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 hidden sm:flex items-center gap-2">
-              <span>MEDICAL DEVICES</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
-              <span>SURGICAL EQUIPMENT</span>
-            </div>
             <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
-              Surgical & Clinical Supplies
+              Surgical Supplies
             </h2>
           </div>
 
@@ -167,7 +162,7 @@ const SurgicalProductsSection = () => {
             <Link
               to="/surgical/categories"
               aria-label="View all surgical categories"
-              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
             >
               <span>View all</span>
             </Link>

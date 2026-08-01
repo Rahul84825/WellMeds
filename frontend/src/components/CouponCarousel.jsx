@@ -628,7 +628,6 @@ const CouponCarousel = () => {
   const [visibleCount, setVisibleCount] = useState(2);
   const [isHovered, setIsHovered] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
 
   // Touch swipe states (preserved from original)
   const [touchStart, setTouchStart] = useState(0);
@@ -712,10 +711,8 @@ const CouponCarousel = () => {
       console.warn("Clipboard access failed:", err);
     }
     setCopiedCode(code);
-    setToastMessage(`Coupon code "${code}" copied successfully!`);
     setTimeout(() => {
       setCopiedCode("");
-      setToastMessage("");
     }, 3000);
   };
 
@@ -1003,36 +1000,6 @@ const CouponCarousel = () => {
           </div>
         )}
       </div>
-
-      {/* ── Floating Toast Notification (preserved from original) ── */}
-      {toastMessage && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{
-            position: "fixed",
-            bottom: "40px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "#0f172a",
-            color: "#f8fafc",
-            padding: "14px 24px",
-            borderRadius: "14px",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            fontSize: "13px",
-            fontWeight: 600,
-            border: "1px solid rgba(255,255,255,0.10)",
-            animation: "fade-in 0.2s ease-out",
-          }}
-        >
-          <Check size={16} style={{ color: "#10b981" }} />
-          {toastMessage}
-        </div>
-      )}
     </section>
   );
 };

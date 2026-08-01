@@ -66,7 +66,6 @@ const AuthModal = () => {
       setMobile(phoneVal);
       if (result.devOtp) setDevOtpHint(result.devOtp);
       setStep(STEP_OTP);
-      toast.success(`OTP sent to +91 ${phoneVal}`);
     } catch (err) {
       setErrorMsg(err.response?.data?.message || err.message || "Failed to send OTP. Please try again.");
     } finally {
@@ -87,7 +86,6 @@ const AuthModal = () => {
       if (isNew) {
         setStep(STEP_ONBOARDING);
       } else {
-        toast.success(`Welcome back, ${loggedUser.name}!`);
         closeAuthModal();
         
         // Redirect logic
@@ -110,7 +108,6 @@ const AuthModal = () => {
     try {
       const result = await sendOtp(mobile);
       if (result.devOtp) setDevOtpHint(result.devOtp);
-      toast.success("OTP resent successfully!");
       return true;
     } catch (err) {
       setErrorMsg(err.response?.data?.message || err.message || "Failed to resend OTP.");
@@ -124,7 +121,6 @@ const AuthModal = () => {
     setIsSubmitting(true);
     try {
       const updatedUser = await updateProfile({ name, email });
-      toast.success(`Account setup complete! Welcome, ${updatedUser.name}.`);
       closeAuthModal();
 
       // Redirect logic
@@ -134,7 +130,7 @@ const AuthModal = () => {
         navigate("/admin");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || "Failed to complete onboarding.");
+      setErrorMsg(err.response?.data?.message || err.message || "Failed to complete onboarding.");
     } finally {
       setIsSubmitting(false);
     }

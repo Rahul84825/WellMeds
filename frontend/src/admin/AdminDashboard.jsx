@@ -358,7 +358,6 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Failed to load dashboard data", err);
-      toast.error("Failed to load dashboard statistics");
     } finally {
       setLoading(false);
     }
@@ -372,7 +371,6 @@ const Dashboard = () => {
     if (downloadingSales) return;
     try {
       setDownloadingSales(true);
-      toast.info("Assembling sales report, please wait...");
       const blob = await api.downloadSalesReport();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -382,10 +380,8 @@ const Dashboard = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success("Sales report downloaded successfully!");
     } catch (err) {
       console.error("Failed to export sales report", err);
-      toast.error("Failed to download sales report.");
     } finally {
       setDownloadingSales(false);
     }
@@ -395,7 +391,6 @@ const Dashboard = () => {
     if (downloadingCustomers) return;
     try {
       setDownloadingCustomers(true);
-      toast.info("Assembling customer report, please wait...");
       const blob = await api.downloadCustomersReport();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -405,10 +400,8 @@ const Dashboard = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success("Customer report downloaded successfully!");
     } catch (err) {
       console.error("Failed to export customer report", err);
-      toast.error("Failed to download customer report.");
     } finally {
       setDownloadingCustomers(false);
     }

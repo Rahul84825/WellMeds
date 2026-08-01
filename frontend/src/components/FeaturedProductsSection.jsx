@@ -65,9 +65,9 @@ export const FeaturedProductsSection = () => {
     <section className="py-12 md:py-14 w-full bg-white dark:bg-zinc-950">
       <div className="home-section-container">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+        <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4">
           <div>
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <div className="hidden sm:flex font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 items-center gap-2">
               <span>MOST REQUESTED</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
               <span>BEST SELLERS & CHRONIC THERAPIES</span>
@@ -75,13 +75,13 @@ export const FeaturedProductsSection = () => {
             <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
               Best Sellers & Patient Favorites
             </h2>
-            <p className="font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
+            <p className="hidden sm:block font-sans text-xs sm:text-sm text-[#3f544d] dark:text-zinc-400 mt-1 font-normal">
               Discover our highest rated medicines, chronic therapy plans, and customer-favorite healthcare products.
             </p>
           </div>
 
-          {/* Right Header Navigation Controls: ( ← ) [ BROWSE ] ( → ) */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {/* Right Header Navigation Controls */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Left Navigation Arrow */}
             <button
               type="button"
@@ -100,7 +100,7 @@ export const FeaturedProductsSection = () => {
             <Link
               to="/products"
               aria-label="View all products"
-              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
             >
               <span>View all</span>
             </Link>

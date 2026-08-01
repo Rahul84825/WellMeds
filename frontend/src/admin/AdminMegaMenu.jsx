@@ -61,7 +61,6 @@ const AdminMegaMenu = () => {
       setMenuData(data || { conditions: [], specialities: [], sources: [], quickLinks: [] });
     } catch (err) {
       console.error("Failed to load mega menu cms data", err);
-      toast.error("Failed to load mega menu items.");
     } finally {
       setLoading(false);
     }
@@ -143,7 +142,6 @@ const AdminMegaMenu = () => {
   const handleSaveItem = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error("Name/Title is required");
       return;
     }
 
@@ -168,48 +166,34 @@ const AdminMegaMenu = () => {
     try {
       if (editingItem) {
         await api.updateMegaMenuItem(editingItem._id || editingItem.id, payload);
-        toast.success("Item updated successfully.");
       } else {
         await api.createMegaMenuItem(payload);
-        toast.success("Item added successfully.");
       }
       setEditorOpen(false);
       fetchMenuData();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save menu item.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteItem = async (id, title) => {
-    toast.warning(`Are you sure you want to delete "${title}"?`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteMegaMenuItem(id);
-            toast.success("Item deleted successfully.");
-            fetchMenuData();
-          } catch (err) {
-            console.error("Delete failed", err);
-            toast.error("Failed to delete item.");
-          }
-        }
-      }
-    });
+    try {
+      await api.deleteMegaMenuItem(id);
+      fetchMenuData();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
   const handleToggleVisible = async (item) => {
     const nextVal = !item.visible;
     try {
       await api.updateMegaMenuItem(item._id || item.id, { visible: nextVal });
-      toast.success(`${item.name} is now ${nextVal ? "Visible" : "Hidden"}`);
       fetchMenuData();
     } catch (err) {
       console.error("Toggle visibility failed", err);
-      toast.error("Failed to update visibility.");
     }
   };
 
@@ -233,7 +217,6 @@ const AdminMegaMenu = () => {
       fetchMenuData();
     } catch (err) {
       console.error("Failed to reorder items", err);
-      toast.error("Failed to save sorting order.");
     }
   };
 

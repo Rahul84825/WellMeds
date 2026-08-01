@@ -250,7 +250,6 @@ const Navbar = () => {
   };
 
   const handleUploadSuccess = (data) => {
-    toast.success(`Prescription "${data.fileName}" uploaded successfully!`);
     setUploadModalOpen(false);
   };
 

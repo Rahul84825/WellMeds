@@ -455,82 +455,103 @@
 
 @media (max-width: 768px) {
   .wellmeds-hero-section {
-    padding: 32px 20px;
+    padding: 36px 16px 28px 16px;
     min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
-  .wellmeds-hero-section .eyebrow {
-    font-size: 13px;
-    letter-spacing: 3px;
-    margin-bottom: 14px;
+
+  /* Hide headline, eyebrow, and trust line on mobile */
+  .wellmeds-hero-section .eyebrow,
+  .wellmeds-hero-section .headline,
+  .wellmeds-hero-section .trust-line {
+    display: none !important;
   }
-  .wellmeds-hero-section .headline {
-    font-size: 28px;
-    margin-bottom: 18px;
-    line-height: 1.25;
+
+  .wellmeds-hero-section .search-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
   }
+
+  /* Golden tape visible at top center of search card */
+  .wellmeds-hero-section .search-tape {
+    display: block !important;
+    top: -12px;
+    width: 80px;
+    height: 22px;
+  }
+
   .wellmeds-hero-section .search-card {
-    padding: 18px 20px;
+    padding: 16px 16px 14px 16px;
+    border-radius: 14px;
   }
+
+  /* Dashed horizontal divider line */
   .wellmeds-hero-section .search-row {
-    gap: 12px;
-    padding-bottom: 12px;
+    border-bottom: 2px dashed var(--line) !important;
+    padding-bottom: 12px !important;
+    gap: 10px;
   }
+
   .wellmeds-hero-section .search-rx {
-    font-size: 24px;
+    font-size: 22px;
   }
+
   .wellmeds-hero-section .search-input-field {
-    font-size: 16px;
+    font-size: 14px;
   }
+
   .wellmeds-hero-section .search-btn {
-    padding: 9px 18px;
+    padding: 8px 16px;
     font-size: 12px;
   }
-  .wellmeds-hero-section .trust-line {
-    font-size: 13px;
-    margin-top: 18px;
+
+  /* Category chips under dashed line */
+  .wellmeds-hero-section .search-hint {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    font-size: 11px;
+    margin-top: 10px;
+    opacity: 0.85;
+    font-family: 'IBM Plex Mono', 'Liberation Mono', monospace;
   }
 }
 
 @media (max-width: 480px) {
   .wellmeds-hero-section {
-    padding: 24px 12px;
+    padding: 30px 12px 24px 12px;
   }
-  .wellmeds-hero-section .eyebrow {
-    font-size: 11px;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-  }
-  .wellmeds-hero-section .headline {
-    font-size: 22px;
-    margin-bottom: 14px;
+  .wellmeds-hero-section .search-tape {
+    width: 70px;
+    height: 20px;
+    top: -10px;
   }
   .wellmeds-hero-section .search-card {
-    padding: 14px 14px;
+    padding: 14px 12px 12px 12px;
   }
   .wellmeds-hero-section .search-row {
     gap: 8px;
-    padding-bottom: 10px;
+    padding-bottom: 10px !important;
   }
   .wellmeds-hero-section .search-rx {
     font-size: 20px;
   }
   .wellmeds-hero-section .search-input-field {
-    font-size: 14px;
+    font-size: 13px;
   }
   .wellmeds-hero-section .search-btn {
-    padding: 8px 14px;
+    padding: 7px 12px;
     font-size: 11px;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
   .wellmeds-hero-section .search-hint {
-    font-size: 11px;
-    margin-top: 10px;
-  }
-  .wellmeds-hero-section .search-hint span {
-    margin-right: 10px;
-  }
-  .wellmeds-hero-section .trust-line {
-    font-size: 11px;
-    margin-top: 16px;
+    font-size: 10.5px;
+    gap: 6px 10px;
+    margin-top: 8px;
   }
 }

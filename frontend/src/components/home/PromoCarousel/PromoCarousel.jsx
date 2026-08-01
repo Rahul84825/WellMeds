@@ -108,7 +108,7 @@ const PromoCarousel = () => {
   const progressRatio = (activeSlide / (totalBanners - 1)) * 100;
 
   return (
-    <div className="w-full relative select-none">
+    <div className="w-full relative select-none mb-12">
       {/* Carousel Track Container */}
       <div
         className="relative group"

@@ -59,10 +59,8 @@ const ProductCard = ({ product }) => {
     setIsAdding(true);
     try {
       await addToCart(product, 1);
-      toast.success(`${product.name} added to cart!`);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add product to cart.");
     } finally {
       setIsAdding(false);
     }
@@ -75,7 +73,6 @@ const ProductCard = ({ product }) => {
       await updateQuantity(productId, cartQuantity + 1);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update quantity.");
     }
   };
 
@@ -90,7 +87,6 @@ const ProductCard = ({ product }) => {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update quantity.");
     }
   };
 
@@ -105,7 +101,6 @@ const ProductCard = ({ product }) => {
       navigate("/checkout");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to proceed to checkout.");
     }
   };
 

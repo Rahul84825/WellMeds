@@ -62,7 +62,7 @@ const WhyWellMedsBar = () => {
   ];
 
   return (
-    <section className="w-full py-10 md:py-14 text-left select-none">
+    <section className="w-full py-10 md:py-14 text-left select-none home-section-container px-4 sm:px-6 lg:px-8">
       <div className="bg-[#f4f9f7] dark:bg-zinc-900/70 rounded-[28px] border border-slate-200/80 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
         {/* Medical grid pattern overlay */}
         <div 

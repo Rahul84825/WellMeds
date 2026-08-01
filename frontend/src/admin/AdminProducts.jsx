@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { 
@@ -56,21 +55,12 @@ const ManageProducts = () => {
   }, []);
 
   const handleDelete = async (id, name) => {
-    toast.warning(`Are you sure you want to permanently delete "${name}" from the catalog?`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteProduct(id);
-            setProducts(prev => prev.filter(p => p.id !== id && p._id !== id));
-            toast.success("Product deleted successfully.");
-          } catch (err) {
-            console.error("Failed to delete product", err);
-            toast.error("Failed to delete product.");
-          }
-        }
-      }
-    });
+    try {
+      await api.deleteProduct(id);
+      setProducts(prev => prev.filter(p => p.id !== id && p._id !== id));
+    } catch (err) {
+      console.error("Failed to delete product", err);
+    }
   };
 
   // Extract all categories dynamically for filter options

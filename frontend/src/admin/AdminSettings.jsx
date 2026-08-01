@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { toast } from "sonner";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { 
@@ -19,29 +18,26 @@ import {
 
 const AdminSettings = () => {
   const { user } = useAuth();
-  
-  // Profile settings
-  const [name, setName] = useState(user?.name || "Admin Staff");
-  const [email, setEmail] = useState(user?.email || "admin@wellmeds.com");
-  const [avatar, setAvatar] = useState(user?.avatar || "");
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+
+  const [savingSection, setSavingSection] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Store Configuration
-  const [shippingLimit, setShippingLimit] = useState("499");
-  const [shippingFee, setShippingFee] = useState("40");
-  const [taxPercent, setTaxPercent] = useState("12");
-  const [storeAddress, setStoreAddress] = useState("WellMeds Healthcare Hub, Sector 5, Bangalore - 560001");
-  const [supportPhone, setSupportPhone] = useState("+91 74209 09445");
-  const [supportEmail, setSupportEmail] = useState("support@wellmeds.com");
+  // Form states
+  const [name, setName] = useState(user?.name || "Dr. Claire Wilson");
+  const [email, setEmail] = useState(user?.email || "admin@wellmeds.in");
+  const [avatar, setAvatar] = useState(user?.avatar || "");
+  const [phone, setPhone] = useState(user?.phone || "+91 9876543210");
 
-  // Toggles
-  const [notifyNewOrder, setNotifyNewOrder] = useState(true);
-  const [notifyRxUpload, setNotifyRxUpload] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  // Shop Settings
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(499);
+  const [standardDeliveryFee, setStandardDeliveryFee] = useState(49);
+  const [taxRate, setTaxRate] = useState(12); // GST 12%
+  const [currencySymbol, setCurrencySymbol] = useState("₹");
 
-  const [savingSection, setSavingSection] = useState(null); // 'profile' | 'store' | 'notify'
+  // Notification Toggles
+  const [emailOrderAlerts, setEmailOrderAlerts] = useState(true);
+  const [smsPrescriptionAlerts, setSmsPrescriptionAlerts] = useState(true);
+  const [lowStockWarning, setLowStockWarning] = useState(true);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -49,13 +45,10 @@ const AdminSettings = () => {
 
     try {
       setUploading(true);
-      toast.info("Uploading image to Cloudinary...");
       const uploadedUrl = await api.uploadImage(file);
       setAvatar(uploadedUrl);
-      toast.success("Avatar image uploaded successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to upload avatar image.");
     } finally {
       setUploading(false);
     }
@@ -66,10 +59,8 @@ const AdminSettings = () => {
     setSavingSection("profile");
     try {
       await api.updateProfile({ name, email, avatar });
-      toast.success("Admin profile updated successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update profile details.");
     } finally {
       setSavingSection(null);
     }
@@ -80,7 +71,6 @@ const AdminSettings = () => {
     setSavingSection("store");
     setTimeout(() => {
       setSavingSection(null);
-      toast.success("Store operating parameters saved!");
     }, 800);
   };
 
@@ -88,7 +78,6 @@ const AdminSettings = () => {
     setSavingSection("notify");
     setTimeout(() => {
       setSavingSection(null);
-      toast.success("Alert preferences updated!");
     }, 600);
   };
 
@@ -109,260 +98,210 @@ const AdminSettings = () => {
         {/* Left Side: Forms */}
         <div className="lg:col-span-2 space-y-lg">
           
-          {/* Profile Form */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm p-lg space-y-md">
-            <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-              <User size={16} className="text-primary dark:text-[#a4c9ff]" />
-              Staff Profile Details
-            </h3>
-            
-            <form onSubmit={handleSaveProfile} className="space-y-md text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Display Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-              </div>
+          {/* Section 1: Administrator Profile */}
+          <form onSubmit={handleSaveProfile} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
+            <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
+              <User size={18} className="text-[#004782]" />
+              <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">Admin Staff Profile</h2>
+            </div>
 
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Avatar</label>
-                <div className="flex flex-col sm:flex-row items-center gap-md bg-slate-50 dark:bg-zinc-950 p-md rounded-2xl border border-slate-200 dark:border-zinc-800">
-                  <div className="relative h-16 w-16 rounded-full bg-[#004782]/10 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
-                    {avatar ? (
-                      <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full bg-[#004782] text-white flex items-center justify-center font-bold text-lg">
-                        {name.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                    {uploading && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Loader size="xs" color="text-white" />
-                      </div>
-                    )}
+            {/* Avatar Upload */}
+            <div className="flex items-center gap-md">
+              <div className="relative w-16 h-16 rounded-full border border-slate-200 dark:border-zinc-700 overflow-hidden bg-slate-50 dark:bg-zinc-800 shrink-0">
+                {avatar ? (
+                  <img src={avatar} alt="Admin Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center font-bold text-lg text-slate-400">
+                    {name?.charAt(0) || "A"}
                   </div>
-                  <div className="flex-grow w-full">
-                    <label className="inline-flex items-center justify-center gap-xs px-md py-sm bg-white dark:bg-zinc-900 border border-slate-250 dark:border-zinc-850 hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-95 rounded-xl text-[11px] font-bold text-slate-700 dark:text-zinc-200 cursor-pointer shadow-xs transition-all min-h-[38px] select-none text-center">
-                      <Upload size={14} className="text-[#004782] dark:text-[#a4c9ff]" />
-                      <span>Upload Avatar Image</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleImageUpload} 
-                        disabled={uploading}
-                      />
-                    </label>
-                    <p className="text-[10px] text-slate-400 mt-2 font-medium">JPEG, PNG, or WEBP. Max size 5MB.</p>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader size="sm" />
                   </div>
-                </div>
+                )}
               </div>
+              <label className="cursor-pointer bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors">
+                <Upload size={14} />
+                Change Picture
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md pt-sm border-t border-slate-100 dark:border-zinc-800">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verify Password</label>
-                  <input
-                    type="password"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Password</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={savingSection !== null}
-                className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-xs select-none cursor-pointer"
-              >
-                {savingSection === "profile" ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                Save Changes
-              </button>
-            </form>
-          </div>
-
-          {/* Store Settings Form */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm p-lg space-y-md">
-            <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-              <Store size={16} className="text-secondary dark:text-secondary-fixed-dim" />
-              Store Operation Parameters
-            </h3>
-            
-            <form onSubmit={handleSaveStore} className="space-y-md text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Free Delivery Limit (₹)</label>
-                  <input
-                    type="number"
-                    value={shippingLimit}
-                    onChange={(e) => setShippingLimit(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Shipping Fee (₹)</label>
-                  <input
-                    type="number"
-                    value={shippingFee}
-                    onChange={(e) => setShippingFee(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Default GST Tax (%)</label>
-                  <input
-                    type="number"
-                    value={taxPercent}
-                    onChange={(e) => setTaxPercent(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-xs">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Store Headquarters Address</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Full Name</label>
                 <input
                   type="text"
-                  value={storeAddress}
-                  onChange={(e) => setStoreAddress(e.target.value)}
-                  className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Support Phone Hotline</label>
-                  <input
-                    type="text"
-                    value={supportPhone}
-                    onChange={(e) => setSupportPhone(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Support Email Inbox</label>
-                  <input
-                    type="email"
-                    value={supportEmail}
-                    onChange={(e) => setSupportEmail(e.target.value)}
-                    className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
               </div>
 
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Phone Number</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-xs">
               <button
                 type="submit"
-                disabled={savingSection !== null}
-                className="bg-[#086b53] text-white px-lg py-sm rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-xs select-none cursor-pointer"
+                disabled={savingSection === "profile"}
+                className="bg-[#004782] hover:bg-[#003562] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
               >
-                {savingSection === "store" ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                {savingSection === "profile" ? <Loader size="sm" /> : <Save size={14} />}
+                Save Profile
+              </button>
+            </div>
+          </form>
+
+          {/* Section 2: Store Operations */}
+          <form onSubmit={handleSaveStore} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
+            <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
+              <Store size={18} className="text-[#004782]" />
+              <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">E-Commerce & Delivery Settings</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Free Shipping Minimum (₹)</label>
+                <input
+                  type="number"
+                  value={freeShippingThreshold}
+                  onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Standard Flat Delivery Fee (₹)</label>
+                <input
+                  type="number"
+                  value={standardDeliveryFee}
+                  onChange={(e) => setStandardDeliveryFee(Number(e.target.value))}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Global GST / Tax Rate (%)</label>
+                <input
+                  type="number"
+                  value={taxRate}
+                  onChange={(e) => setTaxRate(Number(e.target.value))}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Currency Symbol</label>
+                <input
+                  type="text"
+                  value={currencySymbol}
+                  onChange={(e) => setCurrencySymbol(e.target.value)}
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-xs">
+              <button
+                type="submit"
+                disabled={savingSection === "store"}
+                className="bg-[#004782] hover:bg-[#003562] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
+              >
+                {savingSection === "store" ? <Loader size="sm" /> : <Save size={14} />}
                 Save Parameters
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
+
         </div>
 
-        {/* Right Side: Options & Status cards */}
+        {/* Right Side: Security & Notifications */}
         <div className="space-y-lg">
           
-          {/* Notifications Panel */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm p-lg space-y-md">
-            <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-              <Bell size={16} className="text-amber-500" />
-              Staff Notifications
-            </h3>
-            
+          {/* Notifications Card */}
+          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
+            <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
+              <Bell size={18} className="text-[#004782]" />
+              <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">Alert Preferences</h2>
+            </div>
+
             <div className="space-y-md text-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-slate-800 dark:text-zinc-100">Alert on new orders</p>
-                  <p className="text-[10px] text-slate-400">Receive sounds and popups for orders.</p>
-                </div>
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-slate-700 dark:text-zinc-300 font-medium">New Order Email Alerts</span>
                 <input
                   type="checkbox"
-                  checked={notifyNewOrder}
-                  onChange={(e) => setNotifyNewOrder(e.target.checked)}
-                  className="rounded text-primary focus:ring-primary h-4 w-4"
+                  checked={emailOrderAlerts}
+                  onChange={(e) => {
+                    setEmailOrderAlerts(e.target.checked);
+                    handleSaveNotify();
+                  }}
+                  className="w-4 h-4 accent-[#004782] rounded"
                 />
-              </div>
+              </label>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-slate-800 dark:text-zinc-100">Alert on prescription uploads</p>
-                  <p className="text-[10px] text-slate-400">Trigger email when patients attach Rx.</p>
-                </div>
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-slate-700 dark:text-zinc-300 font-medium">SMS Prescription Uploads</span>
                 <input
                   type="checkbox"
-                  checked={notifyRxUpload}
-                  onChange={(e) => setNotifyRxUpload(e.target.checked)}
-                  className="rounded text-primary focus:ring-primary h-4 w-4"
+                  checked={smsPrescriptionAlerts}
+                  onChange={(e) => {
+                    setSmsPrescriptionAlerts(e.target.checked);
+                    handleSaveNotify();
+                  }}
+                  className="w-4 h-4 accent-[#004782] rounded"
                 />
-              </div>
+              </label>
 
-              <button
-                onClick={handleSaveNotify}
-                disabled={savingSection !== null}
-                className="w-full text-center text-xs font-bold border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 py-sm rounded-xl text-slate-600 dark:text-zinc-200 transition-colors select-none cursor-pointer"
-              >
-                {savingSection === "notify" ? "Updating..." : "Save Preferences"}
-              </button>
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-slate-700 dark:text-zinc-300 font-medium">Low Stock System Warnings</span>
+                <input
+                  type="checkbox"
+                  checked={lowStockWarning}
+                  onChange={(e) => {
+                    setLowStockWarning(e.target.checked);
+                    handleSaveNotify();
+                  }}
+                  className="w-4 h-4 accent-[#004782] rounded"
+                />
+              </label>
             </div>
           </div>
 
-          {/* Maintenance / Security panel */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm p-lg space-y-md">
-            <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-xs pb-sm border-b border-slate-100 dark:border-zinc-800">
-              <ShieldCheck size={16} className="text-red-500" />
-              Store State & Security
-            </h3>
-
-            <div className="space-y-md text-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-slate-800 dark:text-zinc-100">Store Maintenance Mode</p>
-                  <p className="text-[10px] text-slate-400">Lock shop database for public access.</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={maintenanceMode}
-                  onChange={(e) => setMaintenanceMode(e.target.checked)}
-                  className="rounded text-red-600 focus:ring-red-500 h-4 w-4"
-                />
-              </div>
-
-              <div className="p-sm bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl flex gap-xs text-[10px] text-amber-700 dark:text-amber-400">
-                <Info size={16} className="shrink-0" />
-                <p className="leading-snug">Caution: enabling maintenance mode will block users from searching catalogs or creating new orders.</p>
-              </div>
+          {/* System Info */}
+          <div className="bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 p-md rounded-2xl text-xs space-y-xs text-slate-600 dark:text-zinc-400">
+            <div className="flex items-center gap-xs font-bold text-slate-800 dark:text-zinc-200">
+              <ShieldCheck size={16} className="text-[#004782]" />
+              WellMeds Core Stack Version
             </div>
+            <p>Framework: React 18 + Vite</p>
+            <p>API Endpoint: Active</p>
+            <p>Database Connection: MongoDB Verified</p>
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };

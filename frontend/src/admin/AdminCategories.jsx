@@ -78,7 +78,6 @@ const ProductCategories = () => {
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.warning(`File size exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
       return;
     }
 
@@ -86,11 +85,8 @@ const ProductCategories = () => {
     try {
       const secureUrl = await api.uploadImage(file);
       setImage(secureUrl);
-      toast.success("Category image uploaded successfully.");
     } catch (err) {
       console.error("Category image upload failed", err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to upload category image.";
-      toast.error(errMsg);
     } finally {
       setUploading(false);
     }
@@ -113,16 +109,13 @@ const ProductCategories = () => {
     try {
       if (editingCategory) {
         await api.updateCategory(editingCategory.id || editingCategory._id, payload);
-        toast.success("Category updated successfully.");
       } else {
         await api.createCategory(payload);
-        toast.success("Category added successfully.");
       }
       setEditorOpen(false);
       fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save category.");
     } finally {
       setSaving(false);
     }
@@ -139,26 +132,16 @@ const ProductCategories = () => {
       setCategories(prev => prev.map(c => (c._id === targetId || c.id === targetId) ? { ...c, status: newStatus, isActive: newStatus === "Active" } : c));
     } catch (err) {
       console.error("Failed to toggle status", err);
-      toast.error("Failed to update status.");
     }
   };
 
   const handleDelete = async (id, name) => {
-    toast.warning(`Are you sure you want to delete category "${name}"? All assigned products will be unlinked.`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteCategory(id);
-            setCategories(prev => prev.filter(c => c.id !== id && c._id !== id));
-            toast.success("Category deleted successfully.");
-          } catch (err) {
-            console.error("Failed to delete category", err);
-            toast.error("Failed to delete category.");
-          }
-        }
-      }
-    });
+    try {
+      await api.deleteCategory(id);
+      setCategories(prev => prev.filter(c => c.id !== id && c._id !== id));
+    } catch (err) {
+      console.error("Failed to delete category", err);
+    }
   };
 
   if (loading) {

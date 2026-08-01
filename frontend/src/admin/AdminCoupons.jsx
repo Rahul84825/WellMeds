@@ -101,7 +101,6 @@ const AdminCoupons = () => {
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
     if (!code || !discountValue || !expiryDate) {
-      toast.warning("Please fill in code, discount value, and expiry date.");
       return;
     }
 
@@ -128,16 +127,13 @@ const AdminCoupons = () => {
     try {
       if (editingCoupon) {
         await api.adminUpdateCoupon(editingCoupon.id, payload);
-        toast.success("Coupon updated successfully.");
       } else {
         await api.adminCreateCoupon(payload);
-        toast.success("Coupon created successfully.");
       }
       setFormOpen(false);
       fetchCoupons();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save coupon.");
     } finally {
       setSaving(false);
     }
@@ -153,7 +149,6 @@ const AdminCoupons = () => {
       setCoupons(prev => prev.map(c => c.id === coupon.id ? { ...c, status: newStatus, isActive: newStatus === "Active" } : c));
     } catch (err) {
       console.error("Failed to toggle status", err);
-      toast.error("Failed to toggle coupon status.");
     }
   };
 
@@ -172,11 +167,9 @@ const AdminCoupons = () => {
 
     try {
       await api.adminCreateCoupon(payload);
-      toast.success(`Coupon duplicated as: ${duplicatedCode}`);
       fetchCoupons();
     } catch (err) {
       console.error("Failed to duplicate coupon", err);
-      toast.error("Failed to duplicate coupon.");
     }
   };
 
@@ -185,7 +178,6 @@ const AdminCoupons = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     try {
       await api.adminUpdateCoupon(coupon.id, { expiryDate: yesterday });
-      toast.info("Coupon marked as expired.");
       fetchCoupons();
     } catch (err) {
       console.error("Failed to expire coupon", err);
@@ -193,21 +185,12 @@ const AdminCoupons = () => {
   };
 
   const handleDelete = async (id, code) => {
-    toast.warning(`Delete coupon "${code}"? This will permanently remove its record.`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.adminDeleteCoupon(id);
-            setCoupons(prev => prev.filter(c => c.id !== id));
-            toast.success("Coupon deleted successfully.");
-          } catch (err) {
-            console.error("Failed to delete coupon", err);
-            toast.error("Failed to delete coupon.");
-          }
-        }
-      }
-    });
+    try {
+      await api.adminDeleteCoupon(id);
+      setCoupons(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      console.error("Failed to delete coupon", err);
+    }
   };
 
   if (loading) {

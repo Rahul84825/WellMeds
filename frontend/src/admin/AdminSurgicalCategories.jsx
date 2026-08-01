@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { toast } from "sonner";
 import { 
   Plus, 
   Trash2, 
@@ -43,7 +42,6 @@ const AdminSurgicalCategories = () => {
       setCategories(data.categories);
     } catch (err) {
       console.error("Failed to load admin surgical categories", err);
-      toast.error("Failed to load surgical categories.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +77,6 @@ const AdminSurgicalCategories = () => {
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.warning(`File size exceeds ${MAX_FILE_SIZE_MB}MB limit.`);
       return;
     }
 
@@ -87,11 +84,8 @@ const AdminSurgicalCategories = () => {
     try {
       const secureUrl = await api.uploadImage(file);
       setImage(secureUrl);
-      toast.success("Image uploaded successfully!");
     } catch (err) {
       console.error("Upload failed", err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to upload image.";
-      toast.error(errMsg);
     } finally {
       setUploadingImage(false);
     }
@@ -119,37 +113,25 @@ const AdminSurgicalCategories = () => {
     try {
       if (editingCategory) {
         await api.updateSurgicalCategory(editingCategory.id || editingCategory._id, payload);
-        toast.success("Surgical category updated successfully.");
       } else {
         await api.createSurgicalCategory(payload);
-        toast.success("Surgical category added successfully.");
       }
       setEditorOpen(false);
       fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save category.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id, catName) => {
-    toast.warning(`Are you sure you want to delete category "${catName}"?`, {
-      action: {
-        label: "Delete",
-        onClick: async () => {
-          try {
-            await api.deleteSurgicalCategory(id);
-            setCategories(prev => prev.filter(c => c.id !== id && c._id !== id));
-            toast.success("Surgical category deleted successfully.");
-          } catch (err) {
-            console.error("Failed to delete category", err);
-            toast.error(err.response?.data?.message || "Failed to delete surgical category.");
-          }
-        }
-      }
-    });
+    try {
+      await api.deleteSurgicalCategory(id);
+      setCategories(prev => prev.filter(c => c.id !== id && c._id !== id));
+    } catch (err) {
+      console.error("Failed to delete category", err);
+    }
   };
 
   if (loading) {

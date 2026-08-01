@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Star, Quote, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 const testimonialsData = [
@@ -215,20 +216,20 @@ export const TestimonialsSection = () => {
       <div className="home-section-container">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
+        <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
           <div>
-            <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
+            <div className="hidden sm:flex font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 items-center gap-2">
               <span>CLINICAL TRUST</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
               <span>PATIENT REVIEWS</span>
             </div>
             <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
-              Patient & Customer Experiences
+              What our patients Say
             </h2>
           </div>
 
           {/* Right Header Navigation Controls: ( ← ) [ View all ] ( → ) */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Left Navigation Arrow */}
             <button
               type="button"
@@ -240,13 +241,13 @@ export const TestimonialsSection = () => {
             </button>
 
             {/* View All button */}
-            <a
-              href="/about"
-              className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200"
+            <Link
+              to="/about"
+              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
               aria-label="View all patient reviews"
             >
               <span>View all</span>
-            </a>
+            </Link>
 
             {/* Right Navigation Arrow */}
             <button
