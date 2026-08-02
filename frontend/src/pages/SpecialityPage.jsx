@@ -5,6 +5,8 @@ import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import {
   ChevronRight,
   ChevronLeft,
@@ -21,8 +23,7 @@ import {
 const SpecialityPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageParam = parseInt(searchParams.get("page")) || 1;
+  const { currentPage, setPage } = usePaginationUrl();
 
   const [speciality, setSpeciality] = useState(null);
   const [allSpecialities, setAllSpecialities] = useState([]);
@@ -31,10 +32,9 @@ const SpecialityPage = () => {
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   // Pagination
-  const currentPage = pageParam;
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const limit = 12;
+  const limit = 20;
 
   // Load active specialities for sidebar
   useEffect(() => {
@@ -64,8 +64,8 @@ const SpecialityPage = () => {
         });
 
         setProducts(prodData.products || []);
-        setTotalProducts(prodData.total || 0);
-        setTotalPages(prodData.pages || 1);
+        setTotalProducts(prodData.totalProducts || prodData.total || 0);
+        setTotalPages(prodData.totalPages || prodData.pages || 1);
       } catch (err) {
         console.error("Failed to load speciality data", err);
       } finally {
@@ -74,26 +74,6 @@ const SpecialityPage = () => {
     };
     fetchSpecialityData();
   }, [slug, currentPage]);
-
-  const handlePageChange = (newPage) => {
-    setSearchParams({ page: newPage.toString() });
-  };
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -201,17 +181,20 @@ const SpecialityPage = () => {
           <main className="lg:col-span-9 space-y-6">
             {products.length > 0 ? (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                    Showing <span className="font-bold text-[#172b26] dark:text-white">{products.length}</span> of <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> Speciality Formulations
-                  </p>
-                </div>
-
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                   {products.map((prod) => (
                     <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                   ))}
                 </div>
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalProducts}
+                  pageSize={limit}
+                  onPageChange={setPage}
+                  itemLabel="Speciality Formulations"
+                />
               </div>
             ) : (
               <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4">
@@ -222,65 +205,6 @@ const SpecialityPage = () => {
                 <p className="text-xs text-slate-500 font-sans">
                   We are actively expanding our catalog for this specialty area. Check back soon.
                 </p>
-              </div>
-            )}
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-6 text-xs font-semibold text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(1)}
-                    disabled={currentPage === 1}
-                    className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                  >
-                    <ChevronsLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  {getPageNumbers().map((pNum) => (
-                    <button
-                      key={pNum}
-                      type="button"
-                      onClick={() => handlePageChange(pNum)}
-                      className={`w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === pNum
-                          ? "bg-[#157a6d] text-white shadow-xs"
-                          : "hover:bg-white text-slate-600 dark:text-zinc-300"
-                        }`}
-                    >
-                      {pNum}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                  >
-                    <ChevronsRight size={16} />
-                  </button>
-                </div>
               </div>
             )}
           </main>

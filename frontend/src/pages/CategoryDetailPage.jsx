@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import {
   Search,
   X,
@@ -24,6 +26,7 @@ import {
 const CategoryDetailPage = () => {
   const { categorySlug } = useParams();
   const navigate = useNavigate();
+  const { currentPage, setPage } = usePaginationUrl();
 
   // Category & Data States
   const [category, setCategory] = useState(null);
@@ -36,105 +39,84 @@ const CategoryDetailPage = () => {
   // Filtering, Search & Sorting States
   const [searchVal, setSearchVal] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
-  const [rxFilter, setRxFilter] = useState("all");
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  // Pagination State (Driven by DB response)
   const [totalProducts, setTotalProducts] = useState(0);
-  const LIMIT = 24;
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 20;
 
-  // 1. Fetch Category Details & Related Categories
+  // Single unified data fetching effect with AbortController & state reset
   useEffect(() => {
-    let isMounted = true;
-    const fetchCategoryAndRelated = async () => {
-      setLoadingCategory(true);
+    const controller = new AbortController();
+
+    // 1. Immediately reset state to eliminate stale data leakage when switching category
+    setProducts([]);
+    setTotalProducts(0);
+    setTotalPages(1);
+    setLoadingCategory(true);
+    setLoadingProducts(true);
+
+    const loadCategoryData = async () => {
       try {
-        const [catData, allCats] = await Promise.all([
-          api.getCategory(categorySlug).catch(() => null),
-          api.getCategories().catch(() => [])
+        const [catData, allCats, prodData] = await Promise.all([
+          api.getCategory(categorySlug, { signal: controller.signal }).catch(() => null),
+          api.getCategories({ signal: controller.signal }).catch(() => []),
+          api.getProducts(
+            {
+              category: categorySlug,
+              page: currentPage,
+              limit: LIMIT,
+              sortBy: sortBy,
+              search: searchVal || undefined,
+            },
+            { signal: controller.signal }
+          ).catch(() => ({ products: [], totalProducts: 0, totalPages: 1 }))
         ]);
 
-        if (!isMounted) return;
+        if (controller.signal.aborted) return;
 
+        // Set Category Header
         if (catData) {
           setCategory(catData);
         } else {
-          setCategory(null);
+          const name = categorySlug
+            .split("-")
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ");
+          setCategory({ name, slug: categorySlug, description: "" });
         }
 
+        // Set Related Categories (all active categories)
         const activeCats = (allCats || []).filter(
           (c) => c.status === "Active" || c.isActive === true
         );
-        const filteredRelated = activeCats
-          .filter((c) => c.slug !== categorySlug && c._id !== catData?._id)
-          .slice(0, 8);
+        const filteredRelated = activeCats.filter((c) => c.slug !== categorySlug);
         setRelatedCategories(filteredRelated);
 
+        // Set Products & DB Pagination Metadata
+        setProducts(prodData.products || []);
+        setTotalProducts(prodData.totalProducts || prodData.total || 0);
+        setTotalPages(prodData.totalPages || prodData.pages || 1);
+
       } catch (err) {
-        console.error("Failed to load category details", err);
+        if (err.name !== "CanceledError" && err.name !== "AbortError") {
+          console.error("Failed to load category page data", err);
+        }
       } finally {
-        if (isMounted) setLoadingCategory(false);
+        if (!controller.signal.aborted) {
+          setLoadingCategory(false);
+          setLoadingProducts(false);
+        }
       }
     };
 
-    fetchCategoryAndRelated();
-    setCurrentPage(1);
-    setSearchVal("");
+    loadCategoryData();
+
     return () => {
-      isMounted = false;
+      // Cancel pending network requests if user changes category rapidly
+      controller.abort();
     };
-  }, [categorySlug]);
-
-  // 2. Fetch Products for this Category
-  const fetchCategoryProducts = useCallback(async () => {
-    setLoadingProducts(true);
-    try {
-      const data = await api.getProducts({
-        category: category?.name || undefined,
-        page: currentPage,
-        limit: LIMIT,
-      });
-
-      setProducts(data.products || []);
-      setTotalProducts(data.total || (data.products ? data.products.length : 0));
-    } catch (err) {
-      console.error("Failed to fetch category products", err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, [category, currentPage]);
-
-  useEffect(() => {
-    if (category) {
-      fetchCategoryProducts();
-    }
-  }, [category, fetchCategoryProducts]);
-
-  // 3. Client-side filtering & sorting
-  const filteredProducts = products
-    .filter((p) => {
-      if (searchVal.trim()) {
-        const q = searchVal.toLowerCase();
-        const nameMatch = p.name?.toLowerCase().includes(q);
-        const brandMatch = p.brandName?.toLowerCase().includes(q);
-        const moleculeMatch = p.moleculeName?.toLowerCase().includes(q);
-        if (!nameMatch && !brandMatch && !moleculeMatch) return false;
-      }
-      if (rxFilter === "rx") {
-        if (!p.rxRequired) return false;
-      } else if (rxFilter === "otc") {
-        if (p.rxRequired) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "price_asc") return (a.price || 0) - (b.price || 0);
-      if (sortBy === "price_desc") return (b.price || 0) - (a.price || 0);
-      if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
-      return (a.name || "").localeCompare(b.name || "");
-    });
-
-  const totalPages = Math.max(1, Math.ceil(totalProducts / LIMIT));
+  }, [categorySlug, currentPage, sortBy, searchVal]);
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -142,7 +124,7 @@ const CategoryDetailPage = () => {
     { name: category?.name || "Category", url: `/category/${categorySlug}` },
   ];
 
-  if (loadingCategory) {
+  if (loadingCategory && loadingProducts && products.length === 0) {
     return (
       <div className="min-h-screen bg-clinical-grid py-12 flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-4 border-[#157a6d] border-t-transparent animate-spin" />
@@ -150,7 +132,7 @@ const CategoryDetailPage = () => {
     );
   }
 
-  if (!category) {
+  if (!category && !loadingCategory) {
     return (
       <div className="min-h-screen bg-clinical-grid py-12">
         <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 text-center space-y-4">
@@ -168,8 +150,8 @@ const CategoryDetailPage = () => {
   return (
     <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title={`${category.name} Medicines & Formulations | WellMeds`}
-        description={category.description || `Browse authentic clinical ${category.name} prescription medicines and therapeutic treatments at WellMeds.`}
+        title={`${category?.name || "Category"} Medicines & Formulations | WellMeds`}
+        description={category?.description || `Browse authentic clinical ${category?.name} prescription medicines and therapeutic treatments at WellMeds.`}
         canonical={`/category/${categorySlug}`}
         breadcrumbs={breadcrumbs}
       />
@@ -185,7 +167,7 @@ const CategoryDetailPage = () => {
               <ChevronRight size={14} className="text-slate-300" />
               <Link to="/categories" className="hover:text-[#157a6d]">Categories</Link>
               <ChevronRight size={14} className="text-slate-300" />
-              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{category.name}</span>
+              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{category?.name}</span>
             </nav>
 
             <div className="space-y-2">
@@ -195,11 +177,11 @@ const CategoryDetailPage = () => {
               </div>
 
               <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
-                {category.name}
+                {category?.name}
               </h1>
 
               <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                {category.description || `Browse verified clinical formulations, prescription drugs, and chronic care medications for ${category.name}.`}
+                {category?.description || `Browse verified clinical formulations, prescription drugs, and chronic care medications for ${category?.name}.`}
               </p>
             </div>
 
@@ -223,19 +205,6 @@ const CategoryDetailPage = () => {
           </div>
         </div>
 
-        {/* ── FILTER CONTROLS ── */}
-        <div className="flex justify-end gap-3">
-          <select
-            value={rxFilter}
-            onChange={(e) => setRxFilter(e.target.value)}
-            className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-full px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none cursor-pointer shadow-xs"
-          >
-            <option value="all">All Types (Rx & OTC)</option>
-            <option value="rx">Prescription Required (Rx)</option>
-            <option value="otc">Over The Counter (OTC)</option>
-          </select>
-        </div>
-
         {/* ── PRODUCT GRID OR SKELETONS ── */}
         <div>
           {loadingProducts ? (
@@ -248,11 +217,21 @@ const CategoryDetailPage = () => {
                 </div>
               ))}
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-              {filteredProducts.map((prod) => (
-                <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
-              ))}
+          ) : products.length > 0 ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                {products.map((prod) => (
+                  <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={LIMIT}
+                onPageChange={setPage}
+                itemLabel="Formulations"
+              />
             </div>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
@@ -274,12 +253,19 @@ const CategoryDetailPage = () => {
                 <Link
                   key={relCat._id || relCat.id}
                   to={`/category/${relCat.slug}`}
-                  className="flex items-center gap-3 p-3 bg-[#f4f9f7] dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl hover:border-[#157a6d] transition-all group"
+                  className="flex items-center justify-between gap-2 p-3 bg-[#f4f9f7] dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl hover:border-[#157a6d] transition-all group"
                 >
-                  <Pill size={18} className="text-[#157a6d] shrink-0" />
-                  <span className="font-bold text-xs text-[#172b26] dark:text-zinc-200 truncate group-hover:text-[#157a6d]">
-                    {relCat.name}
-                  </span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Pill size={16} className="text-[#157a6d] shrink-0" />
+                    <span className="font-bold text-[#172b26] dark:text-zinc-200 text-xs truncate group-hover:text-[#157a6d]">
+                      {relCat.name}
+                    </span>
+                  </div>
+                  {typeof relCat.count === "number" && relCat.count > 0 && (
+                    <span className="bg-[#157a6d]/10 text-[#157a6d] dark:bg-emerald-950 dark:text-emerald-400 text-[10px] font-clinical-mono font-bold px-2 py-0.5 rounded-full shrink-0">
+                      {relCat.count}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

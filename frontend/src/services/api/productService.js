@@ -11,13 +11,14 @@ export const productService = {
    * @param {Object} params - { search, category, brand, filter, sort, page, limit }
    * @returns {{ products, total, page, pages }} — full paginated response
    */
-  async getProducts(params = {}) {
-    const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller } = params;
+  async getProducts(params = {}, config = {}) {
+    const { search, category, speciality, molecule, brand, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller, sortBy, sort } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
     if (speciality) cleanParams.speciality = speciality;
     if (molecule) cleanParams.molecule = molecule;
+    if (brand) cleanParams.brand = brand;
     if (page) cleanParams.page = page;
     if (limit) cleanParams.limit = limit;
     if (productType) cleanParams.productType = productType;
@@ -26,13 +27,18 @@ export const productService = {
     if (isGLP1Medicine !== undefined) cleanParams.isGLP1Medicine = isGLP1Medicine;
     if (isHealthSupplement !== undefined) cleanParams.isHealthSupplement = isHealthSupplement;
     if (isBestSeller !== undefined) cleanParams.isBestSeller = isBestSeller;
+    if (sortBy) cleanParams.sortBy = sortBy;
+    if (sort) cleanParams.sort = sort;
 
-    const data = await apiInstance.get("/products", { params: cleanParams });
+    const data = await apiInstance.get("/products", { params: cleanParams, signal: config?.signal });
     return {
       products: data.products || [],
-      total: data.total || 0,
-      page: data.page || 1,
-      pages: data.pages || 1,
+      total: data.totalProducts || data.total || 0,
+      totalProducts: data.totalProducts || data.total || 0,
+      page: data.page || data.currentPage || 1,
+      currentPage: data.currentPage || data.page || 1,
+      pages: data.totalPages || data.pages || 1,
+      totalPages: data.totalPages || data.pages || 1,
     };
   },
 

@@ -6,89 +6,123 @@ import { SurgicalCategory } from "../models/SurgicalCategory.js";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
+const escapeRegex = (str) => (str || "").replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
 export const getProducts = async (req, res, next) => {
-  const { search, category, speciality, molecule, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller } = req.query;
+  const {
+    search,
+    category,
+    speciality,
+    molecule,
+    brand,
+    page,
+    limit,
+    productType,
+    isSurgical,
+    surgicalCategory,
+    isGLP1Medicine,
+    isHealthSupplement,
+    isBestSeller,
+    sortBy,
+    sort,
+  } = req.query;
 
   try {
-    const query = {};
+    const andConditions = [];
 
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { brand: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
+    // Search query across name, brand, manufacturer, description
+    if (search && search.trim()) {
+      const q = escapeRegex(search.trim());
+      andConditions.push({
+        $or: [
+          { name: { $regex: q, $options: "i" } },
+          { brand: { $regex: q, $options: "i" } },
+          { manufacturer: { $regex: q, $options: "i" } },
+          { description: { $regex: q, $options: "i" } },
+        ],
+      });
     }
 
-    // Filter by category name or slug
+    // Filter by Brand / Manufacturer
+    if (brand && brand.trim()) {
+      const b = escapeRegex(brand.trim());
+      andConditions.push({
+        $or: [
+          { brand: { $regex: `^${b}$`, $options: "i" } },
+          { manufacturer: { $regex: `^${b}$`, $options: "i" } },
+        ],
+      });
+    }
+
+    // Robust Category Filtering (matches ObjectId, Category doc slug/name, or raw category string/therapeutics)
     if (category && category.trim()) {
-      const matchedCategory = await Category.findOne({
-        $or: [
-          { name: { $regex: `^${category.trim()}$`, $options: "i" } },
-          { slug: category.trim().toLowerCase() }
-        ]
-      });
-      if (matchedCategory) {
-        query.category = matchedCategory._id;
-      } else {
-        // No matching category — return empty result set immediately
-        return res.status(200).json({
-          success: true,
-          count: 0,
-          total: 0,
-          page: 1,
-          pages: 1,
-          products: [],
-        });
+      const catStr = category.trim();
+      const isObjId = mongoose.Types.ObjectId.isValid(catStr);
+
+      const slugVariant1 = slugify(catStr, { lower: true });
+      const slugVariant2 = catStr.toLowerCase().replace(/\s+/g, "-");
+      const nameVariant = catStr.replace(/-/g, " ");
+
+      const categoryOr = [
+        { slug: slugVariant1 },
+        { slug: slugVariant2 },
+        { name: { $regex: `^${escapeRegex(catStr)}$`, $options: "i" } },
+        { name: { $regex: `^${escapeRegex(nameVariant)}$`, $options: "i" } },
+      ];
+      if (isObjId) {
+        categoryOr.unshift({ _id: catStr });
       }
+
+      const matchedCategories = await Category.find({ $or: categoryOr });
+      const matchedIds = matchedCategories.map((c) => c._id);
+      if (isObjId) {
+        matchedIds.push(new mongoose.Types.ObjectId(catStr));
+      }
+
+      const categoryOrConditions = [];
+      if (matchedIds.length > 0) {
+        categoryOrConditions.push({ category: { $in: matchedIds } });
+      }
+
+      categoryOrConditions.push(
+        { medicineCategory: { $regex: `^${escapeRegex(catStr)}$`, $options: "i" } },
+        { medicineCategory: { $regex: `^${escapeRegex(nameVariant)}$`, $options: "i" } },
+        { "productSpecifications.therapeuticCategory": { $regex: `^${escapeRegex(catStr)}$`, $options: "i" } },
+        { "productSpecifications.therapeuticCategory": { $regex: `^${escapeRegex(nameVariant)}$`, $options: "i" } }
+      );
+
+      andConditions.push({ $or: categoryOrConditions });
     }
 
-    // Filter by speciality slug or name
+    // Speciality Filtering
     if (speciality && speciality.trim()) {
-      const matchedSpeciality = await MedicalSpeciality.findOne({
-        $or: [
-          { slug: speciality.trim().toLowerCase() },
-          { name: { $regex: `^${speciality.trim()}$`, $options: "i" } }
-        ]
-      });
-      if (matchedSpeciality) {
-        query.specialities = matchedSpeciality._id;
+      const specVal = speciality.trim();
+      let matchedSpec = null;
+      if (mongoose.Types.ObjectId.isValid(specVal)) {
+        matchedSpec = await MedicalSpeciality.findById(specVal);
+      }
+      if (!matchedSpec) {
+        matchedSpec = await MedicalSpeciality.findOne({
+          $or: [
+            { slug: specVal.toLowerCase() },
+            { name: { $regex: `^${escapeRegex(specVal)}$`, $options: "i" } },
+            { name: { $regex: `^${escapeRegex(specVal.replace(/-/g, " "))}$`, $options: "i" } },
+          ],
+        });
+      }
+      if (matchedSpec) {
+        andConditions.push({ specialities: matchedSpec._id });
       } else {
-        // No matching speciality — return empty result set immediately
-        return res.status(200).json({
-          success: true,
-          count: 0,
-          total: 0,
-          page: 1,
-          pages: 1,
-          products: [],
+        andConditions.push({
+          $or: [
+            { specialities: specVal },
+            { "productSpecifications.therapeuticCategory": { $regex: escapeRegex(specVal), $options: "i" } },
+          ],
         });
       }
     }
 
-    // Filter by isGLP1Medicine
-    if (isGLP1Medicine !== undefined && isGLP1Medicine !== "") {
-      query.isGLP1Medicine = isGLP1Medicine === "true";
-    }
-
-    // Filter by isHealthSupplement
-    if (isHealthSupplement !== undefined && isHealthSupplement !== "") {
-      query.isHealthSupplement = isHealthSupplement === "true";
-    }
-
-    // Filter by isBestSeller
-    if (isBestSeller !== undefined && isBestSeller !== "") {
-      if (isBestSeller === "true") {
-        query.$or = [
-          { isBestSeller: true },
-          { isHealthSupplement: true }
-        ];
-      } else {
-        query.isBestSeller = false;
-      }
-    }
-    // Filter by molecule slug or ID
-    // Filter by molecule slug, ID, or name
+    // Molecule Filtering
     if (molecule && molecule.trim()) {
       const queryVal = molecule.trim();
       let matchedMolecule = null;
@@ -99,71 +133,121 @@ export const getProducts = async (req, res, next) => {
         matchedMolecule = await Molecule.findOne({
           $or: [
             { slug: queryVal.toLowerCase() },
-            { name: { $regex: `^${queryVal}$`, $options: "i" } }
-          ]
+            { name: { $regex: `^${escapeRegex(queryVal)}$`, $options: "i" } },
+            { name: { $regex: `^${escapeRegex(queryVal.replace(/-/g, " "))}$`, $options: "i" } },
+          ],
         });
       }
-
       if (matchedMolecule) {
-        query.molecules = matchedMolecule._id;
+        andConditions.push({
+          $or: [
+            { molecules: matchedMolecule._id },
+            { moleculeSlug: matchedMolecule.slug },
+          ],
+        });
       } else {
-        return res.status(200).json({
-          success: true,
-          count: 0,
-          total: 0,
-          page: 1,
-          pages: 1,
-          products: [],
+        andConditions.push({
+          $or: [
+            { molecules: queryVal },
+            { moleculeSlug: queryVal.toLowerCase() },
+          ],
         });
       }
     }
-    if (productType) {
-      query.productType = productType;
+
+    // GLP1 Medicine toggle
+    if (isGLP1Medicine !== undefined && isGLP1Medicine !== "") {
+      andConditions.push({ isGLP1Medicine: isGLP1Medicine === "true" });
     }
 
-    if (isSurgical !== undefined) {
-      query.isSurgical = isSurgical === "true";
+    // Health Supplement toggle
+    if (isHealthSupplement !== undefined && isHealthSupplement !== "") {
+      andConditions.push({ isHealthSupplement: isHealthSupplement === "true" });
     }
 
-    if (surgicalCategory && surgicalCategory.trim()) {
-      if (mongoose.Types.ObjectId.isValid(surgicalCategory)) {
-        query.surgicalCategory = surgicalCategory;
+    // Best Seller toggle
+    if (isBestSeller !== undefined && isBestSeller !== "") {
+      if (isBestSeller === "true") {
+        andConditions.push({
+          $or: [{ isBestSeller: true }, { isHealthSupplement: true }],
+        });
       } else {
-        const matchedSurgCategory = await SurgicalCategory.findOne({ slug: surgicalCategory.trim() });
-        if (matchedSurgCategory) {
-          query.surgicalCategory = matchedSurgCategory._id;
-        } else {
-          return res.status(200).json({
-            success: true,
-            count: 0,
-            total: 0,
-            page: 1,
-            pages: 1,
-            products: [],
-          });
-        }
+        andConditions.push({ isBestSeller: false });
       }
     }
 
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 28;
+    // Product Type filter
+    if (productType) {
+      andConditions.push({ productType });
+    }
+
+    // Surgical flag filter
+    if (isSurgical !== undefined && isSurgical !== "") {
+      andConditions.push({ isSurgical: isSurgical === "true" });
+    }
+
+    // Surgical Category filter
+    if (surgicalCategory && surgicalCategory.trim()) {
+      const scVal = surgicalCategory.trim();
+      let matchedSurg = null;
+      if (mongoose.Types.ObjectId.isValid(scVal)) {
+        matchedSurg = await SurgicalCategory.findById(scVal);
+      }
+      if (!matchedSurg) {
+        matchedSurg = await SurgicalCategory.findOne({
+          $or: [
+            { slug: scVal.toLowerCase() },
+            { name: { $regex: `^${escapeRegex(scVal)}$`, $options: "i" } },
+            { name: { $regex: `^${escapeRegex(scVal.replace(/-/g, " "))}$`, $options: "i" } },
+          ],
+        });
+      }
+      if (matchedSurg) {
+        andConditions.push({ surgicalCategory: matchedSurg._id });
+      } else {
+        andConditions.push({ surgicalCategory: scVal });
+      }
+    }
+
+    const query = andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.max(1, Math.min(parseInt(limit) || 20, 100));
     const skipNum = (pageNum - 1) * limitNum;
+
+    // Server-side sorting
+    const sortVal = sortBy || sort || "name_asc";
+    const sortObj = {};
+    if (sortVal === "price_asc") sortObj.price = 1;
+    else if (sortVal === "price_desc") sortObj.price = -1;
+    else if (sortVal === "name_desc") sortObj.name = -1;
+    else if (sortVal === "newest") sortObj.createdAt = -1;
+    else sortObj.name = 1;
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
-      .select("name brand price originalPrice image stock inStock requiresRx badge category surgicalCategory productType isSurgical strength packSize manufacturer slug molecules")
+      .select(
+        "name brand price originalPrice image stock inStock requiresRx isPrescriptionRequired isColdChain badge category surgicalCategory productType isSurgical strength packSize manufacturer slug molecules"
+      )
       .populate("category", "name slug")
       .populate("surgicalCategory", "name slug")
       .populate("molecules", "name slug")
+      .sort(sortObj)
       .skip(skipNum)
       .limit(limitNum);
+
+    const totalPages = Math.ceil(total / limitNum) || 1;
 
     res.status(200).json({
       success: true,
       count: products.length,
+      totalProducts: total,
       total,
+      currentPage: pageNum,
       page: pageNum,
-      pages: Math.ceil(total / limitNum),
+      totalPages,
+      pages: totalPages,
+      pageSize: limitNum,
       products,
     });
   } catch (error) {

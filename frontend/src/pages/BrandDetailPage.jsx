@@ -5,14 +5,21 @@ import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import { Building2, Sparkles, Phone, FileText, ChevronRight, Package } from "lucide-react";
 
 const BrandDetailPage = () => {
   const { brandSlug } = useParams();
+  const { currentPage, setPage } = usePaginationUrl();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [brandName, setBrandName] = useState("");
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+  const limit = 20;
 
   const formatBrandTitle = (slug) => {
     if (!slug) return "Brand";
@@ -29,20 +36,15 @@ const BrandDetailPage = () => {
         const title = formatBrandTitle(brandSlug);
         setBrandName(title);
 
-        const res = await api.getProducts({ limit: 100 });
-        const allProds = res?.products || res?.data || (Array.isArray(res) ? res : []);
-
-        const matched = allProds.filter((p) => {
-          let b = "";
-          if (typeof p.brand === "string") b = p.brand;
-          else if (p.brand && typeof p.brand === "object" && p.brand.name) b = p.brand.name;
-          else if (typeof p.manufacturer === "string") b = p.manufacturer;
-
-          const pSlug = b.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-          return pSlug === brandSlug.toLowerCase() || b.toLowerCase().includes(title.toLowerCase());
+        const res = await api.getProducts({
+          brand: title,
+          page: currentPage,
+          limit: limit,
         });
 
-        setProducts(matched.length > 0 ? matched : allProds.slice(0, 12));
+        setProducts(res?.products || []);
+        setTotalProducts(res?.totalProducts || res?.total || (res?.products ? res.products.length : 0));
+        setTotalPages(res?.totalPages || res?.pages || 1);
       } catch (err) {
         console.error("Error loading brand products:", err);
       } finally {
@@ -51,7 +53,7 @@ const BrandDetailPage = () => {
     };
 
     loadBrandProducts();
-  }, [brandSlug]);
+  }, [brandSlug, currentPage]);
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -130,17 +132,19 @@ const BrandDetailPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Showing <span className="font-bold text-[#172b26] dark:text-white">{products.length}</span> Formulations from {brandName}
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={limit}
+                onPageChange={setPage}
+                itemLabel={`Formulations from ${brandName}`}
+              />
             </div>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">

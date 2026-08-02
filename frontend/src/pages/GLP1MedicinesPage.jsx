@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import {
   ChevronRight,
   ChevronLeft,
@@ -18,17 +20,14 @@ import {
 } from "lucide-react";
 
 const GLP1MedicinesPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageParam = parseInt(searchParams.get("page")) || 1;
+  const { currentPage, setPage } = usePaginationUrl();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
-  const limit = 12;
-
-  const currentPage = pageParam;
+  const limit = 20;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,8 +42,8 @@ const GLP1MedicinesPage = () => {
         limit: limit,
       });
       setProducts(data.products || []);
-      setTotalProducts(data.total || 0);
-      setTotalPages(data.pages || 1);
+      setTotalProducts(data.totalProducts || data.total || 0);
+      setTotalPages(data.totalPages || data.pages || 1);
     } catch (err) {
       console.error("Failed to load GLP-1 medicines", err);
     } finally {
@@ -55,10 +54,6 @@ const GLP1MedicinesPage = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  const handlePageChange = (newPage) => {
-    setSearchParams({ page: newPage.toString() });
-  };
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -134,50 +129,27 @@ const GLP1MedicinesPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Showing <span className="font-bold text-[#172b26] dark:text-white">{products.length}</span> of <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> GLP-1 Formulations
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={limit}
+                onPageChange={setPage}
+                itemLabel="GLP-1 Formulations"
+              />
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
+            <div className="text-[#172b26] dark:text-white text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
               <Package size={36} className="mx-auto text-slate-400" />
-              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">No GLP-1 Medicines Currently Listed</h3>
+              <h3 className="font-editorial text-2xl font-semibold">No GLP-1 Medicines Currently Listed</h3>
             </div>
           )}
         </div>
-
-        {/* ── PAGINATION ── */}
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-6 text-xs font-semibold text-slate-500">
-            <button
-              type="button"
-              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <span>Page {currentPage} of {totalPages}</span>
-
-            <button
-              type="button"
-              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
 
         {/* ── WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />

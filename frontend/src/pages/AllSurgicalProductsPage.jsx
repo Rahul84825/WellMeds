@@ -4,6 +4,8 @@ import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import {
   Search,
   X,
@@ -18,21 +20,22 @@ import {
 
 const AllSurgicalProductsPage = () => {
   const navigate = useNavigate();
+  const { currentPage, setPage } = usePaginationUrl();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchVal, setSearchVal] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
-  const LIMIT = 24;
+  const LIMIT = 20;
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchVal);
-      setCurrentPage(1);
     }, 450);
     return () => clearTimeout(timer);
   }, [searchVal]);
@@ -45,22 +48,12 @@ const AllSurgicalProductsPage = () => {
         limit: LIMIT,
         isSurgical: true,
         search: debouncedSearch || undefined,
+        sortBy: sortBy,
       });
 
-      let list = data.products || [];
-
-      if (sortBy === "price_asc") {
-        list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
-      } else if (sortBy === "price_desc") {
-        list = [...list].sort((a, b) => (b.price || 0) - (a.price || 0));
-      } else if (sortBy === "name_desc") {
-        list = [...list].sort((a, b) => (b.name || "").localeCompare(a.name || ""));
-      } else {
-        list = [...list].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-      }
-
-      setProducts(list);
-      setTotalProducts(data.total || 0);
+      setProducts(data.products || []);
+      setTotalProducts(data.totalProducts || data.total || 0);
+      setTotalPages(data.totalPages || data.pages || 1);
     } catch (err) {
       console.error("Failed to fetch surgical products", err);
     } finally {
@@ -71,8 +64,6 @@ const AllSurgicalProductsPage = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  const totalPages = Math.max(1, Math.ceil(totalProducts / LIMIT));
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -154,17 +145,19 @@ const AllSurgicalProductsPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Showing <span className="font-bold text-[#172b26] dark:text-white">{products.length}</span> of <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> Surgical Items
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={LIMIT}
+                onPageChange={setPage}
+                itemLabel="Surgical Items"
+              />
             </div>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
@@ -174,31 +167,6 @@ const AllSurgicalProductsPage = () => {
             </div>
           )}
         </div>
-
-        {/* ── PAGINATION ── */}
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-6 text-xs font-semibold text-slate-500">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <span>Page {currentPage} of {totalPages}</span>
-
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* ── CONSULTATION MODAL ── */}

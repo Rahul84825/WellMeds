@@ -5,6 +5,8 @@ import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 
 import {
   Sparkles,
@@ -26,7 +28,7 @@ import {
 
 const WellnessPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { currentPage, setPage, searchParams, setSearchParams } = usePaginationUrl();
   const categoryParam = searchParams.get("category") || "All";
 
   // Data State
@@ -35,14 +37,14 @@ const WellnessPage = () => {
   const [loading, setLoading] = useState(true);
   const [featuredLoading, setFeaturedLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Consultation Modal State
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   // Filtering & Pagination
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 12;
+  const limit = 20;
 
   // Sync selectedCategory with categoryParam changes
   useEffect(() => {
@@ -97,25 +99,19 @@ const WellnessPage = () => {
         });
         if (active) {
           setProducts(data.products || []);
-          setTotalProducts(data.total || 0);
-          setLoading(false);
+          setTotalProducts(data.totalProducts || data.total || 0);
+          setTotalPages(data.totalPages || data.pages || 1);
         }
       } catch (err) {
         console.error("Failed to fetch wellness products", err);
+      } finally {
         if (active) {
           setLoading(false);
         }
       }
     };
-
-    const timer = setTimeout(() => {
-      fetchProducts();
-    }, 0);
-
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
+    fetchProducts();
+    return () => { active = false; };
   }, [currentPage, selectedCategory]);
 
   // Scroll to grid top when page changes
@@ -133,26 +129,6 @@ const WellnessPage = () => {
     if (gridEl) {
       gridEl.scrollIntoView({ behavior: "smooth" });
     }
-  };
-
-  const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
-  const showingStart = totalProducts > 0 ? (currentPage - 1) * limit + 1 : 0;
-  const showingEnd = Math.min(currentPage * limit, totalProducts);
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
   };
 
   const breadcrumbs = [
@@ -302,17 +278,20 @@ const WellnessPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Showing <span className="font-bold text-[#172b26] dark:text-white">{showingStart}–{showingEnd}</span> of <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> Wellness Formulations
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={prod.id || prod._id} product={prod} />
                 ))}
               </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={limit}
+                onPageChange={setPage}
+                itemLabel="Wellness Formulations"
+              />
             </div>
           ) : (
             /* Empty State Card */
@@ -331,7 +310,7 @@ const WellnessPage = () => {
                 onClick={() => {
                   setSearchParams({});
                   setSelectedCategory("All");
-                  setCurrentPage(1);
+                  setPage(1);
                 }}
                 className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all inline-flex items-center gap-2 cursor-pointer shadow-xs"
               >
@@ -342,70 +321,7 @@ const WellnessPage = () => {
           )}
         </div>
 
-        {/* ── 5. MODERN PILL PAGINATION ── */}
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-6 text-xs font-semibold text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="First Page"
-              >
-                <ChevronsLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Previous Page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {getPageNumbers().map((pNum) => (
-                <button
-                  key={pNum}
-                  type="button"
-                  onClick={() => setCurrentPage(pNum)}
-                  className={`w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === pNum
-                    ? "bg-[#157a6d] text-white shadow-xs"
-                    : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
-                    }`}
-                >
-                  {pNum}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Next Page"
-              >
-                <ChevronRight size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Last Page"
-              >
-                <ChevronsRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── 6. REUSABLE WHY WELLMEDS BAR ── */}
+        {/* ── 5. REUSABLE WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
 
       </div>

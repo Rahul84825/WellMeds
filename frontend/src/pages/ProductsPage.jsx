@@ -5,6 +5,8 @@ import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 
 import {
   Search,
@@ -27,23 +29,24 @@ import {
 
 const ProductsPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { currentPage, setPage, searchParams, setSearchParams } = usePaginationUrl();
 
   // Dynamic data from backend
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Consultation Modal State
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 28;
+  const limit = 20;
 
   // Category & Speciality filters from URL
   const categoryParam = searchParams.get("category") || "";
   const specialityParam = searchParams.get("speciality") || "";
+  const brandParam = searchParams.get("brand") || "";
+  const moleculeParam = searchParams.get("molecule") || "";
 
   // Search states
   const [searchVal, setSearchVal] = useState(searchParams.get("search") || "");
@@ -72,14 +75,13 @@ const ProductsPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchVal);
-      const newParams = {};
-      if (searchVal.trim()) newParams.search = searchVal;
-      if (categoryParam) newParams.category = categoryParam;
-      if (specialityParam) newParams.speciality = specialityParam;
-      setSearchParams(Object.keys(newParams).length ? newParams : {});
+      const newParams = new URLSearchParams(searchParams);
+      if (searchVal.trim()) newParams.set("search", searchVal);
+      else newParams.delete("search");
+      setSearchParams(newParams, { replace: true });
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchVal, setSearchParams, categoryParam, specialityParam]);
+  }, [searchVal, setSearchParams, searchParams]);
 
   // Fetch Products
   const fetchProducts = useCallback(async () => {
@@ -97,6 +99,8 @@ const ProductsPage = () => {
         search: debouncedSearch || undefined,
         category: categoryParam || undefined,
         speciality: specialityParam || undefined,
+        brand: brandParam || undefined,
+        molecule: moleculeParam || undefined,
         productType: prodTypeParam || undefined,
         isGLP1Medicine: isGLP1Param === "true" ? true : undefined,
         isHealthSupplement: isSuppParam === "true" ? true : undefined,
@@ -104,29 +108,18 @@ const ProductsPage = () => {
         isSurgical: isSurgParam === "true" ? true : undefined,
       });
       setProducts(data.products || []);
-      setTotalProducts(data.total || 0);
+      setTotalProducts(data.totalProducts || data.total || 0);
+      setTotalPages(data.totalPages || data.pages || 1);
     } catch (err) {
       console.error("Failed to fetch products", err);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, categoryParam, specialityParam, searchParams]);
+  }, [currentPage, debouncedSearch, categoryParam, specialityParam, brandParam, moleculeParam, searchParams]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  // Reset to page 1 when search query, category, or speciality changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearch, categoryParam, specialityParam]);
-
-  // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
-
-  const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
 
   const getPageNumbers = () => {
     const pages = [];
@@ -288,17 +281,20 @@ const ProductsPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Showing <span className="font-bold text-[#172b26] dark:text-white">{products.length}</span> of <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> Products
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
               </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={limit}
+                onPageChange={setPage}
+                itemLabel="Products"
+              />
             </div>
           ) : (
             /* Empty State Card */
@@ -327,70 +323,7 @@ const ProductsPage = () => {
           )}
         </div>
 
-        {/* ── 4. MODERN PILL PAGINATION ── */}
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-6 text-xs font-semibold text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="First Page"
-              >
-                <ChevronsLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Previous Page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {getPageNumbers().map((pNum) => (
-                <button
-                  key={pNum}
-                  type="button"
-                  onClick={() => setCurrentPage(pNum)}
-                  className={`w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === pNum
-                    ? "bg-[#157a6d] text-white shadow-xs"
-                    : "hover:bg-white dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
-                    }`}
-                >
-                  {pNum}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Next Page"
-              >
-                <ChevronRight size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className="w-9 h-9 flex items-center justify-center border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
-                title="Last Page"
-              >
-                <ChevronsRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── 5. REUSABLE WHY WELLMEDS BAR ── */}
+        {/* ── 4. REUSABLE WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
 
       </div>

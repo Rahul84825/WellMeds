@@ -5,25 +5,28 @@ import ProductCard from "../components/ProductCard";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
+import Pagination from "../components/common/Pagination";
+import usePaginationUrl from "../hooks/usePaginationUrl";
 import { Search, X, ChevronRight, Sparkles, FlaskConical, Package, Phone, FileText } from "lucide-react";
 
 const SearchResultsPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { currentPage, setPage, searchParams } = usePaginationUrl();
   const query = searchParams.get("q") || "";
 
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const [matchedMolecules, setMatchedMolecules] = useState([]);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
-  const limit = 28;
+  const limit = 20;
 
   const fetchSearchResults = useCallback(async () => {
     if (!query.trim()) {
       setProducts([]);
       setTotalProducts(0);
+      setTotalPages(1);
       setLoading(false);
       return;
     }
@@ -31,7 +34,8 @@ const SearchResultsPage = () => {
     try {
       const data = await api.getSearchResults({ q: query, page: currentPage, limit });
       setProducts(data.products || []);
-      setTotalProducts(data.total || 0);
+      setTotalProducts(data.totalProducts || data.total || 0);
+      setTotalPages(data.totalPages || data.pages || 1);
 
       const moleculesData = await api.searchAll(query);
       setMatchedMolecules(moleculesData?.molecules || []);
@@ -45,10 +49,6 @@ const SearchResultsPage = () => {
   useEffect(() => {
     fetchSearchResults();
   }, [fetchSearchResults]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [query]);
 
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -148,17 +148,19 @@ const SearchResultsPage = () => {
             </div>
           ) : products.length > 0 ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  Found <span className="font-bold text-[#172b26] dark:text-white">{totalProducts}</span> matching products
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalProducts}
+                pageSize={limit}
+                onPageChange={setPage}
+                itemLabel="Products"
+              />
             </div>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">

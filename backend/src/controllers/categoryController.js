@@ -4,8 +4,26 @@ import mongoose from "mongoose";
 
 export const getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find().sort({ name: 1 });
-    res.status(200).json({ success: true, categories });
+    const Product = mongoose.model("Product");
+    const categories = await Category.find().sort({ name: 1 }).lean();
+
+    const categoryCounts = await Product.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } }
+    ]);
+
+    const countMap = {};
+    categoryCounts.forEach((item) => {
+      if (item._id) {
+        countMap[item._id.toString()] = item.count;
+      }
+    });
+
+    const enrichedCategories = categories.map((cat) => ({
+      ...cat,
+      count: countMap[cat._id.toString()] || 0
+    }));
+
+    res.status(200).json({ success: true, categories: enrichedCategories });
   } catch (error) {
     next(error);
   }
@@ -20,16 +38,49 @@ export const getCategoryBySlug = async (req, res, next) => {
     }
     if (!category) {
       const cleanSlug = id.trim().toLowerCase();
+      const nameVariant = cleanSlug.replace(/-/g, " ");
+      const slugVariant = slugify(nameVariant, { lower: true });
       category = await Category.findOne({
         $or: [
           { slug: cleanSlug },
-          { name: { $regex: `^${cleanSlug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, $options: "i" } }
+          { slug: slugVariant },
+          { name: { $regex: `^${cleanSlug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, $options: "i" } },
+          { name: { $regex: `^${nameVariant.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, $options: "i" } }
         ]
       });
     }
 
-    if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found" });
+    if (category) {
+      const catObj = category.toObject ? category.toObject() : { ...category };
+      const Product = mongoose.model("Product");
+      const liveCount = await Product.countDocuments({
+        $or: [
+          { category: category._id },
+          { category: category._id?.toString() }
+        ]
+      });
+      catObj.count = liveCount;
+      category = catObj;
+    } else {
+      // Synthesize category details if products exist for this category name
+      const nameVariant = id.trim().replace(/-/g, " ");
+      const displayName = nameVariant.replace(/\b\w/g, (c) => c.toUpperCase());
+      const Product = mongoose.model("Product");
+      const liveCount = await Product.countDocuments({
+        $or: [
+          { medicineCategory: { $regex: `^${id.trim()}$`, $options: "i" } },
+          { "productSpecifications.therapeuticCategory": { $regex: `^${id.trim()}$`, $options: "i" } }
+        ]
+      });
+      category = {
+        _id: id,
+        name: displayName,
+        slug: id.toLowerCase(),
+        count: liveCount,
+        description: `Browse authentic clinical ${displayName} prescription medicines and therapeutic treatments at WellMeds.`,
+        status: "Active",
+        isActive: true
+      };
     }
 
     res.status(200).json({ success: true, category });
