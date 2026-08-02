@@ -36,6 +36,26 @@ export const uploadPrescription = async (req, res, next) => {
       },
     ];
 
+    // Find active cart to build fallback snapshot if not provided in req.body
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+    let snapshotData = req.body.cartSnapshot ? JSON.parse(req.body.cartSnapshot) : null;
+
+    if (!snapshotData && cart && cart.items.length > 0) {
+      const itemsSnapshot = cart.items.map((i) => ({
+        productId: (i.product._id || i.product.id || i.product).toString(),
+        name: i.product?.name || "",
+        quantity: i.quantity,
+        price: i.product?.price || 0,
+        requiresRx: !!(i.product?.requiresRx || i.product?.isPrescriptionRequired),
+      }));
+
+      snapshotData = {
+        items: itemsSnapshot,
+        subtotal: itemsSnapshot.reduce((acc, i) => acc + i.price * i.quantity, 0),
+        requiresRx: true,
+      };
+    }
+
     const prescription = await Prescription.create({
       user: req.user._id,
       name: fileNames.join(", "),
@@ -46,13 +66,12 @@ export const uploadPrescription = async (req, res, next) => {
       fileType: files[0].mimetype || "",
       status: "Pending Review",
       patientNotes: req.body.patientNotes || req.body.notes || "",
-      cartSnapshot: req.body.cartSnapshot ? JSON.parse(req.body.cartSnapshot) : null,
+      cartSnapshot: snapshotData,
       doctorName: req.body.doctorName || "",
       timeline: initialTimeline,
     });
 
     // Link prescription to user's active cart and lock checkout session
-    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
     if (cart) {
       cart.prescription = prescription._id;
       cart.prescriptionStatus = "Uploaded";
@@ -87,6 +106,7 @@ export const uploadPrescription = async (req, res, next) => {
         { upsert: true, new: true }
       );
     }
+
 
     // Create Notification
     await Notification.create({

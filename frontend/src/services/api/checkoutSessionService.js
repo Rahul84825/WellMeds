@@ -16,8 +16,14 @@ export const checkoutSessionService = {
     return data;
   },
 
+  async getCartRxStatus() {
+    const data = await apiInstance.get("/checkout-session/rx-status");
+    return data;
+  },
+
   async modifyCart() {
     const data = await apiInstance.post("/checkout-session/modify-cart");
     return data;
   },
 };
+

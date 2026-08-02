@@ -6,13 +6,19 @@ import { roundPrice } from "../utils/currency";
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+  const hasToken = () => !!localStorage.getItem("medishop_token");
+
   const [cartItems, setCartItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem("medishop_cart");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+    // Only unauthenticated guest carts are loaded from local storage
+    if (!localStorage.getItem("medishop_token")) {
+      try {
+        const savedGuest = localStorage.getItem("medishop_guest_cart");
+        return savedGuest ? JSON.parse(savedGuest) : [];
+      } catch {
+        return [];
+      }
     }
+    return [];
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -23,12 +29,15 @@ export const CartProvider = ({ children }) => {
   const [checkoutSessionStatus, setCheckoutSessionStatus] = useState("ACTIVE"); // ACTIVE | LOCKED | PENDING_VERIFICATION | VERIFIED | PAYMENT_PENDING | PAYMENT_SUCCESS | EXPIRED | CANCELLED
   const [lockReason, setLockReason] = useState("");
 
-  // Persist to localStorage on every change
+  // Persist to localStorage ONLY for unauthenticated guest sessions
   useEffect(() => {
-    localStorage.setItem("medishop_cart", JSON.stringify(cartItems));
+    if (!hasToken()) {
+      localStorage.setItem("medishop_guest_cart", JSON.stringify(cartItems));
+    } else {
+      localStorage.removeItem("medishop_guest_cart");
+      localStorage.removeItem("medishop_cart");
+    }
   }, [cartItems]);
-
-  const hasToken = () => !!localStorage.getItem("medishop_token");
 
   // Fetch Checkout Session & Lock Status
   const refreshCartLockStatus = useCallback(async () => {
@@ -51,21 +60,29 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
+  // Complete hard purge on user logout
+  const purgeCartOnLogout = useCallback(() => {
+    setCartItems([]);
+    setIsCartLocked(false);
+    setCheckoutSessionStatus("ACTIVE");
+    setLockReason("");
+    setPendingRxFile(null);
+    localStorage.removeItem("medishop_cart");
+    localStorage.removeItem("medishop_guest_cart");
+    localStorage.removeItem("wellmeds_cart_lock_sync");
+    localStorage.removeItem("wellmeds_cart_cleared");
+  }, []);
+
   // Multi-tab sync & tab focus refresh
   useEffect(() => {
     refreshCartLockStatus();
 
     const handleStorageChange = (e) => {
+      if (e.key === "wellmeds_auth_logout" || e.key === "wellmeds_cart_cleared") {
+        purgeCartOnLogout();
+      }
       if (e.key === "wellmeds_cart_lock_sync") {
         refreshCartLockStatus();
-      }
-      if (e.key === "wellmeds_cart_cleared") {
-        setCartItems([]);
-        setIsCartLocked(false);
-        setCheckoutSessionStatus("PAYMENT_SUCCESS");
-        setLockReason("");
-        setPendingRxFile(null);
-        localStorage.removeItem("medishop_cart");
       }
     };
 
@@ -80,7 +97,7 @@ export const CartProvider = ({ children }) => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [refreshCartLockStatus]);
+  }, [refreshCartLockStatus, purgeCartOnLogout]);
 
   // Broadcast lock state change to other tabs
   const broadcastLockSync = () => {
@@ -122,25 +139,15 @@ export const CartProvider = ({ children }) => {
 
   // ─────────────────────────────────────────────────────
   // Backend sync — called after login with the logged-in token
-  // Merges local guest cart with server cart, then syncs up.
-  // ─────────────────────────────────────────────────────
-  // ─────────────────────────────────────────────────────
-  // Backend sync — called after login with the logged-in token
-  // Merges local guest cart with server cart only on initial login.
+  // Fetches authenticated user's cart from backend DB.
+  // Merges genuine guest cart ONLY if guest items were added while logged out.
   // ─────────────────────────────────────────────────────
   const syncCartForUser = useCallback(async (isInitialLogin = false) => {
     setIsSyncing(true);
     try {
-      // 1. Fetch server cart
-      const serverItems = await cartService.getCart();
-      const normalizedServer = normalizeBackendItems(serverItems);
-
-      if (!isInitialLogin) {
-        // Session restore or page refresh: server cart is the single source of truth!
-        setCartItems(normalizedServer);
-      } else {
-        // Fresh login: merge guest cart items into server cart
-        const savedGuest = localStorage.getItem("medishop_cart");
+      if (isInitialLogin) {
+        // Check if a genuine guest cart exists from unauthenticated browsing
+        const savedGuest = localStorage.getItem("medishop_guest_cart");
         let guestItems = [];
         try {
           guestItems = savedGuest ? JSON.parse(savedGuest) : [];
@@ -148,9 +155,10 @@ export const CartProvider = ({ children }) => {
           guestItems = [];
         }
 
-        if (guestItems.length === 0) {
-          setCartItems(normalizedServer);
-        } else {
+        if (guestItems.length > 0) {
+          // Fetch current server cart to prevent duplicates
+          const serverItems = await cartService.getCart();
+          const normalizedServer = normalizeBackendItems(serverItems);
           const serverIds = normalizedServer.map((i) => i.id);
           const guestOnlyItems = guestItems.filter((i) => !serverIds.includes(i.id));
 
@@ -161,23 +169,25 @@ export const CartProvider = ({ children }) => {
               console.warn(`Could not sync guest cart item ${item.name}:`, err.message);
             }
           }
-
-          // Re-fetch merged server cart
-          const mergedServerItems = await cartService.getCart();
-          setCartItems(normalizeBackendItems(mergedServerItems));
+          // Immediately delete guest cart from local storage after merging
+          localStorage.removeItem("medishop_guest_cart");
         }
       }
+
+      // Fetch the single source of truth: authenticated user's backend cart
+      const serverItems = await cartService.getCart();
+      setCartItems(normalizeBackendItems(serverItems));
     } catch (err) {
-      console.warn("Cart sync failed, staying on local cart:", err.message);
+      console.warn("Cart sync failed:", err.message);
     } finally {
       setIsSyncing(false);
     }
   }, []);
 
-  // Called on logout: save current cart to localStorage, no backend call needed
+  // Called on logout: purge local cart completely
   const saveCartToLocalOnLogout = useCallback(() => {
-    // Cart is already persisted to localStorage via useEffect
-  }, []);
+    purgeCartOnLogout();
+  }, [purgeCartOnLogout]);
 
   // ─────────────────────────────────────────────────────
   // Cart operations — optimistic update + server sync
@@ -227,13 +237,14 @@ export const CartProvider = ({ children }) => {
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
+        refreshCartLockStatus();
       } catch (err) {
         if (!handleLockError(err)) {
           console.warn("Backend addToCart failed:", err.message);
         }
       }
     }
-  }, [isCartLocked]);
+  }, [isCartLocked, refreshCartLockStatus]);
 
   const removeFromCart = useCallback(async (id) => {
     if (!id) return;
@@ -249,13 +260,14 @@ export const CartProvider = ({ children }) => {
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
+        refreshCartLockStatus();
       } catch (err) {
         if (!handleLockError(err)) {
           console.warn("Backend removeFromCart failed:", err.message);
         }
       }
     }
-  }, [isCartLocked]);
+  }, [isCartLocked, refreshCartLockStatus]);
 
   const updateQuantity = useCallback(async (id, quantity) => {
     if (!id) return;
@@ -279,13 +291,14 @@ export const CartProvider = ({ children }) => {
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
+        refreshCartLockStatus();
       } catch (err) {
         if (!handleLockError(err)) {
           console.warn("Backend updateQuantity failed:", err.message);
         }
       }
     }
-  }, [isCartLocked, removeFromCart]);
+  }, [isCartLocked, removeFromCart, refreshCartLockStatus]);
 
   const clearCart = useCallback(async () => {
     if (isCartLocked) {
@@ -294,6 +307,7 @@ export const CartProvider = ({ children }) => {
 
     setCartItems([]);
     localStorage.removeItem("medishop_cart");
+    localStorage.removeItem("medishop_guest_cart");
 
     if (hasToken()) {
       try {
@@ -314,6 +328,7 @@ export const CartProvider = ({ children }) => {
     setLockReason("");
     setPendingRxFile(null);
     localStorage.removeItem("medishop_cart");
+    localStorage.removeItem("medishop_guest_cart");
     localStorage.setItem("wellmeds_cart_cleared", Date.now().toString());
     broadcastLockSync();
   }, []);
@@ -365,6 +380,7 @@ export const CartProvider = ({ children }) => {
         lockReason,
         modifyCart,
         refreshCartLockStatus,
+        purgeCartOnLogout,
         addToCart,
         removeFromCart,
         updateQuantity,
@@ -386,3 +402,4 @@ export const useCart = () => {
   if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 };
+

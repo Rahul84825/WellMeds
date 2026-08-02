@@ -275,6 +275,32 @@ export const createRazorpayOrder = async (req, res, next) => {
 
     const totals = await computeOrderTotals(items, couponCode, req.user._id);
 
+    // Strict Backend Rx Guard: If order contains Rx products, verify matching approved prescription exists
+    let verifiedRxDoc = null;
+    if (totals.orderRequiresRx) {
+      const { Prescription } = await import("../models/Prescription.js");
+      const userPrescriptions = await Prescription.find({ user: req.user._id, status: "Approved" }).sort({ createdAt: -1 });
+
+      verifiedRxDoc = userPrescriptions.find((rx) => {
+        if (!rx.cartSnapshot || !Array.isArray(rx.cartSnapshot.items)) return false;
+        const snapshotItems = rx.cartSnapshot.items;
+        return items.every((cartItem) => {
+          const cId = (cartItem.product || cartItem.id || cartItem._id).toString();
+          const match = snapshotItems.find((s) => s.productId === cId || s.productId?.toString() === cId);
+          if (!match) return false;
+          return match.quantity === cartItem.quantity;
+        });
+      });
+
+      if (!verifiedRxDoc) {
+        return res.status(400).json({
+          success: false,
+          message: "Prescription verification required. Your current cart medicines or quantities do not match any approved prescription.",
+        });
+      }
+    }
+
+
     // Initialise Razorpay Order Session
     let razorpayOrder;
     if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
@@ -324,7 +350,8 @@ export const createRazorpayOrder = async (req, res, next) => {
       existingDraft.finalAmount = totals.finalAmount;
       existingDraft.requiresRx = totals.orderRequiresRx;
       existingDraft.rxUploaded = totals.orderRequiresRx;
-      existingDraft.rxFile = rxFile || null;
+      existingDraft.rxFile = verifiedRxDoc ? verifiedRxDoc.fileUrl : rxFile || null;
+      existingDraft.prescription = verifiedRxDoc ? verifiedRxDoc._id : null;
       existingDraft.shippingAddress = shippingAddress || "N/A";
       existingDraft.deliveryCoordinates = checkedCoordinates;
       existingDraft.paymentMethod = "razorpay";
@@ -358,7 +385,8 @@ export const createRazorpayOrder = async (req, res, next) => {
         finalAmount: totals.finalAmount,
         requiresRx: totals.orderRequiresRx,
         rxUploaded: totals.orderRequiresRx,
-        rxFile: rxFile || null,
+        rxFile: verifiedRxDoc ? verifiedRxDoc.fileUrl : rxFile || null,
+        prescription: verifiedRxDoc ? verifiedRxDoc._id : null,
         shippingAddress: shippingAddress || "N/A",
         deliveryCoordinates: checkedCoordinates,
         paymentMethod: "razorpay",
@@ -368,6 +396,7 @@ export const createRazorpayOrder = async (req, res, next) => {
         timeline,
       });
     }
+
 
 
     res.status(200).json({

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 
 // Import local promotional banner assets
 import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
@@ -7,6 +9,9 @@ import savingImg from "../../../assets/PromoCarousel/saving.png";
 import cancerImg from "../../../assets/PromoCarousel/cancer.png";
 import healthImg from "../../../assets/PromoCarousel/health.png";
 import glp1Img from "../../../assets/PromoCarousel/GlP-1.png";
+import moveFreelyImg from "../../../assets/PromoCarousel/Move_Freely.png";
+import physiotherapyImg from "../../../assets/PromoCarousel/Physiotherapy.png";
+import saveImg from "../../../assets/PromoCarousel/save.png";
 
 const promoBanners = [
   {
@@ -16,10 +21,22 @@ const promoBanners = [
     link: "/products",
   },
   {
+    id: "move-freely",
+    img: moveFreelyImg,
+    alt: "Move Freely — Joint & Bone Care Support",
+    link: "/products",
+  },
+  {
     id: "cancer",
     img: cancerImg,
     alt: "Here to support your cancer care journey — Upto 80% OFF on Genuine Medicines",
     link: "/category/cancer-care",
+  },
+  {
+    id: "physiotherapy",
+    img: physiotherapyImg,
+    alt: "Physiotherapy & Rehabilitation Supplies",
+    link: "/products",
   },
   {
     id: "sunhalt",
@@ -27,6 +44,13 @@ const promoBanners = [
     alt: "Sunhalt Gold — Your Ultimate Skin Protection",
     link: "/wellness",
   },
+  {
+    id: "save-big",
+    img: saveImg,
+    alt: "Save Big on Healthcare & Prescription Supplies",
+    link: "/offers",
+  },
+
   {
     id: "delivery",
     img: deliveryImg,
@@ -41,8 +65,11 @@ const promoBanners = [
   },
 ];
 
+
 const PromoCarousel = () => {
+  const navigate = useNavigate();
   const scrollRef = useRef(null);
+
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -123,11 +150,19 @@ const PromoCarousel = () => {
           {promoBanners.map((banner) => (
             <div
               key={banner.id}
-              onClick={() => banner.link && window.location.assign(banner.link)}
+              onClick={() => {
+                if (!banner.link) return;
+                if (banner.link.startsWith("http")) {
+                  window.open(banner.link, "_blank", "noopener,noreferrer");
+                } else {
+                  navigate(banner.link);
+                }
+              }}
               className="promo-card-item shrink-0 snap-start cursor-pointer rounded-2xl sm:rounded-[22px] overflow-hidden border border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-xs
                          w-[88%] sm:w-[58%] lg:w-[calc((100%-20px)/2.25)]
                          aspect-[2.35/1]"
             >
+
               <img
                 src={banner.img}
                 alt={banner.alt}

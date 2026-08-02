@@ -188,60 +188,34 @@ const Checkout = () => {
 
   const checkRxStatus = useCallback(async () => {
     if (requiresRx && user) {
+      setLoadingRxCheck(true);
       try {
-        // Query CheckoutSession status from backend
-        let sessionStatus = "ACTIVE";
-        try {
-          const sessionRes = await api.getCheckoutSessionStatus();
-          if (sessionRes && sessionRes.success) {
-            sessionStatus = sessionRes.status || "ACTIVE";
-          }
-        } catch (sErr) {
-          console.warn("Could not fetch checkout session status:", sErr.message);
-        }
-
-        const data = await api.getMyPrescriptions();
-        setMyPrescriptions(data || []);
-        
-        // Single Authoritative Priority Decision Hierarchy
-        const approvedRx = (data || []).find((rx) => rx.status === "Approved");
-        const matchingRx = (data || []).find((rx) => isSnapshotMatchingCart(rx.cartSnapshot, cartItems));
-        
-        const targetRx = approvedRx || matchingRx || (data && data.length > 0 ? data[0] : null);
-        setMatchingRxDoc(targetRx);
-        
-        if (sessionStatus === "VERIFIED" || approvedRx || (matchingRx && matchingRx.status === "Approved")) {
-          setRxStatus("Verified");
-          setHasApprovedRx(true);
-        } else if (sessionStatus === "PENDING_VERIFICATION" || (targetRx && (targetRx.status === "Pending Review" || targetRx.status === "Under Verification"))) {
-          setRxStatus("Pending Verification");
-          setHasApprovedRx(false);
-        } else if (targetRx && targetRx.status === "Rejected") {
-          setRxStatus("Rejected");
-          setRxMessage(targetRx.adminNotes || "Your prescription was rejected by our pharmacist.");
-          setHasApprovedRx(false);
-        } else {
-          setHasApprovedRx(false);
-          const hasAnyRx = data && data.length > 0;
-          if (hasAnyRx) {
-            setRxStatus("Needs Re-verification");
+        const res = await api.getCartRxStatus();
+        if (res && res.success) {
+          if (!res.requiresRx) {
+            setRxStatus("Verified");
+            setHasApprovedRx(true);
           } else {
-            setRxStatus("Prescription Required");
+            setRxStatus(res.rxStatus || "Prescription Required");
+            setHasApprovedRx(res.isEligible || false);
+            if (res.reason) setRxMessage(res.reason);
+            if (res.prescription) setMatchingRxDoc(res.prescription);
           }
         }
       } catch (err) {
-        console.error("Failed to check prescription status", err);
+        console.error("Failed to check prescription status from backend", err);
       } finally {
         setLoadingRxCheck(false);
       }
     } else {
       setLoadingRxCheck(false);
     }
-  }, [requiresRx, user, cartItems, isSnapshotMatchingCart]);
+  }, [requiresRx, user]);
 
   useEffect(() => {
     checkRxStatus();
   }, [checkRxStatus]);
+
 
   // Dynamic automatic status checking (polling every 4 seconds when Pending Verification & multi-tab sync)
   useEffect(() => {

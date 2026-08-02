@@ -39,8 +39,11 @@ export const AddressProvider = ({ children }) => {
   }, [user]);
 
   useEffect(() => {
+    setAddresses([]);
+    setSelectedAddressId(null);
     fetchAddresses();
-  }, [fetchAddresses]);
+  }, [user, fetchAddresses]);
+
 
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0] || null;
   const selectedAddress = addresses.find((a) => a._id === selectedAddressId || a.id === selectedAddressId) || defaultAddress;

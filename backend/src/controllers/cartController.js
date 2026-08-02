@@ -47,21 +47,18 @@ const cleanCartPrescription = async (cart) => {
     }
     
     if (rx) {
-      if (rx.status === "Approved") {
-        cart.prescriptionStatus = "Approved";
+      const isMatching = isSnapshotMatchingCart(rx.cartSnapshot, cart.items);
+      if (!isMatching) {
+        cart.prescription = null;
+        cart.prescriptionStatus = "Pending";
       } else {
-        const isMatching = isSnapshotMatchingCart(rx.cartSnapshot, cart.items);
-        if (!isMatching) {
-          cart.prescription = null;
-          cart.prescriptionStatus = "Pending";
-        } else {
-          // Sync status
-          const rxStatus = rx.status;
-          if (rxStatus === "Pending Review") cart.prescriptionStatus = "Uploaded";
-          else if (rxStatus === "Under Verification") cart.prescriptionStatus = "Under Review";
-          else if (rxStatus === "Rejected") cart.prescriptionStatus = "Rejected";
-          else if (rxStatus === "Expired") cart.prescriptionStatus = "Expired";
-        }
+        const rxStatus = rx.status;
+        if (rxStatus === "Approved") cart.prescriptionStatus = "Approved";
+        else if (rxStatus === "Pending Review") cart.prescriptionStatus = "Uploaded";
+        else if (rxStatus === "Under Verification") cart.prescriptionStatus = "Under Review";
+        else if (rxStatus === "Rejected") cart.prescriptionStatus = "Rejected";
+        else if (rxStatus === "Expired") cart.prescriptionStatus = "Expired";
+        else cart.prescriptionStatus = "Pending";
       }
     } else {
       cart.prescription = null;
@@ -71,6 +68,7 @@ const cleanCartPrescription = async (cart) => {
     cart.prescriptionStatus = "Pending";
   }
 };
+
 
 export const getCart = async (req, res, next) => {
   try {

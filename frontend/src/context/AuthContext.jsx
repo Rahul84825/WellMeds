@@ -112,10 +112,18 @@ export const AuthProvider = ({ children }) => {
       await api.logoutUser();
       onLogoutCallbacks.forEach((fn) => fn());
       setUser(null);
+      localStorage.removeItem("medishop_token");
+      localStorage.removeItem("medishop_refresh_token");
+      localStorage.removeItem("medishop_user");
+      localStorage.removeItem("medishop_cart");
+      localStorage.removeItem("medishop_guest_cart");
+      localStorage.removeItem("wellmeds_cart_lock_sync");
+      localStorage.setItem("wellmeds_auth_logout", Date.now().toString());
     } finally {
       setLoading(false);
     }
   }, [onLogoutCallbacks]);
+
 
   // ── Update profile ────────────────────────────────────────────────────────
   const updateProfile = useCallback(async (profileData) => {
