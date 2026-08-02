@@ -14,6 +14,7 @@
     "import:molecules:part4": "node scripts/importMoleculesPart4.js",
     "import:products": "node scripts/importProducts.js",
     "import:products:batch": "node scripts/importProductsBatch.js",
+    "import:products:part1": "node scripts/importAllProductsPart1.js",
     "replace:molecules": "node scripts/replaceMolecules.js",
     "enrich:molecules": "node scripts/enrichMolecules.js",
     "enrich:products": "node scripts/enrichProducts.js"

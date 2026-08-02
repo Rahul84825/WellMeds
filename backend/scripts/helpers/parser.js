@@ -75,6 +75,52 @@ export const toBulletArray = (val) => {
 // ─── Structured parsers ───────────────────────────────────────────────────────
 
 /**
+ * Standardize section titles to canonical form.
+ */
+export const normalizeSectionTitle = (title) => {
+  if (!title) return "";
+  const trimmed = String(title).trim();
+  const lower = trimmed.toLowerCase();
+  if (
+    lower === "uses & clinical indications" ||
+    lower.startsWith("uses of") ||
+    lower === "indications" ||
+    lower === "use" ||
+    lower === "what it treats"
+  ) {
+    return "Uses";
+  }
+  if (
+    lower === "about this medicine" ||
+    lower === "about medicine" ||
+    lower === "about the medicine"
+  ) {
+    return "About This Medicine";
+  }
+  if (lower === "introduction" || lower === "intro") {
+    return "Introduction";
+  }
+  if (
+    lower === "how it works" ||
+    lower === "effects (how it works)" ||
+    lower === "mechanism of action"
+  ) {
+    return "How It Works";
+  }
+  if (
+    lower === "drug interactions" ||
+    lower === "interaction with other drugs" ||
+    lower === "interactions"
+  ) {
+    return "Drug Interactions";
+  }
+  if (lower === "more information" || lower === "additional information") {
+    return "More Information";
+  }
+  return trimmed;
+};
+
+/**
  * Parse medicalSections[] from multiple column values.
  *
  * Each argument is { title, rawValue } where rawValue is the Excel cell.
@@ -86,7 +132,7 @@ export const toBulletArray = (val) => {
 export const parseMedicalSections = (...sections) => {
   return sections
     .map(({ title, rawValue }) => ({
-      title: title.trim(),
+      title: normalizeSectionTitle(title),
       content: toString(rawValue),
     }))
     .filter((s) => s.content.length > 0);

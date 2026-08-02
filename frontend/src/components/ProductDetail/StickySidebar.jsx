@@ -13,7 +13,8 @@ const StickySidebar = ({
   // Compile active clinical sections containing data
   const clinicalItems = [
     { label: "Specifications", id: "Specifications", available: !!hasSpecs },
-    { label: "Introduction", id: "Introduction", available: !!(product?.description && product.description.trim()) },
+    { label: "Introduction", id: "Introduction", available: computedSections.some(s => s.id === "Introduction") || !!(product?.description && product.description.trim()) },
+    { label: "About This Medicine", id: "AboutThisMedicine", available: computedSections.some(s => s.id === "AboutThisMedicine") },
     { label: "Uses", id: "Uses", available: computedSections.some(s => s.id === "Uses") },
     { label: "Benefits", id: "Benefits", available: computedSections.some(s => s.id === "Benefits") },
     { label: "Dosage", id: "Dosage", available: computedSections.some(s => s.id === "Dosage") },

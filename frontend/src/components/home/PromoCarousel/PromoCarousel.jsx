@@ -15,6 +15,12 @@ import saveImg from "../../../assets/PromoCarousel/save.png";
 
 const promoBanners = [
   {
+    id: "save-big",
+    img: saveImg,
+    alt: "Save Big on Healthcare & Prescription Supplies",
+    link: "/offers",
+  },
+  {
     id: "fever",
     img: savingImg,
     alt: "1 in 3 fever cases isn't just viral — Get Tested",
@@ -44,13 +50,6 @@ const promoBanners = [
     alt: "Sunhalt Gold — Your Ultimate Skin Protection",
     link: "/wellness",
   },
-  {
-    id: "save-big",
-    img: saveImg,
-    alt: "Save Big on Healthcare & Prescription Supplies",
-    link: "/offers",
-  },
-
   {
     id: "delivery",
     img: deliveryImg,

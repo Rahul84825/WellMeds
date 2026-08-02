@@ -403,7 +403,14 @@ const ProductDetails = () => {
       : [];
 
     const findAndRemoveMedSec = (titles) => {
-      const idx = medicalSecs.findIndex(s => s?.title && titles.some(t => s.title.toLowerCase() === t.toLowerCase()));
+      const idx = medicalSecs.findIndex(s => {
+        if (!s?.title) return false;
+        const lowerTitle = s.title.toLowerCase().trim();
+        return titles.some(t => {
+          const lowerT = t.toLowerCase();
+          return lowerTitle === lowerT || lowerTitle.includes(lowerT) || lowerT.includes(lowerTitle);
+        });
+      });
       if (idx !== -1) {
         const sec = medicalSecs.splice(idx, 1)[0];
         if (sec && sec.content && typeof sec.content === "string" && sec.content.trim().length > 0) {
@@ -413,13 +420,25 @@ const ProductDetails = () => {
       return null;
     };
 
-    // 1. Uses
-    const usesSec = findAndRemoveMedSec(["uses", "use"]);
-    if (usesSec) {
-      sections.push({ id: "Uses", title: "Uses", content: usesSec.content });
+    // 1. Introduction
+    const introSec = findAndRemoveMedSec(["introduction", "intro"]);
+    if (introSec) {
+      sections.push({ id: "Introduction", title: "Introduction", content: introSec.content });
     }
 
-    // 3. Benefits
+    // 2. About This Medicine
+    const aboutSec = findAndRemoveMedSec(["about this medicine", "about medicine", "about the medicine"]);
+    if (aboutSec) {
+      sections.push({ id: "AboutThisMedicine", title: "About This Medicine", content: aboutSec.content });
+    }
+
+    // 3. Uses
+    const usesSec = findAndRemoveMedSec(["uses", "use", "uses & clinical indications", "indications", "what it treats"]);
+    if (usesSec) {
+      sections.push({ id: "Uses", title: "Uses & Indications", content: usesSec.content });
+    }
+
+    // 4. Benefits
     const benefitsSec = findAndRemoveMedSec(["benefits", "key benefits"]);
     if (product.benefits && product.benefits.length > 0) {
       sections.push({ id: "Benefits", title: "Key Benefits", type: "benefits" });
@@ -427,7 +446,7 @@ const ProductDetails = () => {
       sections.push({ id: "Benefits", title: "Key Benefits", content: benefitsSec.content });
     }
 
-    // 4. Dosage / Usage Instructions
+    // 5. Dosage / Usage Instructions
     const usageSec = findAndRemoveMedSec(["dosage", "how to use", "usage instructions", "dosage instructions"]);
     if (product.usageInstructions && product.usageInstructions.length > 0) {
       sections.push({ id: "Dosage", title: "Usage & Dosage Instructions", type: "usage" });
@@ -435,7 +454,7 @@ const ProductDetails = () => {
       sections.push({ id: "Dosage", title: "Usage & Dosage Instructions", content: usageSec.content });
     }
 
-    // 5. Warnings & Precautions
+    // 6. Warnings & Precautions
     const warningsSec = findAndRemoveMedSec(["warnings", "warnings & precautions", "warnings and precautions"]);
     if (product.warnings && product.warnings.length > 0) {
       sections.push({ id: "Warnings", title: "Warnings & Precautions", type: "warnings" });
@@ -443,7 +462,7 @@ const ProductDetails = () => {
       sections.push({ id: "Warnings", title: "Warnings & Precautions", content: warningsSec.content });
     }
 
-    // 6. Side Effects
+    // 7. Side Effects
     const sideEffectsSec = findAndRemoveMedSec(["side effects", "sideeffects"]);
     if (product.sideEffects && product.sideEffects.length > 0) {
       sections.push({ id: "SideEffects", title: "Side Effects", type: "sideeffects" });
@@ -451,15 +470,15 @@ const ProductDetails = () => {
       sections.push({ id: "SideEffects", title: "Side Effects", content: sideEffectsSec.content });
     }
 
-    // 7. Precautions / Safety Information
+    // 8. Precautions / Safety Information
     const safetySec = findAndRemoveMedSec(["precautions", "safety information", "safety advice", "safety cards"]);
-    if (Array.isArray(product.safetyCards)) {
+    if (Array.isArray(product.safetyCards) && product.safetyCards.length > 0) {
       sections.push({ id: "Precautions", title: "Safety Information", type: "safety" });
     } else if (safetySec) {
       sections.push({ id: "Precautions", title: "Safety Information", content: safetySec.content });
     }
 
-    // 8. Storage
+    // 9. Storage
     const storageSec = findAndRemoveMedSec(["storage", "storage conditions", "storage instructions"]);
     if (product.storageInstructions && product.storageInstructions.length > 0) {
       sections.push({ id: "Storage", title: "Storage Instructions", type: "storage" });
@@ -467,7 +486,7 @@ const ProductDetails = () => {
       sections.push({ id: "Storage", title: "Storage Instructions", content: storageSec.content });
     }
 
-    // 9. FAQs
+    // 10. FAQs
     const faqsSec = findAndRemoveMedSec(["faqs", "faq", "frequently asked questions"]);
     if (product.faqs && product.faqs.length > 0) {
       sections.push({ id: "FAQs", title: "FAQs", type: "faqs" });
@@ -475,7 +494,7 @@ const ProductDetails = () => {
       sections.push({ id: "FAQs", title: "FAQs", content: faqsSec.content });
     }
 
-    // 11. References
+    // 11. References (Must appear AFTER all medical sections)
     const referencesSec = findAndRemoveMedSec(["references", "citations & references", "citations and references", "sources"]);
     if (product.references && product.references.length > 0) {
       sections.push({ id: "References", title: "Citations & References", type: "references" });
@@ -483,7 +502,7 @@ const ProductDetails = () => {
       sections.push({ id: "References", title: "Citations & References", content: referencesSec.content });
     }
 
-    // Add remaining non-empty custom sections
+    // 12. Remaining custom medical sections
     medicalSecs.forEach((sec, idx) => {
       if (sec && sec.content && typeof sec.content === "string" && sec.content.trim().length > 0) {
         sections.push({
