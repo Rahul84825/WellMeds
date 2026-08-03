@@ -23,6 +23,10 @@ export const getProducts = async (req, res, next) => {
     isGLP1Medicine,
     isHealthSupplement,
     isBestSeller,
+    stock,
+    inStock,
+    rx,
+    requiresRx,
     sortBy,
     sort,
   } = req.query;
@@ -55,7 +59,7 @@ export const getProducts = async (req, res, next) => {
     }
 
     // Robust Category Filtering (matches ObjectId, Category doc slug/name, or raw category string/therapeutics)
-    if (category && category.trim()) {
+    if (category && category.trim() && category.trim() !== "All") {
       const catStr = category.trim();
       const isObjId = mongoose.Types.ObjectId.isValid(catStr);
 
@@ -209,18 +213,56 @@ export const getProducts = async (req, res, next) => {
       }
     }
 
+    // Stock Filter
+    const stockParam = stock || inStock;
+    if (stockParam && stockParam !== "All" && stockParam !== "") {
+      if (stockParam === "instock" || stockParam === "true") {
+        andConditions.push({
+          $and: [
+            { inStock: { $ne: false } },
+            { stock: { $gt: 0 } },
+          ],
+        });
+      } else if (stockParam === "out" || stockParam === "false") {
+        andConditions.push({
+          $or: [
+            { inStock: false },
+            { stock: { $lte: 0 } },
+            { stock: null },
+          ],
+        });
+      }
+    }
+
+    // Prescription Filter
+    const rxParam = rx || requiresRx;
+    if (rxParam && rxParam !== "All" && rxParam !== "") {
+      if (rxParam === "yes" || rxParam === "true") {
+        andConditions.push({
+          $or: [{ requiresRx: true }, { isPrescriptionRequired: true }],
+        });
+      } else if (rxParam === "no" || rxParam === "false") {
+        andConditions.push({
+          requiresRx: { $ne: true },
+          isPrescriptionRequired: { $ne: true },
+        });
+      }
+    }
+
     const query = andConditions.length > 0 ? { $and: andConditions } : {};
 
     const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.max(1, Math.min(parseInt(limit) || 20, 100));
+    const limitNum = Math.max(1, Math.min(parseInt(limit) || 20, 1000));
     const skipNum = (pageNum - 1) * limitNum;
 
     // Server-side sorting
-    const sortVal = sortBy || sort || "name_asc";
+    const sortVal = sortBy || sort || "name-asc";
     const sortObj = {};
-    if (sortVal === "price_asc") sortObj.price = 1;
-    else if (sortVal === "price_desc") sortObj.price = -1;
-    else if (sortVal === "name_desc") sortObj.name = -1;
+    if (sortVal === "price_asc" || sortVal === "price-asc") sortObj.price = 1;
+    else if (sortVal === "price_desc" || sortVal === "price-desc") sortObj.price = -1;
+    else if (sortVal === "name_desc" || sortVal === "name-desc") sortObj.name = -1;
+    else if (sortVal === "stock-asc" || sortVal === "stock_asc") { sortObj.inStock = 1; sortObj.stock = 1; }
+    else if (sortVal === "stock-desc" || sortVal === "stock_desc") { sortObj.inStock = -1; sortObj.stock = -1; }
     else if (sortVal === "newest") sortObj.createdAt = -1;
     else sortObj.name = 1;
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatCurrency } from "../utils/currency";
@@ -23,133 +23,119 @@ import {
 
 const ManageProducts = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Extract URL parameters with safe fallback defaults
+  const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const pageSize = Math.max(1, parseInt(searchParams.get("pageSize") || "25", 10));
+  const searchQuery = searchParams.get("search") || "";
+  const categoryFilter = searchParams.get("category") || "All";
+  const stockFilter = searchParams.get("stock") || "All";
+  const rxFilter = searchParams.get("rx") || "All";
+  const sortOption = searchParams.get("sort") || "name-asc";
+
+  // Data states
   const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [categoriesList, setCategoriesList] = useState([]);
 
-  // Search & Filter
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [stockFilter, setStockFilter] = useState("All");
-  const [rxFilter, setRxFilter] = useState("All");
-  const [sortOption, setSortOption] = useState("name-asc");
-  
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  // Local debounced input for search bar to avoid rapid URL updates
+  const [searchInput, setSearchInput] = useState(searchQuery);
 
-  // Fetch product list
-  const fetchProducts = async () => {
+  // Sync search input if URL changes externally (e.g. back/forward navigation)
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
+  // Fetch full category list for filter dropdown
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await api.getCategories();
+        setCategoriesList(cats || []);
+      } catch (err) {
+        console.error("Failed to load categories for filter", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Helper to update URL params
+  const updateQueryParams = useCallback((newParams, resetPage = false) => {
+    const updated = new URLSearchParams(searchParams);
+
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "" || (key === "category" && value === "All") || (key === "stock" && value === "All") || (key === "rx" && value === "All")) {
+        updated.delete(key);
+      } else {
+        updated.set(key, value);
+      }
+    });
+
+    if (resetPage) {
+      updated.set("page", "1");
+    }
+
+    setSearchParams(updated, { replace: false });
+  }, [searchParams, setSearchParams]);
+
+  // Debounced search query update to URL
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== searchQuery) {
+        updateQueryParams({ search: searchInput.trim() }, true);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, searchQuery, updateQueryParams]);
+
+  // Fetch products from server whenever pagination or filter parameters change
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getProductsList();
-      setProducts(data);
+      const res = await api.getProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: searchQuery,
+        category: categoryFilter !== "All" ? categoryFilter : undefined,
+        stock: stockFilter,
+        rx: rxFilter,
+        sort: sortOption,
+      });
+
+      setProducts(res.products || []);
+      setTotalProducts(res.totalProducts || res.total || 0);
+      setTotalPages(Math.max(1, res.totalPages || res.pages || 1));
     } catch (err) {
       console.error("Failed to load admin products", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, searchQuery, categoryFilter, stockFilter, rxFilter, sortOption]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
+  // Handle item deletion with page refetch
   const handleDelete = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return;
+
     try {
       await api.deleteProduct(id);
-      setProducts(prev => prev.filter(p => p.id !== id && p._id !== id));
+      fetchProducts();
     } catch (err) {
       console.error("Failed to delete product", err);
     }
   };
 
-  // Extract all categories dynamically for filter options
-  const categoriesList = useMemo(() => {
-    const cats = new Set(
-      products
-        .map(p => typeof p.category === "object" ? p.category?.name : p.category)
-        .filter(Boolean)
-    );
-    return ["All", ...Array.from(cats)];
-  }, [products]);
-
-  // Filter products logic
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    // 1. Search query matching
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(q) || 
-        p.manufacturer?.toLowerCase().includes(q) ||
-        p.brand?.toLowerCase().includes(q)
-      );
-    }
-
-    // 2. Category filtering
-    if (categoryFilter !== "All") {
-      result = result.filter(p => {
-        const catName = typeof p.category === "object" ? p.category?.name : p.category;
-        return catName === categoryFilter;
-      });
-    }
-
-    // 3. Stock warning filtering
-    if (stockFilter !== "All") {
-      if (stockFilter === "instock") result = result.filter(p => p.inStock !== false && p.stock > 0);
-      else if (stockFilter === "out") result = result.filter(p => p.inStock === false || p.stock === 0);
-    }
-
-    // 4. Prescription requirement filtering
-    if (rxFilter !== "All") {
-      const needsRx = rxFilter === "yes";
-      result = result.filter(p => p.requiresRx === needsRx);
-    }
-
-    // 5. Sorting
-    result.sort((a, b) => {
-      switch (sortOption) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "price-asc":
-          return a.price - b.price;
-        case "price-desc":
-          return b.price - a.price;
-        case "stock-asc":
-          return (a.inStock === b.inStock) ? 0 : a.inStock ? 1 : -1;
-        case "stock-desc":
-          return (a.inStock === b.inStock) ? 0 : a.inStock ? -1 : 1;
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [products, searchQuery, categoryFilter, stockFilter, rxFilter, sortOption]);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, categoryFilter, stockFilter, rxFilter, sortOption]);
-
-  // Paginated items
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProducts, currentPage]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
-
-  if (loading) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <Loader size="lg" />
-      </div>
-    );
-  }
+  // Pagination calculation details
+  const startIndex = totalProducts > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const endIndex = Math.min(currentPage * pageSize, totalProducts);
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
@@ -165,13 +151,13 @@ const ManageProducts = () => {
             Manage your drug inventory catalog, edit formulas, track stock counts, and verify Rx prescription requirements.
           </p>
         </div>
-        <Link
-          to="/admin/products/new"
+        <button
+          onClick={() => navigate({ pathname: "/admin/products/new", search: location.search })}
           className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/10 select-none cursor-pointer"
         >
           <Plus size={16} />
           Add Product
-        </Link>
+        </button>
       </div>
 
       {/* Modern Filter Row */}
@@ -182,9 +168,9 @@ const ManageProducts = () => {
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
             type="text"
-            placeholder="Search by name, manufacturer..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, manufacturer, brand..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
           />
         </div>
@@ -193,12 +179,12 @@ const ManageProducts = () => {
         <div className="relative">
           <select
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e) => updateQueryParams({ category: e.target.value }, true)}
             className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white rounded-xl text-xs outline-none text-slate-600 dark:text-zinc-300"
           >
             <option value="All">All Categories</option>
-            {categoriesList.filter(c => c !== "All").map(c => (
-              <option key={c} value={c}>{c}</option>
+            {categoriesList.map(c => (
+              <option key={c._id || c.id || c.name} value={c.name}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -207,7 +193,7 @@ const ManageProducts = () => {
         <div className="relative">
           <select
             value={stockFilter}
-            onChange={(e) => setStockFilter(e.target.value)}
+            onChange={(e) => updateQueryParams({ stock: e.target.value }, true)}
             className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white rounded-xl text-xs outline-none text-slate-600 dark:text-zinc-300"
           >
             <option value="All">All Stock Statuses</option>
@@ -220,7 +206,7 @@ const ManageProducts = () => {
         <div className="relative">
           <select
             value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
+            onChange={(e) => updateQueryParams({ sort: e.target.value }, false)}
             className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white rounded-xl text-xs outline-none text-slate-600 dark:text-zinc-300"
           >
             <option value="name-asc">Sort Name: A-Z</option>
@@ -229,35 +215,59 @@ const ManageProducts = () => {
             <option value="price-desc">Sort Price: High to Low</option>
             <option value="stock-asc">Sort Stock: Low to High</option>
             <option value="stock-desc">Sort Stock: High to Low</option>
+            <option value="newest">Sort Newest First</option>
           </select>
         </div>
       </div>
 
-      {/* Prescription Filter toggle options bar */}
-      <div className="flex flex-wrap gap-xs sm:gap-md text-xs font-semibold text-slate-400 items-center pl-sm">
-        <span>Prescription Filter:</span>
-        <button 
-          onClick={() => setRxFilter("All")}
-          className={`px-sm py-0.5 rounded ${rxFilter === "All" ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]" : "hover:text-slate-600"}`}
-        >
-          All Items
-        </button>
-        <button 
-          onClick={() => setRxFilter("yes")}
-          className={`px-sm py-0.5 rounded ${rxFilter === "yes" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400" : "hover:text-slate-600"}`}
-        >
-          Rx Required
-        </button>
-        <button 
-          onClick={() => setRxFilter("no")}
-          className={`px-sm py-0.5 rounded ${rxFilter === "no" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400" : "hover:text-slate-600"}`}
-        >
-          Over-The-Counter (OTC)
-        </button>
+      {/* Prescription Filter toggle options bar & Page Size selection */}
+      <div className="flex flex-wrap items-center justify-between gap-md text-xs font-semibold text-slate-400 pl-sm">
+        <div className="flex flex-wrap gap-xs sm:gap-md items-center">
+          <span>Prescription Filter:</span>
+          <button 
+            onClick={() => updateQueryParams({ rx: "All" }, true)}
+            className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "All" ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]" : "hover:text-slate-600"}`}
+          >
+            All Items
+          </button>
+          <button 
+            onClick={() => updateQueryParams({ rx: "yes" }, true)}
+            className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "yes" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400" : "hover:text-slate-600"}`}
+          >
+            Rx Required
+          </button>
+          <button 
+            onClick={() => updateQueryParams({ rx: "no" }, true)}
+            className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "no" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400" : "hover:text-slate-600"}`}
+          >
+            Over-The-Counter (OTC)
+          </button>
+        </div>
+
+        <div className="flex items-center gap-xs">
+          <span>Show:</span>
+          <select
+            value={pageSize}
+            onChange={(e) => updateQueryParams({ pageSize: e.target.value }, true)}
+            className="p-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-lg text-xs outline-none text-slate-700 dark:text-zinc-300"
+          >
+            <option value="10">10 / page</option>
+            <option value="20">20 / page</option>
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+            <option value="100">100 / page</option>
+          </select>
+        </div>
       </div>
 
       {/* Products Table */}
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden relative min-h-[300px]">
+        {loading && (
+          <div className="absolute inset-0 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
+            <Loader size="md" />
+          </div>
+        )}
+
         {/* Desktop View: Table */}
         <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
@@ -273,10 +283,11 @@ const ManageProducts = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs text-slate-600 dark:text-zinc-300">
-              {paginatedProducts.map((p) => {
-                const isItemInStock = p.inStock !== false && p.stock > 0;
+              {products.map((p) => {
+                const isItemInStock = p.inStock !== false && (p.stock === undefined || p.stock > 0);
+                const prodId = p.id || p._id;
                 return (
-                  <tr key={p.id || p._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
+                  <tr key={prodId} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
                     <td className="p-md">
                       <div className="flex items-center gap-md">
                         <div className="w-10 h-10 bg-slate-50 dark:bg-zinc-955 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
@@ -296,7 +307,7 @@ const ManageProducts = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="p-md font-medium">{typeof p.category === "object" ? p.category?.name : p.category}</td>
+                    <td className="p-md font-medium">{typeof p.category === "object" ? p.category?.name : (p.category || "General")}</td>
                     <td className="p-md font-bold text-slate-800 dark:text-zinc-100">{formatCurrency(p.price)}</td>
                     <td className="p-md">
                       <div className="flex items-center gap-xs">
@@ -307,7 +318,7 @@ const ManageProducts = () => {
                       </div>
                     </td>
                     <td className="p-md">
-                      {p.requiresRx ? (
+                      {p.requiresRx || p.isPrescriptionRequired ? (
                         <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-955/20 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">
                           Rx Required
                         </span>
@@ -331,22 +342,22 @@ const ManageProducts = () => {
                     <td className="p-md text-right">
                       <div className="flex items-center justify-end gap-xs">
                         <button
-                          onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
-                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg"
+                          onClick={() => navigate({ pathname: `/admin/products/${prodId}/edit`, search: location.search })}
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg transition-colors cursor-pointer"
                           title="Edit Details"
                         >
                           <Edit size={14} />
                         </button>
                         <button
-                          onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
-                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg"
+                          onClick={() => navigate(`/products/${p.slug || prodId}`)}
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
                           title="View details on site"
                         >
                           <Eye size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(p.id || p._id, p.name)}
-                          className="p-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-955/20 rounded-lg"
+                          onClick={() => handleDelete(prodId, p.name)}
+                          className="p-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-955/20 rounded-lg transition-colors cursor-pointer"
                           title="Delete Product"
                         >
                           <Trash2 size={14} />
@@ -356,9 +367,9 @@ const ManageProducts = () => {
                   </tr>
                 );
               })}
-              {filteredProducts.length === 0 && (
+              {!loading && products.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="p-lg text-center text-slate-400">No items match the chosen filters.</td>
+                  <td colSpan="7" className="p-lg text-center text-slate-400">No products found matching the specified parameters.</td>
                 </tr>
               )}
             </tbody>
@@ -367,10 +378,11 @@ const ManageProducts = () => {
 
         {/* Mobile Card View */}
         <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/80">
-          {paginatedProducts.map((p) => {
-            const isItemInStock = p.inStock !== false && p.stock > 0;
+          {products.map((p) => {
+            const isItemInStock = p.inStock !== false && (p.stock === undefined || p.stock > 0);
+            const prodId = p.id || p._id;
             return (
-              <div key={p.id || p._id} className="p-md space-y-sm text-xs">
+              <div key={prodId} className="p-md space-y-sm text-xs">
                 <div className="flex gap-md">
                   <div className="w-14 h-14 bg-slate-50 dark:bg-zinc-955 rounded-xl overflow-hidden border border-slate-100 dark:border-zinc-800 shrink-0">
                     <img
@@ -386,7 +398,7 @@ const ManageProducts = () => {
                   <div className="space-y-xs truncate flex-grow">
                     <p className="font-bold text-slate-800 dark:text-zinc-100 truncate text-sm">{p.name}</p>
                     <p className="text-[10px] text-slate-400 font-semibold">
-                      {p.manufacturer || p.brand} • {typeof p.category === "object" ? p.category?.name : p.category}
+                      {p.manufacturer || p.brand} • {typeof p.category === "object" ? p.category?.name : (p.category || "General")}
                     </p>
                     <p className="font-extrabold text-slate-800 dark:text-zinc-100 text-sm">{formatCurrency(p.price)}</p>
                   </div>
@@ -400,7 +412,7 @@ const ManageProducts = () => {
                       {isItemInStock ? "In Stock" : "Out of Stock"}
                     </span>
 
-                    {p.requiresRx ? (
+                    {p.requiresRx || p.isPrescriptionRequired ? (
                       <span className="inline-flex px-2 py-0.5 bg-amber-50 dark:bg-amber-955/20 text-amber-700 dark:text-amber-400 rounded-lg text-[9px] font-bold uppercase">
                         Rx
                       </span>
@@ -424,22 +436,22 @@ const ManageProducts = () => {
                   {/* Actions */}
                   <div className="flex items-center gap-sm">
                     <button
-                      onClick={() => navigate(`/admin/products/${p.id || p._id}/edit`)}
-                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      onClick={() => navigate({ pathname: `/admin/products/${prodId}/edit`, search: location.search })}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800 cursor-pointer"
                       title="Edit Details"
                     >
                       <Edit size={14} />
                     </button>
                     <button
-                      onClick={() => navigate(`/products/${p.slug || p.id || p._id}`)}
-                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      onClick={() => navigate(`/products/${p.slug || prodId}`)}
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800 cursor-pointer"
                       title="View details on site"
                     >
                       <Eye size={14} />
                     </button>
                     <button
-                      onClick={() => handleDelete(p.id || p._id, p.name)}
-                      className="p-sm text-red-600 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800"
+                      onClick={() => handleDelete(prodId, p.name)}
+                      className="p-sm text-red-600 hover:bg-red-55 dark:hover:bg-red-955/20 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800 cursor-pointer"
                       title="Delete Product"
                     >
                       <Trash2 size={14} />
@@ -449,28 +461,28 @@ const ManageProducts = () => {
               </div>
             );
           })}
-          {filteredProducts.length === 0 && (
-            <p className="p-lg text-center text-slate-400">No items match the chosen filters.</p>
+          {!loading && products.length === 0 && (
+            <p className="p-lg text-center text-slate-400">No products found matching the specified parameters.</p>
           )}
         </div>
 
         {/* Pagination footer */}
-        {totalPages > 1 && (
-          <div className="bg-slate-50 dark:bg-zinc-950 px-md py-sm border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-xs font-semibold text-slate-400 select-none">
-            <span>Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} items</span>
+        {totalProducts > 0 && (
+          <div className="bg-slate-50 dark:bg-zinc-950 px-md py-sm border-t border-slate-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-sm text-xs font-semibold text-slate-400 select-none">
+            <span>Showing {startIndex} to {endIndex} of {totalProducts} items</span>
             <div className="flex items-center gap-xs">
               <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                className="p-xs border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-white dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors"
+                disabled={currentPage <= 1 || loading}
+                onClick={() => updateQueryParams({ page: Math.max(1, currentPage - 1).toString() })}
+                className="p-xs border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-white dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors cursor-pointer"
               >
                 <ChevronLeft size={16} />
               </button>
-              <span className="px-sm text-slate-700 dark:text-zinc-300">Page {currentPage} of {totalPages}</span>
+              <span className="px-sm text-slate-700 dark:text-zinc-300 font-bold">Page {currentPage} of {totalPages}</span>
               <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                className="p-xs border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-white dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors"
+                disabled={currentPage >= totalPages || loading}
+                onClick={() => updateQueryParams({ page: Math.min(totalPages, currentPage + 1).toString() })}
+                className="p-xs border border-slate-200 dark:border-zinc-800 rounded-lg hover:bg-white dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors cursor-pointer"
               >
                 <ChevronRight size={16} />
               </button>

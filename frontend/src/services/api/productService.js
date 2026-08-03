@@ -12,7 +12,7 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}, config = {}) {
-    const { search, category, speciality, molecule, brand, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller, sortBy, sort } = params;
+    const { search, category, speciality, molecule, brand, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller, stock, rx, sortBy, sort } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
@@ -27,6 +27,8 @@ export const productService = {
     if (isGLP1Medicine !== undefined) cleanParams.isGLP1Medicine = isGLP1Medicine;
     if (isHealthSupplement !== undefined) cleanParams.isHealthSupplement = isHealthSupplement;
     if (isBestSeller !== undefined) cleanParams.isBestSeller = isBestSeller;
+    if (stock) cleanParams.stock = stock;
+    if (rx) cleanParams.rx = rx;
     if (sortBy) cleanParams.sortBy = sortBy;
     if (sort) cleanParams.sort = sort;
 
@@ -39,6 +41,7 @@ export const productService = {
       currentPage: data.currentPage || data.page || 1,
       pages: data.totalPages || data.pages || 1,
       totalPages: data.totalPages || data.pages || 1,
+      pageSize: data.pageSize || limit || 20,
     };
   },
 

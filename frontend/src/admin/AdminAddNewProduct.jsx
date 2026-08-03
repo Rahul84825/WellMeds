@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
 import { calculateDiscountPercent, calculateSavings, formatPrice } from "../utils/currency";
@@ -239,6 +239,7 @@ const AccordionSection = ({ title, isOpen, onToggle, children }) => {
 
 const AddNewProduct = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const isEditMode = !!id;
 
@@ -783,7 +784,7 @@ const AddNewProduct = () => {
       } else {
         await api.createProduct(productData);
       }
-      navigate("/admin/products");
+      navigate(`/admin/products${location.search || ""}`);
     } catch (err) {
       console.error(err);
     } finally {
@@ -804,7 +805,7 @@ const AddNewProduct = () => {
       
       {/* Mobile Compact Sticky Top Header (Positioned below 64px Admin Navbar) */}
       <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-xs">
-        <Link to="/admin/products" className="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all">
+        <Link to={`/admin/products${location.search || ""}`} className="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all">
           <ArrowLeft size={20} />
         </Link>
 
@@ -830,7 +831,7 @@ const AddNewProduct = () => {
 
       {/* Desktop Back navigation */}
       <div className="hidden md:flex items-center justify-between">
-        <Link to="/admin/products" className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 flex items-center gap-xs font-semibold">
+        <Link to={`/admin/products${location.search || ""}`} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 flex items-center gap-xs font-semibold">
           <ArrowLeft size={16} />
           <span>Back to Products</span>
         </Link>
