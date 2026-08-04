@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
+import MedicineNotFound from "../components/MedicineNotFound";
+import { useMedicineHelp } from "../hooks/useMedicineHelp";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
@@ -20,6 +22,7 @@ const SearchResultsPage = () => {
   const [loading, setLoading] = useState(true);
   const [matchedMolecules, setMatchedMolecules] = useState([]);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+  const { recordSearchResult } = useMedicineHelp();
   const limit = 20;
 
   const fetchSearchResults = useCallback(async () => {
@@ -33,18 +36,21 @@ const SearchResultsPage = () => {
     setLoading(true);
     try {
       const data = await api.getSearchResults({ q: query, page: currentPage, limit });
-      setProducts(data.products || []);
+      const fetchedProducts = data.products || [];
+      setProducts(fetchedProducts);
       setTotalProducts(data.totalProducts || data.total || 0);
       setTotalPages(data.totalPages || data.pages || 1);
 
       const moleculesData = await api.searchAll(query);
       setMatchedMolecules(moleculesData?.molecules || []);
+
+      recordSearchResult(query, fetchedProducts.length);
     } catch (err) {
       console.error("Failed to fetch search results", err);
     } finally {
       setLoading(false);
     }
-  }, [query, currentPage]);
+  }, [query, currentPage, recordSearchResult]);
 
   useEffect(() => {
     fetchSearchResults();
@@ -163,21 +169,7 @@ const SearchResultsPage = () => {
               />
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
-              <Package size={36} className="mx-auto text-slate-400" />
-              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">
-                No Exact Matches Found
-              </h3>
-              <p className="text-xs text-slate-500 font-sans">
-                We couldn't find any products matching "{query}". Try checking your spelling or upload a prescription for assistance.
-              </p>
-              <Link
-                to="/upload-prescription"
-                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold inline-block"
-              >
-                Upload Prescription for Assistance
-              </Link>
-            </div>
+            <MedicineNotFound searchQuery={query} suggestions={matchedMolecules} />
           )}
         </div>
 

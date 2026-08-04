@@ -6,8 +6,11 @@ import FloatingWhatsApp from "../components/FloatingWhatsApp";
 import HealthcareInformation from "../components/layout/HealthcareInformation";
 import AuthModal from "../components/auth/AuthModal";
 import GlobalDrawer from "../components/GlobalDrawer";
+import { useMedicineHelp } from "../hooks/useMedicineHelp";
+import MedicineHelpPopup from "../components/MedicineHelpPopup";
 
 const MainLayout = () => {
+  const { isOpen, handleClose, lastSearchQuery } = useMedicineHelp();
   const location = useLocation();
 
   const showSEOAndTrustBar = () => {
@@ -58,6 +61,12 @@ const MainLayout = () => {
       <FloatingWhatsApp />
       {/* Global App Drawer */}
       <GlobalDrawer />
+      {/* Smart WhatsApp Medicine Assistance Popup */}
+      <MedicineHelpPopup
+        isOpen={isOpen}
+        onClose={handleClose}
+        lastSearchQuery={lastSearchQuery}
+      />
     </div>
   );
 };

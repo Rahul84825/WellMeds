@@ -11,6 +11,7 @@ import {
   Home, Plus, Minus, ArrowRight, ShieldCheck, Tag, Info, Lock, AlertTriangle
 } from "lucide-react";
 import SEO from "../components/common/SEO";
+import { BUSINESS_INFO } from "../config/businessInfo";
 
 const Cart = () => {
   const {
@@ -441,9 +442,9 @@ const Cart = () => {
           {/* Support Footer */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-slate-500 dark:text-zinc-400">
             <span className="flex items-center gap-1.5"><Info size={14} /> Need help?</span>
-            <a href="tel:+919876543210" className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">Call Us</a>
+            <a href={`tel:${BUSINESS_INFO.phoneRaw}`} className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">Call Us ({BUSINESS_INFO.phone})</a>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700"></span>
-            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">WhatsApp</a>
+            <a href={BUSINESS_INFO.whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-slate-800 dark:hover:text-zinc-200 transition-colors">WhatsApp</a>
           </div>
 
         </div>

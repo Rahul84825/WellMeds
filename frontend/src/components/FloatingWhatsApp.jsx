@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { BUSINESS_INFO } from "../config/businessInfo";
 
 const FloatingWhatsApp = () => {
   const [hovered, setHovered] = useState(false);
   const { pathname } = useLocation();
 
   const handleClick = () => {
-    window.open("https://wa.me/919511289914", "_blank", "noopener,noreferrer");
+    window.open(BUSINESS_INFO.whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleKeyDown = (e) => {
@@ -49,7 +50,7 @@ const FloatingWhatsApp = () => {
         style={hovered ? { animation: "wa-tooltip-in 0.2s ease-out both" } : {}}
       >
         <span className="mr-1">💬</span>
-        <span>+91 95112 89914</span>
+        <span>{BUSINESS_INFO.phoneDisplay}</span>
       </div>
 
       {/* WhatsApp Button */}

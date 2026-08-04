@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 
 /**
  * CategoryCard — WellMeds Design System V2
- * Editorial clinical category item card.
+ * Reusable white card component used across Medicine Categories & Surgical Categories.
  */
 const CategoryCard = ({ category, isSurgical = false, basePath }) => {
+  if (!category) return null;
+
   const hasImage = Boolean(category.image?.trim());
   const linkTarget = basePath
     ? `${basePath}${category.slug}`
@@ -19,13 +21,13 @@ const CategoryCard = ({ category, isSurgical = false, basePath }) => {
     <Link
       to={linkTarget}
       aria-label={`Browse ${category.name} products`}
-      className="flex-none flex flex-col items-center group snap-start w-[110px] sm:w-[130px] md:w-[145px]"
+      className="flex-none flex flex-col items-center group snap-start w-[110px] sm:w-[135px] md:w-[155px]"
       style={{ textDecoration: "none" }}
     >
-      <div className="w-full aspect-square rounded-xl bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 p-0 flex items-center justify-center relative overflow-hidden group-hover:border-[#157a6d] group-hover:shadow-[0_8px_24px_rgba(23,43,38,0.08)] transition-all duration-250">
-        {/* Soft mint inner background glow */}
-        <div className="absolute inset-0 bg-[#f4f9f7] dark:bg-zinc-950 group-hover:bg-[#e7f0ea] dark:group-hover:bg-zinc-800/60 transition-colors duration-250" />
-        
+      <div className="w-full aspect-square rounded-2xl bg-white dark:bg-zinc-900 border border-[#E8ECEF] dark:border-zinc-800 p-0 flex items-center justify-center relative overflow-hidden shadow-2xs">
+        {/* Soft background */}
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-zinc-950" />
+
         {hasImage ? (
           <img
             src={category.image}
@@ -33,7 +35,7 @@ const CategoryCard = ({ category, isSurgical = false, basePath }) => {
             loading="lazy"
             decoding="async"
             draggable={false}
-            className="relative z-10 w-full h-full object-cover select-none transition-transform duration-300 group-hover:scale-110"
+            className="relative z-10 w-full h-full object-cover select-none"
             onError={(e) => {
               e.currentTarget.style.display = "none";
               if (e.currentTarget.nextSibling) {
@@ -49,16 +51,14 @@ const CategoryCard = ({ category, isSurgical = false, basePath }) => {
           className="relative z-10 items-center justify-center"
           style={{ display: hasImage ? "none" : "flex" }}
         >
-          <span
-            className="material-symbols-outlined text-3xl sm:text-4xl text-[#157a6d] opacity-80 group-hover:scale-110 transition-transform"
-          >
+          <span className="material-symbols-outlined text-3xl sm:text-4xl text-[#157a6d] opacity-80">
             {category.icon || "medical_services"}
           </span>
         </div>
       </div>
 
       {/* Category Name */}
-      <h3 className="mt-2.5 font-editorial text-xs sm:text-sm font-medium text-[#172b26] dark:text-zinc-200 text-center leading-tight line-clamp-2 group-hover:text-[#157a6d] transition-colors">
+      <h3 className="mt-2.5 font-editorial text-xs sm:text-sm font-medium text-[#172b26] dark:text-zinc-200 text-center leading-tight line-clamp-2">
         {category.name}
       </h3>
     </Link>

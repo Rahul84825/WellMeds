@@ -201,7 +201,7 @@ const UniversalAddressForm = ({
             <input
               type="tel"
               maxLength={10}
-              placeholder="9876543210"
+              placeholder="7798795353"
               value={formData.mobile}
               onChange={(e) => handleChange("mobile", e.target.value.replace(/\D/g, ""))}
               className={`w-full pl-10 bg-white dark:bg-zinc-900 border ${

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { BUSINESS_INFO } from "../../config/businessInfo";
 
 const DEFAULT_SITE_NAME = "WellMeds";
 const DEFAULT_DOMAIN = "https://wellmeds.in";
@@ -100,8 +101,8 @@ const SEO = ({
     updateMetaTag('meta[name="twitter:description"]', "name", "twitter:description", metaDescription);
     updateMetaTag('meta[name="twitter:image"]', "name", "twitter:image", metaImage);
 
-    // 6. JSON-LD Schemas
-    let primarySchema = schema;
+    // 6. JSON-LD Schemas (Default: Centralized Pharmacy Schema)
+    let primarySchema = schema || BUSINESS_INFO.schema;
 
     // Auto-generate BreadcrumbList Schema if breadcrumbs array provided
     if (breadcrumbs && breadcrumbs.length > 0) {
@@ -117,7 +118,7 @@ const SEO = ({
       };
 
       if (primarySchema) {
-        primarySchema = [primarySchema, breadcrumbSchema];
+        primarySchema = Array.isArray(primarySchema) ? [...primarySchema, breadcrumbSchema] : [primarySchema, breadcrumbSchema];
       } else {
         primarySchema = breadcrumbSchema;
       }

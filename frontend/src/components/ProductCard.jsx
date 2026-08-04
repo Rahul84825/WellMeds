@@ -127,11 +127,11 @@ const ProductCard = ({ product }) => {
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#157a6d]
                  overflow-hidden text-left"
     >
-      {/* Top Image Frame with Soft Mint Vignette */}
+      {/* Top Image Frame matching Reference Design */}
       <div className="relative flex items-center justify-center overflow-hidden
-                      bg-[#f4f9f7] dark:bg-zinc-950
-                      h-[160px] sm:h-[185px] md:h-[200px] w-full shrink-0
-                      border-b border-[#dde8e3] dark:border-zinc-800 p-0">
+                      bg-white dark:bg-zinc-950
+                      h-[160px] sm:h-[180px] md:h-[190px] w-full shrink-0
+                      border-b border-slate-100 dark:border-zinc-800 p-3 sm:p-4">
         <img
           alt={product.name}
           src={product.image || DEFAULT_PRODUCT_IMAGE}
@@ -140,31 +140,32 @@ const ProductCard = ({ product }) => {
             e.target.src = DEFAULT_PRODUCT_IMAGE;
           }}
           loading="lazy"
-          className="w-full h-full object-cover select-none
-                     transition-transform duration-300 group-hover:scale-105"
+          decoding="async"
+          className="max-w-[85%] max-h-[85%] object-contain select-none"
+          style={{ imageRendering: "-webkit-optimize-contrast" }}
         />
 
         {/* Top Left Status & Discount Badges */}
         <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
           {discountPercent > 0 && (
-            <span className="w-fit rounded-md bg-[#157a6d] text-white px-2 py-0.5 text-[10px] font-bold font-clinical-mono tracking-wider shadow-xs">
-              SAVE {discountPercent}%
+            <span className="w-fit rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 px-3 py-1 text-xs font-bold font-sans shadow-2xs">
+              {discountPercent}% Off
             </span>
           )}
           {isOOS && (
-            <span className="w-fit rounded-md bg-zinc-700 text-white px-2 py-0.5 text-[10px] font-bold font-clinical-mono uppercase tracking-wider">
-              OUT OF STOCK
+            <span className="w-fit rounded-full bg-zinc-800 text-white px-3 py-1 text-[11px] font-bold font-sans uppercase tracking-wider">
+              Out of Stock
             </span>
           )}
           {product.badge &&
             !["Rx Required", "Top Rated", "Low Stock"].includes(product.badge) && (
-              <span className="w-fit rounded-md bg-[#b08d3e] text-white px-2 py-0.5 text-[10px] font-bold font-clinical-mono uppercase tracking-wider">
+              <span className="w-fit rounded-full bg-[#fef08a] text-[#854d0e] px-3 py-1 text-[11px] font-bold font-sans uppercase tracking-wider">
                 {product.badge}
               </span>
             )}
         </div>
 
-        {/* Top Right Rx & Cold Chain Pills */}
+        {/* Top Right Rx & Cold Chain Circular Icons */}
         {(isRx || isColdChain) && (
           <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5">
             {isRx && (
@@ -175,16 +176,16 @@ const ProductCard = ({ product }) => {
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("rx")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-7 w-7 cursor-pointer items-center justify-center
-                             rounded-full bg-[#157a6d] text-white shadow-xs
-                             transition-transform hover:scale-105 active:scale-95 border border-[#157a6d]"
+                             rounded-full bg-[#4c1d95] text-white shadow-xs
+                             transition-transform hover:scale-110 active:scale-95 border border-[#4c1d95]"
                   aria-label="Prescription Required"
                 >
-                  <span className="text-[11px] font-black font-sans tracking-tight leading-none">Rx</span>
+                  <span className="text-[12px] font-extrabold font-serif leading-none">Rx</span>
                 </button>
                 <MiniTooltip
                   text="Prescription Required"
                   active={activeTooltip === "rx"}
-                  textColor="text-[#84d6b9]"
+                  textColor="text-purple-300"
                 />
               </div>
             )}
@@ -197,9 +198,9 @@ const ProductCard = ({ product }) => {
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("coldChain")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-7 w-7 cursor-pointer items-center justify-center
-                             rounded-full bg-[#0b6c8a] text-white shadow-xs
-                             transition-transform hover:scale-105 active:scale-95 border border-[#0b6c8a]"
-                  aria-label="Cold Chain Product"
+                             rounded-full bg-[#0ea5e9] text-white shadow-xs
+                             transition-transform hover:scale-110 active:scale-95 border border-[#0ea5e9]"
+                  aria-label="Cold Chain Product (2–8°C)"
                 >
                   <Thermometer className="h-3.5 w-3.5" />
                 </button>
@@ -215,23 +216,11 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Information Body */}
-      <div className="flex flex-1 flex-col justify-between p-4 text-left bg-white dark:bg-zinc-900">
+      <div className="flex flex-1 flex-col justify-between p-4 text-left bg-white dark:bg-zinc-900 font-sans">
         <div>
-          {/* Brand / Manufacturer Monospace Tag */}
-          <div className="flex items-center justify-between gap-1 mb-1">
-            <span className="font-clinical-mono text-[10px] font-semibold text-[#5f776e] uppercase tracking-widest truncate">
-              {brandName}
-            </span>
-            {isRx && (
-              <span className="inline-flex items-center gap-1 text-[9px] font-clinical-mono font-bold text-[#157a6d] bg-[#e7f0ea] dark:bg-emerald-950/40 dark:text-emerald-400 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0">
-                <ShieldCheck className="w-2.5 h-2.5 shrink-0" /> RX VERIFIED
-              </span>
-            )}
-          </div>
-
           {/* Product Title */}
           <h3
-            className="font-editorial text-sm sm:text-base font-semibold text-[#172b26] dark:text-zinc-100 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-[#157a6d] transition-colors"
+            className="font-sans text-base sm:text-lg font-bold text-[#1F2937] dark:text-zinc-100 leading-snug line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem] group-hover:text-[#157a6d] transition-colors"
             title={product.name}
           >
             {product.name}
@@ -244,12 +233,12 @@ const ProductCard = ({ product }) => {
                 to={`/molecules/${molecule.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 title={molecule.name}
-                className="font-clinical-mono text-[11px] text-[#157a6d] dark:text-[#38a394] underline hover:text-[#0f6157] truncate block max-w-full"
+                className="font-sans text-[12px] sm:text-xs font-medium text-[#157a6d] dark:text-[#38a394] underline hover:text-[#0f6157] truncate block max-w-full uppercase tracking-wider"
               >
                 {molecule.name}
               </Link>
             ) : (
-              <span className="font-clinical-mono text-[11px] text-[#5f776e]/70 truncate">
+              <span className="font-sans text-[12px] sm:text-xs font-medium text-[#157a6d]/80 dark:text-zinc-400 truncate uppercase tracking-wider">
                 {categoryName}
               </span>
             )}
@@ -257,26 +246,36 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Pricing & Cart Action Block */}
-        <div className="mt-3.5 pt-3 border-t border-dashed border-[#c3d4cc] dark:border-zinc-800">
-          <div className="flex items-baseline justify-between gap-2">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-clinical-mono text-lg sm:text-xl font-bold text-[#172b26] dark:text-zinc-100">
-                ₹{formatPrice(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="font-clinical-mono text-xs text-[#5f776e] line-through">
-                  ₹{formatPrice(product.originalPrice)}
-                </span>
-              )}
-            </div>
-            {savings > 0 && (
-              <span className="font-clinical-mono text-[10px] font-bold text-[#157a6d]">
-                SAVE ₹{formatPrice(savings)}
+        <div className="mt-3">
+          {/* Current Price & MRP */}
+          <div className="flex items-baseline gap-2">
+            <span className="font-sans text-xl sm:text-2xl font-bold text-[#1F2937] dark:text-white leading-none">
+              ₹{formatPrice(product.price)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="font-sans text-xs sm:text-sm text-[#6B7280] dark:text-zinc-500 line-through">
+                ₹{formatPrice(product.originalPrice)}
               </span>
             )}
           </div>
 
-          {/* Cart Stepper OR Add To Cart */}
+          {/* Savings Section with Dashed Divider Above */}
+          <div className="mt-2.5 pt-2 border-t border-dashed border-[#dde8e3] dark:border-zinc-800 min-h-[1.75rem] flex items-center">
+            {savings > 0 ? (
+              <div className="font-sans text-xs sm:text-sm text-[#4B5563] dark:text-zinc-300 font-normal">
+                You Save:{" "}
+                <span className="font-bold text-[#16a34a] dark:text-emerald-400">
+                  ₹{formatPrice(savings)} ({discountPercent}%)
+                </span>
+              </div>
+            ) : (
+              <div className="font-sans text-xs text-[#6B7280] dark:text-zinc-400 font-normal">
+                Best Price Guaranteed
+              </div>
+            )}
+          </div>
+
+          {/* Cart Stepper OR Add To Cart Button */}
           <div className="mt-3">
             {cartQuantity > 0 ? (
               <div className="flex items-center gap-2 w-full h-9">
@@ -289,7 +288,7 @@ const ProductCard = ({ product }) => {
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="font-clinical-mono font-bold text-xs text-[#172b26] dark:text-zinc-100 px-1">
+                  <span className="font-sans font-bold text-xs text-[#172b26] dark:text-zinc-100 px-1">
                     {cartQuantity}
                   </span>
                   <button
@@ -305,7 +304,7 @@ const ProductCard = ({ product }) => {
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="flex-1 h-full py-1.5 px-3 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-clinical-mono font-bold text-xs tracking-wider uppercase flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                  className="flex-1 h-full py-1.5 px-3 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-sans font-bold text-xs tracking-wider uppercase flex items-center justify-center shadow-xs transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap"
                 >
                   Buy Now
                 </button>
@@ -315,7 +314,7 @@ const ProductCard = ({ product }) => {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={isOOS || isAdding}
-                className="w-full py-2 px-3 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-clinical-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-9"
+                className="w-full py-2 px-3 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-sans font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer h-9"
               >
                 {isAdding ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />

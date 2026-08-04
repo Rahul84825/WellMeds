@@ -3,24 +3,19 @@ import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import SEO from "../components/common/SEO";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
-import ConsultationModal from "../components/ConsultationModal";
-import { Sparkles, Phone, FileText, ChevronRight, Mail, MapPin, Clock, Send } from "lucide-react";
-
-const DEFAULT_PHARMACY_LAT = 18.5590;
-const DEFAULT_PHARMACY_LNG = 73.7868;
+import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
+import { Sparkles, Phone, FileText, ChevronRight, Mail, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 
 const wellmedsStoreData = {
-  name: "WellMeds Pharmacy",
-  address: "Shop No 3, Echelon Apartment, Baner - Pashan Link Rd, Baner",
-  city: "Pune",
-  state: "Maharashtra",
-  pincode: "411021",
-  country: "India",
-  phone: "+91 7798795353",
-  email: "info@wellmeds.in",
-  workingHours: "08:00 AM - 11:00 PM (Mon - Sun)",
-  latitude: DEFAULT_PHARMACY_LAT,
-  longitude: DEFAULT_PHARMACY_LNG,
+  name: BUSINESS_INFO.legalName,
+  address: BUSINESS_INFO.address.street,
+  city: BUSINESS_INFO.address.city,
+  state: BUSINESS_INFO.address.state,
+  pincode: BUSINESS_INFO.address.postalCode,
+  country: BUSINESS_INFO.address.country,
+  phone: BUSINESS_INFO.phone,
+  email: BUSINESS_INFO.email,
+  workingHours: BUSINESS_INFO.hours,
 };
 
 const Contact = () => {
@@ -29,7 +24,6 @@ const Contact = () => {
   const [subject, setSubject] = useState("Support");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,14 +94,15 @@ const Contact = () => {
                 <FileText size={15} />
                 <span>Upload Prescription</span>
               </Link>
-              <button
-                type="button"
-                onClick={() => setIsConsultationOpen(true)}
-                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+              <a
+                href={BUSINESS_INFO.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#25D366] hover:bg-[#1ebe5d] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
               >
-                <Phone size={15} />
-                <span>Talk to Pharmacist</span>
-              </button>
+                <MessageSquare size={15} />
+                <span>WhatsApp Us</span>
+              </a>
             </div>
           </div>
         </div>

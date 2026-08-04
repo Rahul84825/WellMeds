@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
+import {
   Search, MapPin, ChevronDown, Loader2, X, ShoppingBag
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
@@ -212,7 +212,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               <Loader2 className="animate-spin text-[#157a6d] shrink-0" size={16} />
             )}
           </div>
-          <button 
+          <button
             type="button"
             onClick={handleSearchSubmit}
             className="search-btn"
@@ -250,7 +250,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
         {/* DROPDOWN AUTOCOMPLETE PANEL (PRESCRIPTION THEMED) */}
         {focused && query.trim().length >= 2 && (
-          <div 
+          <div
             ref={dropdownRef}
             className="rx-dropdown-panel absolute -left-3.5 -right-3.5 sm:-left-5 sm:-right-5 md:-left-8 md:-right-8 top-full mt-3 z-[300] overflow-y-auto max-h-[310px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
           >
@@ -350,12 +350,12 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   }
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={`relative w-full ${isHero ? "max-w-2xl mx-auto" : ""}`}
     >
       {/* SEARCH BAR CONTAINER (NAVBAR PRESCRIPTION THEMED) */}
-      <div 
+      <div
         className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_4px_16px_rgba(23,43,38,0.06)] focus-within:border-[#157a6d] focus-within:ring-2 focus-within:ring-[#157a6d]/15 transition-all duration-300 w-full p-2 gap-3"
       >
         {/* Left: Rx Symbol */}
@@ -396,7 +396,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         </div>
 
         {/* Right: Search button */}
-        <button 
+        <button
           type="button"
           onClick={handleSearchSubmit}
           className="bg-[#157a6d] hover:bg-[#0f6157] text-white font-mono font-bold text-xs letter-spacing-[1.5px] px-5 py-2 rounded-full uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer"
@@ -407,7 +407,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
       {/* DROPDOWN AUTOCOMPLETE PANEL (NAVBAR PRESCRIPTION THEMED) */}
       {focused && query.trim().length >= 2 && (
-        <div 
+        <div
           ref={dropdownRef}
           className="rx-dropdown-panel absolute left-0 right-0 top-full mt-2 z-[300] overflow-y-auto max-h-[350px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
         >
@@ -521,21 +521,20 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
   };
 
   return (
-    <div 
+    <div
       onClick={handleRowClick}
       data-active={active}
-      className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all select-none group text-left cursor-pointer ${
-        active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50 hover:border-slate-100"
-      }`}
+      className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all select-none group text-left cursor-pointer ${active ? "border-[#038076] bg-[#e6f6f4]/20" : "border-transparent hover:bg-slate-50 hover:border-slate-100"
+        }`}
     >
       {/* Product Image */}
-      <div 
+      <div
         className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 p-1 cursor-pointer"
       >
 
-        <img 
-          src={product.image || DEFAULT_PRODUCT_IMAGE} 
-          alt={product.name} 
+        <img
+          src={product.image || DEFAULT_PRODUCT_IMAGE}
+          alt={product.name}
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = DEFAULT_PRODUCT_IMAGE;
@@ -547,7 +546,7 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
       {/* Product Info */}
       <div className="flex-grow min-w-0">
         <div className="flex items-start gap-1">
-          <span 
+          <span
             className="font-bold text-xs text-slate-800 hover:text-[#038076] transition-colors truncate cursor-pointer"
           >
             {product.name}
@@ -558,7 +557,7 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
             </span>
           )}
         </div>
-        
+
         <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
           {product.strength && <span>{product.strength}</span>}
           {product.strength && product.packSize && <span> &bull; </span>}
@@ -622,16 +621,16 @@ const RxProductListItem = ({ product, onSelect, onAddToCart, active }) => {
   };
 
   return (
-    <div 
+    <div
       onClick={handleRowClick}
       data-active={active}
       className="rx-product-item select-none"
     >
       {/* Product Image */}
       <div className="w-11 h-11 bg-white border border-[#dde8e3] rounded-lg flex items-center justify-center shrink-0 p-1">
-        <img 
-          src={product.image || DEFAULT_PRODUCT_IMAGE} 
-          alt={product.name} 
+        <img
+          src={product.image || DEFAULT_PRODUCT_IMAGE}
+          alt={product.name}
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = DEFAULT_PRODUCT_IMAGE;

@@ -277,6 +277,9 @@ productSchema.virtual("id").get(function () {
 productSchema.index({ category: 1 });
 productSchema.index({ surgicalCategory: 1 });
 productSchema.index({ molecules: 1 });
+productSchema.index({ molecules: 1, strength: 1 });
+productSchema.index({ "productSpecifications.dosageForm": 1 });
+productSchema.index({ "productSpecifications.strength": 1 });
 productSchema.index({ specialities: 1 });
 productSchema.index({ productType: 1, isSurgical: 1 });
 productSchema.index({ isGLP1Medicine: 1 });

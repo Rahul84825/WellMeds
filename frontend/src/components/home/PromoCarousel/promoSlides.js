@@ -6,7 +6,7 @@ export const promoSlides = [
     bgGradient: "from-[#004782] via-[#0b5c9e] to-[#086b53]",
     pattern: "cross",
     cta: [
-      { label: "Request via WhatsApp", type: "primary", href: "https://wa.me/917420909445?text=Hello%20WellMeds,%20I%20need%20help%20finding%20a%20medicine.", external: true },
+      { label: "Request via WhatsApp", type: "primary", href: "https://wa.me/917798795353?text=Hello%20WellMeds,%20I%20need%20help%20finding%20a%20medicine.", external: true },
       { label: "Browse Catalog", type: "secondary", to: "/products" }
     ],
     customData: {
@@ -76,7 +76,7 @@ export const promoSlides = [
     pattern: "dna",
     cta: [
       { label: "Upload Prescription Now", type: "primary", to: "/upload-prescription" },
-      { label: "Quick Upload via WhatsApp", type: "secondary", href: "https://wa.me/917420909445?text=Hello%20WellMeds,%20I%20want%20to%20upload%20my%20prescription.", external: true }
+      { label: "Quick Upload via WhatsApp", type: "secondary", href: "https://wa.me/917798795353?text=Hello%20WellMeds,%20I%20want%20to%20upload%20my%20prescription.", external: true }
     ],
     customData: {
       steps: [

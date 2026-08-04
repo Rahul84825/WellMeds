@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
+import MedicineNotFound from "../components/MedicineNotFound";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import ConsultationModal from "../components/ConsultationModal";
 import SEO from "../components/common/SEO";
@@ -296,6 +297,8 @@ const ProductsPage = () => {
                 itemLabel="Products"
               />
             </div>
+          ) : searchVal || searchParam ? (
+            <MedicineNotFound searchQuery={searchVal || searchParam} />
           ) : (
             /* Empty State Card */
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
@@ -306,7 +309,7 @@ const ProductsPage = () => {
                 No Medicines Found
               </h3>
               <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-sans">
-                We couldn't find any medical supplies matching your active filter or search query. Try broadening your keywords.
+                We couldn't find any medical supplies matching your active filter. Try broadening your criteria.
               </p>
               <button
                 type="button"

@@ -3,12 +3,18 @@ import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-const calculateUnitPrice = (prod) => {
-  if (!prod) return 0;
+const parsePackQuantity = (prod) => {
+  if (!prod) return 1;
   const pack = prod.packSize || prod.productSpecifications?.packSize || "";
   const match = pack.match(/(\d+(\.\d+)?)/);
   const qty = match ? parseFloat(match[1]) : 1;
-  return qty > 0 ? (prod.price / qty) : prod.price;
+  return qty > 0 ? qty : 1;
+};
+
+const calculateUnitPrice = (prod) => {
+  if (!prod) return 0;
+  const qty = parsePackQuantity(prod);
+  return prod.price > 0 ? prod.price / qty : 0;
 };
 
 const getSubstituteComparison = (item, baseProduct) => {
@@ -19,9 +25,8 @@ const getSubstituteComparison = (item, baseProduct) => {
   const baseUnit = calculateUnitPrice(baseProduct);
   const itemUnit = calculateUnitPrice(item);
 
-  const hasUnitCalc = baseUnit > 0 && itemUnit > 0 && (baseProduct.packSize || item.packSize);
-  const basePrice = hasUnitCalc ? baseUnit : baseProduct.price;
-  const itemPrice = hasUnitCalc ? itemUnit : item.price;
+  const basePrice = baseUnit > 0 ? baseUnit : baseProduct.price;
+  const itemPrice = itemUnit > 0 ? itemUnit : item.price;
 
   const diffPercent = basePrice > 0
     ? Math.round(((itemPrice - basePrice) / basePrice) * 100)
@@ -36,7 +41,7 @@ const getSubstituteComparison = (item, baseProduct) => {
       ? `${diffPercent}% costlier`
       : `${Math.abs(diffPercent)}% cheaper`;
 
-  const dosageForm = item.productSpecifications?.dosageForm || item.productSpecifications?.packSize || item.packSize || "Injection";
+  const dosageForm = item.productSpecifications?.dosageForm || item.productSpecifications?.packSize || item.packSize || "Unit";
 
   return {
     diffPercent,
@@ -107,20 +112,27 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
   }, [substituteProducts, product]);
 
   const hasSubstitutes = sortedSubstitutes && sortedSubstitutes.length > 0;
+  const cardSubstitutes = sortedSubstitutes.slice(0, 3);
 
   return (
     <div className="pdp-paper-card p-4 rounded-xl select-none w-full flex flex-col text-left font-mono">
-      <h3 className="pdp-serif-title text-sm font-bold text-[#172b26] pb-2 pdp-dashed-line mb-2">
-        Alternative Substitutes
+      <h3 className="pdp-serif-title text-sm font-bold text-[#172b26] pb-2 pdp-dashed-line mb-2 flex items-center justify-between">
+        <span>Alternative Substitutes</span>
+        {hasSubstitutes && (
+          <span className="text-[11px] font-semibold text-[#157a6d] bg-[#e6f4f0] px-2 py-0.5 rounded-full">
+            {sortedSubstitutes.length} available
+          </span>
+        )}
       </h3>
+
       {!hasSubstitutes ? (
-        <div className="text-center py-3 text-xs text-[#5f776e] font-medium">
-          No substitute products recorded.
+        <div className="text-center py-4 px-2 text-xs text-[#5f776e] font-medium leading-relaxed bg-[#f8faf9] rounded-lg border border-[#e2ece8] my-1">
+          No clinically equivalent substitutes available. Please consult your doctor or pharmacist.
         </div>
       ) : (
         <>
           <div className="flex flex-col divide-y divide-[#dde8e3]">
-            {sortedSubstitutes.slice(0, 2).map((item, idx) => {
+            {cardSubstitutes.map((item, idx) => {
               const { diffPercent, isCostlier, comparisonLabel, dosageForm } = getSubstituteComparison(item, product);
 
               return (
@@ -140,7 +152,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                   </div>
                   <div className="text-right shrink-0 whitespace-nowrap">
                     <p className="text-xs font-semibold text-[#172b26]">
-                      ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
+                      ₹ {item.price ? item.price.toFixed(2) : "0.00"}
                     </p>
                     <p className={`text-[11px] font-bold mt-0.5 ${diffPercent === 0
                       ? "text-[#5f776e]"
@@ -156,19 +168,19 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
             })}
           </div>
 
-          {sortedSubstitutes.length > 2 && (
+          {sortedSubstitutes.length > 3 && (
             <button
               ref={viewAllBtnRef}
               onClick={() => setIsModalOpen(true)}
-              className="pdp-btn-primary mt-3 w-full py-2.5 text-xs"
+              className="pdp-btn-primary mt-3 w-full py-2.5 text-xs font-bold flex items-center justify-center gap-1"
             >
-              View All Substitutes <span className="text-sm">→</span>
+              View All {sortedSubstitutes.length} Substitutes <span className="text-sm">→</span>
             </button>
           )}
         </>
       )}
 
-      {/* Centered Modal */}
+      {/* Centered Modal — Displays ALL valid substitutes without truncation */}
       {isModalOpen && createPortal(
         <div
           onClick={handleBackdropClick}
@@ -179,16 +191,21 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           <div
             ref={modalContainerRef}
             onClick={(e) => e.stopPropagation()}
-            className="w-full sm:w-[92vw] max-w-[500px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 text-left z-[100000]"
+            className="w-full sm:w-[92vw] max-w-[540px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800 text-left z-[100000]"
           >
             <div className="p-4 bg-[#f0f8f5] dark:bg-zinc-800/90 border-b border-[#dde8e3] dark:border-zinc-700 flex justify-between items-center text-left">
-              <h3 className="pdp-serif-title text-base font-bold text-[#157a6d] dark:text-[#84d6b9]">
-                Available Substitutes
-              </h3>
+              <div>
+                <h3 className="pdp-serif-title text-base font-bold text-[#157a6d] dark:text-[#84d6b9]">
+                  Available Substitutes ({sortedSubstitutes.length})
+                </h3>
+                <p className="text-[11px] text-[#5f776e] dark:text-zinc-400 mt-0.5">
+                  Clinically equivalent medicines with matching molecule, strength & dosage form
+                </p>
+              </div>
               <button
                 onClick={() => setIsModalOpen(false)}
                 aria-label="Close substitutes modal"
-                className="p-1.5 text-[#5f776e] hover:text-[#172b26] dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-white/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                className="p-1.5 text-[#5f776e] hover:text-[#172b26] dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-white/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer shrink-0 ml-2"
               >
                 <X size={18} className="stroke-[2.5]" />
               </button>
@@ -213,12 +230,12 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
                         {item.name}
                       </h4>
                       <p className="text-[10px] text-[#5f776e] dark:text-zinc-400 font-bold uppercase mt-0.5 truncate">
-                        {item.manufacturer || item.brand || "WellMeds"}
+                        {item.manufacturer || item.brand || "WellMeds"} • {item.packSize || dosageForm}
                       </p>
                     </div>
                     <div className="text-right shrink-0 whitespace-nowrap">
                       <p className="text-xs font-semibold text-[#172b26] dark:text-zinc-200">
-                        ₹ {item.price ? item.price.toFixed(2) : "0.00"}/{dosageForm}
+                        ₹ {item.price ? item.price.toFixed(2) : "0.00"}
                       </p>
                       <p className={`text-[11px] font-bold mt-0.5 ${diffPercent === 0
                         ? "text-[#5f776e] dark:text-zinc-400"

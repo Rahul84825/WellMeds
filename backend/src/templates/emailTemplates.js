@@ -160,7 +160,7 @@ export const wrapBaseTemplate = ({ title, bodyContent }) => `
       <!-- Footer -->
       <div class="footer">
         <p><strong>WellMeds Healthcare Hub</strong></p>
-        <p>Toll-Free Helpline: +91 74209 09445 | Email: <a href="mailto:support@wellmeds.in">support@wellmeds.in</a></p>
+        <p>Phone: +91 7798795353 | Email: <a href="mailto:info@wellmeds.in">info@wellmeds.in</a></p>
         <p>Website: <a href="https://wellmeds.in" target="_blank">www.wellmeds.in</a></p>
         <hr style="border:0; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
         <p>© ${new Date().getFullYear()} WellMeds. All rights reserved.<br />This is an automated notification. Please do not reply directly to this email.</p>

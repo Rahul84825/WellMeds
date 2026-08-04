@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import SEO from "../components/common/SEO";
 import apiInstance from "../services/api/api";
+import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
 import "./MaintenancePage.css";
 
 const LOGO_BASE64 =
@@ -136,9 +137,9 @@ const MaintenancePage = () => {
         <div className="whatsapp-alt">
           Prefer WhatsApp?{" "}
           <a
-            href="https://wa.me/917798795353?text=Hi%2C%20please%20notify%20me%20when%20WellMeds.in%20goes%20live!"
+            href={getWhatsAppLink("Hi, please notify me when WellMeds.in goes live!")}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
           >
             Message us to get notified
           </a>

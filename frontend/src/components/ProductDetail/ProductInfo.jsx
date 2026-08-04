@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import MoleculeLink from "./MoleculeLink";
+import ColdChainInfoButton from "./ColdChainInfoButton";
 import { Share2, Stethoscope, Snowflake, Pill } from "lucide-react";
 
 const ProductAttributeIcon = ({ type }) => {
@@ -57,8 +58,9 @@ const ProductInfo = ({ product, handleShare }) => {
           </span>
         )}
         {product.isColdChain && (
-          <span className="text-sky-900 font-bold flex items-center gap-2 bg-sky-50 px-3 py-1.5 rounded-sm border border-sky-200">
+          <span className="text-sky-900 font-bold flex items-center gap-1.5 bg-sky-50 px-3 py-1.5 rounded-sm border border-sky-200">
             <ProductAttributeIcon type="coldChain" /> Cold Chain Storage
+            <ColdChainInfoButton isColdChain={product.isColdChain} />
           </span>
         )}
       </div>

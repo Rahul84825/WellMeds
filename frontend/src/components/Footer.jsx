@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { BUSINESS_INFO } from "../config/businessInfo";
 import {
   ShieldCheck,
   Award,
@@ -98,22 +99,25 @@ const Footer = () => {
                 Well<span className="text-[#84d6b9]">Meds</span>
               </span>
             </Link>
-            <p className="font-sans text-xs text-[#a3c2b8] leading-relaxed max-w-sm">
-              India’s specialty digital pharmacy committed to authentic prescription drugs, cold-chain biologicals, and expert pharmacist consultations.
-            </p>
+            
+            {/* Address */}
+            <div className="flex items-start gap-2 text-xs text-[#a3c2b8] leading-relaxed">
+              <MapPin className="w-4 h-4 text-[#84d6b9] shrink-0 mt-0.5" />
+              <span>{BUSINESS_INFO.address.shortFormatted}</span>
+            </div>
 
             <div className="pt-2 space-y-2 font-clinical-mono text-xs text-[#d3e8e1]">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#84d6b9] shrink-0" />
-                <span>Rx Verification: <strong>24/7 Available</strong></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#84d6b9] shrink-0" />
-                <span>Dispatch Hours: <strong>Mon–Sat 8:00 AM – 10:00 PM</strong></span>
-              </div>
-              <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#84d6b9] shrink-0" />
-                <span>Customer Helpline: <strong>+91-800-WELLMEDS</strong></span>
+                <span>Phone: <strong>{BUSINESS_INFO.phone}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#84d6b9] shrink-0" />
+                <span>Email: <strong>{BUSINESS_INFO.email}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#84d6b9] shrink-0" />
+                <span>Open: <strong>{BUSINESS_INFO.hoursDisplay}</strong></span>
               </div>
             </div>
           </div>

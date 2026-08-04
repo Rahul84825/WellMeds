@@ -1,5 +1,5 @@
 import express from "express";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSimilarProducts, searchAll, getTrendingProducts, searchProductsResults } from "../controllers/productController.js";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getSubstitutes, getSimilarProducts, searchAll, getTrendingProducts, searchProductsResults } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 import { searchLimiter } from "../middleware/rateLimitMiddleware.js";
@@ -23,6 +23,9 @@ router.route("/:id")
   .get(getProduct)
   .put(protect, admin, updateProduct)
   .delete(protect, admin, deleteProduct);
+
+router.route("/:id/substitutes")
+  .get(getSubstitutes);
 
 router.route("/:id/similar")
   .get(getSimilarProducts);

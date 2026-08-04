@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { BUSINESS_INFO } from "../config/businessInfo";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -146,13 +147,13 @@ const HowWeKeepYouSafePage = () => {
 
               <div className="pt-2 flex flex-wrap gap-3">
                 <a
-                  href="https://wa.me/919511289914"
+                  href={BUSINESS_INFO.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2"
+                  className="bg-[#25D366] hover:bg-[#1ebe5d] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2"
                 >
-                  <Phone size={16} />
-                  <span>Talk to Pharmacist</span>
+                  <MessageSquare size={16} />
+                  <span>WhatsApp Us</span>
                 </a>
                 <Link
                   to="/upload-prescription"
@@ -482,13 +483,13 @@ const HowWeKeepYouSafePage = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <a
-              href="https://wa.me/919511289914"
+              href={BUSINESS_INFO.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto bg-[#25D366] hover:bg-[#1ebe5d] text-white px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center justify-center gap-2"
             >
-              <Phone size={16} />
-              <span>Talk to Pharmacist</span>
+              <MessageSquare size={16} />
+              <span>WhatsApp Us</span>
             </a>
 
             <Link

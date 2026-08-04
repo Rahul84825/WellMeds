@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import SEO from "../components/common/SEO";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
+import { BUSINESS_INFO } from "../config/businessInfo";
 import { formatCurrency } from "../utils/currency";
 import { useCart } from "../hooks/useCart";
 import {
@@ -412,8 +413,8 @@ const PrescriptionTrackerPage = () => {
               <span className="flex items-center gap-1.5">
                 <PhoneCall size={14} /> Need Help?
               </span>
-              <a href="tel:+919876543210" className="hover:underline text-[#02665e] font-extrabold">
-                Call Pharmacist
+              <a href={`tel:${BUSINESS_INFO.phoneRaw}`} className="hover:underline text-[#02665e] font-extrabold">
+                Call {BUSINESS_INFO.phone}
               </a>
             </div>
           </div>

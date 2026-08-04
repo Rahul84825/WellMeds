@@ -98,16 +98,20 @@ export const productService = {
     return data.success;
   },
 
-  async getSimilarProducts(id) {
+  async getSubstitutes(id) {
     if (getSimilarProductPromises[id]) {
       return getSimilarProductPromises[id];
     }
-    getSimilarProductPromises[id] = apiInstance.get(`/products/${id}/similar`)
-      .then(data => data.products || [])
+    getSimilarProductPromises[id] = apiInstance.get(`/products/${id}/substitutes`)
+      .then(data => data.substitutes || data.products || [])
       .finally(() => {
         delete getSimilarProductPromises[id];
       });
     return getSimilarProductPromises[id];
+  },
+
+  async getSimilarProducts(id) {
+    return productService.getSubstitutes(id);
   },
 
   async getTrendingProducts() {

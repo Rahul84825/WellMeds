@@ -6,6 +6,7 @@ import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import SEO from "../components/common/SEO";
 import Loader from "../components/Loader";
 import api from "../services/api";
+import { BUSINESS_INFO } from "../config/businessInfo";
 import {
   CheckCircle2,
   PackageCheck,
@@ -526,11 +527,11 @@ const OrderSuccess = () => {
               Our clinical care team is available 24/7 for any queries regarding your prescription or order status.
             </p>
             <div className="flex items-center gap-4 pt-1 text-xs font-bold text-[#157a6d] dark:text-emerald-400">
-              <a href="tel:+919876543210" className="flex items-center gap-1 hover:underline">
-                <Phone size={14} /> Call Support
+              <a href={`tel:${BUSINESS_INFO.phoneRaw}`} className="flex items-center gap-1 hover:underline">
+                <Phone size={14} /> Call {BUSINESS_INFO.phone}
               </a>
               <span>•</span>
-              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
+              <a href={BUSINESS_INFO.whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
                 <MessageSquare size={14} /> WhatsApp
               </a>
             </div>

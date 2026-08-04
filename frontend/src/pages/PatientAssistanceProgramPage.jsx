@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import papHeroBg from "../assets/PAP/PAP_.png";
 import SEO from "../components/common/SEO";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import { BUSINESS_INFO } from "../config/businessInfo";
 import ConsultationModal from "../components/ConsultationModal";
 
 import {
@@ -469,14 +470,14 @@ const PatientAssistanceProgramPage = () => {
             <div className="p-5 rounded-2xl bg-[#f4f9f7] dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 space-y-2">
               <Phone size={22} className="text-[#157a6d]" />
               <h4 className="font-bold text-xs text-[#172b26] dark:text-white">Phone Support</h4>
-              <p className="text-xs font-mono font-bold text-[#172b26] dark:text-white">+91 95112 89914</p>
-              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Mon–Sat (9am–7pm)</p>
+              <p className="text-xs font-mono font-bold text-[#172b26] dark:text-white">{BUSINESS_INFO.phoneDisplay}</p>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">{BUSINESS_INFO.hoursDisplay}</p>
             </div>
 
             <div className="p-5 rounded-2xl bg-[#f4f9f7] dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 space-y-2">
               <MessageSquare size={22} className="text-[#25D366]" />
               <h4 className="font-bold text-xs text-[#172b26] dark:text-white">WhatsApp Direct</h4>
-              <p className="text-xs font-mono font-bold text-[#25D366]">+91 95112 89914</p>
+              <a href={BUSINESS_INFO.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-mono font-bold text-[#25D366] hover:underline block">{BUSINESS_INFO.phoneDisplay}</a>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400">Instant Chat & Files</p>
             </div>
           </div>

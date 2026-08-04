@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/common/SEO";
+import { BUSINESS_INFO } from "../config/businessInfo";
 
 const ImportedMedicinesPage = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -375,22 +376,22 @@ const ImportedMedicinesPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-md max-w-3xl mx-auto text-left pt-md">
               <div className="border border-outline-variant/30 rounded-2xl p-md bg-background dark:bg-zinc-900/60">
                 <span className="material-symbols-outlined text-primary text-2xl mb-xs">mail</span>
-                <h4 className="font-bold text-xs text-on-surface">Email Inquiries</h4>
-                <p className="text-xs text-on-surface-variant font-bold mt-xs truncate">imports@wellmeds.in</p>
-                <p className="text-[10px] text-on-surface-variant/70 font-semibold truncate">support@wellmeds.in</p>
+                <h4 className="font-bold text-xs text-on-surface">Email Support</h4>
+                <p className="text-xs text-on-surface-variant font-bold mt-xs">{BUSINESS_INFO.email}</p>
+                <p className="text-[10px] text-on-surface-variant/70 font-semibold truncate">{BUSINESS_INFO.email}</p>
               </div>
 
               <div className="border border-outline-variant/30 rounded-2xl p-md bg-background dark:bg-zinc-900/60">
                 <span className="material-symbols-outlined text-primary text-2xl mb-xs">call</span>
                 <h4 className="font-bold text-xs text-on-surface">Phone Support</h4>
-                <p className="text-xs text-on-surface-variant font-bold mt-xs">+91 XXXXX XXXXX</p>
-                <p className="text-[10px] text-on-surface-variant/70 font-semibold">Mon - Sat (9am - 7pm)</p>
+                <p className="text-xs text-on-surface-variant font-bold mt-xs">{BUSINESS_INFO.phone}</p>
+                <p className="text-[10px] text-on-surface-variant/70 font-semibold">{BUSINESS_INFO.hoursDisplay}</p>
               </div>
 
               <div className="border border-outline-variant/30 rounded-2xl p-md bg-background dark:bg-zinc-900/60">
                 <span className="material-symbols-outlined text-secondary text-2xl mb-xs">chat</span>
                 <h4 className="font-bold text-xs text-on-surface">WhatsApp Direct</h4>
-                <p className="text-xs text-on-surface-variant font-bold mt-xs">+91 XXXXX XXXXX</p>
+                <p className="text-xs text-on-surface-variant font-bold mt-xs">{BUSINESS_INFO.phoneDisplay}</p>
                 <p className="text-[10px] text-on-surface-variant/70 font-semibold">Instant reply via WhatsApp</p>
               </div>
             </div>
@@ -398,7 +399,7 @@ const ImportedMedicinesPage = () => {
             {/* Quick Action Buttons */}
             <div className="flex flex-wrap justify-center gap-md pt-sm">
               <a 
-                href="https://wa.me/910000000000" 
+                href={BUSINESS_INFO.whatsappUrl} 
                 target="_blank" 
                 rel="noreferrer"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-lg py-sm rounded-xl font-bold transition-all shadow-md active:scale-95 text-xs flex items-center gap-xs"
@@ -406,13 +407,13 @@ const ImportedMedicinesPage = () => {
                 <span className="material-symbols-outlined text-[16px]">chat</span> WhatsApp Us
               </a>
               <a 
-                href="mailto:imports@wellmeds.in"
+                href={`mailto:${BUSINESS_INFO.email}`}
                 className="bg-[#004782] hover:bg-[#003866] text-white px-lg py-sm rounded-xl font-bold transition-all shadow-md active:scale-95 text-xs flex items-center gap-xs"
               >
                 <span className="material-symbols-outlined text-[16px]">mail</span> Email Support
               </a>
               <a 
-                href="tel:+910000000000"
+                href={`tel:${BUSINESS_INFO.phoneRaw}`}
                 className="border border-[#004782]/45 hover:bg-[#004782]/5 text-[#004782] px-lg py-sm rounded-xl font-bold transition-all active:scale-95 text-xs flex items-center gap-xs"
               >
                 <span className="material-symbols-outlined text-[16px]">call</span> Call Helpline

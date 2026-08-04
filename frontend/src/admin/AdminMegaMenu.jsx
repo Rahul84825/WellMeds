@@ -540,7 +540,7 @@ const AdminMegaMenu = () => {
                 <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wide font-black">Route / Link URL</label>
                 <input
                   type="text"
-                  placeholder="e.g. /offers or tel:+917420909445"
+                  placeholder="e.g. /offers or tel:+917798795353"
                   value={route}
                   onChange={(e) => setRoute(e.target.value)}
                   className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"

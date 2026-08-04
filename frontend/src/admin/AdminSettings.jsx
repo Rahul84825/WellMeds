@@ -26,7 +26,7 @@ const AdminSettings = () => {
   const [name, setName] = useState(user?.name || "Dr. Claire Wilson");
   const [email, setEmail] = useState(user?.email || "admin@wellmeds.in");
   const [avatar, setAvatar] = useState(user?.avatar || "");
-  const [phone, setPhone] = useState(user?.phone || "+91 9876543210");
+  const [phone, setPhone] = useState(user?.phone || "+91 7798795353");
 
   // Shop Settings
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(499);

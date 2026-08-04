@@ -3,6 +3,7 @@ import { Category } from "../models/Category.js";
 import { MedicalSpeciality } from "../models/MedicalSpeciality.js";
 import { Molecule } from "../models/Molecule.js";
 import { SurgicalCategory } from "../models/SurgicalCategory.js";
+import { getClinicalSubstitutesForProduct } from "../services/substituteService.js";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
@@ -517,38 +518,35 @@ export const deleteProduct = async (req, res, next) => {
   }
 };
 
-export const getSimilarProducts = async (req, res, next) => {
+export const getSubstitutes = async (req, res, next) => {
   const { id } = req.params;
   try {
-    let currentProduct;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      currentProduct = await Product.findById(id);
-    } else {
-      currentProduct = await Product.findOne({ slug: id });
-    }
-
-    if (!currentProduct) {
+    const result = await getClinicalSubstitutesForProduct(id);
+    if (!result.success && result.message === "Product not found") {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    if (!currentProduct.molecules || currentProduct.molecules.length === 0) {
-      return res.status(200).json({ success: true, products: [] });
-    }
+    const limitNum = parseInt(req.query.limit);
+    const substitutes = (limitNum && limitNum > 0)
+      ? result.substitutes.slice(0, limitNum)
+      : result.substitutes;
 
-    const similar = await Product.find({
-      _id: { $ne: currentProduct._id },
-      molecules: { $in: currentProduct.molecules }
-    })
-      .select("name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired isNonRefundable badge molecules brand similarMedicinePriority")
-      .populate("molecules", "name slug")
-      .sort({ similarMedicinePriority: -1 })
-      .limit(3);
-
-    res.status(200).json({ success: true, products: similar });
+    res.status(200).json({
+      success: true,
+      count: substitutes.length,
+      totalSubstitutes: result.substitutes.length,
+      substitutes,
+      products: substitutes,
+    });
   } catch (error) {
     next(error);
   }
 };
+
+export const getSimilarProducts = async (req, res, next) => {
+  return getSubstitutes(req, res, next);
+};
+
 
 // ─── Universal Search Endpoints ──────────────────────────────────────────────
 export const searchAll = async (req, res, next) => {

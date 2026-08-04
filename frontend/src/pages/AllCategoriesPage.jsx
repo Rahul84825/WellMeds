@@ -99,25 +99,25 @@ const AllCategoriesPage = () => {
           </div>
         </div>
 
-        {/* ── CATEGORIES GRID ── */}
-        <div>
+        {/* ── CATEGORIES GRID WRAPPED IN A SINGLE BIG WHITE CARD ── */}
+        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-8 gap-x-5 justify-items-center">
               {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="w-[110px] md:w-[170px] flex flex-col items-center animate-pulse">
-                  <div className="w-[110px] h-[110px] md:w-[170px] md:h-[170px] bg-white dark:bg-zinc-800 rounded-[20px] border border-slate-200 dark:border-zinc-700" />
+                <div key={i} className="w-[110px] md:w-[155px] flex flex-col items-center animate-pulse">
+                  <div className="w-[110px] h-[110px] md:w-[155px] md:h-[155px] bg-slate-100 dark:bg-zinc-800 rounded-[20px] border border-slate-200 dark:border-zinc-700" />
                   <div className="h-3.5 bg-slate-200 dark:bg-zinc-800 rounded w-20 mt-2" />
                 </div>
               ))}
             </div>
           ) : categories.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-8 gap-x-5 justify-items-center">
               {categories.map((cat, idx) => (
                 <CategoryCard key={(cat._id || cat.id)?.toString()} category={cat} index={idx} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">
+            <div className="text-center py-16 space-y-4 max-w-lg mx-auto">
               <div className="w-14 h-14 bg-[#f4f9f7] text-[#157a6d] rounded-full flex items-center justify-center mx-auto border border-emerald-200">
                 <FolderOpen size={28} />
               </div>

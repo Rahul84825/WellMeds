@@ -30,7 +30,7 @@ const seedDefaultItems = async () => {
     { type: "quick-link", name: "PAP Auto Refill", route: "/patient-assistance-program", isExternal: false, icon: "Handshake", sortOrder: 0, visible: true },
     { type: "quick-link", name: "Upload Prescription", route: "/upload-prescription", isExternal: false, icon: "FileText", sortOrder: 1, visible: true },
     { type: "quick-link", name: "Today's Offers", route: "/offers", isExternal: false, icon: "Percent", sortOrder: 2, visible: true },
-    { type: "quick-link", name: "Talk to Pharmacist", route: "tel:+917420909445", isExternal: true, icon: "PhoneCall", isHelpCard: true, helpSubtext: "Free support from licensed pharmacists.", sortOrder: 3, visible: true }
+    { type: "quick-link", name: "Contact Customer Care", route: "tel:+917798795353", isExternal: true, icon: "PhoneCall", isHelpCard: true, helpSubtext: "24/7 Support: +91 7798795353", sortOrder: 3, visible: true }
   ];
 
   await MegaMenuItem.insertMany(defaults);

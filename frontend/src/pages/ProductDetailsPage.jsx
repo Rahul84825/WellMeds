@@ -109,7 +109,7 @@ const ProductDetails = () => {
 
         // Fetch remaining data in parallel
         const [substitutes, allProds] = await Promise.all([
-          api.getSimilarProducts(prod._id || prod.id).catch(() => []),
+          api.getSubstitutes(prod._id || prod.id).catch(() => []),
           api.getProductsList().catch(() => [])
         ]);
 
@@ -123,18 +123,8 @@ const ProductDetails = () => {
           setRelatedProducts(related);
         }
 
-        // Substitute products: fetch dynamically using matching molecules sorted by priority
-        if (substitutes && substitutes.length > 0) {
-          setSubstituteProducts(substitutes);
-        } else {
-          // Fallback: same category
-          const prodCatId = prod.category?._id || prod.category;
-          const fallback = allProds.filter(p => {
-            const pCatId = p.category?._id || p.category;
-            return pCatId && prodCatId && pCatId.toString() === prodCatId.toString() && p.slug !== prod.slug;
-          }).slice(0, 4);
-          setSubstituteProducts(fallback);
-        }
+        // Substitute products: strictly clinically equivalent substitutes only (zero category fallback)
+        setSubstituteProducts(Array.isArray(substitutes) ? substitutes : []);
 
         // Update recently viewed in localStorage
         try {
