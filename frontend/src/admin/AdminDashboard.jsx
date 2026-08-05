@@ -4,14 +4,14 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatCurrency } from "../utils/currency";
 import { formatDate } from "../utils/date";
-import { 
-  DollarSign, 
-  ShoppingBag, 
-  AlertCircle, 
-  TrendingUp, 
-  Calendar, 
-  FileText, 
-  Users, 
+import {
+  DollarSign,
+  ShoppingBag,
+  AlertCircle,
+  TrendingUp,
+  Calendar,
+  FileText,
+  Users,
   Activity,
   Package,
   FolderOpen,
@@ -27,7 +27,7 @@ import {
 // ──────────────────────────────────────────────────────────────────────
 const BusinessChart = ({ data, activeTab, setActiveTab }) => {
   const [hoverIndex, setHoverIndex] = useState(null);
-  
+
   if (!data || data.length === 0) {
     return (
       <div className="h-48 flex items-center justify-center bg-slate-50 dark:bg-zinc-950 rounded-xl">
@@ -39,24 +39,24 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
   const metric = activeTab === "revenue" ? "sales" : "orders";
   const values = data.map(d => d[metric]);
   const maxValue = Math.max(...values, 5); // Fallback limit to avoid division by 0
-  
+
   const width = 600;
   const height = 240;
   const paddingLeft = 55;
   const paddingRight = 20;
   const paddingTop = 30;
   const paddingBottom = 40;
-  
+
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
-  
+
   const points = data.map((d, index) => {
     const x = paddingLeft + (index / (data.length - 1)) * chartWidth;
     const ratio = maxValue > 0 ? d[metric] / maxValue : 0;
     const y = paddingTop + chartHeight - ratio * chartHeight;
     return { x, y, ...d };
   });
-  
+
   let pathD = "";
   if (points.length > 0) {
     pathD = `M ${points[0].x} ${points[0].y}`;
@@ -70,12 +70,12 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
       pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
     }
   }
-  
+
   let areaD = "";
   if (points.length > 0) {
     areaD = `${pathD} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`;
   }
-  
+
   return (
     <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm relative">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
@@ -84,29 +84,27 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
           <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Real-time daily transaction analysis</p>
         </div>
         <div className="flex bg-slate-50 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-150 dark:border-zinc-800">
-          <button 
+          <button
             onClick={() => setActiveTab("revenue")}
-            className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${
-              activeTab === "revenue" 
-                ? "bg-[#004782] text-white shadow-xs" 
+            className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${activeTab === "revenue"
+                ? "bg-[#004782] text-white shadow-xs"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
-            }`}
+              }`}
           >
             Revenue (₹)
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("orders")}
-            className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${
-              activeTab === "orders" 
-                ? "bg-[#004782] text-white shadow-xs" 
+            className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${activeTab === "orders"
+                ? "bg-[#004782] text-white shadow-xs"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
-            }`}
+              }`}
           >
             Orders
           </button>
         </div>
       </div>
-      
+
       <div className="relative w-full overflow-hidden select-none">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
           <defs>
@@ -115,27 +113,27 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
               <stop offset="100%" stopColor="#004782" stopOpacity="0.0" />
             </linearGradient>
           </defs>
-          
+
           {/* Grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((r, i) => {
             const y = paddingTop + chartHeight * r;
             const gridVal = maxValue - r * maxValue;
             return (
               <g key={i} className="opacity-40 dark:opacity-20">
-                <line 
-                  x1={paddingLeft} 
-                  y1={y} 
-                  x2={width - paddingRight} 
-                  y2={y} 
-                  stroke="#cbd5e1" 
-                  strokeWidth="0.5" 
-                  strokeDasharray="4 4" 
+                <line
+                  x1={paddingLeft}
+                  y1={y}
+                  x2={width - paddingRight}
+                  y2={y}
+                  stroke="#cbd5e1"
+                  strokeWidth="0.5"
+                  strokeDasharray="4 4"
                   className="dark:stroke-zinc-700"
                 />
-                <text 
-                  x={paddingLeft - 8} 
-                  y={y + 3} 
-                  textAnchor="end" 
+                <text
+                  x={paddingLeft - 8}
+                  y={y + 3}
+                  textAnchor="end"
                   className="fill-slate-400 dark:fill-zinc-400 font-bold text-[8px]"
                 >
                   {activeTab === "revenue" ? `₹${Math.round(gridVal).toLocaleString()}` : Math.round(gridVal)}
@@ -143,52 +141,52 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
               </g>
             );
           })}
-          
+
           {/* Line and Area */}
           <path d={areaD} fill="url(#chart-glow)" className="transition-all duration-300" />
           <path d={pathD} fill="none" stroke="#004782" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-300" />
-          
+
           {/* Points */}
           {points.map((p, i) => (
             <g key={i}>
-              <circle 
-                cx={p.x} 
-                cy={p.y} 
-                r="18" 
-                fill="transparent" 
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r="18"
+                fill="transparent"
                 className="cursor-pointer"
                 onMouseEnter={() => setHoverIndex(i)}
                 onMouseLeave={() => setHoverIndex(null)}
               />
-              <circle 
-                cx={p.x} 
-                cy={p.y} 
-                r={hoverIndex === i ? "5" : "3"} 
-                fill={hoverIndex === i ? "#004782" : "#ffffff"} 
-                stroke="#004782" 
-                strokeWidth={hoverIndex === i ? "2.5" : "1.5"} 
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={hoverIndex === i ? "5" : "3"}
+                fill={hoverIndex === i ? "#004782" : "#ffffff"}
+                stroke="#004782"
+                strokeWidth={hoverIndex === i ? "2.5" : "1.5"}
                 className="transition-all duration-150 pointer-events-none"
               />
             </g>
           ))}
-          
+
           {/* Labels */}
           {points.map((p, i) => (
-            <text 
-              key={i} 
-              x={p.x} 
-              y={height - paddingBottom + 18} 
-              textAnchor="middle" 
+            <text
+              key={i}
+              x={p.x}
+              y={height - paddingBottom + 18}
+              textAnchor="middle"
               className="fill-slate-400 dark:fill-zinc-500 font-extrabold text-[8px]"
             >
               {p.day}
             </text>
           ))}
         </svg>
-        
+
         {/* Tooltip */}
         {hoverIndex !== null && points[hoverIndex] && (
-          <div 
+          <div
             className="absolute bg-slate-900/95 dark:bg-zinc-950/95 text-white p-2.5 rounded-xl shadow-xl border border-slate-800 dark:border-zinc-800 text-[10px] space-y-0.5 pointer-events-none z-10"
             style={{
               left: `${(points[hoverIndex].x / width) * 100}%`,
@@ -211,9 +209,9 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
 // ──────────────────────────────────────────────────────────────────────
 const OrderStatusDistribution = ({ distribution }) => {
   if (!distribution || distribution.length === 0) return null;
-  
+
   const total = distribution.reduce((sum, item) => sum + item.count, 0);
-  
+
   const statusThemes = {
     "Pending": { color: "bg-amber-500", text: "text-amber-500" },
     "Processing": { color: "bg-blue-500", text: "text-blue-500" },
@@ -250,7 +248,7 @@ const OrderStatusDistribution = ({ distribution }) => {
                 </span>
               </div>
               <div className="w-full h-1.5 bg-slate-50 dark:bg-zinc-950 rounded-full overflow-hidden border border-slate-100/50 dark:border-zinc-800/50">
-                <div 
+                <div
                   className={`h-full rounded-full ${theme.color} transition-all duration-500`}
                   style={{ width: `${percentage}%` }}
                 />
@@ -268,9 +266,9 @@ const OrderStatusDistribution = ({ distribution }) => {
 // ──────────────────────────────────────────────────────────────────────
 const CategoryDistribution = ({ distribution }) => {
   if (!distribution || distribution.length === 0) return null;
-  
+
   const maxVal = Math.max(...distribution.map(d => d.count), 1);
-  
+
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-md">
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-2">
@@ -290,7 +288,7 @@ const CategoryDistribution = ({ distribution }) => {
                 </span>
               </div>
               <div className="w-full h-1.5 bg-slate-50 dark:bg-zinc-950 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-[#004782] dark:bg-[#a4c9ff]/80 rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
@@ -418,7 +416,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-lg animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Title Block with Redesigned Excel Download Buttons */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
@@ -440,7 +438,7 @@ const Dashboard = () => {
             )}
             <span>Sales Report (Excel)</span>
           </button>
-          
+
           <button
             onClick={handleDownloadCustomers}
             disabled={downloadingCustomers}
@@ -458,7 +456,7 @@ const Dashboard = () => {
 
       {/* Grid: 4 Primary Metric Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
-        
+
         {/* Total Revenue Card */}
         <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200 glass-card">
           <div className="p-sm rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#086b53] dark:text-emerald-400">
@@ -515,7 +513,7 @@ const Dashboard = () => {
 
       {/* Grid: 5 Auxiliary Metric Widgets */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-sm">
-        
+
         <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Products</p>
           <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
@@ -560,7 +558,7 @@ const Dashboard = () => {
 
       {/* Grid: SVG Performance Chart & Out of Stock Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-md">
-        
+
         {/* Business Analytics Line Graph */}
         <BusinessChart data={dailySales} activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -571,7 +569,7 @@ const Dashboard = () => {
               <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Out of Stock Alerts</h3>
               <AlertCircle size={14} className="text-red-500 animate-pulse" />
             </div>
-            
+
             <div className="space-y-sm mt-sm">
               {outOfStockProducts.length > 0 ? (
                 outOfStockProducts.map(p => (
@@ -604,7 +602,7 @@ const Dashboard = () => {
 
       {/* Grid: Order Status & Category Distribution */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-        
+
         {/* Status Distribution */}
         <OrderStatusDistribution distribution={orderStatusDistribution} />
 
@@ -615,7 +613,7 @@ const Dashboard = () => {
 
       {/* Grid: Top Selling Products & Recent Prescriptions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-        
+
         {/* Top Selling Products */}
         <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
           <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
@@ -635,9 +633,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-sm shrink-0">
-                    <span className={`px-sm py-0.5 rounded font-black text-[9px] ${
-                      p.inStock ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : "bg-red-50 text-red-650 dark:bg-red-950/20"
-                    }`}>
+                    <span className={`px-sm py-0.5 rounded font-black text-[9px] ${p.inStock ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : "bg-red-50 text-red-650 dark:bg-red-950/20"
+                      }`}>
                       {p.inStock ? "In Stock" : "Out of Stock"}
                     </span>
                     <span className="font-black text-slate-800 dark:text-zinc-200">
@@ -670,13 +667,12 @@ const Dashboard = () => {
                     <p className="font-bold text-slate-800 dark:text-zinc-200 truncate max-w-[150px]">{o.user?.name || "Patient"}</p>
                     <p className="text-[10px] text-slate-400">{o.user?.email || "—"} • {formatDate(o.createdAt)}</p>
                   </div>
-                  <span className={`px-sm py-0.5 rounded font-black text-[9px] ${
-                    o.status === "Approved" 
-                      ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30" 
+                  <span className={`px-sm py-0.5 rounded font-black text-[9px] ${o.status === "Approved"
+                      ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30"
                       : o.status === "Rejected"
-                      ? "bg-red-100 text-red-650 dark:bg-red-950/30"
-                      : "bg-amber-100 text-amber-700 dark:bg-amber-950/30"
-                  }`}>
+                        ? "bg-red-100 text-red-650 dark:bg-red-950/30"
+                        : "bg-amber-100 text-amber-700 dark:bg-amber-950/30"
+                    }`}>
                     {o.status}
                   </span>
                 </div>

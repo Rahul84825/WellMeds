@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
+import {
+  Plus,
+  Trash2,
+  Edit,
   Image as ImageIcon,
   RefreshCw,
   Layers
@@ -22,7 +22,7 @@ const AdminSurgicalCategories = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+
   // Editor State
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null); // null = add
@@ -144,7 +144,7 @@ const AdminSurgicalCategories = () => {
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
@@ -185,7 +185,7 @@ const AdminSurgicalCategories = () => {
               {categories.map((c) => {
                 const categoryId = c.id || c._id;
                 return (
-                  <tr 
+                  <tr
                     key={categoryId}
                     className="border-b border-slate-100 dark:border-zinc-800/80 hover:bg-slate-50/50 dark:hover:bg-zinc-950/20 transition-all"
                   >
@@ -237,7 +237,7 @@ const AdminSurgicalCategories = () => {
         maxWidth="max-w-md"
       >
         <form onSubmit={handleSaveCategory} className="space-y-md text-xs pt-1">
-          
+
           {/* Category Title */}
           <div className="space-y-xs">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Title *</label>
@@ -271,7 +271,7 @@ const AdminSurgicalCategories = () => {
                   <ImageIcon size={20} className="text-slate-300" />
                 )}
               </div>
-              
+
               <div className="flex-grow flex flex-col gap-xs">
                 {uploadingImage ? (
                   <div className="flex items-center gap-xs text-[10px] text-slate-400 animate-pulse font-bold">

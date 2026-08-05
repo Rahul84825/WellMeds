@@ -2,21 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import logoImg from "../assets/logos/logo.png";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  FolderOpen, 
-  ClipboardList, 
-  Settings, 
-  LogOut, 
-  Users, 
-  Tag, 
-  ChevronLeft, 
-  ChevronRight, 
-  Menu, 
-  Bell, 
-  Search, 
-  Globe, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  FolderOpen,
+  ClipboardList,
+  Settings,
+  LogOut,
+  Users,
+  Tag,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  Bell,
+  Search,
+  Globe,
   FileCheck2,
   Calendar,
   X,
@@ -35,7 +35,7 @@ const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  
+
   // Global search states
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
@@ -112,7 +112,7 @@ const AdminLayout = () => {
       ]);
 
       const query = val.toLowerCase();
-      
+
       const filteredProds = prods.filter(p => p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)).slice(0, 3);
       const filteredCats = cats.filter(c => c.name.toLowerCase().includes(query)).slice(0, 3);
       const filteredOrds = ords.filter(o => o && (o.orderId?.toLowerCase().includes(query) || o.customer?.toLowerCase().includes(query))).slice(0, 3);
@@ -148,45 +148,44 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 flex transition-colors duration-300">
-      
+
       {/* ──────────────────────────────────────────────────────── */}
       {/* SIDEBAR PANEL */}
       {/* ──────────────────────────────────────────────────────── */}
       {/* Sidebar Backdrop Overlay on Mobile */}
       {!collapsed && (
-        <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden animate-[fade-in_0.2s_ease-out]" 
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden animate-[fade-in_0.2s_ease-out]"
           onClick={() => setCollapsed(true)}
         />
       )}
 
-      <aside 
-        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-md ${
-          collapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
-        }`}
+      <aside
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-md ${collapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
+          }`}
       >
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-md border-b border-slate-200 dark:border-zinc-800">
           {!collapsed ? (
             <Link to="/" className="flex items-center gap-2 h-12 w-auto hover:opacity-90 transition-opacity">
-              <img 
-                src={logoImg} 
-                alt="WellMeds Admin" 
-                className="h-full w-auto object-contain" 
+              <img
+                src={logoImg}
+                alt="WellMeds Admin"
+                className="h-full w-auto object-contain"
               />
               <span className="font-bold text-lg text-[#004782] dark:text-[#a4c9ff] tracking-tight whitespace-nowrap">Admin</span>
             </Link>
           ) : (
             <Link to="/" className="mx-auto h-10 w-10 hover:opacity-90 transition-opacity">
-              <img 
-                src={logoImg} 
-                alt="WellMeds" 
-                className="h-full w-full object-contain" 
+              <img
+                src={logoImg}
+                alt="WellMeds"
+                className="h-full w-full object-contain"
               />
             </Link>
           )}
-          
-          <button 
+
+          <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-all hidden md:block"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -210,16 +209,15 @@ const AdminLayout = () => {
                   }
                 }}
                 className={({ isActive }) =>
-                  `flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm transition-all duration-200 group relative ${
-                    isActive
-                      ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]"
-                      : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100"
+                  `flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm transition-all duration-200 group relative ${isActive
+                    ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]"
+                    : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100"
                   }`
                 }
               >
                 <Icon size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
                 {!collapsed && <span className="truncate">{item.label}</span>}
-                
+
                 {/* Collapsed Tooltip */}
                 {collapsed && (
                   <span className="absolute left-full ml-md px-sm py-xs bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
@@ -271,20 +269,19 @@ const AdminLayout = () => {
       {/* ──────────────────────────────────────────────────────── */}
       {/* MAIN VIEW CONTAINER */}
       {/* ──────────────────────────────────────────────────────── */}
-      <div 
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 pl-0 ${
-          collapsed ? "md:pl-20" : "md:pl-64"
-        }`}
+      <div
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 pl-0 ${collapsed ? "md:pl-20" : "md:pl-64"
+          }`}
       >
-        
+
         {/* ──────────────────────────────────────────────────────── */}
         {/* STICKY TOP HEADER */}
         {/* ──────────────────────────────────────────────────────── */}
         <header className="sticky top-0 h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 shadow-sm z-40 flex items-center justify-between px-lg transition-colors duration-300">
-          
+
           {/* Header Left: Toggle & Calendar */}
           <div className="flex items-center gap-md">
-            <button 
+            <button
               onClick={() => setCollapsed(!collapsed)}
               className="p-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg md:hidden"
             >
@@ -308,7 +305,7 @@ const AdminLayout = () => {
                 className="w-full pl-lg pr-lg py-1.5 md:py-sm bg-slate-100 dark:bg-zinc-800/60 border border-transparent hover:border-slate-300 dark:hover:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#004782] dark:focus:border-[#004782] rounded-xl text-[11px] md:text-xs text-slate-700 dark:text-zinc-200 focus:ring-1 focus:ring-[#004782] outline-none transition-all"
               />
               {searchQuery && (
-                <button 
+                <button
                   onClick={clearSearch}
                   className="absolute right-sm top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200"
                 >
@@ -339,9 +336,9 @@ const AdminLayout = () => {
                         <p className="font-bold text-slate-400 text-[10px] uppercase mb-xs tracking-wider">Products</p>
                         <div className="space-y-xs">
                           {searchResults.products.map(p => (
-                            <Link 
-                              key={p.id} 
-                              to="/admin/products" 
+                            <Link
+                              key={p.id}
+                              to="/admin/products"
                               onClick={clearSearch}
                               className="flex items-center gap-sm p-sm rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                             >
@@ -362,9 +359,9 @@ const AdminLayout = () => {
                         <p className="font-bold text-slate-400 text-[10px] uppercase mb-xs tracking-wider">Orders</p>
                         <div className="space-y-xs">
                           {searchResults.orders.map(o => (
-                            <Link 
-                              key={o.orderId} 
-                              to="/admin/orders" 
+                            <Link
+                              key={o.orderId}
+                              to="/admin/orders"
                               onClick={clearSearch}
                               className="flex justify-between items-center p-sm rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                             >
@@ -372,7 +369,7 @@ const AdminLayout = () => {
                                 <p className="font-semibold text-slate-800 dark:text-zinc-200 font-mono text-[11px]">{o.orderId}</p>
                                 <p className="text-[10px] text-slate-400">{o.customer}</p>
                               </div>
-                               <span className="text-[10px] font-bold text-primary dark:text-[#a4c9ff]">₹{o.total}</span>
+                              <span className="text-[10px] font-bold text-primary dark:text-[#a4c9ff]">₹{o.total}</span>
                             </Link>
                           ))}
                         </div>
@@ -385,9 +382,9 @@ const AdminLayout = () => {
                         <p className="font-bold text-slate-400 text-[10px] uppercase mb-xs tracking-wider">Coupons</p>
                         <div className="space-y-xs">
                           {searchResults.coupons.map(c => (
-                            <Link 
-                              key={c.id} 
-                              to="/admin/coupons" 
+                            <Link
+                              key={c.id}
+                              to="/admin/coupons"
                               onClick={clearSearch}
                               className="flex justify-between items-center p-sm rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                             >
@@ -407,9 +404,9 @@ const AdminLayout = () => {
                         <p className="font-bold text-slate-400 text-[10px] uppercase mb-xs tracking-wider">Categories</p>
                         <div className="space-y-xs">
                           {searchResults.categories.map(c => (
-                            <Link 
-                              key={c.id} 
-                              to="/admin/categories" 
+                            <Link
+                              key={c.id}
+                              to="/admin/categories"
                               onClick={clearSearch}
                               className="flex items-center gap-xs p-sm rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                             >
@@ -428,11 +425,11 @@ const AdminLayout = () => {
 
           {/* Header Right: Notifications & Profile */}
           <div className="flex items-center gap-md">
-            
+
             {/* Quick action: Go to website */}
-            <Link 
-              to="/" 
-              className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors hidden sm:block" 
+            <Link
+              to="/"
+              className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors hidden sm:block"
               title="Open shop website"
             >
               <Globe size={18} />
@@ -440,7 +437,7 @@ const AdminLayout = () => {
 
             {/* Notification bell panel */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all relative"
                 title="Notifications"
@@ -471,8 +468,8 @@ const AdminLayout = () => {
                           <span>Prescriptions Pending</span>
                         </div>
                         <p className="text-slate-500 dark:text-zinc-400">There are {pendingRxCount} prescriptions awaiting review by a pharmacist.</p>
-                        <Link 
-                          to="/admin/prescriptions" 
+                        <Link
+                          to="/admin/prescriptions"
                           onClick={() => setNotificationsOpen(false)}
                           className="text-[#004782] dark:text-[#a4c9ff] font-bold hover:underline inline-block pt-xs"
                         >

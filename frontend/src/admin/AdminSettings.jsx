@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { 
-  Settings, 
-  User, 
-  Lock, 
-  Store, 
-  Bell, 
-  ShieldCheck, 
-  Save, 
+import {
+  Settings,
+  User,
+  Lock,
+  Store,
+  Bell,
+  ShieldCheck,
+  Save,
   RefreshCw,
   Moon,
   Info,
@@ -83,7 +83,7 @@ const AdminSettings = () => {
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Title */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
@@ -94,10 +94,10 @@ const AdminSettings = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg items-start">
-        
+
         {/* Left Side: Forms */}
         <div className="lg:col-span-2 space-y-lg">
-          
+
           {/* Section 1: Administrator Profile */}
           <form onSubmit={handleSaveProfile} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
             <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
@@ -237,7 +237,7 @@ const AdminSettings = () => {
 
         {/* Right Side: Security & Notifications */}
         <div className="space-y-lg">
-          
+
           {/* Notifications Card */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
             <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">

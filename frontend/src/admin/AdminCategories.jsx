@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
-import { 
-  FolderOpen, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Upload, 
-  X, 
-  ToggleLeft, 
-  ToggleRight, 
-  Layers, 
-  CheckCircle, 
+import {
+  FolderOpen,
+  Plus,
+  Trash2,
+  Edit,
+  Upload,
+  X,
+  ToggleLeft,
+  ToggleRight,
+  Layers,
+  CheckCircle,
   Image as ImageIcon,
   Sparkles,
   Info,
@@ -25,7 +25,7 @@ const ProductCategories = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+
   // Editor State
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null); // null means adding
@@ -124,7 +124,7 @@ const ProductCategories = () => {
   const handleToggleStatus = async (cat) => {
     const newStatus = cat.status === "Active" ? "Inactive" : "Active";
     try {
-      await api.updateCategory(cat.id || cat._id, { 
+      await api.updateCategory(cat.id || cat._id, {
         status: newStatus,
         isActive: newStatus === "Active"
       });
@@ -154,7 +154,7 @@ const ProductCategories = () => {
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
@@ -178,8 +178,8 @@ const ProductCategories = () => {
         {categories.map((c) => {
           const categoryId = c.id || c._id;
           return (
-            <div 
-              key={categoryId} 
+            <div
+              key={categoryId}
               className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all"
             >
               <div>
@@ -201,7 +201,7 @@ const ProductCategories = () => {
 
               {/* Action buttons footer */}
               <div className="flex items-center justify-between pt-sm border-t border-slate-100 dark:border-zinc-800/60 mt-sm">
-                
+
                 {/* Status Toggle */}
                 <button
                   onClick={() => handleToggleStatus(c)}
@@ -253,7 +253,7 @@ const ProductCategories = () => {
       >
         {/* Form body */}
         <form onSubmit={handleSaveCategory} className="space-y-md text-xs pt-1">
-          
+
           {/* Category Name */}
           <div className="space-y-xs">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category Name *</label>
@@ -287,7 +287,7 @@ const ProductCategories = () => {
                   <ImageIcon size={20} className="text-slate-300" />
                 )}
               </div>
-              
+
               <div className="flex-grow flex flex-col gap-xs">
                 {uploading ? (
                   <div className="flex items-center gap-xs text-[10px] text-slate-400 animate-pulse font-bold">

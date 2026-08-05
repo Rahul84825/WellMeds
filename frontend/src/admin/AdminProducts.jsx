@@ -4,17 +4,17 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatCurrency } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  ShieldAlert, 
-  CheckCircle, 
-  ArrowUpDown, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  ShieldAlert,
+  CheckCircle,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Settings,
   HelpCircle,
@@ -139,7 +139,7 @@ const ManageProducts = () => {
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
@@ -162,7 +162,7 @@ const ManageProducts = () => {
 
       {/* Modern Filter Row */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-sm bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm transition-all duration-300">
-        
+
         {/* Search */}
         <div className="relative md:col-span-2">
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -224,19 +224,19 @@ const ManageProducts = () => {
       <div className="flex flex-wrap items-center justify-between gap-md text-xs font-semibold text-slate-400 pl-sm">
         <div className="flex flex-wrap gap-xs sm:gap-md items-center">
           <span>Prescription Filter:</span>
-          <button 
+          <button
             onClick={() => updateQueryParams({ rx: "All" }, true)}
             className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "All" ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]" : "hover:text-slate-600"}`}
           >
             All Items
           </button>
-          <button 
+          <button
             onClick={() => updateQueryParams({ rx: "yes" }, true)}
             className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "yes" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400" : "hover:text-slate-600"}`}
           >
             Rx Required
           </button>
-          <button 
+          <button
             onClick={() => updateQueryParams({ rx: "no" }, true)}
             className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "no" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400" : "hover:text-slate-600"}`}
           >
@@ -311,9 +311,8 @@ const ManageProducts = () => {
                     <td className="p-md font-bold text-slate-800 dark:text-zinc-100">{formatCurrency(p.price)}</td>
                     <td className="p-md">
                       <div className="flex items-center gap-xs">
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          isItemInStock ? "bg-emerald-500" : "bg-red-500"
-                        }`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isItemInStock ? "bg-emerald-500" : "bg-red-500"
+                          }`}></span>
                         <span className="font-semibold">{isItemInStock ? "In Stock" : "Out of Stock"}</span>
                       </div>
                     </td>
@@ -406,9 +405,8 @@ const ManageProducts = () => {
 
                 <div className="flex flex-wrap gap-xs items-center justify-between pt-xs">
                   <div className="flex flex-wrap gap-xs items-center">
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold ${
-                      isItemInStock ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : "bg-red-50 text-red-600 dark:bg-red-955/20"
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold ${isItemInStock ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20" : "bg-red-50 text-red-600 dark:bg-red-955/20"
+                      }`}>
                       {isItemInStock ? "In Stock" : "Out of Stock"}
                     </span>
 

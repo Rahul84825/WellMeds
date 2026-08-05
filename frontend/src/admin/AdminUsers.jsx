@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
-import { 
-  Users, 
-  Search, 
-  UserCheck, 
-  ShieldAlert, 
-  Filter, 
+import {
+  Users,
+  Search,
+  UserCheck,
+  ShieldAlert,
+  Filter,
   Trash2,
   Mail,
   Calendar,
@@ -48,10 +48,10 @@ const AdminUsers = () => {
   // Filtered list
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      const matchesSearch = 
-        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch =
+        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email?.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchesRole = roleFilter === "All" || u.role === roleFilter;
 
       return matchesSearch && matchesRole;
@@ -68,7 +68,7 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
-      
+
       {/* Title */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
@@ -145,11 +145,10 @@ const AdminUsers = () => {
                   </td>
                   <td className="p-md font-mono text-[10px] text-slate-400">{u._id}</td>
                   <td className="p-md">
-                    <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      u.role === "admin" 
-                        ? "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400" 
+                    <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${u.role === "admin"
+                        ? "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400"
                         : "bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300"
-                    }`}>
+                      }`}>
                       {u.role === "admin" ? "Admin" : "Customer"}
                     </span>
                   </td>
@@ -203,11 +202,10 @@ const AdminUsers = () => {
               </div>
 
               <div className="flex items-center justify-between pt-xs">
-                <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                  u.role === "admin" 
-                    ? "bg-red-100 text-red-600 dark:bg-red-955/30 dark:text-red-400" 
+                <span className={`inline-flex items-center gap-xs px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${u.role === "admin"
+                    ? "bg-red-100 text-red-600 dark:bg-red-955/30 dark:text-red-400"
                     : "bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300"
-                }`}>
+                  }`}>
                   {u.role === "admin" ? "Admin" : "Customer"}
                 </span>
 

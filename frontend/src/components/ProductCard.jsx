@@ -176,8 +176,8 @@ const ProductCard = ({ product }) => {
                   onMouseEnter={isTouchDevice ? undefined : () => setActiveTooltip("rx")}
                   onMouseLeave={isTouchDevice ? undefined : () => setActiveTooltip(null)}
                   className="flex h-7 w-7 cursor-pointer items-center justify-center
-                             rounded-full bg-[#4c1d95] text-white shadow-xs
-                             transition-transform hover:scale-110 active:scale-95 border border-[#4c1d95]"
+                             rounded-full bg-[#157a6d] text-white shadow-xs
+                             transition-transform hover:scale-110 active:scale-95 border border-[#157a6d]"
                   aria-label="Prescription Required"
                 >
                   <span className="text-[12px] font-extrabold font-serif leading-none">Rx</span>
@@ -185,7 +185,7 @@ const ProductCard = ({ product }) => {
                 <MiniTooltip
                   text="Prescription Required"
                   active={activeTooltip === "rx"}
-                  textColor="text-purple-300"
+                  textColor="text-[#157a6d] dark:text-emerald-400"
                 />
               </div>
             )}
