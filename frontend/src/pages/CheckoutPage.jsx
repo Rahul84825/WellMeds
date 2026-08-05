@@ -133,6 +133,7 @@ const Checkout = () => {
   const [matchingRxDoc, setMatchingRxDoc] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [pollingTimeout, setPollingTimeout] = useState(false);
 
@@ -285,6 +286,7 @@ const Checkout = () => {
   // Order placement
   const handlePlaceOrder = async (e) => {
     if (e) e.preventDefault();
+    setOrderError("");
 
     if (!selectedAddress) {
       return;
@@ -455,10 +457,13 @@ const Checkout = () => {
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", function (response) {
         setIsSubmitting(false);
+        setOrderError("Payment failed or was cancelled. Please try again.");
       });
       rzp.open();
     } catch (err) {
       console.error("Failed to place order", err);
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to initialize payment session. Please try again.";
+      setOrderError(errMsg);
       setIsSubmitting(false);
     }
   };
@@ -869,6 +874,12 @@ const Checkout = () => {
 
             {/* Checkout Action */}
             <div className="p-6 pt-0">
+              {orderError && (
+                <div className="mb-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
+                  <span>{orderError}</span>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={

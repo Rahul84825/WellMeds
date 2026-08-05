@@ -204,10 +204,23 @@ export const CartProvider = ({ children }) => {
     return false;
   };
 
+  const autoUnlockCart = async () => {
+    if (isCartLocked) {
+      setIsCartLocked(false);
+      setCheckoutSessionStatus("ACTIVE");
+      setLockReason("");
+      try {
+        await checkoutSessionService.modifyCart();
+      } catch (e) {
+        console.warn("Cart unlock notice:", e.message);
+      }
+    }
+  };
+
   const addToCart = useCallback(async (product, quantity = 1) => {
     if (!product) return;
     if (isCartLocked) {
-      return;
+      await autoUnlockCart();
     }
 
     const productId = (product._id || product.id)?.toString();
@@ -249,7 +262,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = useCallback(async (id) => {
     if (!id) return;
     if (isCartLocked) {
-      return;
+      await autoUnlockCart();
     }
 
     setCartItems((prev) => prev.filter((i) => i.id !== id));
@@ -272,7 +285,7 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = useCallback(async (id, quantity) => {
     if (!id) return;
     if (isCartLocked) {
-      return;
+      await autoUnlockCart();
     }
 
     if (quantity <= 0) {

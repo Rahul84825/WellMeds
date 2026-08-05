@@ -6,6 +6,7 @@ import {
 import { useCart } from "../../context/CartContext";
 import api from "../../services/api";
 import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
+import SearchPlaceholderCarousel from "./SearchPlaceholderCarousel";
 
 export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const navigate = useNavigate();
@@ -182,17 +183,23 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       <div ref={containerRef} className="relative w-full">
         <div className="search-row">
           <div className="search-rx">℞</div>
-          <div className="flex-1 flex items-center relative gap-1 min-w-0">
+          <div className="flex-1 flex items-center relative gap-1 min-w-0 h-full">
             <input
               ref={inputRef}
               type="text"
-              placeholder="Search medicines, molecules or products..."
+              placeholder=""
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
-              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none"
+              onBlur={() => setFocused(false)}
+              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
+            />
+            <SearchPlaceholderCarousel
+              isFocused={focused}
+              hasValue={!!query}
+              className="text-[#849e96] font-mono text-xs sm:text-base"
             />
             {query && (
               <button
@@ -221,32 +228,11 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
           </button>
         </div>
 
-        <div className="search-hint">
+        <p className="search-hint">
           {["Oncology", "HIV", "Transplant", "Cardiac", "Rare disease"].map((tag) => (
-            <span
-              key={tag}
-              onClick={() => {
-                setQuery(tag);
-                setActiveIndex(-1);
-                triggerSearch(tag);
-                navigate(`/search?q=${encodeURIComponent(tag)}`);
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setQuery(tag);
-                  setActiveIndex(-1);
-                  triggerSearch(tag);
-                  navigate(`/search?q=${encodeURIComponent(tag)}`);
-                }
-              }}
-            >
-              {tag}
-            </span>
+            <span key={tag}>{tag}</span>
           ))}
-        </div>
+        </p>
 
         {/* DROPDOWN AUTOCOMPLETE PANEL (PRESCRIPTION THEMED) */}
         {focused && query.trim().length >= 2 && (
@@ -364,17 +350,23 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         </div>
 
         {/* Input */}
-        <div className="flex-1 flex items-center relative gap-2">
+        <div className="flex-1 flex items-center relative gap-2 min-w-0 h-full">
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search Medicines, Molecules, Wellness, Surgical..."
+            placeholder=""
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
-            className="w-full bg-transparent border-none text-xs outline-none text-[#3f544d] placeholder:text-slate-400 focus:ring-0 focus:outline-none p-0 font-mono font-semibold"
+            onBlur={() => setFocused(false)}
+            className="w-full bg-transparent border-none text-xs outline-none text-[#3f544d] focus:ring-0 focus:outline-none p-0 font-mono font-semibold relative z-10"
             style={{ outline: "none", border: "none", boxShadow: "none" }}
+          />
+          <SearchPlaceholderCarousel
+            isFocused={focused}
+            hasValue={!!query}
+            className="text-slate-400 font-mono text-xs font-semibold"
           />
           {query && (
             <button

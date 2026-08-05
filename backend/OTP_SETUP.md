@@ -10,7 +10,7 @@
 
 ```bash
 # ─── OTP Core ───────────────────────────────────────────────────
-OTP_PROVIDER=console          # console | msg91 | twilio
+OTP_PROVIDER=msg91            # console (dev) | msg91 (production)
 ENABLE_DEV_OTP_BYPASS=true    # Allow 000000 as OTP in dev — set false in production
 
 OTP_LENGTH=6
@@ -71,26 +71,6 @@ Your WellMeds OTP is {#var#}. Valid for 5 minutes. Do not share with anyone.
 
 ---
 
-## Twilio Setup Instructions
-
-1. **Create account** at [twilio.com](https://twilio.com)
-2. **Get Account SID + Auth Token** from [console.twilio.com](https://console.twilio.com)
-3. **Create Verify Service**:
-   - Go to Verify → Services → Create Service
-   - Name: "WellMeds"
-   - Copy the **Service SID** (starts with `VA...`)
-4. **Get Phone Number**: Verify → Phone Numbers → Buy a Number (choose India +91 capable)
-5. Set in `.env`:
-   ```
-   OTP_PROVIDER=twilio
-   TWILIO_ACCOUNT_SID=ACxxxxx
-   TWILIO_AUTH_TOKEN=xxxxxxxx
-   TWILIO_VERIFY_SERVICE_SID=VAxxxxxx
-   TWILIO_PHONE_NUMBER=+1XXXXXXXXXX
-   ```
-
----
-
 ## Development (Console) Mode
 
 Default setup. OTP is printed directly to the server terminal:
@@ -112,13 +92,9 @@ Additionally, the API response in development includes `devOtp` field, which is 
 ## Test Phone Number Instructions
 
 ### MSG91
-- Use the MSG91 dashboard's "Test" feature before going live
-- Indian numbers only (10-digit starting with 6-9)
-
-### Twilio
-- Use verified phone numbers in trial mode
-- For production: remove trial restrictions (upgrade account)
-- Test numbers: any real mobile that can receive SMS
+- Use the MSG91 dashboard’s “Test” feature before going live
+- Indian numbers only (10-digit starting with 6–9)
+- Keep test numbers verified inside MSG91 sandbox before DLT approval
 
 ---
 
@@ -126,7 +102,7 @@ Additionally, the API response in development includes `devOtp` field, which is 
 
 - [ ] `NODE_ENV=production` in production `.env`
 - [ ] `ENABLE_DEV_OTP_BYPASS=false`
-- [ ] `OTP_PROVIDER=msg91` or `OTP_PROVIDER=twilio`
+- [ ] `OTP_PROVIDER=msg91`
 - [ ] All provider credentials filled in
 - [ ] DLT registration complete (for MSG91)
 - [ ] `JWT_SECRET` and `JWT_REFRESH_SECRET` are strong, unique, random strings (32+ chars)
@@ -188,24 +164,11 @@ After deployment, verify:
 
 ---
 
-## Switching Providers (Zero Code Change)
+## Switching to Console (Dev)
 
-To switch from console to MSG91:
 ```bash
 # .env
-OTP_PROVIDER=msg91
-OTP_AUTH_KEY=your_msg91_auth_key
-OTP_TEMPLATE_ID=your_approved_template_id
-```
-
-To switch to Twilio:
-```bash
-# .env
-OTP_PROVIDER=twilio
-TWILIO_ACCOUNT_SID=ACxxxxx
-TWILIO_AUTH_TOKEN=xxxxxxxx
-TWILIO_VERIFY_SERVICE_SID=VAxxxxxx
-TWILIO_PHONE_NUMBER=+1XXXXXXXXXX
+OTP_PROVIDER=console
 ```
 
 **No controller, service, or frontend code needs modification.**

@@ -11,14 +11,14 @@ import crypto from "crypto";
  *
  * Supported providers:
  *   "console" — print OTP to server terminal (development / testing)
- *   "msg91"   — MSG91 SMS gateway (India)
- *   "twilio"  — Twilio Verify / Twilio Messages API
+ *   "msg91"   — MSG91 SMS gateway (India, DLT-compliant)
  *
  * To add a new provider:
  *   1. Add a function sendVia<Name>(mobile, otp) below
  *   2. Add a case in the switch inside sendSms()
  *   3. Add env vars to otpConfig and .env
  */
+
 
 // ─── Console Provider (Development / Fallback) ───────────────────────────────
 const sendViaConsole = async (mobile, otp) => {
@@ -35,6 +35,12 @@ const sendViaMSG91 = async (mobile, otp) => {
   const { authKey, templateId, baseUrl } = otpConfig.msg91;
 
   if (!authKey || !templateId) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[OTP] MSG91 credentials not fully configured (OTP_TEMPLATE_ID is missing). Falling back to console provider in dev."
+      );
+      return await sendViaConsole(mobile, otp);
+    }
     throw new Error(
       "MSG91 credentials not configured. Set OTP_AUTH_KEY and OTP_TEMPLATE_ID in .env"
     );
@@ -68,46 +74,6 @@ const sendViaMSG91 = async (mobile, otp) => {
   return { success: true, provider: "msg91", result };
 };
 
-// ─── Twilio Provider ─────────────────────────────────────────────────────────
-const sendViaTwilio = async (mobile, otp) => {
-  const { accountSid, authToken, verifyServiceSid } = otpConfig.twilio;
-
-  if (!accountSid || !authToken || !verifyServiceSid) {
-    throw new Error(
-      "Twilio credentials not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID in .env"
-    );
-  }
-
-  // Normalize to E.164 format (+91 default for India)
-  const normalizedMobile = mobile.startsWith("+") ? mobile : `+91${mobile}`;
-
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-  const bodyParams = new URLSearchParams({
-    To: normalizedMobile,
-    From: process.env.TWILIO_PHONE_NUMBER || "",
-    Body: `Your WellMeds OTP is: ${otp}. Valid for ${otpConfig.expiryMinutes} minutes. Do not share with anyone.`,
-  });
-
-  const credentials = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: bodyParams,
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(`Twilio error: ${result.message || JSON.stringify(result)}`);
-  }
-
-  return { success: true, provider: "twilio", result };
-};
-
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
@@ -125,21 +91,19 @@ export const sendSms = async (mobile, otp) => {
     case "msg91":
       return await sendViaMSG91(mobile, otp);
 
-    case "twilio":
-      return await sendViaTwilio(mobile, otp);
-
     case "console":
     default:
-      if (process.env.NODE_ENV === "production" && provider !== "msg91" && provider !== "twilio") {
+      if (process.env.NODE_ENV === "production" && provider !== "msg91") {
         // Safety guard: never silently skip SMS in production
         throw new Error(
-          "OTP_PROVIDER is not set to a real provider (msg91 or twilio). Cannot send OTP in production. " +
-            "Set OTP_PROVIDER=msg91 or OTP_PROVIDER=twilio and configure credentials in .env"
+          "OTP_PROVIDER is not set to \"msg91\". Cannot send OTP in production. " +
+            "Set OTP_PROVIDER=msg91 and configure MSG91 credentials in .env"
         );
       }
       return await sendViaConsole(mobile, otp);
   }
 };
+
 
 /**
  * Generate a cryptographically random N-digit OTP string.

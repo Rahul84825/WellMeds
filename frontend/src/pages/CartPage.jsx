@@ -207,8 +207,8 @@ const Cart = () => {
                         className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal"
                       />
                       {discountPercent > 0 && (
-                        <span className="absolute -bottom-2 -left-2 bg-emerald-100 text-[#157a6d] dark:bg-emerald-900/50 dark:text-emerald-400 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs border border-emerald-200 dark:border-emerald-800">
-                          {discountPercent}% OFF
+                        <span className="absolute -bottom-2 -left-2 rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 px-2.5 py-0.5 text-[11px] font-bold font-sans shadow-2xs">
+                          {discountPercent}% Off
                         </span>
                       )}
                     </div>

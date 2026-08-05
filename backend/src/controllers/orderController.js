@@ -279,18 +279,41 @@ export const createRazorpayOrder = async (req, res, next) => {
     let verifiedRxDoc = null;
     if (totals.orderRequiresRx) {
       const { Prescription } = await import("../models/Prescription.js");
-      const userPrescriptions = await Prescription.find({ user: req.user._id, status: "Approved" }).sort({ createdAt: -1 });
+      const { Cart } = await import("../models/Cart.js");
+      const { CheckoutSession } = await import("../models/CheckoutSession.js");
 
-      verifiedRxDoc = userPrescriptions.find((rx) => {
+      // Filter only items that actually require a prescription
+      const rxValidatedItems = totals.validatedItems.filter((i) => i.requiresRx);
+
+      const matchesRx = (rx) => {
+        if (!rx || rx.status !== "Approved") return false;
         if (!rx.cartSnapshot || !Array.isArray(rx.cartSnapshot.items)) return false;
         const snapshotItems = rx.cartSnapshot.items;
-        return items.every((cartItem) => {
-          const cId = (cartItem.product || cartItem.id || cartItem._id).toString();
+        if (rxValidatedItems.length !== snapshotItems.length) return false;
+        return rxValidatedItems.every((cartItem) => {
+          const cId = cartItem.product.toString();
           const match = snapshotItems.find((s) => s.productId === cId || s.productId?.toString() === cId);
           if (!match) return false;
           return match.quantity === cartItem.quantity;
         });
-      });
+      };
+
+      // Check all Approved prescriptions belonging to this user
+      const userPrescriptions = await Prescription.find({ user: req.user._id, status: "Approved" }).sort({ createdAt: -1 });
+      verifiedRxDoc = userPrescriptions.find(matchesRx);
+
+      // Fallback check: user's Cart or CheckoutSession linked prescription
+      if (!verifiedRxDoc) {
+        const userCart = await Cart.findOne({ user: req.user._id }).populate("prescription");
+        if (userCart && userCart.prescription && matchesRx(userCart.prescription)) {
+          verifiedRxDoc = userCart.prescription;
+        } else {
+          const session = await CheckoutSession.findOne({ user: req.user._id, status: "VERIFIED" }).populate("prescription");
+          if (session && session.prescription && matchesRx(session.prescription)) {
+            verifiedRxDoc = session.prescription;
+          }
+        }
+      }
 
       if (!verifiedRxDoc) {
         return res.status(400).json({

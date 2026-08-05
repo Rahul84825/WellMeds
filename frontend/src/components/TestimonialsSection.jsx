@@ -227,38 +227,6 @@ export const TestimonialsSection = () => {
               What our patients Say
             </h2>
           </div>
-
-          {/* Right Header Navigation Controls: ( ← ) [ View all ] ( → ) */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Left Navigation Arrow */}
-            <button
-              type="button"
-              onClick={() => scroll("left")}
-              aria-label="Previous testimonials"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] cursor-pointer"
-            >
-              <ChevronLeft size={18} />
-            </button>
-
-            {/* View All button */}
-            <Link
-              to="/about"
-              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
-              aria-label="View all patient reviews"
-            >
-              <span>View all</span>
-            </Link>
-
-            {/* Right Navigation Arrow */}
-            <button
-              type="button"
-              onClick={() => scroll("right")}
-              aria-label="Next testimonials"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] cursor-pointer"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
         </div>
 
         {/* Testimonials Carousel Track */}

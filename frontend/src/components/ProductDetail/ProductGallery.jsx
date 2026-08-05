@@ -47,8 +47,8 @@ const ProductGallery = ({
       >
         {/* Discount Badge */}
         {discountPercent > 0 && (
-          <span className="absolute top-4 left-4 z-10 bg-[#b08d3e] text-white font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs">
-            SAVE {discountPercent}%
+          <span className="absolute top-4 left-4 z-10 inline-flex items-center justify-center rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 px-3 py-1 text-xs font-bold font-sans shadow-2xs">
+            {discountPercent}% Off
           </span>
         )}
 

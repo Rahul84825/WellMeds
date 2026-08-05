@@ -16,11 +16,9 @@ export const checkCartLock = async (req, res, next) => {
       expiresAt: { $gt: new Date() },
     });
 
-    if (session && session.isLocked) {
+    if (session && session.isLocked && session.status !== "VERIFIED") {
       let msg = "Your cart is currently locked because your prescription is under pharmacist verification.";
-      if (session.status === "VERIFIED") {
-        msg = "Your prescription has been verified. Cart items cannot be modified prior to payment. Click 'Modify Cart' to make changes.";
-      } else if (session.status === "PAYMENT_PENDING") {
+      if (session.status === "PAYMENT_PENDING") {
         msg = "Payment is currently processing. Cart items cannot be modified.";
       }
 

@@ -184,26 +184,17 @@
 .wellmeds-hero-section .search-hint span {
   color: var(--ink-soft);
   margin-right: 14px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.wellmeds-hero-section .search-hint span:hover {
-  color: var(--teal);
+  cursor: default;
 }
 
 .wellmeds-hero-section .trust-line {
   margin-top: 22px;
   font-size: 14px;
   letter-spacing: 0.5px;
-  color: var(--ink-soft);
-  text-align: center;
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
-}
-
-.wellmeds-hero-section .trust-line b {
   color: var(--ink);
   font-weight: 700;
+  text-align: center;
+  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
 }
 
 /* ==========================================================================

@@ -187,14 +187,13 @@ export const checkoutPrescription = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Prescription not found" });
     }
 
-    if (prescription.status !== "Approved") {
-      return res.status(400).json({ success: false, message: "Prescription must be approved before checkout" });
-    }
-
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       cart = new Cart({ user: req.user._id, items: [] });
     }
+
+    cart.prescription = prescription._id;
+    cart.prescriptionStatus = prescription.status;
 
     // If prescribedItems exist, populate them into cart items
     if (prescription.prescribedItems && prescription.prescribedItems.length > 0) {
@@ -203,7 +202,7 @@ export const checkoutPrescription = async (req, res, next) => {
         if (!prodId) continue;
         
         const existingIdx = cart.items.findIndex(
-          (ci) => ci.product.toString() === prodId.toString()
+          (ci) => ci.product && ci.product.toString() === prodId.toString()
         );
         if (existingIdx > -1) {
           cart.items[existingIdx].quantity = pItem.quantity || 1;
@@ -217,13 +216,11 @@ export const checkoutPrescription = async (req, res, next) => {
       }
     }
 
-    cart.prescription = prescription._id;
-    cart.prescriptionStatus = "Approved";
     await cart.save();
 
     res.status(200).json({
       success: true,
-      message: "Prescribed items loaded into cart",
+      message: `Prescription linked to cart (${prescription.status})`,
       cart,
     });
   } catch (error) {
@@ -237,23 +234,28 @@ export const checkoutPrescription = async (req, res, next) => {
 export const deletePrescription = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const prescription = await Prescription.findOne({ _id: id, user: req.user._id });
+    const isUserAdmin = req.user && req.user.role === "admin";
+    const query = isUserAdmin ? { _id: id } : { _id: id, user: req.user._id };
+
+    const prescription = await Prescription.findOne(query);
     if (!prescription) {
       return res.status(404).json({ success: false, message: "Prescription not found or not authorized" });
     }
 
-    if (prescription.status === "Approved") {
-      return res.status(400).json({ success: false, message: "Cannot delete an approved prescription" });
-    }
-
     await prescription.deleteOne();
 
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: prescription.user });
     if (cart && cart.prescription && cart.prescription.toString() === id) {
       cart.prescription = null;
       cart.prescriptionStatus = "Pending";
       await cart.save();
     }
+
+    const { CheckoutSession } = await import("../models/CheckoutSession.js");
+    await CheckoutSession.updateMany(
+      { prescription: id },
+      { $set: { prescription: null, status: "ACTIVE", isLocked: false } }
+    );
 
     res.status(200).json({ success: true, message: "Prescription deleted successfully" });
   } catch (error) {
@@ -510,7 +512,7 @@ export const approvePrescription = async (req, res, next) => {
         user: prescription.user._id,
         prescription: prescription._id,
         status: "VERIFIED",
-        isLocked: true,
+        isLocked: false,
         lockReason: "Prescription verified by pharmacist. Cart is ready for checkout payment.",
       },
       { upsert: true, new: true }

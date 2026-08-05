@@ -29,7 +29,7 @@ const HeroSection = () => {
 
       {/* Trust & Guarantees Line */}
       <div className="trust-line hero-anim-trust">
-        <b>100% genuine medicines</b> &nbsp;·&nbsp; fast delivery &nbsp;·&nbsp; easy repeat orders
+        100% genuine medicines &nbsp;·&nbsp; fast delivery &nbsp;·&nbsp; easy repeat orders
       </div>
     </section>
   );

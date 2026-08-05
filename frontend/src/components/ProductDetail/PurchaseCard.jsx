@@ -69,9 +69,9 @@ const PurchaseCard = ({
           </div>
           <div className="flex justify-between items-center text-[11px] font-sans font-bold">
             <span className="text-black">Inclusive of all taxes & GST</span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-[#157a6d] font-extrabold bg-[#f4f9f7] px-2 py-0.5 rounded-sm border border-[#dde8e3]">
-                SAVE {discountPercent}%
+            {discountPercent > 0 && (
+              <span className="inline-flex items-center justify-center rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 px-3 py-1 text-xs font-bold font-sans shadow-2xs">
+                {discountPercent}% Off
               </span>
             )}
           </div>

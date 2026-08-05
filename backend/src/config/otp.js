@@ -5,9 +5,9 @@
  *
  * Supported providers:
  *   console  — Logs OTP to server terminal (development only)
- *   msg91    — MSG91 SMS API (recommended for India)
- *   twilio   — Twilio Verify API
+ *   msg91    — MSG91 SMS API (India, DLT-compliant — recommended)
  */
+
 const otpConfig = {
   // ─── Provider Selection ────────────────────────────────────────────────────
   provider: process.env.OTP_PROVIDER || "console",
@@ -27,13 +27,6 @@ const otpConfig = {
     baseUrl: process.env.OTP_BASE_URL || "https://api.msg91.com/api/v5",
   },
 
-  // Twilio Verify
-  twilio: {
-    accountSid: process.env.TWILIO_ACCOUNT_SID || "",
-    authToken: process.env.TWILIO_AUTH_TOKEN || "",
-    verifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || "",
-  },
-
   // Generic / Custom provider
   generic: {
     apiKey: process.env.OTP_API_KEY || "",
@@ -42,5 +35,6 @@ const otpConfig = {
     templateId: process.env.OTP_TEMPLATE_ID || "",
   },
 };
+
 
 export default otpConfig;

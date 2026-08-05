@@ -186,7 +186,7 @@ const AdminPrescriptions = () => {
     setIsSubmitting(true);
     try {
       const payload = {
-        adminNotes,
+        adminNotes: adminNotes || "Verified & Approved by Pharmacist",
         doctorName,
         items: prescribedItems,
       };
@@ -195,7 +195,7 @@ const AdminPrescriptions = () => {
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
-      setSelectedRx({ ...selectedRx, ...updatedRx });
+      setSelectedRx(null);
     } catch (err) {
       console.error("Failed to approve prescription", err);
     } finally {
@@ -205,13 +205,10 @@ const AdminPrescriptions = () => {
 
   const handleReject = async () => {
     if (!selectedRx) return;
-    if (!adminNotes.trim()) {
-      return;
-    }
     setIsSubmitting(true);
     try {
       const payload = {
-        adminNotes,
+        adminNotes: adminNotes.trim() || "Prescription rejected by pharmacist.",
         doctorName,
       };
       const updatedRx = await api.rejectPrescription(selectedRx.id || selectedRx._id, payload);
@@ -219,7 +216,7 @@ const AdminPrescriptions = () => {
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
-      setSelectedRx({ ...selectedRx, ...updatedRx });
+      setSelectedRx(null);
     } catch (err) {
       console.error("Failed to reject prescription", err);
     } finally {
