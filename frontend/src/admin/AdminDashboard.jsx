@@ -87,7 +87,7 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
           <button
             onClick={() => setActiveTab("revenue")}
             className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${activeTab === "revenue"
-                ? "bg-[#004782] text-white shadow-xs"
+                ? "bg-[#157a6d] text-white shadow-xs"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
               }`}
           >
@@ -96,7 +96,7 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
           <button
             onClick={() => setActiveTab("orders")}
             className={`px-sm py-1 text-[10px] font-extrabold rounded-md transition-all ${activeTab === "orders"
-                ? "bg-[#004782] text-white shadow-xs"
+                ? "bg-[#157a6d] text-white shadow-xs"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
               }`}
           >
@@ -109,8 +109,8 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#004782" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#004782" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#157a6d" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#157a6d" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -144,7 +144,7 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
 
           {/* Line and Area */}
           <path d={areaD} fill="url(#chart-glow)" className="transition-all duration-300" />
-          <path d={pathD} fill="none" stroke="#004782" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-300" />
+          <path d={pathD} fill="none" stroke="#157a6d" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-300" />
 
           {/* Points */}
           {points.map((p, i) => (
@@ -162,8 +162,8 @@ const BusinessChart = ({ data, activeTab, setActiveTab }) => {
                 cx={p.x}
                 cy={p.y}
                 r={hoverIndex === i ? "5" : "3"}
-                fill={hoverIndex === i ? "#004782" : "#ffffff"}
-                stroke="#004782"
+                fill={hoverIndex === i ? "#157a6d" : "#ffffff"}
+                stroke="#157a6d"
                 strokeWidth={hoverIndex === i ? "2.5" : "1.5"}
                 className="transition-all duration-150 pointer-events-none"
               />
@@ -283,13 +283,13 @@ const CategoryDistribution = ({ distribution }) => {
             <div key={index} className="space-y-0.5">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-zinc-350">
                 <span className="truncate max-w-[150px]">{item.categoryName}</span>
-                <span className="font-extrabold text-[#004782] dark:text-[#a4c9ff]">
-                  {item.count} <span className="text-[9px] text-slate-400 font-normal">items</span>
+                <span className="font-extrabold text-[#157a6d] dark:text-emerald-400">
+                  {item.count} <span className="text-[10px] text-slate-400 font-medium">items</span>
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-slate-50 dark:bg-zinc-950 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-slate-50 dark:bg-zinc-950 rounded-full overflow-hidden border border-slate-100 dark:border-zinc-800">
                 <div
-                  className="h-full bg-[#004782] dark:bg-[#a4c9ff]/80 rounded-full transition-all duration-500"
+                  className="h-full bg-[#157a6d] dark:bg-emerald-400 rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -425,16 +425,16 @@ const Dashboard = () => {
             Here's a breakdown of what's happening at WellMeds today.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-sm">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={handleDownloadSales}
             disabled={downloadingSales}
-            className="flex items-center gap-xs text-[11px] font-bold text-white bg-[#004782] hover:bg-[#003c70] active:scale-95 px-md py-sm rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed select-none min-h-[38px]"
+            className="flex items-center gap-2 text-sm font-semibold text-white bg-[#157a6d] hover:bg-[#0f6157] active:scale-95 px-4 py-2.5 rounded-2xl transition-all shadow-xs cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed select-none min-h-[42px]"
           >
             {downloadingSales ? (
               <Loader size="xs" color="text-white" />
             ) : (
-              <FileSpreadsheet size={14} className="shrink-0" />
+              <FileSpreadsheet size={16} className="shrink-0" />
             )}
             <span>Sales Report (Excel)</span>
           </button>
@@ -442,12 +442,12 @@ const Dashboard = () => {
           <button
             onClick={handleDownloadCustomers}
             disabled={downloadingCustomers}
-            className="flex items-center gap-xs text-[11px] font-bold text-slate-700 dark:text-zinc-200 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-95 px-md py-sm rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed select-none min-h-[38px]"
+            className="flex items-center gap-2 text-sm font-semibold text-[#157a6d] dark:text-emerald-400 bg-white dark:bg-zinc-900 border border-[#157a6d]/30 dark:border-emerald-500/30 hover:bg-[#157a6d]/5 active:scale-95 px-4 py-2.5 rounded-2xl transition-all shadow-xs cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed select-none min-h-[42px]"
           >
             {downloadingCustomers ? (
-              <Loader size="xs" color="text-slate-500" />
+              <Loader size="xs" color="text-[#157a6d]" />
             ) : (
-              <Download size={14} className="shrink-0 text-[#004782] dark:text-[#a4c9ff]" />
+              <Download size={16} className="shrink-0 text-[#157a6d] dark:text-emerald-400" />
             )}
             <span>Customer Report (Excel)</span>
           </button>
@@ -472,7 +472,7 @@ const Dashboard = () => {
 
         {/* Total Orders Card */}
         <div className="bg-white dark:bg-zinc-900 p-md rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm flex items-center gap-md hover:-translate-y-0.5 transition-all duration-200 glass-card">
-          <div className="p-sm rounded-xl bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]">
+          <div className="p-sm rounded-xl bg-[#157a6d]/10 text-[#157a6d] dark:text-emerald-400">
             <ShoppingBag size={20} />
           </div>
           <div>
@@ -517,7 +517,7 @@ const Dashboard = () => {
         <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Products</p>
           <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
-            <Package size={14} className="text-[#004782]" />
+            <Package size={14} className="text-[#157a6d]" />
             <span className="font-extrabold text-sm">{stats.totalProductsCount}</span>
           </div>
         </div>
@@ -549,55 +549,47 @@ const Dashboard = () => {
         <div className="bg-white dark:bg-zinc-900 p-sm rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-xs">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Monthly Sales</p>
           <div className="flex items-center gap-xs mt-xs text-slate-700 dark:text-zinc-200">
-            <Calendar size={14} className="text-[#004782]" />
+            <Calendar size={14} className="text-[#157a6d]" />
             <span className="font-extrabold text-sm">{formatCurrency(stats.monthlySales)}</span>
           </div>
         </div>
 
       </div>
 
-      {/* Grid: SVG Performance Chart & Out of Stock Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-md">
-
-        {/* Business Analytics Line Graph */}
-        <BusinessChart data={dailySales} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-        {/* Out of Stock Alerts Widget (Replaces numeric low stock warnings) */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-sm border-b border-slate-100 dark:border-zinc-800">
-              <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Out of Stock Alerts</h3>
-              <AlertCircle size={14} className="text-red-500 animate-pulse" />
-            </div>
-
-            <div className="space-y-sm mt-sm">
-              {outOfStockProducts.length > 0 ? (
-                outOfStockProducts.map(p => (
-                  <div key={p._id || p.id} className="flex justify-between items-center bg-slate-50 dark:bg-zinc-950 p-xs rounded-xl border border-slate-100 dark:border-zinc-800 text-xs">
-                    <div className="flex items-center gap-xs truncate">
-                      <img src={p.image} className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-zinc-700" alt="" />
-                      <div className="truncate">
-                        <p className="font-bold truncate text-slate-800 dark:text-zinc-200">{p.name}</p>
-                        <p className="text-[9px] text-slate-400 truncate">
-                          {typeof p.category === "object" ? p.category?.name : "OTC Product"}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="px-sm py-0.5 rounded font-black text-[9px] bg-red-50 text-red-600 dark:bg-red-950/20 shrink-0">
-                      Out of Stock
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-400 text-center py-md">All catalog inventory levels are healthy.</p>
-              )}
-            </div>
+      {/* Out of Stock Alerts Widget */}
+      <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between pb-sm border-b border-slate-100 dark:border-zinc-800">
+            <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Out of Stock Alerts</h3>
+            <AlertCircle size={14} className="text-red-500 animate-pulse" />
           </div>
-          <Link to="/admin/products" className="w-full text-center text-xs font-bold text-[#004782] dark:text-[#a4c9ff] hover:underline pt-md">
-            Manage Catalog
-          </Link>
-        </div>
 
+          <div className="space-y-sm mt-sm">
+            {outOfStockProducts.length > 0 ? (
+              outOfStockProducts.map(p => (
+                <div key={p._id || p.id} className="flex justify-between items-center bg-slate-50 dark:bg-zinc-950 p-xs rounded-xl border border-slate-100 dark:border-zinc-800 text-xs">
+                  <div className="flex items-center gap-xs truncate">
+                    <img src={p.image} className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-zinc-700" alt="" />
+                    <div className="truncate">
+                      <p className="font-bold truncate text-slate-800 dark:text-zinc-200">{p.name}</p>
+                      <p className="text-[9px] text-slate-400 truncate">
+                        {typeof p.category === "object" ? p.category?.name : "OTC Product"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-sm py-0.5 rounded font-black text-[9px] bg-red-50 text-red-600 dark:bg-red-950/20 shrink-0">
+                    Out of Stock
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-md">All catalog inventory levels are healthy.</p>
+            )}
+          </div>
+        </div>
+        <Link to="/admin/products" className="w-full text-center text-xs font-bold text-[#157a6d] dark:text-emerald-400 hover:underline pt-md">
+          Manage Catalog
+        </Link>
       </div>
 
       {/* Grid: Order Status & Category Distribution */}

@@ -30,31 +30,31 @@ const getStatusConfigLocal = (status) => {
   switch (status) {
     case "Pending Review":
       return {
-        badge: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-955/20 dark:text-amber-400 dark:border-amber-900/40",
+        badge: "bg-amber-50 text-amber-800 border-amber-200/70 dark:bg-amber-950/40 dark:text-amber-300 font-semibold",
         dot: "bg-amber-500",
         label: "Pending Review"
       };
     case "Under Verification":
       return {
-        badge: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-955/20 dark:text-blue-400 dark:border-blue-900/40",
-        dot: "bg-blue-500",
+        badge: "bg-[#f4f9f7] text-[#157a6d] border-[#157a6d]/25 dark:bg-teal-950/40 dark:text-teal-300 font-semibold",
+        dot: "bg-[#157a6d]",
         label: "Verifying"
       };
     case "Approved":
       return {
-        badge: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-955/20 dark:text-emerald-400 dark:border-emerald-900/40",
-        dot: "bg-emerald-500",
+        badge: "bg-[#bbf7d0] text-[#15803d] border-emerald-300/40 dark:bg-emerald-950/80 dark:text-emerald-300 font-semibold",
+        dot: "bg-[#15803d]",
         label: "Approved"
       };
     case "Rejected":
       return {
-        badge: "bg-red-50 text-red-600 border-red-200 dark:bg-red-955/20 dark:text-red-400 dark:border-red-900/40",
+        badge: "bg-red-50 text-red-700 border-red-200/70 dark:bg-red-950/40 dark:text-red-300 font-semibold",
         dot: "bg-red-500",
         label: "Rejected"
       };
     case "Expired":
       return {
-        badge: "bg-slate-100 text-slate-500 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700/50",
+        badge: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-zinc-800 dark:text-zinc-300 font-semibold",
         dot: "bg-slate-400",
         label: "Expired"
       };

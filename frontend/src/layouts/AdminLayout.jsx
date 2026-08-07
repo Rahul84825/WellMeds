@@ -147,7 +147,7 @@ const AdminLayout = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 flex transition-colors duration-300">
+    <div className="min-h-screen pdp-grid-bg bg-[#f4f9f7]/30 text-slate-900 dark:text-zinc-100 flex transition-colors duration-300 font-sans">
 
       {/* ──────────────────────────────────────────────────────── */}
       {/* SIDEBAR PANEL */}
@@ -155,28 +155,30 @@ const AdminLayout = () => {
       {/* Sidebar Backdrop Overlay on Mobile */}
       {!collapsed && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden animate-[fade-in_0.2s_ease-out]"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 md:hidden animate-[fade-in_0.2s_ease-out]"
           onClick={() => setCollapsed(true)}
         />
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-md ${collapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-zinc-900 border-r border-[#dde8e3] dark:border-zinc-800 flex flex-col z-50 transition-all duration-300 shadow-[0_4px_24px_rgba(23,43,38,0.06)] ${collapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
           }`}
       >
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-md border-b border-slate-200 dark:border-zinc-800">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#dde8e3] dark:border-zinc-800 gap-2">
           {!collapsed ? (
-            <Link to="/" className="flex items-center gap-2 h-12 w-auto hover:opacity-90 transition-opacity">
+            <Link to="/" className="flex items-center gap-2 overflow-hidden hover:opacity-90 transition-opacity min-w-0">
               <img
                 src={logoImg}
-                alt="WellMeds Admin"
-                className="h-full w-auto object-contain"
+                alt="WellMeds"
+                className="h-8 max-w-[120px] object-contain shrink-0"
               />
-              <span className="font-bold text-lg text-[#004782] dark:text-[#a4c9ff] tracking-tight whitespace-nowrap">Admin</span>
+              <span className="bg-[#f4f9f7] text-[#157a6d] dark:bg-emerald-950/60 dark:text-emerald-300 border border-[#157a6d]/20 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider shrink-0">
+                Admin
+              </span>
             </Link>
           ) : (
-            <Link to="/" className="mx-auto h-10 w-10 hover:opacity-90 transition-opacity">
+            <Link to="/" className="mx-auto h-8 w-8 hover:opacity-90 transition-opacity">
               <img
                 src={logoImg}
                 alt="WellMeds"
@@ -187,7 +189,7 @@ const AdminLayout = () => {
 
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-sm text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-all hidden md:block"
+            className="p-1.5 text-slate-400 hover:text-[#157a6d] hover:bg-[#f4f9f7] dark:hover:bg-zinc-800 rounded-lg transition-all hidden md:block cursor-pointer shrink-0"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -209,9 +211,9 @@ const AdminLayout = () => {
                   }
                 }}
                 className={({ isActive }) =>
-                  `flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm transition-all duration-200 group relative ${isActive
-                    ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]"
-                    : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100"
+                  `flex items-center gap-sm px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all duration-200 group relative ${isActive
+                    ? "bg-[#157a6d] text-white shadow-xs"
+                    : "text-slate-600 dark:text-zinc-400 hover:bg-[#f4f9f7] dark:hover:bg-zinc-800/60 hover:text-[#157a6d] dark:hover:text-zinc-100"
                   }`
                 }
               >
@@ -220,7 +222,7 @@ const AdminLayout = () => {
 
                 {/* Collapsed Tooltip */}
                 {collapsed && (
-                  <span className="absolute left-full ml-md px-sm py-xs bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
+                  <span className="absolute left-full ml-md px-2.5 py-1 bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
                     {item.label}
                   </span>
                 )}
@@ -228,7 +230,7 @@ const AdminLayout = () => {
             );
           })}
 
-          <div className="pt-md my-md border-t border-slate-200 dark:border-zinc-800">
+          <div className="pt-md my-md border-t border-[#dde8e3] dark:border-zinc-800">
             <Link
               to="/"
               onClick={() => {
@@ -236,13 +238,13 @@ const AdminLayout = () => {
                   setCollapsed(true);
                 }
               }}
-              className="flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100 group relative"
+              className="flex items-center gap-sm px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 dark:text-zinc-400 hover:bg-[#f4f9f7] dark:hover:bg-zinc-800 hover:text-[#157a6d] group relative"
             >
-              <Globe size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              {!collapsed && <span>Go to Shop</span>}
+              <Globe size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-110 text-[#157a6d]" />
+              {!collapsed && <span>Go to Storefront</span>}
               {collapsed && (
-                <span className="absolute left-full ml-md px-sm py-xs bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
-                  Go to Shop
+                <span className="absolute left-full ml-md px-2.5 py-1 bg-slate-800 dark:bg-zinc-700 text-white text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
+                  Go to Storefront
                 </span>
               )}
             </Link>
@@ -250,15 +252,15 @@ const AdminLayout = () => {
         </nav>
 
         {/* Logout Footer */}
-        <div className="p-sm border-t border-slate-200 dark:border-zinc-800">
+        <div className="p-sm border-t border-[#dde8e3] dark:border-zinc-800">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-sm px-md py-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all group relative font-medium text-sm"
+            className="w-full flex items-center gap-sm px-3.5 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all group relative font-semibold text-xs cursor-pointer"
           >
             <LogOut size={18} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
             {!collapsed && <span>Logout</span>}
             {collapsed && (
-              <span className="absolute left-full ml-md px-sm py-xs bg-red-600 text-white text-[11px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
+              <span className="absolute left-full ml-md px-2.5 py-1 bg-red-600 text-white text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap shadow-lg">
                 Logout
               </span>
             )}
@@ -277,7 +279,7 @@ const AdminLayout = () => {
         {/* ──────────────────────────────────────────────────────── */}
         {/* STICKY TOP HEADER */}
         {/* ──────────────────────────────────────────────────────── */}
-        <header className="sticky top-0 h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 shadow-sm z-40 flex items-center justify-between px-lg transition-colors duration-300">
+        <header className="sticky top-0 h-16 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-[#dde8e3] dark:border-zinc-800 shadow-xs z-40 flex items-center justify-between px-lg transition-colors duration-300">
 
           {/* Header Left: Toggle & Calendar */}
           <div className="flex items-center gap-md">

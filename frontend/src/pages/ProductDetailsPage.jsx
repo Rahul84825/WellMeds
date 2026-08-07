@@ -680,7 +680,7 @@ const ProductDetails = () => {
       <div
         id="Specifications"
         ref={el => sectionRefs.current["Specifications"] = el}
-        className="pdp-paper-card p-6 md:p-8 space-y-4 scroll-mt-28 font-mono text-left"
+        className="pdp-paper-card p-6 md:p-8 space-y-4 scroll-mt-28 font-sans text-left"
       >
         <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
           <span className="material-symbols-outlined text-[18px] text-[#157a6d]">list_alt</span> Product Specifications
@@ -728,7 +728,7 @@ const ProductDetails = () => {
         <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
           <span className="material-symbols-outlined text-[18px] text-[#157a6d]">info</span> Product Overview & Introduction
         </h2>
-        <p className="font-mono text-xs text-[#3f544d] leading-relaxed whitespace-pre-line">
+        <p className="font-sans text-xs text-[#3f544d] leading-relaxed whitespace-pre-line">
           {product.description}
         </p>
       </div>
@@ -753,7 +753,7 @@ const ProductDetails = () => {
       <div
         id="Disclaimer"
         ref={el => sectionRefs.current["Disclaimer"] = el}
-        className="pdp-paper-card p-6 md:p-8 space-y-3 scroll-mt-28 text-left font-mono"
+        className="pdp-paper-card p-6 md:p-8 space-y-3 scroll-mt-28 text-left font-sans"
       >
         <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
           <span className="material-symbols-outlined text-[18px] text-amber-600">warning</span> Medical Disclaimer
@@ -790,11 +790,11 @@ const ProductDetails = () => {
 
   // Desktop View
   return (
-    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black animate-[fade-in_0.3s_ease-out] text-left" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black animate-[fade-in_0.3s_ease-out] text-left font-sans">
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 space-y-6">
 
         {/* Breadcrumbs */}
-        <nav className="text-xs font-mono font-bold text-black flex items-center gap-2 flex-wrap select-none mb-4">
+        <nav className="text-xs font-sans font-bold text-black flex items-center gap-2 flex-wrap select-none mb-4">
           <Link to="/" className="hover:text-[#157a6d] transition-colors">Home</Link>
           <span className="text-[#888888]">/</span>
           <Link to="/products" className="hover:text-[#157a6d] transition-colors">Products</Link>
@@ -874,7 +874,7 @@ const ProductDetails = () => {
 
         {/* Bottom carousels */}
         {relatedProducts.length > 0 && (
-          <section className="pt-8 border-t border-[#c8dad3] mt-8 text-left font-mono">
+          <section className="pt-8 border-t border-[#c8dad3] mt-8 text-left font-sans">
             <h2 className="pdp-serif-title text-xl font-bold text-[#0f172a] mb-4">Related Products (Same Brand)</h2>
 
             {/* Mobile horizontal touch carousel / Desktop grid */}

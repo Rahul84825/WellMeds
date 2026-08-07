@@ -115,7 +115,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
   const cardSubstitutes = sortedSubstitutes.slice(0, 3);
 
   return (
-    <div className="pdp-paper-card p-4 rounded-xl select-none w-full flex flex-col text-left font-mono">
+    <div className="pdp-paper-card p-4 rounded-xl select-none w-full flex flex-col text-left font-sans">
       <h3 className="pdp-serif-title text-sm font-bold text-[#172b26] pb-2 pdp-dashed-line mb-2 flex items-center justify-between">
         <span>Alternative Substitutes</span>
         {hasSubstitutes && (
@@ -186,7 +186,7 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           onClick={handleBackdropClick}
           aria-modal="true"
           role="dialog"
-          className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-mono"
+          className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-md z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-sans"
         >
           <div
             ref={modalContainerRef}

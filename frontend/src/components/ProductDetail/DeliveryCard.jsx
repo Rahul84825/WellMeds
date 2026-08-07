@@ -6,7 +6,7 @@ const DeliveryCard = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="pdp-paper-card p-3.5 text-left font-mono select-none space-y-2">
+    <div className="pdp-paper-card p-3.5 text-left font-sans select-none space-y-2">
       <div
         onClick={() => setExpanded(!expanded)}
         className="flex items-center justify-between cursor-pointer group"

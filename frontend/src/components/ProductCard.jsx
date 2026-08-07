@@ -158,7 +158,9 @@ const ProductCard = ({ product }) => {
             </span>
           )}
           {product.badge &&
-            !["Rx Required", "Top Rated", "Low Stock"].includes(product.badge) && (
+            !["Rx Required", "Top Rated", "Low Stock"].includes(product.badge) &&
+            !product.badge.toUpperCase().includes("OFF") &&
+            !product.badge.includes("%") && (
               <span className="w-fit rounded-full bg-[#fef08a] text-[#854d0e] px-3 py-1 text-[11px] font-bold font-sans uppercase tracking-wider">
                 {product.badge}
               </span>

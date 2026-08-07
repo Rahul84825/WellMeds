@@ -297,8 +297,8 @@ const ProductsPage = () => {
                 itemLabel="Products"
               />
             </div>
-          ) : searchVal || searchParam ? (
-            <MedicineNotFound searchQuery={searchVal || searchParam} />
+          ) : (searchVal || categoryParam || specialityParam || brandParam || moleculeParam) ? (
+            <MedicineNotFound searchQuery={searchVal || categoryParam || specialityParam || brandParam || moleculeParam} />
           ) : (
             /* Empty State Card */
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 shadow-sm space-y-4 max-w-lg mx-auto">

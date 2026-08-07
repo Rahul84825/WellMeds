@@ -12,23 +12,23 @@ export const AdminBadge = ({ variant = "neutral", children, size = "md", classNa
   }[size] || "px-2.5 py-1 text-xs";
 
   const variantClasses = {
-    // Green / Approved / Completed / Paid / Delivered
-    success: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60",
+    // Storefront Green / Approved / Completed / Paid / Delivered
+    success: "bg-[#bbf7d0] text-[#15803d] dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300/40 font-semibold",
     
-    // Yellow / Warning / Pending / Rx Review Needed
-    warning: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60",
+    // Soft Amber / Warning / Pending / Rx Review Needed
+    warning: "bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/70 font-semibold",
 
-    // Blue / Info / Processing / Packed / Shipped
-    info: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60",
+    // Storefront Soft Teal / Info / Processing / Packed / Shipped
+    info: "bg-[#f4f9f7] text-[#157a6d] dark:bg-teal-950/50 dark:text-teal-300 border border-[#157a6d]/25 font-semibold",
 
-    // Purple / Special / Rx Verification
-    purple: "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60",
+    // Purple / Indigo / Special / Rx Verification
+    purple: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-200/60 font-semibold",
 
     // Red / Danger / Cancelled / Rejected / Unpaid / OOS
-    danger: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60",
+    danger: "bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200/70 font-semibold",
 
     // Slate / Neutral / Draft
-    neutral: "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700",
+    neutral: "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-semibold",
   }[variant] || "bg-slate-100 text-slate-700 border border-slate-200";
 
   return (
