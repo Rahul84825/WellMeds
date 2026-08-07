@@ -379,11 +379,10 @@ const UploadPrescriptionPage = () => {
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
-                    className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center transition-all ${
-                      dragActive
+                    className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center transition-all ${dragActive
                         ? "border-[#038076] bg-teal-50/60 dark:bg-teal-950/30 scale-[1.01]"
                         : "border-slate-250 dark:border-zinc-800 hover:border-[#038076] bg-slate-50/50 dark:bg-zinc-950/50 cursor-pointer"
-                    }`}
+                      }`}
                   >
                     <input
                       type="file"
@@ -645,38 +644,67 @@ const UploadPrescriptionPage = () => {
               )}
             </div>
 
-            {/* PHARMACIST SUPPORT & HOW IT WORKS CARD */}
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4 w-full">
+            {/* PHARMACIST SUPPORT & VERIFICATION PROCESS CARD */}
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-xs space-y-4 w-full">
               <h3 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-4">
                 <Stethoscope className="text-[#038076]" size={20} />
                 Verification Process
               </h3>
 
               <div className="space-y-3.5 text-xs text-slate-600 dark:text-zinc-400">
-                <div className="flex items-start gap-3 bg-slate-50/70 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-150 dark:border-zinc-800">
+                <div className="flex items-start gap-3.5 bg-slate-50/70 dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-150 dark:border-zinc-800">
                   <Clock className="w-5 h-5 text-[#038076] shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">15-Minute Rapid Review</p>
-                    <p className="text-[11px] text-slate-500">Our clinical team verifies doctor details, medicine names, and dosages.</p>
+                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">15-Minute Rapid Review</p>
+                    <p className="text-xs text-slate-500 pt-0.5 leading-relaxed">Our clinical team verifies doctor details, medicine names, and dosages.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-slate-50/70 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-150 dark:border-zinc-800">
+                <div className="flex items-start gap-3.5 bg-slate-50/70 dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-150 dark:border-zinc-800">
                   <ShieldCheck className="w-5 h-5 text-[#038076] shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">100% Genuine Medicines</p>
-                    <p className="text-[11px] text-slate-500">Sourced directly from certified pharmaceutical manufacturers.</p>
+                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">100% Genuine Medicines</p>
+                    <p className="text-xs text-slate-500 pt-0.5 leading-relaxed">Sourced directly from certified pharmaceutical manufacturers.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-slate-50/70 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-150 dark:border-zinc-800">
+                <div className="flex items-start gap-3.5 bg-slate-50/70 dark:bg-zinc-950/50 p-4 rounded-2xl border border-slate-150 dark:border-zinc-800">
                   <Lock className="w-5 h-5 text-[#038076] shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">Privacy & SSL Security</p>
-                    <p className="text-[11px] text-slate-500">Your health data and prescription records are encrypted and protected.</p>
+                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">Privacy & SSL Security</p>
+                    <p className="text-xs text-slate-500 pt-0.5 leading-relaxed">Your health data and prescription records are encrypted and protected.</p>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* ACTION BUTTON PLACED DIRECTLY UNDER VERIFICATION PROCESS CARD */}
+            <div className="pt-1">
+              {!user ? (
+                <button
+                  type="button"
+                  onClick={() => openLoginModal("/upload-prescription")}
+                  className="w-full bg-[#038076] hover:bg-[#026860] text-white font-bold h-12 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
+                >
+                  <span>LOGIN TO UPLOAD PRESCRIPTION</span>
+                  <ArrowRight size={16} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleUploadSubmit}
+                  disabled={uploading || !selectedFile}
+                  className="w-full bg-[#038076] hover:bg-[#026860] text-white font-bold h-12 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <span className="inline-block animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4" />
+                  ) : (
+                    <UploadCloud size={16} />
+                  )}
+                  <span>{uploading ? "UPLOADING..." : "UPLOAD & SAVE PRESCRIPTION"}</span>
+                  {!uploading && <ArrowRight size={16} />}
+                </button>
+              )}
             </div>
 
           </div>
