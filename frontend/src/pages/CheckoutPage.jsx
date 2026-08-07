@@ -17,7 +17,8 @@ import { useAddress } from "../context/AddressContext";
 import UniversalAddressForm from "../components/address/UniversalAddressForm";
 import AddressCard from "../components/address/AddressCard";
 import AddressSelectorModal from "../components/address/AddressSelectorModal";
-
+import { validateDeliveryLocation } from "../services/googleMapsService";
+import GoogleMapPicker from "../components/common/GoogleMapPicker";
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -83,21 +84,31 @@ const Checkout = () => {
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Dynamic Shipping calculation
+  // Dynamic Shipping & Google Distance Matrix calculation
   const [dynamicShipping, setDynamicShipping] = useState(0);
   const [shippingMsg, setShippingMsg] = useState("");
+  const [deliveryMatrix, setDeliveryMatrix] = useState(null);
 
   useEffect(() => {
     const calcShipping = async () => {
       if (selectedAddress) {
         try {
-          const res = await api.calculateDeliveryFee({
-            subtotal,
-            pincode: selectedAddress.pincode,
-            state: selectedAddress.state,
-          });
-          setDynamicShipping(res.charge);
-          setShippingMsg(res.message);
+          // Check road distance & delivery matrix via Google Maps Platform
+          const matrix = await validateDeliveryLocation(selectedAddress.latitude, selectedAddress.longitude);
+          setDeliveryMatrix(matrix);
+
+          if (matrix && matrix.success) {
+            setDynamicShipping(matrix.deliveryFee !== undefined ? matrix.deliveryFee : 40);
+            setShippingMsg(matrix.message || `Driving Distance: ${matrix.distanceKm} km | Est. ${matrix.displayText}`);
+          } else {
+            const res = await api.calculateDeliveryFee({
+              subtotal,
+              pincode: selectedAddress.pincode,
+              state: selectedAddress.state,
+            });
+            setDynamicShipping(res.charge);
+            setShippingMsg(res.message);
+          }
         } catch (e) {
           setDynamicShipping(subtotal >= 500 ? 0 : 50);
         }
@@ -333,6 +344,13 @@ const Checkout = () => {
         pincode: selectedAddress.pincode,
         type: selectedAddress.type || "Home",
         deliveryInstructions: selectedAddress.deliveryInstructions || "",
+        latitude: selectedAddress.latitude || deliveryMatrix?.latitude || null,
+        longitude: selectedAddress.longitude || deliveryMatrix?.longitude || null,
+        placeId: selectedAddress.placeId || "",
+        formattedAddress: selectedAddress.formattedAddress || "",
+        distanceKm: deliveryMatrix?.distanceKm || null,
+        estimatedTimeMinutes: deliveryMatrix?.durationMinutes || null,
+        deliveryFee: activeShipping,
       };
 
       const formattedAddressStr = [
@@ -548,7 +566,7 @@ const Checkout = () => {
               </div>
             )}
 
-            {/* Address Display or Inline Universal Form */}
+            {/* Address Display with Interactive Google Map & Delivery Distance Matrix */}
             {selectedAddress && !showAddForm ? (
               <div className="space-y-3">
                 <AddressCard
@@ -556,8 +574,32 @@ const Checkout = () => {
                   isSelected={true}
                   showActions={false}
                 />
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-1">
-                  <span>{shippingMsg || "Pan-India Express Delivery"}</span>
+
+                {/* Google Maps Nationwide Delivery Badge */}
+                <div className="p-3 rounded-2xl bg-teal-50/70 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-[#157a6d] dark:text-emerald-300 font-bold">
+                    <Navigation size={15} className="shrink-0 text-[#157a6d]" />
+                    <span>
+                      Pan-India Express Shipping & Dispatch
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0 bg-[#bbf7d0] text-[#15803d] border border-emerald-300/40">
+                    ✔ Pan-India Delivery
+                  </span>
+                </div>
+
+                {/* Interactive Route Map Preview */}
+                <div className="pt-1">
+                  <GoogleMapPicker
+                    latitude={selectedAddress.latitude}
+                    longitude={selectedAddress.longitude}
+                    height="180px"
+                    interactive={false}
+                    showRoute={true}
+                  />
+                </div>
+
+                <div className="flex items-center justify-end text-xs font-semibold pt-1">
                   <button
                     type="button"
                     onClick={() => setShowAddForm(true)}

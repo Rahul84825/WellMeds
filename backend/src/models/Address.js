@@ -86,6 +86,24 @@ const addressSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    latitude: {
+      type: Number,
+      default: null,
+    },
+    longitude: {
+      type: Number,
+      default: null,
+    },
+    placeId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    formattedAddress: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -94,8 +112,11 @@ const addressSchema = new mongoose.Schema(
   }
 );
 
-// Virtual for formatted single-line address
-addressSchema.virtual("formattedAddress").get(function () {
+// Virtual for formatted single-line address display
+addressSchema.virtual("displayAddress").get(function () {
+  if (this.formattedAddress && this.formattedAddress.trim().length > 0) {
+    return this.formattedAddress;
+  }
   const parts = [
     this.houseNo,
     this.building,

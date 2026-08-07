@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import {
+  fetchAutocompleteSuggestions,
+  fetchPlaceDetailsById,
+  getUserCurrentPosition,
+  reverseGeocodeCoordinates,
+} from "../../services/googleMapsService";
+import GoogleMapPicker from "../common/GoogleMapPicker";
 import { 
   User, 
   Phone, 
@@ -13,7 +20,10 @@ import {
   Briefcase,
   FileText,
   Bookmark,
-  Sparkles
+  Sparkles,
+  Search,
+  Loader2,
+  Map
 } from "lucide-react";
 
 const INDIAN_STATES = [
@@ -49,9 +59,20 @@ const UniversalAddressForm = ({
     type: initialValues?.type || "Home",
     deliveryInstructions: initialValues?.deliveryInstructions || "",
     isDefault: initialValues?.isDefault !== undefined ? initialValues.isDefault : false,
+    latitude: initialValues?.latitude || null,
+    longitude: initialValues?.longitude || null,
+    placeId: initialValues?.placeId || "",
+    formattedAddress: initialValues?.formattedAddress || "",
   });
 
   const [errors, setErrors] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [locationStatus, setLocationStatus] = useState("");
+  const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (initialValues) {
@@ -70,6 +91,10 @@ const UniversalAddressForm = ({
         type: initialValues.type || "Home",
         deliveryInstructions: initialValues.deliveryInstructions || "",
         isDefault: initialValues.isDefault !== undefined ? initialValues.isDefault : false,
+        latitude: initialValues.latitude || null,
+        longitude: initialValues.longitude || null,
+        placeId: initialValues.placeId || "",
+        formattedAddress: initialValues.formattedAddress || "",
       });
     } else if (user) {
       setFormData((prev) => ({
@@ -79,6 +104,96 @@ const UniversalAddressForm = ({
       }));
     }
   }, [initialValues, user]);
+
+  // Debounced Places Autocomplete Search (300ms)
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!value || value.trim().length < 2) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      const results = await fetchAutocompleteSuggestions(value);
+      setSuggestions(results);
+      setIsSearching(false);
+    }, 300);
+  };
+
+  // Handle Place Selection
+  const handleSelectPrediction = async (prediction) => {
+    setSearchQuery(prediction.description);
+    setSuggestions([]);
+    setIsSearching(true);
+
+    const details = await fetchPlaceDetailsById(prediction.placeId);
+    setIsSearching(false);
+
+    if (details) {
+      setFormData((prev) => ({
+        ...prev,
+        street: details.street || prev.street || prediction.mainText,
+        building: details.landmark || prev.building || prediction.mainText,
+        landmark: details.landmark || prev.landmark,
+        city: details.city || prev.city,
+        state: details.state || prev.state,
+        pincode: details.pincode || prev.pincode,
+        latitude: details.latitude,
+        longitude: details.longitude,
+        placeId: details.placeId,
+        formattedAddress: details.formattedAddress,
+      }));
+      setLocationStatus(`✔ Location selected: ${prediction.mainText}`);
+    }
+  };
+
+  // Handle GPS "Use Current Location"
+  const handleUseCurrentLocation = async () => {
+    setIsLocating(true);
+    setLocationStatus("Locating device position via GPS...");
+    try {
+      const pos = await getUserCurrentPosition();
+      const result = await reverseGeocodeCoordinates(pos.latitude, pos.longitude);
+
+      if (result) {
+        setFormData((prev) => ({
+          ...prev,
+          houseNo: result.houseNo || prev.houseNo,
+          building: result.building || prev.building || result.street || "",
+          street: result.street || prev.street || "",
+          landmark: result.landmark || prev.landmark || "",
+          city: result.city || prev.city || "Pune",
+          state: result.state || prev.state || "Maharashtra",
+          pincode: result.pincode || prev.pincode || "",
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+          placeId: result.placeId || "",
+          formattedAddress: result.formattedAddress || "",
+        }));
+        setLocationStatus("✔ GPS location detected & auto-filled!");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+        }));
+        setLocationStatus("✔ Coordinates captured from GPS!");
+      }
+    } catch (err) {
+      console.error(err);
+      setLocationStatus(`⚠️ ${err.message || "Failed to fetch GPS location"}`);
+    } finally {
+      setIsLocating(false);
+    }
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -242,12 +357,99 @@ const UniversalAddressForm = ({
         )}
       </div>
 
-      {/* Address Details Header */}
-      <div className="border-b border-slate-100 dark:border-zinc-800 pb-2 pt-2">
+      {/* Address Details Header with Google Places Autocomplete & GPS Action Bar */}
+      <div className="border-b border-slate-100 dark:border-zinc-800 pb-2 pt-2 flex items-center justify-between">
         <h3 className="text-xs font-bold uppercase tracking-wider text-[#038076] dark:text-[#84d6b9] flex items-center gap-1.5">
           <Home size={14} /> Address Details
         </h3>
+
+        {/* GPS Location Button */}
+        <button
+          type="button"
+          onClick={handleUseCurrentLocation}
+          disabled={isLocating}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#038076]/10 text-[#038076] dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-[11px] hover:bg-[#038076]/20 transition-all cursor-pointer disabled:opacity-50"
+        >
+          {isLocating ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Navigation size={13} className="fill-current" />
+          )}
+          <span>Use Current Location</span>
+        </button>
       </div>
+
+      {/* Google Places Autocomplete Search Box */}
+      <div className="relative">
+        <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1">
+          Search Area, Building, Landmark or Locality (Google Places)
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search e.g. Baner Road, Pune or Echelon Apartments..."
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+            className="w-full pl-9 pr-8 bg-slate-50 dark:bg-zinc-900 border border-teal-200/80 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all"
+          />
+          <Search size={15} className="absolute left-3 top-3 text-[#038076] dark:text-emerald-400" />
+          {isSearching && (
+            <Loader2 size={14} className="absolute right-3 top-3 animate-spin text-slate-400" />
+          )}
+        </div>
+
+        {/* Autocomplete Predictions Dropdown */}
+        {suggestions.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-zinc-800">
+            {suggestions.map((p) => (
+              <button
+                type="button"
+                key={p.placeId}
+                onClick={() => handleSelectPrediction(p)}
+                className="w-full text-left px-3.5 py-2.5 hover:bg-teal-50/50 dark:hover:bg-zinc-800/60 transition-all flex items-start gap-2.5"
+              >
+                <MapPin size={15} className="text-[#038076] shrink-0 mt-0.5" />
+                <div className="truncate">
+                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate">{p.mainText}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{p.secondaryText || p.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Location Status Alert / Notification */}
+      {locationStatus && (
+        <div className="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200/60 dark:border-teal-900/40 text-xs font-semibold text-[#038076] dark:text-emerald-300 flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <Sparkles size={14} /> {locationStatus}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowMap(!showMap)}
+            className="text-[11px] underline font-bold flex items-center gap-1 hover:text-[#026860]"
+          >
+            <Map size={12} /> {showMap ? "Hide Map" : "View Map"}
+          </button>
+        </div>
+      )}
+
+      {/* Embedded Google Map Picker Preview */}
+      {showMap && (
+        <div className="my-2">
+          <GoogleMapPicker
+            latitude={formData.latitude}
+            longitude={formData.longitude}
+            onLocationSelect={({ latitude, longitude }) => {
+              setFormData((prev) => ({ ...prev, latitude, longitude }));
+              setLocationStatus(`✔ Marker moved to: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            }}
+            height="200px"
+            interactive={true}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
         {/* House / Flat / Apartment */}

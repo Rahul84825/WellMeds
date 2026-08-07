@@ -125,7 +125,14 @@ const orderSchema = new mongoose.Schema(
       country: { type: String, default: "India" },
       pincode: { type: String, default: "" },
       type: { type: String, default: "Home" },
-      deliveryInstructions: { type: String, default: "" }
+      deliveryInstructions: { type: String, default: "" },
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null },
+      placeId: { type: String, default: "" },
+      formattedAddress: { type: String, default: "" },
+      distanceKm: { type: Number, default: null },
+      estimatedTimeMinutes: { type: Number, default: null },
+      deliveryFee: { type: Number, default: 0 }
     },
 
     paymentMethod: {

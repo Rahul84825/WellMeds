@@ -37,6 +37,10 @@ export const addAddress = async (req, res) => {
       type,
       deliveryInstructions,
       isDefault,
+      latitude,
+      longitude,
+      placeId,
+      formattedAddress,
     } = req.body;
 
     // Check if user already has addresses
@@ -66,6 +70,10 @@ export const addAddress = async (req, res) => {
       type: type || "Home",
       deliveryInstructions: deliveryInstructions || "",
       isDefault: shouldBeDefault,
+      latitude: latitude ? Number(latitude) : null,
+      longitude: longitude ? Number(longitude) : null,
+      placeId: placeId || "",
+      formattedAddress: formattedAddress || "",
     });
 
     res.status(201).json({
@@ -109,6 +117,10 @@ export const updateAddress = async (req, res) => {
       type,
       deliveryInstructions,
       isDefault,
+      latitude,
+      longitude,
+      placeId,
+      formattedAddress,
     } = req.body;
 
     if (isDefault && !address.isDefault) {
@@ -128,6 +140,10 @@ export const updateAddress = async (req, res) => {
     address.pincode = pincode !== undefined ? pincode : address.pincode;
     address.type = type !== undefined ? type : address.type;
     address.deliveryInstructions = deliveryInstructions !== undefined ? deliveryInstructions : address.deliveryInstructions;
+    if (latitude !== undefined) address.latitude = latitude ? Number(latitude) : null;
+    if (longitude !== undefined) address.longitude = longitude ? Number(longitude) : null;
+    if (placeId !== undefined) address.placeId = placeId;
+    if (formattedAddress !== undefined) address.formattedAddress = formattedAddress;
     if (isDefault !== undefined) {
       address.isDefault = Boolean(isDefault);
     }

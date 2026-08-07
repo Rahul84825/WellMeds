@@ -13,7 +13,6 @@ import {
   sendOrderCancelled,
   sendOrderStatusEmail,
 } from "../services/emailService.js";
-import { validateDeliveryRadius } from "../services/locationService.js";
 
 
 // Helper to compute order details from product database prices
@@ -252,23 +251,15 @@ export const createRazorpayOrder = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Order items are required" });
     }
 
-    // Backend Delivery Radius Validation
+    // Optional coordinates capture for shipment tracking
     let checkedCoordinates = null;
     if (deliveryCoordinates && deliveryCoordinates.latitude && deliveryCoordinates.longitude) {
       const lat = parseFloat(deliveryCoordinates.latitude);
       const lng = parseFloat(deliveryCoordinates.longitude);
       if (!isNaN(lat) && !isNaN(lng)) {
-        const deliveryCheck = validateDeliveryRadius(lat, lng);
-        if (!deliveryCheck.isEligible) {
-          return res.status(400).json({
-            success: false,
-            message: deliveryCheck.message || "Sorry, this address is outside our delivery area.",
-          });
-        }
         checkedCoordinates = {
           latitude: lat,
           longitude: lng,
-          distanceKm: deliveryCheck.distanceKm,
         };
       }
     }

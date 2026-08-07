@@ -8,6 +8,7 @@ import { AdminCard, AdminCardHeader } from "./components/ui/AdminCard";
 import { AdminBadge } from "./components/ui/AdminBadge";
 import { AdminButton } from "./components/ui/AdminButton";
 import { AdminInput, AdminSelect } from "./components/ui/AdminInput";
+import GoogleMapPicker from "../components/common/GoogleMapPicker";
 import {
   AdminTable,
   AdminTableHead,
@@ -39,7 +40,10 @@ import {
   Clock,
   Phone,
   Mail,
-  FileText
+  FileText,
+  Navigation,
+  Copy,
+  ExternalLink
 } from "lucide-react";
 
 /**
@@ -552,6 +556,55 @@ const ManageOrders = () => {
                   <div className="flex items-start gap-2 text-slate-500 pt-1">
                     <MapPin size={15} className="text-slate-400 shrink-0 mt-0.5" />
                     <span className="leading-relaxed">{selectedOrder.shippingAddress}</span>
+                  </div>
+
+                  {/* Google Maps Distance Matrix & Interactive Map View */}
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#157a6d] dark:text-emerald-400 flex items-center gap-1">
+                        <Navigation size={13} />
+                        Road Distance: {selectedOrder.shippingAddressObject?.distanceKm || "Calculated"} km
+                      </span>
+                      {selectedOrder.shippingAddressObject?.estimatedTimeMinutes && (
+                        <span className="text-slate-400 font-semibold">
+                          Est: {selectedOrder.shippingAddressObject.estimatedTimeMinutes} mins
+                        </span>
+                      )}
+                    </div>
+
+                    <GoogleMapPicker
+                      latitude={selectedOrder.shippingAddressObject?.latitude}
+                      longitude={selectedOrder.shippingAddressObject?.longitude}
+                      height="160px"
+                      interactive={false}
+                      showRoute={true}
+                    />
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${
+                          selectedOrder.shippingAddressObject?.latitude || 18.559
+                        },${selectedOrder.shippingAddressObject?.longitude || 73.7868}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white text-xs font-bold transition-all"
+                      >
+                        <ExternalLink size={13} /> Open in Google Maps
+                      </a>
+                      {selectedOrder.shippingAddressObject?.latitude && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const coords = `${selectedOrder.shippingAddressObject.latitude},${selectedOrder.shippingAddressObject.longitude}`;
+                            navigator.clipboard.writeText(coords);
+                            alert(`Coordinates copied: ${coords}`);
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Copy size={13} /> Copy Coords
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </AdminCard>
