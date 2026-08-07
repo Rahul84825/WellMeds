@@ -1,6 +1,12 @@
 import { CheckoutSession } from "../models/CheckoutSession.js";
 import { Cart } from "../models/Cart.js";
 import { Prescription } from "../models/Prescription.js";
+import {
+  normalizeRxItems,
+  evaluatePrescriptionCartMatch,
+  findMatchingApprovedPrescriptions,
+  evaluateAllUserPrescriptions,
+} from "../services/cartMatchingEngine.js";
 
 // Helper to check if session expired and auto-expire it
 const checkExpiry = async (session) => {
@@ -103,13 +109,12 @@ export const getCartRxStatus = async (req, res, next) => {
         isEligible: true,
         message: "Cart is empty.",
         prescription: null,
+        matchingPrescriptions: [],
       });
     }
 
-    // Filter Rx items from current cart
-    const rxCartItems = cart.items.filter(
-      (item) => item.product && (item.product.requiresRx || item.product.isPrescriptionRequired)
-    );
+    // Filter & normalize Rx items from current cart using matching engine
+    const rxCartItems = normalizeRxItems(cart.items);
 
     if (rxCartItems.length === 0) {
       return res.status(200).json({
@@ -119,10 +124,20 @@ export const getCartRxStatus = async (req, res, next) => {
         isEligible: true,
         message: "No prescription required for current cart items.",
         prescription: null,
+        matchingPrescriptions: [],
       });
     }
 
-    // Cart contains Rx items. Check CheckoutSession status & Prescription status.
+    // Fetch all user prescriptions
+    const userPrescriptions = await Prescription.find({ user: userId }).sort({ createdAt: -1 });
+
+    // Evaluate all prescriptions against current cart
+    const allEvaluated = evaluateAllUserPrescriptions(userPrescriptions, rxCartItems);
+
+    // Find all approved prescriptions matching current cart
+    const matchingApproved = findMatchingApprovedPrescriptions(userPrescriptions, rxCartItems);
+
+    // Check CheckoutSession status
     let session = await CheckoutSession.findOne({
       user: userId,
       status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
@@ -135,50 +150,32 @@ export const getCartRxStatus = async (req, res, next) => {
       }
     }
 
-    // Helper for snapshot matching
-    const matchesCartSnapshot = (snapshot) => {
-      if (!snapshot || !Array.isArray(snapshot.items)) return false;
-      const snapshotItems = snapshot.items;
-      if (rxCartItems.length !== snapshotItems.length) return false;
-
-      return rxCartItems.every((cartItem) => {
-        const prodId = (cartItem.product._id || cartItem.product.id || cartItem.product).toString();
-        const match = snapshotItems.find((s) => s.productId === prodId || s.productId?.toString() === prodId);
-        if (!match) return false;
-        return match.quantity === cartItem.quantity;
-      });
-    };
-
     let targetPrescription = cart.prescription || (session ? session.prescription : null);
 
-    // If cart/session has no linked prescription, check user's prescriptions for a matching one
-    if (!targetPrescription) {
-      const userPrescriptions = await Prescription.find({ user: userId }).sort({ createdAt: -1 });
-      targetPrescription = userPrescriptions.find((rx) => matchesCartSnapshot(rx.cartSnapshot));
-    }
-
+    // If target prescription is set on cart, evaluate it
     let rxStatus = "Prescription Required";
     let isEligible = false;
     let lockReason = "";
     let reason = "";
 
     if (targetPrescription) {
-      const isSnapshotValid = matchesCartSnapshot(targetPrescription.cartSnapshot);
+      const evalResult = evaluatePrescriptionCartMatch(targetPrescription, rxCartItems);
 
       if (targetPrescription.status === "Approved") {
-        if (isSnapshotValid) {
+        if (evalResult.isMatch) {
           rxStatus = "Verified";
           isEligible = true;
+          reason = "An approved prescription matching your current cart is selected.";
         } else {
           rxStatus = "Needs Re-verification";
           isEligible = false;
-          reason = "Your cart items or quantities have changed since your prescription was approved. Re-verification is required.";
+          reason = evalResult.reason || "Your cart items or quantities have changed since your prescription was approved.";
         }
       } else if (
         targetPrescription.status === "Pending Review" ||
         targetPrescription.status === "Under Verification"
       ) {
-        if (isSnapshotValid) {
+        if (evalResult.isMatch) {
           rxStatus = "Pending Verification";
           isEligible = false;
           lockReason = "Prescription is under pharmacist verification. Please wait.";
@@ -192,6 +189,11 @@ export const getCartRxStatus = async (req, res, next) => {
         isEligible = false;
         reason = targetPrescription.adminNotes || "Your prescription verification was declined by our pharmacist.";
       }
+    } else if (matchingApproved.length > 0) {
+      // If matching approved prescription(s) exist but user hasn't explicitly selected one yet
+      rxStatus = "Prescription Required";
+      isEligible = false;
+      reason = `${matchingApproved.length} approved prescription(s) matching your current cart were found. Please select one or upload a new one.`;
     }
 
     // Sync CheckoutSession if state changed
@@ -216,8 +218,20 @@ export const getCartRxStatus = async (req, res, next) => {
             fileUrl: targetPrescription.fileUrl,
             status: targetPrescription.status,
             adminNotes: targetPrescription.adminNotes,
+            createdAt: targetPrescription.createdAt,
           }
         : null,
+      matchingPrescriptions: matchingApproved.map((m) => ({
+        _id: m.prescription._id,
+        name: m.prescription.name,
+        fileUrl: m.prescription.fileUrl,
+        createdAt: m.prescription.createdAt,
+        approvedAt: m.prescription.approvedAt,
+        status: m.prescription.status,
+        matchType: m.matchType,
+        reason: m.reason,
+      })),
+      allPrescriptions: allEvaluated,
     });
   } catch (error) {
     next(error);

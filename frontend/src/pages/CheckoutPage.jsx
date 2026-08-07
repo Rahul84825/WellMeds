@@ -10,7 +10,7 @@ import LoginRequiredModal from "../components/LoginRequiredModal";
 import { 
   UploadCloud, CheckCircle2, ClipboardList, Stethoscope, Clock, 
   ArrowLeft, Tag, Info, ArrowRight, ShieldCheck, Lock, Trash2, 
-  RefreshCcw, AlertTriangle, AlertCircle, MapPin, Navigation, Compass
+  RefreshCcw, AlertTriangle, AlertCircle, MapPin, Navigation, Compass, FileText
 } from "lucide-react";
 import { formatCurrency, roundPrice } from "../utils/currency";
 import { useAddress } from "../context/AddressContext";
@@ -142,6 +142,9 @@ const Checkout = () => {
   const [rxMessage, setRxMessage] = useState("");
   const [myPrescriptions, setMyPrescriptions] = useState([]);
   const [matchingRxDoc, setMatchingRxDoc] = useState(null);
+  const [matchingPrescriptions, setMatchingPrescriptions] = useState([]);
+  const [allPrescriptions, setAllPrescriptions] = useState([]);
+  const [selectingRxId, setSelectingRxId] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -207,11 +210,14 @@ const Checkout = () => {
           if (!res.requiresRx) {
             setRxStatus("Verified");
             setHasApprovedRx(true);
+            setMatchingPrescriptions([]);
           } else {
             setRxStatus(res.rxStatus || "Prescription Required");
             setHasApprovedRx(res.isEligible || false);
             if (res.reason) setRxMessage(res.reason);
             if (res.prescription) setMatchingRxDoc(res.prescription);
+            if (res.matchingPrescriptions) setMatchingPrescriptions(res.matchingPrescriptions);
+            if (res.allPrescriptions) setAllPrescriptions(res.allPrescriptions);
           }
         }
       } catch (err) {
@@ -223,6 +229,25 @@ const Checkout = () => {
       setLoadingRxCheck(false);
     }
   }, [requiresRx, user]);
+
+  const handleSelectPrescription = async (prescriptionId) => {
+    setSelectingRxId(prescriptionId);
+    setOrderError("");
+    try {
+      const res = await api.selectPrescriptionForCart(prescriptionId);
+      if (res && res.success) {
+        setRxStatus("Verified");
+        setHasApprovedRx(true);
+        if (res.prescription) setMatchingRxDoc(res.prescription);
+        await checkRxStatus();
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Failed to select prescription";
+      setOrderError(msg);
+    } finally {
+      setSelectingRxId(null);
+    }
+  };
 
   useEffect(() => {
     checkRxStatus();
@@ -626,116 +651,160 @@ const Checkout = () => {
             )}
           </div>
 
-          {/* Rx Verification Card */}
+          {/* Rx Verification Card Section */}
           {requiresRx && (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-6 shadow-sm space-y-6">
-              <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-4">
-                Prescription Verification
-              </h3>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-6 shadow-sm space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
+                <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white flex items-center gap-2">
+                  <Stethoscope size={20} className="text-[#038076]" />
+                  Prescription Verification
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setRxInfoModalOpen(true)}
+                  className="text-xs font-bold text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <UploadCloud size={14} /> Upload New Prescription
+                </button>
+              </div>
 
               {loadingRxCheck ? (
-                <div className="py-6 flex justify-center"><Loader size="sm" /></div>
+                <div className="py-8 flex justify-center"><Loader size="sm" /></div>
               ) : rxStatus === "Verified" ? (
-                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-4 flex items-center justify-between text-emerald-800 dark:text-emerald-300">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+                <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={24} />
+                    </div>
                     <div>
-                      <h4 className="text-sm font-bold">Prescription Verified</h4>
-                      <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-0.5 truncate max-w-[200px] sm:max-w-[300px]">
-                        {matchingRxDoc?.name || "Verified Prescription Document"}
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">Prescription Verified for Current Cart</h4>
+                        <span className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">Approved</span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-zinc-400 mt-1 truncate max-w-md">
+                        Document: <span className="font-bold text-slate-800 dark:text-zinc-200">{matchingRxDoc?.name || "Verified Prescription"}</span>
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setRxModalOpen(true)}
-                    className="text-[#157a6d] dark:text-emerald-400 font-bold text-xs hover:underline cursor-pointer"
+                    onClick={() => setRxInfoModalOpen(true)}
+                    className="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
                   >
-                    Change
+                    Upload New Instead
                   </button>
-                </div>
-              ) : rxStatus === "Pending Verification" ? (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-amber-800 dark:text-amber-300">
-                  <div className="flex items-start gap-3">
-                    <RefreshCcw className="w-6 h-6 text-amber-500 shrink-0 animate-spin" />
-                    <div>
-                      <h4 className="font-bold text-sm">Waiting for Pharmacist Verification</h4>
-                      <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mt-0.5">
-                        We are verifying prescription "{matchingRxDoc?.name || "Document"}". Please wait a moment...
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => checkRxStatus()}
-                    className="bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer"
-                  >
-                    Check Status
-                  </button>
-                </div>
-              ) : rxStatus === "Rejected" ? (
-                <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 space-y-3 text-left">
-                  <div className="flex items-start gap-3 text-rose-800 dark:text-rose-300">
-                    <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-sm">Prescription Rejected</h4>
-                      <p className="text-xs text-rose-700/80 dark:text-rose-400/80 leading-relaxed mt-0.5">
-                        Reason: {rxMessage || "Prescription does not meet regulated criteria."}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-rose-200/50 dark:border-rose-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <span className="text-[11px] text-rose-700/70 dark:text-rose-400/70">Please upload a valid, signed doctor's prescription sheet.</span>
-                    <button
-                      type="button"
-                      onClick={() => setRxModalOpen(true)}
-                      className="bg-rose-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-rose-700 transition-all cursor-pointer w-full sm:w-auto"
-                    >
-                      Upload Prescription
-                    </button>
-                  </div>
-                </div>
-              ) : rxStatus === "Needs Re-verification" ? (
-                <div className="bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/50 rounded-2xl p-4 space-y-3 text-left">
-                  <div className="flex items-start gap-3 text-sky-800 dark:text-sky-300">
-                    <AlertCircle className="w-6 h-6 text-sky-500 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-sm">Needs Re-verification</h4>
-                      <p className="text-xs text-sky-700/80 dark:text-sky-400/80 leading-relaxed mt-0.5">
-                        Your cart items or quantities have changed since your last prescription upload. Previous verification is invalidated.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-sky-200/50 dark:border-sky-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <span className="text-[11px] text-sky-700/70 dark:text-sky-400/70">Regulation requires you to upload a prescription for the current cart snapshot.</span>
-                    <button
-                      type="button"
-                      onClick={() => setRxInfoModalOpen(true)}
-                      className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
-                    >
-                      Upload Prescription
-                    </button>
-                  </div>
                 </div>
               ) : (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 space-y-3 text-left">
-                  <div className="flex items-start gap-3 text-amber-800 dark:text-amber-300">
-                    <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-sm">Prescription Required</h4>
-                      <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mt-0.5">
-                        You are purchasing regulated medicines. Please upload a valid medical prescription signed by a certified doctor.
-                      </p>
+                <div className="space-y-4">
+                  {/* Status Banner */}
+                  {rxStatus === "Needs Re-verification" ? (
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-2xl p-4 flex items-start gap-3 text-amber-900 dark:text-amber-200 text-xs">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-extrabold text-sm mb-0.5">Your cart has changed since your last approved prescription</p>
+                        <p className="text-amber-700 dark:text-amber-300/80 leading-relaxed">
+                          {rxMessage || "Your cart items or quantities differ from previous verification records. Please select a matching prescription below or upload a new one."}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="pt-3 border-t border-amber-200/50 dark:border-amber-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <span className="text-[11px] text-amber-700/70 dark:text-amber-400/70">Verifications are processed by our licensed pharmacists.</span>
+                  ) : rxStatus === "Pending Verification" ? (
+                    <div className="bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/60 rounded-2xl p-4 flex items-start gap-3 text-teal-900 dark:text-teal-200 text-xs">
+                      <RefreshCcw className="w-5 h-5 text-[#038076] shrink-0 animate-spin mt-0.5" />
+                      <div>
+                        <p className="font-extrabold text-sm mb-0.5">Waiting for Pharmacist Verification</p>
+                        <p className="text-teal-700 dark:text-teal-300/80 leading-relaxed">
+                          We are verifying prescription "{matchingRxDoc?.name || "Document"}". Please wait a moment...
+                        </p>
+                      </div>
+                    </div>
+                  ) : rxStatus === "Rejected" ? (
+                    <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 rounded-2xl p-4 flex items-start gap-3 text-rose-900 dark:text-rose-200 text-xs">
+                      <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-extrabold text-sm mb-0.5">Prescription Verification Declined</p>
+                        <p className="text-rose-700 dark:text-rose-300/80 leading-relaxed">
+                          {rxMessage || "Your previous prescription was declined by our pharmacist. Please upload a clear prescription document."}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Matching Approved Prescriptions Section (Scenario A, B & D) */}
+                  {matchingPrescriptions.length > 0 ? (
+                    <div className="space-y-3 pt-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-extrabold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                          <CheckCircle2 size={16} className="text-[#038076]" />
+                          Matching Approved Prescription(s) Available ({matchingPrescriptions.length})
+                        </p>
+                        <span className="text-[11px] text-slate-400">Select one to proceed to payment</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3">
+                        {matchingPrescriptions.map((m) => (
+                          <div
+                            key={m._id}
+                            className="p-4 rounded-2xl border-2 border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 hover:border-[#038076] transition-all space-y-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                          >
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">{m.name}</h4>
+                                <span className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">
+                                  Approved
+                                </span>
+                                <span className="bg-teal-100 dark:bg-teal-900/60 text-[#038076] dark:text-teal-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">
+                                  Matches Current Cart
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                                Uploaded on {new Date(m.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <button
+                                type="button"
+                                onClick={() => handleSelectPrescription(m._id)}
+                                disabled={selectingRxId === m._id}
+                                className="w-full sm:w-auto bg-[#038076] hover:bg-[#026860] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                              >
+                                {selectingRxId === m._id ? (
+                                  <span className="inline-block animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5" />
+                                ) : (
+                                  <CheckCircle2 size={15} />
+                                )}
+                                <span>Use This Prescription</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    /* No matching approved prescription found */
+                    <div className="text-center py-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-950/50 space-y-3">
+                      <FileText size={32} className="mx-auto text-slate-400 opacity-60" />
+                      <p className="text-xs font-bold text-slate-700 dark:text-zinc-300 max-w-sm mx-auto">
+                        No approved prescription matches your current cart items. Please upload a valid prescription to continue.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setRxInfoModalOpen(true)}
+                        className="bg-[#038076] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:bg-[#026860] transition-all cursor-pointer inline-flex items-center gap-2"
+                      >
+                        <UploadCloud size={16} /> Upload Prescription
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Always provide Upload New Prescription option */}
+                  <div className="pt-2 flex justify-end">
                     <button
                       type="button"
                       onClick={() => setRxInfoModalOpen(true)}
-                      className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
+                      className="text-xs font-bold text-[#038076] dark:text-[#84d6b9] hover:underline flex items-center gap-1 cursor-pointer"
                     >
-                      Upload Prescription
+                      + Upload a newer prescription document
                     </button>
                   </div>
                 </div>

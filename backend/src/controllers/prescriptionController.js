@@ -11,6 +11,10 @@ import { Notification } from "../models/Notification.js";
 import { Cart } from "../models/Cart.js";
 import { Product } from "../models/Product.js";
 import { CheckoutSession } from "../models/CheckoutSession.js";
+import {
+  normalizeRxItems,
+  evaluatePrescriptionCartMatch,
+} from "../services/cartMatchingEngine.js";
 
 // ─────────────────────────────────────────────
 // PATIENT — Upload a new prescription
@@ -607,6 +611,71 @@ export const rejectPrescription = async (req, res, next) => {
     );
 
     res.status(200).json({ success: true, prescription });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────
+// PATIENT — Select an approved prescription for active cart
+// ─────────────────────────────────────────────
+export const selectPrescriptionForCart = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const prescription = await Prescription.findOne({ _id: id, user: req.user._id });
+    if (!prescription) {
+      return res.status(404).json({
+        success: false,
+        message: "Prescription not found or does not belong to your account.",
+      });
+    }
+
+    if (prescription.status !== "Approved") {
+      return res.status(400).json({
+        success: false,
+        message: `Only approved prescriptions can be selected for checkout (Current status: ${prescription.status}).`,
+      });
+    }
+
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Your cart is empty.",
+      });
+    }
+
+    const rxCartItems = normalizeRxItems(cart.items);
+    const evalResult = evaluatePrescriptionCartMatch(prescription, rxCartItems);
+
+    if (!evalResult.isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: evalResult.reason || "This prescription does not match your current cart items.",
+      });
+    }
+
+    cart.prescription = prescription._id;
+    cart.prescriptionStatus = "Approved";
+    await cart.save();
+
+    await CheckoutSession.findOneAndUpdate(
+      { user: req.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+      {
+        user: req.user._id,
+        prescription: prescription._id,
+        status: "VERIFIED",
+        isLocked: false,
+        lockReason: "Prescription selected and verified for current cart.",
+      },
+      { upsert: true, new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Prescription linked and verified for checkout.",
+      prescription,
+    });
   } catch (error) {
     next(error);
   }

@@ -444,17 +444,8 @@ const UploadPrescriptionPage = () => {
                     />
                   </div>
 
-                  {/* Submit Button */}
-                  {!user ? (
-                    <button
-                      type="button"
-                      onClick={handleGuestClick}
-                      className="w-full bg-[#038076] hover:bg-[#026860] text-white font-bold h-12 rounded-2xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
-                    >
-                      <span>Login to Upload Prescription</span>
-                      <ArrowRight size={16} />
-                    </button>
-                  ) : (
+                  {/* Submit Button (Only when logged in) */}
+                  {user && (
                     <button
                       type="submit"
                       disabled={uploading || !selectedFile}

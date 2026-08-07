@@ -51,6 +51,14 @@ export const prescriptionService = {
   },
 
   /**
+   * Select a matching approved prescription for current cart checkout.
+   */
+  async selectPrescriptionForCart(id) {
+    const data = await apiInstance.post(`/prescriptions/${id}/select`);
+    return data;
+  },
+
+  /**
    * Delete a prescription by ID.
    */
   async deletePrescription(id) {

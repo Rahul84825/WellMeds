@@ -10,6 +10,7 @@ import {
   rejectPrescription,
   updatePrescriptionItems,
   checkoutPrescription,
+  selectPrescriptionForCart,
 } from "../controllers/prescriptionController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
@@ -33,7 +34,8 @@ router.put("/:id/status", protect, admin, updatePrescriptionStatus);
 router.put("/:id/approve", protect, admin, approvePrescription);
 router.put("/:id/reject", protect, admin, rejectPrescription);
 
-// ── Patient: Checkout Approved Prescription ──────────────
+// ── Patient: Select / Checkout Approved Prescription ──────
+router.post("/:id/select", protect, selectPrescriptionForCart);
 router.post("/:id/checkout", protect, checkoutPrescription);
 
 // ── Patient: Get / Delete single prescription ─────────────
