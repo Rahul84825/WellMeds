@@ -151,7 +151,8 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       if (viewed.length > 5) viewed = viewed.slice(0, 5);
       localStorage.setItem("wellmeds_recently_viewed", JSON.stringify(viewed));
 
-      navigate(`/products/${item.value.slug || item.value.id || item.value._id}`);
+      const targetId = item.value.slug || item.value._id || item.value.id;
+      navigate(`/products/${targetId}`);
     }
   };
 
@@ -192,7 +193,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
               className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
             />
@@ -359,7 +359,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             className="w-full bg-transparent border-none text-xs outline-none text-[#3f544d] focus:ring-0 focus:outline-none p-0 font-mono font-semibold relative z-10"
             style={{ outline: "none", border: "none", boxShadow: "none" }}
           />
@@ -509,7 +508,6 @@ const ProductListItem = ({ product, onSelect, onAddToCart, active }) => {
     // Avoid navigation when clicking cart/wishlist buttons
     if (e.target.closest("button")) return;
     onSelect();
-    navigate(`/products/${product.slug || product._id || product.id}`);
   };
 
   return (
@@ -609,7 +607,6 @@ const RxProductListItem = ({ product, onSelect, onAddToCart, active }) => {
   const handleRowClick = (e) => {
     if (e.target.closest("button")) return;
     onSelect();
-    navigate(`/products/${product.slug || product._id || product.id}`);
   };
 
   return (
