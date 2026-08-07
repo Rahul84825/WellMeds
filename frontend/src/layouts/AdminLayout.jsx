@@ -147,7 +147,7 @@ const AdminLayout = () => {
   });
 
   return (
-    <div className="min-h-screen pdp-grid-bg bg-[#f4f9f7]/30 text-slate-900 dark:text-zinc-100 flex transition-colors duration-300 font-sans">
+    <div className="min-h-screen pdp-grid-bg bg-[#eef7f4] dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex transition-colors duration-300 font-sans">
 
       {/* ──────────────────────────────────────────────────────── */}
       {/* SIDEBAR PANEL */}
