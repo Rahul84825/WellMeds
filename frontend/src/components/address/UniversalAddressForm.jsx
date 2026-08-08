@@ -357,66 +357,11 @@ const UniversalAddressForm = ({
         )}
       </div>
 
-      {/* Address Details Header with Google Places Autocomplete & GPS Action Bar */}
+      {/* Address Details Header */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-2 pt-2 flex items-center justify-between">
         <h3 className="text-xs font-bold uppercase tracking-wider text-[#038076] dark:text-[#84d6b9] flex items-center gap-1.5">
           <Home size={14} /> Address Details
         </h3>
-
-        {/* GPS Location Button */}
-        <button
-          type="button"
-          onClick={handleUseCurrentLocation}
-          disabled={isLocating}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#038076]/10 text-[#038076] dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-[11px] hover:bg-[#038076]/20 transition-all cursor-pointer disabled:opacity-50"
-        >
-          {isLocating ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <Navigation size={13} className="fill-current" />
-          )}
-          <span>Use Current Location</span>
-        </button>
-      </div>
-
-      {/* Google Places Autocomplete Search Box */}
-      <div className="relative">
-        <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1">
-          Search Area, Building, Landmark or Locality (Google Places)
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search e.g. Baner Road, Pune or Echelon Apartments..."
-            value={searchQuery}
-            onChange={handleSearchInputChange}
-            className="w-full pl-9 pr-8 bg-slate-50 dark:bg-zinc-900 border border-teal-200/80 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all"
-          />
-          <Search size={15} className="absolute left-3 top-3 text-[#038076] dark:text-emerald-400" />
-          {isSearching && (
-            <Loader2 size={14} className="absolute right-3 top-3 animate-spin text-slate-400" />
-          )}
-        </div>
-
-        {/* Autocomplete Predictions Dropdown */}
-        {suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-zinc-800">
-            {suggestions.map((p) => (
-              <button
-                type="button"
-                key={p.placeId}
-                onClick={() => handleSelectPrediction(p)}
-                className="w-full text-left px-3.5 py-2.5 hover:bg-teal-50/50 dark:hover:bg-zinc-800/60 transition-all flex items-start gap-2.5"
-              >
-                <MapPin size={15} className="text-[#038076] shrink-0 mt-0.5" />
-                <div className="truncate">
-                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate">{p.mainText}</p>
-                  <p className="text-[10px] text-slate-400 truncate">{p.secondaryText || p.description}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Location Status Alert / Notification */}

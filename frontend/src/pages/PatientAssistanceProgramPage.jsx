@@ -583,15 +583,6 @@ const PatientAssistanceProgramPage = () => {
               <span>Apply for Assistance</span>
             </button>
 
-            <button
-              type="button"
-              onClick={handleExpertClick}
-              className="w-full sm:w-auto bg-white hover:bg-slate-100 text-[#172b26] px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Phone size={16} />
-              <span>Talk to Pharmacist</span>
-            </button>
-
             <Link
               to="/products"
               className="w-full sm:w-auto border border-white/40 hover:bg-white/10 text-white px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2"

@@ -186,14 +186,6 @@ const WellnessPage = () => {
                 <span>Shop Wellness</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setIsConsultationOpen(true)}
-                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-7 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
-              >
-                <Phone size={16} />
-                <span>Talk to Pharmacist</span>
-              </button>
             </div>
           </div>
         </div>

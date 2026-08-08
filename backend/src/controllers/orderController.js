@@ -93,8 +93,9 @@ const computeOrderTotals = async (items, couponCode, userId) => {
   const roundMoney = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
   const roundedSubtotal = roundMoney(subtotal);
   const roundedDiscountAmount = roundMoney(discountAmount);
-  const tax = roundMoney(roundedSubtotal * 0.12);
-  const finalAmount = roundMoney(Math.max(0, roundedSubtotal - roundedDiscountAmount + shipping + tax));
+  // GST is already included in product prices
+  const tax = 0;
+  const finalAmount = roundMoney(Math.max(0, roundedSubtotal - roundedDiscountAmount + shipping));
 
   return {
     subtotal: roundedSubtotal,

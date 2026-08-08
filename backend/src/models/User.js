@@ -54,6 +54,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    dob: {
+      type: String,
+      default: "",
+    },
+    gender: {
+      type: String,
+      default: "",
+    },
+    bloodGroup: {
+      type: String,
+      default: "",
+    },
     isProfileCompleted: {
       type: Boolean,
       default: false,

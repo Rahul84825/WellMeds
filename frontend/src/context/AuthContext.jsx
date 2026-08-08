@@ -90,12 +90,22 @@ export const AuthProvider = ({ children }) => {
     return await api.sendOtp(mobile, name, email);
   }, []);
 
+  const [showWelcomeToast, setShowWelcomeToast] = useState(false);
+
+  const triggerWelcomeToast = useCallback(() => {
+    setShowWelcomeToast(true);
+    setTimeout(() => {
+      setShowWelcomeToast(false);
+    }, 3500);
+  }, []);
+
   // ── Verify OTP and auto-login ─────────────────────────────────────────────
   const verifyOtp = useCallback(async (mobile, otp, name = "", email = "") => {
     setLoading(true);
     try {
       const loggedUser = await api.verifyOtp(mobile, otp, name, email);
       setUser(loggedUser);
+      triggerWelcomeToast();
 
       // Fire post-login callbacks (cart merge for initial login)
       onLoginCallbacks.forEach((fn) => fn(true).catch(() => {}));
@@ -103,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [onLoginCallbacks]);
+  }, [onLoginCallbacks, triggerWelcomeToast]);
 
   // ── Logout ────────────────────────────────────────────────────────────────
   const logout = useCallback(async () => {
@@ -161,8 +171,22 @@ export const AuthProvider = ({ children }) => {
         openLoginModal,
         closeAuthModal,
         authModalRedirect,
+        triggerWelcomeToast,
       }}
     >
+      {/* Floating Welcome Toast */}
+      {showWelcomeToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100000] pointer-events-none animate-[fade-in_0.2s_ease-out]">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-3 select-none">
+            <div className="w-6 h-6 rounded-full bg-[#39b54a] text-white flex items-center justify-center font-bold shrink-0 text-xs shadow-xs">
+              ✓
+            </div>
+            <span className="text-sm font-semibold text-slate-800 dark:text-zinc-100 tracking-tight">
+              Welcome Back!
+            </span>
+          </div>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   );

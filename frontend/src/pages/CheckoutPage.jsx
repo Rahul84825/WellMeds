@@ -128,9 +128,7 @@ const Checkout = () => {
   const [availableCoupons, setAvailableCoupons] = useState([]);
 
   // Derived totals with coupon
-  const discountAmount = roundPrice(couponDiscount);
-  const activeShipping = couponApplied?.freeDelivery ? 0 : dynamicShipping;
-  const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeShipping + tax));
+  const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeShipping));
   const [rxAttached, setRxAttached] = useState(false);
   const [rxFileName, setRxFileName] = useState("");
   const [rxModalOpen, setRxModalOpen] = useState(false);

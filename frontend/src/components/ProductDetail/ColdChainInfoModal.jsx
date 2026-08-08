@@ -75,7 +75,7 @@ const ColdChainInfoModal = ({ isOpen, onClose, triggerRef }) => {
       aria-modal="true"
       role="dialog"
       aria-labelledby="cold-chain-title"
-      className="fixed inset-0 w-screen h-screen bg-black/45 backdrop-blur-md z-[99999] flex items-center justify-center p-3 sm:p-4 select-none animate-[fade-in_0.2s_ease-out]"
+      className="fixed inset-0 w-screen h-screen bg-black/50 z-[99999] flex items-center justify-center p-3 sm:p-4 select-none"
       style={{
         fontFamily: "'Liberation Sans', 'DejaVu Sans', Arial, sans-serif"
       }}
@@ -84,7 +84,7 @@ const ColdChainInfoModal = ({ isOpen, onClose, triggerRef }) => {
       <div
         ref={modalContainerRef}
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white rounded-[16px] overflow-hidden relative text-left shadow-[0_30px_70px_rgba(0,0,0,0.25)] animate-[scale-up_0.2s_ease-out] ${
+        className={`bg-white rounded-[16px] overflow-hidden relative text-left shadow-2xl ${
           isMobileView ? "w-full max-w-[340px]" : "w-full max-w-[800px]"
         }`}
       >

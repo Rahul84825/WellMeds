@@ -10,6 +10,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import { formatDate } from "../utils/date";
 import SEO from "../components/common/SEO";
+import ProfileInfoCard from "../components/profile/ProfileInfoCard";
 import { 
   User, 
   MapPin, 
@@ -251,6 +252,9 @@ const Profile = () => {
             </div>
           </div>
         </div>
+
+        {/* ── PROFILE INFORMATION CARD ── */}
+        <ProfileInfoCard />
 
         {/* ── QUICK DASHBOARD STATS BAR ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

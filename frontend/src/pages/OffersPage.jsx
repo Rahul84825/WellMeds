@@ -111,23 +111,6 @@ const OffersPage = () => {
               </p>
             </div>
 
-            <div className="pt-2 flex flex-wrap gap-3">
-              <Link
-                to="/upload-prescription"
-                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
-              >
-                <FileText size={15} />
-                <span>Upload Prescription</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => setIsConsultationOpen(true)}
-                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
-              >
-                <Phone size={15} />
-                <span>Talk to Pharmacist</span>
-              </button>
-            </div>
           </div>
         </div>
 

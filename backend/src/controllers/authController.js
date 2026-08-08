@@ -123,6 +123,9 @@ export const getProfile = async (req, res, next) => {
         mobile: user.mobile || null,
         role: user.role,
         avatar: user.avatar,
+        dob: user.dob || "",
+        gender: user.gender || "",
+        bloodGroup: user.bloodGroup || "",
         authProvider: user.authProvider,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
@@ -136,7 +139,7 @@ export const getProfile = async (req, res, next) => {
 
 // ─── Update Profile ────────────────────────────────────────────────────────────
 export const updateProfile = async (req, res, next) => {
-  const { name, email, avatar, address, gender, dob } = req.body;
+  const { name, email, avatar, address, gender, dob, bloodGroup } = req.body;
 
   try {
     const user = await User.findById(req.user.id);
@@ -150,6 +153,7 @@ export const updateProfile = async (req, res, next) => {
     if (address !== undefined) user.address = address;
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
+    if (bloodGroup !== undefined) user.bloodGroup = bloodGroup;
 
     if (user.name && user.email) {
       user.isProfileCompleted = true;
@@ -168,6 +172,9 @@ export const updateProfile = async (req, res, next) => {
         mobile: user.mobile || null,
         role: user.role,
         avatar: user.avatar,
+        dob: user.dob || "",
+        gender: user.gender || "",
+        bloodGroup: user.bloodGroup || "",
         authProvider: user.authProvider,
         isProfileCompleted: user.isProfileCompleted,
       },

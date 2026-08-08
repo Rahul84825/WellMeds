@@ -372,9 +372,9 @@ export const CartProvider = ({ children }) => {
   const subtotal = roundPrice(cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * item.quantity, 0));
   // Indian shipping: free above ₹499, else ₹49 flat fee
   const shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
-  // GST 12%
-  const tax = roundPrice(subtotal * 0.12);
-  const total = roundPrice(subtotal + shipping + tax);
+  // GST is already included in product prices
+  const tax = 0;
+  const total = roundPrice(subtotal + shipping);
   const requiresRx = cartItems.some((item) => item.requiresRx);
 
   return (

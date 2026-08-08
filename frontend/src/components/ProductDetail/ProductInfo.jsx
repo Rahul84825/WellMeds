@@ -19,17 +19,14 @@ const ProductAttributeIcon = ({ type }) => {
 const ProductInfo = ({ product, handleShare }) => {
   return (
     <div className="space-y-4 text-left flex-1 flex flex-col justify-start h-full text-black font-sans">
-      {/* Eyebrow / Category Specialty Tag */}
-      <div className="flex flex-wrap items-center gap-2.5">
-        <span className="text-xs font-sans font-bold uppercase tracking-[2.5px] text-[#b08d3e]">
-          {product.category?.name || product.category || "Specialty Medicine"}
-        </span>
-        {product.requiresRx && (
+      {/* Eyebrow / Specialty Tag */}
+      {product.requiresRx && (
+        <div className="flex flex-wrap items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 border border-[#157a6d] rounded-sm px-2.5 py-0.5 text-xs font-sans font-bold uppercase tracking-widest text-[#157a6d]">
             <span className="font-sans font-black">℞</span> Prescription Required
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Product Name & Share Button Row */}
       <div className="flex justify-between items-start gap-4">

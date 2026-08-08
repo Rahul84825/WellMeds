@@ -200,39 +200,6 @@ const ProductsPage = () => {
                 Explore thousands of genuine prescription medicines, specialty therapies, surgical products, and wellness formulations with guaranteed cold-chain integrity.
               </p>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Link
-                to="/upload-prescription"
-                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
-              >
-                <FileText size={15} />
-                <span>Upload Prescription</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => setIsConsultationOpen(true)}
-                className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-6 py-2.5 rounded-full text-xs font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
-              >
-                <Phone size={15} />
-                <span>Talk to Pharmacist</span>
-              </button>
-
-              {(categoryParam || specialityParam || searchVal) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchVal("");
-                    navigate("/products");
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 px-4 py-2 rounded-full transition-all cursor-pointer"
-                >
-                  <X size={14} />
-                  <span>Clear Filters</span>
-                </button>
-              )}
-            </div>
           </div>
         </div>
 
