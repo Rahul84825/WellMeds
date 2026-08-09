@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import SEO from "../components/common/SEO";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
+import ConsultationModal from "../components/ConsultationModal";
 import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
 import { Sparkles, Phone, FileText, ChevronRight, Mail, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 
@@ -19,6 +20,7 @@ const wellmedsStoreData = {
 };
 
 const Contact = () => {
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("Support");
