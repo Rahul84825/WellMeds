@@ -303,9 +303,9 @@ const MoleculeDetailPage = () => {
                               ₹{price.toLocaleString("en-IN")}
                             </span>
                           </div>
-                          {prod.manufacturer && (
+                          {(prod.manufacturer || prod.marketer) && (
                             <p className="text-[10px] font-mono text-[#444444] mt-0.5 truncate font-medium">
-                              {prod.manufacturer}
+                              {prod.manufacturer || prod.marketer}
                             </p>
                           )}
                         </div>
@@ -533,8 +533,8 @@ const MoleculeDetailPage = () => {
                         <p className="text-base font-sans font-bold text-black group-hover:text-[#157a6d] transition-colors leading-snug">
                           {prod.name}
                         </p>
-                        {prod.manufacturer && (
-                          <p className="text-xs font-mono text-black mt-1 font-medium">{prod.manufacturer}</p>
+                        {(prod.manufacturer || prod.marketer) && (
+                          <p className="text-xs font-mono text-black mt-1 font-medium">{prod.manufacturer || prod.marketer}</p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           {prod.requiresPrescription ? (

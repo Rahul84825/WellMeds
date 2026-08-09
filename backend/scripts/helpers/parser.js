@@ -157,50 +157,37 @@ export const parseComposition = (val) => {
     .filter(Boolean);
 
   return lines.map((line) => {
-    // Try semicolon-separated: ingredient; strength; purpose
     const parts = line.split(/\s*[;–—]\s*/);
     if (parts.length >= 3) {
       return {
-        ingredient: parts[0].trim(),
-        strength: parts[1].trim(),
-        purpose: parts[2].trim(),
+        ingredient: parts[0].trim() || "Active Ingredient",
+        strength: parts[1].trim() || "As directed",
+        purpose: parts[2].trim() || "Active Ingredient",
       };
     }
     if (parts.length === 2) {
       return {
-        ingredient: parts[0].trim(),
-        strength: parts[1].trim(),
+        ingredient: parts[0].trim() || "Active Ingredient",
+        strength: parts[1].trim() || "As directed",
         purpose: "Active Ingredient",
       };
     }
-    // Try splitting off trailing "Xmg / Xmcg / Xiu" as strength
     const strengthMatch = line.match(/^(.+?)\s+([\d.,]+\s*(?:mg|mcg|iu|g|ml|%|units?)?)\s*$/i);
     if (strengthMatch) {
       return {
-        ingredient: strengthMatch[1].trim(),
-        strength: strengthMatch[2].trim(),
+        ingredient: strengthMatch[1].trim() || line,
+        strength: strengthMatch[2].trim() || "As directed",
         purpose: "Active Ingredient",
       };
     }
     return {
-      ingredient: line,
-      strength: "",
+      ingredient: line || "Active Ingredient",
+      strength: "As directed",
       purpose: "Active Ingredient",
     };
   });
 };
 
-/**
- * Parse benefits[] from a multi-line cell.
- *
- * Supported formats (one benefit per line):
- *   "Treats cancer – long description"
- *   "Treats cancer: long description"
- *   "Treats cancer"               ← description defaults to ""
- *
- * @param {any} val – Raw cell value
- * @returns {{ title: string, description: string }[]}
- */
 export const parseBenefits = (val) => {
   if (!val) return [];
   const lines = String(val)
@@ -213,7 +200,7 @@ export const parseBenefits = (val) => {
     if (sep) {
       const idx = line.indexOf(sep[0]);
       return {
-        title: line.substring(0, idx).trim(),
+        title: line.substring(0, idx).trim() || line,
         description: line.substring(idx + sep[0].length).trim(),
       };
     }
@@ -221,20 +208,10 @@ export const parseBenefits = (val) => {
   });
 };
 
-/**
- * Parse faqs[] from a numbered / plain-text block.
- *
- * Supported formats:
- *   "1. Question? Answer."
- *   "Q: Question\nA: Answer"
- *   "Question? Answer."
- *
- * @param {any} val – Raw cell value
- * @returns {{ question: string, answer: string }[]}
- */
 export const parseFAQs = (val) => {
   if (!val) return [];
-  const text = String(val);
+  const text = String(val).trim();
+  if (!text) return [];
 
   // Format: "Q: ...\nA: ..."
   if (/Q\s*:/i.test(text) && /A\s*:/i.test(text)) {
@@ -251,50 +228,67 @@ export const parseFAQs = (val) => {
         }
         return null;
       })
-      .filter(Boolean);
+      .filter((f) => f && f.question && f.answer);
   }
 
-  // Format: "1. Question? Answer." or "1. Question Answer"
+  // Format: Double newline separated blocks (Question on line 1, Answer on line 2+)
+  const blocks = text.split(/\r?\n\r?\n/).map((b) => b.trim()).filter(Boolean);
+  const parsed = [];
+
+  for (const block of blocks) {
+    const lines = block.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length >= 2) {
+      const question = lines[0].replace(/^[•\-\*\d.]+\s*/, "").trim();
+      const answer = lines.slice(1).join(" ").trim();
+      if (question && answer) {
+        parsed.push({ question, answer });
+        continue;
+      }
+    } else if (lines.length === 1) {
+      const line = lines[0].replace(/^[•\-\*\d.]+\s*/, "").trim();
+      const qIdx = line.indexOf("?");
+      if (qIdx !== -1) {
+        const question = line.substring(0, qIdx + 1).trim();
+        const answer = line.substring(qIdx + 1).trim();
+        if (question) {
+          parsed.push({
+            question,
+            answer: answer || "Please consult your doctor or healthcare professional for details.",
+          });
+          continue;
+        }
+      }
+    }
+  }
+
+  if (parsed.length > 0) {
+    return parsed;
+  }
+
+  // Format: Numbered block format "1. Question? Answer"
   const numbered = text.split(/\n(?=\d+\.)/).filter(Boolean);
   if (numbered.length > 0 && /^\d+\./.test(numbered[0])) {
     return numbered
       .map((block) => {
         const cleaned = block.replace(/^\d+\.\s*/, "").trim();
-        // Split at first "?" that ends the question
         const qIdx = cleaned.indexOf("?");
         if (qIdx !== -1) {
           return {
             question: cleaned.substring(0, qIdx + 1).trim(),
-            answer: cleaned.substring(qIdx + 1).trim(),
+            answer: cleaned.substring(qIdx + 1).trim() || "Please consult your doctor or healthcare professional for details.",
           };
         }
-        // Fallback: treat entire block as question with empty answer
-        return { question: cleaned, answer: "" };
+        return {
+          question: cleaned,
+          answer: "Please consult your doctor or healthcare professional for details.",
+        };
       })
-      .filter((f) => f.question.length > 0);
+      .filter((f) => f.question.length > 0 && f.answer.length > 0);
   }
 
-  // Fallback: one entry per line
-  return text
-    .split(/\r?\n/)
-    .map((l) => l.replace(/^[•\-\*]+\s*/, "").trim())
-    .filter(Boolean)
-    .map((l) => ({ question: l, answer: "" }));
+  return [];
 };
 
-/**
- * Parse safetyCards[] from Safety Advice cell.
- *
- * Supported format (one entry per line):
- *   "Pregnancy: Unsafe"
- *   "Kidney: Use with caution"
- *
- * Also supports the Safety Information Cards column:
- *   "• Prescription Required: Yes"
- *
- * @param {any} val – Raw cell value
- * @returns {{ icon: string, title: string, status: string, description: string }[]}
- */
 export const parseSafetyCards = (val) => {
   if (!val) return [];
   const lines = String(val)
@@ -302,7 +296,6 @@ export const parseSafetyCards = (val) => {
     .map((l) => l.replace(/^[•\-\*]+\s*/, "").trim())
     .filter(Boolean);
 
-  // Icon mapping for common safety categories
   const iconMap = {
     pregnancy: "baby",
     breastfeeding: "baby-bottle",
@@ -322,37 +315,29 @@ export const parseSafetyCards = (val) => {
 
   return lines
     .map((line) => {
-      // "Title: Status" or "Title: Status – Description"
       const colonIdx = line.indexOf(":");
       if (colonIdx === -1) return null;
 
       const title = line.substring(0, colonIdx).trim();
       const rest = line.substring(colonIdx + 1).trim();
 
-      // Check for description after "–" or "—"
       const dashMatch = rest.match(/^(.+?)\s*[–—]\s*(.+)$/);
       const status = dashMatch ? dashMatch[1].trim() : rest;
       const description = dashMatch ? dashMatch[2].trim() : "";
 
-      // Resolve icon
       const titleLower = title.toLowerCase();
       const icon = Object.keys(iconMap).find((k) => titleLower.includes(k)) || "info";
 
-      return { icon, title, status, description };
+      return {
+        icon,
+        title: title || "Safety Information",
+        status: status || "Consult Doctor",
+        description,
+      };
     })
-    .filter(Boolean);
+    .filter((s) => s && s.title && s.status);
 };
 
-/**
- * Parse specifications[] from a bullet list cell.
- *
- * Supported format (one spec per line):
- *   "• Label: Value"
- *   "Label: Value"
- *
- * @param {any} val – Raw cell value
- * @returns {{ label: string, value: string }[]}
- */
 export const parseSpecifications = (val) => {
   if (!val) return [];
   const lines = String(val)
@@ -364,10 +349,10 @@ export const parseSpecifications = (val) => {
     .map((line) => {
       const colonIdx = line.indexOf(":");
       if (colonIdx === -1) return null;
-      return {
-        label: line.substring(0, colonIdx).trim(),
-        value: line.substring(colonIdx + 1).trim(),
-      };
+      const label = line.substring(0, colonIdx).trim();
+      const value = line.substring(colonIdx + 1).trim();
+      if (!label || !value) return null;
+      return { label, value };
     })
     .filter(Boolean);
 };

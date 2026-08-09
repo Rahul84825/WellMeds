@@ -191,7 +191,7 @@ const Cart = () => {
                   ? calculateDiscountPercent(item.originalPrice, item.price)
                   : 0;
 
-                const manufacturer = item.manufacturer || item.brand || "WELLMEDS";
+                const manufacturer = item.manufacturer || item.marketer || item.brand || "WELLMEDS";
                 const packSize = item.packSize || item.productSpecifications?.packSize || "1 UNIT";
                 const moleculeName = item.molecules?.[0]?.name || item.genericName || item.productSpecifications?.genericName;
 

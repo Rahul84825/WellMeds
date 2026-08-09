@@ -80,13 +80,13 @@ const ProductInfo = ({ product, handleShare }) => {
       )}
 
       {/* Manufacturer Stamp */}
-      {(product.manufacturer || product.brand) && (
+      {(product.manufacturer || product.marketer || product.brand || product.productSpecifications?.manufacturer) && (
         <div className="pt-3.5 border-t border-dashed border-[#c3d4cc] mt-1">
           <span className="block font-sans text-[11px] font-bold text-black uppercase tracking-widest mb-1 select-none">
             Manufactured / Marketed By
           </span>
           <p className="font-sans text-sm font-extrabold text-[#157a6d] uppercase tracking-wider">
-            {product.manufacturer || product.brand}
+            {product.manufacturer || product.marketer || product.brand || product.productSpecifications?.manufacturer}
           </p>
         </div>
       )}

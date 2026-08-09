@@ -31,59 +31,59 @@ import fs from "fs";
  *   sheetName – name of the worksheet that was parsed
  *   data      – array of row objects (header row used as keys)
  */
-export const readProductExcel = (filename = "Product_Template.xlsx") => {
-  // ── Candidate paths (resolved at runtime for CWD flexibility) ────────────
-  const candidates = [
-    path.resolve("scripts/data", filename),
-    path.resolve("backend/scripts/data", filename),
-    path.resolve("../scripts/data", filename),
-  ];
+/**
+ * Locate and parse a product Excel file or custom file path.
+ */
+export const readProductExcel = (filePathOrName) => {
+  let filePath = filePathOrName;
 
-  let filePath = null;
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      filePath = candidate;
-      break;
+  if (!fs.existsSync(filePath)) {
+    // Candidate paths
+    const candidates = [
+      path.resolve("data/import", filePathOrName),
+      path.resolve("../data/import", filePathOrName),
+      path.resolve("backend/scripts/data", filePathOrName),
+      path.resolve("scripts/data", filePathOrName),
+      path.resolve("../scripts/data", filePathOrName),
+    ];
+
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        filePath = candidate;
+        break;
+      }
     }
   }
 
-  if (!filePath) {
-    throw new Error(
-      `Product Excel file "${filename}" not found.\n` +
-        `Searched in:\n` +
-        candidates.map((c) => `  ${c}`).join("\n") +
-        `\n\nPlease place the Excel file at: backend/scripts/data/${filename}`
-    );
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Product Excel file "${filePathOrName}" not found.`);
   }
 
-  // ── Parse workbook ────────────────────────────────────────────────────────
   const workbook = xlsx.readFile(filePath, {
-    cellNF: false,   // skip number format info
-    cellHTML: false, // skip HTML strings
+    cellNF: false,
+    cellHTML: false,
     type: "file",
   });
 
   if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-    throw new Error(`The Excel file "${filename}" contains no sheets.`);
+    throw new Error(`The Excel file "${filePathOrName}" contains no sheets.`);
   }
 
-  // ── Find the first sheet that contains actual data rows ───────────────────
+  const results = [];
   for (const sheetName of workbook.SheetNames) {
     const worksheet = workbook.Sheets[sheetName];
-    if (!worksheet || !worksheet["!ref"]) continue; // completely blank sheet
+    if (!worksheet || !worksheet["!ref"]) continue;
 
     const rawData = xlsx.utils.sheet_to_json(worksheet, {
-      defval: "",      // return "" for empty cells instead of undefined
-      raw: false,      // convert all values to their formatted string
+      defval: "",
+      raw: false,
     });
 
-    // Filter out rows that are entirely empty after trimming
     const data = rawData
       .filter((row) =>
         Object.values(row).some((v) => String(v).trim().length > 0)
       )
       .map((row) => {
-        // Trim every string value in the row
         const cleaned = {};
         for (const [key, value] of Object.entries(row)) {
           cleaned[key.trim()] =
@@ -93,11 +93,53 @@ export const readProductExcel = (filename = "Product_Template.xlsx") => {
       });
 
     if (data.length > 0) {
-      return { sheetName, data };
+      results.push({ sheetName, data });
     }
   }
 
-  throw new Error(
-    `The Excel file "${filename}" was read successfully but all sheets were empty.`
-  );
+  if (results.length === 0) {
+    throw new Error(`All sheets in "${filePathOrName}" were empty.`);
+  }
+
+  // Return first sheet data for backward compatibility, plus all sheets info
+  return {
+    sheetName: results[0].sheetName,
+    data: results[0].data,
+    allSheets: results,
+    filePath,
+  };
 };
+
+/**
+ * Scan data/import and backend/scripts/data for all XLSX files.
+ */
+export const getImportXlsxFiles = () => {
+  const candidateDirs = [
+    path.resolve("data/import"),
+    path.resolve("../data/import"),
+    path.resolve("backend/scripts/data"),
+    path.resolve("scripts/data"),
+  ];
+
+  const foundFiles = [];
+  const seenBasenames = new Set();
+
+  for (const dir of candidateDirs) {
+    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+      const files = fs.readdirSync(dir);
+      for (const f of files) {
+        if (f.endsWith(".xlsx") && !f.startsWith("~$")) {
+          const fullPath = path.join(dir, f);
+          const base = f.toLowerCase();
+          if (!seenBasenames.has(base)) {
+            seenBasenames.add(base);
+            foundFiles.push(fullPath);
+          }
+        }
+      }
+    }
+  }
+
+  return foundFiles;
+};
+

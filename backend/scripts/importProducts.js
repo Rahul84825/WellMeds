@@ -1,27 +1,23 @@
 /**
  * importProducts.js
  * ─────────────────────────────────────────────────────────────────────────────
- * WellMeds Product Import Utility  –  ADD ONLY / NO UPDATE / NO DELETE
+ * WellMeds Product Import Utility — ADDITIVE / DUPLICATE-SAFE
  *
- * Reads an Excel file from scripts/data/ and inserts NEW products into
- * MongoDB.  This script NEVER modifies, updates, replaces, or deletes any
- * existing document.  It only inserts rows that are genuinely new.
+ * Reads XLSX files from data/import/ (or backend/scripts/data/) and inserts
+ * genuinely NEW products into MongoDB.
  *
- * Usage:
- *   npm run import:products            (from backend/ directory)
- *   node scripts/importProducts.js
- *
- * To change the Excel filename, update PRODUCT_EXCEL_FILENAME below.
+ * STRICT NON-DESTRUCTIVE GUARANTEES:
+ * - NEVER updates, overwrites, replaces, or deletes existing products.
+ * - NEVER modifies existing product prices, categories, molecules, or content.
+ * - Source of truth is the existing database — existing products win.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-// ── Shared helpers (reused from Molecule Import Utility) ──────────────────────
 import { connectDB, disconnectDB } from "./helpers/db.js";
 import { logger } from "./helpers/logger.js";
-import { slugify } from "./helpers/slugify.js";
-
-// ── Product-specific helpers ──────────────────────────────────────────────────
-import { readProductExcel } from "./helpers/productExcelReader.js";
+import { readProductExcel, getImportXlsxFiles } from "./helpers/productExcelReader.js";
+import path from "path";
+import fs from "fs";
 import {
   toString,
   toNumber,
@@ -39,23 +35,15 @@ import {
   uniqueSlug,
 } from "./helpers/parser.js";
 
-// ── Mongoose models ───────────────────────────────────────────────────────────
+// Mongoose models
 import { Product } from "../src/models/Product.js";
 import { Category } from "../src/models/Category.js";
 import { Molecule } from "../src/models/Molecule.js";
 import { MedicalSpeciality } from "../src/models/MedicalSpeciality.js";
 import { SurgicalCategory } from "../src/models/SurgicalCategory.js";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURATION  ←  Change the filename here when the client provides a new file
-// ─────────────────────────────────────────────────────────────────────────────
-const PRODUCT_EXCEL_FILENAME = process.argv[2] || process.env.PRODUCT_EXCEL_FILENAME || "ENZALUTAMIDE.xlsx";
+const CLI_ARG = process.argv[2];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CATEGORY COLUMN ALIASES
-// Add any new column name variants here — the importer will recognise them
-// automatically. All matching is case-insensitive and whitespace-trimmed.
-// ─────────────────────────────────────────────────────────────────────────────
 const CATEGORY_COLUMN_ALIASES = [
   "Category",
   "category",
@@ -73,9 +61,6 @@ const CATEGORY_COLUMN_ALIASES = [
   "category_name",
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility: case-insensitive cell getter
-// ─────────────────────────────────────────────────────────────────────────────
 const getVal = (row, keys) => {
   for (const k of keys) {
     if (row[k] !== undefined) return row[k];
@@ -87,10 +72,6 @@ const getVal = (row, keys) => {
   return undefined;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility: detect whether ANY category column alias exists in the row keys
-// Returns { found: boolean, columnKey: string|null, rawValue: string }
-// ─────────────────────────────────────────────────────────────────────────────
 const detectCategoryColumn = (row) => {
   const rowKeys = Object.keys(row);
   for (const alias of CATEGORY_COLUMN_ALIASES) {
@@ -108,17 +89,7 @@ const detectCategoryColumn = (row) => {
   return { found: false, columnKey: null, rawValue: "" };
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility: content-inference fallback
-// Scans free-text columns for any known category name or related medical keywords.
-//
-// @param {object}  row          – Excel row
-// @param {Map}     categoryMap  – name(lowercase) → ObjectId
-// @param {object[]} allCategories – full category docs (for name access)
-// @returns {{ categoryId: ObjectId|null, matchedName: string|null, columnKey: string|null }}
-// ─────────────────────────────────────────────────────────────────────────────
 const inferCategoryFromContent = (row, categoryMap, allCategories) => {
-  // Columns to scan, in priority order
   const scanColumns = [
     "More Information",
     "Uses",
@@ -131,13 +102,14 @@ const inferCategoryFromContent = (row, categoryMap, allCategories) => {
     "Effects (How It Works)",
   ];
 
-  // Map category names to primary medical keywords
   const categoryKeywordsMap = {
     "cancer care": ["cancer care", "cancer", "oncology", "anticancer", "mcrpc", "nmcrpc", "tumor", "tumour"],
     "cardiac care": ["cardiac care", "cardiac", "cardiovascular", "heart", "hypertension", "blood pressure"],
     "diabetes care": ["diabetes care", "diabetes", "diabetic", "glycemic", "insulin", "glucose"],
     "respiratory care": ["respiratory care", "respiratory", "lungs", "asthma", "copd", "bronchial"],
-    "kidney / transplant care": ["kidney care", "kidney", "renal", "transplant", "nephrology"],
+    "kidney / transplant care": ["kidney care", "transplant care", "kidney", "renal", "transplant", "nephrology"],
+    "transplant care": ["transplant care", "transplant"],
+    "infectious disease care": ["infectious disease care", "infectious disease", "antibiotic", "antifungal", "antiviral", "infection"],
     "hepatitis care": ["hepatitis care", "hepatitis", "liver", "hepatic"],
     "neuro & mental health": ["neuro", "neurology", "mental health", "psychiatric", "brain", "seizure"],
     "rare & orphan diseases": ["rare disease", "orphan disease", "genetics"],
@@ -172,9 +144,6 @@ const inferCategoryFromContent = (row, categoryMap, allCategories) => {
   return { categoryId: null, matchedName: null, columnKey: null };
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility: build a lookup map  name(lowercase) → ObjectId
-// ─────────────────────────────────────────────────────────────────────────────
 const buildLookup = (docs) => {
   const map = new Map();
   for (const doc of docs) {
@@ -185,34 +154,39 @@ const buildLookup = (docs) => {
   return map;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility: escape a string for use in a RegExp
-// ─────────────────────────────────────────────────────────────────────────────
-const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Clean active ingredient text to strip dosage/strength quantities
+ * (e.g. "Meropenem 1000 mg" -> "Meropenem", "Plerixafor 24mg" -> "Plerixafor")
+ */
+const extractBaseMoleculeName = (rawText) => {
+  if (!rawText) return "";
+  return String(rawText)
+    .replace(/\s*\d+(\.\d+)?\s*(mg|gm|g|mcg|ml|iu|units?|%)\b/gi, "")
+    .replace(/[\(\)]/g, "")
+    .trim();
+};
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main execution
-// ─────────────────────────────────────────────────────────────────────────────
 const run = async () => {
   const startTime = Date.now();
-  logger.heading("WellMeds Product Import Utility  (ADD ONLY)");
+  logger.heading("WellMeds Product Import Utility — ADDITIVE / DUPLICATE-SAFE");
 
-  // Counters
-  let importedCount = 0;
-  let duplicateCount = 0;
-  let missingCategoryCount = 0;
-  let missingFieldsCount = 0;
-  let failedCount = 0;
-  let warningCount = 0;
-  let createdCategoriesCount = 0;
-  const newManufacturers = new Set();
-  const skippedReasonsLog = [];
+  let totalXlsxRows = 0;
+  let successfullyAdded = 0;
+  let skippedAlreadyExisted = 0;
+  let skippedInvalid = 0;
+  let failedUnexpectedly = 0;
 
-  let data = [];
+  let moleculeFieldsMapped = 0;
+  let marketerFieldsMapped = 0;
+  let manufacturerFieldsMapped = 0;
+
+  const skippedDuplicatesList = [];
+  const skippedInvalidList = [];
+
   let dbInfo = null;
   let allCategories = [];
   let existingProducts = [];
-  let initialManufacturers = new Set();
+  let previousProductCount = 0;
 
   try {
     // ── 1. Database connection ─────────────────────────────────────────────
@@ -220,22 +194,24 @@ const run = async () => {
     dbInfo = await connectDB();
     logger.success(`[CONNECTED] ${dbInfo.isAtlas ? "MongoDB Atlas" : "MongoDB"} Connected`);
 
-    // ── 2. Read Excel ──────────────────────────────────────────────────────
-    logger.info("[READ] Reading Excel…");
-    const excelResult = readProductExcel(PRODUCT_EXCEL_FILENAME);
-    const sheetName = excelResult.sheetName;
-    data = excelResult.data;
-    logger.success(
-      `[READ] Sheet "${sheetName}" loaded — ${data.length} data row(s) found.`
-    );
+    // ── 2. Determine XLSX files to process ────────────────────────────────
+    let filesToProcess = [];
+    if (CLI_ARG) {
+      filesToProcess = [CLI_ARG];
+    } else {
+      filesToProcess = getImportXlsxFiles();
+    }
 
-    if (data.length === 0) {
-      logger.warn("No data rows found in the Excel file. Exiting.");
+    if (filesToProcess.length === 0) {
+      logger.error("No XLSX files found to process in data/import or backend/scripts/data.");
       return;
     }
 
-    // ── 3. Pre-load reference collections into memory ─────────────────────
-    logger.info("Pre-loading reference collections…");
+    logger.info(`[FILES] Found ${filesToProcess.length} XLSX file(s) to process:`);
+    filesToProcess.forEach((f) => console.log(`  - ${path.basename(f)}`));
+
+    // ── 3. Pre-load reference collections & DB product count ────────────────
+    logger.info("Pre-loading database reference collections…");
 
     const [
       fetchedProducts,
@@ -244,7 +220,7 @@ const run = async () => {
       allSpecialities,
       allSurgicalCategories,
     ] = await Promise.all([
-      Product.find({}, { name: 1, slug: 1, sku: 1, manufacturer: 1, brand: 1 }),
+      Product.find({}, { name: 1, slug: 1, sku: 1, manufacturer: 1, marketer: 1, brand: 1 }),
       Category.find({}, { name: 1 }),
       Molecule.find({}, { name: 1 }),
       MedicalSpeciality.find({}, { name: 1 }),
@@ -253,715 +229,466 @@ const run = async () => {
 
     existingProducts = fetchedProducts;
     allCategories = fetchedCategories;
+    previousProductCount = existingProducts.length;
 
-    // Duplicate-detection sets (checked in O(1))
-    const existingNames = new Set(
-      existingProducts.map((p) => p.name.toLowerCase().trim())
-    );
-    const existingSlugs = new Set(
-      existingProducts.map((p) => (p.slug || "").toLowerCase().trim())
-    );
-    const existingSkus = new Set(
-      existingProducts
-        .filter((p) => p.sku)
-        .map((p) => p.sku.toLowerCase().trim())
-    );
+    // Duplicate-detection maps & sets (O(1) lookup)
+    const existingNamesMap = new Map();
+    const existingSlugs = new Set();
+    const existingSkus = new Set();
 
-    // Reference lookup maps
+    for (const p of existingProducts) {
+      const normName = p.name.toLowerCase().trim();
+      existingNamesMap.set(normName, p);
+      if (p.slug) existingSlugs.add(p.slug.toLowerCase().trim());
+      if (p.sku) existingSkus.add(p.sku.toLowerCase().trim());
+    }
+
     const categoryMap = buildLookup(allCategories);
     const moleculeMap = buildLookup(allMolecules);
     const specialityMap = buildLookup(allSpecialities);
-    const surgicalCategoryMap = buildLookup(allSurgicalCategories);
 
-    // Manufacturer & Brand Lookup Maps (for normalization)
-    initialManufacturers = new Set();
     const manufacturerMap = new Map();
     const brandMap = new Map();
 
     for (const p of existingProducts) {
       if (p.manufacturer) {
         const norm = p.manufacturer.toLowerCase().trim();
-        initialManufacturers.add(norm);
-        if (!manufacturerMap.has(norm)) {
-          manufacturerMap.set(norm, p.manufacturer);
-        }
+        if (!manufacturerMap.has(norm)) manufacturerMap.set(norm, p.manufacturer);
       }
       if (p.brand) {
         const norm = p.brand.toLowerCase().trim();
-        if (!brandMap.has(norm)) {
-          brandMap.set(norm, p.brand);
-        }
+        if (!brandMap.has(norm)) brandMap.set(norm, p.brand);
       }
     }
 
-    // Pre-import logging
     console.log("\n===========================================");
-    console.log("  Connected Database & Collection Info");
+    console.log("  Database Pre-Import Snapshot");
     console.log("===========================================");
-    console.log(`  Connected Database Host : ${dbInfo.host}`);
-    console.log(`  Connection Type         : ${dbInfo.isAtlas ? "MongoDB Atlas (Cloud)" : "Local/Other MongoDB"}`);
+    console.log(`  Database Host           : ${dbInfo.host}`);
     console.log(`  Database Name           : ${dbInfo.dbName}`);
-    console.log("-------------------------------------------");
+    console.log(`  Previous Product Count  : ${previousProductCount}`);
     console.log(`  Categories Found        : ${allCategories.length}`);
-    console.log(`  Products Found          : ${existingProducts.length}`);
     console.log(`  Molecules Found         : ${allMolecules.length}`);
-    console.log(`  Specialities Found      : ${allSpecialities.length}`);
-    console.log(`  Surgical Categories     : ${allSurgicalCategories.length}`);
-    console.log(`  Manufacturers Found     : ${initialManufacturers.size}`);
     console.log("===========================================\n");
 
-    // ── Detect Wrong Database Warning ─────────────────────────────────────
-    if (allCategories.length === 0 && existingProducts.length === 0 && initialManufacturers.size === 0) {
-      logger.warn("⚠️  [WARNING] All reference collections (Categories, Products, Manufacturers) are unexpectedly empty!");
-      logger.warn(`    Please verify if the importer is connected to the correct database (Database Name: "${dbInfo.dbName}").\n`);
-    }
-
-    // ── 4. Process each row ────────────────────────────────────────────────
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-      const rowNum = i + 2; // Excel row number (header = row 1)
-
+    // ── 4. Process every file and sheet ──────────────────────────────────
+    for (const fileItem of filesToProcess) {
+      logger.info(`[PROCESSING FILE] ${path.basename(fileItem)}`);
+      let parsedWorkbook;
       try {
-        // ── 4a. Extract product name (required) ────────────────────────────
-        const rawName = getVal(row, [
-          "PRODUCT NAME",
-          "Product Name",
-          "Name",
-          "name",
-          "product_name",
-        ]);
+        parsedWorkbook = readProductExcel(fileItem);
+      } catch (fErr) {
+        logger.error(`Failed to read file ${fileItem}: ${fErr.message}`);
+        skippedInvalidList.push({ file: path.basename(fileItem), row: 0, reason: `File error: ${fErr.message}` });
+        skippedInvalid++;
+        continue;
+      }
 
-        if (!rawName || toString(rawName).length === 0) {
-          const msg = `Row ${rowNum}: Skipped [Missing Required Fields] — "PRODUCT NAME" column is empty.`;
-          logger.warn(msg);
-          skippedReasonsLog.push(msg);
-          missingFieldsCount++;
-          continue;
-        }
+      const sheets = parsedWorkbook.allSheets || [{ sheetName: parsedWorkbook.sheetName, data: parsedWorkbook.data }];
 
-        const name = toString(rawName);
-        logger.info(`[ROW] Processing: ${name}`);
+      for (const sheetObj of sheets) {
+        const { sheetName, data } = sheetObj;
+        logger.info(`  Sheet "${sheetName}": ${data.length} row(s)`);
 
-        // ── 4b. Duplicate detection ────────────────────────────────────────
-        const nameLower = name.toLowerCase().trim();
+        for (let i = 0; i < data.length; i++) {
+          totalXlsxRows++;
+          const row = data[i];
+          const rowNum = i + 2;
 
-        // Check SKU early if present
-        const rawSku = getVal(row, ["SKU", "sku", "Sku", "Product SKU"]);
-        const sku = rawSku ? toString(rawSku) : undefined;
+          try {
+            // STEP 1: Read row & Extract product name
+            const rawName = getVal(row, [
+              "PRODUCT NAME",
+              "Product Name",
+              "Name",
+              "name",
+              "product_name",
+            ]);
 
-        if (existingNames.has(nameLower)) {
-          const msg = `Row ${rowNum}: Skipped [Duplicate Name] — Product "${name}" already exists in database.`;
-          logger.warn(msg);
-          skippedReasonsLog.push(msg);
-          duplicateCount++;
-          continue;
-        }
-
-        if (sku && existingSkus.has(sku.toLowerCase().trim())) {
-          const msg = `Row ${rowNum}: Skipped [Duplicate SKU] — Product "${name}" [SKU: ${sku}] already exists in database.`;
-          logger.warn(msg);
-          skippedReasonsLog.push(msg);
-          duplicateCount++;
-          continue;
-        }
-
-        // ── 4c. Slug ───────────────────────────────────────────────────────
-        const rawSlug = getVal(row, [
-          "URL Custom Slug",
-          "Slug",
-          "slug",
-          "URL Slug",
-          "url_slug",
-          "url_custom_slug",
-        ]);
-        let baseSlug = rawSlug
-          ? slugify(toString(rawSlug).replace(/^\/+/, ""))
-          : slugify(name);
-        if (!baseSlug) baseSlug = slugify(name);
-
-        const baseSlugLower = baseSlug.toLowerCase().trim();
-        if (existingSlugs.has(baseSlugLower)) {
-          const msg = `Row ${rowNum}: Skipped [Duplicate Slug] — Product "${name}" [Slug: ${baseSlug}] already exists in database.`;
-          logger.warn(msg);
-          skippedReasonsLog.push(msg);
-          duplicateCount++;
-          continue;
-        }
-
-        // Ensures uniqueness; also mutates existingSlugs to track within-file duplicates
-        const finalSlug = uniqueSlug(baseSlug, existingSlugs);
-
-        if (finalSlug !== baseSlug) {
-          logger.warn(
-            `[SLUG] Slug "${baseSlug}" already taken — using "${finalSlug}" for: ${name}`
-          );
-          warningCount++;
-        }
-
-        // ── 4d. Resolve Category (REQUIRED) ───────────────────────────────
-        let categoryId = null;
-        const {
-          found: catColFound,
-          columnKey: catColKey,
-          rawValue: catColValue,
-        } = detectCategoryColumn(row);
-
-        if (catColFound && catColValue.length > 0) {
-          // Column present and has a value — direct name lookup
-          const directId = categoryMap.get(catColValue.toLowerCase().trim()) || null;
-          if (directId) {
-            categoryId = directId;
-            logger.muted(`  [CATEGORY] Matched: "${catColValue}" (column: "${catColKey}")`);
-          } else {
-            logger.warn(`[WARNING] Unknown Category: "${catColValue}" (column: "${catColKey}"). Creating it dynamically...`);
-            try {
-              const newCatSlug = slugify(catColValue);
-              const newCat = await Category.create({
-                name: catColValue,
-                slug: newCatSlug,
-                status: "Active",
-                isActive: true,
-              });
-              categoryId = newCat._id;
-              categoryMap.set(catColValue.toLowerCase().trim(), categoryId);
-              allCategories.push(newCat);
-              createdCategoriesCount++;
-              logger.success(`[CATEGORY] Created new category: "${catColValue}"`);
-            } catch (catErr) {
-              logger.error(`[ERROR] Failed to create category dynamically: ${catErr.message}`);
-              warningCount++;
+            if (!rawName || toString(rawName).length === 0) {
+              const reason = `Row ${rowNum} in ${path.basename(fileItem)}: Skipped [Missing Required Fields] — Product Name is empty.`;
+              logger.warn(reason);
+              skippedInvalidList.push({ file: path.basename(fileItem), row: rowNum, reason: "Product Name is empty" });
+              skippedInvalid++;
+              continue;
             }
-          }
-        }
 
-        // Fallback 1: Content Inference (if categoryId is still null)
-        if (!categoryId) {
-          const { categoryId: inferredId, matchedName: inferredName, columnKey: inferredCol } =
-            inferCategoryFromContent(row, categoryMap, allCategories);
-          if (inferredId) {
-            categoryId = inferredId;
-            logger.muted(
-              `  [CATEGORY] Inferred "${inferredName}" from content of column "${inferredCol}"`
+            const name = toString(rawName);
+            const nameLower = name.toLowerCase().trim();
+
+            // STEP 2: Extract price and validate
+            const sellingPrice = toNumber(getVal(row, ["Selling Price (₹)", "Selling Price", "Price", "price"]), 0);
+            const mrp = toNumber(getVal(row, ["MRP (₹)", "MRP", "mrp", "Original Price", "originalPrice"]), 0);
+
+            const finalPrice = sellingPrice > 0 ? sellingPrice : mrp;
+            const finalOriginalPrice = mrp > 0 ? mrp : finalPrice;
+
+            if (finalPrice <= 0 && finalOriginalPrice <= 0) {
+              const reason = `Row ${rowNum}: Skipped [Invalid Price] — "${name}" has no valid selling price or MRP.`;
+              logger.warn(reason);
+              skippedInvalidList.push({ file: path.basename(fileItem), row: rowNum, name, reason: "Invalid Price" });
+              skippedInvalid++;
+              continue;
+            }
+
+            // STEP 3 & 4: Check if product already exists (CRITICAL DUPLICATE RULE)
+            const rawSku = getVal(row, ["SKU", "sku", "Sku", "Product SKU"]);
+            const sku = rawSku ? toString(rawSku) : undefined;
+
+            if (existingNamesMap.has(nameLower)) {
+              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate Product] — "${name}" already exists in database.`);
+              skippedDuplicatesList.push(name);
+              skippedAlreadyExisted++;
+              continue;
+            }
+
+            if (sku && existingSkus.has(sku.toLowerCase().trim())) {
+              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate SKU] — "${name}" [SKU: ${sku}] already exists.`);
+              skippedDuplicatesList.push(`${name} (SKU: ${sku})`);
+              skippedAlreadyExisted++;
+              continue;
+            }
+
+            // Slug uniqueness check
+            const rawSlug = getVal(row, [
+              "URL Custom Slug",
+              "Slug",
+              "slug",
+              "URL Slug",
+              "url_slug",
+            ]);
+            let baseSlug = rawSlug
+              ? toString(rawSlug).replace(/^\/+/, "")
+              : name;
+            baseSlug = baseSlug.toLowerCase().trim().replace(/[\s\-_]+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-");
+            if (!baseSlug) baseSlug = name.toLowerCase().trim().replace(/[\s\-_]+/g, "-").replace(/[^\w\-]+/g, "");
+
+            const finalSlug = uniqueSlug(baseSlug, existingSlugs);
+
+            // Resolve Category
+            let categoryId = null;
+            const {
+              found: catColFound,
+              columnKey: catColKey,
+              rawValue: catColValue,
+            } = detectCategoryColumn(row);
+
+            if (catColFound && catColValue.length > 0) {
+              const directId = categoryMap.get(catColValue.toLowerCase().trim()) || null;
+              if (directId) {
+                categoryId = directId;
+              } else {
+                const lowerVal = catColValue.toLowerCase().trim();
+                for (const [existingCatName, existingId] of categoryMap.entries()) {
+                  if (existingCatName.includes(lowerVal) || lowerVal.includes(existingCatName)) {
+                    categoryId = existingId;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (!categoryId) {
+              const { categoryId: inferredId } = inferCategoryFromContent(row, categoryMap, allCategories);
+              if (inferredId) categoryId = inferredId;
+            }
+
+            if (!categoryId) {
+              let defaultCatId = categoryMap.get("prescription") || categoryMap.get("infectious disease care") || categoryMap.get("transplant care");
+              if (defaultCatId) {
+                categoryId = defaultCatId;
+              } else {
+                const reason = `Row ${rowNum}: Skipped [Missing Category] — Category for "${name}" could not be resolved.`;
+                logger.error(reason);
+                skippedInvalidList.push({ file: path.basename(fileItem), row: rowNum, name, reason: "Missing Category" });
+                skippedInvalid++;
+                continue;
+              }
+            }
+
+            // Resolve Molecules
+            const rawMolecules = getVal(row, [
+              "Associated Molecules",
+              "Molecules",
+              "molecules",
+              "Molecule",
+              "Active Ingredient",
+              "Generic Name",
+            ]);
+            const moleculeIds = [];
+            if (rawMolecules && toString(rawMolecules).length > 0) {
+              moleculeFieldsMapped++;
+              const moleculeNames = toArray(rawMolecules, /[;,]+/);
+              for (const mName of moleculeNames) {
+                const normDirect = mName.toLowerCase().trim();
+                let mId = moleculeMap.get(normDirect);
+                if (!mId) {
+                  const cleanedName = extractBaseMoleculeName(mName);
+                  if (cleanedName) {
+                    mId = moleculeMap.get(cleanedName.toLowerCase().trim());
+                  }
+                }
+                if (mId) moleculeIds.push(mId);
+              }
+            }
+
+            // Resolve Specialities
+            const rawSpecialities = getVal(row, ["Specialities", "Speciality", "Medical Speciality"]);
+            const specialityIds = [];
+            if (rawSpecialities) {
+              const specNames = toArray(rawSpecialities, /[;,]+/);
+              for (const sName of specNames) {
+                const sId = specialityMap.get(sName.toLowerCase().trim());
+                if (sId) specialityIds.push(sId);
+              }
+            }
+
+            // Scalar fields
+            const rawSpecsText = toString(getVal(row, ["Product Specifications", "Specifications", "specs"]));
+            let mfrFromSpecs = "";
+            if (rawSpecsText) {
+              const mfrMatch = rawSpecsText.match(/Manufacturer:\s*(.+?)(?=\n|$)/i);
+              if (mfrMatch) mfrFromSpecs = mfrMatch[1].trim();
+            }
+
+            const marketer = toString(getVal(row, ["Marketer", "marketer", "Marketed By", "Marketing Company"]));
+            if (marketer) marketerFieldsMapped++;
+
+            let manufacturer = toString(getVal(row, ["Manufacturer", "manufacturer", "Manufacturer Name", "Mfr", "Pharma Company"]));
+            if (!manufacturer && mfrFromSpecs) manufacturer = mfrFromSpecs;
+            if (!manufacturer && marketer) manufacturer = marketer;
+            if (manufacturer) manufacturerFieldsMapped++;
+
+            if (manufacturer) {
+              const norm = manufacturer.toLowerCase().trim();
+              if (manufacturerMap.has(norm)) {
+                manufacturer = manufacturerMap.get(norm);
+              } else {
+                manufacturerMap.set(norm, manufacturer);
+              }
+            }
+
+            const country = toString(getVal(row, ["Country", "country", "Country of Origin"]));
+            const importedCountry = toString(getVal(row, ["Imported Country", "importedCountry"]));
+            const strength = toString(getVal(row, ["Strength", "strength"]));
+            const packSize = toString(getVal(row, ["Pack Size", "packSize", "Pack"]));
+            
+            let brand = toString(getVal(row, ["Brand", "brand", "Brand Name"]));
+            if (brand) {
+              const norm = brand.toLowerCase().trim();
+              if (brandMap.has(norm)) brand = brandMap.get(norm);
+              else brandMap.set(norm, brand);
+            }
+
+            const description = toString(
+              getVal(row, ["Introduction", "Description", "description", "introduction", "About This Medicine"])
             );
-          }
-        }
+            const image = toString(getVal(row, ["Image", "image", "Image URL", "Main Image"]));
+            const rawImages = getVal(row, ["Images", "images", "Image URLs"]);
+            const images = rawImages ? toArray(rawImages, /[;,]+/) : [];
 
-        // Fallback 2: Default to "Prescription" category
-        if (!categoryId) {
-          let defaultPrescriptionId = categoryMap.get("prescription");
-          if (!defaultPrescriptionId) {
-            logger.info(`[CATEGORY] Default category "Prescription" not found. Creating it dynamically...`);
-            try {
-              const newPrescCat = await Category.create({
-                name: "Prescription",
-                slug: "prescription",
-                icon: "medical_services",
-                status: "Active",
-                isActive: true,
-              });
-              defaultPrescriptionId = newPrescCat._id;
-              categoryMap.set("prescription", defaultPrescriptionId);
-              allCategories.push(newPrescCat);
-              createdCategoriesCount++;
-              logger.success(`[CATEGORY] Created new category: "Prescription"`);
-            } catch (pCatErr) {
-              logger.error(`[ERROR] Failed to create "Prescription" category: ${pCatErr.message}`);
-            }
-          }
-
-          if (defaultPrescriptionId) {
-            categoryId = defaultPrescriptionId;
-            logger.info(`  [CATEGORY] Defaulted to "Prescription" category for prescription medicine.`);
-          } else {
-            const msg = `Row ${rowNum}: Skipped [Missing Category] — Category for "${name}" could not be resolved.\nRequired category missing:\nPrescription\nImport cannot continue for this product.`;
-            logger.error(msg);
-            skippedReasonsLog.push(msg);
-            missingCategoryCount++;
-            continue;
-          }
-        }
-
-        // ── 4e. Resolve Molecules ──────────────────────────────────────────
-        const rawMolecules = getVal(row, [
-          "Associated Molecules",
-          "Molecules",
-          "molecules",
-          "Molecule",
-          "associated_molecules",
-          "Generic Name",
-        ]);
-        const moleculeIds = [];
-
-        if (rawMolecules) {
-          const moleculeNames = toArray(rawMolecules, /[;,]+/);
-          for (const mName of moleculeNames) {
-            const mId = moleculeMap.get(mName.toLowerCase().trim());
-            if (mId) {
-              moleculeIds.push(mId);
-              logger.muted(`  [MOLECULE] Matched: ${mName}`);
-            } else {
-              logger.warn(`[WARNING] Unknown Molecule: "${mName}"`);
-              warningCount++;
-              // Continue with remaining valid molecules — do NOT skip product
-            }
-          }
-        }
-
-        // ── 4f. Resolve Medical Specialities ──────────────────────────────
-        const rawSpecialities = getVal(row, [
-          "Specialities",
-          "Speciality",
-          "specialities",
-          "speciality",
-          "Medical Speciality",
-          "Medical Specialities",
-        ]);
-        const specialityIds = [];
-
-        if (rawSpecialities) {
-          const specNames = toArray(rawSpecialities, /[;,]+/);
-          for (const sName of specNames) {
-            const sId = specialityMap.get(sName.toLowerCase().trim());
-            if (sId) {
-              specialityIds.push(sId);
-              logger.muted(`  [SPECIALITY] Matched: ${sName}`);
-            } else {
-              logger.warn(`[WARNING] Unknown Speciality: "${sName}"`);
-              warningCount++;
-            }
-          }
-        }
-
-        // ── 4g. Surgical Category ──────────────────────────────────────────
-        const rawIsSurgical = getVal(row, [
-          "isSurgical",
-          "Is Surgical",
-          "Surgical",
-          "surgical",
-          "is_surgical",
-        ]);
-        const isSurgical = toBoolean(rawIsSurgical);
-        let surgicalCategoryId = null;
-
-        if (isSurgical) {
-          const rawSurgCat = getVal(row, [
-            "Surgical Category",
-            "surgicalCategory",
-            "surgical_category",
-            "SurgicalCategory",
-          ]);
-          const surgCatName = toString(rawSurgCat);
-          if (surgCatName) {
-            surgicalCategoryId =
-              surgicalCategoryMap.get(surgCatName.toLowerCase().trim()) || null;
-            if (surgicalCategoryId) {
-              logger.muted(`  [SURGICAL CATEGORY] Matched: ${surgCatName}`);
-            } else {
-              logger.warn(
-                `[WARNING] Unknown Surgical Category: "${surgCatName}" — isSurgical set to false.`
-              );
-              warningCount++;
-            }
-          }
-        }
-
-        // ── 4h. Related Products (resolved post-insert) ────────────────────
-        const rawRelated = getVal(row, [
-          "Related Products",
-          "relatedProducts",
-          "related_products",
-        ]);
-        const relatedProductNames = rawRelated
-          ? toArray(rawRelated, /[;,]+/)
-          : [];
-
-        // ── 4i. Scalar fields ──────────────────────────────────────────────
-        let manufacturer = toString(getVal(row, ["Manufacturer", "manufacturer"]));
-        if (manufacturer) {
-          const norm = manufacturer.toLowerCase().trim();
-          if (manufacturerMap.has(norm)) {
-            const existingManufacturer = manufacturerMap.get(norm);
-            if (existingManufacturer !== manufacturer) {
-              logger.muted(`  [MANUFACTURER] Normalized "${manufacturer}" to existing "${existingManufacturer}"`);
-              manufacturer = existingManufacturer;
-            }
-          } else {
-            manufacturerMap.set(norm, manufacturer);
-          }
-        }
-
-        const marketer = toString(getVal(row, ["Marketer", "marketer", "Marketed By"]));
-        const country = toString(getVal(row, ["Country", "country", "Country of Origin"]));
-        const importedCountry = toString(
-          getVal(row, ["Imported Country", "importedCountry", "imported_country", "Country of Import"])
-        );
-        const strength = toString(getVal(row, ["Strength", "strength", "Dosage Strength"]));
-        const packSize = toString(getVal(row, ["Pack Size", "packSize", "pack_size", "Pack"]));
-        
-        let brand = toString(getVal(row, ["Brand", "brand", "Brand Name"]));
-        if (brand) {
-          const norm = brand.toLowerCase().trim();
-          if (brandMap.has(norm)) {
-            const existingBrand = brandMap.get(norm);
-            if (existingBrand !== brand) {
-              logger.muted(`  [BRAND] Normalized "${brand}" to existing "${existingBrand}"`);
-              brand = existingBrand;
-            }
-          } else {
-            brandMap.set(norm, brand);
-          }
-        }
-
-        const price = toNumber(getVal(row, ["Price", "price", "MRP"]), 0);
-        const originalPrice = toNumber(
-          getVal(row, ["Original Price", "originalPrice", "original_price", "MRP Original"]),
-          0
-        );
-        const stock = toNumber(getVal(row, ["Stock", "stock", "Quantity"]), 0);
-        const description = toString(
-          getVal(row, ["Introduction", "Description", "description", "introduction", "Product Description", "About This Medicine"])
-        );
-        const image = toString(getVal(row, ["Image", "image", "Image URL", "Main Image"]));
-        const rawImages = getVal(row, ["Images", "images", "Image URLs", "Additional Images"]);
-        const images = rawImages ? toArray(rawImages, /[;,]+/) : [];
-        const medicineCategory = toString(
-          getVal(row, ["Medicine Category", "medicineCategory", "medicine_category"])
-        );
-        const moleculeSlug = toString(
-          getVal(row, ["Molecule Slug", "moleculeSlug", "molecule_slug"])
-        );
-        const displayOrder = toNumber(
-          getVal(row, ["Display Order", "displayOrder", "display_order"]),
-          0
-        );
-        const similarMedicinePriority = toNumber(
-          getVal(row, ["Similar Medicine Priority", "similarMedicinePriority", "similar_medicine_priority"]),
-          0
-        );
-        const badge = toString(getVal(row, ["Badge", "badge", "Product Badge"]));
-        const rawProductType = toString(
-          getVal(row, ["Product Type", "productType", "product_type"])
-        ).toLowerCase();
-        const productType = ["medicine", "wellness"].includes(rawProductType)
-          ? rawProductType
-          : "medicine";
-
-        // ── 4j. Boolean flags ──────────────────────────────────────────────
-        const requiresRx = toBoolean(
-          getVal(row, ["requiresRx", "Requires Rx", "Requires Prescription", "Rx", "Prescription Required"])
-        );
-        const isColdChain = toBoolean(
-          getVal(row, ["isColdChain", "Is Cold Chain", "Cold Chain", "cold_chain", "Cold Chain Product"])
-        );
-        const isPrescriptionRequired = toBoolean(
-          getVal(row, ["isPrescriptionRequired", "Prescription Required", "Is Prescription Required"])
-        );
-        const isImported = toBoolean(
-          getVal(row, ["isImported", "Is Imported", "Imported", "imported"])
-        );
-        const inStock = toBoolean(
-          getVal(row, ["inStock", "In Stock", "In stock"]),
-          true // default true
-        );
-        const isNonRefundable = toBoolean(
-          getVal(row, ["isNonRefundable", "nonRefundable", "Non-Refundable", "prepaidOnly", "Prepaid Only", "PrepaidOnly", "prepaid_only", "isPrepaidOnly"]),
-          false // default false
-        );
-
-        // ── 4k. Medical Sections ───────────────────────────────────────────
-        const medicalSections = parseMedicalSections(
-          {
-            title: "Uses",
-            rawValue: getVal(row, ["Uses", "uses", "Indications", "What it Treats"]),
-          },
-          {
-            title: "How It Works",
-            rawValue: getVal(row, [
-              "Effects (How It Works)",
-              "How It Works",
-              "Mechanism of Action",
-              "effects_how_it_works",
-            ]),
-          },
-          {
-            title: "Drug Interactions",
-            rawValue: getVal(row, [
-              "Interaction with Other Drugs",
-              "Drug Interactions",
-              "Interactions",
-              "drug_interactions",
-            ]),
-          },
-          {
-            title: "More Information",
-            rawValue: getVal(row, ["More Information", "Additional Information", "more_information"]),
-          },
-          {
-            title: "About This Medicine",
-            rawValue: getVal(row, ["About This Medicine"]),
-          }
-        );
-
-        // ── 4l. Structured arrays ──────────────────────────────────────────
-        const usageInstructions = toBulletArray(
-          getVal(row, [
-            "Usage & Dosage Instructions",
-            "Usage Instructions",
-            "usageInstructions",
-            "usage_instructions",
-            "Dosage",
-            "Usage & Dosage",
-          ])
-        );
-
-        const storageInstructions = toBulletArray(
-          getVal(row, ["Storage Instructions", "Storage", "storageInstructions", "storage_instructions"])
-        );
-
-        const warnings = toBulletArray(
-          getVal(row, ["Warnings", "warnings", "Warning", "Clinical Warnings & Precautions"])
-        );
-
-        // Combine Common + Serious side effects
-        const rawCommonSE = getVal(row, ["Common Side Effects", "Side Effects", "sideEffects", "side_effects"]);
-        const rawSeriousSE = getVal(row, ["Serious Side Effects", "serious_side_effects"]);
-        const sideEffects = [...toBulletArray(rawCommonSE), ...toBulletArray(rawSeriousSE)];
-
-        // Combine Safety Advice + Safety Information Cards + individual safety advice columns
-        const rawSafetyAdvice = getVal(row, ["Safety Advice", "Safety", "safety_advice"]);
-        const rawSafetyCards = getVal(row, ["Safety Information Cards", "safety_information_cards"]);
-        
-        const extraSafetyCards = [];
-        const safetyCategories = ["Pregnancy", "Breastfeeding", "Alcohol", "Liver", "Kidney", "Driving"];
-        const safetyIconMap = {
-          pregnancy: "baby",
-          breastfeeding: "baby-bottle",
-          kidney: "kidney",
-          liver: "liver",
-          driving: "car",
-          alcohol: "wine",
-        };
-        for (const cat of safetyCategories) {
-          const statusVal = getVal(row, [`${cat} - Status`, `${cat}-Status`, `${cat} Status`]);
-          const adviceVal = getVal(row, [`${cat} - Advice`, `${cat}-Advice`, `${cat} Advice`]);
-          if (statusVal || adviceVal) {
-            extraSafetyCards.push({
-              icon: safetyIconMap[cat.toLowerCase()] || "info",
-              title: cat,
-              status: toString(statusVal),
-              description: toString(adviceVal),
-            });
-          }
-        }
-
-        const safetyCards = [
-          ...parseSafetyCards(rawSafetyAdvice),
-          ...parseSafetyCards(rawSafetyCards),
-          ...extraSafetyCards,
-        ];
-
-        const faqs = parseFAQs(getVal(row, ["Patient FAQs", "FAQs", "faqs", "FAQ"]));
-
-        const specifications = parseSpecifications(
-          getVal(row, ["Specifications", "specifications", "Specs"])
-        );
-
-        const composition = parseComposition(
-          getVal(row, ["Composition", "composition", "Active Ingredients", "Active Ingredient"])
-        );
-
-        const benefits = parseBenefits(getVal(row, ["Benefits", "benefits", "Key Benefits"]));
-
-        const imagesData = parseImagesData(
-          getVal(row, ["Images Data", "imagesData", "images_data", "Image Data"])
-        );
-
-        const seo = parseSEO(
-          getVal(row, ["Search Engine Optimization (SEO)", "SEO", "seo", "SEO Information"]),
-          name
-        );
-        // Overrides for separate SEO columns if present
-        const seoTitle = getVal(row, ["SEO Title", "seoTitle", "seo_title"]);
-        const metaDesc = getVal(row, ["Meta Description", "metaDescription", "meta_description"]);
-        const seoKeywords = getVal(row, ["SEO Keywords", "seoKeywords", "seo_keywords", "Keywords", "keywords"]);
-        const focusKeyword = getVal(row, ["Focus Keyword", "focusKeyword", "focus_keyword"]);
-        if (seoTitle) seo.metaTitle = toString(seoTitle);
-        if (metaDesc) seo.metaDescription = toString(metaDesc);
-        if (seoKeywords) seo.keywords = toString(seoKeywords);
-        if (focusKeyword) {
-          if (!seo.keywords) seo.keywords = toString(focusKeyword);
-          else seo.keywords = `${toString(focusKeyword)}, ${seo.keywords}`;
-        }
-
-        // ── 4l-spec. Product Specifications ─────────────────────────────────
-        const productSpecifications = {
-          genericName: toString(getVal(row, ["Generic Name", "genericName", "generic_name"])),
-          strength: toString(getVal(row, ["Strength", "strength"])),
-          dosageForm: toString(getVal(row, ["Dosage Form", "dosageForm", "dosage_form"])),
-          route: toString(getVal(row, ["Route", "route"])),
-          prescription: toString(getVal(row, ["Prescription Required", "prescriptionRequired", "prescription_required"])),
-          manufacturer: manufacturer,
-          packSize: packSize,
-          storage: toString(getVal(row, ["Storage (Spec)", "storageSpec", "storage_spec", "Storage"])),
-          coldChain: toString(getVal(row, ["Cold Chain Product", "coldChainProduct", "cold_chain_product"])),
-          productType: productType,
-        };
-
-        const rawReferences = getVal(row, [
-          "Medical References / Citations",
-          "References",
-          "references",
-          "Citations",
-        ]);
-        const references = rawReferences ? toArray(rawReferences, /[;,]+/) : [];
-
-        // ── 4m. Assemble Product document ──────────────────────────────────
-        const productDoc = {
-          name,
-          slug: finalSlug,
-          category: categoryId,
-          molecules: moleculeIds,
-          specialities: specialityIds,
-          isSurgical: surgicalCategoryId ? true : false,
-          ...(surgicalCategoryId && { surgicalCategory: surgicalCategoryId }),
-
-          manufacturer,
-          marketer,
-          country,
-          importedCountry,
-          strength,
-          packSize,
-          brand,
-          price,
-          originalPrice,
-          stock,
-          description,
-          image,
-          images,
-          imagesData,
-          medicineCategory,
-          moleculeSlug,
-          displayOrder,
-          similarMedicinePriority,
-          badge,
-          productType,
-
-          requiresRx,
-          isColdChain,
-          isPrescriptionRequired,
-          isImported,
-          inStock,
-          isNonRefundable,
-
-          medicalSections,
-          usageInstructions,
-          storageInstructions,
-          warnings,
-          sideEffects,
-          safetyCards,
-          faqs,
-          specifications,
-          composition,
-          benefits,
-          seo,
-          references,
-          productSpecifications,
-          relatedProducts: [],
-        };
-
-        // Set SKU (generate a unique one from slug if missing to prevent index errors)
-        productDoc.sku = sku ? sku : `WM-${finalSlug.toUpperCase()}`;
-
-        // ── 4n. Track in-memory before insertion ───────────────────────────
-        // (existingSlugs already mutated by uniqueSlug)
-        existingNames.add(nameLower);
-        if (sku) existingSkus.add(sku.toLowerCase().trim());
-
-        // ── 4o. Insert into MongoDB ────────────────────────────────────────
-        const inserted = await Product.create(productDoc);
-        if (manufacturer && !initialManufacturers.has(manufacturer.toLowerCase().trim())) {
-          newManufacturers.add(manufacturer.toLowerCase().trim());
-        }
-        logger.success(`[INSERTED] ${name}`);
-        importedCount++;
-
-        // ── 4p. Patch related products (best-effort, ADD-ONLY on new doc) ──
-        if (relatedProductNames.length > 0) {
-          const relatedIds = [];
-          for (const rpName of relatedProductNames) {
-            const found = await Product.findOne(
-              { name: new RegExp(`^${escapeRegex(rpName)}$`, "i") },
-              { _id: 1 }
+            // Rx and Specs
+            const requiresRx = toBoolean(
+              getVal(row, ["requiresRx", "Requires Rx", "Requires Prescription", "Rx", "Prescription Required"]),
+              rawSpecsText.toLowerCase().includes("prescription required: yes") || rawSpecsText.toLowerCase().includes("prescription required: true")
             );
-            if (found) {
-              relatedIds.push(found._id);
-            } else {
-              logger.warn(`[WARNING] Unknown Related Product: "${rpName}" — ignored for: ${name}`);
-              warningCount++;
-            }
-          }
-          if (relatedIds.length > 0) {
-            // Only patches the freshly inserted document — never touches existing products
-            await Product.updateOne(
-              { _id: inserted._id },
-              { $set: { relatedProducts: relatedIds } }
+            const isColdChain = toBoolean(
+              getVal(row, ["isColdChain", "Is Cold Chain", "Cold Chain"]),
+              rawSpecsText.toLowerCase().includes("cold chain product: yes")
             );
+            const isPrescriptionRequired = requiresRx;
+
+            // Content Sections
+            const medicalSections = parseMedicalSections(
+              {
+                title: "Uses",
+                rawValue: getVal(row, ["Uses", "uses", "Indications"]),
+              },
+              {
+                title: "How It Works",
+                rawValue: getVal(row, ["Effects (How It Works)", "How It Works"]),
+              },
+              {
+                title: "Drug Interactions",
+                rawValue: getVal(row, ["Interaction with Other Drugs", "Drug Interactions"]),
+              },
+              {
+                title: "More Information",
+                rawValue: getVal(row, ["More Information", "Additional Information"]),
+              },
+              {
+                title: "About This Medicine",
+                rawValue: getVal(row, ["About This Medicine"]),
+              }
+            );
+
+            const usageInstructions = toBulletArray(
+              getVal(row, ["Usage & Dosage Instructions", "Usage Instructions", "Usage & Dosage", "Dosage"])
+            );
+
+            const storageInstructions = toBulletArray(
+              getVal(row, ["Storage Instructions", "Storage"])
+            );
+
+            const warnings = toBulletArray(
+              getVal(row, ["Warnings", "warnings", "Clinical Warnings & Precautions"])
+            );
+
+            const rawCommonSE = getVal(row, ["Common Side Effects", "Side Effects", "sideEffects"]);
+            const sideEffects = toBulletArray(rawCommonSE);
+
+            const rawSafetyAdvice = getVal(row, ["Safety Advice", "Safety Information", "Safety"]);
+            const safetyCards = parseSafetyCards(rawSafetyAdvice);
+
+            const faqs = parseFAQs(getVal(row, ["Patient FAQs", "FAQs", "faqs"]));
+            const specifications = parseSpecifications(rawSpecsText);
+            const composition = parseComposition(getVal(row, ["Composition", "Active Ingredient", "Active Ingredients"]));
+            const benefits = parseBenefits(getVal(row, ["Benefits", "Key Health Benefits", "Key Benefits"]));
+            const imagesData = parseImagesData(getVal(row, ["Images Data", "imagesData"]));
+            
+            const seo = parseSEO(getVal(row, ["Search Engine Optimization (SEO)", "SEO"]), name);
+            const seoTitle = getVal(row, ["SEO Title", "seoTitle"]);
+            const metaDesc = getVal(row, ["Meta Description", "metaDescription"]);
+            const seoKeywords = getVal(row, ["SEO Keywords", "seoKeywords"]);
+            if (seoTitle) seo.metaTitle = toString(seoTitle);
+            if (metaDesc) seo.metaDescription = toString(metaDesc);
+            if (seoKeywords) seo.keywords = toString(seoKeywords);
+
+            const productSpecifications = {
+              genericName: toString(getVal(row, ["Generic Name", "genericName", "Active Ingredient"])),
+              strength: strength,
+              dosageForm: toString(getVal(row, ["Dosage Form", "dosageForm"])),
+              route: toString(getVal(row, ["Route", "route"])),
+              prescription: isPrescriptionRequired ? "Yes" : "No",
+              manufacturer: manufacturer || marketer,
+              packSize: packSize,
+              storage: toString(getVal(row, ["Storage (Spec)", "Storage"])),
+              coldChain: isColdChain ? "Yes" : "No",
+              productType: "medicine",
+            };
+
+            const rawReferences = getVal(row, ["Clinical References", "Medical References / Citations", "References"]);
+            const references = rawReferences ? toBulletArray(rawReferences) : [];
+
+            // Assemble new product object
+            const newProductData = {
+              name,
+              slug: finalSlug,
+              category: categoryId,
+              molecules: moleculeIds,
+              specialities: specialityIds,
+              manufacturer,
+              marketer,
+              country,
+              importedCountry,
+              strength,
+              packSize,
+              brand,
+              price: finalPrice,
+              originalPrice: finalOriginalPrice,
+              stock: 100,
+              inStock: true,
+              description,
+              image,
+              images,
+              imagesData,
+              requiresRx,
+              isColdChain,
+              isPrescriptionRequired,
+              isNonRefundable: false,
+              medicalSections,
+              usageInstructions,
+              storageInstructions,
+              warnings,
+              sideEffects,
+              safetyCards,
+              faqs,
+              specifications,
+              composition,
+              benefits,
+              seo,
+              references,
+              productSpecifications,
+              sku: sku ? sku : `WM-${finalSlug.toUpperCase()}`,
+            };
+
+            // CREATE NEW PRODUCT (STEP 5: IF NOT EXISTS -> CREATE)
+            const createdDoc = await Product.create(newProductData);
+
+            // Register in O(1) duplicate prevention sets for within-batch deduplication
+            existingNamesMap.set(nameLower, createdDoc);
+            existingSlugs.add(finalSlug.toLowerCase().trim());
+            if (newProductData.sku) existingSkus.add(newProductData.sku.toLowerCase().trim());
+
+            successfullyAdded++;
+            logger.success(`[ADDED] ${name}`);
+
+          } catch (rowErr) {
+            const msg = `Row ${rowNum} in ${path.basename(fileItem)}: Failed unexpected error — ${rowErr.message}`;
+            logger.error(`[ERROR] ${msg}`);
+            skippedInvalidList.push({ file: path.basename(fileItem), row: rowNum, reason: rowErr.message });
+            failedUnexpectedly++;
           }
         }
-
-      } catch (rowErr) {
-        // Per-row isolation: continue importing remaining rows
-        const msg = `Row ${rowNum}: Failed [Insert Error] — ${rowErr.message || rowErr}`;
-        logger.error(`[ERROR] ${msg}`);
-        skippedReasonsLog.push(msg);
-        failedCount++;
       }
     }
 
   } catch (fatalErr) {
-    logger.error("[ERROR] A critical error occurred during the import:", fatalErr);
-    failedCount++;
+    logger.error("[FATAL ERROR] Import interrupted:", fatalErr);
+    failedUnexpectedly++;
   } finally {
-    // ── 5. Final Summary & Skipped Reasons ────────────────────────────────
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    const totalSkipped = duplicateCount + missingCategoryCount + missingFieldsCount;
-
-    if (skippedReasonsLog.length > 0) {
-      console.log("\n===========================================");
-      console.log("  Detailed Skipped / Failed Rows Log");
-      console.log("===========================================");
-      for (const logItem of skippedReasonsLog) {
-        console.log(`• ${logItem}`);
-      }
+    // Post-import count check
+    let finalProductCount = previousProductCount;
+    try {
+      finalProductCount = await Product.countDocuments();
+    } catch (e) {
+      finalProductCount = previousProductCount + successfullyAdded;
     }
 
-    console.log("\n===========================================");
-    console.log("  Import Summary");
-    console.log("===========================================");
-    console.log(`  Atlas Connected         : ${dbInfo && dbInfo.isAtlas ? "Yes" : "No"}`);
-    console.log(`  Database Name           : ${dbInfo ? dbInfo.dbName : "N/A"}`);
-    console.log(`  Categories Found        : ${allCategories.length}`);
-    console.log(`  Products Found          : ${existingProducts.length}`);
-    console.log(`  Manufacturers Found     : ${initialManufacturers.size}`);
-    console.log("-------------------------------------------");
-    console.log(`  Total Rows in Excel     : ${data.length}`);
-    console.log(`  Imported                : ${importedCount}`);
-    console.log(`  Duplicates              : ${duplicateCount}`);
-    console.log(`  Missing Category        : ${missingCategoryCount}`);
-    console.log(`  Missing Required Fields : ${missingFieldsCount}`);
-    console.log(`  Skipped (Total)         : ${totalSkipped}`);
-    console.log(`  Failed Imports          : ${failedCount}`);
-    console.log("-------------------------------------------");
-    console.log(`  Created Categories      : ${createdCategoriesCount}`);
-    console.log(`  New Manufacturers       : ${newManufacturers.size}`);
-    console.log(`  Execution Time          : ${duration}s`);
-    console.log("===========================================\n");
+    const expectedFinalCount = previousProductCount + successfullyAdded;
 
-    // ── 6. Disconnect ──────────────────────────────────────────────────────
+    console.log("\n-----------------------------------------");
+    console.log("WELLMEDS PRODUCT IMPORT REPORT");
+    console.log("-----------------------------------------");
+    console.log(`XLSX rows processed: ${totalXlsxRows}`);
+    console.log(`Successfully added: ${successfullyAdded}`);
+    console.log(`Skipped — already existed: ${skippedAlreadyExisted}`);
+    console.log(`Skipped — invalid: ${skippedInvalid}`);
+    console.log(`Failed: ${failedUnexpectedly}`);
+    console.log(`Previous product count: ${previousProductCount}`);
+    console.log(`New products added: ${successfullyAdded}`);
+    console.log(`Final product count: ${finalProductCount}`);
+    console.log("-----------------------------------------");
+    console.log(`Molecule fields successfully mapped: ${moleculeFieldsMapped}`);
+    console.log(`Marketer fields successfully mapped: ${marketerFieldsMapped}`);
+    console.log(`Manufacturer fields successfully mapped: ${manufacturerFieldsMapped}`);
+    console.log(`Products skipped as duplicates: ${skippedAlreadyExisted}`);
+    console.log(`Invalid rows: ${skippedInvalid}`);
+    console.log("-----------------------------------------\n");
+
+    if (skippedDuplicatesList.length > 0) {
+      console.log(`Skipped duplicates (${skippedDuplicatesList.length} total):`);
+      skippedDuplicatesList.slice(0, 10).forEach((dupName, index) => {
+        console.log(`  ${index + 1}. ${dupName}`);
+      });
+      if (skippedDuplicatesList.length > 10) {
+        console.log(`  ... and ${skippedDuplicatesList.length - 10} more duplicates skipped.`);
+      }
+      console.log("\n");
+    }
+
+    if (skippedInvalidList.length > 0) {
+      console.log(`Skipped invalid rows (${skippedInvalidList.length} total):`);
+      skippedInvalidList.forEach((inv, index) => {
+        console.log(`  ${index + 1}. [${inv.file} Row ${inv.row}] ${inv.name ? `"${inv.name}": ` : ""}${inv.reason}`);
+      });
+      console.log("\n");
+    }
+
     logger.info("Disconnecting from database…");
     await disconnectDB();
-    logger.success("Database connection closed.");
-    process.exit(failedCount > 0 && importedCount === 0 ? 1 : 0);
+    logger.success("Database connection closed cleanly.");
+    process.exit(failedUnexpectedly > 0 && successfullyAdded === 0 ? 1 : 0);
   }
 };
 
