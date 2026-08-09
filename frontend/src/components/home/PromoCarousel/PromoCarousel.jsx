@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-
 // Import local promotional banner assets
 import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
 import savingImg from "../../../assets/PromoCarousel/saving.png";
 import cancerImg from "../../../assets/PromoCarousel/cancer.png";
-import healthImg from "../../../assets/PromoCarousel/health.png";
 import glp1Img from "../../../assets/PromoCarousel/GlP-1.png";
 import moveFreelyImg from "../../../assets/PromoCarousel/Move_Freely.png";
 import physiotherapyImg from "../../../assets/PromoCarousel/Physiotherapy.png";
@@ -46,7 +44,7 @@ const promoBanners = [
   },
   {
     id: "sunhalt",
-    img: healthImg,
+    img: saveImg,
     alt: "Sunhalt Gold — Your Ultimate Skin Protection",
     link: "/wellness",
   },
@@ -64,10 +62,12 @@ const promoBanners = [
   },
 ];
 
+const AUTOPLAY_DELAY_MS = 3200; // 3.2s target range (3000ms - 3500ms)
 
 const PromoCarousel = () => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+  const timerRef = useRef(null);
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -75,6 +75,16 @@ const PromoCarousel = () => {
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const totalBanners = promoBanners.length;
+
+  // Preload all banner images immediately on mount
+  useEffect(() => {
+    promoBanners.forEach((banner) => {
+      if (banner.img) {
+        const img = new Image();
+        img.src = banner.img;
+      }
+    });
+  }, []);
 
   const updateScrollState = useCallback(() => {
     if (!scrollRef.current) return;
@@ -121,16 +131,36 @@ const PromoCarousel = () => {
     scrollToSlide(prevIndex);
   }, [activeSlide, totalBanners, scrollToSlide]);
 
-  // Autoplay effect - 5 seconds
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(() => {
+  // Autoplay with timer reset logic
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
       handleNext();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [isPaused, handleNext]);
+    }, AUTOPLAY_DELAY_MS);
+  }, [handleNext]);
 
-  // Calculate progress fill ratio & offset
+  useEffect(() => {
+    if (!isPaused) {
+      startTimer();
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused, startTimer]);
+
+  const onManualNext = () => {
+    handleNext();
+    if (!isPaused) startTimer();
+  };
+
+  const onManualPrev = () => {
+    handlePrev();
+    if (!isPaused) startTimer();
+  };
+
+  // Calculate progress fill ratio
   const progressRatio = (activeSlide / (totalBanners - 1)) * 100;
 
   return (
@@ -146,7 +176,7 @@ const PromoCarousel = () => {
           className="flex overflow-x-auto scrollbar-none gap-4 sm:gap-5 scroll-smooth py-1 px-0.5 snap-x snap-mandatory"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {promoBanners.map((banner) => (
+          {promoBanners.map((banner, idx) => (
             <div
               key={banner.id}
               onClick={() => {
@@ -161,11 +191,11 @@ const PromoCarousel = () => {
                          w-[88%] sm:w-[58%] lg:w-[calc((100%-20px)/2.25)]
                          aspect-[2.35/1]"
             >
-
               <img
                 src={banner.img}
                 alt={banner.alt}
-                loading="lazy"
+                loading={idx === 0 ? "eager" : "lazy"}
+                decoding="async"
                 draggable={false}
                 className="w-full h-full object-cover object-center"
               />
@@ -177,8 +207,8 @@ const PromoCarousel = () => {
         {canScrollLeft && (
           <button
             type="button"
-            onClick={handlePrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer"
+            onClick={onManualPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
             aria-label="Previous Banner"
           >
             <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -189,8 +219,8 @@ const PromoCarousel = () => {
         {canScrollRight && (
           <button
             type="button"
-            onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer"
+            onClick={onManualNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
             aria-label="Next Banner"
           >
             <ChevronRight size={20} className="sm:w-6 sm:h-6" />
@@ -198,7 +228,7 @@ const PromoCarousel = () => {
         )}
       </div>
 
-      {/* Progress Indicator Line (Bottom Left - Reference Image Identity) */}
+      {/* Progress Indicator Line */}
       <div className="flex items-center justify-start mt-3.5 px-1">
         <div className="w-20 sm:w-24 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
           <div

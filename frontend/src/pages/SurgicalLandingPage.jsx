@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import ProductCard from "../components/ProductCard";
 import CategoryCard from "../components/CategoryCard";
+import SurgicalHeroSection from "../components/SurgicalHeroSection";
 import { 
   Scissors, 
   Shield, 
@@ -128,70 +129,8 @@ const SurgicalLandingPage = () => {
         breadcrumbs={breadcrumbs}
       />
       
-      {/* Hero Banner Section */}
-      <section className="relative bg-gradient-to-br from-[#001f3f] via-[#004782] to-[#086b53] text-white py-16 md:py-24 overflow-hidden border-b border-slate-100 dark:border-zinc-800">
-        <div className="absolute inset-0 medical-pattern opacity-10 pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
-          <div className="space-y-6 md:space-y-8 animate-[fade-in_0.4s_ease-out]">
-            <span className="inline-block bg-white/10 text-white text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider border border-white/20">
-              Institutional &amp; Home Care Solutions
-            </span>
-            <h1 className="font-extrabold text-4xl md:text-5xl lg:text-6xl text-white leading-tight">
-              Surgical &amp; Clinical <br />
-              <span className="text-[#84d6b9]">Equipment Catalog</span>
-            </h1>
-            <p className="text-slate-200 text-sm md:text-base leading-relaxed max-w-xl font-medium">
-              Equip your hospital, clinic, or private nursing setup with premium surgical tools, disposable sterile syringes, clinical thermometers, hospital beds, and advanced health monitors.
-            </p>
-            
-            <div className="flex flex-wrap gap-md">
-              <Link
-                to="/surgical/all"
-                className="bg-[#086b53] hover:bg-emerald-700 text-white font-bold h-[48px] px-8 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-md shadow-emerald-950/20 select-none cursor-pointer"
-              >
-                Browse All Surgical Products
-              </Link>
-              <a
-                href="#categories-section"
-                className="border border-white/30 hover:border-white hover:bg-white/5 text-white font-bold h-[48px] px-8 rounded-xl flex items-center justify-center transition-all duration-200 select-none"
-              >
-                Explore Categories
-              </a>
-            </div>
-
-            {/* Micro Stats */}
-            <div className="grid grid-cols-3 gap-md pt-6 border-t border-white/10 text-xs text-slate-300">
-              <div>
-                <div className="font-extrabold text-lg text-white">100%</div>
-                <div className="mt-1 font-semibold">Clinically Certified</div>
-              </div>
-              <div>
-                <div className="font-extrabold text-lg text-white">50+</div>
-                <div className="mt-1 font-semibold">Hospital Brands</div>
-              </div>
-              <div>
-                <div className="font-extrabold text-lg text-white">24/7</div>
-                <div className="mt-1 font-semibold">Support Helpline</div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Graphic Banner */}
-          <div className="hidden lg:block relative h-[400px] bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-lg flex flex-col justify-end">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#84d6b9]/10 rounded-full blur-3xl"></div>
-            <div className="relative z-20 space-y-xs max-w-sm text-left">
-              <h3 className="font-black text-lg text-white">WellMeds Care Shield</h3>
-              <p className="text-slate-300 font-medium text-xs leading-relaxed">
-                Hospital diagnostics, sterile operating consumables, and home care beds delivered under strict cold chain packaging and quality control audits.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      {/* Hero Section: Banner Carousel & Featured Brands */}
+      <SurgicalHeroSection />
 
       {/* Categories Grid Section */}
       <section id="categories-section" className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
