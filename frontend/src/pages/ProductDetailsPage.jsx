@@ -24,6 +24,7 @@ import ProductTabs from "../components/ProductDetail/ProductTabs";
 import SafetyAdviceCards from "../components/ProductDetail/SafetyAdviceCards";
 import SubstituteProducts from "../components/ProductDetail/SubstituteProducts";
 import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkeleton";
+import { renderStorageContent } from "../utils/renderStorageContent";
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -698,6 +699,21 @@ const ProductDetails = () => {
           ].map((spec) => {
             const val = product.productSpecifications[spec.key];
             if (!val || !val.trim()) return null;
+            if (spec.key === "storage") {
+              return (
+                <div
+                  key={spec.key}
+                  className="py-3.5 border-b border-dashed border-[#dde8e3] text-left font-sans space-y-2"
+                >
+                  <div className="font-bold text-xs uppercase tracking-wider text-[#172b26]">
+                    {spec.label}
+                  </div>
+                  <div className="pt-0.5">
+                    {renderStorageContent(val)}
+                  </div>
+                </div>
+              );
+            }
             return (
               <div
                 key={spec.key}

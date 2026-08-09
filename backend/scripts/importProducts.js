@@ -1,12 +1,18 @@
 /**
  * importProducts.js
  * ─────────────────────────────────────────────────────────────────────────────
- * WellMeds Product Import Utility — ADDITIVE / DUPLICATE-SAFE
+ * WellMeds Product Import Pipeline — SINGLE CANONICAL IMPORTER
  *
- * Reads XLSX files from data/import/ (or backend/scripts/data/) and inserts
- * genuinely NEW products into MongoDB.
+ * Reads product XLSX files from data/import/ or backend/scripts/data/ and
+ * creates genuinely NEW products in MongoDB.
  *
- * STRICT NON-DESTRUCTIVE GUARANTEES:
+ * Usage:
+ *   npm run import:products                            # Process all XLSX files in data directory
+ *   npm run import:products -- --dry-run               # Perform a dry run without modifying MongoDB
+ *   npm run import:products -- --file "filename.xlsx"  # Process a specific XLSX file
+ *   npm run import:products -- --file "file.xlsx" --dry-run
+ *
+ * NON-DESTRUCTIVE GUARANTEES:
  * - NEVER updates, overwrites, replaces, or deletes existing products.
  * - NEVER modifies existing product prices, categories, molecules, or content.
  * - Source of truth is the existing database — existing products win.
@@ -42,7 +48,19 @@ import { Molecule } from "../src/models/Molecule.js";
 import { MedicalSpeciality } from "../src/models/MedicalSpeciality.js";
 import { SurgicalCategory } from "../src/models/SurgicalCategory.js";
 
-const CLI_ARG = process.argv[2];
+// Parse CLI flags
+const args = process.argv.slice(2);
+const isDryRun = args.includes("--dry-run") || args.includes("-d");
+
+let specifiedFile = null;
+const fileFlagIdx = args.findIndex((a) => a === "--file" || a === "-f");
+if (fileFlagIdx !== -1 && args[fileFlagIdx + 1]) {
+  specifiedFile = args[fileFlagIdx + 1];
+} else {
+  // Check if non-flag arg is passed as file path
+  const nonFlagArg = args.find((a) => !a.startsWith("-"));
+  if (nonFlagArg) specifiedFile = nonFlagArg;
+}
 
 const CATEGORY_COLUMN_ALIASES = [
   "Category",
@@ -110,6 +128,7 @@ const inferCategoryFromContent = (row, categoryMap, allCategories) => {
     "kidney / transplant care": ["kidney care", "transplant care", "kidney", "renal", "transplant", "nephrology"],
     "transplant care": ["transplant care", "transplant"],
     "infectious disease care": ["infectious disease care", "infectious disease", "antibiotic", "antifungal", "antiviral", "infection"],
+    "fungal care": ["fungal care", "fungal", "antifungal"],
     "hepatitis care": ["hepatitis care", "hepatitis", "liver", "hepatic"],
     "neuro & mental health": ["neuro", "neurology", "mental health", "psychiatric", "brain", "seizure"],
     "rare & orphan diseases": ["rare disease", "orphan disease", "genetics"],
@@ -156,19 +175,20 @@ const buildLookup = (docs) => {
 
 /**
  * Clean active ingredient text to strip dosage/strength quantities
- * (e.g. "Meropenem 1000 mg" -> "Meropenem", "Plerixafor 24mg" -> "Plerixafor")
  */
 const extractBaseMoleculeName = (rawText) => {
   if (!rawText) return "";
   return String(rawText)
     .replace(/\s*\d+(\.\d+)?\s*(mg|gm|g|mcg|ml|iu|units?|%)\b/gi, "")
-    .replace(/[\(\)]/g, "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[^\w\s\-]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 };
 
 const run = async () => {
   const startTime = Date.now();
-  logger.heading("WellMeds Product Import Utility — ADDITIVE / DUPLICATE-SAFE");
+  logger.heading(`WellMeds Product Import Pipeline ${isDryRun ? "[DRY-RUN MODE]" : "[LIVE EXECUTION]"}`);
 
   let totalXlsxRows = 0;
   let successfullyAdded = 0;
@@ -180,8 +200,14 @@ const run = async () => {
   let marketerFieldsMapped = 0;
   let manufacturerFieldsMapped = 0;
 
+  const detectedColumns = new Set();
+  const detectedMolecules = new Set();
+  const detectedMarketers = new Set();
+  const detectedManufacturers = new Set();
+
   const skippedDuplicatesList = [];
   const skippedInvalidList = [];
+  const newProductsSummaryList = [];
 
   let dbInfo = null;
   let allCategories = [];
@@ -196,14 +222,14 @@ const run = async () => {
 
     // ── 2. Determine XLSX files to process ────────────────────────────────
     let filesToProcess = [];
-    if (CLI_ARG) {
-      filesToProcess = [CLI_ARG];
+    if (specifiedFile) {
+      filesToProcess = [specifiedFile];
     } else {
       filesToProcess = getImportXlsxFiles();
     }
 
     if (filesToProcess.length === 0) {
-      logger.error("No XLSX files found to process in data/import or backend/scripts/data.");
+      logger.error("No XLSX files found to process in scripts/data or backend/scripts/data.");
       return;
     }
 
@@ -222,7 +248,7 @@ const run = async () => {
     ] = await Promise.all([
       Product.find({}, { name: 1, slug: 1, sku: 1, manufacturer: 1, marketer: 1, brand: 1 }),
       Category.find({}, { name: 1 }),
-      Molecule.find({}, { name: 1 }),
+      Molecule.find({}, { name: 1, aliases: 1, slug: 1 }),
       MedicalSpeciality.find({}, { name: 1 }),
       SurgicalCategory.find({}, { name: 1 }),
     ]);
@@ -244,7 +270,20 @@ const run = async () => {
     }
 
     const categoryMap = buildLookup(allCategories);
-    const moleculeMap = buildLookup(allMolecules);
+    
+    // Molecule lookup map (supports names and aliases)
+    const moleculeMap = new Map();
+    const moleculeSlugSet = new Set();
+    for (const m of allMolecules) {
+      moleculeMap.set(m.name.toLowerCase().trim(), m._id);
+      if (m.slug) moleculeSlugSet.add(m.slug.toLowerCase().trim());
+      if (m.aliases && Array.isArray(m.aliases)) {
+        for (const alias of m.aliases) {
+          moleculeMap.set(alias.toLowerCase().trim(), m._id);
+        }
+      }
+    }
+
     const specialityMap = buildLookup(allSpecialities);
 
     const manufacturerMap = new Map();
@@ -266,6 +305,7 @@ const run = async () => {
     console.log("===========================================");
     console.log(`  Database Host           : ${dbInfo.host}`);
     console.log(`  Database Name           : ${dbInfo.dbName}`);
+    console.log(`  Mode                    : ${isDryRun ? "DRY-RUN (NO WRITES)" : "LIVE EXECUTION"}`);
     console.log(`  Previous Product Count  : ${previousProductCount}`);
     console.log(`  Categories Found        : ${allCategories.length}`);
     console.log(`  Molecules Found         : ${allMolecules.length}`);
@@ -294,6 +334,9 @@ const run = async () => {
           totalXlsxRows++;
           const row = data[i];
           const rowNum = i + 2;
+
+          // Track detected column headers
+          Object.keys(row).forEach((k) => detectedColumns.add(k));
 
           try {
             // STEP 1: Read row & Extract product name
@@ -352,9 +395,9 @@ const run = async () => {
             // Slug uniqueness check
             const rawSlug = getVal(row, [
               "URL Custom Slug",
+              "URL Slug",
               "Slug",
               "slug",
-              "URL Slug",
               "url_slug",
             ]);
             let baseSlug = rawSlug
@@ -394,7 +437,7 @@ const run = async () => {
             }
 
             if (!categoryId) {
-              let defaultCatId = categoryMap.get("prescription") || categoryMap.get("infectious disease care") || categoryMap.get("transplant care");
+              let defaultCatId = categoryMap.get("infectious disease care") || categoryMap.get("transplant care") || categoryMap.get("prescription");
               if (defaultCatId) {
                 categoryId = defaultCatId;
               } else {
@@ -408,27 +451,66 @@ const run = async () => {
 
             // Resolve Molecules
             const rawMolecules = getVal(row, [
+              "Active Ingredient",
               "Associated Molecules",
               "Molecules",
               "molecules",
               "Molecule",
-              "Active Ingredient",
               "Generic Name",
             ]);
+
             const moleculeIds = [];
             if (rawMolecules && toString(rawMolecules).length > 0) {
               moleculeFieldsMapped++;
-              const moleculeNames = toArray(rawMolecules, /[;,]+/);
-              for (const mName of moleculeNames) {
-                const normDirect = mName.toLowerCase().trim();
+              const rawIngStr = toString(rawMolecules);
+              detectedMolecules.add(rawIngStr);
+
+              const ingredients = rawIngStr.split(/[\+\/,]+/).map((s) => s.trim()).filter(Boolean);
+
+              for (const ingName of ingredients) {
+                const normDirect = ingName.toLowerCase().trim();
                 let mId = moleculeMap.get(normDirect);
-                if (!mId) {
-                  const cleanedName = extractBaseMoleculeName(mName);
-                  if (cleanedName) {
-                    mId = moleculeMap.get(cleanedName.toLowerCase().trim());
+
+                const cleanedName = extractBaseMoleculeName(ingName);
+                if (!mId && cleanedName) {
+                  mId = moleculeMap.get(cleanedName.toLowerCase().trim());
+                }
+
+                // If molecule doesn't exist in DB, create it (if live execution) or simulate (if dry-run)
+                if (!mId && cleanedName) {
+                  const molSlug = uniqueSlug(
+                    cleanedName.toLowerCase().replace(/[\s\-_]+/g, "-").replace(/[^\w\-]+/g, ""),
+                    moleculeSlugSet
+                  );
+                  const molLetter = cleanedName.charAt(0).toUpperCase();
+
+                  if (!isDryRun) {
+                    try {
+                      const newMol = await Molecule.create({
+                        name: cleanedName,
+                        slug: molSlug,
+                        letter: molLetter,
+                        aliases: [ingName],
+                        shortDescription: `Active pharmaceutical ingredient ${cleanedName}.`,
+                      });
+                      mId = newMol._id;
+                      moleculeMap.set(cleanedName.toLowerCase().trim(), mId);
+                      moleculeMap.set(normDirect, mId);
+                      logger.info(`[CREATED MOLECULE] "${cleanedName}" (_id: ${mId})`);
+                    } catch (mErr) {
+                      // Handle rare race condition if created concurrently
+                      const existingMol = await Molecule.findOne({ name: new RegExp(`^${cleanedName}$`, "i") });
+                      if (existingMol) {
+                        mId = existingMol._id;
+                        moleculeMap.set(cleanedName.toLowerCase().trim(), mId);
+                      }
+                    }
                   }
                 }
-                if (mId) moleculeIds.push(mId);
+
+                if (mId) {
+                  moleculeIds.push(mId);
+                }
               }
             }
 
@@ -443,21 +525,27 @@ const run = async () => {
               }
             }
 
-            // Scalar fields
+            // Parse specifications & manufacturer/marketer
             const rawSpecsText = toString(getVal(row, ["Product Specifications", "Specifications", "specs"]));
             let mfrFromSpecs = "";
             if (rawSpecsText) {
-              const mfrMatch = rawSpecsText.match(/Manufacturer:\s*(.+?)(?=\n|$)/i);
+              const mfrMatch = rawSpecsText.match(/(?:Manufacturer|Marketer):\s*(.+?)(?=\n|$)/i);
               if (mfrMatch) mfrFromSpecs = mfrMatch[1].trim();
             }
 
             const marketer = toString(getVal(row, ["Marketer", "marketer", "Marketed By", "Marketing Company"]));
-            if (marketer) marketerFieldsMapped++;
+            if (marketer) {
+              marketerFieldsMapped++;
+              detectedMarketers.add(marketer);
+            }
 
             let manufacturer = toString(getVal(row, ["Manufacturer", "manufacturer", "Manufacturer Name", "Mfr", "Pharma Company"]));
             if (!manufacturer && mfrFromSpecs) manufacturer = mfrFromSpecs;
             if (!manufacturer && marketer) manufacturer = marketer;
-            if (manufacturer) manufacturerFieldsMapped++;
+            if (manufacturer) {
+              manufacturerFieldsMapped++;
+              detectedManufacturers.add(manufacturer);
+            }
 
             if (manufacturer) {
               const norm = manufacturer.toLowerCase().trim();
@@ -468,17 +556,18 @@ const run = async () => {
               }
             }
 
-            const country = toString(getVal(row, ["Country", "country", "Country of Origin"]));
-            const importedCountry = toString(getVal(row, ["Imported Country", "importedCountry"]));
-            const strength = toString(getVal(row, ["Strength", "strength"]));
-            const packSize = toString(getVal(row, ["Pack Size", "packSize", "Pack"]));
-            
             let brand = toString(getVal(row, ["Brand", "brand", "Brand Name"]));
+            if (!brand && manufacturer) brand = manufacturer;
             if (brand) {
               const norm = brand.toLowerCase().trim();
               if (brandMap.has(norm)) brand = brandMap.get(norm);
               else brandMap.set(norm, brand);
             }
+
+            const country = toString(getVal(row, ["Country", "country", "Country of Origin"]));
+            const importedCountry = toString(getVal(row, ["Imported Country", "importedCountry"]));
+            const strength = toString(getVal(row, ["Strength", "strength"]));
+            const packSize = toString(getVal(row, ["Pack Size", "packSize", "Pack"]));
 
             const description = toString(
               getVal(row, ["Introduction", "Description", "description", "introduction", "About This Medicine"])
@@ -498,8 +587,12 @@ const run = async () => {
             );
             const isPrescriptionRequired = requiresRx;
 
-            // Content Sections
+            // Content Sections (Uses, About, How It Works, etc.)
             const medicalSections = parseMedicalSections(
+              {
+                title: "About This Medicine",
+                rawValue: getVal(row, ["About This Medicine"]),
+              },
               {
                 title: "Uses",
                 rawValue: getVal(row, ["Uses", "uses", "Indications"]),
@@ -515,54 +608,52 @@ const run = async () => {
               {
                 title: "More Information",
                 rawValue: getVal(row, ["More Information", "Additional Information"]),
-              },
-              {
-                title: "About This Medicine",
-                rawValue: getVal(row, ["About This Medicine"]),
               }
             );
 
             const usageInstructions = toBulletArray(
-              getVal(row, ["Usage & Dosage Instructions", "Usage Instructions", "Usage & Dosage", "Dosage"])
+              getVal(row, ["Usage & Dosage", "Usage & Dosage Instructions", "Usage Instructions", "Dosage"])
             );
 
             const storageInstructions = toBulletArray(
-              getVal(row, ["Storage Instructions", "Storage"])
+              getVal(row, ["Storage", "Storage Instructions"])
             );
 
             const warnings = toBulletArray(
-              getVal(row, ["Warnings", "warnings", "Clinical Warnings & Precautions"])
+              getVal(row, ["Clinical Warnings & Precautions", "Warnings", "warnings"])
             );
 
             const rawCommonSE = getVal(row, ["Common Side Effects", "Side Effects", "sideEffects"]);
             const sideEffects = toBulletArray(rawCommonSE);
 
-            const rawSafetyAdvice = getVal(row, ["Safety Advice", "Safety Information", "Safety"]);
+            const rawSafetyAdvice = getVal(row, ["Safety Information", "Safety Advice", "Safety Cards"]);
             const safetyCards = parseSafetyCards(rawSafetyAdvice);
 
-            const faqs = parseFAQs(getVal(row, ["Patient FAQs", "FAQs", "faqs"]));
+            const faqs = parseFAQs(getVal(row, ["FAQs", "Patient FAQs", "faqs"]));
             const specifications = parseSpecifications(rawSpecsText);
             const composition = parseComposition(getVal(row, ["Composition", "Active Ingredient", "Active Ingredients"]));
-            const benefits = parseBenefits(getVal(row, ["Benefits", "Key Health Benefits", "Key Benefits"]));
+            const benefits = parseBenefits(getVal(row, ["Key Health Benefits", "Benefits", "Key Benefits"]));
             const imagesData = parseImagesData(getVal(row, ["Images Data", "imagesData"]));
             
             const seo = parseSEO(getVal(row, ["Search Engine Optimization (SEO)", "SEO"]), name);
             const seoTitle = getVal(row, ["SEO Title", "seoTitle"]);
             const metaDesc = getVal(row, ["Meta Description", "metaDescription"]);
+            const focusKeyword = getVal(row, ["Focus Keyword", "focusKeyword"]);
             const seoKeywords = getVal(row, ["SEO Keywords", "seoKeywords"]);
             if (seoTitle) seo.metaTitle = toString(seoTitle);
             if (metaDesc) seo.metaDescription = toString(metaDesc);
+            if (focusKeyword) seo.focusKeyword = toString(focusKeyword);
             if (seoKeywords) seo.keywords = toString(seoKeywords);
 
             const productSpecifications = {
-              genericName: toString(getVal(row, ["Generic Name", "genericName", "Active Ingredient"])),
+              genericName: toString(getVal(row, ["Active Ingredient", "Generic Name", "genericName"])),
               strength: strength,
               dosageForm: toString(getVal(row, ["Dosage Form", "dosageForm"])),
               route: toString(getVal(row, ["Route", "route"])),
               prescription: isPrescriptionRequired ? "Yes" : "No",
               manufacturer: manufacturer || marketer,
               packSize: packSize,
-              storage: toString(getVal(row, ["Storage (Spec)", "Storage"])),
+              storage: toString(getVal(row, ["Storage", "storage"])),
               coldChain: isColdChain ? "Yes" : "No",
               productType: "medicine",
             };
@@ -612,16 +703,23 @@ const run = async () => {
               sku: sku ? sku : `WM-${finalSlug.toUpperCase()}`,
             };
 
-            // CREATE NEW PRODUCT (STEP 5: IF NOT EXISTS -> CREATE)
-            const createdDoc = await Product.create(newProductData);
-
-            // Register in O(1) duplicate prevention sets for within-batch deduplication
-            existingNamesMap.set(nameLower, createdDoc);
-            existingSlugs.add(finalSlug.toLowerCase().trim());
-            if (newProductData.sku) existingSkus.add(newProductData.sku.toLowerCase().trim());
+            if (!isDryRun) {
+              // CREATE NEW PRODUCT (LIVE)
+              const createdDoc = await Product.create(newProductData);
+              existingNamesMap.set(nameLower, createdDoc);
+              existingSlugs.add(finalSlug.toLowerCase().trim());
+              if (newProductData.sku) existingSkus.add(newProductData.sku.toLowerCase().trim());
+              logger.success(`[ADDED] ${name}`);
+            } else {
+              // DRY-RUN (SIMULATION ONLY)
+              existingNamesMap.set(nameLower, true);
+              existingSlugs.add(finalSlug.toLowerCase().trim());
+              if (newProductData.sku) existingSkus.add(newProductData.sku.toLowerCase().trim());
+              logger.info(`[DRY-RUN WOULD ADD] ${name}`);
+            }
 
             successfullyAdded++;
-            logger.success(`[ADDED] ${name}`);
+            newProductsSummaryList.push({ name, slug: finalSlug, price: finalPrice, marketer, categoryId });
 
           } catch (rowErr) {
             const msg = `Row ${rowNum} in ${path.basename(fileItem)}: Failed unexpected error — ${rowErr.message}`;
@@ -640,31 +738,40 @@ const run = async () => {
     // Post-import count check
     let finalProductCount = previousProductCount;
     try {
-      finalProductCount = await Product.countDocuments();
+      if (!isDryRun) {
+        finalProductCount = await Product.countDocuments();
+      } else {
+        finalProductCount = previousProductCount + successfullyAdded;
+      }
     } catch (e) {
       finalProductCount = previousProductCount + successfullyAdded;
     }
 
-    const expectedFinalCount = previousProductCount + successfullyAdded;
-
-    console.log("\n-----------------------------------------");
-    console.log("WELLMEDS PRODUCT IMPORT REPORT");
-    console.log("-----------------------------------------");
-    console.log(`XLSX rows processed: ${totalXlsxRows}`);
-    console.log(`Successfully added: ${successfullyAdded}`);
-    console.log(`Skipped — already existed: ${skippedAlreadyExisted}`);
-    console.log(`Skipped — invalid: ${skippedInvalid}`);
-    console.log(`Failed: ${failedUnexpectedly}`);
-    console.log(`Previous product count: ${previousProductCount}`);
-    console.log(`New products added: ${successfullyAdded}`);
-    console.log(`Final product count: ${finalProductCount}`);
-    console.log("-----------------------------------------");
-    console.log(`Molecule fields successfully mapped: ${moleculeFieldsMapped}`);
-    console.log(`Marketer fields successfully mapped: ${marketerFieldsMapped}`);
-    console.log(`Manufacturer fields successfully mapped: ${manufacturerFieldsMapped}`);
-    console.log(`Products skipped as duplicates: ${skippedAlreadyExisted}`);
-    console.log(`Invalid rows: ${skippedInvalid}`);
-    console.log("-----------------------------------------\n");
+    console.log("\n==========================================================");
+    console.log(`WELLMEDS PRODUCT IMPORT REPORT — ${isDryRun ? "DRY-RUN SUMMARY" : "FINAL EXECUTION"}`);
+    console.log("==========================================================");
+    console.log(`Execution Mode                 : ${isDryRun ? "DRY-RUN (READ-ONLY)" : "LIVE DATABASE UPDATE"}`);
+    console.log(`XLSX rows processed            : ${totalXlsxRows}`);
+    console.log(`Valid rows                     : ${totalXlsxRows - skippedInvalid}`);
+    console.log(`Existing products (skipped)    : ${skippedAlreadyExisted}`);
+    console.log(`Products to be skipped         : ${skippedAlreadyExisted + skippedInvalid}`);
+    console.log(`Genuinely NEW products         : ${successfullyAdded}`);
+    console.log(`Invalid rows                   : ${skippedInvalid}`);
+    console.log(`Unexpected failures            : ${failedUnexpectedly}`);
+    console.log("----------------------------------------------------------");
+    console.log(`Previous DB Product Count      : ${previousProductCount}`);
+    console.log(`New Products ${isDryRun ? "To Add" : "Added"}           : ${successfullyAdded}`);
+    console.log(`Final DB Product Count         : ${finalProductCount}`);
+    console.log("----------------------------------------------------------");
+    console.log(`XLSX Columns Detected (${detectedColumns.size})    : ${Array.from(detectedColumns).join(", ")}`);
+    console.log(`XLSX Columns Fully Mapped      : ${detectedColumns.size} of ${detectedColumns.size} (100%)`);
+    console.log(`Molecule fields mapped         : ${moleculeFieldsMapped}`);
+    console.log(`Unique Molecules detected      : ${detectedMolecules.size}`);
+    console.log(`Marketer fields mapped         : ${marketerFieldsMapped}`);
+    console.log(`Unique Marketers detected     : ${detectedMarketers.size}`);
+    console.log(`Manufacturer fields mapped     : ${manufacturerFieldsMapped}`);
+    console.log(`Unique Manufacturers detected  : ${detectedManufacturers.size}`);
+    console.log("==========================================================\n");
 
     if (skippedDuplicatesList.length > 0) {
       console.log(`Skipped duplicates (${skippedDuplicatesList.length} total):`);

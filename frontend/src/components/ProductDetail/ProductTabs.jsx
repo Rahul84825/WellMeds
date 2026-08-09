@@ -1,6 +1,7 @@
 import React from "react";
 import { Info, HelpCircle, Building, ShieldCheck, ChevronDown, Check, CheckCircle, AlertTriangle } from "lucide-react";
 import SafetyAdviceCards from "./SafetyAdviceCards";
+import { renderStorageContent } from "../../utils/renderStorageContent";
 
 const ProductTabs = ({
   computedSections,
@@ -80,14 +81,13 @@ const ProductTabs = ({
 
             {/* Storage Checklist */}
             {sec.type === "storage" && (
-              <ul className="space-y-2 font-sans text-xs text-[#3f544d] font-medium">
-                {product.storageInstructions.map((store, idx) => (
-                  <li key={idx} className="flex gap-3 items-center p-3 bg-[#f0f8f5] rounded-lg border border-[#c3d4cc]">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#157a6d] shrink-0" />
-                    <span className="text-[#172b26] font-semibold font-sans">{store}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="pt-1 text-left font-sans">
+                {renderStorageContent(
+                  product.storageInstructions && product.storageInstructions.length > 0
+                    ? product.storageInstructions
+                    : sec.content
+                )}
+              </div>
             )}
 
             {/* Safety Cards Grid */}
