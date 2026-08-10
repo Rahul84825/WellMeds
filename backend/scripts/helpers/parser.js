@@ -451,3 +451,72 @@ export const uniqueSlug = (baseSlug, usedSlugs) => {
   usedSlugs.add(candidate);
   return candidate;
 };
+
+// ─── CANONICAL PRODUCT IDENTITY NORMALIZERS ──────────────────────────────────
+
+/**
+ * Extract and normalize dosage form from text or specs
+ */
+export const normalizeDosageForm = (text = "", dosageFormCol = "") => {
+  const combined = `${text} ${dosageFormCol}`.toLowerCase();
+  if (/\b(tablet|tablets|tab|tabs|tab\.)\b/.test(combined)) return "tablet";
+  if (/\b(capsule|capsules|cap|caps|cap\.|softgel|gelatin capsule)\b/.test(combined)) return "capsule";
+  if (/\b(injection|injections|inj|inj\.|infusion|iv)\b/.test(combined)) return "injection";
+  if (/\b(suspension|susp|oral suspension)\b/.test(combined)) return "suspension";
+  if (/\b(solution|sol|oral solution)\b/.test(combined)) return "solution";
+  if (/\b(powder|sachet|sachets)\b/.test(combined)) return "powder";
+  if (/\b(syrup|syr)\b/.test(combined)) return "syrup";
+  if (/\b(cream|ointment|gel)\b/.test(combined)) return "cream";
+  if (/\b(drop|drops)\b/.test(combined)) return "drop";
+  return "other";
+};
+
+/**
+ * Extract and normalize strength from text or specs
+ */
+export const extractNormalizedStrength = (text = "", strengthCol = "") => {
+  const source = `${strengthCol} ${text}`.trim();
+  const comboMatch = source.match(/(\d+(?:\.\d+)?\s*(?:mg|g|mcg|iu|ml))\s*\/\s*(\d+(?:\.\d+)?\s*(?:mg|g|mcg|iu|ml))/i);
+  if (comboMatch) {
+    return `${comboMatch[1].replace(/\s+/g, "").toLowerCase()}/${comboMatch[2].replace(/\s+/g, "").toLowerCase()}`;
+  }
+  const unitMatch = source.match(/(\d+(?:\.\d+)?)\s*(mg|gm|g|mcg|ml|iu|units?|%)\b/i);
+  if (unitMatch) {
+    const num = parseFloat(unitMatch[1]);
+    const unit = unitMatch[2].toLowerCase().replace(/^units?$/, "iu").replace(/^gm$/, "g");
+    return `${num}${unit}`;
+  }
+  const impliedMatch = source.match(/(\d+(?:\.\d+)?)\s*(?:tablet|tablets|tab|capsule|capsules|cap|injection|inj)/i);
+  if (impliedMatch) {
+    const num = parseFloat(impliedMatch[1]);
+    return `${num}mg`;
+  }
+  return "";
+};
+
+/**
+ * Extract normalized brand core name
+ */
+export const extractNormalizedBrandCore = (rawName = "") => {
+  if (!rawName) return "";
+  return String(rawName)
+    .toLowerCase()
+    .trim()
+    .replace(/\s*\d+(\.\d+)?\s*(mg|gm|g|mcg|ml|iu|units?|%)\b/gi, "")
+    .replace(/\s*\d+(\.\d+)?\s*(tablet|tablets|tab|tabs|capsule|capsules|cap|caps|injection|injections|inj|infusion|solution|suspension|powder|syrup|cream|gel|drop|pack|ml)\b/gi, "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+/**
+ * Build composite canonical product identity key: "brandCore|strength|dosageForm"
+ */
+export const getCanonicalKey = (name = "", strengthCol = "", formCol = "") => {
+  const core = extractNormalizedBrandCore(name);
+  const str = extractNormalizedStrength(name, strengthCol);
+  const form = normalizeDosageForm(name, formCol);
+  if (!core) return "";
+  return `${core}|${str}|${form}`;
+};

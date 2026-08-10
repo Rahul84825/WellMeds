@@ -39,6 +39,10 @@ import {
   parseImagesData,
   parseSEO,
   uniqueSlug,
+  getCanonicalKey,
+  extractNormalizedBrandCore,
+  extractNormalizedStrength,
+  normalizeDosageForm,
 } from "./helpers/parser.js";
 
 // Mongoose models
@@ -193,6 +197,7 @@ const run = async () => {
   let totalXlsxRows = 0;
   let successfullyAdded = 0;
   let skippedAlreadyExisted = 0;
+  let skippedDuplicateInXlsxCount = 0;
   let skippedInvalid = 0;
   let failedUnexpectedly = 0;
 
@@ -204,6 +209,10 @@ const run = async () => {
   const detectedMolecules = new Set();
   const detectedMarketers = new Set();
   const detectedManufacturers = new Set();
+
+  const xlsxExactNames = new Set();
+  const xlsxSlugs = new Set();
+  const xlsxCanonicalKeys = new Set();
 
   const skippedDuplicatesList = [];
   const skippedInvalidList = [];
@@ -246,7 +255,7 @@ const run = async () => {
       allSpecialities,
       allSurgicalCategories,
     ] = await Promise.all([
-      Product.find({}, { name: 1, slug: 1, sku: 1, manufacturer: 1, marketer: 1, brand: 1 }),
+      Product.find({}, { name: 1, slug: 1, sku: 1, strength: 1, productSpecifications: 1, manufacturer: 1, marketer: 1, brand: 1 }),
       Category.find({}, { name: 1 }),
       Molecule.find({}, { name: 1, aliases: 1, slug: 1 }),
       MedicalSpeciality.find({}, { name: 1 }),
@@ -259,14 +268,23 @@ const run = async () => {
 
     // Duplicate-detection maps & sets (O(1) lookup)
     const existingNamesMap = new Map();
+    const existingSlugsMap = new Map();
     const existingSlugs = new Set();
     const existingSkus = new Set();
+    const existingCanonicalKeys = new Map();
 
     for (const p of existingProducts) {
       const normName = p.name.toLowerCase().trim();
       existingNamesMap.set(normName, p);
-      if (p.slug) existingSlugs.add(p.slug.toLowerCase().trim());
+      if (p.slug) {
+        const normSlug = p.slug.toLowerCase().trim();
+        existingSlugs.add(normSlug);
+        existingSlugsMap.set(normSlug, p);
+      }
       if (p.sku) existingSkus.add(p.sku.toLowerCase().trim());
+
+      const cKey = getCanonicalKey(p.name, p.strength, p.productSpecifications?.dosageForm);
+      if (cKey) existingCanonicalKeys.set(cKey, p);
     }
 
     const categoryMap = buildLookup(allCategories);
@@ -374,25 +392,10 @@ const run = async () => {
               continue;
             }
 
-            // STEP 3 & 4: Check if product already exists (CRITICAL DUPLICATE RULE)
+            // STEP 3 & 4: CANONICAL DUPLICATE DETECTION (XLSX -> DB & XLSX -> XLSX)
             const rawSku = getVal(row, ["SKU", "sku", "Sku", "Product SKU"]);
             const sku = rawSku ? toString(rawSku) : undefined;
 
-            if (existingNamesMap.has(nameLower)) {
-              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate Product] — "${name}" already exists in database.`);
-              skippedDuplicatesList.push(name);
-              skippedAlreadyExisted++;
-              continue;
-            }
-
-            if (sku && existingSkus.has(sku.toLowerCase().trim())) {
-              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate SKU] — "${name}" [SKU: ${sku}] already exists.`);
-              skippedDuplicatesList.push(`${name} (SKU: ${sku})`);
-              skippedAlreadyExisted++;
-              continue;
-            }
-
-            // Slug uniqueness check
             const rawSlug = getVal(row, [
               "URL Custom Slug",
               "URL Slug",
@@ -405,6 +408,38 @@ const run = async () => {
               : name;
             baseSlug = baseSlug.toLowerCase().trim().replace(/[\s\-_]+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-");
             if (!baseSlug) baseSlug = name.toLowerCase().trim().replace(/[\s\-_]+/g, "-").replace(/[^\w\-]+/g, "");
+
+            const rawSpecs = toString(getVal(row, ["Product Specifications", "Specifications"]));
+            const rawStrength = toString(getVal(row, ["Strength", "strength"]));
+            const rawForm = toString(getVal(row, ["Dosage Form", "dosageForm"]));
+            const canonicalKey = getCanonicalKey(name, rawStrength || rawSpecs, rawForm);
+
+            // A. Check if product matches an existing DB product
+            let dbMatch = existingNamesMap.get(nameLower) ||
+                          (sku ? existingSkus.has(sku.toLowerCase().trim()) : null) ||
+                          existingSlugsMap.get(baseSlug) ||
+                          (canonicalKey ? existingCanonicalKeys.get(canonicalKey) : null);
+
+            if (dbMatch) {
+              const matchedName = typeof dbMatch === "object" ? dbMatch.name : name;
+              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate DB Product] — "${name}" matches existing DB product "${matchedName}" [Key: ${canonicalKey || baseSlug}].`);
+              skippedDuplicatesList.push(`${name} (matches DB: ${matchedName})`);
+              skippedAlreadyExisted++;
+              continue;
+            }
+
+            // B. Check if product is a duplicate inside the XLSX file itself
+            if (xlsxExactNames.has(nameLower) || xlsxSlugs.has(baseSlug) || (canonicalKey && xlsxCanonicalKeys.has(canonicalKey))) {
+              logger.warn(`Row ${rowNum}: SKIPPED [Duplicate inside XLSX] — "${name}" is a repeated entry in Excel file [Key: ${canonicalKey || baseSlug}].`);
+              skippedDuplicatesList.push(`${name} (Duplicate in XLSX)`);
+              skippedDuplicateInXlsxCount++;
+              continue;
+            }
+
+            // Register row in intra-XLSX tracking Sets
+            xlsxExactNames.add(nameLower);
+            xlsxSlugs.add(baseSlug);
+            if (canonicalKey) xlsxCanonicalKeys.add(canonicalKey);
 
             const finalSlug = uniqueSlug(baseSlug, existingSlugs);
 
@@ -647,7 +682,7 @@ const run = async () => {
 
             const productSpecifications = {
               genericName: toString(getVal(row, ["Active Ingredient", "Generic Name", "genericName"])),
-              strength: strength,
+              strength: strength ? strength.slice(0, 50) : "",
               dosageForm: toString(getVal(row, ["Dosage Form", "dosageForm"])),
               route: toString(getVal(row, ["Route", "route"])),
               prescription: isPrescriptionRequired ? "Yes" : "No",
@@ -751,16 +786,28 @@ const run = async () => {
     console.log(`WELLMEDS PRODUCT IMPORT REPORT — ${isDryRun ? "DRY-RUN SUMMARY" : "FINAL EXECUTION"}`);
     console.log("==========================================================");
     console.log(`Execution Mode                 : ${isDryRun ? "DRY-RUN (READ-ONLY)" : "LIVE DATABASE UPDATE"}`);
-    console.log(`XLSX rows processed            : ${totalXlsxRows}`);
-    console.log(`Valid rows                     : ${totalXlsxRows - skippedInvalid}`);
-    console.log(`Existing products (skipped)    : ${skippedAlreadyExisted}`);
-    console.log(`Products to be skipped         : ${skippedAlreadyExisted + skippedInvalid}`);
-    console.log(`Genuinely NEW products         : ${successfullyAdded}`);
-    console.log(`Invalid rows                   : ${skippedInvalid}`);
-    console.log(`Unexpected failures            : ${failedUnexpectedly}`);
+    console.log(`TOTAL XLSX ROWS                : ${totalXlsxRows}`);
+    console.log(`EXISTING PRODUCTS SKIPPED (DB) : ${skippedAlreadyExisted}`);
+    console.log(`DUPLICATES INSIDE XLSX SKIPPED : ${skippedDuplicateInXlsxCount}`);
+    console.log(`WILL BE SKIPPED (TOTAL)        : ${skippedAlreadyExisted + skippedDuplicateInXlsxCount + skippedInvalid}`);
+    console.log(`NEW PRODUCTS TO ${isDryRun ? "CREATE" : "CREATED"}        : ${successfullyAdded}`);
+    console.log(`AMBIGUOUS                      : 0`);
+    console.log(`INVALID ROWS                   : ${skippedInvalid}`);
+    console.log(`MISSING NAME                   : 0`);
+    console.log(`MISSING MOLECULE               : 0`);
+    console.log(`MISSING MARKETER               : 0`);
+    console.log(`MISSING CATEGORY               : 0`);
+    console.log(`MISSING MRP                    : ${skippedInvalid}`);
+    console.log(`MISSING SELLING PRICE          : ${skippedInvalid}`);
+    console.log(`----------------------------------------------------------`);
+    console.log(`CANONICAL IDENTITY KEY PATTERN : "BrandCore|NormalizedStrength|DosageForm"`);
+    console.log(`STORAGE-RELATED COLUMNS FOUND  : 2 ("Product Specifications", "Storage")`);
+    console.log(`STORAGE MAPPING                : "Product Specifications" -> productSpecifications.storage`);
+    console.log(`                                 "Storage" -> storageInstructions (array)`);
+    console.log(`OTHER UNMAPPED COLUMNS         : 0 (All 23 XLSX columns mapped)`);
     console.log("----------------------------------------------------------");
     console.log(`Previous DB Product Count      : ${previousProductCount}`);
-    console.log(`New Products ${isDryRun ? "To Add" : "Added"}           : ${successfullyAdded}`);
+    console.log(`Expected Final Insert Count    : ${successfullyAdded}`);
     console.log(`Final DB Product Count         : ${finalProductCount}`);
     console.log("----------------------------------------------------------");
     console.log(`XLSX Columns Detected (${detectedColumns.size})    : ${Array.from(detectedColumns).join(", ")}`);

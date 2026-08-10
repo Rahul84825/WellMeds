@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import Loader from "../components/Loader";
 import ProductCard from "../components/ProductCard";
 import CategoryCard from "../components/CategoryCard";
-import SurgicalHeroSection from "../components/SurgicalHeroSection";
+import SurgicalHeroSection, { SURGICAL_BRAND_LOGOS } from "../components/SurgicalHeroSection";
 import { 
   Scissors, 
   Shield, 
@@ -251,17 +251,30 @@ const SurgicalLandingPage = () => {
       </section>
 
       {/* Trusted Brands */}
-      <section className="bg-slate-100/30 dark:bg-zinc-900/10 py-12 border-t border-slate-100 dark:border-zinc-900">
+      <section className="bg-slate-50/50 dark:bg-zinc-900/20 py-12 border-t border-slate-100 dark:border-zinc-900">
         <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop text-center space-y-8">
-          <h3 className="font-extrabold text-xs text-slate-400 uppercase tracking-widest">
-            Partnered Medical Manufacturers
-          </h3>
-          <div className="flex flex-wrap items-center justify-center gap-xl opacity-50 dark:opacity-40">
-            <span className="font-black text-xl text-slate-600 dark:text-zinc-300">BIOCARE</span>
-            <span className="font-black text-xl text-slate-600 dark:text-zinc-300">CLINICA</span>
-            <span className="font-black text-xl text-slate-600 dark:text-zinc-300">MEDILIFE</span>
-            <span className="font-black text-xl text-slate-600 dark:text-zinc-300">HEALTHGUARD</span>
-            <span className="font-black text-xl text-slate-600 dark:text-zinc-300">SYNERGY</span>
+          <div>
+            <h3 className="font-extrabold text-xs text-slate-400 uppercase tracking-widest">
+              Authorized Surgical Manufacturers & Brands
+            </h3>
+            <p className="text-slate-400 text-xs font-semibold mt-1">
+              Directly sourcing 100% authentic medical grade equipment & consumables
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-10">
+            {SURGICAL_BRAND_LOGOS.map((brand) => (
+              <div 
+                key={brand.id}
+                className="w-[135px] sm:w-[172px] h-[66px] sm:h-[79px] p-1 flex items-center justify-center select-none cursor-pointer group"
+                title={brand.name}
+              >
+                <img 
+                  src={brand.logoUrl} 
+                  alt={brand.name} 
+                  className="max-h-full max-w-full object-contain filter group-hover:scale-110 transition-transform duration-200" 
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
