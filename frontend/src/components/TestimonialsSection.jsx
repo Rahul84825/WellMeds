@@ -1,78 +1,50 @@
-import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Star, Quote, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Star, Quote, ChevronLeft, ChevronRight, Check, MapPin } from "lucide-react";
 
 const testimonialsData = [
   {
     id: 1,
-    text: "The fast delivery saved me when I ran out of my insulin. WellMeds is an absolute lifesaver!",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC1qqFDPjz3Mr8onJQ_6cbTaWVtMMoFCE-6sTlTgkcqLOKLEU7U3qWgl5neLi-aExwyKcNlOuGK-jbKREv0LmfG8eMYE5dhyYdml4NKYqh4jZZ2II3rQMplB5l1wdrg1iQYa8NUGFdLEAwtlT52u8uBWQBJ-cy9N9Vy-zcunLCewUWgbW3Qv1O3vsKGczS5bkVn8SqR5U8VoIf7kgX8sA9FPbOVUcKMKSC7eL7KLtU2azZeiAd1cJmdoYS_ASeVhCh_u3Th9Vj86YqO",
-    name: "Sarah Johnson",
+    text: "I’m from Solapur and once needed a cancer medicine for my grandfather. It wasn’t easily available, but Wellmeds helped me arrange it at a good price. The medicine was of good quality and the service was very helpful. Truly appreciate the support when we needed it most.",
+    name: "Vinay Yelgulwar",
     role: "Verified Buyer",
+    place: "Solapur",
     time: "2 days ago",
     source: "Google Review"
   },
   {
     id: 2,
-    text: "I appreciate the prescription verification process. It feels very secure, clinical, and professional. The pharmacists are highly helpful.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAphcqGx1fnNXyk5p_UtWhj_s54is7crJPOrdv-bdBBDjM48or3uFwhmUtrwjHBoS1DJjVoeJj_btREqdZQp1g8-Lbe94PGnvb7v74XRz3Aj5VYtoE_hsUmosd8fMoqz5B1wG6_vhc7YoDq_71RmIVWjnpqzvXZxpze9TDRNG6lLxdGwlgGCRNwIxQYR4QhQxhmRZ83e3lkrp7IfWJFRkhX5qm5siC1CD7CtiAQWlmqIP7k1wOHo5Oz12fYUEJvrtFjgc-vKMHgMYEb",
-    name: "Mark Davis",
+    text: "I have been associated with Wellmeds since 2023, when they had their offline store. Recently purchased an osteoporosis injection from them and was very happy with the price offered. The service has always been reliable and professional. Glad to continue getting my medicines from Wellmeds.",
+    name: "Mehrun Qureshi",
     role: "Regular Customer",
+    place: "Pune",
     time: "2 weeks ago",
     source: "Google Review"
   },
   {
     id: 3,
-    text: "Best prices for chronic medication. The digital prescription log feature is incredibly convenient and makes order tracking very straightforward.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAzX8IBvLldjApG9rj0bhInruyvu-5aL0N1oxJh_FTwZPrSp-FgL1WRGlIEfV3Y_PWkw-2-NDTounyW9TTY9wBzEwHTYngSzgjsDPCTEAeAWD9F8uBdH1ZcIR5y57r78mVrBrM9Uzb7aS4c7PglCbbJP9onxrTgjrX4gZ7S8BPqo-hMQBmY2PA1UcbiDGWBKVeJcK3h5uLrxW9aXyVN90BPOKREzBHrZpFQ3q94AOMP_n5vi2_Mns5utqL-QlOVKMMEWWHRlPIou5Mg",
-    name: "Emily Chen",
+    text: "My temperature-sensitive medicine arrived on time in secure insulated packaging with ice packs, exactly as promised. The delivery was handled professionally, and the medicine was in excellent condition on arrival. Really appreciate WellMeds' reliable cold-chain service.",
+    name: "Mamta Parmar",
     role: "Verified Buyer",
+    place: "Pune",
     time: "1 month ago",
     source: "Google Review"
   },
   {
     id: 4,
-    text: "Navigating cancer treatment medicines is extremely stressful, but WellMeds ensured cold-chain integrity and timely delivery for my critical medications. Truly top-notch support.",
-    image: null,
-    name: "Rajesh Kumar",
+    text: "First time at Wellmeds! Impressed by the wide selection. Found competitive pricing on essential meds, even specialized ones like anti-HIV and anti-cancer drugs.",
+    name: "June Barsha",
     role: "Verified Buyer",
+    place: "Pune",
     time: "3 weeks ago",
     source: "Google Review"
   },
   {
     id: 5,
-    text: "Very professional service. The home delivery of my mother's daily heart medications is always punctual, nicely packed, and authentic.",
-    image: null,
-    name: "Anita Deshmukh",
+    text: "I live in UK and needed a good quantity of antibiotic injections, which were quite expensive here. Wellmeds helped arrange them from India and couriered them to me. Really appreciate their service and support.",
+    name: "Soham D",
     role: "Regular Customer",
+    place: "United Kingdom",
     time: "5 days ago",
-    source: "Google Review"
-  },
-  {
-    id: 6,
-    text: "Exceptional support from the consulting pharmacists. They helped me understand drug-to-drug interactions before I ordered my chronic therapy plans.",
-    image: null,
-    name: "David Miller",
-    role: "Verified Buyer",
-    time: "12 days ago",
-    source: "Google Review"
-  },
-  {
-    id: 7,
-    text: "Authentic medicines with batch tracking gives me absolute peace of mind. Excellent UI/UX storefront as well. Highly recommended for chronic care.",
-    image: null,
-    name: "Priya Sharma",
-    role: "Regular Customer",
-    time: "1 month ago",
-    source: "Google Review"
-  },
-  {
-    id: 8,
-    text: "Super quick upload prescription workflow. Approved and dispatched in a couple of hours. Brilliant service, clean dashboard to log my Rx history.",
-    image: null,
-    name: "James Wilson",
-    role: "Verified Buyer",
-    time: "2 months ago",
     source: "Google Review"
   }
 ];
@@ -99,7 +71,6 @@ const GoogleIcon = () => (
 );
 
 const TestimonialCard = ({ item }) => {
-  const [imageError, setImageError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getInitials = (name) => {
@@ -118,38 +89,37 @@ const TestimonialCard = ({ item }) => {
   return (
     <div className="w-[85vw] sm:w-[320px] md:w-[350px] shrink-0 snap-start flex flex-col gap-sm select-none">
       
-      {/* 1. Customer Details Header (Aligned outside the card body) */}
+      {/* 1. Customer Details Header */}
       <div className="flex items-center gap-md px-xs">
-        {/* Avatar */}
-        {!item.image || imageError ? (
-          <div className="w-[52px] h-[52px] rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-bold text-base border border-slate-200 dark:border-zinc-800 shadow-xs shrink-0">
-            {getInitials(item.name)}
-          </div>
-        ) : (
-          <img
-            src={item.image}
-            alt={item.name}
-            onError={() => setImageError(true)}
-            className="w-[52px] h-[52px] rounded-full object-cover border border-slate-200 dark:border-zinc-800 shadow-xs shrink-0"
-          />
-        )}
+        {/* Initials Avatar */}
+        <div className="w-[52px] h-[52px] rounded-full bg-[#038076]/10 text-[#038076] dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center font-bold text-base border border-slate-200 dark:border-zinc-800 shadow-xs shrink-0">
+          {getInitials(item.name)}
+        </div>
 
-        {/* Name and Stars */}
+        {/* Name, Verified Badge, Stars & Place */}
         <div className="text-left">
-          <div className="flex items-center gap-xs">
+          <div className="flex items-center gap-xs flex-wrap">
             <span className="font-extrabold text-sm text-slate-800 dark:text-zinc-150 leading-tight">
               {item.name}
             </span>
-            <span className="inline-flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 text-[9px] font-black px-1.5 py-0.5 rounded-md gap-0.5 shrink-0 select-none">
+            <span className="inline-flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[9px] font-black px-1.5 py-0.5 rounded-md gap-0.5 shrink-0 select-none">
               <Check className="w-2.5 h-2.5" />
               Verified
             </span>
           </div>
           
-          <div className="flex items-center gap-0.5 mt-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            ))}
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              ))}
+            </div>
+            {item.place && (
+              <span className="inline-flex items-center gap-0.5 text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                <MapPin className="w-3 h-3 text-[#157a6d] dark:text-emerald-400 shrink-0" />
+                {item.place}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -186,7 +156,7 @@ const TestimonialCard = ({ item }) => {
         <div className="relative z-10 border-t border-slate-200/60 dark:border-zinc-800/50 pt-sm flex items-center justify-between text-[11px] font-bold text-slate-400 dark:text-zinc-550 select-none">
           <span className="flex items-center gap-xs">
             <GoogleIcon />
-            Google Review
+            {item.source || "Google Review"}
           </span>
           <span>{item.time || "2 months ago"}</span>
         </div>
@@ -198,16 +168,74 @@ const TestimonialCard = ({ item }) => {
 };
 
 export const TestimonialsSection = () => {
-  const scrollRef = useRef(null);
+  const sliderRef = useRef(null);
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollAmount = clientWidth * 0.8;
-      scrollRef.current.scrollTo({
-        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
-        behavior: "smooth"
-      });
+  // Arrow visibility state
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Mouse drag state
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragScrollLeft = useRef(0);
+
+  // Update arrow visibility based on scroll position
+  const updateArrows = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 8);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+  }, []);
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    // ResizeObserver for dynamic width changes
+    const ro = new ResizeObserver(updateArrows);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      ro.disconnect();
+    };
+  }, [updateArrows]);
+
+  const scrollLeft = () => {
+    if (!sliderRef.current) return;
+    const amount = sliderRef.current.clientWidth * 0.75;
+    sliderRef.current.scrollBy({ left: -amount, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    if (!sliderRef.current) return;
+    const amount = sliderRef.current.clientWidth * 0.75;
+    sliderRef.current.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  // Mouse drag-to-scroll
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    dragStartX.current = e.pageX - sliderRef.current.offsetLeft;
+    dragScrollLeft.current = sliderRef.current.scrollLeft;
+    sliderRef.current.style.cursor = "grabbing";
+    sliderRef.current.style.userSelect = "none";
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const delta = (x - dragStartX.current) * 1.5;
+    sliderRef.current.scrollLeft = dragScrollLeft.current - delta;
+  };
+
+  const stopDragging = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = "grab";
+      sliderRef.current.style.userSelect = "";
     }
   };
 
@@ -227,17 +255,57 @@ export const TestimonialsSection = () => {
               What our patients Say
             </h2>
           </div>
+
+          {/* Right Header Navigation Controls: ( ← ) ( → ) */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Left Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              aria-label="Scroll testimonials left"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollLeft
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* Right Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              aria-label="Scroll testimonials right"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollRight
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Testimonials Carousel Track */}
         <div className="relative w-full overflow-hidden">
           <div
-            ref={scrollRef}
-            className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4"
+            ref={sliderRef}
+            role="list"
+            aria-label="Testimonials carousel"
+            className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 select-none"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
+              cursor: "grab",
             }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={stopDragging}
+            onMouseLeave={stopDragging}
           >
             {testimonialsData.map((item) => (
               <TestimonialCard key={item.id} item={item} />
@@ -251,3 +319,4 @@ export const TestimonialsSection = () => {
 };
 
 export default TestimonialsSection;
+
