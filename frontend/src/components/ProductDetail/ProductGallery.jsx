@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Loader from "../Loader";
 import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
+import { getCardImageUrl } from "../../utils/image";
 
 const ProductGallery = ({
   imagesList,
@@ -39,7 +40,7 @@ const ProductGallery = ({
 
       {/* Main Image Container (Prescription Paper Frame) */}
       <div 
-        className="w-full aspect-square pdp-paper-card overflow-hidden relative cursor-zoom-in flex items-center justify-center p-6 transition-all duration-300"
+        className="w-full aspect-square pdp-paper-card overflow-hidden relative cursor-zoom-in flex items-center justify-center p-3 sm:p-4 transition-all duration-300"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -60,11 +61,11 @@ const ProductGallery = ({
         
         {/* Main Product Image */}
         <img 
-          src={imagesList[activeImageIdx] || DEFAULT_PRODUCT_IMAGE} 
+          src={getCardImageUrl(imagesList[activeImageIdx], { width: 1000 }) || DEFAULT_PRODUCT_IMAGE} 
           alt={productName} 
           loading="eager"
           fetchpriority="high"
-          className="w-auto h-auto max-w-[90%] max-h-[90%] object-contain select-none transition-transform duration-[250ms] ease-in-out hover:scale-105" 
+          className="w-full h-full max-w-full max-h-full object-contain select-none transition-transform duration-[250ms] ease-in-out hover:scale-105" 
           onLoad={() => setIsImageLoading(false)}
           onError={(e) => {
             setIsImageLoading(false);

@@ -7,6 +7,7 @@ import ProductCard from "../components/ProductCard";
 import { X, ChevronLeft, ChevronRight, Share2, Snowflake, ShoppingCart, Star, Info, HelpCircle, CheckCircle, AlertTriangle, Check } from "lucide-react";
 import { formatCurrency, calculateDiscountPercent } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
+import { getCardImageUrl } from "../utils/image";
 
 // Prescription Design System Stylesheet
 import "../components/ProductDetail/ProductDetail.css";
@@ -979,7 +980,7 @@ const ProductDetails = () => {
         >
           {/* Modal Container Card */}
           <div
-            className="bg-white dark:bg-zinc-900 w-[95vw] md:w-[70vw] max-w-[900px] h-auto max-h-[80vh] md:max-h-[85vh] rounded-3xl shadow-2xl relative flex flex-col items-center justify-center p-lg animate-[scale-up_0.25s_ease-out] border border-slate-100 dark:border-zinc-800/40"
+            className="bg-white dark:bg-zinc-900 w-[95vw] md:w-[65vw] max-w-[850px] h-auto max-h-[80vh] md:max-h-[80vh] rounded-3xl shadow-2xl relative flex flex-col items-center justify-center p-lg animate-[scale-up_0.25s_ease-out] border border-slate-100 dark:border-zinc-800/40"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -1005,11 +1006,11 @@ const ProductDetails = () => {
             )}
 
             {/* Image Viewer */}
-            <div className="w-full flex items-center justify-center p-md md:p-lg overflow-hidden h-[65vh] md:h-[70vh]">
+            <div className="w-full flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden h-[65vh] md:h-[75vh]">
               <img
-                src={imagesList[activeImageIdx]}
+                src={getCardImageUrl(imagesList[activeImageIdx], { width: 1200 }) || DEFAULT_PRODUCT_IMAGE}
                 alt={product.name}
-                className="max-w-full max-h-full object-contain rounded-2xl transition-all duration-200 ease-in-out select-none"
+                className="w-full h-full max-w-full max-h-full object-contain rounded-2xl transition-all duration-200 ease-in-out select-none"
               />
             </div>
 

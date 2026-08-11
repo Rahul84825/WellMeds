@@ -5,6 +5,7 @@ import { RefreshCw, ShoppingCart, Plus, Minus, ShieldCheck, Thermometer } from "
 import MiniTooltip from "./MiniTooltip";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { calculateSavings, calculateDiscountPercent, formatPrice } from "../utils/currency";
+import { getCardImageUrl } from "../utils/image";
 
 /**
  * Global ProductCard — WellMeds Design System V2 (Editorial Identity)
@@ -130,19 +131,18 @@ const ProductCard = ({ product }) => {
       {/* Top Image Frame matching Reference Design */}
       <div className="relative flex items-center justify-center overflow-hidden
                       bg-white dark:bg-zinc-950
-                      h-[160px] sm:h-[180px] md:h-[190px] w-full shrink-0
-                      border-b border-slate-100 dark:border-zinc-800 p-3 sm:p-4">
+                      h-[160px] sm:h-[180px] md:h-[215px] lg:h-[225px] w-full shrink-0
+                      border-b border-slate-100 dark:border-zinc-800 p-3 md:p-5 lg:p-6">
         <img
           alt={product.name}
-          src={product.image || DEFAULT_PRODUCT_IMAGE}
+          src={getCardImageUrl(product.image) || DEFAULT_PRODUCT_IMAGE}
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = DEFAULT_PRODUCT_IMAGE;
           }}
           loading="lazy"
           decoding="async"
-          className="max-w-[85%] max-h-[85%] object-contain select-none"
-          style={{ imageRendering: "-webkit-optimize-contrast" }}
+          className="w-full h-full max-w-full max-h-full md:max-w-[85%] md:max-h-[85%] object-contain select-none transition-transform duration-300 ease-out group-hover:scale-[1.03]"
         />
 
         {/* Top Left Status & Discount Badges */}
@@ -169,7 +169,7 @@ const ProductCard = ({ product }) => {
 
         {/* Top Right Rx & Cold Chain Circular Icons */}
         {(isRx || isColdChain) && (
-          <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5">
+          <div className="absolute right-3 top-3 z-30 flex items-center gap-1.5">
             {isRx && (
               <div className="relative">
                 <button
@@ -188,6 +188,7 @@ const ProductCard = ({ product }) => {
                   text="Prescription Required"
                   active={activeTooltip === "rx"}
                   textColor="text-[#157a6d] dark:text-emerald-400"
+                  align="right"
                 />
               </div>
             )}
@@ -209,7 +210,8 @@ const ProductCard = ({ product }) => {
                 <MiniTooltip
                   text="Store at 2–8°C"
                   active={activeTooltip === "coldChain"}
-                  textColor="text-sky-300"
+                  textColor="text-sky-600 dark:text-sky-300"
+                  align="right"
                 />
               </div>
             )}
