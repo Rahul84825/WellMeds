@@ -1,5 +1,5 @@
 import React from "react";
-import { Info, HelpCircle, Building, ShieldCheck, ChevronDown, Check, CheckCircle, AlertTriangle } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 import SafetyAdviceCards from "./SafetyAdviceCards";
 import { renderStorageContent } from "../../utils/renderStorageContent";
 
@@ -24,62 +24,58 @@ const ProductTabs = ({
               {sec.title}
             </h2>
 
-            {/* Key Benefits Icon Grid */}
+            {/* Key Benefits — Clean Point-by-Point List */}
             {sec.type === "benefits" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+              <ul className="space-y-3 font-sans">
                 {product.benefits.map((benefit, bIdx) => (
-                  <div key={bIdx} className="p-4 bg-[#f0f8f5] rounded-xl border border-[#c3d4cc] flex gap-3 items-start transition-all hover:border-[#157a6d]">
-                    <div className="w-6 h-6 bg-[#157a6d] text-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle size={14} />
-                    </div>
+                  <li key={bIdx} className="flex items-start gap-3 text-sm text-black leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#157a6d] shrink-0 mt-2" />
                     <div>
-                      <p className="font-bold text-xs text-[#172b26] font-sans">{benefit.title}</p>
-                      {benefit.description && <p className="text-[11px] text-[#3f544d] mt-1 leading-relaxed font-sans">{benefit.description}</p>}
+                      <p className="font-bold text-[#172b26] font-sans">{benefit.title}</p>
+                      {benefit.description && <p className="text-[#3f544d] text-sm mt-0.5 font-normal leading-relaxed font-sans">{benefit.description}</p>}
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Dosage Checklist */}
-            {sec.type === "usage" && (
-              <ul className="space-y-2.5 font-sans text-xs text-[#3f544d] font-medium">
-                {product.usageInstructions.map((inst, idx) => (
-                  <li key={idx} className="flex gap-3 items-start leading-relaxed bg-[#f4f8f6] p-3 rounded-lg border border-[#dde8e3]">
-                    <div className="w-5 h-5 rounded-full bg-[#157a6d] text-white flex items-center justify-center shrink-0 mt-0.5">
-                      <Check size={12} className="stroke-[3]" />
-                    </div>
-                    <span className="text-[#172b26] font-semibold font-sans">{inst}</span>
                   </li>
                 ))}
               </ul>
             )}
 
-            {/* Warnings Alert Panels */}
-            {sec.type === "warnings" && (
-              <div className="space-y-3 font-sans">
-                {product.warnings.map((warn, idx) => (
-                  <div key={idx} className="p-4 bg-red-50 border border-red-200 rounded-xl flex gap-3 items-start">
-                    <AlertTriangle className="text-red-600 shrink-0 mt-0.5" size={16} />
-                    <p className="text-xs text-red-900 leading-relaxed font-semibold font-sans">{warn}</p>
-                  </div>
+            {/* Dosage Checklist — Clean Point-by-Point List */}
+            {sec.type === "usage" && (
+              <ul className="space-y-2.5 font-sans">
+                {product.usageInstructions.map((inst, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-sm text-black leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#157a6d] shrink-0 mt-2" />
+                    <span className="text-[#172b26] font-medium font-sans">{inst}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
 
-            {/* Side Effects List */}
+            {/* Warnings — Clean Point-by-Point List */}
+            {sec.type === "warnings" && (
+              <ul className="space-y-2.5 font-sans">
+                {product.warnings.map((warn, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-sm text-black leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e] shrink-0 mt-2" />
+                    <span className="text-[#172b26] font-medium font-sans">{warn}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Side Effects — Clean Point-by-Point List */}
             {sec.type === "sideeffects" && (
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5 font-sans text-xs text-[#172b26] font-semibold">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-sans text-sm text-[#172b26] font-medium">
                 {product.sideEffects.map((side, idx) => (
-                  <li key={idx} className="flex gap-2.5 items-center p-2.5 bg-[#f4f8f6] rounded-lg border border-[#dde8e3]">
-                    <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  <li key={idx} className="flex items-center gap-2.5 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#157a6d] shrink-0" />
                     <span className="font-sans">{side}</span>
                   </li>
                 ))}
               </ul>
             )}
 
-            {/* Storage Checklist */}
+            {/* Storage Content */}
             {sec.type === "storage" && (
               <div className="pt-1 text-left font-sans">
                 {renderStorageContent(
@@ -90,7 +86,7 @@ const ProductTabs = ({
               </div>
             )}
 
-            {/* Safety Cards Grid */}
+            {/* Safety Cards Grid — Locked & Preserved */}
             {sec.type === "safety" && (
               <SafetyAdviceCards safetyCards={product.safetyCards} />
             )}
@@ -116,7 +112,7 @@ const ProductTabs = ({
                         </span>
                       </button>
                       {isOpen && (
-                        <div className="pdp-faq-content pt-1 border-t border-dashed border-[#dde8e3] font-sans">
+                        <div className="pdp-faq-content pt-1 border-t border-dashed border-[#dde8e3] font-sans text-sm">
                           <p>{faq.answer}</p>
                         </div>
                       )}
@@ -126,21 +122,21 @@ const ProductTabs = ({
               </div>
             )}
 
-            {/* References */}
+            {/* References — Clean Numbered Point List */}
             {sec.type === "references" && (
-              <ul className="space-y-2 font-sans text-xs text-[#5f776e] italic">
+              <ol className="space-y-2 font-sans text-sm text-[#3f544d]">
                 {product.references.map((ref, idx) => (
-                  <li key={idx} className="flex gap-2 items-start bg-[#f4f8f6] p-2.5 rounded border border-[#dde8e3]">
-                    <span className="font-bold text-[#157a6d] font-sans">[{idx + 1}]</span>
+                  <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                    <span className="font-bold text-[#157a6d] shrink-0 font-sans">[{idx + 1}]</span>
                     <span className="text-left font-sans">{ref}</span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             )}
 
             {/* Default Text Content for Custom Sections */}
             {!sec.type && (
-              <p className="font-sans text-xs text-[#3f544d] leading-relaxed whitespace-pre-line text-left font-medium">
+              <p className="font-sans text-sm text-[#3f544d] leading-relaxed whitespace-pre-line text-left font-medium">
                 {sec.content}
               </p>
             )}

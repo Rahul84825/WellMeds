@@ -700,21 +700,6 @@ const ProductDetails = () => {
           ].map((spec) => {
             const val = product.productSpecifications[spec.key];
             if (!val || !val.trim()) return null;
-            if (spec.key === "storage") {
-              return (
-                <div
-                  key={spec.key}
-                  className="py-3.5 border-b border-dashed border-[#dde8e3] text-left font-sans space-y-2"
-                >
-                  <div className="font-bold text-xs uppercase tracking-wider text-[#172b26]">
-                    {spec.label}
-                  </div>
-                  <div className="pt-0.5">
-                    {renderStorageContent(val)}
-                  </div>
-                </div>
-              );
-            }
             return (
               <div
                 key={spec.key}
@@ -723,7 +708,7 @@ const ProductDetails = () => {
                 <div className="pdp-spec-label">
                   {spec.label}
                 </div>
-                <div className="pdp-spec-value">
+                <div className="pdp-spec-value text-right max-w-[65%] leading-snug">
                   {val}
                 </div>
               </div>
@@ -745,7 +730,7 @@ const ProductDetails = () => {
         <h2 className="pdp-serif-title text-xl text-[#172b26] flex items-center gap-2 pb-3 pdp-dashed-line">
           <span className="material-symbols-outlined text-[18px] text-[#157a6d]">info</span> Product Overview & Introduction
         </h2>
-        <p className="font-sans text-xs text-[#3f544d] leading-relaxed whitespace-pre-line">
+        <p className="font-sans text-sm text-[#3f544d] leading-relaxed whitespace-pre-line">
           {product.description}
         </p>
       </div>

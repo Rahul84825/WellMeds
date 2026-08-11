@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 
 const parsePackQuantity = (prod) => {
   if (!prod) return 1;
@@ -169,13 +169,15 @@ const SubstituteProducts = ({ substituteProducts = [], product }) => {
           </div>
 
           {sortedSubstitutes.length > 3 && (
-            <button
-              ref={viewAllBtnRef}
-              onClick={() => setIsModalOpen(true)}
-              className="pdp-btn-primary mt-3 w-full py-2.5 text-xs font-bold flex items-center justify-center gap-1"
-            >
-              View All {sortedSubstitutes.length} Substitutes <span className="text-sm">→</span>
-            </button>
+            <div className="pt-3 pb-0.5">
+              <button
+                ref={viewAllBtnRef}
+                onClick={() => setIsModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-sans font-bold uppercase tracking-widest text-[#157a6d] hover:bg-[#157a6d] hover:text-white border border-[#157a6d] bg-white rounded-md transition-all cursor-pointer shadow-2xs"
+              >
+                VIEW ALL ({sortedSubstitutes.length}) <ArrowRight size={12} />
+              </button>
+            </div>
           )}
         </>
       )}

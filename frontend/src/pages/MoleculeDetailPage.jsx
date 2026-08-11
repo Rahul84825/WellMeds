@@ -158,15 +158,14 @@ const MoleculeDetailPage = () => {
         <div className="bg-white border border-[#dde8e3] rounded-lg p-10 text-center max-w-sm shadow-lg">
           <AlertTriangle className="mx-auto mb-4 text-[#b08d3e]" size={40} />
           <h2
-            className="text-2xl text-black mb-2 font-bold"
-            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+            className="text-2xl text-black mb-2 font-sans font-bold"
           >Molecule Not Found</h2>
-          <p className="text-sm font-mono text-black mb-6">
+          <p className="text-sm font-sans text-black mb-6">
             The molecule you requested does not exist in our reference index.
           </p>
           <button
             onClick={() => navigate("/molecules")}
-            className="bg-[#157a6d] text-white text-sm font-mono font-bold tracking-widest uppercase px-6 py-2.5 rounded-full hover:bg-[#0f6157] transition-all"
+            className="bg-[#157a6d] text-white text-sm font-sans font-bold tracking-widest uppercase px-6 py-2.5 rounded-full hover:bg-[#0f6157] transition-all cursor-pointer"
           >
             BROWSE INDEX
           </button>
@@ -176,7 +175,7 @@ const MoleculeDetailPage = () => {
   }
 
   return (
-    <div style={{ ...PAGE_BG, fontFamily: "'IBM Plex Mono', monospace" }} className="min-h-screen text-black">
+    <div style={PAGE_BG} className="min-h-screen text-black font-sans">
       <SEO
         title={`${molecule.name} Uses, Dosage, Side Effects`}
         description={molecule.shortDescription || `Explore ${molecule.name} clinical information on WellMeds.`}
@@ -193,35 +192,34 @@ const MoleculeDetailPage = () => {
         <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 pt-8 pb-10">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 mb-5 select-none" aria-label="Breadcrumb">
-            <span onClick={() => navigate("/")} className="text-xs font-mono uppercase tracking-widest text-black font-semibold cursor-pointer hover:text-[#157a6d] transition-colors">Home</span>
+            <span onClick={() => navigate("/")} className="text-xs font-sans uppercase tracking-widest text-black font-semibold cursor-pointer hover:text-[#157a6d] transition-colors">Home</span>
             <ChevronRight size={11} className="text-[#888888]" />
-            <span onClick={() => navigate("/molecules")} className="text-xs font-mono uppercase tracking-widest text-black font-semibold cursor-pointer hover:text-[#157a6d] transition-colors">Molecule Index</span>
+            <span onClick={() => navigate("/molecules")} className="text-xs font-sans uppercase tracking-widest text-black font-semibold cursor-pointer hover:text-[#157a6d] transition-colors">Molecule Index</span>
             <ChevronRight size={11} className="text-[#888888]" />
-            <span className="text-xs font-mono uppercase tracking-widest text-[#157a6d] font-bold">{molecule.name}</span>
+            <span className="text-xs font-sans uppercase tracking-widest text-[#157a6d] font-bold">{molecule.name}</span>
           </nav>
 
           {/* Category + Rx badge row */}
           <div className="flex flex-wrap items-center gap-3.5 mb-4">
             {molecule.category && (
-              <span className="text-xs font-mono font-bold uppercase tracking-[2.5px] text-[#b08d3e]">
+              <span className="text-xs font-sans font-bold uppercase tracking-[2.5px] text-[#b08d3e]">
                 {molecule.category}
               </span>
             )}
             <span className="text-[#888888] text-sm">·</span>
-            <span className="inline-flex items-center gap-2 border border-[#157a6d] rounded-sm px-3 py-1 text-xs font-mono font-bold uppercase tracking-widest text-[#157a6d]">
-              <span className="font-serif font-black">℞</span> Prescription
+            <span className="inline-flex items-center gap-2 border border-[#157a6d] rounded-sm px-3 py-1 text-xs font-sans font-bold uppercase tracking-widest text-[#157a6d]">
+              <span className="font-sans font-black">℞</span> Prescription
             </span>
           </div>
 
           {/* Molecule Name */}
           <h1
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black leading-tight mb-3"
-            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-black leading-tight mb-3"
           >
             {molecule.name}
           </h1>
           {molecule.aliases?.length > 0 && (
-            <p className="text-xs sm:text-sm font-mono text-black font-semibold mb-4">
+            <p className="text-xs sm:text-sm font-sans text-black font-medium mb-4">
               Also known as: {molecule.aliases.join(" · ")}
             </p>
           )}
@@ -240,13 +238,13 @@ const MoleculeDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-9 items-start">
 
           {/* ── LEFT SIDEBAR (Sticky Below Header) ───────────────────── */}
-          <aside className="lg:col-span-3 space-y-6 order-2 lg:order-1 lg:sticky lg:top-[84px] self-start z-20 max-h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
+          <aside className="lg:col-span-3 space-y-6 order-2 lg:order-1 lg:sticky lg:top-[84px] self-start z-20">
 
             {/* Clinical Index Card */}
             <div className="bg-white border border-[#dde8e3] rounded-sm overflow-hidden shadow-sm">
               {/* Header */}
               <div className="px-4 py-3.5 border-b border-dashed border-[#c3d4cc] bg-[#f4f9f7]">
-                <p className="text-xs font-mono font-bold uppercase tracking-[2px] text-black">
+                <p className="text-xs font-sans font-bold uppercase tracking-[2px] text-black">
                   Clinical Index
                 </p>
               </div>
@@ -258,9 +256,9 @@ const MoleculeDetailPage = () => {
                     <button
                       key={s.id}
                       onClick={() => scrollToSection(s.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors text-xs font-mono border-b border-[#dde8e3]/60 last:border-0 group cursor-pointer ${activeSection === s.id
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors text-xs font-sans border-b border-[#dde8e3]/60 last:border-0 group cursor-pointer ${activeSection === s.id
                           ? "bg-[#157a6d] text-white font-bold"
-                          : "text-black hover:bg-[#f4f9f7] hover:text-[#157a6d] font-semibold"
+                          : "text-black hover:bg-[#f4f9f7] hover:text-[#157a6d] font-medium"
                         }`}
                     >
                       <Icon size={14} className={activeSection === s.id ? "text-white" : "text-[#157a6d] group-hover:text-[#157a6d]"} />
@@ -274,11 +272,11 @@ const MoleculeDetailPage = () => {
             {/* Available Brands card */}
             <div className="bg-white border border-[#dde8e3] rounded-sm overflow-hidden shadow-sm">
               <div className="px-4 py-3.5 border-b border-dashed border-[#c3d4cc] bg-[#f4f9f7] flex items-center justify-between">
-                <p className="text-xs font-mono font-bold uppercase tracking-[2px] text-black">
+                <p className="text-xs font-sans font-bold uppercase tracking-[2px] text-black">
                   Available Brands
                 </p>
                 {!productsLoading && products.length > 0 && (
-                  <span className="text-xs font-mono font-bold text-[#157a6d]">{products.length} found</span>
+                  <span className="text-xs font-sans font-bold text-[#157a6d]">{products.length} found</span>
                 )}
               </div>
 
@@ -287,7 +285,7 @@ const MoleculeDetailPage = () => {
               ) : products.length > 0 ? (
                 <>
                   <div className="divide-y divide-[#dde8e3]/60">
-                    {products.slice(0, 4).map((prod, idx) => {
+                    {products.slice(0, 3).map((prod, idx) => {
                       const price = prod.salePrice || prod.price || 0;
                       return (
                         <div
@@ -299,12 +297,12 @@ const MoleculeDetailPage = () => {
                             <p className="text-xs font-sans font-bold text-black group-hover:text-[#157a6d] transition-colors leading-snug line-clamp-2">
                               {prod.name}
                             </p>
-                            <span className="text-xs font-mono font-bold text-black shrink-0">
+                            <span className="text-xs font-sans font-bold text-black shrink-0">
                               ₹{price.toLocaleString("en-IN")}
                             </span>
                           </div>
                           {(prod.manufacturer || prod.marketer) && (
-                            <p className="text-[10px] font-mono text-[#444444] mt-0.5 truncate font-medium">
+                            <p className="text-[10px] font-sans text-[#444444] mt-0.5 truncate font-medium">
                               {prod.manufacturer || prod.marketer}
                             </p>
                           )}
@@ -312,10 +310,10 @@ const MoleculeDetailPage = () => {
                       );
                     })}
                   </div>
-                  <div className="px-4 py-3 border-t border-dashed border-[#c3d4cc]">
+                  <div className="p-3.5 border-t border-dashed border-[#c3d4cc] bg-[#f8faf9]">
                     <button
                       onClick={() => setShowAllBrandsModal(true)}
-                      className="w-full flex items-center justify-center gap-2 py-2 text-xs font-mono font-bold uppercase tracking-widest text-[#157a6d] hover:bg-[#157a6d] hover:text-white border border-[#157a6d] rounded-sm transition-all cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-sans font-bold uppercase tracking-widest text-[#157a6d] hover:bg-[#157a6d] hover:text-white border border-[#157a6d] bg-white rounded-md transition-all cursor-pointer shadow-2xs"
                     >
                       VIEW ALL ({products.length}) <ArrowRight size={12} />
                     </button>
@@ -323,7 +321,7 @@ const MoleculeDetailPage = () => {
                 </>
               ) : (
                 <div className="px-4 py-5 text-center">
-                  <p className="text-xs font-mono text-black font-semibold">No brands listed.</p>
+                  <p className="text-xs font-sans text-black font-semibold">No brands listed.</p>
                 </div>
               )}
             </div>
@@ -572,7 +570,7 @@ const ClinicalSection = ({ id, title, icon: Icon, children, accent }) => (
       <Icon size={18} className={accent ? "text-[#b08d3e]" : "text-[#157a6d]"} />
       <h2
         id={`heading-${id}`}
-        className="text-lg sm:text-xl font-mono font-bold uppercase tracking-[2px] text-black"
+        className="text-lg sm:text-xl font-sans font-bold uppercase tracking-[2px] text-black"
       >
         {title}
       </h2>
