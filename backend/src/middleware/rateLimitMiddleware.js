@@ -20,32 +20,6 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// OTP Send: max 30 per hour per IP (per-mobile limit is enforced in controller)
-export const otpSendLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 30,
-  skip: isDevOrLocal,
-  message: {
-    success: false,
-    message: "Too many OTP requests from this IP. Please try again after 1 hour.",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// OTP Verify: max 30 attempts per 15 minutes per IP
-export const otpVerifyLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  skip: isDevOrLocal,
-  message: {
-    success: false,
-    message: "Too many OTP verification attempts. Please try again after 15 minutes.",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // General request limiter for overall system (GET read requests & local requests are bypassed)
 export const globalLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,

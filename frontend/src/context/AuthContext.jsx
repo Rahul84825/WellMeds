@@ -85,11 +85,6 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // ── Send OTP ──────────────────────────────────────────────────────────────
-  const sendOtp = useCallback(async (mobile, name = "", email = "") => {
-    return await api.sendOtp(mobile, name, email);
-  }, []);
-
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
 
   const triggerWelcomeToast = useCallback(() => {
@@ -99,17 +94,45 @@ export const AuthProvider = ({ children }) => {
     }, 3500);
   }, []);
 
-  // ── Verify OTP and auto-login ─────────────────────────────────────────────
-  const verifyOtp = useCallback(async (mobile, otp, name = "", email = "") => {
+  // ── Login with Email + Password ───────────────────────────────────────────
+  const login = useCallback(async (email, password) => {
     setLoading(true);
     try {
-      const loggedUser = await api.verifyOtp(mobile, otp, name, email);
-      setUser(loggedUser);
+      const data = await api.login(email, password);
+      setUser(data.user);
+      triggerWelcomeToast();
+      onLoginCallbacks.forEach((fn) => fn(true).catch(() => {}));
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  }, [onLoginCallbacks, triggerWelcomeToast]);
+
+  // ── Register with Name + Email + Password ─────────────────────────────────
+  const register = useCallback(async (name, email, password) => {
+    setLoading(true);
+    try {
+      const data = await api.registerUser(name, email, password);
+      setUser(data.user);
+      triggerWelcomeToast();
+      onLoginCallbacks.forEach((fn) => fn(true).catch(() => {}));
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  }, [onLoginCallbacks, triggerWelcomeToast]);
+
+  // ── Login with Google ─────────────────────────────────────────────────────
+  const loginWithGoogle = useCallback(async (idToken) => {
+    setLoading(true);
+    try {
+      const data = await api.googleLogin(idToken);
+      setUser(data.user);
       triggerWelcomeToast();
 
       // Fire post-login callbacks (cart merge for initial login)
       onLoginCallbacks.forEach((fn) => fn(true).catch(() => {}));
-      return loggedUser;
+      return data;
     } finally {
       setLoading(false);
     }
@@ -160,8 +183,9 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         loading,
-        sendOtp,
-        verifyOtp,
+        login,
+        register,
+        loginWithGoogle,
         logout,
         updateProfile,
         isAdmin: user?.role === "admin",

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,26 +11,23 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       unique: true,
-      sparse: true, // Sparse: allows multiple documents without email (phone-auth users)
+      sparse: true,
       trim: true,
       lowercase: true,
       match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"],
     },
-    // Mobile number for OTP authentication
     mobile: {
       type: String,
       unique: true,
-      sparse: true, // Sparse: won't break existing users that don't have mobile
+      sparse: true,
       trim: true,
       index: true,
       match: [/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"],
     },
-    // Password kept for backward compatibility with existing data — not used in new flow
     password: {
       type: String,
       select: false,
     },
-    // Google OAuth fields — kept for backward compatibility with existing data
     googleId: {
       type: String,
       unique: true,
@@ -44,11 +42,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // Extended authProvider enum to include phone OTP
     authProvider: {
       type: String,
       enum: ["google", "email", "local", "phone"],
-      default: "phone",
+      default: "google",
     },
     isVerified: {
       type: Boolean,
@@ -77,12 +74,10 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
-    // Legacy fields kept for backward compatibility — not populated in new OTP flow
     verificationToken: String,
     verificationTokenExpires: Date,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    // Brute force protection — repurposed for OTP rate limiting tracking
     loginAttempts: {
       type: Number,
       required: true,
@@ -98,5 +93,21 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Hash password before saving if modified
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password") || !this.password) {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Compare password
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 export const User = mongoose.model("User", userSchema);

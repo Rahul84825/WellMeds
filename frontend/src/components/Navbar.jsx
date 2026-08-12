@@ -458,13 +458,13 @@ const Navbar = () => {
                     <span className="max-w-[100px] truncate">{user.name}</span>
                   </button>
                 ) : (
-                  <button
-                    onClick={() => openLoginModal()}
+                  <Link
+                    to="/login"
                     className="px-5 h-[38px] border border-slate-200/90 bg-white rounded-2xl flex items-center justify-center gap-2 text-slate-800 hover:bg-slate-50 hover:border-slate-300 focus:outline-none font-semibold cursor-pointer shrink-0 text-[14.5px] transition-all duration-150"
                   >
                     <User className="w-[18px] h-[18px] text-slate-700" />
                     <span>Login</span>
-                  </button>
+                  </Link>
                 )}
 
                 {profileDropdownOpen && user && (

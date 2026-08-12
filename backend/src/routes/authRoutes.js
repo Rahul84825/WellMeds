@@ -1,14 +1,30 @@
 import express from "express";
-import { logout, refresh, getProfile, updateProfile, getSearchHistory, addSearchHistory, clearSearchHistory } from "../controllers/authController.js";
-import { sendOtp, verifyOtp } from "../controllers/otpController.js";
+import {
+  registerUser,
+  loginUser,
+  forgotPassword,
+  resetPassword,
+  logout,
+  refresh,
+  getProfile,
+  updateProfile,
+  getSearchHistory,
+  addSearchHistory,
+  clearSearchHistory,
+} from "../controllers/authController.js";
+import { googleAuth } from "../controllers/googleAuthController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { otpSendLimiter, otpVerifyLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
-// ─── OTP Authentication (Primary auth method) ────────────────────────────────
-router.post("/otp/send", otpSendLimiter, sendOtp);
-router.post("/otp/verify", otpVerifyLimiter, verifyOtp);
+// ─── Customer Authentication Endpoints ─────────────────────────────────────
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+
+// ─── Google Authentication ───────────────────────────────────────────────────
+router.post("/google", googleAuth);
 
 // ─── Session Management ────────────────────────────────────────────────────────
 router.post("/logout", protect, logout);

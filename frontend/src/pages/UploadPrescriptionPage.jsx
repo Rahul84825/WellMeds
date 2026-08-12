@@ -96,7 +96,7 @@ const UploadPrescriptionPage = () => {
         e.preventDefault();
         e.stopPropagation();
       }
-      openLoginModal("/upload-prescription");
+      navigate("/login", { state: { from: "/upload-prescription" } });
       return true;
     }
     return false;

@@ -2,23 +2,8 @@ import apiInstance from "./api";
 import { fetchWithCache, clearCache } from "./cacheUtil";
 
 export const authService = {
-  /**
-   * Send OTP to the given mobile number.
-   * For new users, name and email are passed along (optional).
-   * Returns { success, isExistingUser, devOtp? }
-   */
-  async sendOtp(mobile, name = "", email = "") {
-    const data = await apiInstance.post("/auth/otp/send", { mobile, name, email });
-    return data;
-  },
-
-  /**
-   * Verify the OTP submitted by the user.
-   * On success, stores JWT and user session.
-   * Returns the user object.
-   */
-  async verifyOtp(mobile, otp, name = "", email = "") {
-    const data = await apiInstance.post("/auth/otp/verify", { mobile, otp, name, email });
+  async login(email, password) {
+    const data = await apiInstance.post("/auth/login", { email, password });
     if (data.success && data.token) {
       localStorage.setItem("medishop_token", data.token);
       if (data.refreshToken) {
@@ -27,7 +12,41 @@ export const authService = {
       localStorage.setItem("medishop_user", JSON.stringify(data.user));
       clearCache("auth");
     }
-    return data.user;
+    return data;
+  },
+
+  async registerUser(name, email, password) {
+    const data = await apiInstance.post("/auth/register", { name, email, password });
+    if (data.success && data.token) {
+      localStorage.setItem("medishop_token", data.token);
+      if (data.refreshToken) {
+        localStorage.setItem("medishop_refresh_token", data.refreshToken);
+      }
+      localStorage.setItem("medishop_user", JSON.stringify(data.user));
+      clearCache("auth");
+    }
+    return data;
+  },
+
+  async forgotPassword(email) {
+    return await apiInstance.post("/auth/forgot-password", { email });
+  },
+
+  async resetPassword(token, password) {
+    return await apiInstance.post("/auth/reset-password", { token, password });
+  },
+
+  async googleLogin(idToken) {
+    const data = await apiInstance.post("/auth/google", { idToken });
+    if (data.success && data.token) {
+      localStorage.setItem("medishop_token", data.token);
+      if (data.refreshToken) {
+        localStorage.setItem("medishop_refresh_token", data.refreshToken);
+      }
+      localStorage.setItem("medishop_user", JSON.stringify(data.user));
+      clearCache("auth");
+    }
+    return data;
   },
 
   async getCurrentUser() {

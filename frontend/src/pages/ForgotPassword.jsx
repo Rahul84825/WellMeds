@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/api/authService";
-import Loader from "../components/Loader";
+import SEO from "../components/common/SEO";
+import { Mail, ShieldCheck, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 
+/**
+ * ForgotPassword Page — Password recovery request page for WellMeds.
+ * Uses email-based recovery without OTP / SMS.
+ */
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,30 +16,28 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) {
+    setError("");
+
+    if (!email || !email.trim()) {
       setError("Please enter your email address.");
       return;
     }
 
-    // Gmail validation
-    if (!/@gmail\.com$/i.test(email.trim())) {
-      setError("Only Gmail addresses are supported for recovery.");
-      return;
-    }
-
     setIsSubmitting(true);
-    setError("");
     setSuccessMessage("");
 
     try {
-      const res = await authService.forgotPassword(email);
-      setSuccessMessage(res.message || "A password recovery link has been sent to your Gmail account.");
+      const res = await authService.forgotPassword(email.trim());
+      setSuccessMessage(
+        res.message || "If an account with that email address exists, a password reset link has been dispatched."
+      );
       setEmail("");
     } catch (err) {
       console.error(err);
       setError(
         err.response?.data?.message ||
-        "An error occurred while dispatching the recovery email. Please try again."
+        err.message ||
+        "An error occurred while processing your request. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -42,110 +45,109 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center py-xl px-margin-mobile md:px-margin-desktop bg-surface transition-colors duration-300">
-      <div className="absolute inset-0 medical-pattern"></div>
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center animate-[fade-in_0.25s_ease-out]">
+      <SEO
+        title="Forgot Password — WellMeds"
+        description="Reset your WellMeds account password safely via email."
+      />
 
-      <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-xl text-left">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-[32px] shadow-2xl p-6 sm:p-10 text-left">
+        
+        {/* Header */}
+        <div className="text-center space-y-3 mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 font-sans tracking-tight">
+            Reset Password
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
+            Enter your registered email address below to receive password recovery instructions.
+          </p>
+        </div>
 
         {/* Success Card */}
         {successMessage ? (
-          <div className="text-center space-y-md py-md animate-fade-in">
-            <div className="inline-flex p-sm rounded-full bg-primary/10 text-primary mb-xs">
-              <span className="material-symbols-outlined text-[48px]">mail_lock</span>
+          <div className="text-center space-y-4 py-4 animate-[fade-in_0.2s_ease-out]">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="font-headline-lg text-headline-lg text-primary font-bold">
-              Check Your Inbox
-            </h2>
-            <p className="text-body-sm text-on-surface-variant leading-relaxed">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">
+              Check Your Email
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
               {successMessage}
             </p>
-            <p className="text-[11px] text-on-surface-variant/70 italic">
-              (Note: For development setups without SMTP, the verification link is also printed in the backend terminal logs.)
-            </p>
-            <div className="pt-md">
+            <div className="pt-4">
               <Link
                 to="/login"
-                className="inline-flex w-full py-sm px-lg rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 justify-center items-center gap-xs"
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#157a6d] hover:bg-[#0f5c52] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                <span>Return to Sign In</span>
+                <ArrowLeft className="w-4 h-4" />
+                <span>Return to Login</span>
               </Link>
             </div>
           </div>
         ) : (
-          <>
-            {/* Brand Header */}
-            <div className="text-center space-y-sm mb-lg">
-              <div className="inline-flex p-sm rounded-full bg-primary/10 text-primary mb-xs">
-                <span className="material-symbols-outlined text-[32px]">lock_reset</span>
-              </div>
-              <h2 className="font-headline-lg text-headline-lg text-primary font-bold">
-                Reset Password
-              </h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Enter your Gmail address below, and we'll send you a secure link to reset your account credentials.
-              </p>
-            </div>
-
-            {/* Error Message */}
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            {/* Error Notification */}
             {error && (
-              <div className="bg-error-container/20 border border-error/30 text-error p-md rounded-lg text-body-sm flex items-start gap-xs mb-md animate-pulse">
-                <span className="material-symbols-outlined text-[18px] mt-[2px] flex-shrink-0">error</span>
-                <span>{error}</span>
+              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                {error}
               </div>
             )}
 
-            {/* Recovery Form */}
-            <form onSubmit={handleSubmit} className="space-y-md">
-              <div className="space-y-xs">
-                <label htmlFor="email" className="block font-body-sm text-sm font-bold text-on-surface">
-                  Gmail Address
-                </label>
-                <div className="relative">
-                  <span className="absolute left-md top-[50%] -translate-y-[50%] material-symbols-outlined text-on-surface-variant text-[20px]">
-                    mail
-                  </span>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    disabled={isSubmitting}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="yourname@gmail.com"
-                    className="w-full pl-xl pr-md py-sm bg-surface-container border border-outline-variant rounded-lg text-body-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200"
-                  />
-                </div>
+            <div className="space-y-1.5">
+              <label htmlFor="reset-email" className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                Email Address <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <Mail className="w-4 h-4 text-slate-400 dark:text-zinc-500 absolute left-4 pointer-events-none" />
+                <input
+                  id="reset-email"
+                  type="email"
+                  required
+                  autoFocus
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError("");
+                  }}
+                  placeholder="name@example.com"
+                  className="w-full pl-11 pr-4 py-3 bg-[#f8fafc] dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 focus:border-[#157a6d] rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 transition-all"
+                />
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-sm px-lg rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-body-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-xs"
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3.5 px-6 rounded-2xl bg-[#157a6d] hover:bg-[#0f5c52] disabled:opacity-60 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Sending Link...</span>
+                </>
+              ) : (
+                <>
+                  <span>Send Recovery Instructions</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+
+            <div className="text-center pt-2 border-t border-slate-100 dark:border-zinc-800">
+              <Link
+                to="/login"
+                className="text-xs font-bold text-[#157a6d] dark:text-emerald-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader size="sm" />
-                    <span>Sending Link...</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-[18px]">send</span>
-                    <span>Send Recovery Link</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="text-center text-body-sm text-on-surface-variant mt-md pt-sm border-t border-outline-variant/20">
-              Never mind, take me{" "}
-              <Link to="/login" className="text-primary hover:underline font-bold">
-                back to Sign In
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Login</span>
               </Link>
             </div>
-          </>
+          </form>
         )}
-
       </div>
     </div>
   );

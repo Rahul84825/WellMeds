@@ -222,11 +222,10 @@ const GlobalDrawer = () => {
           {/* User Greetings Login Card */}
           <div 
             onClick={() => {
+              setIsDrawerOpen(false);
               if (!user) {
-                setIsDrawerOpen(false);
-                openLoginModal();
+                navigate("/login");
               } else {
-                setIsDrawerOpen(false);
                 navigate("/profile");
               }
             }}
@@ -626,7 +625,7 @@ const GlobalDrawer = () => {
               <button
                 onClick={() => {
                   setIsDrawerOpen(false);
-                  openLoginModal();
+                  navigate("/login");
                 }}
                 className="w-full py-3 px-4 border border-slate-200 bg-white rounded-xl flex items-center justify-center gap-2 text-slate-700 hover:bg-slate-50 transition-colors font-bold text-xs min-h-[48px] cursor-pointer"
               >

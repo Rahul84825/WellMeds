@@ -430,7 +430,7 @@ const Cart = () => {
             <div className="p-6 pt-0">
               <button
                 type="button"
-                onClick={() => { user ? navigate("/checkout") : openLoginModal("/checkout"); }}
+                onClick={() => { user ? navigate("/checkout") : navigate("/login", { state: { from: "/checkout" } }); }}
                 className="w-full bg-[#157a6d] hover:bg-[#0f5c52] text-white py-3.5 px-6 rounded-full font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-xs cursor-pointer tracking-wide"
               >
                 {user ? "Proceed to Checkout" : "Login to Checkout"}

@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "./Modal";
 import { Lock } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const LoginRequiredModal = ({ 
   isOpen, 
@@ -10,16 +10,16 @@ const LoginRequiredModal = ({
   message = "Please login to continue checkout.",
   cancelText = "Continue Browsing"
 }) => {
-  const { openLoginModal } = useAuth();
+  const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    openLoginModal(fromPath);
     onClose();
+    navigate("/login", { state: { from: fromPath } });
   };
 
   const handleRegisterClick = () => {
-    openLoginModal(fromPath);
     onClose();
+    navigate("/register", { state: { from: fromPath } });
   };
 
   return (

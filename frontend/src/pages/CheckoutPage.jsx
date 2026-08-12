@@ -19,6 +19,8 @@ import AddressCard from "../components/address/AddressCard";
 import AddressSelectorModal from "../components/address/AddressSelectorModal";
 import { validateDeliveryLocation } from "../services/googleMapsService";
 import GoogleMapPicker from "../components/common/GoogleMapPicker";
+import GoogleAuthButton from "../components/auth/GoogleAuthButton";
+import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -534,7 +536,7 @@ const Checkout = () => {
 
   // ── Guest Auth Gate ──
   if (!authLoading && !user) {
-    return <CheckoutAuthGate sendOtp={api.sendOtp} verifyOtp={api.verifyOtp} />;
+    return <CheckoutAuthGate />;
   }
 
   // ── Main Checkout UI ──
@@ -1228,162 +1230,36 @@ const Checkout = () => {
 export default Checkout;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CheckoutAuthGate (Redesigned)
+// CheckoutAuthGate (Google Authentication Gate)
 // ─────────────────────────────────────────────────────────────────────────────
-const OTP_LEN = 6;
-const RESEND_CD = 60;
+const CheckoutAuthGate = () => {
+  const { loginWithGoogle, updateProfile } = useAuth();
+  const [step, setStep] = useState("auth"); // auth | complete_profile
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-const sanitiseMsg = (err) => {
-  const raw = (err?.response?.data?.message || err?.message || "").toLowerCase();
-  if (!raw) return "Something went wrong. Please try again.";
-  if (/too many|rate limit/i.test(raw)) return err?.response?.data?.message || "Too many OTP requests. Please wait before trying again.";
-  if (/expired/i.test(raw)) return "OTP has expired. Please request a new one.";
-  if (/incorrect|wrong|invalid.*otp/i.test(raw)) {
-    const rem = err?.response?.data?.remainingAttempts;
-    return rem !== undefined ? `Incorrect OTP. ${rem} attempt${rem !== 1 ? "s" : ""} remaining.` : "Incorrect OTP. Please try again.";
-  }
-  if (/maximum.*attempt|too many.*attempt/i.test(raw)) return "Too many incorrect attempts. Please request a new OTP.";
-  if (/valid.*mobile|valid.*number/i.test(raw)) return "Please enter a valid 10-digit mobile number.";
-  if (/network error/i.test(err?.message)) return "Unable to connect. Check your internet connection.";
-  const safe = err?.response?.data?.message || "";
-  return safe && safe.length < 120 ? safe : "Something went wrong. Please try again.";
-};
-
-const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
-  const [step, setStep] = useState("mobile"); // mobile | details | otp
-  const [mobile, setMobile] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isExistingUser, setIsExistingUser] = useState(false);
-
-  const [otpDigits, setOtpDigits] = useState(Array(OTP_LEN).fill(""));
-  const otpRefs = useRef([]);
-  const lastVerifiedOtpRef = useRef("");
-
-  // 60s resend countdown
-  const [resendCount, setResendCount] = useState(0);
-  const resendTimer = useRef(null);
-  const startResend = () => {
-    setResendCount(RESEND_CD);
-    clearInterval(resendTimer.current);
-    resendTimer.current = setInterval(() => {
-      setResendCount((p) => { if (p <= 1) { clearInterval(resendTimer.current); return 0; } return p - 1; });
-    }, 1000);
-  };
-  useEffect(() => () => clearInterval(resendTimer.current), []);
-
-  // 5m OTP expiry countdown
-  const [expiryCount, setExpiryCount] = useState(0);
-  const expiryTimer = useRef(null);
-  const startExpiry = () => {
-    setExpiryCount(5 * 60);
-    clearInterval(expiryTimer.current);
-    expiryTimer.current = setInterval(() => {
-      setExpiryCount((p) => { if (p <= 1) { clearInterval(expiryTimer.current); return 0; } return p - 1; });
-    }, 1000);
-  };
-  useEffect(() => () => clearInterval(expiryTimer.current), []);
-
-  useEffect(() => {
-    if (step === "otp" && expiryCount === 0) {
-      setOtpDigits(Array(OTP_LEN).fill(""));
-      lastVerifiedOtpRef.current = "";
-      setError("OTP has expired. Please request a new OTP.");
-      setTimeout(() => otpRefs.current[0]?.focus(), 50);
-    }
-  }, [expiryCount, step]);
-
-  const [busy, setBusy] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState("");
-  const [devHint, setDevHint] = useState("");
-  const [welcomeDone, setWelcomeDone] = useState(false);
-  const [welcomeName, setWelcomeName] = useState("");
-
-  const doSendOtp = async (e) => {
-    e?.preventDefault();
-    setError("");
-    if (!isExistingUser && !name.trim()) { setError("Please enter your full name."); return; }
-    setBusy(true);
+  const handleGoogleSuccess = async (credential) => {
+    setErrorMsg("");
     try {
-      const r = await sendOtp(mobile.trim(), name.trim(), email.trim());
-      setIsExistingUser(!!r.isExistingUser);
-      if (r.devOtp) setDevHint(r.devOtp);
-      setOtpDigits(Array(OTP_LEN).fill(""));
-      lastVerifiedOtpRef.current = "";
-      setStep("otp");
-      startResend();
-      startExpiry();
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
-    } catch (err) { setError(sanitiseMsg(err)); }
-    finally { setBusy(false); }
-  };
-
-  const doVerify = useCallback(async (override) => {
-    if (verifying) return;
-    const val = override || otpDigits.join("");
-    if (val.length < OTP_LEN) { setError(`Please enter all ${OTP_LEN} digits.`); return; }
-    if (val === lastVerifiedOtpRef.current) return;
-    lastVerifiedOtpRef.current = val;
-
-    setVerifying(true); setError("");
-    try {
-      const u = await verifyOtp(mobile.trim(), val, name.trim(), email.trim());
-      setWelcomeName(u?.name || "there");
-      setWelcomeDone(true);
+      const res = await loginWithGoogle(credential);
+      if (res.requiresMobile || (res.user && !res.user.mobile)) {
+        setStep("complete_profile");
+      }
     } catch (err) {
-      setError(sanitiseMsg(err));
-      setOtpDigits(Array(OTP_LEN).fill(""));
-      lastVerifiedOtpRef.current = "";
-      setTimeout(() => otpRefs.current[0]?.focus(), 50);
-    } finally { setVerifying(false); }
-  }, [otpDigits, mobile, name, email, verifyOtp, verifying]);
-
-  const doResend = async () => {
-    if (resendCount > 0) return;
-    setError(""); setDevHint(""); setOtpDigits(Array(OTP_LEN).fill(""));
-    lastVerifiedOtpRef.current = "";
-    setBusy(true);
-    try {
-      const r = await sendOtp(mobile.trim(), name.trim(), email.trim());
-      if (r.devOtp) setDevHint(r.devOtp);
-      startResend();
-      startExpiry();
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
-    } catch (err) { setError(sanitiseMsg(err)); }
-    finally { setBusy(false); }
-  };
-
-  const oChange = (i, v) => {
-    lastVerifiedOtpRef.current = "";
-    const d = v.replace(/\D/g, "").slice(-1);
-    const next = [...otpDigits]; next[i] = d; setOtpDigits(next); setError("");
-    if (d && i < OTP_LEN - 1) otpRefs.current[i + 1]?.focus();
-    if (d && i === OTP_LEN - 1) {
-      const full = [...next.slice(0, OTP_LEN - 1), d].join("");
-      if (full.length === OTP_LEN && !verifying) doVerify(full);
+      setErrorMsg(err.response?.data?.message || err.message || "Google authentication failed. Please try again.");
     }
   };
 
-  const oKey = (i, e) => {
-    if (e.key === "Backspace") {
-      lastVerifiedOtpRef.current = "";
-      if (otpDigits[i]) { const n = [...otpDigits]; n[i] = ""; setOtpDigits(n); }
-      else if (i > 0) otpRefs.current[i - 1]?.focus();
-    } else if (e.key === "ArrowLeft" && i > 0) otpRefs.current[i - 1]?.focus();
-    else if (e.key === "ArrowRight" && i < OTP_LEN - 1) otpRefs.current[i + 1]?.focus();
-  };
-
-  const oPaste = (e) => {
-    e.preventDefault();
-    lastVerifiedOtpRef.current = "";
-    const p = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LEN);
-    if (!p) return;
-    const next = Array(OTP_LEN).fill("");
-    for (let i = 0; i < OTP_LEN; i++) next[i] = p[i] || "";
-    setOtpDigits(next);
-    otpRefs.current[Math.min(p.length, OTP_LEN - 1)]?.focus();
-    if (p.length === OTP_LEN) doVerify(p);
+  const handleProfileCompleteSubmit = async ({ mobile }) => {
+    setIsSubmitting(true);
+    setErrorMsg("");
+    try {
+      await updateProfile({ mobile });
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || err.message || "Failed to save profile.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -1396,157 +1272,49 @@ const CheckoutAuthGate = ({ sendOtp, verifyOtp }) => {
       </div>
 
       <div className="max-w-md mx-auto mt-12">
-        {welcomeDone ? (
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 shadow-xl text-center animate-[fade-in_0.3s_ease-out]">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#3f257a]/10 text-[#3f257a] mb-5 mx-auto">
-              <span className="text-3xl">👋</span>
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="bg-slate-50 dark:bg-zinc-950/50 border-b border-slate-100 dark:border-zinc-800 px-6 py-5 flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-[#3f257a]/10 text-[#3f257a] dark:text-[#a4c9ff]">
+              <Lock size={24} />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Welcome, {welcomeName.split(" ")[0]}!</h2>
-            <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6">Loading your checkout...</p>
-            <div className="flex justify-center">
-              <Loader size="sm" color="#3f257a" />
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-lg overflow-hidden">
-            {/* Header */}
-            <div className="bg-slate-50 dark:bg-zinc-950/50 border-b border-slate-100 dark:border-zinc-800 px-6 py-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-[#3f257a]/10 text-[#3f257a] dark:text-[#a4c9ff]">
-                <Lock size={24} />
-              </div>
-              <div>
-                <h2 className="font-bold text-slate-900 dark:text-white text-base">Authentication Required</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Continue with your mobile number to checkout.</p>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Cart preview pill */}
-              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2.5 border border-slate-200/50 dark:border-zinc-800/50">
-                <ShieldCheck size={16} className="text-[#038076] dark:text-[#84d6b9]" />
-                <span>Your cart is securely saved and will not be cleared.</span>
-              </div>
-
-              {error && (
-                <div role="alert" className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl text-sm flex items-start gap-2">
-                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
-              {devHint && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs flex items-center gap-2">
-                  <span className="font-bold">Dev OTP:</span>
-                  <strong className="font-mono tracking-widest text-sm">{devHint}</strong>
-                </div>
-              )}
-
-              {/* STEP: Mobile */}
-              {step === "mobile" && (
-                <form onSubmit={(e) => {
-                  e.preventDefault(); setError("");
-                  const c = mobile.trim().replace(/\D/g, "");
-                  if (!/^[6-9]\d{9}$/.test(c)) { setError("Please enter a valid 10-digit mobile number."); return; }
-                  setStep("details");
-                }} className="space-y-6" noValidate>
-                  <div className="space-y-1.5">
-                    <label htmlFor="gate-mobile" className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Mobile Number</label>
-                    <div className="relative flex items-center">
-                      <div className="absolute left-0 flex items-center pl-4 h-full pointer-events-none">
-                        <span className="text-slate-500 font-mono text-sm">+91</span>
-                        <div className="ml-3 w-px h-5 bg-slate-200 dark:bg-zinc-700" />
-                      </div>
-                      <input id="gate-mobile" type="tel" inputMode="numeric" maxLength={10} autoFocus autoComplete="tel-national"
-                        value={mobile} onChange={(e) => { setMobile(e.target.value.replace(/\D/g, "").slice(0, 10)); setError(""); }}
-                        placeholder="9XXXXXXXXX" aria-label="10-digit mobile number"
-                        className="w-full pl-[76px] pr-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3f257a]/20 transition-all font-mono tracking-widest"
-                      />
-                    </div>
-                  </div>
-                  <button type="submit" disabled={mobile.length < 10} className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
-                    <span>Continue</span>
-                    <ArrowRight size={18} />
-                  </button>
-                </form>
-              )}
-
-              {/* STEP: Details */}
-              {step === "details" && (
-                <form onSubmit={doSendOtp} className="space-y-6" noValidate>
-                  <div className="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2 border border-slate-200 dark:border-zinc-800/50">
-                    <span className="font-mono tracking-wider">+91 {mobile}</span>
-                    <button type="button" onClick={() => { setStep("mobile"); setError(""); }} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline">Change</button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="gate-name" className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Full Name <span className="text-rose-500">*</span></label>
-                      <input id="gate-name" type="text" autoFocus required autoComplete="name" value={name} onChange={(e) => { setName(e.target.value); setError(""); }} placeholder="Your full name"
-                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#02665e]/20 transition-all" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label htmlFor="gate-email" className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Email Address <span className="font-normal text-slate-400">(optional)</span></label>
-                      <input id="gate-email" type="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} placeholder="you@example.com"
-                        className="w-full px-4 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#02665e]/20 transition-all" />
-                    </div>
-                  </div>
-                  <button type="submit" disabled={busy} className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
-                    {busy ? <Loader size="sm" color="white" /> : "Send OTP"}
-                  </button>
-                </form>
-              )}
-
-              {/* STEP: OTP */}
-              {step === "otp" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2 border border-slate-200 dark:border-zinc-800/50">
-                    <span className="font-mono tracking-wider">+91 {mobile}</span>
-                    <button type="button" onClick={() => { setStep("details"); setError(""); }} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline">Edit</button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <label className="text-sm font-semibold text-slate-700 dark:text-zinc-300 text-center block">Enter the {OTP_LEN}-digit code</label>
-                    <div className="flex gap-2 justify-center" onPaste={oPaste}>
-                      {otpDigits.map((d, i) => (
-                        <input key={i} id={`gate-otp-${i + 1}`} ref={(el) => (otpRefs.current[i] = el)}
-                          type="text" inputMode="numeric" pattern="[0-9]*" maxLength={1} value={d}
-                          autoComplete={i === 0 ? "one-time-code" : "off"}
-                          onChange={(e) => oChange(i, e.target.value)} onKeyDown={(e) => oKey(i, e)} disabled={verifying}
-                          className={`w-11 h-12 text-center text-lg font-bold font-mono rounded-xl border-2 bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-all focus:outline-none disabled:opacity-60 ${d ? "border-[#02665e] focus:ring-4 focus:ring-[#02665e]/20" : "border-slate-200 dark:border-zinc-800 focus:border-[#02665e] focus:ring-4 focus:ring-[#02665e]/20"}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {!verifying ? (
-                    <button type="button" onClick={() => doVerify()} disabled={otpDigits.join("").length < OTP_LEN}
-                      className="w-full py-3 rounded-xl bg-[#02665e] hover:bg-[#014d47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow hover:shadow-md transition-all flex items-center justify-center gap-2">
-                      Verify & Continue
-                    </button>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 py-2">
-                      <Loader size="sm" />
-                      <span className="text-sm font-medium text-slate-600 dark:text-zinc-400">Verifying...</span>
-                    </div>
-                  )}
-
-                  <div className="text-center space-y-2 pt-2 border-t border-slate-100 dark:border-zinc-800/50">
-                    {resendCount > 0 ? (
-                      <p className="text-xs text-slate-500 dark:text-zinc-400">Resend OTP in <strong className="font-mono">{`0:${resendCount.toString().padStart(2, "0")}`}</strong></p>
-                    ) : (
-                      <button type="button" onClick={doResend} disabled={busy} className="text-[#02665e] dark:text-[#52d6c9] text-xs font-bold hover:underline disabled:opacity-50">
-                        {busy ? "Sending..." : "Resend OTP"}
-                      </button>
-                    )}
-                    {expiryCount > 0 && (
-                      <p className="text-[11px] text-slate-400 dark:text-zinc-500">
-                        OTP valid for <span className="font-mono">{`${Math.floor(expiryCount / 60)}:${(expiryCount % 60).toString().padStart(2, "0")}`}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
+            <div>
+              <h2 className="font-bold text-slate-900 dark:text-white text-base">Authentication Required</h2>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Continue with Google to complete your checkout.</p>
             </div>
           </div>
-        )}
+
+          <div className="p-6 space-y-6">
+            {/* Cart preview pill */}
+            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950 rounded-lg px-4 py-2.5 border border-slate-200/50 dark:border-zinc-800/50">
+              <ShieldCheck size={16} className="text-[#038076] dark:text-[#84d6b9]" />
+              <span>Your cart is securely saved and will not be cleared.</span>
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                {errorMsg}
+              </div>
+            )}
+
+            {step === "auth" && (
+              <div className="pt-2">
+                <GoogleAuthButton
+                  onSuccess={handleGoogleSuccess}
+                  onError={(err) => setErrorMsg(err)}
+                  isLoading={isSubmitting}
+                />
+              </div>
+            )}
+
+            {step === "complete_profile" && (
+              <CompleteProfileModal
+                onSubmit={handleProfileCompleteSubmit}
+                isLoading={isSubmitting}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

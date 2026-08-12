@@ -1,30 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import PhoneLogin from "../components/auth/PhoneLogin";
-import OTPVerification from "../components/auth/OTPVerification";
-import NewUserDetails from "../components/auth/NewUserDetails";
+import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import SEO from "../components/common/SEO";
-
-const STEP_PHONE = "phone";
-const STEP_OTP = "otp";
-const STEP_ONBOARDING = "onboarding";
+import { ShieldCheck } from "lucide-react";
 
 /**
  * AdminLoginPage — standalone login page shown during Maintenance Mode.
- * Renders the full auth flow inline (no MainLayout / AuthModal dependency).
- * Only admin users are granted access after OTP verification.
+ * Renders the Google auth card inline (no MainLayout / AuthModal dependency).
  */
 const AdminLoginPage = () => {
-  const { sendOtp, verifyOtp, updateProfile, user, isAdmin, logout } = useAuth();
+  const { loginWithGoogle, user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(STEP_PHONE);
-  const [mobile, setMobile] = useState("");
-  const [devOtpHint, setDevOtpHint] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResending, setIsResending] = useState(false);
 
   // If already logged in as admin, go straight to admin panel
   useEffect(() => {
@@ -33,88 +23,19 @@ const AdminLoginPage = () => {
     }
   }, [user, isAdmin, navigate]);
 
-  const handlePhoneSubmit = async (phoneVal) => {
+  const handleGoogleSuccess = async (credential) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
-      const result = await sendOtp(phoneVal);
-      setMobile(phoneVal);
-      if (result.devOtp) setDevOtpHint(result.devOtp);
-      setStep(STEP_OTP);
-    } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || err.message || "Failed to send OTP. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleVerifyOtp = async (otpVal) => {
-    setIsSubmitting(true);
-    setErrorMsg("");
-    try {
-      const loggedUser = await verifyOtp(mobile, otpVal);
-
-      // Admin-only enforcement during Maintenance Mode
-      if (loggedUser.role !== "admin") {
-        // Immediately log out the non-admin user
+      const res = await loginWithGoogle(credential);
+      if (res.user?.role !== "admin") {
         await logout();
-        setStep(STEP_PHONE);
-        setMobile("");
-        setDevOtpHint("");
-        setErrorMsg("Access restricted. Only administrators can log in during maintenance.");
+        setErrorMsg("Access restricted. Only administrators can log in to the admin portal.");
         return;
       }
-
-      const isNew = !loggedUser.email || loggedUser.name.startsWith("User ");
-      if (isNew) {
-        setStep(STEP_ONBOARDING);
-      } else {
-        navigate("/admin", { replace: true });
-      }
-    } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || err.message || "Incorrect OTP. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setIsResending(true);
-    setErrorMsg("");
-    try {
-      const result = await sendOtp(mobile);
-      if (result.devOtp) setDevOtpHint(result.devOtp);
-      return true;
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || err.message || "Failed to resend OTP.");
-      return false;
-    } finally {
-      setIsResending(false);
-    }
-  };
-
-  const handleOnboardingSubmit = async ({ name, email }) => {
-    setIsSubmitting(true);
-    try {
-      const updatedUser = await updateProfile({ name, email });
-
-      // Admin-only guard after onboarding too
-      if (updatedUser.role !== "admin") {
-        await logout();
-        setStep(STEP_PHONE);
-        setErrorMsg("Access restricted. Only administrators can log in during maintenance.");
-        return;
-      }
-
       navigate("/admin", { replace: true });
     } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || err.message || "Failed to complete onboarding."
-      );
+      setErrorMsg(err.response?.data?.message || err.message || "Google authentication failed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -180,30 +101,33 @@ const AdminLoginPage = () => {
           position: "relative",
         }}
       >
-        {step === STEP_PHONE && (
-          <PhoneLogin
-            onSubmit={handlePhoneSubmit}
-            isLoading={isSubmitting}
-            initialMobile={mobile}
-          />
-        )}
+        <div className="text-center py-2 space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-zinc-100 font-sans tracking-tight">
+              Admin Portal Sign In
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              Authenticate with your authorized Google administrator account.
+            </p>
+          </div>
 
-        {step === STEP_OTP && (
-          <OTPVerification
-            mobile={mobile}
-            onVerify={handleVerifyOtp}
-            onResend={handleResendOtp}
-            onBack={() => setStep(STEP_PHONE)}
-            isLoading={isSubmitting}
-            isResending={isResending}
-            devOtpHint={devOtpHint}
-            errorMsg={errorMsg}
-          />
-        )}
+          {errorMsg && (
+            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+              {errorMsg}
+            </div>
+          )}
 
-        {step === STEP_ONBOARDING && (
-          <NewUserDetails onSubmit={handleOnboardingSubmit} isLoading={isSubmitting} />
-        )}
+          <div className="pt-2">
+            <GoogleAuthButton
+              onSuccess={handleGoogleSuccess}
+              onError={(err) => setErrorMsg(err)}
+              isLoading={isSubmitting}
+            />
+          </div>
+        </div>
       </div>
 
       <p
@@ -214,7 +138,7 @@ const AdminLoginPage = () => {
           textAlign: "center",
         }}
       >
-        Site under maintenance · Admin access only
+        WellMeds Administrator Portal
       </p>
     </div>
   );

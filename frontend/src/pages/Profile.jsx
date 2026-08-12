@@ -603,7 +603,7 @@ const Profile = () => {
                     Registered Mobile Number
                   </label>
                   <div className="w-full bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-zinc-400">
-                    +91 {user.mobile} (Primary OTP Login Key)
+                    +91 {user.mobile}
                   </div>
                 </div>
               )}

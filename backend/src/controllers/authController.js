@@ -2,6 +2,208 @@ import { User } from "../models/User.js";
 import { generateToken } from "../utils/generateToken.js";
 import { generateRefreshToken } from "../utils/generateRefreshToken.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+
+// ─── Register Customer (Email + Password) ────────────────────────────────────
+export const registerUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Please enter your name." });
+    }
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, message: "Please enter your email address." });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "An account with this email address already exists. Please log in instead.",
+      });
+    }
+
+    const user = await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password,
+      authProvider: "email",
+      isVerified: true,
+      role: "customer",
+      lastLogin: new Date(),
+    });
+
+    const requiresMobile = !user.mobile || !user.mobile.trim();
+
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id, user.role);
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken } });
+
+    const accessExpire = user.role === "admin" ? "30d" : "7d";
+    const refreshExpire = user.role === "admin" ? "90d" : "30d";
+    res.cookie("accessToken", accessToken, getCookieOptions(accessExpire, req));
+    res.cookie("refreshToken", refreshToken, getCookieOptions(refreshExpire, req));
+
+    secLog("[REGISTER]", { userId: user._id, email: user.email });
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      requiresMobile,
+      token: accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile || null,
+        role: user.role,
+        avatar: user.avatar || "",
+        authProvider: user.authProvider,
+        isProfileCompleted: user.isProfileCompleted || !requiresMobile,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Login Customer (Email + Password) ───────────────────────────────────────
+export const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, message: "Please enter your email address." });
+    }
+    if (!password) {
+      return res.status(400).json({ success: false, message: "Please enter your password." });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Select password field explicitly
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
+
+    if (!user || !(await user.matchPassword(password))) {
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const requiresMobile = !user.mobile || !user.mobile.trim();
+
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id, user.role);
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken } });
+
+    const accessExpire = user.role === "admin" ? "30d" : "7d";
+    const refreshExpire = user.role === "admin" ? "90d" : "30d";
+    res.cookie("accessToken", accessToken, getCookieOptions(accessExpire, req));
+    res.cookie("refreshToken", refreshToken, getCookieOptions(refreshExpire, req));
+
+    secLog("[LOGIN]", { userId: user._id, email: user.email });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      requiresMobile,
+      token: accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile || null,
+        role: user.role,
+        avatar: user.avatar || "",
+        authProvider: user.authProvider,
+        isProfileCompleted: user.isProfileCompleted || !requiresMobile,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Forgot Password ──────────────────────────────────────────────────────────
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, message: "Please enter your email address." });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (user) {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+      const resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+
+      user.resetPasswordToken = resetPasswordToken;
+      user.resetPasswordExpires = resetPasswordExpires;
+      await user.save();
+
+      secLog("[FORGOT_PASSWORD]", { userId: user._id, email: user.email });
+      console.log(`[AUTH][PASSWORD_RESET_TOKEN] Email: ${user.email} | Token: ${resetToken}`);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "If an account with that email address exists, password reset instructions have been dispatched.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Reset Password ────────────────────────────────────────────────────────────
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: "Token and new password are required." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
+    }
+
+    const resetPasswordToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired password reset token." });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    secLog("[RESET_PASSWORD_SUCCESS]", { userId: user._id });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now log in with your new password.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // ─── Cookie Options ──────────────────────────────────────────────────────────
 const getCookieOptions = (expireString, req) => {

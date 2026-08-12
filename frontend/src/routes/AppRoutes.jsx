@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -22,6 +22,8 @@ const OrderSuccessPage = lazy(() => import("../pages/OrderSuccessPage"));
 const AboutPage = lazy(() => import("../pages/AboutPage"));
 const ContactPage = lazy(() => import("../pages/ContactPage"));
 const Login = lazy(() => import("../pages/Login"));
+const Register = lazy(() => import("../pages/Register"));
+const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
 const ProfilePage = lazy(() => import("../pages/Profile"));
 const OrdersPage = lazy(() => import("../pages/OrdersPage"));
 const UploadPrescriptionPage = lazy(() => import("../pages/UploadPrescriptionPage"));
@@ -76,6 +78,14 @@ const AdminLoginPage = lazy(() => import("../pages/AdminLoginPage"));
 const isMaintenanceMode =
   import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
   import.meta.env.MAINTENANCE_MODE === "true";
+
+// Legacy /sign-in redirect handler (e.g. /sign-in?mode=register -> /register)
+const SignInRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode");
+  const target = mode === "register" ? "/register" : "/login";
+  return <Navigate to={target} replace />;
+};
 
 const AppRoutes = () => {
   if (isMaintenanceMode) {
@@ -171,13 +181,12 @@ const AppRoutes = () => {
           <Route path="refund-policy" element={<RefundPolicyPage />} />
           <Route path="shipping-policy" element={<ShippingPolicyPage />} />
 
-          {/* Primary auth route */}
+          {/* Dedicated Customer Auth Routes */}
           <Route path="login" element={<Login />} />
-
-          {/* Legacy auth routes → redirect to /login */}
-          <Route path="register" element={<Navigate to="/login" replace />} />
+          <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="sign-in" element={<SignInRedirect />} />
           <Route path="verify-email" element={<Navigate to="/login" replace />} />
-          <Route path="forgot-password" element={<Navigate to="/login" replace />} />
           <Route path="reset-password" element={<Navigate to="/login" replace />} />
 
           {/* Protected Patient Pages */}
