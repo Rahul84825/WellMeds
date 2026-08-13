@@ -484,7 +484,7 @@ const PatientAssistanceProgramPage = () => {
 
           <div className="flex flex-wrap justify-center gap-3 pt-3">
             <a
-              href="https://wa.me/919511289914"
+              href="https://wa.me/917798795353"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#25D366] hover:bg-[#1ebe5d] text-white px-7 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2"
@@ -500,7 +500,7 @@ const PatientAssistanceProgramPage = () => {
               <span>Email Support</span>
             </a>
             <a
-              href="tel:+919511289914"
+              href="tel:+917798795353"
               className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-7 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2"
             >
               <Phone size={16} />
