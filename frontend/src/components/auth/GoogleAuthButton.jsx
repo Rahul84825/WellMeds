@@ -54,14 +54,7 @@ const GoogleAuthButton = ({ onSuccess, onError, isLoading = false, className = "
           {/* Custom Styled WellMeds Google Button */}
           <button
             type="button"
-            onClick={() => {
-              const googleIframe = document.querySelector(".hidden-google-login-target iframe, .hidden-google-login-target div[role='button']");
-              if (googleIframe) {
-                googleIframe.click();
-              } else {
-                launchGoogleLogin();
-              }
-            }}
+            onClick={() => launchGoogleLogin()}
             className="w-full py-3.5 px-5 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-slate-50/90 dark:hover:bg-zinc-700/80 border border-slate-200/90 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 text-xs sm:text-sm font-bold shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex items-center justify-center gap-3 cursor-pointer"
           >
             {/* Official Google Multi-colored G Logo SVG */}

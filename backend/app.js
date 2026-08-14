@@ -37,6 +37,7 @@ app.use(responseCompressor);
 
 // Security Middlewares
 app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows loading local file uploads in frontend
   contentSecurityPolicy: {
     directives: {

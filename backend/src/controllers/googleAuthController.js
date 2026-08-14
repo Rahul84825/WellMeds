@@ -40,7 +40,9 @@ export const googleAuth = async (req, res, next) => {
       });
     }
 
-    let payload;
+    let payload = null;
+
+    // 1. Try verifying as Google JWT ID Token (via google-auth-library)
     try {
       const ticket = await client.verifyIdToken({
         idToken: tokenToVerify,
@@ -48,7 +50,34 @@ export const googleAuth = async (req, res, next) => {
       });
       payload = ticket.getPayload();
     } catch (verifyError) {
-      console.error("[AUTH][GOOGLE][VERIFY_FAILED]", verifyError.message);
+      console.warn("[AUTH][GOOGLE] ID Token verification failed/bypassed, verifying via Google userinfo endpoint:", verifyError.message);
+    }
+
+    // 2. If ID Token verification failed or token is an OAuth2 access token, fetch directly from Google userinfo API
+    if (!payload || !payload.email) {
+      try {
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: {
+            Authorization: `Bearer ${tokenToVerify}`,
+          },
+        });
+        if (userInfoRes.ok) {
+          const userInfo = await userInfoRes.json();
+          if (userInfo && userInfo.email) {
+            payload = {
+              sub: userInfo.sub,
+              email: userInfo.email,
+              name: userInfo.name,
+              picture: userInfo.picture,
+            };
+          }
+        }
+      } catch (userinfoError) {
+        console.error("[AUTH][GOOGLE][USERINFO_FAILED]", userinfoError.message);
+      }
+    }
+
+    if (!payload || !payload.email) {
       return res.status(401).json({
         success: false,
         message: "Invalid or expired Google authentication token.",
