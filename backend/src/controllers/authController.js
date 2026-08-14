@@ -341,7 +341,7 @@ export const getProfile = async (req, res, next) => {
 
 // ─── Update Profile ────────────────────────────────────────────────────────────
 export const updateProfile = async (req, res, next) => {
-  const { name, email, avatar, address, gender, dob, bloodGroup } = req.body;
+  const { name, email, mobile, avatar, address, gender, dob, bloodGroup } = req.body;
 
   try {
     const user = await User.findById(req.user.id);
@@ -357,16 +357,38 @@ export const updateProfile = async (req, res, next) => {
     if (dob !== undefined) user.dob = dob;
     if (bloodGroup !== undefined) user.bloodGroup = bloodGroup;
 
-    if (user.name && user.email) {
+    if (mobile !== undefined && mobile !== null) {
+      const cleanMobile = String(mobile).replace(/\D/g, "").slice(-10);
+      if (cleanMobile) {
+        if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+          return res.status(400).json({
+            success: false,
+            message: "Please enter a valid 10-digit Indian mobile number",
+          });
+        }
+        // Check if another customer is already using this mobile number
+        const existing = await User.findOne({ mobile: cleanMobile, _id: { $ne: user._id } });
+        if (existing) {
+          return res.status(400).json({
+            success: false,
+            message: "This mobile number is already linked with another account.",
+          });
+        }
+        user.mobile = cleanMobile;
+      }
+    }
+
+    if (user.mobile && user.mobile.trim()) {
       user.isProfileCompleted = true;
     }
 
     await user.save();
 
-    secLog("[PROFILE_UPDATE]", { userId: user._id });
+    secLog("[PROFILE_UPDATE]", { userId: user._id, mobile: user.mobile });
 
     res.status(200).json({
       success: true,
+      message: "Profile updated successfully",
       user: {
         id: user._id,
         name: user.name,
