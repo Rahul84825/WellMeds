@@ -99,7 +99,20 @@ apiInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Guard 2: Skip refresh if the caller opted out (e.g. initial session bootstrap)
+    // Guard 2: Skip refresh on auth endpoints (login, google auth, register, etc.)
+    const requestUrl = originalRequest.url || "";
+    const isAuthEndpoint =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.includes("/auth/google") ||
+      requestUrl.includes("/auth/forgot-password") ||
+      requestUrl.includes("/auth/reset-password");
+
+    if (isAuthEndpoint) {
+      return Promise.reject(error);
+    }
+
+    // Guard 3: Skip refresh if the caller opted out (e.g. initial session bootstrap)
     // This prevents guest users from triggering a pointless /auth/refresh call
     if (originalRequest.skipAuthRetry) {
       return Promise.reject(error);
