@@ -408,14 +408,36 @@ export const createProduct = async (req, res, next) => {
       badge = "";
     }
 
-    // Resolve Category string name to ObjectId if needed
+    // Resolve Category or SurgicalCategory string name/ObjectId
     let categoryId = productData.category;
+    let surgicalCategoryId = productData.surgicalCategory;
+
     if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
       const matchedCategory = await Category.findOne({
         name: { $regex: `^${categoryId.trim()}$`, $options: "i" },
       });
       if (matchedCategory) {
         categoryId = matchedCategory._id;
+      } else {
+        const matchedSurg = await SurgicalCategory.findOne({
+          name: { $regex: `^${categoryId.trim()}$`, $options: "i" },
+        });
+        if (matchedSurg) {
+          surgicalCategoryId = matchedSurg._id;
+          productData.isSurgical = true;
+          productData.productType = "surgical";
+        }
+      }
+    }
+
+    if (surgicalCategoryId && !mongoose.Types.ObjectId.isValid(surgicalCategoryId)) {
+      const matchedSurg = await SurgicalCategory.findOne({
+        name: { $regex: `^${surgicalCategoryId.trim()}$`, $options: "i" },
+      });
+      if (matchedSurg) {
+        surgicalCategoryId = matchedSurg._id;
+        productData.isSurgical = true;
+        productData.productType = "surgical";
       }
     }
 
@@ -431,12 +453,13 @@ export const createProduct = async (req, res, next) => {
     const product = await Product.create({
       ...productData,
       category: categoryId,
+      surgicalCategory: surgicalCategoryId,
       slug,
       badge,
       moleculeSlug,
     });
 
-    // Increment category product count (category is now ObjectId)
+    // Increment category product count if valid Category document
     if (product.category) {
       await Category.findByIdAndUpdate(
         product.category,
@@ -520,6 +543,26 @@ export const updateProduct = async (req, res, next) => {
       });
       if (matchedCategory) {
         updateData.category = matchedCategory._id;
+      } else {
+        const matchedSurg = await SurgicalCategory.findOne({
+          name: { $regex: `^${updateData.category.trim()}$`, $options: "i" },
+        });
+        if (matchedSurg) {
+          updateData.surgicalCategory = matchedSurg._id;
+          updateData.isSurgical = true;
+          updateData.productType = "surgical";
+        }
+      }
+    }
+
+    if (updateData.surgicalCategory && !mongoose.Types.ObjectId.isValid(updateData.surgicalCategory)) {
+      const matchedSurg = await SurgicalCategory.findOne({
+        name: { $regex: `^${updateData.surgicalCategory.trim()}$`, $options: "i" },
+      });
+      if (matchedSurg) {
+        updateData.surgicalCategory = matchedSurg._id;
+        updateData.isSurgical = true;
+        updateData.productType = "surgical";
       }
     }
 
@@ -528,12 +571,14 @@ export const updateProduct = async (req, res, next) => {
       runValidators: true,
     });
 
-    // Sync counts if category changed (compare ObjectIds)
-    if (updateData.category && updateData.category.toString() !== product.category.toString()) {
+    // Sync counts if category changed (compare ObjectIds safely)
+    if (
+      updateData.category &&
+      product.category &&
+      updateData.category.toString() !== product.category.toString()
+    ) {
       // Decrement old category
-      if (product.category) {
-        await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
-      }
+      await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
       // Increment new category
       await Category.findByIdAndUpdate(updateData.category, { $inc: { count: 1 } });
     }

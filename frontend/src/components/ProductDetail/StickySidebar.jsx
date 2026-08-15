@@ -8,7 +8,9 @@ const StickySidebar = ({
   computedSections = [],
   activeSection = ""
 }) => {
-  const hasSpecs = product?.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
+  const hasSpecs =
+    (product?.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) ||
+    (product?.specifications && Array.isArray(product.specifications) && product.specifications.length > 0);
   
   // Compile active clinical sections containing data
   const clinicalItems = [
@@ -30,9 +32,11 @@ const StickySidebar = ({
   return (
     <aside className="w-full md:w-[30%] lg:w-[22%] shrink-0 self-stretch order-2 lg:order-1 select-none text-left hidden lg:block space-y-md">
       {/* Component 1 (Upper): Alternative Medicines Card */}
-      <div className="w-full">
-        <SubstituteProducts substituteProducts={substituteProducts} product={product} />
-      </div>
+      {!product?.isSurgical && product?.productType !== "surgical" && (
+        <div className="w-full">
+          <SubstituteProducts substituteProducts={substituteProducts} product={product} />
+        </div>
+      )}
 
       {/* Component 2 (Lower): Clinical Index */}
       <div className="w-full sticky top-24">

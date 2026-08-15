@@ -19,6 +19,11 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  variant: {
+    option: { type: String, default: "" },
+    price: { type: Number },
+    sellingPrice: { type: Number },
+  },
 });
 
 const orderSchema = new mongoose.Schema(

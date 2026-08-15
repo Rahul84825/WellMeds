@@ -679,7 +679,9 @@ const ProductDetails = () => {
   }, [product]);
 
   const memoizedSpecifications = useMemo(() => {
-    if (!product || !product.productSpecifications || !Object.values(product.productSpecifications).some(v => v !== undefined && v !== "")) return null;
+    const hasFixedSpecs = product?.productSpecifications && Object.values(product.productSpecifications).some(v => v !== undefined && v !== "");
+    const hasCustomSpecs = product?.specifications && Array.isArray(product.specifications) && product.specifications.length > 0;
+    if (!product || (!hasFixedSpecs && !hasCustomSpecs)) return null;
     return (
       <div
         id="Specifications"
@@ -690,7 +692,7 @@ const ProductDetails = () => {
           <span className="material-symbols-outlined text-[18px] text-[#157a6d]">list_alt</span> Product Specifications
         </h2>
         <div className="flex flex-col w-full text-xs">
-          {[
+          {hasFixedSpecs && [
             { label: "Generic Name", key: "genericName" },
             { label: "Strength", key: "strength" },
             { label: "Dosage Form", key: "dosageForm" },
@@ -712,6 +714,22 @@ const ProductDetails = () => {
                 </div>
                 <div className="pdp-spec-value text-right max-w-[65%] leading-snug">
                   {val}
+                </div>
+              </div>
+            );
+          })}
+          {hasCustomSpecs && product.specifications.map((spec, idx) => {
+            if (!spec.label || !spec.value) return null;
+            return (
+              <div
+                key={`custom-spec-${idx}`}
+                className="pdp-spec-row"
+              >
+                <div className="pdp-spec-label">
+                  {spec.label}
+                </div>
+                <div className="pdp-spec-value text-right max-w-[65%] leading-snug">
+                  {spec.value}
                 </div>
               </div>
             );
@@ -845,10 +863,12 @@ const ProductDetails = () => {
                 {/* Prescription and Cold Chain Cards */}
                 {memoizedRxColdChain}
 
-                {/* Mobile Substitute Products Card (Aligned Directly Under Delivery Card on Mobile Only) */}
-                <div className="lg:hidden">
-                  <SubstituteProducts substituteProducts={substituteProducts} product={product} />
-                </div>
+                {/* Mobile Substitute Products Card (Aligned Directly Under Delivery Card on Mobile Only for medicines) */}
+                {!product.isSurgical && product.productType !== "surgical" && (
+                  <div className="lg:hidden">
+                    <SubstituteProducts substituteProducts={substituteProducts} product={product} />
+                  </div>
+                )}
               </div>
 
               {/* Right Column: Sticky Purchase Panel (Desktop Only) */}

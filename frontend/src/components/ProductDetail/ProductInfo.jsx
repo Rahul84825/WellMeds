@@ -49,6 +49,10 @@ const ProductInfo = ({ product, handleShare }) => {
           <span className="text-black font-bold flex items-center gap-2 bg-[#f4f9f7] px-3 py-1.5 rounded-sm border border-[#c3d4cc]">
             <ProductAttributeIcon type="rx" /> Rx Required
           </span>
+        ) : product.isSurgical || product.productType === "surgical" ? (
+          <span className="text-black font-bold flex items-center gap-2 bg-[#f4f9f7] px-3 py-1.5 rounded-sm border border-[#c3d4cc]">
+            <span className="material-symbols-outlined text-[15px] text-[#157a6d]">medical_services</span> Medical Supplies &amp; Equipment
+          </span>
         ) : (
           <span className="text-black font-bold flex items-center gap-2 bg-[#f4f9f7] px-3 py-1.5 rounded-sm border border-[#c3d4cc]">
             <ProductAttributeIcon type="otc" /> OTC Medicine
@@ -61,6 +65,25 @@ const ProductInfo = ({ product, handleShare }) => {
           </span>
         )}
       </div>
+
+      {/* Highlights for Surgical / Medical Supplies */}
+      {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
+        <div className="pt-3.5 border-t border-dashed border-[#c3d4cc] mt-1 space-y-2">
+          <span className="block font-sans text-xs font-bold text-black uppercase tracking-wider select-none flex items-center gap-1.5">
+            <span className="w-1.5 h-3 bg-[#157a6d] rounded-full inline-block" /> Highlights
+          </span>
+          <ul className="space-y-1 text-xs text-[#2c3e38]">
+            {product.specifications.map((spec, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <span className="text-[#157a6d] font-bold">•</span>
+                <span className="font-sans">
+                  <strong className="text-black font-semibold">{spec.label}:</strong> {spec.value}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Salt Composition */}
       {product.molecules && product.molecules.length > 0 && (

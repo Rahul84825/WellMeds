@@ -991,7 +991,7 @@ const AddNewProduct = () => {
                   Basic Information
                 </h3>
 
-                {/* Surgical Product & Specialities Options */}
+                {/* Surgical Product Options */}
                 <div className="p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-xl space-y-sm">
                   {/* Surgical Toggle */}
                   <div className="flex items-center gap-sm">
@@ -1009,39 +1009,6 @@ const AddNewProduct = () => {
                     <label htmlFor="isSurgicalToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
                       Surgical Product
                     </label>
-                  </div>
-
-                  {/* Specialities Select */}
-                  <div className="flex flex-col gap-sm pt-sm border-t border-slate-200/60 dark:border-zinc-800">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Associated Specialities (Select Multiple)
-                    </label>
-                    <div className="flex flex-wrap gap-xs">
-                      {allSpecialities.map((spec) => {
-                        const specId = spec._id || spec.id;
-                        const isSelected = selectedSpecialities.includes(specId);
-                        return (
-                          <button
-                            type="button"
-                            key={specId}
-                            onClick={() => {
-                              setSelectedSpecialities(prev =>
-                                prev.includes(specId)
-                                  ? prev.filter(id => id !== specId)
-                                  : [...prev, specId]
-                              );
-                            }}
-                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${isSelected
-                                ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
-                                : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-850"
-                              }`}
-                          >
-                            {isSelected && <Check size={10} />}
-                            {spec.name}
-                          </button>
-                        );
-                      })}
-                    </div>
                   </div>
 
                   {/* Surgical Category select box */}
@@ -1239,45 +1206,73 @@ const AddNewProduct = () => {
                 </div>
               </div>
 
-              {/* Section 2: Pricing */}
-              <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
-                <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
-                  Pricing Settings
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price / MRP (₹)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={originalPrice}
-                      onChange={(e) => setOriginalPrice(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="space-y-xs">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selling Price (₹) *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required={!isSurgical && !isCategorySurgical(category)}
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="space-y-xs bg-slate-50 dark:bg-zinc-950/20 p-sm rounded-xl border border-slate-200/50 dark:border-zinc-800 flex flex-col justify-center">
-                    <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Discount Calculator</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-450 mt-1">
-                      {price && originalPrice && parseFloat(originalPrice) > parseFloat(price)
-                        ? `${calculateDiscountPercent(originalPrice, price)}% Discount (Save ₹${formatPrice(calculateSavings(originalPrice, price))})`
-                        : "No Discount"}
-                    </span>
+              {/* Section 2: Pricing (Only for Standard / Medicine Products) */}
+              {!isSurgical && !isCategorySurgical(category) && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
+                  <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                    Pricing Settings
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+                    <div className="space-y-xs">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Original Price / MRP (₹)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={originalPrice}
+                        onChange={(e) => setOriginalPrice(e.target.value)}
+                        className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-xs">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selling Price (₹) *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required={!isSurgical && !isCategorySurgical(category)}
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-xs bg-slate-50 dark:bg-zinc-950/20 p-sm rounded-xl border border-slate-200/50 dark:border-zinc-800 flex flex-col justify-center">
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Discount Calculator</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-450 mt-1">
+                        {price && originalPrice && parseFloat(originalPrice) > parseFloat(price)
+                          ? `${calculateDiscountPercent(originalPrice, price)}% Discount (Save ₹${formatPrice(calculateSavings(originalPrice, price))})`
+                          : "No Discount"}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Product Highlights & Specifications (Surgical / Custom) */}
+              {(isSurgical || isCategorySurgical(category)) && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs animate-[fade-in_0.2s_ease-out]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                        <span>Product Highlights &amp; Specifications</span>
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Enter key highlights displayed on the Product Detail Page. Format: <strong className="text-slate-600 dark:text-zinc-300">Label: Value</strong> (one specification per line).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <textarea
+                      rows={7}
+                      value={specificationsText}
+                      onChange={(e) => setSpecificationsText(e.target.value)}
+                      placeholder="e.g.&#10;Product Name: Latex Medical Examination Gloves | 100 Pcs&#10;Generic Name: Medical Examination Gloves&#10;Size: Small, Medium, Large&#10;Colour: White&#10;Material: Natural Rubber Latex&#10;Net Quantity: 100 Gloves per Box&#10;Sterility: Non-Sterile"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed dark:text-zinc-200"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Surgical Variants Section */}
               {(isSurgical || isCategorySurgical(category)) && (
@@ -1581,6 +1576,39 @@ const AddNewProduct = () => {
                         </span>
                       </span>
                     </button>
+                  </div>
+
+                  {/* Specialities Select for Medicines */}
+                  <div className="flex flex-col gap-sm col-span-full pt-sm border-t border-slate-100 dark:border-zinc-800">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Associated Specialities (Select Multiple)
+                    </label>
+                    <div className="flex flex-wrap gap-xs">
+                      {allSpecialities.map((spec) => {
+                        const specId = spec._id || spec.id;
+                        const isSelected = selectedSpecialities.includes(specId);
+                        return (
+                          <button
+                            type="button"
+                            key={specId}
+                            onClick={() => {
+                              setSelectedSpecialities(prev =>
+                                prev.includes(specId)
+                                  ? prev.filter(id => id !== specId)
+                                  : [...prev, specId]
+                              );
+                            }}
+                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${isSelected
+                                ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
+                                : "bg-slate-50 dark:bg-zinc-955 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
+                              }`}
+                          >
+                            {isSelected && <Check size={10} />}
+                            {spec.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
 
@@ -1912,6 +1940,27 @@ const AddNewProduct = () => {
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                </AccordionSection>
+
+                {/* Accordion Panel 3: Product Highlights & Custom Specifications */}
+                <AccordionSection
+                  title="Product Highlights & Custom Specifications"
+                  isOpen={activeClinicalSection === "customSpecifications"}
+                  onToggle={() => setActiveClinicalSection(activeClinicalSection === "customSpecifications" ? null : "customSpecifications")}
+                >
+                  <div className="space-y-xs">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specifications &amp; Highlights Editor</label>
+                      <span className="text-[10px] text-slate-400 font-medium">Format: Label: Value (one per line)</span>
+                    </div>
+                    <textarea
+                      rows={7}
+                      value={specificationsText}
+                      onChange={(e) => setSpecificationsText(e.target.value)}
+                      placeholder="e.g.&#10;Product Name: Latex Medical Examination Gloves&#10;Material: Natural Rubber Latex&#10;Colour: White&#10;Net Quantity: 100 Gloves per Box"
+                      className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed dark:text-zinc-200"
+                    />
                   </div>
                 </AccordionSection>
 
