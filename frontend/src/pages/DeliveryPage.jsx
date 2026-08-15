@@ -191,7 +191,7 @@ const DeliveryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3EEE0] text-[#172B26] font-sans antialiased selection:bg-[#157A6D] selection:text-white">
+    <div className="min-h-screen bg-white text-[#172B26] font-sans antialiased selection:bg-[#157A6D] selection:text-white">
       <SEO
         title="Medicine Delivery in Pune | WellMeds"
         description="Order genuine medicines online with WellMeds for reliable 3-hour medicine delivery across Pune. Upload your prescription or browse specialty healthcare."
@@ -201,7 +201,7 @@ const DeliveryPage = () => {
       />
 
       {/* ── 1. HERO SECTION ── */}
-      <section className="relative bg-gradient-to-b from-[#0F3B34] to-[#0d332d] text-[#F3EEE0] pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden text-center px-4 sm:px-8">
+      <section className="relative bg-gradient-to-b from-[#0F3B34] to-[#0d332d] text-white pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden text-center px-4 sm:px-8">
         {/* Glow ambient background circles */}
         <div
           className="absolute -top-40 -right-28 w-[480px] h-[480px] rounded-full pointer-events-none opacity-40 blur-3xl"
@@ -216,13 +216,13 @@ const DeliveryPage = () => {
           {/* Main Headline (Single H1) */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
             Your medicines, delivered anywhere in{" "}
-            <span className="text-[#E8C547] underline decoration-[#157A6D] decoration-wavy decoration-2 underline-offset-8">
+            <span className="text-[#E8C547]">
               Pune
             </span>{" "}
             — in 3 hours.
           </h1>
 
-          <p className="text-base sm:text-lg text-[#F3EEE0]/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
             Genuine medicines, licensed pharmacist verification, and temperature-controlled doorstep delivery across 60+ Pune pincodes.
           </p>
 
@@ -237,7 +237,7 @@ const DeliveryPage = () => {
               href={whatsappOrderUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-[#F3EEE0] transition-all bg-white/5 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-white transition-all bg-white/5 backdrop-blur-sm"
             >
               <MessageSquare className="w-4 h-4 text-[#84d6b9]" />
               <span>↳ Order on WhatsApp</span>
@@ -245,7 +245,7 @@ const DeliveryPage = () => {
 
             <Link
               to="/upload-prescription"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-[#F3EEE0] transition-all bg-white/5 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-white transition-all bg-white/5 backdrop-blur-sm"
             >
               <Upload className="w-4 h-4 text-[#E8C547]" />
               <span>↳ Upload Prescription</span>
@@ -253,7 +253,7 @@ const DeliveryPage = () => {
 
             <a
               href={`tel:${BUSINESS_INFO.phoneRaw}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-[#F3EEE0] transition-all bg-white/5 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/20 hover:border-[#157A6D] hover:bg-[#157A6D]/20 text-white transition-all bg-white/5 backdrop-blur-sm"
             >
               <PhoneCall className="w-4 h-4 text-[#84d6b9]" />
               <span>↳ Call to Order ({BUSINESS_INFO.phoneDisplay})</span>
@@ -266,7 +266,7 @@ const DeliveryPage = () => {
       <section
         ref={registerSectionRef("trust")}
         data-section-key="trust"
-        className={`bg-[#F3EEE0] border-b border-[#172B26]/10 py-7 px-4 sm:px-8 transition-all duration-700 ${
+        className={`bg-white border-b border-[#172B26]/10 py-7 px-4 sm:px-8 transition-all duration-700 ${
           revealedSections.trust ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
@@ -342,7 +342,7 @@ const DeliveryPage = () => {
               >
                 {/* Slide 1: FIRST200 */}
                 <div className="w-full shrink-0 p-1">
-                  <div className="bg-[#0F3B34] text-[#F3EEE0] rounded-2xl p-7 sm:p-8 relative overflow-hidden">
+                  <div className="bg-[#0F3B34] text-white rounded-2xl p-7 sm:p-8 relative overflow-hidden">
                     <div className="absolute top-4 -right-8 rotate-45 bg-[#C1703A] text-white text-[10px] font-bold tracking-widest px-8 py-1 shadow-md uppercase">
                       ₹200 OFF
                     </div>
@@ -352,7 +352,7 @@ const DeliveryPage = () => {
                     <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                       Flat ₹200 off on your first order
                     </h3>
-                    <p className="text-sm text-[#F3EEE0]/75 mb-5 max-w-md">
+                    <p className="text-sm text-white/75 mb-5 max-w-md">
                       Valid on prescription medicines and healthcare products above ₹500 across Pune.
                     </p>
 
@@ -360,7 +360,7 @@ const DeliveryPage = () => {
                       <button
                         type="button"
                         onClick={() => handleCopyCode("FIRST200")}
-                        className="inline-flex items-center gap-2 border border-dashed border-[#F3EEE0]/60 px-4 py-2 rounded-lg font-mono font-bold text-sm text-[#E8C547] hover:bg-white/10 transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 border border-dashed border-white/30 px-4 py-2 rounded-lg font-mono font-bold text-sm text-[#E8C547] hover:bg-white/10 transition-colors cursor-pointer"
                         title="Click to copy coupon code"
                       >
                         <span>CODE: FIRST200</span>
@@ -382,7 +382,7 @@ const DeliveryPage = () => {
 
                 {/* Slide 2: WhatsApp Refill */}
                 <div className="w-full shrink-0 p-1">
-                  <div className="bg-[#F8F4EA] text-[#172B26] border border-[#172B26]/10 rounded-2xl p-7 sm:p-8 relative overflow-hidden">
+                  <div className="bg-white text-[#172B26] border border-[#172B26]/10 rounded-2xl p-7 sm:p-8 relative overflow-hidden">
                     <div className="absolute top-4 -right-8 rotate-45 bg-[#157A6D] text-white text-[10px] font-bold tracking-widest px-8 py-1 shadow-md uppercase">
                       NEW
                     </div>
@@ -413,14 +413,14 @@ const DeliveryPage = () => {
             {/* Arrows */}
             <button
               onClick={() => setOfferIndex((prev) => (prev === 0 ? 1 : 0))}
-              className="absolute top-1/2 -left-4 -translate-y-1/2 w-9 h-9 rounded-full bg-[#F3EEE0] border border-[#172B26]/20 text-[#172B26] flex items-center justify-center shadow-md hover:bg-[#157A6D] hover:text-white transition-colors cursor-pointer"
+              className="absolute top-1/2 -left-4 -translate-y-1/2 w-9 h-9 rounded-full bg-white border border-[#172B26]/20 text-[#172B26] flex items-center justify-center shadow-md hover:bg-[#157A6D] hover:text-white transition-colors cursor-pointer"
               aria-label="Previous offer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => setOfferIndex((prev) => (prev === 0 ? 1 : 0))}
-              className="absolute top-1/2 -right-4 -translate-y-1/2 w-9 h-9 rounded-full bg-[#F3EEE0] border border-[#172B26]/20 text-[#172B26] flex items-center justify-center shadow-md hover:bg-[#157A6D] hover:text-white transition-colors cursor-pointer"
+              className="absolute top-1/2 -right-4 -translate-y-1/2 w-9 h-9 rounded-full bg-white border border-[#172B26]/20 text-[#172B26] flex items-center justify-center shadow-md hover:bg-[#157A6D] hover:text-white transition-colors cursor-pointer"
               aria-label="Next offer"
             >
               <ChevronRight className="w-5 h-5" />
@@ -451,7 +451,7 @@ const DeliveryPage = () => {
       <section
         ref={registerSectionRef("stats")}
         data-section-key="stats"
-        className={`bg-[#0F3B34] text-[#F3EEE0] py-14 md:py-18 px-4 sm:px-8 transition-all duration-700 ${
+        className={`bg-[#0F3B34] text-white py-14 md:py-18 px-4 sm:px-8 transition-all duration-700 ${
           revealedSections.stats ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
@@ -470,7 +470,7 @@ const DeliveryPage = () => {
               <span className="block text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
                 3 hrs
               </span>
-              <p className="text-xs sm:text-sm text-[#F3EEE0]/65">
+              <p className="text-xs sm:text-sm text-white/65">
                 average delivery time in Pune
               </p>
             </div>
@@ -479,7 +479,7 @@ const DeliveryPage = () => {
               <span className="block text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
                 60+
               </span>
-              <p className="text-xs sm:text-sm text-[#F3EEE0]/65">
+              <p className="text-xs sm:text-sm text-white/65">
                 Pune & PCMC pincodes covered
               </p>
             </div>
@@ -488,7 +488,7 @@ const DeliveryPage = () => {
               <span className="block text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
                 100%
               </span>
-              <p className="text-xs sm:text-sm text-[#F3EEE0]/65">
+              <p className="text-xs sm:text-sm text-white/65">
                 orders pharmacist-verified
               </p>
             </div>
@@ -497,13 +497,13 @@ const DeliveryPage = () => {
               <span className="block text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
                 24x7
               </span>
-              <p className="text-xs sm:text-sm text-[#F3EEE0]/65">
+              <p className="text-xs sm:text-sm text-white/65">
                 prescription upload & ordering
               </p>
             </div>
           </div>
 
-          <p className="text-xs text-[#F3EEE0]/60 max-w-xl">
+          <p className="text-xs text-white/60 max-w-xl">
             Figures reflect current service commitments from our Baner, Pune hub and are continuously updated as local coverage expands.
           </p>
         </div>
@@ -535,7 +535,7 @@ const DeliveryPage = () => {
             {displayedPincodes.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-[#F8F4EA] border border-[#172B26]/10 rounded-xl p-3.5 sm:p-4 text-sm hover:-translate-y-0.5 hover:border-[#157A6D] hover:shadow-sm transition-all text-left flex flex-col justify-between"
+                className="bg-white border border-[#172B26]/10 rounded-xl p-3.5 sm:p-4 text-sm hover:-translate-y-0.5 hover:border-[#157A6D] hover:shadow-sm transition-all text-left flex flex-col justify-between"
               >
                 <span className="font-semibold text-[#172B26]">{item.name}</span>
                 <span className="font-mono font-bold text-xs text-[#157A6D] mt-1.5 flex items-center gap-1">
@@ -579,7 +579,7 @@ const DeliveryPage = () => {
       <section
         ref={registerSectionRef("why")}
         data-section-key="why"
-        className={`bg-[#F8F4EA] py-14 md:py-20 px-4 sm:px-8 transition-all duration-700 ${
+        className={`bg-white py-14 md:py-20 px-4 sm:px-8 transition-all duration-700 ${
           revealedSections.why ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
@@ -594,7 +594,7 @@ const DeliveryPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#F3EEE0] rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
+            <div className="bg-white rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
               <div className="flex items-center gap-2 text-[#C1703A] font-bold text-xs tracking-widest uppercase">
                 <Award className="w-5 h-5 text-[#C1703A]" />
                 <span>GENUINE</span>
@@ -605,7 +605,7 @@ const DeliveryPage = () => {
               </p>
             </div>
 
-            <div className="bg-[#F3EEE0] rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
+            <div className="bg-white rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
               <div className="flex items-center gap-2 text-[#C1703A] font-bold text-xs tracking-widest uppercase">
                 <DollarSign className="w-5 h-5 text-[#C1703A]" />
                 <span>AFFORDABLE</span>
@@ -616,7 +616,7 @@ const DeliveryPage = () => {
               </p>
             </div>
 
-            <div className="bg-[#F3EEE0] rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
+            <div className="bg-white rounded-2xl p-7 border border-[#172B26]/10 hover:-translate-y-1 hover:shadow-md transition-all space-y-3">
               <div className="flex items-center gap-2 text-[#C1703A] font-bold text-xs tracking-widest uppercase">
                 <Truck className="w-5 h-5 text-[#C1703A]" />
                 <span>RELIABLE</span>
@@ -668,7 +668,7 @@ const DeliveryPage = () => {
       <section
         ref={registerSectionRef("cta")}
         data-section-key="cta"
-        className={`bg-[#157A6D] text-[#F3EEE0] py-14 md:py-20 px-4 sm:px-8 text-center transition-all duration-700 ${
+        className={`bg-[#157A6D] text-white py-14 md:py-20 px-4 sm:px-8 text-center transition-all duration-700 ${
           revealedSections.cta ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
       >
@@ -676,13 +676,13 @@ const DeliveryPage = () => {
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
             Pune, your medicines are a tap away.
           </h2>
-          <p className="text-sm sm:text-base text-[#F3EEE0]/85 max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-white/85 max-w-lg mx-auto">
             Upload your prescription now and our registered pharmacists will verify it in under a minute.
           </p>
           <div className="pt-3">
             <Link
               to="/upload-prescription"
-              className="inline-flex items-center gap-2 bg-[#F3EEE0] hover:bg-white text-[#172B26] font-bold px-8 py-3.5 rounded-full text-base shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 bg-white hover:bg-white text-[#172B26] font-bold px-8 py-3.5 rounded-full text-base shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
             >
               <Upload className="w-5 h-5 text-[#157A6D]" />
               <span>Upload Prescription</span>

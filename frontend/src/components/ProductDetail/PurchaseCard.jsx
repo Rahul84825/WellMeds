@@ -15,17 +15,28 @@ const PurchaseCard = ({
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
   const productId = (product._id || product.id)?.toString();
-  const cartItem = cartItems?.find((item) => item.id === productId);
-  const isInCart = !!cartItem;
 
   const getVariants = (prod) => {
+    if (prod.variants && Array.isArray(prod.variants) && prod.variants.length > 0) {
+      return prod.variants.map((v, idx) => ({
+        id: idx,
+        option: v.option,
+        name: v.option,
+        price: v.sellingPrice || v.price,
+        originalPrice: v.price || v.sellingPrice,
+        sellingPrice: v.sellingPrice || v.price,
+      }));
+    }
+
     const packingsStr = prod.productSpecifications?.availablePackings || prod.availablePackings;
     if (packingsStr && typeof packingsStr === "string" && packingsStr.trim().length > 0) {
       return packingsStr.split(",").map((p, idx) => ({
         id: idx,
+        option: p.trim(),
         name: p.trim(),
         price: prod.price,
         originalPrice: prod.originalPrice || prod.price,
+        sellingPrice: prod.price,
       }));
     }
 
@@ -33,15 +44,26 @@ const PurchaseCard = ({
     return [
       {
         id: 0,
+        option: defaultPackSize,
         name: defaultPackSize,
         price: prod.price,
         originalPrice: prod.originalPrice || prod.price,
+        sellingPrice: prod.price,
       }
     ];
   };
 
   const variants = getVariants(product);
   const selectedVariant = variants[selectedVariantIdx] || variants[0];
+  const activePrice = selectedVariant?.sellingPrice || selectedVariant?.price || product.price;
+  const activeOriginalPrice = selectedVariant?.originalPrice || product.originalPrice;
+  const activeDiscount = activeOriginalPrice && activeOriginalPrice > activePrice
+    ? Math.round(((activeOriginalPrice - activePrice) / activeOriginalPrice) * 100)
+    : 0;
+
+  const currentCartKey = selectedVariant?.option ? `${productId}-${selectedVariant.option}` : productId;
+  const cartItem = cartItems?.find((item) => item.id === currentCartKey || (item.productId === productId && item.variant?.option === selectedVariant?.option));
+  const isInCart = !!cartItem;
 
   const variantNameUpper = selectedVariant.name.toUpperCase();
   const packSizeUpper = (product.packSize || product.productSpecifications?.packSize || "").toUpperCase();
@@ -49,6 +71,26 @@ const PurchaseCard = ({
 
   const handleGoToCart = () => {
     navigate("/cart");
+  };
+
+  const onAddToCart = () => {
+    handleAddToCart({
+      ...product,
+      price: activePrice,
+      originalPrice: activeOriginalPrice,
+      variant: selectedVariant,
+      selectedVariant: selectedVariant,
+    });
+  };
+
+  const onBuyNow = () => {
+    handleBuyNow({
+      ...product,
+      price: activePrice,
+      originalPrice: activeOriginalPrice,
+      variant: selectedVariant,
+      selectedVariant: selectedVariant,
+    });
   };
 
   return (
@@ -59,19 +101,19 @@ const PurchaseCard = ({
         <div className="space-y-1">
           <div className="flex items-baseline gap-2">
             <span className="pdp-serif-title text-3xl font-bold text-[#157a6d] leading-none font-sans">
-              {formatCurrency(product.price)}
+              {formatCurrency(activePrice)}
             </span>
-            {product.originalPrice && product.originalPrice > product.price && (
+            {activeOriginalPrice && activeOriginalPrice > activePrice && (
               <span className="text-black line-through text-xs font-bold">
-                MRP {formatCurrency(product.originalPrice)}
+                MRP {formatCurrency(activeOriginalPrice)}
               </span>
             )}
           </div>
           <div className="flex justify-between items-center text-[11px] font-sans font-bold">
             <span className="text-black">Inclusive of all taxes & GST</span>
-            {discountPercent > 0 && (
+            {activeDiscount > 0 && (
               <span className="inline-flex items-center justify-center rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 px-3 py-1 text-xs font-bold font-sans shadow-2xs">
-                {discountPercent}% Off
+                {activeDiscount}% Off
               </span>
             )}
           </div>
@@ -83,7 +125,9 @@ const PurchaseCard = ({
         {/* 2. Choose Pack Size (Variants Selector) */}
         {variants.length > 0 && (
           <div className="space-y-2 text-left">
-            <span className="block text-[10px] font-bold text-black uppercase tracking-wider font-sans">Select Packaging Option</span>
+            <span className="block text-[10px] font-bold text-black uppercase tracking-wider font-sans">
+              {product.isSurgical ? "Select Variant / Size" : "Select Packaging Option"}
+            </span>
             <div className="grid grid-cols-2 gap-2">
               {variants.map((v, idx) => {
                 const isSelected = selectedVariantIdx === idx;
@@ -109,10 +153,15 @@ const PurchaseCard = ({
                         <div className="w-4 h-4 rounded-full border border-[#c3d4cc] shrink-0" />
                       )}
                     </div>
-                    <div className="p-2.5 text-left w-full">
+                    <div className="p-2.5 text-left w-full flex items-center justify-between">
                       <span className="font-bold text-[11px] text-black font-sans">
-                        {formatCurrency(v.price)}/Unit
+                        {formatCurrency(v.price)}
                       </span>
+                      {v.originalPrice && v.originalPrice > v.price && (
+                        <span className="text-[10px] text-slate-400 line-through">
+                          {formatCurrency(v.originalPrice)}
+                        </span>
+                      )}
                     </div>
                   </button>
                 );
@@ -133,7 +182,7 @@ const PurchaseCard = ({
               {/* Go To Cart ↗ */}
               <button
                 onClick={handleGoToCart}
-                className="pdp-btn-primary w-full h-11 text-xs tracking-widest font-bold uppercase rounded-sm"
+                className="pdp-btn-primary w-full h-11 text-xs tracking-widest font-bold uppercase rounded-sm cursor-pointer"
               >
                 Go To Cart <span className="text-sm font-semibold">↗</span>
               </button>
@@ -142,7 +191,7 @@ const PurchaseCard = ({
               <div className="flex items-center justify-center bg-[#f4f9f7] h-11 w-full rounded-sm p-1 gap-6 border border-[#dde8e3] animate-[fade-in_0.20s_ease-out]">
                 <button
                   type="button"
-                  onClick={() => updateQuantity(productId, cartItem.quantity - 1)}
+                  onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
                   className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold font-sans"
                 >
                   -
@@ -152,7 +201,7 @@ const PurchaseCard = ({
                 </span>
                 <button
                   type="button"
-                  onClick={() => updateQuantity(productId, cartItem.quantity + 1)}
+                  onClick={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
                   disabled={cartItem.quantity >= (product.stock || 30)}
                   className="w-8 h-8 rounded-sm bg-white border border-[#c3d4cc] flex items-center justify-center text-black hover:border-[#157a6d] cursor-pointer shadow-2xs transition-colors font-bold font-sans"
                 >
@@ -164,18 +213,18 @@ const PurchaseCard = ({
             <>
               {/* Buy Now */}
               <button
-                onClick={handleBuyNow}
+                onClick={onBuyNow}
                 disabled={product.inStock === false || product.stock === 0}
-                className="pdp-btn-primary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="pdp-btn-primary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Buy Now
               </button>
 
               {/* Add to Cart Outline */}
               <button
-                onClick={handleAddToCart}
+                onClick={onAddToCart}
                 disabled={product.inStock === false || product.stock === 0}
-                className="pdp-btn-secondary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="pdp-btn-secondary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Add To Cart <ShoppingCart size={15} />
               </button>

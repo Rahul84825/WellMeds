@@ -337,6 +337,36 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
+const normalizeAndValidateVariants = (variants) => {
+  if (!variants || !Array.isArray(variants) || variants.length === 0) {
+    return [];
+  }
+  const clean = [];
+  for (const v of variants) {
+    if (!v) continue;
+    const option = (v.option || "").toString().trim();
+    if (!option) continue;
+    const price = typeof v.price === "number" ? v.price : parseFloat(v.price);
+    const sellingPrice = typeof v.sellingPrice === "number" ? v.sellingPrice : parseFloat(v.sellingPrice);
+
+    if (isNaN(price) || price < 0) {
+      throw new Error(`Variant "${option}" must have a valid non-negative MRP / Price.`);
+    }
+    if (isNaN(sellingPrice) || sellingPrice < 0) {
+      throw new Error(`Variant "${option}" must have a valid non-negative Selling Price.`);
+    }
+    if (sellingPrice > price) {
+      throw new Error(`Variant "${option}" Selling Price (₹${sellingPrice}) cannot exceed MRP / Price (₹${price}).`);
+    }
+    clean.push({
+      option,
+      price: Math.round(price * 100) / 100,
+      sellingPrice: Math.round(sellingPrice * 100) / 100,
+    });
+  }
+  return clean;
+};
+
 export const createProduct = async (req, res, next) => {
   const productData = req.body;
 
@@ -354,6 +384,15 @@ export const createProduct = async (req, res, next) => {
       productData.brand = productData.manufacturer;
     } else if (productData.brand) {
       productData.manufacturer = productData.brand;
+    }
+
+    // Handle Variants Normalization & Validation
+    if (productData.variants) {
+      productData.variants = normalizeAndValidateVariants(productData.variants);
+      if (productData.variants.length > 0) {
+        if (!productData.price) productData.price = productData.variants[0].sellingPrice;
+        if (!productData.originalPrice) productData.originalPrice = productData.variants[0].price;
+      }
     }
 
     // Handle In Stock Boolean Toggle
@@ -438,6 +477,15 @@ export const updateProduct = async (req, res, next) => {
       updateData.brand = updateData.manufacturer;
     } else if (updateData.brand !== undefined) {
       updateData.manufacturer = updateData.brand;
+    }
+
+    // Handle Variants Normalization & Validation
+    if (updateData.variants !== undefined) {
+      updateData.variants = normalizeAndValidateVariants(updateData.variants);
+      if (updateData.variants.length > 0) {
+        if (!updateData.price) updateData.price = updateData.variants[0].sellingPrice;
+        if (!updateData.originalPrice) updateData.originalPrice = updateData.variants[0].price;
+      }
     }
 
     // Handle In Stock Boolean Toggle

@@ -569,14 +569,16 @@ const ProductDetails = () => {
     setQuantity(prev => (prev > 1 ? prev - 1 : prev));
   }, []);
 
-  const handleAddToCart = useCallback(() => {
-    if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
+  const handleAddToCart = useCallback((customProduct = null) => {
+    const target = customProduct || product;
+    if (!target || target.inStock === false || target.stock === 0) return;
+    addToCart(target, quantity, target.variant || target.selectedVariant);
   }, [product, quantity, addToCart]);
 
-  const handleBuyNow = useCallback(() => {
-    if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
+  const handleBuyNow = useCallback((customProduct = null) => {
+    const target = customProduct || product;
+    if (!target || target.inStock === false || target.stock === 0) return;
+    addToCart(target, quantity, target.variant || target.selectedVariant);
     navigate("/cart");
   }, [product, quantity, addToCart, navigate]);
 

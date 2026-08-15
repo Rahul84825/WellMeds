@@ -267,6 +267,7 @@ const AddNewProduct = () => {
   const [isSurgical, setIsSurgical] = useState(false);
   const [surgicalCategory, setSurgicalCategory] = useState("");
   const [allSurgicalCategories, setAllSurgicalCategories] = useState([]);
+  const [variants, setVariants] = useState([]);
   const [allMolecules, setAllMolecules] = useState([]);
   const [selectedMolecules, setSelectedMolecules] = useState([]);
   const [moleculeSearchQuery, setMoleculeSearchQuery] = useState("");
@@ -357,11 +358,62 @@ const AddNewProduct = () => {
   const [canonicalUrl, setCanonicalUrl] = useState("");
   const [ogImage, setOgImage] = useState("");
 
+  const isCategorySurgical = (catId) => {
+    if (!catId) return false;
+    const idStr = typeof catId === "object" ? (catId._id || catId.id || "") : catId.toString();
+    return allSurgicalCategories.some(
+      (sc) => (sc._id || sc.id)?.toString() === idStr || sc.name === idStr || sc.slug === idStr
+    );
+  };
+
+  const handleCategoryChange = (selectedVal) => {
+    setCategory(selectedVal);
+    const isSurg = isCategorySurgical(selectedVal);
+    setIsSurgical(isSurg);
+    if (isSurg) {
+      setSurgicalCategory(selectedVal);
+      setProductType("surgical");
+      if (!variants || variants.length === 0) {
+        setVariants([
+          {
+            option: "Standard",
+            price: originalPrice || price || "",
+            sellingPrice: price || "",
+          }
+        ]);
+      }
+    } else {
+      setSurgicalCategory("");
+      setProductType("medicine");
+    }
+  };
+
+  const addVariant = () => {
+    setVariants((prev) => [
+      ...prev,
+      { option: "", price: "", sellingPrice: "" }
+    ]);
+  };
+
+  const updateVariant = (index, field, value) => {
+    setVariants((prev) =>
+      prev.map((v, idx) => (idx === index ? { ...v, [field]: value } : v))
+    );
+  };
+
+  const removeVariant = (index) => {
+    if (variants.length <= 1) return;
+    setVariants((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const getSelectedCategoryId = () => {
     if (!category) return "";
     if (typeof category === "object") return category?._id || category?.id || "";
     const found = allCategories.find(c => c._id === category || c.id === category || c.name === category);
-    return found ? (found._id || found.id) : category;
+    if (found) return found._id || found.id;
+    const foundSurg = allSurgicalCategories.find(sc => sc._id === category || sc.id === category || sc.name === category);
+    if (foundSurg) return foundSurg._id || foundSurg.id;
+    return category;
   };
 
   // Fetch product if in Edit Mode
@@ -459,9 +511,27 @@ const AddNewProduct = () => {
             if (product.molecules) {
               setSelectedMolecules(product.molecules.map(m => m._id || m.id || m));
             }
-            setIsSurgical(product.isSurgical || false);
-            setSurgicalCategory(product.surgicalCategory?._id || product.surgicalCategory || "");
-            setProductType(product.productType || "medicine");
+            const isSurg = product.isSurgical || isCategorySurgical(product.category) || false;
+            setIsSurgical(isSurg);
+            setSurgicalCategory(product.surgicalCategory?._id || product.surgicalCategory || (isSurg ? product.category : ""));
+            setProductType(isSurg ? "surgical" : (product.productType || "medicine"));
+
+            if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+              setVariants(product.variants.map(v => ({
+                option: v.option || "",
+                price: v.price !== undefined ? v.price : "",
+                sellingPrice: v.sellingPrice !== undefined ? v.sellingPrice : "",
+              })));
+              setIsSurgical(true);
+            } else if (isSurg) {
+              setVariants([
+                {
+                  option: "Standard",
+                  price: product.originalPrice || product.price || "",
+                  sellingPrice: product.price || "",
+                }
+              ]);
+            }
           }
         } catch (err) {
           console.error("Failed to load product data", err);
@@ -712,13 +782,48 @@ const AddNewProduct = () => {
     const cleanSpecs = parseSpecificationsText(specificationsText).filter(s => s.label.trim() && s.value.trim());
     const cleanRefs = parseTextareaToArray(referencesText);
 
+    // Validate surgical variants if surgical product
+    const isSurgProduct = isSurgical || isCategorySurgical(category);
+    let cleanVariants = [];
+    if (isSurgProduct) {
+      if (!variants || variants.length === 0) {
+        alert("Please add at least one surgical variant with option name, price, and selling price.");
+        return;
+      }
+      for (const v of variants) {
+        if (!v.option || !v.option.trim()) {
+          alert("All surgical variants must have a valid option name (e.g. Small, Medium, Standard).");
+          return;
+        }
+        const vPrice = parseFloat(v.price);
+        const vSellingPrice = parseFloat(v.sellingPrice);
+        if (isNaN(vPrice) || vPrice < 0) {
+          alert(`Variant "${v.option}" must have a valid non-negative Price / MRP.`);
+          return;
+        }
+        if (isNaN(vSellingPrice) || vSellingPrice < 0) {
+          alert(`Variant "${v.option}" must have a valid non-negative Selling Price.`);
+          return;
+        }
+        if (vSellingPrice > vPrice) {
+          alert(`Variant "${v.option}": Selling Price (₹${vSellingPrice}) cannot be greater than Price / MRP (₹${vPrice}).`);
+          return;
+        }
+        cleanVariants.push({
+          option: v.option.trim(),
+          price: Math.round(vPrice * 100) / 100,
+          sellingPrice: Math.round(vSellingPrice * 100) / 100,
+        });
+      }
+    }
+
     const productData = {
       name: name.trim(),
       category: typeof category === "object" ? (category?.name || category?._id) : category,
-      productType,
+      productType: isSurgProduct ? "surgical" : productType,
       brand: specManufacturer.trim() || manufacturer.trim(), // for DB required validation
-      price: parseFloat(price),
-      originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
+      price: cleanVariants.length > 0 ? cleanVariants[0].sellingPrice : parseFloat(price),
+      originalPrice: cleanVariants.length > 0 ? cleanVariants[0].price : (originalPrice ? parseFloat(originalPrice) : parseFloat(price)),
       inStock,
       isNonRefundable,
       prepaidOnly,
@@ -731,8 +836,9 @@ const AddNewProduct = () => {
       description: description.trim(),
       specialities: selectedSpecialities,
       molecules: selectedMolecules,
-      isSurgical,
-      surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
+      isSurgical: isSurgProduct,
+      surgicalCategory: isSurgProduct && surgicalCategory ? surgicalCategory : (isCategorySurgical(category) ? category : undefined),
+      variants: cleanVariants.length > 0 ? cleanVariants : undefined,
 
       // V2 Fields
       manufacturer: specManufacturer.trim() || manufacturer.trim(),
@@ -885,6 +991,81 @@ const AddNewProduct = () => {
                   Basic Information
                 </h3>
 
+                {/* Surgical Product & Specialities Options */}
+                <div className="p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-xl space-y-sm">
+                  {/* Surgical Toggle */}
+                  <div className="flex items-center gap-sm">
+                    <input
+                      type="checkbox"
+                      id="isSurgicalToggle"
+                      checked={isSurgical}
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setIsSurgical(val);
+                        if (!val) setSurgicalCategory("");
+                      }}
+                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                    />
+                    <label htmlFor="isSurgicalToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
+                      Surgical Product
+                    </label>
+                  </div>
+
+                  {/* Specialities Select */}
+                  <div className="flex flex-col gap-sm pt-sm border-t border-slate-200/60 dark:border-zinc-800">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Associated Specialities (Select Multiple)
+                    </label>
+                    <div className="flex flex-wrap gap-xs">
+                      {allSpecialities.map((spec) => {
+                        const specId = spec._id || spec.id;
+                        const isSelected = selectedSpecialities.includes(specId);
+                        return (
+                          <button
+                            type="button"
+                            key={specId}
+                            onClick={() => {
+                              setSelectedSpecialities(prev =>
+                                prev.includes(specId)
+                                  ? prev.filter(id => id !== specId)
+                                  : [...prev, specId]
+                              );
+                            }}
+                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${isSelected
+                                ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
+                                : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-850"
+                              }`}
+                          >
+                            {isSelected && <Check size={10} />}
+                            {spec.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Surgical Category select box */}
+                  {isSurgical && (
+                    <div className="space-y-xs pt-sm border-t border-slate-200/60 dark:border-zinc-800 animate-[fade-in_0.2s_ease-out]">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Surgical Category *</label>
+                      <select
+                        required={isSurgical}
+                        value={surgicalCategory}
+                        onChange={(e) => setSurgicalCategory(e.target.value)}
+                        className="w-full p-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
+                      >
+                        <option value="">Select Surgical Category</option>
+                        {allSurgicalCategories.map((cat) => {
+                          const idVal = cat.id || cat._id;
+                          return (
+                            <option key={idVal} value={idVal}>{cat.name}</option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
                   <div className="space-y-xs">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Name *</label>
@@ -914,12 +1095,23 @@ const AddNewProduct = () => {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category *</label>
                     <select
                       value={getSelectedCategoryId()}
-                      onChange={(e) => setCategory(e.target.value)}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
                     >
-                      {allCategories.map((cat) => (
-                        <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
-                      ))}
+                      <optgroup label="Medicines &amp; Wellness Categories">
+                        {allCategories.map((cat) => (
+                          <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
+                        ))}
+                      </optgroup>
+                      {allSurgicalCategories && allSurgicalCategories.length > 0 && (
+                        <optgroup label="Surgical Categories">
+                          {allSurgicalCategories.map((scat) => (
+                            <option key={scat._id || scat.id} value={scat._id || scat.id}>
+                              {scat.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
                   <div className="space-y-xs sm:col-span-2">
@@ -1069,7 +1261,7 @@ const AddNewProduct = () => {
                     <input
                       type="number"
                       step="0.01"
-                      required
+                      required={!isSurgical && !isCategorySurgical(category)}
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
@@ -1086,6 +1278,130 @@ const AddNewProduct = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Surgical Variants Section */}
+              {(isSurgical || isCategorySurgical(category)) && (
+                <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs animate-[fade-in_0.2s_ease-out]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-xs border-b border-slate-100 dark:border-zinc-800">
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                        <span>Surgical Variants</span>
+                        <span className="bg-[#157A6D]/10 text-[#157A6D] dark:text-[#84d6b9] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {variants.length} Option{variants.length === 1 ? "" : "s"}
+                        </span>
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Add different sizes, configurations, or options available for this product.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addVariant}
+                      className="inline-flex items-center gap-1 bg-[#157A6D] hover:bg-[#116459] text-white px-3.5 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
+                    >
+                      <Plus size={14} />
+                      <span>Add Variant</span>
+                    </button>
+                  </div>
+
+                  {/* Desktop Header */}
+                  <div className="hidden md:grid grid-cols-12 gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+                    <div className="col-span-5">Variant / Option Name *</div>
+                    <div className="col-span-3">Price / MRP (₹) *</div>
+                    <div className="col-span-3">Selling Price (₹) *</div>
+                    <div className="col-span-1 text-center">Action</div>
+                  </div>
+
+                  {/* Variants List */}
+                  <div className="space-y-3">
+                    {variants.map((v, idx) => {
+                      const isPriceInvalid = v.price && v.sellingPrice && parseFloat(v.sellingPrice) > parseFloat(v.price);
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-3 rounded-xl border bg-slate-50 dark:bg-zinc-950 transition-all ${
+                            isPriceInvalid
+                              ? "border-rose-300 dark:border-rose-800/60 bg-rose-50/20"
+                              : "border-slate-200 dark:border-zinc-800"
+                          }`}
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                            {/* Option Name */}
+                            <div className="md:col-span-5 space-y-1">
+                              <label className="block md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Variant / Option Name *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={v.option}
+                                onChange={(e) => updateVariant(idx, "option", e.target.value)}
+                                placeholder="e.g. Small, Medium, Large, 50ml"
+                                className="w-full p-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-[#157A6D] rounded-xl outline-none font-medium text-xs text-slate-800 dark:text-zinc-100"
+                              />
+                            </div>
+
+                            {/* Price / MRP */}
+                            <div className="md:col-span-3 space-y-1">
+                              <label className="block md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Price / MRP (₹) *
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                required
+                                value={v.price}
+                                onChange={(e) => updateVariant(idx, "price", e.target.value)}
+                                placeholder="e.g. 500"
+                                className="w-full p-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-[#157A6D] rounded-xl outline-none font-medium text-xs text-slate-800 dark:text-zinc-100"
+                              />
+                            </div>
+
+                            {/* Selling Price */}
+                            <div className="md:col-span-3 space-y-1">
+                              <label className="block md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Selling Price (₹) *
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                required
+                                value={v.sellingPrice}
+                                onChange={(e) => updateVariant(idx, "sellingPrice", e.target.value)}
+                                placeholder="e.g. 399"
+                                className="w-full p-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-[#157A6D] rounded-xl outline-none font-medium text-xs text-slate-800 dark:text-zinc-100"
+                              />
+                            </div>
+
+                            {/* Remove Action */}
+                            <div className="md:col-span-1 flex items-center justify-end md:justify-center pt-1 md:pt-0">
+                              <button
+                                type="button"
+                                disabled={variants.length <= 1}
+                                onClick={() => removeVariant(idx)}
+                                className="p-2 text-slate-400 hover:text-rose-600 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
+                                title={variants.length <= 1 ? "Minimum 1 variant required" : "Remove variant"}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Error warning if sellingPrice > price */}
+                          {isPriceInvalid && (
+                            <div className="mt-2 text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                              <AlertTriangle size={13} />
+                              <span>Selling Price (₹{v.sellingPrice}) cannot exceed MRP / Price (₹{v.price}).</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+
+                </div>
+              )}
 
               {/* Section 3: Inventory */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
@@ -1267,77 +1583,7 @@ const AddNewProduct = () => {
                     </button>
                   </div>
 
-                  {/* Surgical Toggle */}
-                  <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
-                    <input
-                      type="checkbox"
-                      id="isSurgicalToggle"
-                      checked={isSurgical}
-                      onChange={(e) => {
-                        const val = e.target.checked;
-                        setIsSurgical(val);
-                        if (!val) setSurgicalCategory("");
-                      }}
-                      className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
-                    />
-                    <label htmlFor="isSurgicalToggle" className="font-bold text-slate-700 dark:text-zinc-200 select-none cursor-pointer">
-                      Surgical Product
-                    </label>
-                  </div>
 
-                  {/* Specialities Select */}
-                  <div className="flex flex-col gap-sm col-span-full pt-sm border-t border-slate-100 dark:border-zinc-800">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Associated Specialities (Select Multiple)
-                    </label>
-                    <div className="flex flex-wrap gap-xs">
-                      {allSpecialities.map((spec) => {
-                        const specId = spec._id || spec.id;
-                        const isSelected = selectedSpecialities.includes(specId);
-                        return (
-                          <button
-                            type="button"
-                            key={specId}
-                            onClick={() => {
-                              setSelectedSpecialities(prev =>
-                                prev.includes(specId)
-                                  ? prev.filter(id => id !== specId)
-                                  : [...prev, specId]
-                              );
-                            }}
-                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${isSelected
-                                ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
-                                : "bg-slate-50 dark:bg-zinc-955 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
-                              }`}
-                          >
-                            {isSelected && <Check size={10} />}
-                            {spec.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Surgical Category select box */}
-                  {isSurgical && (
-                    <div className="space-y-xs col-span-full pt-sm border-t border-slate-100 dark:border-zinc-800 animate-[fade-in_0.2s_ease-out]">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Surgical Category *</label>
-                      <select
-                        required={isSurgical}
-                        value={surgicalCategory}
-                        onChange={(e) => setSurgicalCategory(e.target.value)}
-                        className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none dark:text-zinc-200"
-                      >
-                        <option value="">Select Surgical Category</option>
-                        {allSurgicalCategories.map((cat) => {
-                          const idVal = cat.id || cat._id;
-                          return (
-                            <option key={idVal} value={idVal}>{cat.name}</option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  )}
 
                 </div>
               </div>

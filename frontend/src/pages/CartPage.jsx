@@ -223,7 +223,13 @@ const Cart = () => {
                         </Link>
                         
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-zinc-400 font-sans">
-                          <span className="font-medium text-slate-700 dark:text-zinc-300">{packSize}</span>
+                          {item.variant?.option ? (
+                            <span className="font-bold text-[#157a6d] dark:text-[#84d6b9] bg-[#157a6d]/10 px-2 py-0.5 rounded-md">
+                              Option: {item.variant.option}
+                            </span>
+                          ) : (
+                            <span className="font-medium text-slate-700 dark:text-zinc-300">{packSize}</span>
+                          )}
                           <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700"></span>
                           <span>By {manufacturer}</span>
                         </div>

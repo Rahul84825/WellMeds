@@ -260,6 +260,16 @@ const productSchema = new mongoose.Schema(
         "Surgical Category is required if product is surgical",
       ],
     },
+    variants: {
+      type: [
+        {
+          option: { type: String, required: true, trim: true },
+          price: { type: Number, required: true, min: 0 },
+          sellingPrice: { type: Number, required: true, min: 0 },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
