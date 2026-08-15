@@ -116,13 +116,14 @@ const Navbar = () => {
   // Mobile search drawer expansion state
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
 
-  // Scroll search bar visibility state (For Homepage scroll)
-  const [showNavbarSearch, setShowNavbarSearch] = useState(location.pathname !== "/");
+  // Scroll search bar visibility state (For Homepage and /delivery scroll)
+  const isHeroSearchPage = location.pathname === "/" || location.pathname === "/delivery";
+  const [showNavbarSearch, setShowNavbarSearch] = useState(!isHeroSearchPage);
 
   // Discrete State Machine Engine Refs
   const isNavVisibleRef = useRef(true);
   const isScrolledRef = useRef(false);
-  const showSearchRef = useRef(location.pathname !== "/");
+  const showSearchRef = useRef(!isHeroSearchPage);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -145,7 +146,7 @@ const Navbar = () => {
           }
 
           // 2. Search Bar Visibility State
-          const nextShowSearch = location.pathname === "/" ? currentScrollY > 180 : true;
+          const nextShowSearch = isHeroSearchPage ? currentScrollY > 180 : true;
           if (nextShowSearch !== showSearchRef.current) {
             showSearchRef.current = nextShowSearch;
             setShowNavbarSearch(nextShowSearch);

@@ -151,6 +151,7 @@ export const generatePagesSitemap = async (siteUrl) => {
     { url: "/about", priority: "0.6", changefreq: "monthly" },
     { url: "/contact", priority: "0.6", changefreq: "monthly" },
     { url: "/upload-prescription", priority: "0.6", changefreq: "monthly" },
+    { url: "/delivery", priority: "0.9", changefreq: "weekly" },
     { url: "/glp-1-medicines", priority: "0.8", changefreq: "weekly" },
     { url: "/health-supplements", priority: "0.8", changefreq: "weekly" },
     { url: "/patient-assistance-program", priority: "0.6", changefreq: "monthly" },

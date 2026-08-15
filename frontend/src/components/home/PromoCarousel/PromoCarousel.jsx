@@ -52,7 +52,7 @@ const promoBanners = [
     id: "delivery",
     img: deliveryImg,
     alt: "WellMeds Express Emergency Delivery — Cold Chain Certified",
-    link: "/products",
+    link: "/delivery",
   },
   {
     id: "glp1",

@@ -53,6 +53,7 @@ const PrivacyPolicyPage = lazy(() => import("../pages/PrivacyPolicyPage"));
 const TermsAndConditionsPage = lazy(() => import("../pages/TermsAndConditionsPage"));
 const RefundPolicyPage = lazy(() => import("../pages/RefundPolicyPage"));
 const ShippingPolicyPage = lazy(() => import("../pages/ShippingPolicyPage"));
+const DeliveryPage = lazy(() => import("../pages/DeliveryPage"));
 
 // Admin Pages (Lazy Loaded)
 const Dashboard = lazy(() => import("../admin/AdminDashboard"));
@@ -180,6 +181,7 @@ const AppRoutes = () => {
           <Route path="terms-and-conditions" element={<TermsAndConditionsPage />} />
           <Route path="refund-policy" element={<RefundPolicyPage />} />
           <Route path="shipping-policy" element={<ShippingPolicyPage />} />
+          <Route path="delivery" element={<DeliveryPage />} />
 
           {/* Dedicated Customer Auth Routes */}
           <Route path="login" element={<Login />} />

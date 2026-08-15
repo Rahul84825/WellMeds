@@ -134,6 +134,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/delivery" className="hover:text-white transition-colors">
+                  Medicine Delivery in Pune
+                </Link>
+              </li>
+              <li>
                 <Link to="/brands" className="hover:text-white transition-colors">
                   Pharmaceutical Brands
                 </Link>
