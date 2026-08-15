@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
@@ -68,6 +69,7 @@ const getStatusConfigLocal = (status) => {
 };
 
 const AdminPrescriptions = () => {
+  const navigate = useNavigate();
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -195,7 +197,9 @@ const AdminPrescriptions = () => {
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
-      setSelectedRx(null);
+      closeModal();
+      navigate("/admin/prescriptions");
+      fetchAllPrescriptions();
     } catch (err) {
       console.error("Failed to approve prescription", err);
     } finally {
@@ -216,7 +220,9 @@ const AdminPrescriptions = () => {
       setPrescriptions((prev) =>
         prev.map((rx) => ((rx.id || rx._id) === (updatedRx.id || updatedRx._id) ? { ...rx, ...updatedRx } : rx))
       );
-      setSelectedRx(null);
+      closeModal();
+      navigate("/admin/prescriptions");
+      fetchAllPrescriptions();
     } catch (err) {
       console.error("Failed to reject prescription", err);
     } finally {
@@ -313,7 +319,7 @@ const AdminPrescriptions = () => {
       {/* Title */}
       <div className="flex items-center gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-          <FileText className="text-[#02665e]" />
+          <FileText className="text-[#157A6D]" />
           Prescription Verification Portal
         </h1>
         <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-sm py-0.5 rounded-full text-[10px] font-bold">
@@ -330,7 +336,7 @@ const AdminPrescriptions = () => {
             placeholder="Search by patient, doctor, medicine, or filename..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-[#02665e] rounded-xl text-xs outline-none"
+            className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-[#157A6D] rounded-xl text-xs outline-none"
           />
         </div>
 
@@ -394,7 +400,7 @@ const AdminPrescriptions = () => {
                       </td>
                       <td className="p-md">{rx.createdAt ? formatDate(rx.createdAt) : "—"}</td>
                       <td className="p-md">
-                        <span className="font-bold text-[#02665e] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded text-[11px]">
+                        <span className="font-bold text-[#157A6D] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded text-[11px]">
                           {itemsCount} Item(s) Logged
                         </span>
                       </td>
@@ -404,7 +410,7 @@ const AdminPrescriptions = () => {
                           {config.label}
                         </span>
                       </td>
-                      <td className="p-md text-right font-bold text-[#02665e] dark:text-[#52d6c9]">Review &rarr;</td>
+                      <td className="p-md text-right font-bold text-[#157A6D] dark:text-[#52d6c9]">Review &rarr;</td>
                     </tr>
                   );
                 })
@@ -450,7 +456,7 @@ const AdminPrescriptions = () => {
                         href={activeFileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-[#02665e] text-white rounded-xl text-xs font-bold hover:bg-[#014d47] transition-all"
+                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-[#157A6D] text-white rounded-xl text-xs font-bold hover:bg-[#014d47] transition-all"
                       >
                         <ExternalLink size={14} /> Open PDF Document
                       </a>
@@ -487,7 +493,7 @@ const AdminPrescriptions = () => {
                           type="button"
                           onClick={() => setActiveFileIndex(idx)}
                           className={`w-12 h-12 rounded-xl border-2 overflow-hidden shrink-0 transition-all ${
-                            activeFileIndex === idx ? "border-[#02665e] ring-2 ring-[#02665e]/30" : "border-slate-200"
+                            activeFileIndex === idx ? "border-[#157A6D] ring-2 ring-[#157A6D]/30" : "border-slate-200"
                           }`}
                         >
                           {isPdf ? (
@@ -531,14 +537,14 @@ const AdminPrescriptions = () => {
                     placeholder="Enter doctor name (e.g. Dr. Rahul Sharma)"
                     value={doctorName}
                     onChange={(e) => setDoctorName(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#02665e]/20"
+                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#157A6D]/20"
                   />
                 </div>
 
                 {/* Pharmacist Medicine Search & Assignment */}
                 <div className="space-y-3 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/40">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-xs text-[#02665e] dark:text-emerald-300 flex items-center gap-1.5 uppercase tracking-wider">
+                    <h4 className="font-bold text-xs text-[#157A6D] dark:text-emerald-300 flex items-center gap-1.5 uppercase tracking-wider">
                       <Pill size={16} /> Prescribed Medicines Log ({prescribedItems.length})
                     </h4>
                   </div>
@@ -570,7 +576,7 @@ const AdminPrescriptions = () => {
                               <span className="font-bold text-slate-800 dark:text-zinc-200 block">{prod.name}</span>
                               <span className="text-[10px] text-slate-400">{prod.packSize || "1 Unit"}</span>
                             </div>
-                            <span className="font-bold text-[#02665e]">{formatCurrency(prod.price)}</span>
+                            <span className="font-bold text-[#157A6D]">{formatCurrency(prod.price)}</span>
                           </div>
                         ))}
                       </div>
@@ -585,7 +591,7 @@ const AdminPrescriptions = () => {
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-800 dark:text-zinc-200">{item.name}</span>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-[#02665e]">{formatCurrency(item.price * (item.quantity || 1))}</span>
+                              <span className="font-bold text-[#157A6D]">{formatCurrency(item.price * (item.quantity || 1))}</span>
                               <button
                                 type="button"
                                 onClick={() => handleRemovePrescribedItem(idx)}
@@ -627,7 +633,7 @@ const AdminPrescriptions = () => {
                       type="button"
                       onClick={handleSaveItemsOnly}
                       disabled={isSubmitting}
-                      className="text-xs font-bold text-[#02665e] hover:underline block ml-auto"
+                      className="text-xs font-bold text-[#157A6D] hover:underline block ml-auto"
                     >
                       Save Prescribed Items
                     </button>
@@ -642,7 +648,7 @@ const AdminPrescriptions = () => {
                     onChange={(e) => setAdminNotes(e.target.value)}
                     placeholder="Enter verification notes or rejection details for the patient..."
                     rows={2}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#02665e]/20"
+                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#157A6D]/20"
                   />
                 </div>
 
@@ -658,7 +664,7 @@ const AdminPrescriptions = () => {
                   <button
                     onClick={handleApprove}
                     disabled={isSubmitting}
-                    className="flex-1 bg-[#02665e] hover:bg-[#014d47] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs shadow-sm cursor-pointer"
+                    className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs shadow-sm cursor-pointer"
                   >
                     <Check size={16} /> Approve &amp; Sync Cart
                   </button>

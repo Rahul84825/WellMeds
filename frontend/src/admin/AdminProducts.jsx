@@ -144,7 +144,7 @@ const ManageProducts = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
           <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-            <Package className="text-[#004782]" />
+            <Package className="text-[#157A6D]" />
             Products Inventory
           </h1>
           <p className="text-xs text-slate-400 font-medium">
@@ -153,7 +153,7 @@ const ManageProducts = () => {
         </div>
         <button
           onClick={() => navigate({ pathname: "/admin/products/new", search: location.search })}
-          className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/10 select-none cursor-pointer"
+          className="bg-[#157A6D] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:bg-[#116459] active:scale-95 transition-all shadow-md select-none cursor-pointer"
         >
           <Plus size={16} />
           Add Product
@@ -226,7 +226,7 @@ const ManageProducts = () => {
           <span>Prescription Filter:</span>
           <button
             onClick={() => updateQueryParams({ rx: "All" }, true)}
-            className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "All" ? "bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff]" : "hover:text-slate-600"}`}
+            className={`px-sm py-0.5 rounded transition-colors ${rxFilter === "All" ? "bg-[#157A6D]/10 text-[#157A6D] dark:text-[#84d6b9]" : "hover:text-slate-600"}`}
           >
             All Items
           </button>
@@ -342,7 +342,7 @@ const ManageProducts = () => {
                       <div className="flex items-center justify-end gap-xs">
                         <button
                           onClick={() => navigate({ pathname: `/admin/products/${prodId}/edit`, search: location.search })}
-                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg transition-colors cursor-pointer"
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#157A6D] dark:hover:text-[#84d6b9] rounded-lg transition-colors cursor-pointer"
                           title="Edit Details"
                         >
                           <Edit size={14} />
@@ -435,7 +435,7 @@ const ManageProducts = () => {
                   <div className="flex items-center gap-sm">
                     <button
                       onClick={() => navigate({ pathname: `/admin/products/${prodId}/edit`, search: location.search })}
-                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800 cursor-pointer"
+                      className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#157A6D] dark:hover:text-[#84d6b9] rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center border border-slate-100 dark:border-zinc-800 cursor-pointer"
                       title="Edit Details"
                     >
                       <Edit size={14} />

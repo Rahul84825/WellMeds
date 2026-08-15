@@ -226,7 +226,7 @@ const AdminMegaMenu = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-50 flex items-center gap-2">
-            <Globe className="text-[#004782]" />
+            <Globe className="text-[#157A6D]" />
             <span>Medicines Mega Menu Management</span>
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -244,7 +244,7 @@ const AdminMegaMenu = () => {
           </button>
           <button
             onClick={openAddMode}
-            className="flex items-center gap-2 bg-[#004782] hover:bg-[#003866] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.98] shadow-sm select-none cursor-pointer"
+            className="flex items-center gap-2 bg-[#157A6D] hover:bg-[#116459] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.98] shadow-sm select-none cursor-pointer"
           >
             <Plus size={16} />
             <span>Add Item</span>
@@ -265,7 +265,7 @@ const AdminMegaMenu = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 font-semibold text-sm border-b-2 transition-all whitespace-nowrap outline-none cursor-pointer ${
               activeTab === tab.id
-                ? "border-[#004782] text-[#004782] dark:text-[#a4c9ff]"
+                ? "border-[#157A6D] text-[#157A6D] dark:text-[#a4c9ff]"
                 : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-100"
             }`}
           >
@@ -350,26 +350,26 @@ const AdminMegaMenu = () => {
                         {item.type === "condition" && (
                           <div className="text-xs">
                             <span className="font-semibold text-slate-500">Linked Category: </span>
-                            <span className="font-bold text-[#004782]">{item.linkedCategory || "None"}</span>
+                            <span className="font-bold text-[#157A6D]">{item.linkedCategory || "None"}</span>
                           </div>
                         )}
                         {item.type === "speciality" && (
                           <div className="text-xs">
                             <span className="font-semibold text-slate-500">Linked Speciality Slug: </span>
-                            <span className="font-bold text-[#004782]">{item.linkedSpeciality || "None"}</span>
+                            <span className="font-bold text-[#157A6D]">{item.linkedSpeciality || "None"}</span>
                           </div>
                         )}
                         {item.type === "source" && (
                           <div className="text-xs">
                             <span className="font-semibold text-slate-500">Query Parameter: </span>
-                            <span className="font-bold text-[#004782]">{item.queryParam || "None"}</span>
+                            <span className="font-bold text-[#157A6D]">{item.queryParam || "None"}</span>
                           </div>
                         )}
                         {item.type === "quick-link" && (
                           <div className="flex flex-col gap-0.5 text-xs">
                             <div>
                               <span className="font-semibold text-slate-500">Route / Link: </span>
-                              <span className="font-bold text-[#004782]">{item.route || "None"}</span>
+                              <span className="font-bold text-[#157A6D]">{item.route || "None"}</span>
                             </div>
                             <div>
                               <span className="text-[10px] text-slate-400 font-medium">
@@ -452,7 +452,7 @@ const AdminMegaMenu = () => {
               placeholder={activeTab === "quickLinks" ? "e.g. Upload Prescription" : "e.g. Cardiac Care"}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
             />
           </div>
 
@@ -464,7 +464,7 @@ const AdminMegaMenu = () => {
               placeholder="e.g. cardiac-care"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
             />
           </div>
 
@@ -476,7 +476,7 @@ const AdminMegaMenu = () => {
               placeholder="e.g. Heart, Globe, Handshake, Percent, FileText"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+              className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
             />
             <p className="text-[10px] text-slate-400 font-medium">Lucide icon name identifier (e.g. Globe, Activity, Heart, Handshake).</p>
           </div>
@@ -488,7 +488,7 @@ const AdminMegaMenu = () => {
               <select
                 value={linkedCategory}
                 onChange={(e) => setLinkedCategory(e.target.value)}
-                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
               >
                 <option value="">-- Select Storefront Category --</option>
                 {categories.map((c) => (
@@ -507,7 +507,7 @@ const AdminMegaMenu = () => {
               <select
                 value={linkedSpeciality}
                 onChange={(e) => setLinkedSpeciality(e.target.value)}
-                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
               >
                 <option value="">-- Select Storefront Speciality --</option>
                 {specialitiesList.map((s) => (
@@ -528,7 +528,7 @@ const AdminMegaMenu = () => {
                 placeholder="e.g. isImported=true"
                 value={queryParam}
                 onChange={(e) => setQueryParam(e.target.value)}
-                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+                className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
               />
             </div>
           )}
@@ -543,7 +543,7 @@ const AdminMegaMenu = () => {
                   placeholder="e.g. /offers or tel:+917798795353"
                   value={route}
                   onChange={(e) => setRoute(e.target.value)}
-                  className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+                  className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
                 />
               </div>
 
@@ -554,7 +554,7 @@ const AdminMegaMenu = () => {
                     id="isExternal"
                     checked={isExternal}
                     onChange={(e) => setIsExternal(e.target.checked)}
-                    className="h-4 w-4 text-[#004782] border-slate-200 focus:ring-[#004782] rounded"
+                    className="h-4 w-4 text-[#157A6D] border-slate-200 focus:ring-[#157A6D] rounded"
                   />
                   <label htmlFor="isExternal" className="text-xs font-bold text-slate-700 dark:text-zinc-300">External URL</label>
                 </div>
@@ -565,7 +565,7 @@ const AdminMegaMenu = () => {
                     id="openInNewTab"
                     checked={openInNewTab}
                     onChange={(e) => setOpenInNewTab(e.target.checked)}
-                    className="h-4 w-4 text-[#004782] border-slate-200 focus:ring-[#004782] rounded"
+                    className="h-4 w-4 text-[#157A6D] border-slate-200 focus:ring-[#157A6D] rounded"
                   />
                   <label htmlFor="openInNewTab" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Open in New Tab</label>
                 </div>
@@ -578,7 +578,7 @@ const AdminMegaMenu = () => {
                     id="isHelpCard"
                     checked={isHelpCard}
                     onChange={(e) => setIsHelpCard(e.target.checked)}
-                    className="h-4 w-4 text-[#004782] border-slate-200 focus:ring-[#004782] rounded"
+                    className="h-4 w-4 text-[#157A6D] border-slate-200 focus:ring-[#157A6D] rounded"
                   />
                   <label htmlFor="isHelpCard" className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1">
                     <span>Render as "Need Help" Card at Bottom</span>
@@ -593,7 +593,7 @@ const AdminMegaMenu = () => {
                       placeholder="e.g. Free support from licensed pharmacists."
                       value={helpSubtext}
                       onChange={(e) => setHelpSubtext(e.target.value)}
-                      className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#004782] focus:border-[#004782]"
+                      className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
                     />
                   </div>
                 )}
@@ -608,7 +608,7 @@ const AdminMegaMenu = () => {
               id="visible"
               checked={visible}
               onChange={(e) => setVisible(e.target.checked)}
-              className="h-4 w-4 text-[#004782] border-slate-200 focus:ring-[#004782] rounded"
+              className="h-4 w-4 text-[#157A6D] border-slate-200 focus:ring-[#157A6D] rounded"
             />
             <label htmlFor="visible" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Visible on Storefront Mega Menu</label>
           </div>
@@ -625,7 +625,7 @@ const AdminMegaMenu = () => {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-[#004782] hover:bg-[#003866] text-white rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.98] outline-none cursor-pointer flex items-center justify-center gap-1.5"
+              className="px-4 py-2 bg-[#157A6D] hover:bg-[#116459] text-white rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.98] outline-none cursor-pointer flex items-center justify-center gap-1.5"
             >
               {saving ? "Saving..." : "Save Item"}
             </button>

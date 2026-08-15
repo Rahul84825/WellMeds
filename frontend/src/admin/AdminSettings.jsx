@@ -87,7 +87,7 @@ const AdminSettings = () => {
       {/* Title */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-          <Settings className="text-[#004782]" />
+          <Settings className="text-[#157A6D]" />
           System Settings
         </h1>
         <p className="text-xs text-slate-400 font-medium">Configure global shop operating limits, customize staff details, and modify backend alerts.</p>
@@ -101,7 +101,7 @@ const AdminSettings = () => {
           {/* Section 1: Administrator Profile */}
           <form onSubmit={handleSaveProfile} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
             <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
-              <User size={18} className="text-[#004782]" />
+              <User size={18} className="text-[#157A6D]" />
               <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">Admin Staff Profile</h2>
             </div>
 
@@ -135,7 +135,7 @@ const AdminSettings = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
 
@@ -145,7 +145,7 @@ const AdminSettings = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
 
@@ -155,7 +155,7 @@ const AdminSettings = () => {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
             </div>
@@ -164,7 +164,7 @@ const AdminSettings = () => {
               <button
                 type="submit"
                 disabled={savingSection === "profile"}
-                className="bg-[#004782] hover:bg-[#003562] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
+                className="bg-[#157A6D] hover:bg-[#116459] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
               >
                 {savingSection === "profile" ? <Loader size="sm" /> : <Save size={14} />}
                 Save Profile
@@ -175,7 +175,7 @@ const AdminSettings = () => {
           {/* Section 2: Store Operations */}
           <form onSubmit={handleSaveStore} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
             <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
-              <Store size={18} className="text-[#004782]" />
+              <Store size={18} className="text-[#157A6D]" />
               <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">E-Commerce & Delivery Settings</h2>
             </div>
 
@@ -186,7 +186,7 @@ const AdminSettings = () => {
                   type="number"
                   value={freeShippingThreshold}
                   onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
 
@@ -196,7 +196,7 @@ const AdminSettings = () => {
                   type="number"
                   value={standardDeliveryFee}
                   onChange={(e) => setStandardDeliveryFee(Number(e.target.value))}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
 
@@ -206,7 +206,7 @@ const AdminSettings = () => {
                   type="number"
                   value={taxRate}
                   onChange={(e) => setTaxRate(Number(e.target.value))}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
 
@@ -216,7 +216,7 @@ const AdminSettings = () => {
                   type="text"
                   value={currencySymbol}
                   onChange={(e) => setCurrencySymbol(e.target.value)}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#004782]"
+                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
                 />
               </div>
             </div>
@@ -225,7 +225,7 @@ const AdminSettings = () => {
               <button
                 type="submit"
                 disabled={savingSection === "store"}
-                className="bg-[#004782] hover:bg-[#003562] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
+                className="bg-[#157A6D] hover:bg-[#116459] text-white px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors shadow-xs"
               >
                 {savingSection === "store" ? <Loader size="sm" /> : <Save size={14} />}
                 Save Parameters
@@ -241,7 +241,7 @@ const AdminSettings = () => {
           {/* Notifications Card */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">
             <div className="flex items-center gap-xs border-b border-slate-100 dark:border-zinc-800 pb-xs">
-              <Bell size={18} className="text-[#004782]" />
+              <Bell size={18} className="text-[#157A6D]" />
               <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">Alert Preferences</h2>
             </div>
 
@@ -255,7 +255,7 @@ const AdminSettings = () => {
                     setEmailOrderAlerts(e.target.checked);
                     handleSaveNotify();
                   }}
-                  className="w-4 h-4 accent-[#004782] rounded"
+                  className="w-4 h-4 accent-[#157A6D] rounded"
                 />
               </label>
 
@@ -268,7 +268,7 @@ const AdminSettings = () => {
                     setSmsPrescriptionAlerts(e.target.checked);
                     handleSaveNotify();
                   }}
-                  className="w-4 h-4 accent-[#004782] rounded"
+                  className="w-4 h-4 accent-[#157A6D] rounded"
                 />
               </label>
 
@@ -281,7 +281,7 @@ const AdminSettings = () => {
                     setLowStockWarning(e.target.checked);
                     handleSaveNotify();
                   }}
-                  className="w-4 h-4 accent-[#004782] rounded"
+                  className="w-4 h-4 accent-[#157A6D] rounded"
                 />
               </label>
             </div>
@@ -290,7 +290,7 @@ const AdminSettings = () => {
           {/* System Info */}
           <div className="bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 p-md rounded-2xl text-xs space-y-xs text-slate-600 dark:text-zinc-400">
             <div className="flex items-center gap-xs font-bold text-slate-800 dark:text-zinc-200">
-              <ShieldCheck size={16} className="text-[#004782]" />
+              <ShieldCheck size={16} className="text-[#157A6D]" />
               WellMeds Core Stack Version
             </div>
             <p>Framework: React 18 + Vite</p>

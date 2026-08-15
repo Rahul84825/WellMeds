@@ -149,7 +149,7 @@ const AdminSurgicalCategories = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
           <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-            <Layers className="text-[#004782]" />
+            <Layers className="text-[#157A6D]" />
             Surgical Categories
           </h1>
           <p className="text-xs text-slate-400 font-medium">
@@ -158,7 +158,7 @@ const AdminSurgicalCategories = () => {
         </div>
         <button
           onClick={openAddMode}
-          className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/10 select-none cursor-pointer"
+          className="bg-[#157A6D] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:bg-[#116459] active:scale-95 transition-all shadow-md select-none cursor-pointer"
         >
           <Plus size={16} />
           Create Surgical Category
@@ -207,7 +207,7 @@ const AdminSurgicalCategories = () => {
                       <div className="flex items-center justify-end gap-xs">
                         <button
                           onClick={() => openEditMode(c)}
-                          className="p-xs text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] rounded-lg transition-colors"
+                          className="p-xs text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#157A6D] rounded-lg transition-colors"
                           title="Edit Category"
                         >
                           <Edit size={14} />
@@ -280,7 +280,7 @@ const AdminSurgicalCategories = () => {
                   </div>
                 ) : (
                   <>
-                    <label className="bg-[#004782] text-white px-md py-1.5 rounded-xl font-bold text-[10px] hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer w-fit">
+                    <label className="bg-[#157A6D] hover:bg-[#116459] text-white px-md py-1.5 rounded-xl font-bold text-[10px] active:scale-95 transition-all select-none cursor-pointer w-fit">
                       Choose Image
                       <input
                         type="file"
@@ -301,7 +301,7 @@ const AdminSurgicalCategories = () => {
             <button
               type="submit"
               disabled={saving || uploadingImage}
-              className="flex-1 bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
+              className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
             >
               {saving ? "Saving..." : "Save"}
             </button>

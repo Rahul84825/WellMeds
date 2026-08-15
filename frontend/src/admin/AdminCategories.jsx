@@ -159,14 +159,14 @@ const ProductCategories = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
           <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-            <Layers className="text-[#004782]" />
+            <Layers className="text-[#157A6D]" />
             Product Categories
           </h1>
           <p className="text-xs text-slate-400 font-medium">Configure store sections, customize section illustrations, and view catalog inventory distribution.</p>
         </div>
         <button
           onClick={openAddMode}
-          className="bg-primary text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/10 select-none cursor-pointer"
+          className="bg-[#157A6D] hover:bg-[#116459] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs active:scale-95 transition-all shadow-md select-none cursor-pointer"
         >
           <Plus size={16} />
           Create Category
@@ -317,7 +317,7 @@ const ProductCategories = () => {
             <button
               type="submit"
               disabled={saving || uploading}
-              className="flex-1 bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
+              className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-sm rounded-xl transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
             >
               {saving ? "Saving..." : "Save Category"}
             </button>

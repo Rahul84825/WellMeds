@@ -3,14 +3,14 @@ import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import { api, MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "../services/api";
 import Loader from "../components/Loader";
 import { calculateDiscountPercent, calculateSavings, formatPrice } from "../utils/currency";
-import { 
-  ArrowLeft, 
-  Upload, 
-  Trash2, 
-  Plus, 
-  Check, 
-  Sparkles, 
-  PackageCheck, 
+import {
+  ArrowLeft,
+  Upload,
+  Trash2,
+  Plus,
+  Check,
+  Sparkles,
+  PackageCheck,
   RefreshCw,
   Copy,
   ArrowUp,
@@ -277,7 +277,7 @@ const AddNewProduct = () => {
   const [isGLP1Medicine, setIsGLP1Medicine] = useState(false);
   const [isHealthSupplement, setIsHealthSupplement] = useState(false);
   const [isBestSeller, setIsBestSeller] = useState(false);
-  
+
   // Images
   const [images, setImages] = useState([]);
   const [primaryImageIdx, setPrimaryImageIdx] = useState(0);
@@ -349,7 +349,7 @@ const AddNewProduct = () => {
   const [activeSafetySection, setActiveSafetySection] = useState("usage");
   const [activeSeoCmsSection, setActiveSeoCmsSection] = useState("faqs");
   const [activeMedicalSecIdx, setActiveMedicalSecIdx] = useState(0);
-  
+
   // SEO States
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
@@ -377,7 +377,7 @@ const AddNewProduct = () => {
             setProductType(product.productType || "medicine");
             setPrice(product.price || "");
             setOriginalPrice(product.originalPrice || "");
-            
+
             let initialInStock = true;
             if (product.stock === 0) {
               initialInStock = false;
@@ -392,14 +392,14 @@ const AddNewProduct = () => {
             setIsPrescriptionRequired(product.isPrescriptionRequired || product.requiresRx || false);
             setIsColdChain(product.isColdChain || false);
             setDescription(product.description || "");
-            
+
             // V2 Fields
             setManufacturer(product.manufacturer || product.brand || "");
             setSlug(product.slug || "");
             setIsGLP1Medicine(product.isGLP1Medicine || false);
             setIsHealthSupplement(product.isHealthSupplement || false);
             setIsBestSeller(product.isBestSeller || product.isHealthSupplement || false);
-            
+
             if (product.images && product.images.length > 0) {
               setImages(product.images);
               const idx = product.images.indexOf(product.image);
@@ -444,7 +444,7 @@ const AddNewProduct = () => {
               setSpecStorage("");
               setSpecColdChain(product.isColdChain ? "Yes" : "No");
             }
-            
+
             if (product.seo) {
               setMetaTitle(product.seo.metaTitle || "");
               setMetaDescription(product.seo.metaDescription || "");
@@ -733,7 +733,7 @@ const AddNewProduct = () => {
       molecules: selectedMolecules,
       isSurgical,
       surgicalCategory: isSurgical && surgicalCategory ? surgicalCategory : undefined,
-      
+
       // V2 Fields
       manufacturer: specManufacturer.trim() || manufacturer.trim(),
       strength: specStrength.trim(),
@@ -741,7 +741,7 @@ const AddNewProduct = () => {
       isGLP1Medicine,
       isHealthSupplement,
       isBestSeller,
-      
+
       // CMS Arrays
       medicalSections: cleanMedicalSections,
       composition: cleanComposition,
@@ -754,7 +754,7 @@ const AddNewProduct = () => {
       faqs: cleanFaqs,
       specifications: cleanSpecs,
       references: cleanRefs,
-      
+
       // New Fixed Product Specifications
       productSpecifications: {
         genericName: specGenericName.trim(),
@@ -766,7 +766,7 @@ const AddNewProduct = () => {
         coldChain: specColdChain,
         storage: specStorage.trim()
       },
-      
+
       // SEO Metadata
       seo: {
         metaTitle: metaTitle.trim() || undefined,
@@ -802,7 +802,7 @@ const AddNewProduct = () => {
 
   return (
     <div className="space-y-md sm:space-y-xl animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-6">
-      
+
       {/* Mobile Compact Sticky Top Header (Positioned below 64px Admin Navbar) */}
       <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-xs">
         <Link to={`/admin/products${location.search || ""}`} className="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all">
@@ -839,7 +839,7 @@ const AddNewProduct = () => {
 
       {/* Desktop Header */}
       <h1 className="hidden md:flex font-bold text-xl sm:text-2xl text-slate-800 dark:text-zinc-100 items-center gap-xs flex-wrap">
-        <Sparkles className="text-[#038076] shrink-0" size={24} />
+        <Sparkles className="text-[#157A6D] shrink-0" size={24} />
         <span className="break-words">{isEditMode ? `Product CMS: ${name}` : "Create Catalog Product & Medical Article"}</span>
       </h1>
 
@@ -858,11 +858,10 @@ const AddNewProduct = () => {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 py-3 sm:py-2.5 px-3 sm:px-4 border-b-2 font-bold text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer min-h-[44px] ${
-                activeTab === tab.id
-                  ? "border-[#038076] text-[#038076] dark:text-[#84d6b9]"
+              className={`flex items-center gap-1.5 py-3 sm:py-2.5 px-3 sm:px-4 border-b-2 font-bold text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer min-h-[44px] ${activeTab === tab.id
+                  ? "border-[#157A6D] text-[#157A6D] dark:text-[#84d6b9]"
                   : "border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900"
-              }`}
+                }`}
             >
               <Icon size={15} />
               {tab.label}
@@ -872,20 +871,20 @@ const AddNewProduct = () => {
       </div>
 
       <form onSubmit={handleSave} className="flex flex-col lg:flex-row gap-lg items-start">
-        
+
         {/* Left Form Panel */}
         <div className="flex-1 w-full space-y-lg">
-          
+
           {/* TAB 1: BASIC INFO */}
           {activeTab === "basic" && (
             <div className="space-y-lg w-full">
-              
+
               {/* Section 1: Basic Information */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-lg shadow-sm space-y-md text-xs">
                 <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
                   Basic Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
                   <div className="space-y-xs">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Name *</label>
@@ -941,7 +940,7 @@ const AddNewProduct = () => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     Associated Molecules (Search &amp; Select Multiple)
                   </label>
-                  
+
                   {/* Selected Molecule Badges */}
                   <div className="flex flex-wrap gap-xs pb-xs">
                     {selectedMolecules.map((molId) => {
@@ -983,8 +982,8 @@ const AddNewProduct = () => {
                     />
                     {moleculeDropdownOpen && (
                       <>
-                        <div 
-                          className="fixed inset-0 z-10" 
+                        <div
+                          className="fixed inset-0 z-10"
                           onClick={() => setMoleculeDropdownOpen(false)}
                         />
                         <div className="absolute left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-20 divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
@@ -1028,8 +1027,8 @@ const AddNewProduct = () => {
                             const matchesAlias = mol.aliases?.some(alias => alias.toLowerCase().includes(query));
                             return matchesName || matchesAlias;
                           }).length === 0 && (
-                            <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
-                          )}
+                              <div className="p-sm text-slate-400 italic text-center">No matching molecules found.</div>
+                            )}
                         </div>
                       </>
                     )}
@@ -1158,7 +1157,7 @@ const AddNewProduct = () => {
                   Prescription &amp; Medical Rules
                 </h3>
                 <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-sm sm:gap-md">
-                  
+
                   {/* Rx Toggle */}
                   <div className="flex items-center gap-sm p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 rounded-xl">
                     <input
@@ -1242,28 +1241,24 @@ const AddNewProduct = () => {
                       type="button"
                       id="isWellnessToggle"
                       onClick={() => setProductType(productType === "wellness" ? "medicine" : "wellness")}
-                      className={`relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary ${
-                        productType === "wellness" ? "bg-[#038076]" : "bg-slate-300 dark:bg-zinc-800"
-                      }`}
+                      className={`relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary ${productType === "wellness" ? "bg-[#038076]" : "bg-slate-300 dark:bg-zinc-800"
+                        }`}
                     >
                       <span className="sr-only">Toggle Wellness Product</span>
                       <span
-                        className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-                          productType === "wellness" ? "translate-x-6" : "translate-x-0"
-                        }`}
+                        className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${productType === "wellness" ? "translate-x-6" : "translate-x-0"
+                          }`}
                       >
                         <span
-                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${
-                            productType === "wellness" ? "opacity-100 ease-in" : "opacity-0 ease-out"
-                          }`}
+                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${productType === "wellness" ? "opacity-100 ease-in" : "opacity-0 ease-out"
+                            }`}
                           aria-hidden="true"
                         >
                           <span className="text-[8px] font-extrabold text-[#038076]">ON</span>
                         </span>
                         <span
-                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${
-                            productType === "wellness" ? "opacity-0 ease-out" : "opacity-100 ease-in"
-                          }`}
+                          className={`absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ${productType === "wellness" ? "opacity-0 ease-out" : "opacity-100 ease-in"
+                            }`}
                           aria-hidden="true"
                         >
                           <span className="text-[8px] font-extrabold text-slate-400">OFF</span>
@@ -1304,17 +1299,16 @@ const AddNewProduct = () => {
                             type="button"
                             key={specId}
                             onClick={() => {
-                              setSelectedSpecialities(prev => 
+                              setSelectedSpecialities(prev =>
                                 prev.includes(specId)
                                   ? prev.filter(id => id !== specId)
                                   : [...prev, specId]
                               );
                             }}
-                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${
-                              isSelected
+                            className={`flex items-center gap-xs px-sm py-1.5 rounded-xl border text-[11px] font-semibold transition-all select-none cursor-pointer ${isSelected
                                 ? "bg-[#004782]/10 border-[#004782] text-primary dark:text-[#a4c9ff] dark:border-[#a4c9ff]"
                                 : "bg-slate-50 dark:bg-zinc-955 border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
-                            }`}
+                              }`}
                           >
                             {isSelected && <Check size={10} />}
                             {spec.name}
@@ -1374,7 +1368,7 @@ const AddNewProduct = () => {
                   const parsedPreview = parseTextareaToArray(sec.content);
 
                   return (
-                    <div 
+                    <div
                       key={index}
                       className="border border-slate-200 dark:border-zinc-850 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-zinc-950/10 transition-all"
                     >
@@ -1485,7 +1479,7 @@ const AddNewProduct = () => {
           {activeTab === "clinical" && (
             <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">              {/* Accordion Group */}
               <div className="space-y-md">
-                
+
                 {/* Accordion Panel 1: Benefits */}
                 <AccordionSection
                   title="Key Health Benefits"
@@ -1560,8 +1554,8 @@ const AddNewProduct = () => {
                             >
                               <option value="">Select Dosage Form</option>
                               {[
-                                "Tablet", "Capsule", "Injection", "Syrup", "Suspension", 
-                                "Oral Solution", "Powder", "Cream", "Ointment", "Gel", 
+                                "Tablet", "Capsule", "Injection", "Syrup", "Suspension",
+                                "Oral Solution", "Powder", "Cream", "Ointment", "Gel",
                                 "Lotion", "Drops", "Spray", "Inhaler", "Sachet", "Softgel", "Others"
                               ].map((opt) => (
                                 <option key={opt} value={opt}>{opt}</option>
@@ -1580,7 +1574,7 @@ const AddNewProduct = () => {
                             >
                               <option value="">Select Route</option>
                               {[
-                                "Oral", "Intravenous (IV)", "Intramuscular (IM)", "Subcutaneous (SC)", 
+                                "Oral", "Intravenous (IV)", "Intramuscular (IM)", "Subcutaneous (SC)",
                                 "Topical", "Ophthalmic", "Nasal", "Rectal", "Inhalation", "Others"
                               ].map((opt) => (
                                 <option key={opt} value={opt}>{opt}</option>
@@ -1682,10 +1676,10 @@ const AddNewProduct = () => {
           {/* TAB 4: SAFETY & INSTRUCTIONS */}
           {activeTab === "safety" && (
             <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
-              
+
               {/* Accordion Group */}
               <div className="space-y-md">
-                
+
                 {/* Accordion Panel 1: Usage */}
                 <AccordionSection
                   title="Usage & Dosage Instructions"
@@ -1788,11 +1782,10 @@ const AddNewProduct = () => {
                     return (
                       <div
                         key={index}
-                        className={`p-md bg-slate-50/50 dark:bg-zinc-955/20 rounded-2xl border transition-all space-y-md relative ${
-                          isDuplicate
+                        className={`p-md bg-slate-50/50 dark:bg-zinc-955/20 rounded-2xl border transition-all space-y-md relative ${isDuplicate
                             ? "border-red-400 bg-red-50/30 dark:border-red-900/50"
                             : "border-slate-200/70 dark:border-zinc-800/70"
-                        }`}
+                          }`}
                       >
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-start">
                           {/* Category Selection & Image Preview */}
@@ -1853,11 +1846,10 @@ const AddNewProduct = () => {
                                   type="button"
                                   key={preset}
                                   onClick={() => updateSafetyCard(index, "status", preset)}
-                                  className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold uppercase transition-all ${
-                                    card.status === preset
+                                  className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold uppercase transition-all ${card.status === preset
                                       ? "bg-[#004782] text-white shadow-xs"
                                       : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-400"
-                                  }`}
+                                    }`}
                                 >
                                   {preset}
                                 </button>
@@ -1917,10 +1909,10 @@ const AddNewProduct = () => {
           {/* TAB 5: FAQS & SEO METADATA */}
           {activeTab === "seo" && (
             <div className="space-y-lg text-xs animate-[fade-in_0.2s_ease-out]">
-              
+
               {/* Accordion Group */}
               <div className="space-y-md">
-                
+
                 {/* Accordion Panel 1: Patient FAQs */}
                 <AccordionSection
                   title="Patient FAQs"
@@ -1967,7 +1959,7 @@ const AddNewProduct = () => {
                 <h3 className="font-bold text-sm text-slate-800 dark:text-zinc-100 pb-xs border-b border-slate-100 dark:border-zinc-800">
                   Search Engine Optimization (SEO)
                 </h3>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
                   <div className="space-y-xs">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Meta Title</label>
@@ -2043,7 +2035,7 @@ const AddNewProduct = () => {
 
         {/* Right Media & Publishing Panel */}
         <div className={`w-full lg:w-[350px] shrink-0 space-y-md bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-sm sm:p-lg rounded-2xl shadow-sm text-xs lg:sticky lg:top-6 ${activeTab === "basic" ? "block" : "hidden lg:block"}`}>
-          
+
           <div className="flex justify-between items-center pb-xs border-b border-slate-100 dark:border-zinc-800">
             <h4 className="font-bold text-sm text-slate-800 dark:text-zinc-100">Product Images</h4>
             <span className="text-[10px] bg-slate-100 dark:bg-zinc-800 px-sm py-0.5 rounded text-slate-400 font-bold">Media Hub</span>
@@ -2054,17 +2046,16 @@ const AddNewProduct = () => {
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-2xl p-lg flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-              dragOver 
-                ? "border-primary bg-[#004782]/5" 
+            className={`border-2 border-dashed rounded-2xl p-lg flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragOver
+                ? "border-primary bg-[#004782]/5"
                 : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
-            }`}
+              }`}
           >
             <Upload size={24} className="text-slate-400 mb-xs" />
             <p className="font-semibold text-slate-700 dark:text-zinc-300">Drag & Drop Images here</p>
             <p className="text-[10px] text-slate-400 mt-xs mb-sm">Supports PNG, JPG, JPEG, WEBP up to 10MB</p>
-            
-            <label className="bg-[#004782] text-white px-lg py-3 rounded-xl font-bold text-xs hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer min-h-[48px] inline-flex items-center justify-center">
+
+            <label className="bg-[#157A6D] hover:bg-[#116459] text-white px-lg py-3 rounded-xl font-bold text-xs hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer min-h-[48px] inline-flex items-center justify-center">
               Choose Files
               <input
                 type="file"
@@ -2094,24 +2085,23 @@ const AddNewProduct = () => {
             {images.map((url, index) => {
               const isPrimary = primaryImageIdx === index;
               return (
-                <div 
-                  key={index} 
-                  className={`flex gap-sm p-xs rounded-xl border relative group transition-all ${
-                    isPrimary 
-                      ? "border-emerald-500 bg-emerald-500/[0.03]" 
+                <div
+                  key={index}
+                  className={`flex gap-sm p-xs rounded-xl border relative group transition-all ${isPrimary
+                      ? "border-emerald-500 bg-emerald-500/[0.03]"
                       : "border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/20"
-                  }`}
+                    }`}
                 >
                   <img src={url} className="w-20 h-20 rounded-lg object-cover border border-slate-200 dark:border-zinc-800 shrink-0" alt="" />
-                  
+
                   <div className="flex-1 flex flex-col justify-between py-xs truncate">
                     <div className="flex justify-between items-center gap-xs truncate">
                       <span className="text-[10px] text-slate-400 font-bold truncate">Image #{index + 1}</span>
-                      
+
                       {/* Reorder / Delete buttons */}
                       <div className="flex items-center gap-xs opacity-80 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => reorderImage(index, "up")}
                           disabled={index === 0}
                           className="p-0.5 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 rounded disabled:opacity-30"
@@ -2119,8 +2109,8 @@ const AddNewProduct = () => {
                         >
                           <ArrowUp size={12} />
                         </button>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => reorderImage(index, "down")}
                           disabled={index === images.length - 1}
                           className="p-0.5 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 rounded disabled:opacity-30"
@@ -2128,8 +2118,8 @@ const AddNewProduct = () => {
                         >
                           <ArrowDown size={12} />
                         </button>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => deleteImage(index)}
                           className="p-0.5 hover:bg-red-100 text-red-500 rounded"
                           title="Delete image reference"
@@ -2143,11 +2133,10 @@ const AddNewProduct = () => {
                       <button
                         type="button"
                         onClick={() => setPrimaryImageIdx(index)}
-                        className={`flex items-center gap-0.5 px-sm py-0.5 rounded text-[9px] font-black uppercase transition-colors ${
-                          isPrimary 
-                            ? "bg-emerald-500 text-white" 
+                        className={`flex items-center gap-0.5 px-sm py-0.5 rounded text-[9px] font-black uppercase transition-colors ${isPrimary
+                            ? "bg-emerald-500 text-white"
                             : "bg-slate-200 dark:bg-zinc-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-zinc-700"
-                        }`}
+                          }`}
                       >
                         <Check size={9} />
                         {isPrimary ? "Primary" : "Select Primary"}
@@ -2178,7 +2167,7 @@ const AddNewProduct = () => {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full bg-[#038076] hover:bg-[#026860] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs min-h-[44px]"
+              className="w-full bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs min-h-[44px]"
             >
               {isSaving ? (
                 <>
@@ -2215,7 +2204,7 @@ const AddNewProduct = () => {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="flex-1 bg-[#038076] hover:bg-[#026860] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           {isSaving ? (
             <RefreshCw size={15} className="animate-spin" />
@@ -2228,5 +2217,5 @@ const AddNewProduct = () => {
     </div>
   );
 };
-
 export default AddNewProduct;
+

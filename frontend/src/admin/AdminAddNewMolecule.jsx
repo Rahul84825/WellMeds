@@ -371,7 +371,7 @@ const AdminAddNewMolecule = () => {
           <h2 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
             {isEditMode ? (name || "Edit Molecule") : "New Molecule"}
           </h2>
-          <span className="text-[10px] text-[#038076] dark:text-[#84d6b9] font-bold uppercase tracking-wider block">
+          <span className="text-[10px] text-[#157A6D] dark:text-[#84d6b9] font-bold uppercase tracking-wider block">
             {isEditMode ? "Chemical Compound" : "Draft Creation"}
           </span>
         </div>
@@ -380,7 +380,7 @@ const AdminAddNewMolecule = () => {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-[#038076] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+          className="bg-[#157A6D] hover:bg-[#116459] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
         >
           <Save size={14} />
           <span>{isSaving ? "Saving..." : "Save"}</span>
@@ -416,7 +416,7 @@ const AdminAddNewMolecule = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 sm:py-2.5 border-b-2 font-bold text-xs transition-all whitespace-nowrap shrink-0 cursor-pointer min-h-[44px] ${
                 isActive
-                  ? "border-[#038076] text-[#038076] dark:text-[#84d6b9]"
+                  ? "border-[#157A6D] text-[#157A6D] dark:text-[#84d6b9]"
                   : "border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900"
               }`}
             >
@@ -630,7 +630,7 @@ const AdminAddNewMolecule = () => {
                 <button
                   type="button"
                   onClick={addFaqItem}
-                  className="inline-flex items-center gap-xs px-sm py-1 border border-[#038076] text-[#038076] rounded-xl font-bold hover:bg-[#038076]/5 select-none cursor-pointer"
+                  className="inline-flex items-center gap-xs px-sm py-1 border border-[#157A6D] text-[#157A6D] rounded-xl font-bold hover:bg-[#157A6D]/5 select-none cursor-pointer"
                 >
                   <Plus size={12} /> Add FAQ
                 </button>
@@ -968,7 +968,7 @@ const AdminAddNewMolecule = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-xs bg-[#038076] text-white px-lg py-3 rounded-xl font-bold text-xs hover:bg-[#026860] transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm min-h-[44px]"
+            className="inline-flex items-center justify-center gap-xs bg-[#157A6D] text-white px-lg py-3 rounded-xl font-bold text-xs hover:bg-[#116459] transition-all select-none cursor-pointer disabled:opacity-50 shadow-sm min-h-[44px]"
           >
             <Save size={14} /> {isSaving ? "Saving Compound..." : "Save Molecule Details"}
           </button>
@@ -995,7 +995,7 @@ const AdminAddNewMolecule = () => {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="flex-1 bg-[#038076] hover:bg-[#026860] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <Save size={15} />
           <span>{isSaving ? "Saving..." : (isEditMode ? "Save Changes" : "Create Molecule")}</span>

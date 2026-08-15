@@ -214,14 +214,14 @@ const AdminCoupons = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
           <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-            <Tag className="text-[#004782]" />
+            <Tag className="text-[#157A6D]" />
             Coupons & Offers
           </h1>
           <p className="text-xs text-slate-400 font-medium">Create discount tickets, limit usages per customer, and track order conversions.</p>
         </div>
         <button
           onClick={openCreateForm}
-          className="bg-primary text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/10 select-none cursor-pointer"
+          className="bg-[#157A6D] hover:bg-[#116459] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs active:scale-95 transition-all shadow-md select-none cursor-pointer"
         >
           <Plus size={16} />
           Create Coupon
@@ -649,13 +649,13 @@ const AdminCoupons = () => {
                 <h4 className="font-bold text-xs text-slate-800 dark:text-zinc-100">Live Preview</h4>
                 
                 {/* Simulated Coupon Ticket */}
-                <div className="relative bg-gradient-to-br from-[#004782] to-[#0d599b] text-white p-md rounded-xl overflow-hidden shadow-md select-none">
+                <div className="relative bg-gradient-to-br from-[#157A6D] to-[#0F3B34] text-white p-md rounded-xl overflow-hidden shadow-md select-none">
                   {/* Notch cutouts */}
                   <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-slate-50 dark:bg-zinc-950 rounded-full"></div>
                   <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-slate-50 dark:bg-zinc-950 rounded-full"></div>
                   
                   <div className="border border-dashed border-white/20 p-sm rounded-lg flex flex-col items-center text-center gap-xs">
-                    <p className="text-[10px] font-black tracking-widest text-[#a4c9ff] uppercase">WELLMEDS TICKET</p>
+                    <p className="text-[10px] font-black tracking-widest text-[#84d6b9] uppercase">WELLMEDS TICKET</p>
                     <span className="font-black font-mono text-base tracking-wider bg-white/10 px-md py-0.5 rounded border border-white/10 mt-xs">
                       {code || "CODE"}
                     </span>
@@ -673,7 +673,7 @@ const AdminCoupons = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="w-full bg-[#086b53] hover:bg-emerald-700 text-white font-bold py-sm rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
+                    className="w-full bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-sm rounded-xl text-xs transition-all active:scale-95 disabled:opacity-50 select-none cursor-pointer flex items-center justify-center gap-xs"
                   >
                     {saving ? "Saving..." : "Save Coupon"}
                   </button>

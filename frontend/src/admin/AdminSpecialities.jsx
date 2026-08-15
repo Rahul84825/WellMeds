@@ -305,7 +305,7 @@ const AdminSpecialities = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <div>
           <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-            <Layers className="text-[#004782]" />
+            <Layers className="text-[#157A6D]" />
             Medical Specialities
           </h1>
           <p className="text-xs text-slate-400 font-medium">
@@ -314,7 +314,7 @@ const AdminSpecialities = () => {
         </div>
         <button
           onClick={openCreateModal}
-          className="bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all shadow-md select-none cursor-pointer"
+          className="bg-[#157A6D] hover:bg-[#116459] text-white px-lg py-sm rounded-xl font-bold text-xs flex items-center gap-xs active:scale-95 transition-all shadow-md select-none cursor-pointer"
         >
           <Plus size={16} />
           Add Speciality
@@ -375,7 +375,7 @@ const AdminSpecialities = () => {
                             <img alt={s.name} className="w-full h-full object-contain" src={s.iconImage} />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 bg-[#004782]/10 text-[#004782] rounded-lg flex items-center justify-center font-bold">
+                          <div className="w-8 h-8 bg-[#157A6D]/10 text-[#157A6D] rounded-lg flex items-center justify-center font-bold">
                             {s.name[0]}
                           </div>
                         )}
@@ -411,7 +411,7 @@ const AdminSpecialities = () => {
                       <div className="flex items-center justify-end gap-xs">
                         <button
                           onClick={() => openEditModal(s)}
-                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#004782] dark:hover:text-[#a4c9ff] rounded-lg"
+                          className="p-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-[#157A6D] dark:hover:text-[#84d6b9] rounded-lg"
                           title="Edit Speciality"
                         >
                           <Edit size={14} />
@@ -462,8 +462,8 @@ const AdminSpecialities = () => {
                       onClick={() => handlePageChange(pNum)}
                       className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all ${
                         currentPage === pNum
-                          ? "bg-[#004782] text-white shadow-md shadow-[#004782]/10"
-                          : "hover:bg-slate-50 dark:hover:bg-zinc-950 text-slate-500"
+                          ? "bg-[#157A6D] text-white shadow-md shadow-[#157A6D]/10"
+                          : "hover:bg-slate-50 dark:hover:bg-zinc-955 text-slate-500"
                       }`}
                     >
                       {pNum}
@@ -572,7 +572,7 @@ const AdminSpecialities = () => {
                         id="activeCheckbox"
                         checked={active}
                         onChange={(e) => setActive(e.target.checked)}
-                        className="rounded border-slate-300 text-[#004782] focus:ring-primary h-4 w-4"
+                        className="rounded border-slate-300 text-[#157A6D] focus:ring-primary h-4 w-4"
                       />
                       <label htmlFor="activeCheckbox" className="font-bold text-slate-700 dark:text-zinc-200 select-none">
                         Active & Enabled in Site
@@ -590,7 +590,7 @@ const AdminSpecialities = () => {
                     <button
                       type="button"
                       onClick={addRichSection}
-                      className="flex items-center gap-xs bg-[#004782] text-white px-md py-1 rounded-xl font-bold text-[10px] hover:opacity-90 transition-all cursor-pointer"
+                      className="flex items-center gap-xs bg-[#157A6D] hover:bg-[#116459] text-white px-md py-1 rounded-xl font-bold text-[10px] transition-all cursor-pointer"
                     >
                       <Plus size={10} /> Add Block
                     </button>
@@ -729,7 +729,7 @@ const AdminSpecialities = () => {
           <div className="flex gap-sm pt-md border-t border-slate-100 dark:border-zinc-800 mt-md">
             <button
               type="submit"
-              className="flex-1 bg-[#004782] hover:bg-opacity-95 text-white font-bold py-sm rounded-xl transition-all active:scale-95 select-none cursor-pointer flex items-center justify-center gap-xs"
+              className="flex-1 bg-[#157A6D] hover:bg-[#116459] text-white font-bold py-sm rounded-xl transition-all active:scale-95 select-none cursor-pointer flex items-center justify-center gap-xs"
             >
               {editingSpec ? "Update Speciality" : "Publish Speciality"}
             </button>

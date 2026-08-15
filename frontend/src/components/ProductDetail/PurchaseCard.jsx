@@ -28,7 +28,7 @@ const PurchaseCard = ({
         originalPrice: prod.originalPrice || prod.price,
       }));
     }
-    
+
     const defaultPackSize = prod.packSize || prod.productSpecifications?.packSize || "1 Unit";
     return [
       {
@@ -92,11 +92,10 @@ const PurchaseCard = ({
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVariantIdx(idx)}
-                    className={`w-full rounded-sm border text-left cursor-pointer transition-all flex flex-col overflow-hidden ${
-                      isSelected
+                    className={`w-full rounded-sm border text-left cursor-pointer transition-all flex flex-col overflow-hidden ${isSelected
                         ? "border-[#157a6d] bg-[#f4f9f7] ring-1 ring-[#157a6d]"
                         : "border-[#dde8e3] hover:border-[#c3d4cc] bg-white"
-                    }`}
+                      }`}
                   >
                     <div className="p-2.5 flex justify-between items-center border-b border-[#dde8e3] w-full">
                       <span className="font-bold text-xs text-black truncate max-w-[80%] font-sans">

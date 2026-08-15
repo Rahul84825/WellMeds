@@ -304,7 +304,7 @@ const AdminLayout = () => {
                 placeholder="Global Search..."
                 value={searchQuery}
                 onChange={(e) => handleGlobalSearch(e.target.value)}
-                className="w-full pl-lg pr-lg py-1.5 md:py-sm bg-slate-100 dark:bg-zinc-800/60 border border-transparent hover:border-slate-300 dark:hover:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#004782] dark:focus:border-[#004782] rounded-xl text-[11px] md:text-xs text-slate-700 dark:text-zinc-200 focus:ring-1 focus:ring-[#004782] outline-none transition-all"
+                className="w-full pl-lg pr-lg py-1.5 md:py-sm bg-slate-100 dark:bg-zinc-800/60 border border-transparent hover:border-slate-300 dark:hover:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#157a6d] dark:focus:border-[#157a6d] rounded-xl text-[11px] md:text-xs text-slate-700 dark:text-zinc-200 focus:ring-1 focus:ring-[#157a6d] outline-none transition-all"
               />
               {searchQuery && (
                 <button

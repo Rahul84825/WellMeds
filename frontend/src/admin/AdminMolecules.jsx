@@ -108,7 +108,7 @@ const AdminMolecules = () => {
         </div>
         <Link
           to="/admin/molecules/new"
-          className="inline-flex items-center gap-xs bg-[#004782] text-white px-lg py-sm rounded-xl font-bold text-xs hover:opacity-90 transition-all select-none cursor-pointer self-start sm:self-auto shadow-sm"
+          className="inline-flex items-center gap-xs bg-[#157A6D] hover:bg-[#116459] text-white px-lg py-sm rounded-xl font-bold text-xs active:scale-95 transition-all select-none cursor-pointer self-start sm:self-auto shadow-sm"
         >
           <Plus size={14} /> Add New Molecule
         </Link>
@@ -192,7 +192,7 @@ const AdminMolecules = () => {
                       <div className="flex items-center justify-end gap-xs">
                         <button
                           onClick={() => navigate(`/admin/molecules/${mol._id || mol.id}/edit`)}
-                          className="p-sm text-slate-400 hover:text-[#004782] hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
+                          className="p-sm text-slate-400 hover:text-[#157A6D] dark:hover:text-[#84d6b9] hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
                           title="Edit Molecule"
                         >
                           <Edit size={14} />
@@ -241,7 +241,7 @@ const AdminMolecules = () => {
                     onClick={() => setCurrentPage(pNum)}
                     className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
                       currentPage === pNum
-                        ? "bg-[#004782] text-white shadow-sm"
+                        ? "bg-[#157A6D] text-white shadow-sm"
                         : "hover:bg-slate-100 dark:hover:bg-zinc-950 text-slate-500"
                     }`}
                   >

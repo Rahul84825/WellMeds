@@ -645,7 +645,7 @@ const Dashboard = () => {
         <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
           <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
             <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Recent Prescriptions</h3>
-            <Link to="/admin/prescriptions" className="text-xs text-[#004782] dark:text-[#a4c9ff] hover:underline font-bold flex items-center gap-0.5">
+            <Link to="/admin/prescriptions" className="text-xs text-[#157A6D] dark:text-[#84d6b9] hover:underline font-bold flex items-center gap-0.5">
               <span>Verification Panel</span>
               <ArrowRight size={12} />
             </Link>
@@ -681,7 +681,7 @@ const Dashboard = () => {
       <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-md shadow-sm space-y-sm">
         <div className="flex items-center justify-between pb-xs border-b border-slate-100 dark:border-zinc-800">
           <h3 className="font-bold text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-wider">Recent Orders</h3>
-          <Link to="/admin/orders" className="text-xs text-[#004782] dark:text-[#a4c9ff] hover:underline font-bold flex items-center gap-0.5">
+          <Link to="/admin/orders" className="text-xs text-[#157A6D] dark:text-[#84d6b9] hover:underline font-bold flex items-center gap-0.5">
             <span>View All Orders</span>
             <ArrowRight size={12} />
           </Link>
@@ -730,7 +730,7 @@ const Dashboard = () => {
                   <td className="p-sm text-right">
                     <Link
                       to="/admin/orders"
-                      className="text-[#004782] dark:text-[#a4c9ff] font-bold hover:underline"
+                      className="text-[#157A6D] dark:text-[#84d6b9] font-bold hover:underline"
                     >
                       Manage
                     </Link>
@@ -778,7 +778,7 @@ const Dashboard = () => {
                 </div>
                 <Link
                   to="/admin/orders"
-                  className="text-[#004782] dark:text-[#a4c9ff] font-bold hover:underline py-1.5 px-3.5 bg-[#004782]/5 dark:bg-[#a4c9ff]/5 rounded-xl min-h-[40px] flex items-center justify-center cursor-pointer select-none"
+                  className="text-[#157A6D] dark:text-[#84d6b9] font-bold hover:underline py-1.5 px-3.5 bg-[#157A6D]/10 dark:bg-[#84d6b9]/10 rounded-xl min-h-[40px] flex items-center justify-center cursor-pointer select-none"
                 >
                   Manage
                 </Link>

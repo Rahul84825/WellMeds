@@ -72,7 +72,7 @@ const AdminUsers = () => {
       {/* Title */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-sm">
         <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 flex items-center gap-xs">
-          <Users className="text-[#004782]" />
+          <Users className="text-[#157A6D]" />
           User Management
         </h1>
         <p className="text-xs text-slate-400 font-medium">Verify registered accounts, assign administrative access, or configure pharmacist verification roles.</p>
@@ -125,7 +125,7 @@ const AdminUsers = () => {
                 <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors">
                   <td className="p-md">
                     <div className="flex items-center gap-sm">
-                      <div className="h-8 w-8 rounded-full bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center font-bold">
+                      <div className="h-8 w-8 rounded-full bg-[#157A6D]/10 text-[#157A6D] dark:text-[#84d6b9] flex items-center justify-center font-bold">
                         {u.name?.slice(0, 2).toUpperCase() || "US"}
                       </div>
                       <span className="font-bold text-slate-800 dark:text-zinc-100">{u.name}</span>
@@ -181,7 +181,7 @@ const AdminUsers = () => {
           {filteredUsers.map((u) => (
             <div key={u._id} className="p-md space-y-sm text-xs">
               <div className="flex items-center gap-sm">
-                <div className="h-10 w-10 rounded-full bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center font-bold shrink-0">
+                <div className="h-10 w-10 rounded-full bg-[#157A6D]/10 text-[#157A6D] dark:text-[#84d6b9] flex items-center justify-center font-bold shrink-0">
                   {u.name?.slice(0, 2).toUpperCase() || "US"}
                 </div>
                 <div className="truncate">

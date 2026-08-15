@@ -194,7 +194,7 @@ const AdminWaitlist = () => {
             placeholder="Search by email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#038076]"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#157A6D]"
           />
         </form>
 
@@ -221,14 +221,14 @@ const AdminWaitlist = () => {
 
       {/* Bulk Action Banner */}
       {selectedIds.length > 0 && (
-        <div className="flex items-center justify-between bg-teal-50 dark:bg-teal-950/40 border border-[#038076]/30 p-4 rounded-2xl animate-[fade-in_0.2s_ease-out]">
-          <span className="text-xs font-semibold text-[#038076] dark:text-teal-400">
+        <div className="flex items-center justify-between bg-teal-50 dark:bg-teal-950/40 border border-[#157A6D]/30 p-4 rounded-2xl animate-[fade-in_0.2s_ease-out]">
+          <span className="text-xs font-semibold text-[#157A6D] dark:text-teal-400">
             {selectedIds.length} subscriber(s) selected
           </span>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsNotifyModalOpen(true)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#038076] hover:bg-[#02665e] text-white rounded-lg text-xs font-semibold shadow transition cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#157A6D] hover:bg-[#116459] text-white rounded-lg text-xs font-semibold shadow transition cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Bulk Notify</span>
@@ -270,7 +270,7 @@ const AdminWaitlist = () => {
                       type="checkbox"
                       checked={selectedIds.length === subscribers.length && subscribers.length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-slate-300 dark:border-zinc-700 text-[#038076] focus:ring-[#038076] cursor-pointer"
+                      className="rounded border-slate-300 dark:border-zinc-700 text-[#157A6D] focus:ring-[#157A6D] cursor-pointer"
                     />
                   </th>
                   <th className="p-4">Email Address</th>
@@ -295,7 +295,7 @@ const AdminWaitlist = () => {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleSelect(sub._id)}
-                          className="rounded border-slate-300 dark:border-zinc-700 text-[#038076] focus:ring-[#038076] cursor-pointer"
+                          className="rounded border-slate-300 dark:border-zinc-700 text-[#157A6D] focus:ring-[#157A6D] cursor-pointer"
                         />
                       </td>
                       <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">
@@ -390,7 +390,7 @@ const AdminWaitlist = () => {
             </button>
 
             <div className="flex items-center space-x-2">
-              <div className="p-2.5 bg-teal-50 dark:bg-teal-900/30 text-[#038076] rounded-xl">
+              <div className="p-2.5 bg-teal-50 dark:bg-teal-900/30 text-[#157A6D] rounded-xl">
                 <Send className="w-5 h-5" />
               </div>
               <div>
@@ -412,7 +412,7 @@ const AdminWaitlist = () => {
                   type="text"
                   value={broadcastSubject}
                   onChange={(e) => setBroadcastSubject(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#038076]"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#157A6D]"
                 />
               </div>
 
@@ -424,7 +424,7 @@ const AdminWaitlist = () => {
                   rows={5}
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#038076]"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#157A6D]"
                 />
               </div>
             </div>
@@ -439,7 +439,7 @@ const AdminWaitlist = () => {
               <button
                 disabled={sendingBroadcast}
                 onClick={handleSendBroadcast}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-[#038076] hover:bg-[#02665e] text-white rounded-xl text-xs font-semibold transition disabled:opacity-50"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-[#157A6D] hover:bg-[#116459] text-white rounded-xl text-xs font-semibold transition disabled:opacity-50"
               >
                 {sendingBroadcast ? (
                   <Loader size="sm" />
