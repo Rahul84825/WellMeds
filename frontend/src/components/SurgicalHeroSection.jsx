@@ -12,7 +12,7 @@ import fridoBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 12
 import romsonsLogo from "../assets/srugical/brands/brand-romsons.png";
 import flamingoLogo from "../assets/srugical/brands/flamingo_health-Logo-02 (1).webp";
 import friendsLogo from "../assets/srugical/brands/friends.png";
-import threeMLogo from "../assets/srugical/brands/kisspng-3m-singapore-adhesive-tape-logo-brand-1713943911080.webp";
+import threeMLogo from "../assets/srugical/brands/kisspng-3m-singapore-adhesive-tape-logo-brand-1713943911080.png";
 import omronLogo from "../assets/srugical/brands/omron-vector-logo-free-11574207108nfoalflthr.png";
 import beurerLogo from "../assets/srugical/brands/png-transparent-beurer-hd-logo.png";
 import fridoLogo from "../assets/srugical/brands/35201_Logo.jfif";
