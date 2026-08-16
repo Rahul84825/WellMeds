@@ -11,6 +11,7 @@ import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import BestSellerSection from "../components/BestSellerSection";
 import GLP1ProductsSection from "../components/GLP1ProductsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
+import OrderPromoBanner from "../components/OrderPromoBanner";
 import ConsultationModal from "../components/ConsultationModal";
 import HomeSectionContainer from "../components/layout/HomeSectionContainer";
 import LazySection from "../components/common/LazySection";
@@ -123,6 +124,11 @@ const HomePage = () => {
       {/* Below the fold lazy sections */}
       <LazySection minHeight="250px">
         <TestimonialsSection />
+      </LazySection>
+
+      {/* Fast Delivery Order Promo Banner */}
+      <LazySection minHeight="180px">
+        <OrderPromoBanner />
       </LazySection>
 
 
