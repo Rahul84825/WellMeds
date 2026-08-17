@@ -1,110 +1,93 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 import SEO from "../components/common/SEO";
-import { 
-  User, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Loader2, 
-  ChevronLeft, ChevronRight, CheckCircle2, XCircle, Pill, Star, MapPin, Award
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 /**
- * Showcase slide data for the right visual feature card on Register
+ * Atmospheric background stars configuration
  */
-const REGISTER_SHOWCASE_SLIDES = [
-  {
-    badge: "Digital Prescriptions",
-    stat: "100%",
-    statLabel: "Secure Record",
-    secondaryStat: "HIPAA",
-    secondaryLabel: "Compliant Storage",
-    title: "Upload & Store Medical Prescriptions Safely",
-    subtitle: "Create your free WellMeds patient account to keep digital prescription records and reorder with single-click convenience.",
-    tagColor: "bg-[#157a6d] text-white",
-  },
-  {
-    badge: "Specialty Access",
-    stat: "24/7",
-    statLabel: "Clinical Guidance",
-    secondaryStat: "4,000+",
-    secondaryLabel: "Dispatch Hubs",
-    title: "Access Subsidized & Hard-to-Find Medicines",
-    subtitle: "Direct access to oncology, GLP-1, nephrology, and super-specialty medications with doorstep cold-chain shipping.",
-    tagColor: "bg-[#0f5c52] text-white",
-  },
-  {
-    badge: "Verified Sourcing",
-    stat: "100%",
-    statLabel: "Genuine Sourcing",
-    secondaryStat: "₹50 Cr+",
-    secondaryLabel: "Patient Savings",
-    title: "Direct Sourcing From Licensed Manufacturers",
-    subtitle: "We eliminate intermediaries to bring authentic, high-quality pharmaceuticals directly to your family.",
-    tagColor: "bg-[#14a088] text-white",
-  },
+const REGISTER_STARS = [
+  { left: "98%", top: "6%", width: "2.2px", height: "2.2px", opacity: 0.27 },
+  { left: "94%", top: "45%", width: "2.5px", height: "2.5px", opacity: 0.19 },
+  { left: "99%", top: "45%", width: "1.3px", height: "1.3px", opacity: 0.24 },
+  { left: "63%", top: "4%", width: "1.6px", height: "1.6px", opacity: 0.15 },
+  { left: "7%", top: "19%", width: "1.4px", height: "1.4px", opacity: 0.22 },
+  { left: "78%", top: "46%", width: "2.4px", height: "2.4px", opacity: 0.37 },
+  { left: "90%", top: "95%", width: "1.9px", height: "1.9px", opacity: 0.32 },
+  { left: "88%", top: "60%", width: "1.2px", height: "1.2px", opacity: 0.28 },
+  { left: "53%", top: "20%", width: "1.1px", height: "1.1px", opacity: 0.20 },
+  { left: "70%", top: "89%", width: "2.1px", height: "2.1px", opacity: 0.26 },
+  { left: "3%", top: "1%", width: "2.0px", height: "2.0px", opacity: 0.28 },
+  { left: "46%", top: "19%", width: "1.2px", height: "1.2px", opacity: 0.20 },
+  { left: "13%", top: "66%", width: "1.5px", height: "1.5px", opacity: 0.29 },
+  { left: "43%", top: "60%", width: "2.2px", height: "2.2px", opacity: 0.35 },
+  { left: "15%", top: "96%", width: "2.4px", height: "2.4px", opacity: 0.35 },
+  { left: "45%", top: "95%", width: "2.3px", height: "2.3px", opacity: 0.21 },
+  { left: "69%", top: "93%", width: "2.2px", height: "2.2px", opacity: 0.37 },
+  { left: "53%", top: "74%", width: "1.1px", height: "1.1px", opacity: 0.32 },
+  { left: "15%", top: "80%", width: "2.4px", height: "2.4px", opacity: 0.24 },
+  { left: "7%", top: "5%", width: "1.8px", height: "1.8px", opacity: 0.19 },
+  { left: "74%", top: "67%", width: "1.8px", height: "1.8px", opacity: 0.32 },
+  { left: "15%", top: "50%", width: "1.1px", height: "1.1px", opacity: 0.29 },
+  { left: "79%", top: "17%", width: "2.1px", height: "2.1px", opacity: 0.40 },
+  { left: "32%", top: "23%", width: "1.4px", height: "1.4px", opacity: 0.36 },
+  { left: "8%", top: "85%", width: "1.4px", height: "1.4px", opacity: 0.34 },
+  { left: "89%", top: "93%", width: "1.3px", height: "1.3px", opacity: 0.29 },
+  { left: "32%", top: "96%", width: "1.5px", height: "1.5px", opacity: 0.19 },
+  { left: "41%", top: "10%", width: "1.4px", height: "1.4px", opacity: 0.33 },
+  { left: "33%", top: "20%", width: "2.5px", height: "2.5px", opacity: 0.22 },
+  { left: "80%", top: "75%", width: "1.9px", height: "1.9px", opacity: 0.31 },
+  { left: "58%", top: "93%", width: "2.1px", height: "2.1px", opacity: 0.22 },
+  { left: "66%", top: "56%", width: "2.5px", height: "2.5px", opacity: 0.18 },
+  { left: "45%", top: "96%", width: "1.1px", height: "1.1px", opacity: 0.33 },
+  { left: "90%", top: "67%", width: "1.1px", height: "1.1px", opacity: 0.34 },
+  { left: "26%", top: "57%", width: "2.3px", height: "2.3px", opacity: 0.23 },
+  { left: "24%", top: "13%", width: "1.5px", height: "1.5px", opacity: 0.18 },
+  { left: "70%", top: "91%", width: "1.1px", height: "1.1px", opacity: 0.28 },
+  { left: "79%", top: "86%", width: "1.4px", height: "1.4px", opacity: 0.28 },
+  { left: "68%", top: "57%", width: "2.6px", height: "2.6px", opacity: 0.38 },
+  { left: "97%", top: "14%", width: "1.0px", height: "1.0px", opacity: 0.30 },
+  { left: "58%", top: "29%", width: "1.4px", height: "1.4px", opacity: 0.35 },
+  { left: "80%", top: "2%", width: "1.2px", height: "1.2px", opacity: 0.33 },
+  { left: "42%", top: "17%", width: "2.5px", height: "2.5px", opacity: 0.23 },
+  { left: "8%", top: "45%", width: "1.6px", height: "1.6px", opacity: 0.31 },
+  { left: "77%", top: "9%", width: "1.8px", height: "1.8px", opacity: 0.38 },
+  { left: "49%", top: "98%", width: "2.4px", height: "2.4px", opacity: 0.35 },
+  { left: "65%", top: "12%", width: "2.6px", height: "2.6px", opacity: 0.23 },
+  { left: "31%", top: "55%", width: "1.9px", height: "1.9px", opacity: 0.34 },
+  { left: "54%", top: "99%", width: "2.3px", height: "2.3px", opacity: 0.31 },
+  { left: "28%", top: "70%", width: "1.8px", height: "1.8px", opacity: 0.34 },
 ];
 
 /**
- * Register Page — Full-size pharmacy account creation page matching WellMeds clinical design system.
+ * Register Page — Modern WellMeds registration interface converted from custom UI design.
  */
 const Register = () => {
   const { register, loginWithGoogle, updateProfile, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect target calculation
+  // Redirect calculation
   const searchParams = new URLSearchParams(location.search);
   const redirectFromState = location.state?.from;
   const redirectFromQuery = searchParams.get("redirect") || searchParams.get("from");
   const targetDestination = redirectFromState || redirectFromQuery || "/";
 
-  // Form & UI States
+  // Form states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(true);
 
   const [step, setStep] = useState("auth"); // "auth" | "complete_profile"
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Slide Carousel State for Right Column
-  const [activeSlide, setActiveSlide] = useState(0);
-  const slideTimerRef = useRef(null);
-
-  // Auto-advance slides every 5 seconds
-  useEffect(() => {
-    slideTimerRef.current = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % REGISTER_SHOWCASE_SLIDES.length);
-    }, 5000);
-    return () => {
-      if (slideTimerRef.current) clearInterval(slideTimerRef.current);
-    };
-  }, []);
-
-  const nextSlide = () => {
-    setActiveSlide((prev) => (prev + 1) % REGISTER_SHOWCASE_SLIDES.length);
-  };
-
-  const prevSlide = () => {
-    setActiveSlide((prev) => (prev - 1 + REGISTER_SHOWCASE_SLIDES.length) % REGISTER_SHOWCASE_SLIDES.length);
-  };
-
-  // Real-time password strength checks
-  const strengthChecks = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /\d/.test(password),
-    special: /[@$!%*?&#]/.test(password),
-  };
-
-  const isPasswordValid = Object.values(strengthChecks).every(Boolean);
-
-  // Redirect if already authenticated and mobile number exists
+  // Redirect if already authenticated
   useEffect(() => {
     if (user && user.mobile) {
       if (isAdmin) {
@@ -125,19 +108,19 @@ const Register = () => {
       return;
     }
     if (!email || !email.trim()) {
-      setErrorMsg("Please enter your email address.");
+      setErrorMsg("Please enter your email or mobile number.");
       return;
     }
     if (!password) {
-      setErrorMsg("Please enter a password.");
+      setErrorMsg("Please enter your password.");
       return;
     }
-    if (!isPasswordValid) {
-      setErrorMsg("Password does not meet the minimum security requirements.");
+    if (password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters long.");
       return;
     }
-    if (password !== confirmPassword) {
-      setErrorMsg("Passwords do not match. Please verify both fields.");
+    if (!agreeTerms) {
+      setErrorMsg("Please agree to the Terms and Conditions to proceed.");
       return;
     }
 
@@ -159,7 +142,7 @@ const Register = () => {
       setErrorMsg(
         err.response?.data?.message ||
         err.message ||
-        "Failed to create account. Email may already be registered."
+        "Registration failed. Please check your details and try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -210,381 +193,382 @@ const Register = () => {
     }
   };
 
-  const currentSlide = REGISTER_SHOWCASE_SLIDES[activeSlide];
-
   return (
-    <div className="min-h-[calc(100vh-140px)] bg-[#f6f9f8] dark:bg-zinc-950 py-8 md:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center animate-[fade-in_0.25s_ease-out]">
+    <div
+      className="relative h-screen max-h-screen w-full overflow-hidden flex items-center justify-center p-3 sm:p-4"
+      style={{
+        background: `
+          repeating-linear-gradient(0deg, rgba(15,59,52,0.05) 0px, rgba(15,59,52,0.05) 1px, transparent 1px, transparent 40px),
+          repeating-linear-gradient(90deg, rgba(15,59,52,0.05) 0px, rgba(15,59,52,0.05) 1px, transparent 1px, transparent 40px),
+          radial-gradient(ellipse at 50% 0%, #eef5f0 0%, #dfebe3 85%)
+        `,
+        fontFamily: "'Liberation Sans', 'DejaVu Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif",
+      }}
+    >
       <SEO
-        title="Create Account — WellMeds"
-        description="Create your WellMeds customer account to upload prescriptions, access digital healthcare records, and order clinical medications."
+        title="Create Account — Wellmeds"
+        description="Join Wellmeds for genuine, verified medicine delivery and digital healthcare prescriptions."
       />
 
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-        
-        {/* ── Left Column: Auth Card + Google Rating Pill ── */}
-        <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
-          
-          {/* Main Auth Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-[28px] p-6 sm:p-8 shadow-xl flex-grow flex flex-col justify-between transition-all">
+      {/* Top Left Back / Home Button */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white border border-[#a8c2b6] text-[#172b26] text-xs font-semibold shadow-xs hover:shadow-sm transition-all group cursor-pointer select-none"
+        title="Back to Home"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 text-[#157a6d] group-hover:-translate-x-0.5 transition-transform" />
+        <span>Home</span>
+      </Link>
+
+      {/* Atmospheric Star Points */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {REGISTER_STARS.map((star, idx) => (
+          <div
+            key={idx}
+            className="absolute rounded-full bg-[#157a6d]"
+            style={{
+              left: star.left,
+              top: star.top,
+              width: star.width,
+              height: star.height,
+              opacity: star.opacity,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Central Soft Ambient Glow */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[580px] sm:h-[580px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(21,122,109,0.14) 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Card Wrapper */}
+      <div className="relative z-10 w-full flex items-center justify-center">
+        <div
+          className="w-full max-w-[350px] sm:max-w-[440px] bg-white border border-[#a8c2b6] rounded-[18px] p-5 sm:py-6 sm:px-8 shadow-[0_20px_45px_rgba(23,43,38,0.13)] relative transition-all duration-200"
+        >
+          {step === "complete_profile" ? (
             <div>
-              {/* Header Icon Badge */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-11 h-11 rounded-2xl bg-[#157a6d]/10 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center border border-[#157a6d]/20 shadow-xs">
-                  <User className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-bold tracking-widest text-[#157a6d] dark:text-emerald-400 uppercase bg-[#157a6d]/10 px-3 py-1 rounded-full border border-[#157a6d]/15">
-                  NEW REGISTRATION
-                </span>
+              <div className="text-[20px] sm:text-[24px] text-[#172b26] font-bold text-center mb-1.5">
+                Complete Profile
+              </div>
+              <div className="text-[11.5px] sm:text-[12.5px] text-[#3f544d] text-center mb-4.5">
+                Enter your mobile number to complete registration
               </div>
 
-              {/* Card Title & Subtitle */}
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-zinc-100 font-sans tracking-tight text-left">
-                {step === "complete_profile" ? "Complete Profile" : "Create Account"}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1 mb-6 text-left leading-relaxed">
-                {step === "complete_profile"
-                  ? "Enter your mobile number below to complete registration."
-                  : "Enter your fields below to get started with WellMeds"}
-              </p>
-
-              {/* Error Message Alert */}
               {errorMsg && (
-                <div className="p-3.5 mb-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold text-left animate-[shake_0.2s_ease-in-out]">
+                <div className="p-3 mb-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
                   {errorMsg}
                 </div>
               )}
 
-              {step === "complete_profile" ? (
-                <CompleteProfileModal
-                  onSubmit={handleProfileCompleteSubmit}
-                  isLoading={isSubmitting}
-                />
-              ) : (
-                <form onSubmit={handleEmailRegister} className="space-y-4" noValidate>
-                  {/* Full Name Input */}
-                  <div className="space-y-1.5 text-left">
-                    <label htmlFor="reg-name" className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                      Full Name <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative flex items-center">
-                      <User className="w-4 h-4 text-slate-400 dark:text-zinc-500 absolute left-4 pointer-events-none" />
-                      <input
-                        id="reg-name"
-                        type="text"
-                        required
-                        autoFocus
-                        value={name}
-                        onChange={(e) => {
-                          setName(e.target.value);
-                          setErrorMsg("");
-                        }}
-                        placeholder="John Doe"
-                        className="w-full pl-11 pr-4 py-3 bg-[#f8fafc] dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 focus:border-[#157a6d] rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 transition-all"
-                      />
-                    </div>
-                  </div>
+              <CompleteProfileModal
+                onSubmit={handleProfileCompleteSubmit}
+                isLoading={isSubmitting}
+              />
+            </div>
+          ) : (
+            <div>
+              {/* Header Title & Subtitle */}
+              <h1 className="text-[20px] sm:text-[24px] text-[#172b26] font-bold text-center mb-0.5 tracking-tight">
+                Create your account.
+              </h1>
+              <p className="text-[11.5px] sm:text-[12.5px] text-[#3f544d] text-center mb-3 sm:mb-3.5 leading-relaxed">
+                Join Wellmeds for genuine medicine delivery
+              </p>
 
-                  {/* Email Input */}
-                  <div className="space-y-1.5 text-left">
-                    <label htmlFor="reg-email" className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                      Email Address <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative flex items-center">
-                      <Mail className="w-4 h-4 text-slate-400 dark:text-zinc-500 absolute left-4 pointer-events-none" />
-                      <input
-                        id="reg-email"
-                        type="email"
-                        required
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setErrorMsg("");
-                        }}
-                        placeholder="name@example.com"
-                        className="w-full pl-11 pr-4 py-3 bg-[#f8fafc] dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 focus:border-[#157a6d] rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 transition-all"
-                      />
-                    </div>
-                  </div>
+              {/* Error Message Alert */}
+              {errorMsg && (
+                <div className="p-2.5 mb-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
+                  {errorMsg}
+                </div>
+              )}
 
-                  {/* Password Input */}
-                  <div className="space-y-1.5 text-left">
-                    <label htmlFor="reg-password" className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                      Password <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative flex items-center">
-                      <Lock className="w-4 h-4 text-slate-400 dark:text-zinc-500 absolute left-4 pointer-events-none" />
-                      <input
-                        id="reg-password"
-                        type={showPassword ? "text" : "password"}
-                        required
-                        autoComplete="new-password"
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setErrorMsg("");
-                        }}
-                        placeholder="••••••••"
-                        className="w-full pl-11 pr-11 py-3 bg-[#f8fafc] dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 focus:border-[#157a6d] rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 p-1 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-
-                    {/* Password Strength Meter */}
-                    {password && (
-                      <div className="p-3 bg-slate-100/70 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl space-y-1 mt-2">
-                        <p className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Password Requirements</p>
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                          <div className={`flex items-center gap-1.5 ${strengthChecks.length ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-zinc-500"}`}>
-                            {strengthChecks.length ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                            <span>8+ Characters</span>
-                          </div>
-                          <div className={`flex items-center gap-1.5 ${strengthChecks.uppercase ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-zinc-500"}`}>
-                            {strengthChecks.uppercase ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                            <span>Uppercase Letter</span>
-                          </div>
-                          <div className={`flex items-center gap-1.5 ${strengthChecks.lowercase ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-zinc-500"}`}>
-                            {strengthChecks.lowercase ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                            <span>Lowercase Letter</span>
-                          </div>
-                          <div className={`flex items-center gap-1.5 ${strengthChecks.number ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-zinc-500"}`}>
-                            {strengthChecks.number ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                            <span>1 Number</span>
-                          </div>
-                          <div className={`flex items-center gap-1.5 col-span-2 ${strengthChecks.special ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-zinc-500"}`}>
-                            {strengthChecks.special ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                            <span>Special Character (@$!%*?&#)</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Confirm Password Input */}
-                  <div className="space-y-1.5 text-left">
-                    <label htmlFor="reg-confirmPassword" className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                      Confirm Password <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative flex items-center">
-                      <Lock className="w-4 h-4 text-slate-400 dark:text-zinc-500 absolute left-4 pointer-events-none" />
-                      <input
-                        id="reg-confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        required
-                        autoComplete="new-password"
-                        value={confirmPassword}
-                        onChange={(e) => {
-                          setConfirmPassword(e.target.value);
-                          setErrorMsg("");
-                        }}
-                        placeholder="••••••••"
-                        className="w-full pl-11 pr-11 py-3 bg-[#f8fafc] dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 focus:border-[#157a6d] rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3.5 p-1 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-[11px] text-rose-600 font-medium">Passwords do not match.</p>
-                    )}
-                  </div>
-
-                  {/* Submit Register Button */}
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-[#157a6d] hover:bg-[#0f5c52] disabled:opacity-60 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+              {/* Registration Form */}
+              <form onSubmit={handleEmailRegister} noValidate>
+                {/* Full Name Field */}
+                <div className="mb-2 sm:mb-2.5 text-left">
+                  <label
+                    htmlFor="register-name-input"
+                    className="block text-[10.5px] sm:text-[11.5px] text-[#172b26] font-bold uppercase tracking-wider mb-1"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Creating Account...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>CREATE ACCOUNT</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
+                    FULL NAME
+                  </label>
+                  <div className="flex items-center gap-2 sm:gap-2.5 bg-[#f7f8f6] border-[1.5px] border-[#a8c2b6] focus-within:border-[#157a6d] focus-within:bg-white rounded-[10px] px-3.5 py-2 sm:px-3.5 sm:py-2.5 transition-colors">
+                    <svg
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6f847c] shrink-0"
+                      viewBox="0 0 100 100"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                    >
+                      <circle cx="50" cy="34" r="18" />
+                      <path d="M20 88 C20 62 33 50 50 50 C67 50 80 62 80 88" />
+                    </svg>
+                    <input
+                      id="register-name-input"
+                      type="text"
+                      required
+                      autoFocus
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setErrorMsg("");
+                      }}
+                      placeholder="Your full name"
+                      style={{ outline: "none", boxShadow: "none" }}
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 text-[12.5px] sm:text-[13.5px] text-[#172b26] placeholder:text-[#6f847c] font-medium shadow-none"
+                    />
+                  </div>
+                </div>
 
-              {step === "auth" && (
-                <>
-                  {/* Divider */}
-                  <div className="relative flex py-4 items-center">
-                    <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
-                    <span className="flex-shrink mx-4 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">
-                      OR
+                {/* Email / Mobile Field */}
+                <div className="mb-2 sm:mb-2.5 text-left">
+                  <label
+                    htmlFor="register-email-input"
+                    className="block text-[10.5px] sm:text-[11.5px] text-[#172b26] font-bold uppercase tracking-wider mb-1"
+                  >
+                    EMAIL OR MOBILE NUMBER
+                  </label>
+                  <div className="flex items-center gap-2 sm:gap-2.5 bg-[#f7f8f6] border-[1.5px] border-[#a8c2b6] focus-within:border-[#157a6d] focus-within:bg-white rounded-[10px] px-3.5 py-2 sm:px-3.5 sm:py-2.5 transition-colors">
+                    <svg
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6f847c] shrink-0"
+                      viewBox="0 0 100 100"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                    >
+                      <rect x="10" y="22" width="80" height="56" rx="6" />
+                      <path d="M14 26 L50 55 L86 26" />
+                    </svg>
+                    <input
+                      id="register-email-input"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setErrorMsg("");
+                      }}
+                      placeholder="name@example.com"
+                      style={{ outline: "none", boxShadow: "none" }}
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 text-[12.5px] sm:text-[13.5px] text-[#172b26] placeholder:text-[#6f847c] font-medium shadow-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="mb-0.5 text-left">
+                  <label
+                    htmlFor="register-password-input"
+                    className="block text-[10.5px] sm:text-[11.5px] text-[#172b26] font-bold uppercase tracking-wider mb-1"
+                  >
+                    PASSWORD
+                  </label>
+                  <div className="flex items-center gap-2 sm:gap-2.5 bg-[#f7f8f6] border-[1.5px] border-[#a8c2b6] focus-within:border-[#157a6d] focus-within:bg-white rounded-[10px] px-3.5 py-2 sm:px-3.5 sm:py-2.5 transition-colors">
+                    <svg
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6f847c] shrink-0"
+                      viewBox="0 0 100 100"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                    >
+                      <rect x="22" y="42" width="56" height="46" rx="6" />
+                      <path d="M32 42 L32 28 C32 15 40 8 50 8 C60 8 68 15 68 28 L68 42" />
+                    </svg>
+                    <input
+                      id="register-password-input"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setErrorMsg("");
+                      }}
+                      placeholder="••••••••"
+                      style={{ outline: "none", boxShadow: "none" }}
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 text-[12.5px] sm:text-[13.5px] text-[#172b26] placeholder:text-[#6f847c] font-medium shadow-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-[#6f847c] hover:text-[#172b26] transition-colors p-0.5 cursor-pointer"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Password Requirements Hint */}
+                <div className="text-[9.5px] sm:text-[10px] text-[#6f847c] text-left mb-2 mt-0.5">
+                  Use 8+ characters with a number &amp; symbol
+                </div>
+
+                {/* Terms & Privacy Policy Checkbox Row */}
+                <div className="flex items-start gap-2 mb-2.5 sm:mb-3 text-left">
+                  <label className="flex items-start gap-2 text-[10.5px] sm:text-[11.5px] text-[#3f544d] cursor-pointer select-none leading-normal">
+                    <input
+                      type="checkbox"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                        agreeTerms
+                          ? "bg-[#157a6d] border-[1.5px] border-[#157a6d] shadow-[0_2px_5px_rgba(21,122,109,0.3)]"
+                          : "bg-white border-[1.5px] border-[#a8c2b6]"
+                      }`}
+                    >
+                      {agreeTerms && (
+                        <svg
+                          className="w-2 h-2 sm:w-2.5 sm:h-2.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#ffffff"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M4 12 L9.5 17.5 L20 6" />
+                        </svg>
+                      )}
+                    </div>
+                    <span>
+                      I agree to the&nbsp;
+                      <Link
+                        to="/terms-and-conditions"
+                        className="text-[#157a6d] font-bold hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms
+                      </Link>
+                      &nbsp;&amp;&nbsp;
+                      <Link
+                        to="/privacy-policy"
+                        className="text-[#157a6d] font-bold hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Privacy Policy
+                      </Link>
                     </span>
-                    <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
-                  </div>
-
-                  {/* Google Authentication Button */}
-                  <GoogleAuthButton
-                    onSuccess={handleGoogleSuccess}
-                    onError={(err) => setErrorMsg(err)}
-                    isLoading={isSubmitting}
-                  />
-                </>
-              )}
-            </div>
-
-            {/* Bottom Login Link */}
-            <div className="pt-5 mt-6 text-center border-t border-slate-100 dark:border-zinc-800 text-xs text-slate-500 dark:text-zinc-400">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                state={location.state}
-                className="font-bold text-[#157a6d] dark:text-emerald-400 hover:underline cursor-pointer"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-
-          {/* Bottom Google Rating Badge Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-3.5 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                <div className="w-7 h-7 rounded-full bg-[#157a6d] text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-zinc-900">WM</div>
-                <div className="w-7 h-7 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-zinc-900">Rx</div>
-                <div className="w-7 h-7 rounded-full bg-teal-700 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-zinc-900">✓</div>
-              </div>
-              <div className="text-left">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-slate-800 dark:text-zinc-100">Rated 4.9+</span>
-                  <div className="flex text-amber-400">
-                    <Star className="w-3 h-3 fill-amber-400" />
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-500 dark:text-zinc-400">Verified Patient Support</p>
-              </div>
-            </div>
-            <span className="text-[11px] font-bold text-[#157a6d] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
-              Google Verified
-            </span>
-          </div>
-
-        </div>
-
-        {/* ── Right Column: Showcase Card with Interactive Metrics ── */}
-        <div className="lg:col-span-7 hidden lg:flex flex-col justify-between bg-gradient-to-br from-[#f0f7f5] via-[#e5f2ed] to-[#f4f9f7] dark:from-zinc-900 dark:to-zinc-950 border border-[#cee3dc] dark:border-zinc-800 rounded-[28px] p-8 sm:p-10 relative overflow-hidden shadow-xl min-h-[620px]">
-          
-          {/* Background Pattern & Glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#157a6d]/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
-          {/* Top Pill Emblem */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#157a6d] text-white flex items-center justify-center font-serif font-bold text-sm shadow-xs">
-                wm
-              </div>
-              <span className="text-xs font-bold text-[#157a6d] dark:text-emerald-400 tracking-wide uppercase font-mono">
-                WELLMEDS PATIENT NETWORK
-              </span>
-            </div>
-
-            <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-2xs ${currentSlide.tagColor}`}>
-              {currentSlide.badge}
-            </span>
-          </div>
-
-          {/* Center Visual Mockup Section */}
-          <div className="relative z-10 my-6 flex flex-col items-center justify-center text-center">
-            
-            {/* Visual Container */}
-            <div className="relative w-full max-w-lg bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-[#c3dfd7] dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-lg transition-all duration-300">
-              
-              {/* Floating Stat Badge 1 */}
-              <div className="absolute -top-4 -left-4 bg-[#157a6d] text-white px-4 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-2 text-xs font-bold animate-[bounce_3s_infinite]">
-                <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                <span>{currentSlide.badge}</span>
-              </div>
-
-              {/* Floating Stat Badge 2 */}
-              <div className="absolute -top-4 -right-4 bg-white dark:bg-zinc-900 border border-[#bce0d6] dark:border-zinc-700 text-slate-900 dark:text-white px-4 py-2 rounded-2xl shadow-lg flex items-center gap-2 text-xs font-bold">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#157a6d] animate-ping" />
-                <span className="text-[#157a6d] dark:text-emerald-400 font-extrabold">{currentSlide.stat}</span>
-                <span className="text-[11px] text-slate-500 dark:text-zinc-400">{currentSlide.statLabel}</span>
-              </div>
-
-              {/* Central Illustration Area */}
-              <div className="py-8 space-y-4">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#157a6d] to-[#14a088] text-white flex items-center justify-center mx-auto shadow-xl transform -rotate-3 hover:rotate-0 transition-transform">
-                  <User className="w-10 h-10 text-emerald-100" />
+                  </label>
                 </div>
 
-                <div className="max-w-sm mx-auto space-y-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-sans tracking-tight">
-                    {currentSlide.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
-                    {currentSlide.subtitle}
-                  </p>
-                </div>
-              </div>
-
-              {/* Floating Stat Badge 3 */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-zinc-900 border border-[#bce0d6] dark:border-zinc-700 px-5 py-2 rounded-2xl shadow-lg flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-white">
-                  <Award className="w-4 h-4 text-[#157a6d] dark:text-emerald-400" />
-                  <span className="text-[#157a6d] dark:text-emerald-400 font-extrabold">{currentSlide.secondaryStat}</span>
-                  <span>{currentSlide.secondaryLabel}</span>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Bottom Controls */}
-          <div className="relative z-10 pt-4 flex items-center justify-between border-t border-[#d5e7e1] dark:border-zinc-800">
-            {/* Dots */}
-            <div className="flex items-center gap-2">
-              {REGISTER_SHOWCASE_SLIDES.map((_, idx) => (
+                {/* Create Account Submit Button */}
                 <button
-                  key={idx}
-                  onClick={() => setActiveSlide(idx)}
-                  className={`h-2.5 rounded-full transition-all duration-200 ${idx === activeSlide ? "w-7 bg-[#157a6d]" : "w-2.5 bg-[#a3cebf] dark:bg-zinc-700"}`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
-            </div>
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#157a6d] hover:bg-[#0e5c52] active:scale-[0.99] disabled:opacity-70 text-white font-bold text-[12.5px] sm:text-[13.5px] tracking-[0.5px] py-2.5 sm:py-3 rounded-[10px] shadow-[0_8px_18px_rgba(21,122,109,0.25)] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>CREATING ACCOUNT...</span>
+                    </>
+                  ) : (
+                    <span>CREATE ACCOUNT</span>
+                  )}
+                </button>
+              </form>
 
-            {/* Arrows */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={prevSlide}
-                className="w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-[#157a6d] hover:text-white dark:hover:bg-[#157a6d] transition-all cursor-pointer shadow-xs"
-                aria-label="Previous showcase slide"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-[#157a6d] hover:text-white dark:hover:bg-[#157a6d] transition-all cursor-pointer shadow-xs"
-                aria-label="Next showcase slide"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+              {/* Divider */}
+              <div className="flex items-center gap-2.5 sm:gap-3 my-2 sm:my-2.5">
+                <div className="flex-1 h-[1px] bg-[#a8c2b6]" />
+                <span className="text-[9.5px] sm:text-[10.5px] text-[#6f847c] tracking-[1px] font-bold uppercase">
+                  OR
+                </span>
+                <div className="flex-1 h-[1px] bg-[#a8c2b6]" />
+              </div>
 
+              {/* Google Authentication Button */}
+              <GoogleAuthButton
+                buttonText="Sign up with Google"
+                onSuccess={handleGoogleSuccess}
+                onError={(err) => setErrorMsg(err)}
+                isLoading={isSubmitting}
+              />
+
+              {/* Footer Switcher Line */}
+              <div className="text-center text-[11px] sm:text-[12px] text-[#3f544d] mt-2.5 sm:mt-3">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  state={location.state}
+                  className="font-bold text-[#157a6d] hover:underline cursor-pointer"
+                >
+                  Log In
+                </Link>
+              </div>
+
+              {/* Google Rating Row */}
+              <div className="flex items-center justify-center gap-2 sm:gap-2.5 mt-2.5 sm:mt-3 border border-[#a8c2b6] rounded-[11px] px-3.5 py-1.5 sm:px-4 sm:py-2 bg-[#f7f8f6] w-fit mx-auto shadow-2xs">
+                <div className="flex shrink-0">
+                  <div
+                    className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border-[1.5px] border-white flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold text-[#172b26] shadow-xs shrink-0"
+                    style={{ background: "#cfe6e1" }}
+                  >
+                    A
+                  </div>
+                  <div
+                    className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border-[1.5px] border-white flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold text-[#172b26] -ml-1.5 shadow-xs shrink-0"
+                    style={{ background: "#e6d4a8" }}
+                  >
+                    S
+                  </div>
+                  <div
+                    className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border-[1.5px] border-white flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold text-[#172b26] -ml-1.5 shadow-xs shrink-0"
+                    style={{ background: "#e8c3ac" }}
+                  >
+                    P
+                  </div>
+                </div>
+                <div className="text-left leading-tight">
+                  <div className="text-[10.5px] sm:text-[11.5px] font-bold text-[#172b26] flex items-center gap-1">
+                    <span>Rated <b>4.9</b> on Google</span>
+                    <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 -mt-0.5" viewBox="0 0 24 24" fill="#b08d3e">
+                      <path d="M12 2 L14.6 9.2 L22 9.9 L16.5 14.9 L18.2 22 L12 18.1 L5.8 22 L7.5 14.9 L2 9.9 L9.4 9.2 Z" />
+                    </svg>
+                  </div>
+                  <a
+                    href="https://www.google.com/search?q=wellmeds&oq=wellmeds&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDwyBggCEEUYPDIGCAMQRRg8MgYIBBBFGDzSAQg1MTQyajBqNKgCALACAQ&sourceid=chrome&source=chrome.ob&ie=UTF-8#lrd=0x3bc2bffd675bf687:0x866871240c185cd7,1,,,,"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] sm:text-[10px] text-[#157a6d] font-semibold hover:underline block cursor-pointer"
+                  >
+                    Read Reviews
+                  </a>
+                </div>
+              </div>
+
+              {/* Trust Badge */}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-3 text-[9px] sm:text-[10px] text-[#6f847c]">
+                <svg
+                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#157a6d]"
+                  viewBox="0 0 100 100"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                >
+                  <path d="M50 8 L86 22 L86 46 C86 72 70 88 50 95 C30 88 14 72 14 46 L14 22 Z" />
+                </svg>
+                <span>Licensed Pharmacy · Data Encrypted</span>
+              </div>
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );

@@ -3,10 +3,15 @@ import { useGoogleLogin, GoogleLogin } from "@react-oauth/google";
 import { Loader2 } from "lucide-react";
 
 /**
- * Reusable "Continue with Google" button component.
- * Features a custom WellMeds design with the official Google multi-colored SVG logo.
+ * Reusable Google authentication button component matching the WellMeds authentication design system.
  */
-const GoogleAuthButton = ({ onSuccess, onError, isLoading = false, className = "" }) => {
+const GoogleAuthButton = ({
+  onSuccess,
+  onError,
+  isLoading = false,
+  className = "",
+  buttonText = "Continue with Google",
+}) => {
   const [internalLoading, setInternalLoading] = useState(false);
 
   const handleCredentialResponse = async (idToken) => {
@@ -18,14 +23,18 @@ const GoogleAuthButton = ({ onSuccess, onError, isLoading = false, className = "
       }
     } catch (err) {
       if (onError) {
-        onError(err.response?.data?.message || err.message || "Google Authentication failed. Please try again.");
+        onError(
+          err.response?.data?.message ||
+          err.message ||
+          "Google Authentication failed. Please try again."
+        );
       }
     } finally {
       setInternalLoading(false);
     }
   };
 
-  // Fallback explicit Google login launcher
+  // Explicit Google login launcher
   const launchGoogleLogin = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       if (tokenResponse?.access_token) {
@@ -44,42 +53,42 @@ const GoogleAuthButton = ({ onSuccess, onError, isLoading = false, className = "
       {busy ? (
         <button
           disabled
-          className="w-full py-3.5 px-5 rounded-2xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center gap-2.5 text-slate-600 dark:text-zinc-300 text-xs font-bold cursor-not-allowed opacity-80 shadow-xs"
+          type="button"
+          className="w-full py-3 sm:py-3.5 px-4 rounded-[10px] bg-[#f7f8f6] border-[1.5px] border-[#a8c2b6] flex items-center justify-center gap-2.5 text-[#3f544d] text-[12.5px] sm:text-[14px] font-semibold cursor-not-allowed opacity-80"
         >
           <Loader2 className="w-4 h-4 animate-spin text-[#157a6d]" />
           <span>Verifying with Google...</span>
         </button>
       ) : (
         <div className="w-full relative group">
-          {/* Custom Styled WellMeds Google Button */}
           <button
             type="button"
             onClick={() => launchGoogleLogin()}
-            className="w-full py-3.5 px-5 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-slate-50/90 dark:hover:bg-zinc-700/80 border border-slate-200/90 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 text-xs sm:text-sm font-bold shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex items-center justify-center gap-3 cursor-pointer"
+            className="w-full py-3 sm:py-3.5 px-4 rounded-[10px] bg-white hover:bg-[#f7f8f6] border-[1.5px] border-[#a8c2b6] text-[#172b26] text-[12.5px] sm:text-[14px] font-semibold transition-all duration-150 flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-xs hover:shadow-sm"
           >
-            {/* Official Google Multi-colored G Logo SVG */}
-            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            {/* Google Multi-colored SVG Logo matching design */}
+            <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" viewBox="0 0 48 48">
               <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#FFC107"
+                d="M43.6 20.5H42V20H24v8h11.3C33.9 32.6 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.3-3.5z"
               />
               <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#FF3D00"
+                d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3 24 3 16.3 3 9.7 7.3 6.3 14.7z"
               />
               <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                fill="#4CAF50"
+                d="M24 45c5.4 0 10.3-2 14-5.4l-6.5-5.5C29.3 35.7 26.8 36.5 24 36.5c-5.4 0-10-3.4-11.6-8.2l-6.6 5.1C9.5 40.5 16.2 45 24 45z"
               />
               <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                fill="#1976D2"
+                d="M43.6 20.5H42V20H24v8h11.3c-1 3-3.2 5.4-6 6.9l6.5 5.5c-.5.4 7.2-5.3 7.2-16.4 0-1.2-.1-2.4-.4-3.5z"
               />
             </svg>
-            <span>Continue with Google</span>
+            <span>{buttonText}</span>
           </button>
 
-          {/* Hidden Standard Google OAuth Component for ID token extraction */}
+          {/* Hidden Standard Google OAuth Component */}
           <div className="hidden-google-login-target hidden">
             <GoogleLogin
               onSuccess={(res) => handleCredentialResponse(res.credential)}

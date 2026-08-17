@@ -51,7 +51,7 @@ const MainLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
-      <Navbar />
+      {!isAuthPage && <Navbar />}
       <main className="flex-grow">
         <Outlet />
       </main>

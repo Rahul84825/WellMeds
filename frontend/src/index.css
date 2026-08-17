@@ -668,3 +668,21 @@
 .animate-brand-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Browser Autofill / Autocomplete Background Reset */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #172b26 !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 5000000s ease-in-out 0s, color 5000000s ease-in-out 0s;
+  caret-color: #172b26 !important;
+}
+
+

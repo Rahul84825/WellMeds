@@ -88,7 +88,7 @@ const TestimonialCard = ({ item }) => {
 
   return (
     <div className="w-[85vw] sm:w-[320px] md:w-[350px] shrink-0 snap-start flex flex-col gap-sm select-none">
-      
+
       {/* 1. Customer Details Header */}
       <div className="flex items-center gap-md px-xs">
         {/* Initials Avatar */}
@@ -107,7 +107,7 @@ const TestimonialCard = ({ item }) => {
               Verified
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <div className="flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
@@ -126,7 +126,7 @@ const TestimonialCard = ({ item }) => {
 
       {/* 2. Review Card Shell */}
       <div className="relative flex flex-col justify-between h-[230px] rounded-[24px] border border-slate-150 dark:border-zinc-800/80 bg-[#f7f9fc] dark:bg-zinc-900 p-lg shadow-sm hover:shadow-md hover:border-[#038076] dark:hover:border-[#038076] transition-all duration-300 overflow-hidden">
-        
+
         {/* Quote Watermark Decoration */}
         <div className="absolute top-4 left-4 text-slate-250 dark:text-zinc-850 opacity-40 pointer-events-none select-none">
           <Quote className="w-14 h-14 transform rotate-180 text-slate-300 dark:text-zinc-800" />
@@ -242,7 +242,7 @@ export const TestimonialsSection = () => {
   return (
     <section className="py-12 md:py-16 w-full bg-white dark:bg-zinc-950 transition-colors duration-300 select-none">
       <div className="home-section-container">
-        
+
         {/* Section Header */}
         <div className="flex flex-row items-center justify-between sm:items-end mb-6 gap-4 border-b border-[#dde8e3] dark:border-zinc-800 pb-4">
           <div>
@@ -264,11 +264,10 @@ export const TestimonialsSection = () => {
               onClick={scrollLeft}
               disabled={!canScrollLeft}
               aria-label="Scroll testimonials left"
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
-                canScrollLeft
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${canScrollLeft
                   ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
                   : "opacity-30 cursor-not-allowed"
-              }`}
+                }`}
             >
               <ChevronLeft size={18} />
             </button>
@@ -279,11 +278,10 @@ export const TestimonialsSection = () => {
               onClick={scrollRight}
               disabled={!canScrollRight}
               aria-label="Scroll testimonials right"
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
-                canScrollRight
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${canScrollRight
                   ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d]"
                   : "opacity-30 cursor-not-allowed"
-              }`}
+                }`}
             >
               <ChevronRight size={18} />
             </button>
