@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 import SEO from "../components/common/SEO";
-import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 /**
  * Atmospheric background stars configuration
@@ -194,16 +194,6 @@ const Login = () => {
         title="Log In — Wellmeds"
         description="Log in to your Wellmeds account to access medicines, manage prescriptions, and track clinical orders."
       />
-
-      {/* Top Left Back / Home Button */}
-      <Link
-        to="/"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white border border-[#a8c2b6] text-[#172b26] text-xs font-semibold shadow-xs hover:shadow-sm transition-all group cursor-pointer select-none"
-        title="Back to Home"
-      >
-        <ArrowLeft className="w-3.5 h-3.5 text-[#157a6d] group-hover:-translate-x-0.5 transition-transform" />
-        <span>Home</span>
-      </Link>
 
       {/* Atmospheric Star Points */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
