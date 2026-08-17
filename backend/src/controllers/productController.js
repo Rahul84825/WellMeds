@@ -337,36 +337,6 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
-const normalizeAndValidateVariants = (variants) => {
-  if (!variants || !Array.isArray(variants) || variants.length === 0) {
-    return [];
-  }
-  const clean = [];
-  for (const v of variants) {
-    if (!v) continue;
-    const option = (v.option || "").toString().trim();
-    if (!option) continue;
-    const price = typeof v.price === "number" ? v.price : parseFloat(v.price);
-    const sellingPrice = typeof v.sellingPrice === "number" ? v.sellingPrice : parseFloat(v.sellingPrice);
-
-    if (isNaN(price) || price < 0) {
-      throw new Error(`Variant "${option}" must have a valid non-negative MRP / Price.`);
-    }
-    if (isNaN(sellingPrice) || sellingPrice < 0) {
-      throw new Error(`Variant "${option}" must have a valid non-negative Selling Price.`);
-    }
-    if (sellingPrice > price) {
-      throw new Error(`Variant "${option}" Selling Price (₹${sellingPrice}) cannot exceed MRP / Price (₹${price}).`);
-    }
-    clean.push({
-      option,
-      price: Math.round(price * 100) / 100,
-      sellingPrice: Math.round(sellingPrice * 100) / 100,
-    });
-  }
-  return clean;
-};
-
 export const createProduct = async (req, res, next) => {
   const productData = req.body;
 
@@ -386,15 +356,6 @@ export const createProduct = async (req, res, next) => {
       productData.manufacturer = productData.brand;
     }
 
-    // Handle Variants Normalization & Validation
-    if (productData.variants) {
-      productData.variants = normalizeAndValidateVariants(productData.variants);
-      if (productData.variants.length > 0) {
-        if (!productData.price) productData.price = productData.variants[0].sellingPrice;
-        if (!productData.originalPrice) productData.originalPrice = productData.variants[0].price;
-      }
-    }
-
     // Handle In Stock Boolean Toggle
     const inStock = productData.inStock !== undefined ? !!productData.inStock : true;
     productData.inStock = inStock;
@@ -408,36 +369,14 @@ export const createProduct = async (req, res, next) => {
       badge = "";
     }
 
-    // Resolve Category or SurgicalCategory string name/ObjectId
+    // Resolve Category string name to ObjectId if needed
     let categoryId = productData.category;
-    let surgicalCategoryId = productData.surgicalCategory;
-
     if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
       const matchedCategory = await Category.findOne({
         name: { $regex: `^${categoryId.trim()}$`, $options: "i" },
       });
       if (matchedCategory) {
         categoryId = matchedCategory._id;
-      } else {
-        const matchedSurg = await SurgicalCategory.findOne({
-          name: { $regex: `^${categoryId.trim()}$`, $options: "i" },
-        });
-        if (matchedSurg) {
-          surgicalCategoryId = matchedSurg._id;
-          productData.isSurgical = true;
-          productData.productType = "surgical";
-        }
-      }
-    }
-
-    if (surgicalCategoryId && !mongoose.Types.ObjectId.isValid(surgicalCategoryId)) {
-      const matchedSurg = await SurgicalCategory.findOne({
-        name: { $regex: `^${surgicalCategoryId.trim()}$`, $options: "i" },
-      });
-      if (matchedSurg) {
-        surgicalCategoryId = matchedSurg._id;
-        productData.isSurgical = true;
-        productData.productType = "surgical";
       }
     }
 
@@ -453,13 +392,12 @@ export const createProduct = async (req, res, next) => {
     const product = await Product.create({
       ...productData,
       category: categoryId,
-      surgicalCategory: surgicalCategoryId,
       slug,
       badge,
       moleculeSlug,
     });
 
-    // Increment category product count if valid Category document
+    // Increment category product count (category is now ObjectId)
     if (product.category) {
       await Category.findByIdAndUpdate(
         product.category,
@@ -502,15 +440,6 @@ export const updateProduct = async (req, res, next) => {
       updateData.manufacturer = updateData.brand;
     }
 
-    // Handle Variants Normalization & Validation
-    if (updateData.variants !== undefined) {
-      updateData.variants = normalizeAndValidateVariants(updateData.variants);
-      if (updateData.variants.length > 0) {
-        if (!updateData.price) updateData.price = updateData.variants[0].sellingPrice;
-        if (!updateData.originalPrice) updateData.originalPrice = updateData.variants[0].price;
-      }
-    }
-
     // Handle In Stock Boolean Toggle
     if (updateData.inStock !== undefined) {
       const inStock = !!updateData.inStock;
@@ -543,26 +472,6 @@ export const updateProduct = async (req, res, next) => {
       });
       if (matchedCategory) {
         updateData.category = matchedCategory._id;
-      } else {
-        const matchedSurg = await SurgicalCategory.findOne({
-          name: { $regex: `^${updateData.category.trim()}$`, $options: "i" },
-        });
-        if (matchedSurg) {
-          updateData.surgicalCategory = matchedSurg._id;
-          updateData.isSurgical = true;
-          updateData.productType = "surgical";
-        }
-      }
-    }
-
-    if (updateData.surgicalCategory && !mongoose.Types.ObjectId.isValid(updateData.surgicalCategory)) {
-      const matchedSurg = await SurgicalCategory.findOne({
-        name: { $regex: `^${updateData.surgicalCategory.trim()}$`, $options: "i" },
-      });
-      if (matchedSurg) {
-        updateData.surgicalCategory = matchedSurg._id;
-        updateData.isSurgical = true;
-        updateData.productType = "surgical";
       }
     }
 
@@ -571,14 +480,12 @@ export const updateProduct = async (req, res, next) => {
       runValidators: true,
     });
 
-    // Sync counts if category changed (compare ObjectIds safely)
-    if (
-      updateData.category &&
-      product.category &&
-      updateData.category.toString() !== product.category.toString()
-    ) {
+    // Sync counts if category changed (compare ObjectIds)
+    if (updateData.category && updateData.category.toString() !== product.category.toString()) {
       // Decrement old category
-      await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
+      if (product.category) {
+        await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
+      }
       // Increment new category
       await Category.findByIdAndUpdate(updateData.category, { $inc: { count: 1 } });
     }

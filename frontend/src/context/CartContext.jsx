@@ -119,21 +119,12 @@ export const CartProvider = ({ children }) => {
       .map((item) => {
         const product = item.product || {};
         const productId = (product._id || product.id)?.toString() || "";
-        const variant = item.variant || null;
-        const variantOption = variant?.option || "";
-        const cartKey = variantOption ? `${productId}-${variantOption}` : productId;
-        const price = (variant && variant.sellingPrice !== undefined) ? variant.sellingPrice : (product.price || 0);
-        const originalPrice = (variant && variant.price !== undefined) ? variant.price : (product.originalPrice || null);
-
         return {
-          id: cartKey,
+          id: productId,
           _id: productId,
-          productId: productId,
-          variant: variant,
-          selectedVariant: variant,
           name: product.name || "Unknown Product",
-          price: price,
-          originalPrice: originalPrice,
+          price: product.price || 0,
+          originalPrice: product.originalPrice || null,
           image: product.image || "",
           category: product.category || "",
           brand: product.manufacturer || product.brand || "",
@@ -173,7 +164,7 @@ export const CartProvider = ({ children }) => {
 
           for (const item of guestOnlyItems) {
             try {
-              await cartService.addToCart(item.productId || item._id || item.id, item.quantity, item.variant);
+              await cartService.addToCart(item.id, item.quantity);
             } catch (err) {
               console.warn(`Could not sync guest cart item ${item.name}:`, err.message);
             }
@@ -226,37 +217,27 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const addToCart = useCallback(async (product, quantity = 1, variant = null) => {
+  const addToCart = useCallback(async (product, quantity = 1) => {
     if (!product) return;
     if (isCartLocked) {
       await autoUnlockCart();
     }
 
-    const selectedVar = variant || product.variant || product.selectedVariant || null;
-    const variantOption = selectedVar?.option || "";
-    const productId = (product.productId || product._id || product.id)?.toString();
-    const cartKey = variantOption ? `${productId}-${variantOption}` : productId;
-    const price = (selectedVar && selectedVar.sellingPrice !== undefined) ? selectedVar.sellingPrice : (product.price || 0);
-    const originalPrice = (selectedVar && selectedVar.price !== undefined) ? selectedVar.price : (product.originalPrice || null);
+    const productId = (product._id || product.id)?.toString();
 
     // Optimistic local update
     setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === cartKey);
+      const existing = prev.find((i) => i.id === productId);
       if (existing) {
         const newQty = Math.min(30, existing.quantity + quantity);
-        return prev.map((i) => (i.id === cartKey ? { ...i, quantity: newQty } : i));
+        return prev.map((i) => (i.id === productId ? { ...i, quantity: newQty } : i));
       }
       return [
         ...prev,
         {
           ...product,
-          id: cartKey,
+          id: productId,
           _id: productId,
-          productId: productId,
-          variant: selectedVar,
-          selectedVariant: selectedVar,
-          price,
-          originalPrice,
           quantity: Math.min(30, quantity),
         },
       ];
@@ -265,7 +246,7 @@ export const CartProvider = ({ children }) => {
     // Backend sync if logged in
     if (hasToken()) {
       try {
-        const serverItems = await cartService.addToCart(productId, quantity, selectedVar);
+        const serverItems = await cartService.addToCart(productId, quantity);
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
@@ -284,15 +265,11 @@ export const CartProvider = ({ children }) => {
       await autoUnlockCart();
     }
 
-    const itemToRemove = cartItems.find((i) => i.id === id);
-    const productId = itemToRemove?.productId || itemToRemove?._id || id;
-    const variantOption = itemToRemove?.variant?.option || "";
-
     setCartItems((prev) => prev.filter((i) => i.id !== id));
 
     if (hasToken()) {
       try {
-        const serverItems = await cartService.removeFromCart(productId, variantOption);
+        const serverItems = await cartService.removeFromCart(id);
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
@@ -303,7 +280,7 @@ export const CartProvider = ({ children }) => {
         }
       }
     }
-  }, [cartItems, isCartLocked, refreshCartLockStatus]);
+  }, [isCartLocked, refreshCartLockStatus]);
 
   const updateQuantity = useCallback(async (id, quantity) => {
     if (!id) return;
@@ -315,11 +292,6 @@ export const CartProvider = ({ children }) => {
       removeFromCart(id);
       return;
     }
-
-    const itemToUpdate = cartItems.find((i) => i.id === id);
-    const productId = itemToUpdate?.productId || itemToUpdate?._id || id;
-    const variant = itemToUpdate?.variant || null;
-
     setCartItems((prev) =>
       prev.map((i) =>
         i.id === id ? { ...i, quantity: Math.min(i.stock || 999, quantity) } : i
@@ -328,7 +300,7 @@ export const CartProvider = ({ children }) => {
 
     if (hasToken()) {
       try {
-        const serverItems = await cartService.updateCartQuantity(productId, quantity, variant);
+        const serverItems = await cartService.updateCartQuantity(id, quantity);
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
@@ -339,7 +311,7 @@ export const CartProvider = ({ children }) => {
         }
       }
     }
-  }, [cartItems, isCartLocked, removeFromCart, refreshCartLockStatus]);
+  }, [isCartLocked, removeFromCart, refreshCartLockStatus]);
 
   const clearCart = useCallback(async () => {
     if (isCartLocked) {

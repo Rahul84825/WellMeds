@@ -18,12 +18,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: [
-        function () {
-          return !this.isSurgical && !this.surgicalCategory;
-        },
-        "Category is required",
-      ],
+      required: [true, "Category is required"],
     },
     brand: {
       type: String,
@@ -200,7 +195,7 @@ const productSchema = new mongoose.Schema(
     },
     productType: {
       type: String,
-      enum: ["medicine", "wellness", "surgical"],
+      enum: ["medicine", "wellness"],
       default: "medicine",
     },
     isSurgical: {
@@ -264,16 +259,6 @@ const productSchema = new mongoose.Schema(
         },
         "Surgical Category is required if product is surgical",
       ],
-    },
-    variants: {
-      type: [
-        {
-          option: { type: String, required: true, trim: true },
-          price: { type: Number, required: true, min: 0 },
-          sellingPrice: { type: Number, required: true, min: 0 },
-        },
-      ],
-      default: [],
     },
   },
   {

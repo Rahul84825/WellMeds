@@ -53,11 +53,6 @@ const getSubstituteComparison = (item, baseProduct) => {
 };
 
 const SubstituteProducts = ({ substituteProducts = [], product }) => {
-  // Surgical products do not have chemical/drug substitutes
-  if (product?.isSurgical || product?.productType === "surgical") {
-    return null;
-  }
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalContainerRef = useRef(null);
   const viewAllBtnRef = useRef(null);

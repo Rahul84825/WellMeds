@@ -102,7 +102,7 @@ export const getCart = async (req, res, next) => {
 };
 
 export const addToCart = async (req, res, next) => {
-  const { productId, quantity, variant } = req.body;
+  const { productId, quantity } = req.body;
 
   try {
     const product = await Product.findById(productId);
@@ -124,13 +124,10 @@ export const addToCart = async (req, res, next) => {
       cart = await Cart.create({ user: req.user._id, items: [] });
     }
 
-    const targetOption = (variant?.option || "").trim();
-
     const itemIndex = cart.items.findIndex((item) => {
       if (!item || !item.product) return false;
       const pId = item.product._id ? item.product._id.toString() : item.product.toString();
-      const opt = (item.variant?.option || "").trim();
-      return pId === productId && opt === targetOption;
+      return pId === productId;
     });
 
     if (itemIndex > -1) {
@@ -142,15 +139,8 @@ export const addToCart = async (req, res, next) => {
         });
       }
       cart.items[itemIndex].quantity = newQuantity;
-      if (variant) {
-        cart.items[itemIndex].variant = variant;
-      }
     } else {
-      cart.items.push({
-        product: productId,
-        quantity: requestedQuantity,
-        variant: variant || undefined,
-      });
+      cart.items.push({ product: productId, quantity: requestedQuantity });
     }
 
     // Refresh and clean prescription status
@@ -175,8 +165,7 @@ export const addToCart = async (req, res, next) => {
 };
 
 export const updateQuantity = async (req, res, next) => {
-  const { productId, quantity, variant, variantOption } = req.body;
-  const targetOption = (variant?.option || variantOption || "").trim();
+  const { productId, quantity } = req.body;
 
   try {
     const product = await Product.findById(productId);
@@ -192,10 +181,6 @@ export const updateQuantity = async (req, res, next) => {
     const itemIndex = cart.items.findIndex((item) => {
       if (!item || !item.product) return false;
       const pId = item.product._id ? item.product._id.toString() : item.product.toString();
-      const opt = (item.variant?.option || "").trim();
-      if (targetOption) {
-        return pId === productId && opt === targetOption;
-      }
       return pId === productId;
     });
 
@@ -234,27 +219,18 @@ export const updateQuantity = async (req, res, next) => {
 
 export const removeFromCart = async (req, res, next) => {
   const { productId } = req.params;
-  const { variantOption } = req.query;
-  const targetOption = (variantOption || "").trim();
 
   try {
-    let cart = await Cart.findOne({ user: req.user._id });
-    if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+    if (cart) {
+      cart.items = cart.items.filter((item) => {
+        if (!item || !item.product) return false;
+        const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+        return pId !== productId;
+      });
+      await cleanCartPrescription(cart);
+      await cart.save();
     }
-
-    cart.items = cart.items.filter((item) => {
-      if (!item || !item.product) return false;
-      const pId = item.product.toString();
-      const opt = (item.variant?.option || "").trim();
-      if (targetOption) {
-        return !(pId === productId && opt === targetOption);
-      }
-      return pId !== productId;
-    });
-
-    await cleanCartPrescription(cart);
-    await cart.save();
 
     const updatedCart = await Cart.findOne({ user: req.user._id })
       .populate("items.product")
