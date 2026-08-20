@@ -89,6 +89,57 @@ const SurgicalProductDetailPage = () => {
   // Share tooltip
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Derived Images List
+  const imagesList = useMemo(() => {
+    if (!product) return [DEFAULT_PRODUCT_IMAGE];
+    const validImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (validImages.length > 0) return validImages;
+    if (product.image) return [product.image];
+    return [DEFAULT_PRODUCT_IMAGE];
+  }, [product]);
+
+  // Derived Variants
+  const variantsList = useMemo(() => {
+    if (product && Array.isArray(product.variants) && product.variants.length > 0) {
+      return product.variants;
+    }
+    if (product) {
+      return [
+        {
+          name: "Standard",
+          sellingPrice: product.price || 0,
+          mrp: product.originalPrice || product.price || 0,
+          stock: product.stock !== undefined ? product.stock : 99,
+        },
+      ];
+    }
+    return [];
+  }, [product]);
+
+  // Current active variant
+  const currentVariant = useMemo(() => {
+    if (variantsList.length === 0) return null;
+    return variantsList[selectedVariantIdx] || variantsList[0];
+  }, [variantsList, selectedVariantIdx]);
+
+  // Dynamic Pricing Calculation
+  const currentPrice = currentVariant ? (currentVariant.sellingPrice ?? currentVariant.price) : product?.price || 0;
+  const currentMrp = currentVariant ? (currentVariant.mrp || currentPrice) : product?.originalPrice || currentPrice;
+  const discountPercent = calculateDiscountPercent(currentMrp, currentPrice);
+  const savings = calculateSavings(currentMrp, currentPrice);
+  const isOutOfStock = product?.inStock === false || (currentVariant?.stock !== undefined && currentVariant.stock <= 0);
+
+  // Cart Status
+  const productId = (product?._id || product?.id)?.toString();
+  const variantName = currentVariant?.name || "";
+  const cartItemKey = variantName ? `${productId}-${variantName}` : productId;
+
+  const cartItem = cartItems?.find(
+    (item) => item.id === cartItemKey || (item.productId === productId && (item.variantName || "") === variantName)
+  );
+  const isInCart = !!cartItem;
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
+
   // Lock body scroll when any modal/lightbox is open
   useEffect(() => {
     if (isLightboxOpen || bulkModalOpen) {
@@ -168,57 +219,6 @@ const SurgicalProductDetailPage = () => {
       isMounted = false;
     };
   }, [slug]);
-
-  // Derived Images List
-  const imagesList = useMemo(() => {
-    if (!product) return [DEFAULT_PRODUCT_IMAGE];
-    const validImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
-    if (validImages.length > 0) return validImages;
-    if (product.image) return [product.image];
-    return [DEFAULT_PRODUCT_IMAGE];
-  }, [product]);
-
-  // Derived Variants
-  const variantsList = useMemo(() => {
-    if (product && Array.isArray(product.variants) && product.variants.length > 0) {
-      return product.variants;
-    }
-    if (product) {
-      return [
-        {
-          name: "Standard",
-          sellingPrice: product.price || 0,
-          mrp: product.originalPrice || product.price || 0,
-          stock: product.stock !== undefined ? product.stock : 99,
-        },
-      ];
-    }
-    return [];
-  }, [product]);
-
-  // Current active variant
-  const currentVariant = useMemo(() => {
-    if (variantsList.length === 0) return null;
-    return variantsList[selectedVariantIdx] || variantsList[0];
-  }, [variantsList, selectedVariantIdx]);
-
-  // Dynamic Pricing Calculation
-  const currentPrice = currentVariant ? (currentVariant.sellingPrice ?? currentVariant.price) : product?.price || 0;
-  const currentMrp = currentVariant ? (currentVariant.mrp || currentPrice) : product?.originalPrice || currentPrice;
-  const discountPercent = calculateDiscountPercent(currentMrp, currentPrice);
-  const savings = calculateSavings(currentMrp, currentPrice);
-  const isOutOfStock = product?.inStock === false || (currentVariant?.stock !== undefined && currentVariant.stock <= 0);
-
-  // Cart Status
-  const productId = (product?._id || product?.id)?.toString();
-  const variantName = currentVariant?.name || "";
-  const cartItemKey = variantName ? `${productId}-${variantName}` : productId;
-
-  const cartItem = cartItems?.find(
-    (item) => item.id === cartItemKey || (item.productId === productId && (item.variantName || "") === variantName)
-  );
-  const isInCart = !!cartItem;
-  const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   // Handle Variant Selection
   const handleSelectVariant = (idx) => {
