@@ -49,6 +49,7 @@ const ForgotPassword = () => {
       <SEO
         title="Forgot Password — WellMeds"
         description="Reset your WellMeds account password safely via email."
+        noindex={true}
       />
 
       <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-[32px] shadow-2xl p-6 sm:p-10 text-left">

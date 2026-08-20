@@ -160,7 +160,7 @@ const Profile = () => {
   if (!user) {
     return (
       <div className="min-h-[70vh] bg-[#f8fbfa] dark:bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-        <SEO title="User Profile | WellMeds" description="View account details, orders, and addresses." />
+        <SEO title="User Profile | WellMeds" description="View account details, orders, and addresses." noindex={true} />
         <div className="w-16 h-16 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center mb-4">
           <User size={32} />
         </div>
@@ -185,7 +185,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen wellmeds-editorial-bg py-8 md:py-12 select-none text-left">
-      <SEO title={`${user.name || "My Account"} — Profile | WellMeds`} description="Manage your addresses, prescription records, and track orders." />
+      <SEO title={`${user.name || "My Account"} — Profile | WellMeds`} description="Manage your addresses, prescription records, and track orders." noindex={true} />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         

@@ -198,6 +198,7 @@ const Login = () => {
       <SEO
         title="Log In — Wellmeds"
         description="Log in to your Wellmeds account to access medicines, manage prescriptions, and track clinical orders."
+        noindex={true}
       />
 
       {/* Atmospheric Star Points */}

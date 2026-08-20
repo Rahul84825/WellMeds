@@ -66,7 +66,8 @@ const SearchResultsPage = () => {
       <SEO
         title={`Search results for "${query}" | WellMeds`}
         description={`Find authentic medicines, active molecules, and therapeutic products matching "${query}" at WellMeds.`}
-        canonical={`/search?q=${encodeURIComponent(query)}`}
+        canonical="/search"
+        noindex={true}
         breadcrumbs={breadcrumbs}
       />
 

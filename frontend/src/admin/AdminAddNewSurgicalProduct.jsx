@@ -7,7 +7,6 @@ import {
   Trash2,
   Plus,
   Check,
-  Sparkles,
   Scissors,
   Layers,
   ArrowUp,
@@ -66,13 +65,6 @@ const AdminAddNewSurgicalProduct = () => {
   // Variants state: Array of { _id, name, mrp, sellingPrice, stock, sku }
   const [variants, setVariants] = useState([
     { name: "Standard", mrp: "", sellingPrice: "", stock: 999, sku: "" }
-  ]);
-
-  // Dynamic Highlights: Array of { label, value }
-  const [highlights, setHighlights] = useState([
-    { label: "Material", value: "" },
-    { label: "Sterility", value: "Sterile" },
-    { label: "Usage", value: "Clinical / Hospital" },
   ]);
 
   // Dynamic Specifications: Array of { label, value }
@@ -154,11 +146,6 @@ const AdminAddNewSurgicalProduct = () => {
               sku: prod.sku || "",
             }
           ]);
-        }
-
-        // Set Highlights
-        if (Array.isArray(prod.highlights) && prod.highlights.length > 0) {
-          setHighlights(prod.highlights.map(h => ({ label: h.label || "", value: h.value || "" })));
         }
 
         // Set Specifications
@@ -305,22 +292,6 @@ const AdminAddNewSurgicalProduct = () => {
   };
 
   // ── Dynamic Highlights Actions ──
-  const handleAddHighlight = () => {
-    setHighlights(prev => [...prev, { label: "", value: "" }]);
-  };
-
-  const handleUpdateHighlight = (index, field, value) => {
-    setHighlights(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-  const handleRemoveHighlight = (indexToRemove) => {
-    setHighlights(prev => prev.filter((_, idx) => idx !== indexToRemove));
-  };
-
   // ── Dynamic Specifications Actions ──
   const handleAddSpecification = () => {
     setSpecifications(prev => [...prev, { label: "", value: "" }]);
@@ -395,7 +366,6 @@ const AdminAddNewSurgicalProduct = () => {
       ? formData.tags.split(",").map(t => t.trim()).filter(Boolean)
       : [];
 
-    const cleanHighlights = highlights.filter(h => h.label.trim() && h.value.trim());
     const cleanSpecifications = specifications.filter(s => s.label.trim() && s.value.trim());
 
     const resolvedPrimaryImage = images[primaryImageIdx] || images[0] || "";
@@ -422,7 +392,7 @@ const AdminAddNewSurgicalProduct = () => {
       image: resolvedPrimaryImage,
       images: images.length > 0 ? images : resolvedPrimaryImage ? [resolvedPrimaryImage] : [],
       variants: validatedVariants,
-      highlights: cleanHighlights,
+      highlights: [],
       specifications: cleanSpecifications,
       tags: tagsArray,
       seo: {
@@ -504,7 +474,7 @@ const AdminAddNewSurgicalProduct = () => {
 
       {/* ═════════════════════════════════════════════════════════════════════
           TWO-COLUMN MAIN FORM LAYOUT
-          - LEFT: Form Content (Basic Info, Variants, Highlights, Specs, SEO)
+          - LEFT: Form Content (Basic Info, Variants, Specs, SEO)
           - RIGHT: Sticky Upload Image Option & Save Actions (Sticky on Scroll)
       ═════════════════════════════════════════════════════════════════════ */}
       <form onSubmit={handleSave} className="flex flex-col lg:flex-row gap-6 items-start">
@@ -694,59 +664,13 @@ const AdminAddNewSurgicalProduct = () => {
             </div>
           </div>
 
-          {/* Card 3: Dynamic Highlights */}
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-[#157a6d]" />
-                <h2 className="text-sm sm:text-base font-bold text-slate-800 dark:text-zinc-100">
-                  3. Key Highlights (Key / Value)
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddHighlight}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[#157a6d] dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
-              >
-                <Plus size={13} />
-                <span>Add Highlight</span>
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {highlights.map((h, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-xs">
-                  <input
-                    type="text"
-                    value={h.label}
-                    onChange={(e) => handleUpdateHighlight(idx, "label", e.target.value)}
-                    className="w-1/3 p-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl font-semibold text-slate-900 dark:text-white outline-none focus:border-[#157a6d]"
-                  />
-                  <input
-                    type="text"
-                    value={h.value}
-                    onChange={(e) => handleUpdateHighlight(idx, "value", e.target.value)}
-                    className="flex-1 p-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-white outline-none focus:border-[#157a6d]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveHighlight(idx)}
-                    className="p-2 text-slate-400 hover:text-red-500 rounded-lg cursor-pointer shrink-0"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 4: Technical Specifications */}
+          {/* Card 3: Technical Specifications */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-[#157a6d]" />
                 <h2 className="text-sm sm:text-base font-bold text-slate-800 dark:text-zinc-100">
-                  4. Technical Specifications
+                  3. Technical Specifications
                 </h2>
               </div>
               <button
@@ -786,12 +710,12 @@ const AdminAddNewSurgicalProduct = () => {
             </div>
           </div>
 
-          {/* Card 5: Stock Availability, Status & SEO */}
+          {/* Card 4: Stock Availability, Status & SEO */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
               <ShieldCheck size={18} className="text-[#157a6d]" />
               <h2 className="text-sm sm:text-base font-bold text-slate-800 dark:text-zinc-100">
-                5. Stock Availability, Status & SEO
+                4. Stock Availability, Status & SEO
               </h2>
             </div>
 

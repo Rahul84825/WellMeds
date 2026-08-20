@@ -163,6 +163,7 @@ const CompleteProfilePage = () => {
       <SEO
         title="Complete Profile — Wellmeds"
         description="Enter your mobile number to complete your Wellmeds customer account and start ordering."
+        noindex={true}
       />
 
       {/* Atmospheric Star Points */}

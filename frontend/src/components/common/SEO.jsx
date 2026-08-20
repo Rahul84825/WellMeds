@@ -6,7 +6,7 @@ const DEFAULT_SITE_NAME = "WellMeds";
 const DEFAULT_DOMAIN = "https://wellmeds.in";
 const DEFAULT_TITLE = "WellMeds — Online Pharmacy & Medical Supplies | Buy Medicines Online";
 const DEFAULT_DESCRIPTION = "WellMeds is India's trusted online pharmacy delivering authentic prescription medicines, wellness products, surgical devices, and specialty healthcare directly to your doorstep.";
-const DEFAULT_IMAGE = `${DEFAULT_DOMAIN}/assets/logos/logo.png`;
+const DEFAULT_IMAGE = `${DEFAULT_DOMAIN}/og-default.jpg`;
 
 /**
  * Helper to dynamically create or update a <meta> tag in document <head>
@@ -52,6 +52,25 @@ const updateJsonLd = (schemaData, id = "json-ld-schema") => {
   script.textContent = JSON.stringify(schemaData);
 };
 
+const sanitizeCanonical = (canonicalInput, currentPath) => {
+  if (canonicalInput) {
+    let target = canonicalInput.trim();
+    if (!target.startsWith("http://") && !target.startsWith("https://")) {
+      target = `${DEFAULT_DOMAIN}${target.startsWith("/") ? target : `/${target}`}`;
+    }
+    // Enforce production domain
+    target = target.replace(/^http:\/\//, "https://");
+    target = target.replace(/https?:\/\/(localhost(:\d+)?|wellmeds\.com|wellmeds-git-[^.]+\.vercel\.app)/, DEFAULT_DOMAIN);
+    // Strip trailing slash unless root
+    if (target.endsWith("/") && target !== `${DEFAULT_DOMAIN}/`) {
+      target = target.slice(0, -1);
+    }
+    return target;
+  }
+  const cleanPath = currentPath !== "/" && currentPath.endsWith("/") ? currentPath.slice(0, -1) : currentPath;
+  return `${DEFAULT_DOMAIN}${cleanPath}`;
+};
+
 const SEO = ({
   title,
   description,
@@ -64,13 +83,11 @@ const SEO = ({
   breadcrumbs,
 }) => {
   const location = useLocation();
-  const cleanPath = location.pathname !== "/" && location.pathname.endsWith("/") ? location.pathname.slice(0, -1) : location.pathname;
-  const currentUrl = `${DEFAULT_DOMAIN}${cleanPath}`;
+  const metaCanonical = sanitizeCanonical(canonical, location.pathname);
 
   const metaTitle = title ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_TITLE;
   const metaDescription = description || DEFAULT_DESCRIPTION;
-  const metaImage = image ? (image.startsWith("http") ? image : `${DEFAULT_DOMAIN}${image}`) : DEFAULT_IMAGE;
-  const metaCanonical = canonical ? (canonical.startsWith("http") ? canonical : `${DEFAULT_DOMAIN}${canonical}`) : currentUrl;
+  const metaImage = image ? (image.startsWith("http") ? image : `${DEFAULT_DOMAIN}${image.startsWith("/") ? image : `/${image}`}`) : DEFAULT_IMAGE;
   const metaRobots = noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
 
   useEffect(() => {

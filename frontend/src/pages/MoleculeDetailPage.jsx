@@ -62,33 +62,6 @@ const MoleculeDetailPage = () => {
         const data = await api.getMolecule(slug);
         setMolecule(data);
         if (data) {
-          const seoTitle = data.seo?.metaTitle || data.name;
-          const seoDescription = data.seo?.metaDescription || data.shortDescription || `Learn about ${data.name}.`;
-          const canonicalUrl = data.seo?.canonicalUrl || `https://wellmeds.com/molecules/${data.slug}`;
-
-          document.title = `${seoTitle} | WellMeds`;
-          let metaDesc = document.querySelector("meta[name='description']");
-          if (!metaDesc) { metaDesc = document.createElement("meta"); metaDesc.setAttribute("name", "description"); document.head.appendChild(metaDesc); }
-          metaDesc.setAttribute("content", seoDescription);
-          let canonical = document.querySelector("link[rel='canonical']");
-          if (!canonical) { canonical = document.createElement("link"); canonical.setAttribute("rel", "canonical"); document.head.appendChild(canonical); }
-          canonical.setAttribute("href", canonicalUrl);
-
-          const ogTags = {
-            "og:title": data.seo?.openGraphTitle || seoTitle,
-            "og:description": data.seo?.openGraphDescription || seoDescription,
-            "og:url": `https://wellmeds.com/molecules/${data.slug}`,
-            "og:type": "website",
-            "twitter:card": "summary_large_image",
-            "twitter:title": data.seo?.twitterTitle || seoTitle,
-            "twitter:description": data.seo?.twitterDescription || seoDescription,
-          };
-          Object.entries(ogTags).forEach(([property, content]) => {
-            let tag = document.querySelector(`meta[property='${property}']`) || document.querySelector(`meta[name='${property}']`);
-            if (!tag) { tag = document.createElement("meta"); tag.setAttribute(property.startsWith("og:") ? "property" : "name", property); document.head.appendChild(tag); }
-            tag.setAttribute("content", content);
-          });
-
           fetchProducts(data._id || data.id);
         }
       } catch (err) {
@@ -155,6 +128,7 @@ const MoleculeDetailPage = () => {
   if (!molecule) {
     return (
       <div style={PAGE_BG} className="min-h-screen flex items-center justify-center px-4">
+        <SEO title="Molecule Not Found" noindex={true} />
         <div className="bg-white border border-[#dde8e3] rounded-lg p-10 text-center max-w-sm shadow-lg">
           <AlertTriangle className="mx-auto mb-4 text-[#b08d3e]" size={40} />
           <h2
@@ -177,13 +151,14 @@ const MoleculeDetailPage = () => {
   return (
     <div style={PAGE_BG} className="min-h-screen text-black font-sans">
       <SEO
-        title={`${molecule.name} Uses, Dosage, Side Effects`}
-        description={molecule.shortDescription || `Explore ${molecule.name} clinical information on WellMeds.`}
-        keywords={`${molecule.name}, ${molecule.name} uses, ${molecule.name} dosage, WellMeds`}
+        title={molecule.seo?.metaTitle || `${molecule.name} Uses, Dosage, Side Effects`}
+        description={molecule.seo?.metaDescription || molecule.shortDescription || `Explore ${molecule.name} clinical information, indications, and available formulations on WellMeds.`}
+        keywords={molecule.seo?.keywords || `${molecule.name}, ${molecule.name} uses, ${molecule.name} dosage, WellMeds`}
+        canonical={`/molecule/${molecule.slug || slug}`}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Molecules", url: "/molecules" },
-          { name: molecule.name, url: `/molecules/${slug}` },
+          { name: molecule.name, url: `/molecule/${molecule.slug || slug}` },
         ]}
       />
 

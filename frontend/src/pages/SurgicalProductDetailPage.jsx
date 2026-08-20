@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import ProductCard from "../components/ProductCard";
 import SEO from "../components/common/SEO";
-import Loader from "../components/Loader";
 import { calculateDeliveryDates } from "../components/ProductDetail/ProductDeliveryCheck";
-import { formatCurrency, calculateDiscountPercent, calculateSavings, formatPrice } from "../utils/currency";
+import { calculateDiscountPercent, formatPrice } from "../utils/currency";
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { getCardImageUrl } from "../utils/image";
+import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
 import {
   ChevronRight,
   ChevronLeft,
@@ -17,31 +17,29 @@ import {
   ShoppingCart,
   Plus,
   Minus,
-  Check,
   CheckCircle,
+  CheckCircle2,
   Truck,
   ShieldCheck,
-  Award,
   Package,
-  Sparkles,
   Building2,
-  Phone,
-  HelpCircle,
   Share2,
   Maximize2,
-  Scissors,
-  Layers,
   MapPin,
   RefreshCw,
   Send,
   AlertCircle,
-  FileText
+  Users,
+  Lock,
+  RotateCcw,
+  Tag,
+  ArrowRight
 } from "lucide-react";
 
 const SurgicalProductDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { cartItems, addToCart, updateQuantity } = useCart();
+  const { cartItems, addToCart } = useCart();
 
   // Data states
   const [product, setProduct] = useState(null);
@@ -126,7 +124,6 @@ const SurgicalProductDetailPage = () => {
   const currentPrice = currentVariant ? (currentVariant.sellingPrice ?? currentVariant.price) : product?.price || 0;
   const currentMrp = currentVariant ? (currentVariant.mrp || currentPrice) : product?.originalPrice || currentPrice;
   const discountPercent = calculateDiscountPercent(currentMrp, currentPrice);
-  const savings = calculateSavings(currentMrp, currentPrice);
   const isOutOfStock = product?.inStock === false || (currentVariant?.stock !== undefined && currentVariant.stock <= 0);
 
   // Cart Status
@@ -139,6 +136,14 @@ const SurgicalProductDetailPage = () => {
   );
   const isInCart = !!cartItem;
   const cartQuantity = cartItem ? cartItem.quantity : 0;
+
+  // Direct WhatsApp Bulk Pricing URL
+  const bulkWhatsAppUrl = useMemo(() => {
+    if (!product) return BUSINESS_INFO.whatsappUrl;
+    const variantInfo = currentVariant?.name && currentVariant.name !== "Standard" ? ` (Variant: ${currentVariant.name})` : "";
+    const msg = `Hi WellMeds, I would like to inquire about bulk / institutional pricing for "${product.name}"${variantInfo}. Please share your best wholesale quote and available quantities.`;
+    return getWhatsAppLink(msg);
+  }, [product, currentVariant]);
 
   // Lock body scroll when any modal/lightbox is open
   useEffect(() => {
@@ -270,7 +275,7 @@ const SurgicalProductDetailPage = () => {
     setPincodeError("");
     const pin = String(pincodeInput || "").trim();
     if (!pin || pin.length !== 6 || !/^\d{6}$/.test(pin)) {
-      setPincodeError("Please enter a valid 6-digit Indian PIN code");
+      setPincodeError("Please enter a valid 6-digit PIN code");
       return;
     }
 
@@ -332,10 +337,10 @@ const SurgicalProductDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-950">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 bg-white">
         <div className="w-12 h-12 rounded-full border-4 border-[#157a6d] border-t-transparent animate-spin" />
         <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-          Loading Clinical Product Details...
+          Loading Product Details...
         </p>
       </div>
     );
@@ -343,9 +348,9 @@ const SurgicalProductDetailPage = () => {
 
   if (!product) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center space-y-4 bg-white">
         <Package size={48} className="text-slate-400" />
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Surgical Product Not Found</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Surgical Product Not Found</h2>
         <p className="text-sm text-slate-500 max-w-md">
           The surgical supply item you requested may have been relocated or is temporarily unavailable.
         </p>
@@ -359,12 +364,12 @@ const SurgicalProductDetailPage = () => {
     );
   }
 
-  // Filter populated highlights & specifications
-  const validHighlights = (product.highlights || []).filter((h) => h && h.label && h.value);
+  // Filter populated specifications
   const validSpecifications = (product.specifications || []).filter((s) => s && s.label && s.value);
+  const brandOrManufacturer = product.manufacturer || product.brand || "WellMeds";
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 font-sans pb-20 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20">
       {/* ── SEO METADATA ── */}
       <SEO
         title={product.seo?.metaTitle || `${product.name} | Buy Online at WellMeds`}
@@ -377,46 +382,46 @@ const SurgicalProductDetailPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-8 text-left">
         {/* ── BREADCRUMB ── */}
         <nav className="flex items-center flex-wrap text-xs text-slate-400 gap-1.5 font-medium select-none">
           <Link to="/" className="hover:text-[#157a6d] transition-colors">Home</Link>
-          <ChevronRight size={13} className="text-slate-300 dark:text-zinc-700" />
+          <ChevronRight size={13} className="text-slate-300" />
           <Link to="/surgical" className="hover:text-[#157a6d] transition-colors">Surgical</Link>
           {categorySlug && (
             <>
-              <ChevronRight size={13} className="text-slate-300 dark:text-zinc-700" />
+              <ChevronRight size={13} className="text-slate-300" />
               <Link to={`/surgical/${categorySlug}`} className="hover:text-[#157a6d] transition-colors truncate max-w-[160px]">
                 {categoryName}
               </Link>
             </>
           )}
-          <ChevronRight size={13} className="text-slate-300 dark:text-zinc-700" />
-          <span className="text-[#157a6d] dark:text-emerald-400 font-bold truncate max-w-[200px] sm:max-w-md">
+          <ChevronRight size={13} className="text-slate-300" />
+          <span className="text-slate-600 font-semibold truncate max-w-[220px] sm:max-w-md">
             {product.name}
           </span>
         </nav>
 
         {/* ═════════════════════════════════════════════════════════════════════
-            HERO SECTION (LEFT GALLERY + RIGHT PURCHASE PANEL)
+            HERO SECTION: SIMPLE CLEAN LAYOUT (NO CARDS, WHITE BG)
         ═════════════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* ── LEFT: IMAGE GALLERY (5 COLUMNS) ── */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-3">
             <div className="flex flex-col-reverse sm:flex-row gap-3">
               {/* Vertical Thumbnail Strip (Desktop/Tablet) */}
               {imagesList.length > 1 && (
-                <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[440px] scrollbar-none shrink-0 pb-1 sm:pb-0">
+                <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto max-h-[440px] scrollbar-none shrink-0 pb-1 sm:pb-0">
                   {imagesList.map((imgUrl, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setActiveImageIdx(idx)}
                       onMouseEnter={() => setActiveImageIdx(idx)}
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white border-2 p-1.5 flex items-center justify-center overflow-hidden shrink-0 transition-all cursor-pointer ${
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white border p-1 flex items-center justify-center overflow-hidden shrink-0 transition-all cursor-pointer ${
                         activeImageIdx === idx
-                          ? "border-[#157a6d] shadow-sm ring-2 ring-[#157a6d]/20 scale-[1.02]"
-                          : "border-slate-200 dark:border-zinc-800 hover:border-slate-300"
+                          ? "border-[#157a6d] ring-1 ring-[#157a6d]"
+                          : "border-slate-200 hover:border-slate-300"
                       }`}
                       aria-label={`View image ${idx + 1}`}
                     >
@@ -430,46 +435,37 @@ const SurgicalProductDetailPage = () => {
                 </div>
               )}
 
-              {/* Large Main Image Container */}
+              {/* Large Main Image Display */}
               <div
                 onClick={() => setIsLightboxOpen(true)}
-                className="relative flex-1 aspect-square rounded-2xl bg-white border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 flex items-center justify-center overflow-hidden shadow-xs cursor-zoom-in group"
+                className="relative flex-1 aspect-square rounded-xl bg-white border border-slate-200/80 p-6 sm:p-8 flex items-center justify-center overflow-hidden cursor-zoom-in group"
               >
-                {/* Discount Badge */}
-                {discountPercent > 0 && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 text-xs font-extrabold font-sans shadow-2xs">
-                      {discountPercent}% OFF
-                    </span>
-                  </div>
-                )}
-
-                {/* Lightbox / Zoom Prompt Button */}
+                {/* Lightbox Trigger Icon */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsLightboxOpen(true);
                   }}
-                  className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/90 dark:bg-zinc-800/90 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 shadow-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-105 cursor-pointer"
-                  title="Click to expand fullscreen"
+                  className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 border border-slate-200 text-slate-600 shadow-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-105 cursor-pointer"
+                  title="Click to view full image"
                 >
-                  <Maximize2 size={15} />
+                  <Maximize2 size={14} />
                 </button>
 
-                {/* Primary Image */}
+                {/* Main Product Image */}
                 <img
                   src={getCardImageUrl(imagesList[activeImageIdx], { width: 1000 }) || DEFAULT_PRODUCT_IMAGE}
                   alt={product.name}
                   loading="eager"
-                  className="w-full h-full max-w-full max-h-full object-contain select-none transition-transform duration-300 ease-out group-hover:scale-[1.04]"
+                  className="w-full h-full max-w-full max-h-full object-contain select-none transition-transform duration-300 ease-out group-hover:scale-[1.03]"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = DEFAULT_PRODUCT_IMAGE;
                   }}
                 />
 
-                {/* Arrows for multi-image */}
+                {/* Left/Right arrow controls on hover */}
                 {imagesList.length > 1 && (
                   <>
                     <button
@@ -478,7 +474,7 @@ const SurgicalProductDetailPage = () => {
                         e.stopPropagation();
                         setActiveImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
                       }}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 border border-slate-200 dark:border-zinc-700 shadow-sm flex items-center justify-center text-slate-700 dark:text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 cursor-pointer"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-slate-200 shadow-xs flex items-center justify-center text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 cursor-pointer"
                       aria-label="Previous image"
                     >
                       <ChevronLeft size={16} />
@@ -489,7 +485,7 @@ const SurgicalProductDetailPage = () => {
                         e.stopPropagation();
                         setActiveImageIdx((prev) => (prev + 1) % imagesList.length);
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 border border-slate-200 dark:border-zinc-700 shadow-sm flex items-center justify-center text-slate-700 dark:text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 cursor-pointer"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-slate-200 shadow-xs flex items-center justify-center text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 cursor-pointer"
                       aria-label="Next image"
                     >
                       <ChevronRight size={16} />
@@ -498,120 +494,92 @@ const SurgicalProductDetailPage = () => {
                 )}
               </div>
             </div>
-
-            {/* Gallery Hint */}
-            <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
-              <span>Click image to view high-resolution zoom</span>
-            </p>
           </div>
 
-          {/* ── RIGHT: PRODUCT DETAILS & PURCHASE CARD (7 COLUMNS) ── */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Header / Brand / Title */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-[#157a6d]/20 text-[#157a6d] dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                    <Scissors size={12} />
-                    <span>{categoryName}</span>
-                  </span>
-                  {product.subcategory && (
-                    <span className="text-xs text-slate-400 font-semibold">
-                      • {product.subcategory}
-                    </span>
-                  )}
-                </div>
+          {/* ── RIGHT: PRODUCT DETAILS (CLEAN TYPOGRAPHY, MATCHING REFERENCE) ── */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* 1. Title */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
+              {product.name}
+            </h1>
 
-                {/* Share Button */}
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#157a6d] font-semibold cursor-pointer transition-colors"
-                  title="Share product link"
-                >
-                  <Share2 size={14} />
-                  <span>{copiedLink ? "Link Copied!" : "Share"}</span>
-                </button>
+            {/* 2. By Brand / Manufacturer */}
+            <p className="text-sm font-medium text-slate-700">
+              By <span className="text-[#0284c7] font-semibold hover:underline cursor-pointer">{brandOrManufacturer}</span>
+            </p>
+
+            {/* 3. Ratings & Units Sold (Social Proof Row) */}
+            <div className="flex items-center gap-4 text-xs sm:text-sm font-medium text-slate-600 flex-wrap">
+              <div className="flex items-center gap-1">
+                <span className="text-[#16a34a] font-bold">★ 4.34</span>
+                <span className="text-[#0284c7] font-medium">(1070 Reviews)</span>
               </div>
-
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
-                {product.name}
-              </h1>
-
-              {(product.manufacturer || product.brand) && (
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 font-medium">
-                  Manufactured / Marketed by:{" "}
-                  <span className="font-bold text-slate-800 dark:text-zinc-200">
-                    {product.manufacturer || product.brand}
-                  </span>
-                </p>
-              )}
+              <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                <Users size={15} className="text-[#16a34a]" />
+                <span>5374+ units sold recently</span>
+              </div>
             </div>
 
-            {/* Price Block */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-3">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight font-mono">
-                  {formatCurrency(currentPrice)}
+            {/* 4. Price Row */}
+            <div className="flex items-baseline gap-3 flex-wrap pt-1">
+              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                ₹{formatPrice(currentPrice)}
+              </span>
+
+              {currentMrp > currentPrice && (
+                <span className="text-base sm:text-lg text-slate-500 line-through">
+                  MRP ₹{formatPrice(currentMrp)}
                 </span>
-
-                {currentMrp > currentPrice && (
-                  <span className="text-base sm:text-lg text-slate-400 line-through font-mono">
-                    MRP {formatCurrency(currentMrp)}
-                  </span>
-                )}
-
-                {discountPercent > 0 && (
-                  <span className="px-3 py-1 rounded-full bg-[#bbf7d0] dark:bg-emerald-950/80 text-[#15803d] dark:text-emerald-300 text-xs sm:text-sm font-extrabold shadow-2xs">
-                    {discountPercent}% OFF
-                  </span>
-                )}
-              </div>
-
-              {savings > 0 && (
-                <p className="text-xs sm:text-sm text-[#16a34a] dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                  <CheckCircle size={15} />
-                  <span>You Save: ₹{formatPrice(savings)} ({discountPercent}% Discount Applied)</span>
-                </p>
               )}
 
-              <p className="text-[11px] text-slate-400">
-                Inclusive of all clinical GST & batch compliance taxes.
-              </p>
+              {discountPercent > 0 && (
+                <span className="text-sm sm:text-base font-bold text-[#0284c7]">
+                  ({discountPercent}% OFF)
+                </span>
+              )}
             </div>
 
-            {/* ── VARIANT SELECTOR (IF MULTIPLE VARIANTS) ── */}
-            {variantsList.length > 1 && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs sm:text-sm font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-1.5">
-                    <Layers size={15} className="text-[#157a6d]" />
-                    <span>Select Variation:</span>
-                  </label>
-                  <span className="text-xs text-[#157a6d] font-bold">
-                    Selected: {currentVariant.name}
-                  </span>
-                </div>
+            {/* 5. Trust Features Bar (Blue outline icons matching reference) */}
+            <div className="flex items-center gap-4 sm:gap-6 flex-wrap py-2 text-xs sm:text-sm font-semibold text-slate-700">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={18} className="text-[#0284c7]" />
+                <span>100% Genuine</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Truck size={18} className="text-[#0284c7]" />
+                <span>Pan India Delivery</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Lock size={16} className="text-[#0284c7]" />
+                <span>Safe Payment</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <RotateCcw size={16} className="text-[#0284c7]" />
+                <span>7 Days Return</span>
+              </div>
+            </div>
 
+            {/* 6. Variation Selector (Matching reference button pills) */}
+            {variantsList.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <label className="block text-sm font-bold text-slate-900">
+                  Variation:
+                </label>
                 <div className="flex flex-wrap gap-2.5">
                   {variantsList.map((v, idx) => {
                     const isSelected = selectedVariantIdx === idx;
-                    const vPrice = v.sellingPrice !== undefined ? v.sellingPrice : v.price;
                     return (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => handleSelectVariant(idx)}
-                        className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border flex items-center gap-2 ${
+                        className={`min-w-[72px] px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
                           isSelected
-                            ? "bg-[#157a6d] text-white border-[#157a6d] shadow-sm scale-[1.02]"
-                            : "bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:border-[#157a6d]/60"
+                            ? "bg-[#fff7ed] text-slate-900 border-[#fb923c] shadow-2xs"
+                            : "bg-white text-slate-800 border-slate-200 hover:border-slate-300 shadow-2xs"
                         }`}
                       >
-                        <span>{v.name}</span>
-                        <span className={`text-[11px] font-mono font-medium ${isSelected ? "text-emerald-100" : "text-slate-400"}`}>
-                          ({formatCurrency(vPrice)})
-                        </span>
+                        {v.name}
                       </button>
                     );
                   })}
@@ -619,82 +587,102 @@ const SurgicalProductDetailPage = () => {
               </div>
             )}
 
-            {/* ── PINCODE / DELIVERY AVAILABILITY ── */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-1.5">
-                  <Truck size={16} className="text-[#157a6d]" />
-                  <span>Check Pincode Availability</span>
-                </span>
-                <span className="text-[11px] text-slate-400">Pan-India Clinical Dispatch</span>
+            {/* 7. Buying in Bulk? (Direct WhatsApp Redirect) */}
+            <div className="rounded-2xl border border-[#fb923c]/80 bg-white p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    Buying in bulk?
+                  </h3>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#dcfce7] text-[#15803d] font-bold text-xs">
+                    <Tag size={13} className="fill-[#15803d]" />
+                    <span>Get better prices</span>
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-xs sm:text-sm font-semibold text-slate-800">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-[#16a34a] shrink-0" />
+                    <span>Purchase in Bulk Quantity</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-[#16a34a] shrink-0" />
+                    <span>Best Prices for your business</span>
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleCheckPincode} className="flex gap-2">
-                <div className="relative flex-1">
-                  <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    maxLength={6}
-                    placeholder="Enter 6-digit Pincode"
-                    value={pincodeInput}
-                    onChange={(e) => setPincodeInput(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#157a6d]"
-                  />
-                </div>
+              <a
+                href={bulkWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-[#f97316] text-[#ea580c] hover:bg-orange-50 hover:border-[#ea580c] font-bold text-sm transition-all shadow-2xs group shrink-0 cursor-pointer"
+              >
+                <span>Explore Bulk Pricing</span>
+                <ArrowRight size={17} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+
+            {/* 8. Pincode / Delivery Check (Clean & Simple) */}
+            <div className="space-y-2 pt-2">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <MapPin size={14} className="text-[#157a6d]" />
+                <span>Check Delivery Pincode:</span>
+              </span>
+              <form onSubmit={handleCheckPincode} className="flex gap-2 max-w-sm">
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="Enter 6-digit PIN"
+                  value={pincodeInput}
+                  onChange={(e) => setPincodeInput(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm font-mono font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#157a6d]"
+                />
                 <button
                   type="submit"
                   disabled={checkingPincode}
-                  className="px-5 py-2 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {checkingPincode ? <RefreshCw size={14} className="animate-spin" /> : "Check"}
+                  {checkingPincode ? <RefreshCw size={13} className="animate-spin" /> : "Check"}
                 </button>
               </form>
 
               {pincodeError && (
-                <p className="text-xs text-red-500 font-semibold flex items-center gap-1">
-                  <AlertCircle size={13} />
-                  <span>{pincodeError}</span>
-                </p>
+                <p className="text-xs text-red-500 font-semibold">{pincodeError}</p>
               )}
 
               {pincodeResult.checked && (
-                <div className="pt-1 text-xs space-y-1">
-                  <p className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                    <CheckCircle size={14} />
-                    <span>✓ Delivery Available to PIN {pincodeResult.pincode}</span>
-                  </p>
-                  <p className="text-slate-500 dark:text-zinc-400">
-                    Estimated Delivery: <span className="font-bold text-slate-800 dark:text-zinc-200">{pincodeResult.datesText}</span>
-                  </p>
-                </div>
+                <p className="text-xs text-slate-600">
+                  <span className="text-emerald-600 font-bold">✓ Delivery Available</span> to {pincodeResult.pincode} • <span className="font-semibold text-slate-800">{pincodeResult.datesText}</span>
+                </p>
               )}
             </div>
 
-            {/* ── QUANTITY & CART ACTIONS ── */}
-            <div className="space-y-3 pt-2">
+            {/* 8. Quantity & Add to Cart / Buy Now */}
+            <div className="space-y-3 pt-3">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {/* Quantity Stepper */}
-                <div className="flex items-center justify-between bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3 py-2 min-w-[120px] h-12">
+                <div className="flex items-center justify-between border border-slate-200 rounded-lg px-2 py-1.5 min-w-[110px] h-11 bg-slate-50">
                   <button
                     type="button"
                     disabled={quantity <= 1 || isOutOfStock}
                     onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-700 text-slate-700 dark:text-white flex items-center justify-center font-bold text-sm shadow-2xs hover:bg-slate-50 disabled:opacity-30 cursor-pointer"
+                    className="w-7 h-7 rounded bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
                     aria-label="Decrease quantity"
                   >
-                    <Minus size={14} />
+                    <Minus size={13} />
                   </button>
-                  <span className="font-mono font-bold text-sm text-slate-900 dark:text-white px-2">
+                  <span className="font-mono font-bold text-sm text-slate-900 px-2">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     disabled={isOutOfStock}
                     onClick={() => setQuantity((prev) => Math.min(30, prev + 1))}
-                    className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-700 text-slate-700 dark:text-white flex items-center justify-center font-bold text-sm shadow-2xs hover:bg-slate-50 disabled:opacity-30 cursor-pointer"
+                    className="w-7 h-7 rounded bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
                     aria-label="Increase quantity"
                   >
-                    <Plus size={14} />
+                    <Plus size={13} />
                   </button>
                 </div>
 
@@ -703,9 +691,9 @@ const SurgicalProductDetailPage = () => {
                   type="button"
                   disabled={isOutOfStock}
                   onClick={handleAddToCart}
-                  className="flex-1 h-12 px-6 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:bg-slate-300 dark:disabled:bg-zinc-800 disabled:text-slate-500 cursor-pointer"
+                  className="flex-1 h-11 px-6 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
                 >
-                  <ShoppingCart size={16} />
+                  <ShoppingCart size={15} />
                   <span>{isOutOfStock ? "Out of Stock" : isInCart ? "Update in Cart" : "Add to Cart"}</span>
                 </button>
 
@@ -714,124 +702,72 @@ const SurgicalProductDetailPage = () => {
                   type="button"
                   disabled={isOutOfStock}
                   onClick={handleBuyNow}
-                  className="sm:w-40 h-12 px-6 rounded-xl bg-[#172b26] dark:bg-zinc-800 hover:bg-[#0f1f1b] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-sm transition-all active:scale-[0.98] disabled:opacity-40 cursor-pointer"
+                  className="sm:w-36 h-11 px-6 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-xs transition-all active:scale-[0.98] disabled:opacity-40 cursor-pointer"
                 >
                   <span>Buy Now</span>
                 </button>
               </div>
 
-              {/* Status Alert if in cart */}
+              {/* Status indicator if in cart */}
               {isInCart && (
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
                   <CheckCircle size={14} />
-                  <span>Item currently in your cart (Qty: {cartQuantity}). Ready for checkout.</span>
+                  <span>Item in your cart (Qty: {cartQuantity}).</span>
                 </p>
               )}
-            </div>
 
-            {/* ── TRUST BADGES BAR ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-2.5">
-                <ShieldCheck size={20} className="text-[#157a6d] shrink-0" />
-                <div className="text-[11px] leading-tight">
-                  <p className="font-bold text-slate-800 dark:text-zinc-200">100% Genuine</p>
-                  <p className="text-slate-400 text-[10px]">Direct Clinical Sourcing</p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-2.5">
-                <Award size={20} className="text-[#157a6d] shrink-0" />
-                <div className="text-[11px] leading-tight">
-                  <p className="font-bold text-slate-800 dark:text-zinc-200">Hospital Grade</p>
-                  <p className="text-slate-400 text-[10px]">ISO & CE Standards</p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-2.5">
-                <Truck size={20} className="text-[#157a6d] shrink-0" />
-                <div className="text-[11px] leading-tight">
-                  <p className="font-bold text-slate-800 dark:text-zinc-200">Fast Dispatch</p>
-                  <p className="text-slate-400 text-[10px]">Secure Sanitized Pack</p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-2.5">
-                <Phone size={20} className="text-[#157a6d] shrink-0" />
-                <div className="text-[11px] leading-tight">
-                  <p className="font-bold text-slate-800 dark:text-zinc-200">Clinical Support</p>
-                  <p className="text-slate-400 text-[10px]">Expert Healthcare Help</p>
-                </div>
+              {/* Institutional / Bulk inquiry & Share */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  onClick={() => setBulkModalOpen(true)}
+                  className="text-[#157a6d] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Building2 size={13} />
+                  <span>Inquire for Bulk / Hospital Institutional Pricing</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="text-slate-500 hover:text-[#157a6d] font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <Share2 size={13} />
+                  <span>{copiedLink ? "Copied!" : "Share"}</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         {/* ═════════════════════════════════════════════════════════════════════
-            HIGHLIGHTS SECTION (DYNAMIC KEY/VALUE PAIRS)
+            SPECIFICATIONS & DESCRIPTION (CLEAN TEXT SECTIONS, NO BOXED CARDS)
         ═════════════════════════════════════════════════════════════════════ */}
-        {validHighlights.length > 0 && (
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
-              <Sparkles size={20} className="text-[#157a6d]" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Product Highlights</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {validHighlights.map((h, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800/80 flex flex-col justify-between space-y-1"
-                >
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                    {h.label}
-                  </span>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-100">
-                    {h.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ═════════════════════════════════════════════════════════════════════
-            SPECIFICATIONS & DESCRIPTION SECTION
-        ═════════════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Specifications Table (5 Cols) */}
+        <div className="pt-6 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Specifications (5 Columns) */}
           {validSpecifications.length > 0 && (
-            <div className="lg:col-span-5 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
-                <Award size={18} className="text-[#157a6d]" />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Technical Specifications</h3>
-              </div>
-
-              <div className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
+            <div className="lg:col-span-5 space-y-3">
+              <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-200">
+                Technical Specifications
+              </h3>
+              <div className="divide-y divide-slate-100 text-xs sm:text-sm">
                 {validSpecifications.map((s, idx) => (
                   <div key={idx} className="py-2.5 flex justify-between gap-4">
-                    <span className="text-slate-400 font-semibold">{s.label}</span>
-                    <span className="font-bold text-slate-800 dark:text-zinc-200 text-right">{s.value}</span>
+                    <span className="text-slate-500">{s.label}</span>
+                    <span className="font-semibold text-slate-900 text-right">{s.value}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Detailed Description (7 or 12 Cols) */}
-          <div className={`${validSpecifications.length > 0 ? "lg:col-span-7" : "lg:col-span-12"} bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-4`}>
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
-              <FileText size={18} className="text-[#157a6d]" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Product Description</h3>
-            </div>
-
-            <div className="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
-              <p className="font-bold text-slate-900 dark:text-white">
-                Product Information – {product.name}
-              </p>
+          {/* Product Description (7 or 12 Columns) */}
+          <div className={`${validSpecifications.length > 0 ? "lg:col-span-7" : "lg:col-span-12"} space-y-3`}>
+            <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-200">
+              Product Description
+            </h3>
+            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line space-y-2">
               {product.description ? (
-                <div className="whitespace-pre-line space-y-2">
-                  {product.description}
-                </div>
+                product.description
               ) : (
                 <p>
                   Manufactured to precise medical engineering tolerances, this clinical product is verified for sterile safety, durability, and biocompatibility in professional healthcare environments.
@@ -842,43 +778,37 @@ const SurgicalProductDetailPage = () => {
         </div>
 
         {/* ═════════════════════════════════════════════════════════════════════
-            TRUST & AUTHENTICITY SECTION (WELLMEDS CLINICAL IDENTITY)
+            WHY BUY FROM WELLMEDS (CLEAN UNBOXED TRUST SECTION)
         ═════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Why Buy Surgical Supplies from WellMeds?</h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-              WellMeds guarantees clinical chain-of-custody, direct manufacturer relationships, and rigorous quality inspection.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-[#157a6d]/10 text-[#157a6d] flex items-center justify-center">
-                <ShieldCheck size={20} />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Certified Clinical Sourcing</h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-                Direct procurement from authorized pharmaceutical and medical device manufacturers with verifiable batch certifications.
+        <div className="pt-6 border-t border-slate-200 space-y-4">
+          <h3 className="text-base font-bold text-slate-900">Why Buy Surgical Supplies from WellMeds?</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs sm:text-sm">
+            <div className="space-y-1">
+              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-[#157a6d]" />
+                <span>Certified Clinical Sourcing</span>
+              </h4>
+              <p className="text-slate-500 leading-relaxed text-xs">
+                Direct procurement from authorized pharmaceutical and medical device manufacturers with batch certifications.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-[#157a6d]/10 text-[#157a6d] flex items-center justify-center">
-                <Package size={20} />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Sterile & Tamper-Proof Packaging</h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-                Hospital consumables are stored and packed in climate-regulated pharmaceutical fulfillment centers.
+            <div className="space-y-1">
+              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+                <Package size={16} className="text-[#157a6d]" />
+                <span>Sterile & Tamper-Proof Packaging</span>
+              </h4>
+              <p className="text-slate-500 leading-relaxed text-xs">
+                Hospital consumables stored and packed in climate-regulated pharmaceutical fulfillment centers.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-[#157a6d]/10 text-[#157a6d] flex items-center justify-center">
-                <Truck size={20} />
-              </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Reliable Healthcare Logistics</h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+            <div className="space-y-1">
+              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+                <Truck size={16} className="text-[#157a6d]" />
+                <span>Reliable Healthcare Logistics</span>
+              </h4>
+              <p className="text-slate-500 leading-relaxed text-xs">
                 Expedited delivery across India with temperature-monitored routes and dedicated clinical tracking.
               </p>
             </div>
@@ -889,13 +819,13 @@ const SurgicalProductDetailPage = () => {
             RELATED SURGICAL PRODUCTS
         ═════════════════════════════════════════════════════════════════════ */}
         {relatedProducts.length > 0 && (
-          <div className="space-y-4 pt-4">
+          <div className="space-y-4 pt-6 border-t border-slate-200">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                   Related Surgical Products
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                <p className="text-xs text-slate-500">
                   Recommended clinical supplies from the same category and specialty lines.
                 </p>
               </div>
@@ -919,7 +849,7 @@ const SurgicalProductDetailPage = () => {
       </div>
 
       {/* ═════════════════════════════════════════════════════════════════════
-          FULLSCREEN LIGHTBOX MODAL (PORTALED TO BODY WITH Z-[9999])
+          FULLSCREEN LIGHTBOX MODAL
       ═════════════════════════════════════════════════════════════════════ */}
       {isLightboxOpen && createPortal(
         <div
@@ -933,7 +863,6 @@ const SurgicalProductDetailPage = () => {
           aria-modal="true"
           aria-label="Image Zoom Preview"
         >
-          {/* Modal Content Container */}
           <div
             onClick={(e) => e.stopPropagation()}
             className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center cursor-default animate-[scale-up_0.2s_ease-out]"
@@ -967,7 +896,7 @@ const SurgicalProductDetailPage = () => {
               <img
                 src={getCardImageUrl(imagesList[activeImageIdx], { width: 1400 }) || DEFAULT_PRODUCT_IMAGE}
                 alt={product.name}
-                className="max-h-[68vh] sm:max-h-[74vh] max-w-full object-contain rounded-2xl shadow-2xl bg-white p-4 sm:p-6"
+                className="max-h-[68vh] sm:max-h-[74vh] max-w-full object-contain rounded-xl shadow-2xl bg-white p-4 sm:p-6"
               />
             </div>
 
@@ -986,13 +915,13 @@ const SurgicalProductDetailPage = () => {
 
             {/* Bottom Thumbnails Strip */}
             {imagesList.length > 1 && (
-              <div className="mt-3 flex items-center gap-2 overflow-x-auto max-w-[90vw] p-2 bg-black/60 rounded-2xl backdrop-blur-md border border-white/10">
+              <div className="mt-3 flex items-center gap-2 overflow-x-auto max-w-[90vw] p-2 bg-black/60 rounded-xl backdrop-blur-md border border-white/10">
                 {imagesList.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIdx(idx)}
-                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white p-1 overflow-hidden transition-all cursor-pointer shrink-0 ${
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-white p-1 overflow-hidden transition-all cursor-pointer shrink-0 ${
                       activeImageIdx === idx
                         ? "ring-2 ring-[#157a6d] scale-105 shadow-md"
                         : "opacity-60 hover:opacity-100"
@@ -1013,8 +942,8 @@ const SurgicalProductDetailPage = () => {
       )}
 
       {/* ═════════════════════════════════════════════════════════════════════
-          BULK PROCUREMENT INQUIRY MODAL (PORTALED TO BODY WITH Z-[9999])
-      ═════════════════════════════════════════════════════════════════════ */}
+          BULK PROCUREMENT INQUIRY MODAL
+      ═════════════════════════════════════════════ */}
       {bulkModalOpen && createPortal(
         <div
           onClick={(e) => {
@@ -1028,84 +957,84 @@ const SurgicalProductDetailPage = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 dark:border-zinc-800 shadow-2xl space-y-5 animate-[scale-in_0.15s_ease-out] text-left"
+            className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-5 animate-[scale-in_0.15s_ease-out] text-left"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2 text-[#157a6d]">
                 <Building2 size={20} />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Bulk Purchase Inquiry</h3>
+                <h3 className="text-lg font-bold text-slate-900">Bulk Purchase Inquiry</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setBulkModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Inquire about volume pricing for <span className="font-bold text-slate-800 dark:text-zinc-200">"{product.name}"</span>. Our healthcare supply team will respond with a formal quotation.
+            <p className="text-xs text-slate-500">
+              Inquire about volume pricing for <span className="font-bold text-slate-800">"{product.name}"</span>. Our healthcare supply team will respond with a formal quotation.
             </p>
 
             <form onSubmit={handleBulkSubmit} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Contact Name *</label>
+                  <label className="text-[11px] font-bold text-slate-700">Contact Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="Dr. / Mr. / Ms."
                     value={bulkForm.name}
                     onChange={(e) => setBulkForm({ ...bulkForm, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Hospital / Clinic</label>
+                  <label className="text-[11px] font-bold text-slate-700">Hospital / Clinic</label>
                   <input
                     type="text"
                     placeholder="Facility name"
                     value={bulkForm.hospitalName}
                     onChange={(e) => setBulkForm({ ...bulkForm, hospitalName: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Phone Number *</label>
+                  <label className="text-[11px] font-bold text-slate-700">Phone Number *</label>
                   <input
                     type="tel"
                     required
                     placeholder="+91 98765 43210"
                     value={bulkForm.phone}
                     onChange={(e) => setBulkForm({ ...bulkForm, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-900"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Estimated Quantity</label>
+                  <label className="text-[11px] font-bold text-slate-700">Estimated Quantity</label>
                   <input
                     type="text"
                     placeholder="e.g. 500 units / 50 boxes"
                     value={bulkForm.quantity}
                     onChange={(e) => setBulkForm({ ...bulkForm, quantity: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">Specific Requirements / GSTIN</label>
+                <label className="text-[11px] font-bold text-slate-700">Specific Requirements / GSTIN</label>
                 <textarea
                   rows={2}
                   placeholder="Include required delivery location, variant sizes, or compliance requirements..."
                   value={bulkForm.notes}
                   onChange={(e) => setBulkForm({ ...bulkForm, notes: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
                 />
               </div>
 
@@ -1113,14 +1042,14 @@ const SurgicalProductDetailPage = () => {
                 <button
                   type="button"
                   onClick={() => setBulkModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={bulkSubmitted}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider shadow-sm transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider shadow-xs transition-colors cursor-pointer"
                 >
                   <Send size={13} />
                   <span>{bulkSubmitted ? "Submitting..." : "Submit Inquiry"}</span>

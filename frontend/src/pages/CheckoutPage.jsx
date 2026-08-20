@@ -21,6 +21,7 @@ import { validateDeliveryLocation } from "../services/googleMapsService";
 import GoogleMapPicker from "../components/common/GoogleMapPicker";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
+import SEO from "../components/common/SEO";
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -527,6 +528,7 @@ const Checkout = () => {
   if (cartItems.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 sm:py-32 animate-[fade-in_0.3s_ease-out] flex flex-col items-center text-center">
+        <SEO title="Secure Checkout — WellMeds" noindex={true} />
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">No items to checkout</h2>
         <Link
           to="/products"
@@ -540,12 +542,18 @@ const Checkout = () => {
 
   // ── Guest Auth Gate ──
   if (!authLoading && !user) {
-    return <CheckoutAuthGate />;
+    return (
+      <>
+        <SEO title="Secure Checkout — WellMeds" noindex={true} />
+        <CheckoutAuthGate />
+      </>
+    );
   }
 
   // ── Main Checkout UI ──
   return (
     <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+      <SEO title="Secure Checkout — WellMeds" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
         <Link to="/cart" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5 w-fit">

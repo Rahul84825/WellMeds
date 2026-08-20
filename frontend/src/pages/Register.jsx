@@ -213,6 +213,7 @@ const Register = () => {
       <SEO
         title="Create Account — Wellmeds"
         description="Join Wellmeds for genuine, verified medicine delivery and digital healthcare prescriptions."
+        noindex={true}
       />
 
       {/* Atmospheric Star Points */}
