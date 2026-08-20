@@ -19,6 +19,15 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  variantName: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  variantId: {
+    type: String,
+    default: "",
+  },
 });
 
 const orderSchema = new mongoose.Schema(

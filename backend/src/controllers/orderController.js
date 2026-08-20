@@ -33,14 +33,30 @@ const computeOrderTotals = async (items, couponCode, userId) => {
       orderRequiresRx = true;
     }
 
-    const itemPrice = product.price;
+    let itemPrice = product.price;
+    let displayName = product.name;
+    const targetVariant = item.variantName ? String(item.variantName).trim() : "";
+    const targetVariantId = item.variantId ? String(item.variantId).trim() : "";
+
+    if (targetVariant && Array.isArray(product.variants) && product.variants.length > 0) {
+      const foundVariant = product.variants.find(
+        (v) => (targetVariantId && v._id?.toString() === targetVariantId) || v.name?.toLowerCase() === targetVariant.toLowerCase()
+      );
+      if (foundVariant) {
+        itemPrice = foundVariant.sellingPrice !== undefined ? foundVariant.sellingPrice : foundVariant.price;
+        displayName = `${product.name} - ${foundVariant.name}`;
+      }
+    }
+
     subtotal += itemPrice * item.quantity;
 
     validatedItems.push({
       product: product._id,
-      name: product.name,
+      name: displayName,
       quantity: item.quantity,
       price: itemPrice,
+      variantName: targetVariant,
+      variantId: targetVariantId,
     });
   }
 

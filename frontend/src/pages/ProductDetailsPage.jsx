@@ -105,6 +105,10 @@ const ProductDetails = () => {
       try {
         const prod = await api.getProduct(slug);
         if (!isMounted) return;
+        if (prod && prod.isSurgical) {
+          navigate(`/surgical/products/${prod.slug || slug}`, { replace: true });
+          return;
+        }
         setProduct(prod);
         setActiveImageIdx(0);
         setQuantity(1);

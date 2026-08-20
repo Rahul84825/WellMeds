@@ -6,18 +6,32 @@ export const cartService = {
     return data.items || [];
   },
 
-  async addToCart(productId, quantity) {
-    const data = await apiInstance.post("/cart", { productId, quantity });
+  async addToCart(productId, quantity, variantData = {}) {
+    const payload = {
+      productId,
+      quantity,
+      variantName: variantData.variantName || "",
+      variantId: variantData.variantId || "",
+      price: variantData.price,
+    };
+    const data = await apiInstance.post("/cart", payload);
     return data.items || [];
   },
 
-  async updateCartQuantity(productId, quantity) {
-    const data = await apiInstance.put("/cart", { productId, quantity });
+  async updateCartQuantity(productId, quantity, variantData = {}) {
+    const payload = {
+      productId,
+      quantity,
+      variantName: variantData.variantName || "",
+      variantId: variantData.variantId || "",
+    };
+    const data = await apiInstance.put("/cart", payload);
     return data.items || [];
   },
 
-  async removeFromCart(productId) {
-    const data = await apiInstance.delete(`/cart/${productId}`);
+  async removeFromCart(productId, variantName = "") {
+    const url = variantName ? `/cart/${productId}?variantName=${encodeURIComponent(variantName)}` : `/cart/${productId}`;
+    const data = await apiInstance.delete(url);
     return data.items || [];
   },
 

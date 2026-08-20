@@ -449,7 +449,6 @@ const AdminMegaMenu = () => {
             <input
               type="text"
               required
-              placeholder={activeTab === "quickLinks" ? "e.g. Upload Prescription" : "e.g. Cardiac Care"}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
@@ -461,7 +460,6 @@ const AdminMegaMenu = () => {
             <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wide">Slug (Optional)</label>
             <input
               type="text"
-              placeholder="e.g. cardiac-care"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
               className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
@@ -473,7 +471,6 @@ const AdminMegaMenu = () => {
             <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wide">Icon Name (optional)</label>
             <input
               type="text"
-              placeholder="e.g. Heart, Globe, Handshake, Percent, FileText"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
               className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
@@ -525,7 +522,6 @@ const AdminMegaMenu = () => {
               <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wide font-black">Query Parameter</label>
               <input
                 type="text"
-                placeholder="e.g. isImported=true"
                 value={queryParam}
                 onChange={(e) => setQueryParam(e.target.value)}
                 className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
@@ -540,7 +536,6 @@ const AdminMegaMenu = () => {
                 <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wide font-black">Route / Link URL</label>
                 <input
                   type="text"
-                  placeholder="e.g. /offers or tel:+917798795353"
                   value={route}
                   onChange={(e) => setRoute(e.target.value)}
                   className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"
@@ -590,7 +585,6 @@ const AdminMegaMenu = () => {
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-wide">Help Subtext</label>
                     <input
                       type="text"
-                      placeholder="e.g. Free support from licensed pharmacists."
                       value={helpSubtext}
                       onChange={(e) => setHelpSubtext(e.target.value)}
                       className="px-3 py-2 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#157A6D] focus:border-[#157A6D]"

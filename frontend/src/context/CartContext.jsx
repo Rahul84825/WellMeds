@@ -119,11 +119,20 @@ export const CartProvider = ({ children }) => {
       .map((item) => {
         const product = item.product || {};
         const productId = (product._id || product.id)?.toString() || "";
+        const variantName = item.variantName || "";
+        const variantId = item.variantId || "";
+        const effectivePrice = item.price !== undefined ? item.price : product.price || 0;
+        const itemKey = variantName ? `${productId}-${variantName}` : productId;
+
         return {
-          id: productId,
-          _id: productId,
-          name: product.name || "Unknown Product",
-          price: product.price || 0,
+          id: itemKey,
+          _id: itemKey,
+          productId,
+          variantName,
+          variantId,
+          name: variantName ? `${product.name} (${variantName})` : (product.name || "Unknown Product"),
+          rawName: product.name || "Unknown Product",
+          price: effectivePrice,
           originalPrice: product.originalPrice || null,
           image: product.image || "",
           category: product.category || "",
@@ -133,6 +142,7 @@ export const CartProvider = ({ children }) => {
           requiresRx: product.requiresRx || false,
           badge: product.badge || "",
           quantity: item?.quantity || 1,
+          isSurgical: product.isSurgical || false,
         };
       });
   };
@@ -164,7 +174,11 @@ export const CartProvider = ({ children }) => {
 
           for (const item of guestOnlyItems) {
             try {
-              await cartService.addToCart(item.id, item.quantity);
+              await cartService.addToCart(item.productId || item.id, item.quantity, {
+                variantName: item.variantName,
+                variantId: item.variantId,
+                price: item.price,
+              });
             } catch (err) {
               console.warn(`Could not sync guest cart item ${item.name}:`, err.message);
             }
@@ -217,27 +231,42 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const addToCart = useCallback(async (product, quantity = 1) => {
+  const addToCart = useCallback(async (product, quantity = 1, selectedVariant = null) => {
     if (!product) return;
     if (isCartLocked) {
       await autoUnlockCart();
     }
 
-    const productId = (product._id || product.id)?.toString();
+    const productId = (product.productId || product._id || product.id)?.toString();
+    const variantObj = selectedVariant || product.selectedVariant || null;
+    const variantName = variantObj?.name || product.variantName || "";
+    const variantId = variantObj?._id || product.variantId || "";
+    const effectivePrice = variantObj?.sellingPrice !== undefined
+      ? variantObj.sellingPrice
+      : variantObj?.price !== undefined
+      ? variantObj.price
+      : product.price || 0;
+    const itemKey = variantName ? `${productId}-${variantName}` : productId;
 
     // Optimistic local update
     setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === productId);
+      const existing = prev.find((i) => i.id === itemKey);
       if (existing) {
         const newQty = Math.min(30, existing.quantity + quantity);
-        return prev.map((i) => (i.id === productId ? { ...i, quantity: newQty } : i));
+        return prev.map((i) => (i.id === itemKey ? { ...i, quantity: newQty } : i));
       }
       return [
         ...prev,
         {
           ...product,
-          id: productId,
-          _id: productId,
+          id: itemKey,
+          _id: itemKey,
+          productId,
+          variantName,
+          variantId,
+          price: effectivePrice,
+          name: variantName ? `${product.name} (${variantName})` : product.name,
+          rawName: product.name,
           quantity: Math.min(30, quantity),
         },
       ];
@@ -246,7 +275,11 @@ export const CartProvider = ({ children }) => {
     // Backend sync if logged in
     if (hasToken()) {
       try {
-        const serverItems = await cartService.addToCart(productId, quantity);
+        const serverItems = await cartService.addToCart(productId, quantity, {
+          variantName,
+          variantId,
+          price: effectivePrice,
+        });
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
@@ -259,17 +292,27 @@ export const CartProvider = ({ children }) => {
     }
   }, [isCartLocked, refreshCartLockStatus]);
 
-  const removeFromCart = useCallback(async (id) => {
+  const removeFromCart = useCallback(async (id, variantName = "") => {
     if (!id) return;
     if (isCartLocked) {
       await autoUnlockCart();
     }
 
-    setCartItems((prev) => prev.filter((i) => i.id !== id));
+    let productId = id;
+    let targetVariant = variantName;
+
+    // If id is composite (e.g. 123-Small)
+    if (id.includes("-") && !variantName) {
+      const parts = id.split("-");
+      productId = parts[0];
+      targetVariant = parts.slice(1).join("-");
+    }
+
+    setCartItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id));
 
     if (hasToken()) {
       try {
-        const serverItems = await cartService.removeFromCart(id);
+        const serverItems = await cartService.removeFromCart(productId, targetVariant);
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }
@@ -282,16 +325,26 @@ export const CartProvider = ({ children }) => {
     }
   }, [isCartLocked, refreshCartLockStatus]);
 
-  const updateQuantity = useCallback(async (id, quantity) => {
+  const updateQuantity = useCallback(async (id, quantity, variantName = "") => {
     if (!id) return;
     if (isCartLocked) {
       await autoUnlockCart();
     }
 
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(id, variantName);
       return;
     }
+
+    let productId = id;
+    let targetVariant = variantName;
+
+    if (id.includes("-") && !variantName) {
+      const parts = id.split("-");
+      productId = parts[0];
+      targetVariant = parts.slice(1).join("-");
+    }
+
     setCartItems((prev) =>
       prev.map((i) =>
         i.id === id ? { ...i, quantity: Math.min(i.stock || 999, quantity) } : i
@@ -300,7 +353,9 @@ export const CartProvider = ({ children }) => {
 
     if (hasToken()) {
       try {
-        const serverItems = await cartService.updateCartQuantity(id, quantity);
+        const serverItems = await cartService.updateCartQuantity(productId, quantity, {
+          variantName: targetVariant,
+        });
         if (serverItems) {
           setCartItems(normalizeBackendItems(serverItems));
         }

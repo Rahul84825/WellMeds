@@ -20,7 +20,9 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   const productId = (product._id || product.id)?.toString();
-  const productUrl = `/products/${product.slug || productId}`;
+  const productUrl = product.isSurgical
+    ? `/surgical/products/${product.slug || productId}`
+    : `/products/${product.slug || productId}`;
   const molecule = product.molecules?.length > 0 ? product.molecules[0] : null;
   const isRx = product.isPrescriptionRequired || product.requiresRx || false;
   const isColdChain = product.isColdChain || false;
@@ -29,8 +31,8 @@ const ProductCard = ({ product }) => {
   const rawBrand = product.manufacturer || product.marketer || product.brand || product.productSpecifications?.manufacturer;
   const brandName = typeof rawBrand === "object" ? (rawBrand?.name || rawBrand?.title || "WELLMEDS SPECIALTY") : (rawBrand || "WELLMEDS SPECIALTY");
 
-  const rawCategory = product.category;
-  const categoryName = typeof rawCategory === "object" ? (rawCategory?.name || rawCategory?.title || "Specialty Healthcare") : (rawCategory || "Specialty Healthcare");
+  const rawCategory = product.surgicalCategory || product.category;
+  const categoryName = typeof rawCategory === "object" ? (rawCategory?.name || rawCategory?.title || (product.isSurgical ? "Surgical Supplies" : "Specialty Healthcare")) : (rawCategory || (product.isSurgical ? "Surgical Supplies" : "Specialty Healthcare"));
 
   const cartItem = cartItems?.find((item) => {
     const itemPId = (item.product?._id || item.product?.id || item._id || item.id)?.toString();

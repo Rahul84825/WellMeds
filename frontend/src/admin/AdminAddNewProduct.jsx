@@ -895,7 +895,6 @@ const AddNewProduct = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. Paracetamol tablets 500mg"
                     />
                   </div>
                   <div className="space-y-xs">
@@ -904,7 +903,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={slug}
                       onChange={(e) => setSlug(e.target.value)}
-                      placeholder="e.g. paracetamol-500mg"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono"
                     />
                   </div>
@@ -931,7 +929,6 @@ const AddNewProduct = () => {
                       value={manufacturer}
                       onChange={(e) => setManufacturer(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="e.g. Sun Pharma"
                     />
                   </div>
                 </div>
@@ -972,7 +969,6 @@ const AddNewProduct = () => {
                   <div className="relative max-w-md">
                     <input
                       type="text"
-                      placeholder="Search molecules to add..."
                       value={moleculeSearchQuery}
                       onChange={(e) => {
                         setMoleculeSearchQuery(e.target.value);
@@ -1043,7 +1039,6 @@ const AddNewProduct = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                    placeholder="Provide a quick introduction summary. Will be converted to 'Overview' if no medical sections are created."
                   />
                 </div>
               </div>
@@ -1062,7 +1057,6 @@ const AddNewProduct = () => {
                       value={originalPrice}
                       onChange={(e) => setOriginalPrice(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="0.00"
                     />
                   </div>
                   <div className="space-y-xs">
@@ -1074,7 +1068,6 @@ const AddNewProduct = () => {
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                      placeholder="0.00"
                     />
                   </div>
                   <div className="space-y-xs bg-slate-50 dark:bg-zinc-950/20 p-sm rounded-xl border border-slate-200/50 dark:border-zinc-800 flex flex-col justify-center">
@@ -1450,7 +1443,6 @@ const AddNewProduct = () => {
                               type="text"
                               value={sec.title}
                               onChange={(e) => updateMedicalSection(index, "title", e.target.value)}
-                              placeholder="e.g. How It Works, Precautions, Dosage"
                               className="w-full p-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none"
                             />
                           </div>
@@ -1460,7 +1452,6 @@ const AddNewProduct = () => {
                               rows={6}
                               value={sec.content}
                               onChange={(e) => updateMedicalSection(index, "content", e.target.value)}
-                              placeholder="Type details about this section..."
                               className="w-full p-sm bg-white dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                             />
                           </div>
@@ -1501,7 +1492,6 @@ const AddNewProduct = () => {
                       rows={6}
                       value={benefitsText}
                       onChange={(e) => setBenefitsText(e.target.value)}
-                      placeholder="e.g.&#10;Reduces high fever quickly: Works on the temperature-regulating center of the brain&#10;Relieves mild to moderate pain"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1531,7 +1521,6 @@ const AddNewProduct = () => {
                               value={specGenericName}
                               onChange={(e) => setSpecGenericName(e.target.value)}
                               className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
-                              placeholder="e.g. Paracetamol"
                             />
                           </td>
                         </tr>
@@ -1545,7 +1534,6 @@ const AddNewProduct = () => {
                               onChange={(e) => setSpecStrength(e.target.value)}
                               maxLength={50}
                               className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
-                              placeholder="e.g. 500 mg, 10 mg/5 ml"
                             />
                           </td>
                         </tr>
@@ -1625,7 +1613,6 @@ const AddNewProduct = () => {
                               value={specManufacturer}
                               onChange={(e) => setSpecManufacturer(e.target.value)}
                               className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
-                              placeholder="e.g. Sun Pharma"
                             />
                           </td>
                         </tr>
@@ -1666,7 +1653,6 @@ const AddNewProduct = () => {
                               value={specStorage}
                               onChange={(e) => setSpecStorage(e.target.value)}
                               className="w-full p-xs bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-lg outline-none dark:text-zinc-200"
-                              placeholder="e.g. Store below 30°C, Keep refrigerated (2°C–8°C)"
                             />
                           </td>
                         </tr>
@@ -1698,7 +1684,6 @@ const AddNewProduct = () => {
                       rows={5}
                       value={usageText}
                       onChange={(e) => setUsageText(e.target.value)}
-                      placeholder="e.g.&#10;Take one tablet twice daily after meals&#10;Drink plenty of water"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1716,7 +1701,6 @@ const AddNewProduct = () => {
                       rows={5}
                       value={storageText}
                       onChange={(e) => setStorageText(e.target.value)}
-                      placeholder="e.g.&#10;Store in a cool dry place, away from sunlight&#10;Keep out of reach of children"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1734,7 +1718,6 @@ const AddNewProduct = () => {
                       rows={5}
                       value={warningsText}
                       onChange={(e) => setWarningsText(e.target.value)}
-                      placeholder="e.g.&#10;Do not exceed the recommended daily dose&#10;Avoid alcohol consumption during treatment"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1752,7 +1735,6 @@ const AddNewProduct = () => {
                       rows={5}
                       value={sideEffectsText}
                       onChange={(e) => setSideEffectsText(e.target.value)}
-                      placeholder="e.g.&#10;Nausea&#10;Dizziness&#10;Mild headache"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1843,7 +1825,6 @@ const AddNewProduct = () => {
                               type="text"
                               value={card.status}
                               onChange={(e) => updateSafetyCard(index, "status", e.target.value)}
-                              placeholder="e.g. Consult Doctor, Safe, Unsafe"
                               className="w-full p-2.5 text-xs font-semibold bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none text-slate-800 dark:text-zinc-100"
                             />
                             {/* Preset Buttons */}
@@ -1888,7 +1869,6 @@ const AddNewProduct = () => {
                             rows={2}
                             value={card.description}
                             onChange={(e) => updateSafetyCard(index, "description", e.target.value)}
-                            placeholder="e.g. Consult your doctor before taking this medicine during pregnancy..."
                             className="w-full p-2.5 text-xs font-medium bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none text-slate-700 dark:text-zinc-200 leading-relaxed"
                           />
                         </div>
@@ -1936,7 +1916,6 @@ const AddNewProduct = () => {
                       rows={8}
                       value={faqsText}
                       onChange={(e) => setFaqsText(e.target.value)}
-                      placeholder="Question:&#10;Is it safe to take this medicine on an empty stomach?&#10;&#10;Answer:&#10;Consult your doctor first.&#10;&#10;------------------------&#10;&#10;Question:&#10;Can pregnant women use it?&#10;&#10;Answer:&#10;Consult your doctor first."
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1954,7 +1933,6 @@ const AddNewProduct = () => {
                       rows={5}
                       value={referencesText}
                       onChange={(e) => setReferencesText(e.target.value)}
-                      placeholder="e.g.&#10;WHO Model List of Essential Medicines&#10;Clinical Trials data for Paracetamol"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono text-xs leading-relaxed"
                     />
                   </div>
@@ -1975,7 +1953,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={metaTitle}
                       onChange={(e) => setMetaTitle(e.target.value)}
-                      placeholder="e.g. Buy Dolo 650 Online | WellMeds"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                     />
                   </div>
@@ -1985,7 +1962,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={slug}
                       onChange={(e) => setSlug(e.target.value)}
-                      placeholder="e.g. dolo-650-paracetamol"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none font-mono"
                     />
                   </div>
@@ -1995,7 +1971,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={keywords}
                       onChange={(e) => setKeywords(e.target.value)}
-                      placeholder="e.g. paracetamol, dolo 650, pain relief"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                     />
                   </div>
@@ -2007,7 +1982,6 @@ const AddNewProduct = () => {
                     rows={3}
                     value={metaDescription}
                     onChange={(e) => setMetaDescription(e.target.value)}
-                    placeholder="Provide a concise summary of the medicine for Google search snippets..."
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                   />
                 </div>
@@ -2019,7 +1993,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={canonicalUrl}
                       onChange={(e) => setCanonicalUrl(e.target.value)}
-                      placeholder="e.g. https://wellmeds.com/products/dolo-650"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                     />
                   </div>
@@ -2029,7 +2002,6 @@ const AddNewProduct = () => {
                       type="text"
                       value={ogImage}
                       onChange={(e) => setOgImage(e.target.value)}
-                      placeholder="Override OG Image URL"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
                     />
                   </div>

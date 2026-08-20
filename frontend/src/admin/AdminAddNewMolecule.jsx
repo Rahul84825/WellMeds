@@ -443,7 +443,6 @@ const AdminAddNewMolecule = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="e.g. Paracetamol"
                 />
               </div>
               <div className="space-y-xs">
@@ -455,7 +454,6 @@ const AdminAddNewMolecule = () => {
                   value={letter}
                   onChange={(e) => setLetter(e.target.value.toUpperCase())}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-bold text-center"
-                  placeholder="e.g. P"
                 />
               </div>
             </div>
@@ -468,7 +466,6 @@ const AdminAddNewMolecule = () => {
                   value={aliases}
                   onChange={(e) => setAliases(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="e.g. Acetaminophen, APAP"
                 />
               </div>
               <div className="space-y-xs">
@@ -479,7 +476,6 @@ const AdminAddNewMolecule = () => {
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   className="w-full p-sm bg-slate-100 dark:bg-zinc-950/40 border border-slate-250 dark:border-zinc-800 rounded-xl outline-none font-mono text-[11px]"
-                  placeholder="e.g. paracetamol"
                 />
               </div>
             </div>
@@ -492,7 +488,6 @@ const AdminAddNewMolecule = () => {
                 value={shortDescription}
                 onChange={(e) => setShortDescription(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. A widely used over-the-counter pain reliever and fever reducer."
               />
             </div>
 
@@ -503,7 +498,6 @@ const AdminAddNewMolecule = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="Deep clinical details about how the drug operates and its clinical history."
               />
             </div>
 
@@ -534,7 +528,6 @@ const AdminAddNewMolecule = () => {
                   value={uses}
                   onChange={(e) => setUses(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Relief of mild to moderate pain..."
                 />
               </div>
               <div className="space-y-xs">
@@ -544,7 +537,6 @@ const AdminAddNewMolecule = () => {
                   value={benefits}
                   onChange={(e) => setBenefits(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Gentle on stomach..."
                 />
               </div>
             </div>
@@ -556,7 +548,6 @@ const AdminAddNewMolecule = () => {
                 value={howItWorks}
                 onChange={(e) => setHowItWorks(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="It works by blocking COX enzymes in the central nervous system..."
               />
             </div>
 
@@ -568,7 +559,6 @@ const AdminAddNewMolecule = () => {
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Adults: 500mg-1000mg every 4-6 hours..."
                 />
               </div>
               <div className="space-y-xs">
@@ -578,7 +568,6 @@ const AdminAddNewMolecule = () => {
                   value={storage}
                   onChange={(e) => setStorage(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Store at room temperature below 30°C..."
                 />
               </div>
             </div>
@@ -590,7 +579,6 @@ const AdminAddNewMolecule = () => {
                 value={sideEffects}
                 onChange={(e) => setSideEffects(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="Nausea, skin rashes..."
               />
             </div>
 
@@ -602,7 +590,6 @@ const AdminAddNewMolecule = () => {
                   value={warnings}
                   onChange={(e) => setWarnings(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Severe liver damage may occur if maximum dose is exceeded..."
                 />
               </div>
               <div className="space-y-xs">
@@ -612,7 +599,6 @@ const AdminAddNewMolecule = () => {
                   value={precautions}
                   onChange={(e) => setPrecautions(e.target.value)}
                   className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                  placeholder="Avoid if you have liver disease or consume alcohol regularly..."
                 />
               </div>
             </div>
@@ -658,7 +644,6 @@ const AdminAddNewMolecule = () => {
                           value={faq.question}
                           onChange={(e) => handleFaqChange(idx, "question", e.target.value)}
                           className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                          placeholder="Enter Question..."
                         />
                         <textarea
                           rows={2}
@@ -666,7 +651,6 @@ const AdminAddNewMolecule = () => {
                           value={faq.answer}
                           onChange={(e) => handleFaqChange(idx, "answer", e.target.value)}
                           className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                          placeholder="Enter Answer..."
                         />
                       </div>
                     </div>
@@ -700,7 +684,6 @@ const AdminAddNewMolecule = () => {
                         value={ref}
                         onChange={(e) => handleReferenceChange(idx, e.target.value)}
                         className="flex-1 p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                        placeholder="e.g. World Health Organization Drug Information Guidelines..."
                       />
                       <button
                         type="button"
@@ -756,7 +739,6 @@ const AdminAddNewMolecule = () => {
             <div className="relative w-full max-w-md">
               <input
                 type="text"
-                placeholder="Search related molecules to add..."
                 value={moleculeSearchQuery}
                 onChange={(e) => {
                   setMoleculeSearchQuery(e.target.value);
@@ -824,7 +806,6 @@ const AdminAddNewMolecule = () => {
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. Paracetamol tablets 500mg active compound"
               />
             </div>
 
@@ -835,7 +816,6 @@ const AdminAddNewMolecule = () => {
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="Summarize the medical properties for search engine results..."
               />
             </div>
 
@@ -846,7 +826,6 @@ const AdminAddNewMolecule = () => {
                 value={focusKeyword}
                 onChange={(e) => setFocusKeyword(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. Paracetamol"
               />
             </div>
 
@@ -867,7 +846,6 @@ const AdminAddNewMolecule = () => {
                 ))}
                 <input
                   type="text"
-                  placeholder="Type keyword and press Enter..."
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -890,7 +868,6 @@ const AdminAddNewMolecule = () => {
                 value={canonicalUrl}
                 onChange={(e) => setCanonicalUrl(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. https://wellmeds.com/molecules/paracetamol"
               />
             </div>
 
@@ -901,7 +878,6 @@ const AdminAddNewMolecule = () => {
                 value={openGraphTitle}
                 onChange={(e) => setOpenGraphTitle(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. Paracetamol active compound summary"
               />
             </div>
 
@@ -912,7 +888,6 @@ const AdminAddNewMolecule = () => {
                 value={openGraphDescription}
                 onChange={(e) => setOpenGraphDescription(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="Summarize the properties for social sharing previews..."
               />
             </div>
 
@@ -923,7 +898,6 @@ const AdminAddNewMolecule = () => {
                 value={ogImage}
                 onChange={(e) => setOgImage(e.target.value)}
                 className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
-                placeholder="e.g. https://wellmeds.com/images/paracetamol-og.jpg"
               />
             </div>
 
@@ -944,7 +918,6 @@ const AdminAddNewMolecule = () => {
                 ))}
                 <input
                   type="text"
-                  placeholder="Type tag and press Enter..."
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();

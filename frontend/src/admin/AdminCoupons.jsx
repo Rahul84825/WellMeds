@@ -492,7 +492,6 @@ const AdminCoupons = () => {
                       required
                       value={code}
                       onChange={(e) => setCode(e.target.value.toUpperCase())}
-                      placeholder="e.g. WELLMEDS50"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -502,7 +501,6 @@ const AdminCoupons = () => {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Monsoon Clearance Health savings"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -515,7 +513,6 @@ const AdminCoupons = () => {
                     rows={2}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe details shown to customers at checkout..."
                     className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                   />
                 </div>
@@ -541,7 +538,6 @@ const AdminCoupons = () => {
                       min="1"
                       value={discountValue}
                       onChange={(e) => setDiscountValue(e.target.value)}
-                      placeholder={discountType === "percentage" ? "e.g. 15 (for 15%)" : "e.g. 150 (for ₹150)"}
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -552,7 +548,6 @@ const AdminCoupons = () => {
                       min="0"
                       value={maximumDiscount}
                       onChange={(e) => setMaximumDiscount(e.target.value)}
-                      placeholder="e.g. 200 (0 for no cap)"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -567,7 +562,6 @@ const AdminCoupons = () => {
                       min="0"
                       value={minimumOrder}
                       onChange={(e) => setMinimumOrder(e.target.value)}
-                      placeholder="e.g. 499"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -578,7 +572,6 @@ const AdminCoupons = () => {
                       min="1"
                       value={usageLimit}
                       onChange={(e) => setUsageLimit(e.target.value)}
-                      placeholder="e.g. 100 (blank if unlimited)"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>
@@ -589,7 +582,6 @@ const AdminCoupons = () => {
                       min="1"
                       value={perUserLimit}
                       onChange={(e) => setPerUserLimit(e.target.value)}
-                      placeholder="e.g. 1"
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
                     />
                   </div>

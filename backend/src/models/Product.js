@@ -14,11 +14,21 @@ const productSchema = new mongoose.Schema(
       lowercase: true,
     },
     // UPDATED: category is now an ObjectId reference to Category document
-    // This enables proper relational queries and .populate() support
+    // Category is required only for non-surgical products
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: [true, "Category is required"],
+      required: [
+        function () {
+          return !this.isSurgical;
+        },
+        "Category is required",
+      ],
+    },
+    subcategory: {
+      type: String,
+      default: "",
+      trim: true,
     },
     brand: {
       type: String,
@@ -42,6 +52,14 @@ const productSchema = new mongoose.Schema(
     inStock: {
       type: Boolean,
       default: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
     },
     requiresRx: {
       type: Boolean,
@@ -75,9 +93,40 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    shortDescription: {
+      type: String,
+      default: "",
+    },
     description: {
       type: String,
       default: "",
+    },
+    variants: {
+      type: [
+        {
+          name: { type: String, required: true, trim: true },
+          mrp: { type: Number, min: 0, default: 0 },
+          price: { type: Number, required: true, min: 0 },
+          sellingPrice: { type: Number, min: 0 },
+          stock: { type: Number, default: 99, min: 0 },
+          discount: { type: Number, default: 0 },
+          sku: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
+    highlights: {
+      type: [
+        {
+          label: { type: String, required: true, trim: true },
+          value: { type: String, required: true, trim: true },
+        },
+      ],
+      default: [],
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
     sku: {
       type: String,
@@ -276,6 +325,9 @@ productSchema.virtual("id").get(function () {
 // Database Indexes for High-Performance Queries & Search
 productSchema.index({ category: 1 });
 productSchema.index({ surgicalCategory: 1 });
+productSchema.index({ isSurgical: 1, surgicalCategory: 1, isActive: 1 });
+productSchema.index({ isSurgical: 1, subcategory: 1 });
+productSchema.index({ isSurgical: 1, isFeatured: 1 });
 productSchema.index({ molecules: 1 });
 productSchema.index({ molecules: 1, strength: 1 });
 productSchema.index({ "productSpecifications.dosageForm": 1 });

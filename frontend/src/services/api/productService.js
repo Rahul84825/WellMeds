@@ -12,7 +12,7 @@ export const productService = {
    * @returns {{ products, total, page, pages }} — full paginated response
    */
   async getProducts(params = {}, config = {}) {
-    const { search, category, speciality, molecule, brand, page, limit, productType, isSurgical, surgicalCategory, isGLP1Medicine, isHealthSupplement, isBestSeller, stock, rx, sortBy, sort } = params;
+    const { search, category, speciality, molecule, brand, page, limit, productType, isSurgical, surgicalCategory, subcategory, isActive, isFeatured, isGLP1Medicine, isHealthSupplement, isBestSeller, stock, rx, sortBy, sort } = params;
     const cleanParams = {};
     if (search) cleanParams.search = search;
     if (category) cleanParams.category = category;
@@ -22,8 +22,11 @@ export const productService = {
     if (page) cleanParams.page = page;
     if (limit) cleanParams.limit = limit;
     if (productType) cleanParams.productType = productType;
-    if (isSurgical) cleanParams.isSurgical = isSurgical;
+    if (isSurgical !== undefined) cleanParams.isSurgical = isSurgical;
     if (surgicalCategory) cleanParams.surgicalCategory = surgicalCategory;
+    if (subcategory) cleanParams.subcategory = subcategory;
+    if (isActive !== undefined) cleanParams.isActive = isActive;
+    if (isFeatured !== undefined) cleanParams.isFeatured = isFeatured;
     if (isGLP1Medicine !== undefined) cleanParams.isGLP1Medicine = isGLP1Medicine;
     if (isHealthSupplement !== undefined) cleanParams.isHealthSupplement = isHealthSupplement;
     if (isBestSeller !== undefined) cleanParams.isBestSeller = isBestSeller;
@@ -43,6 +46,26 @@ export const productService = {
       totalPages: data.totalPages || data.pages || 1,
       pageSize: data.pageSize || limit || 20,
     };
+  },
+
+  async getSurgicalProducts(params = {}, config = {}) {
+    return productService.getProducts({ ...params, isSurgical: true }, config);
+  },
+
+  async getSurgicalProduct(idOrSlug) {
+    return productService.getProduct(idOrSlug);
+  },
+
+  async createSurgicalProduct(productData) {
+    return productService.createProduct({ ...productData, isSurgical: true });
+  },
+
+  async updateSurgicalProduct(id, updatedData) {
+    return productService.updateProduct(id, { ...updatedData, isSurgical: true });
+  },
+
+  async deleteSurgicalProduct(id) {
+    return productService.deleteProduct(id);
   },
 
   /**

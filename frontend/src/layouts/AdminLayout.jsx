@@ -24,6 +24,7 @@ import {
   HeartPulse,
   FlaskConical,
   Scissors,
+  Layers,
   MailSearch
 } from "lucide-react";
 import { api } from "../services/api";
@@ -78,8 +79,9 @@ const AdminLayout = () => {
   const navItems = [
     { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: ShoppingBag },
+    { to: "/admin/surgical-products", label: "Surgical Products", icon: Scissors },
     { to: "/admin/categories", label: "Categories", icon: FolderOpen },
-    { to: "/admin/surgical-categories", label: "Surgical Categories", icon: Scissors },
+    { to: "/admin/surgical-categories", label: "Surgical Categories", icon: Layers },
     { to: "/admin/specialities", label: "Specialities", icon: HeartPulse },
     { to: "/admin/molecules", label: "Molecules", icon: FlaskConical },
     { to: "/admin/orders", label: "Orders", icon: ClipboardList },

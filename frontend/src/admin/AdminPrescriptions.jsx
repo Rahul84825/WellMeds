@@ -333,7 +333,6 @@ const AdminPrescriptions = () => {
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
             type="text"
-            placeholder="Search by patient, doctor, medicine, or filename..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-[#157A6D] rounded-xl text-xs outline-none"
@@ -534,7 +533,6 @@ const AdminPrescriptions = () => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Consulting Doctor Name</label>
                   <input
                     type="text"
-                    placeholder="Enter doctor name (e.g. Dr. Rahul Sharma)"
                     value={doctorName}
                     onChange={(e) => setDoctorName(e.target.value)}
                     className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#157A6D]/20"
@@ -554,7 +552,6 @@ const AdminPrescriptions = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                     <input
                       type="text"
-                      placeholder="Search database to add medicine to prescription..."
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none"
@@ -646,7 +643,6 @@ const AdminPrescriptions = () => {
                   <textarea
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Enter verification notes or rejection details for the patient..."
                     rows={2}
                     className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-[#157A6D]/20"
                   />

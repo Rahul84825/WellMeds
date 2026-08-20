@@ -188,7 +188,23 @@ export const getProducts = async (req, res, next) => {
 
     // Surgical flag filter
     if (isSurgical !== undefined && isSurgical !== "") {
-      andConditions.push({ isSurgical: isSurgical === "true" });
+      andConditions.push({ isSurgical: isSurgical === "true" || isSurgical === true });
+    }
+
+    // Active status filter
+    if (req.query.isActive !== undefined && req.query.isActive !== "") {
+      andConditions.push({ isActive: req.query.isActive === "true" || req.query.isActive === true });
+    }
+
+    // Featured status filter
+    if (req.query.isFeatured !== undefined && req.query.isFeatured !== "") {
+      andConditions.push({ isFeatured: req.query.isFeatured === "true" || req.query.isFeatured === true });
+    }
+
+    // Subcategory filter
+    if (req.query.subcategory && req.query.subcategory.trim()) {
+      const sub = escapeRegex(req.query.subcategory.trim());
+      andConditions.push({ subcategory: { $regex: `^${sub}$`, $options: "i" } });
     }
 
     // Surgical Category filter
@@ -270,10 +286,10 @@ export const getProducts = async (req, res, next) => {
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
       .select(
-        "name brand price originalPrice image stock inStock requiresRx isPrescriptionRequired isColdChain badge category surgicalCategory productType isSurgical strength packSize manufacturer slug molecules"
+        "name brand price originalPrice image images stock inStock requiresRx isPrescriptionRequired isColdChain badge category surgicalCategory subcategory productType isSurgical strength packSize manufacturer slug molecules variants highlights specifications shortDescription description isActive isFeatured tags"
       )
       .populate("category", "name slug")
-      .populate("surgicalCategory", "name slug")
+      .populate("surgicalCategory", "name slug icon image")
       .populate("molecules", "name slug")
       .sort(sortObj)
       .skip(skipNum)
@@ -307,23 +323,23 @@ export const getProduct = async (req, res, next) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       product = await Product.findById(id)
         .populate("category", "name slug")
-        .populate("surgicalCategory", "name slug")
+        .populate("surgicalCategory", "name slug icon image")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
         .populate({
           path: "relatedProducts",
-          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules",
+          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules isSurgical category surgicalCategory",
           populate: { path: "molecules", select: "name slug" }
         });
     } else {
       product = await Product.findOne({ slug: id })
         .populate("category", "name slug")
-        .populate("surgicalCategory", "name slug")
+        .populate("surgicalCategory", "name slug icon image")
         .populate("specialities", "name slug")
         .populate("molecules", "name slug")
         .populate({
           path: "relatedProducts",
-          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules",
+          select: "name price originalPrice image slug requiresRx isColdChain isPrescriptionRequired badge molecules isSurgical category surgicalCategory",
           populate: { path: "molecules", select: "name slug" }
         });
     }
@@ -356,10 +372,60 @@ export const createProduct = async (req, res, next) => {
       productData.manufacturer = productData.brand;
     }
 
+    // Clean & validate Variants if provided
+    if (Array.isArray(productData.variants) && productData.variants.length > 0) {
+      productData.variants = productData.variants
+        .filter((v) => v && v.name && v.name.trim())
+        .map((v, idx) => {
+          const mrp = Number(v.mrp) >= 0 ? Number(v.mrp) : 0;
+          const sellingPrice = Number(v.sellingPrice !== undefined ? v.sellingPrice : v.price) || 0;
+          const discount = mrp > sellingPrice && mrp > 0 ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+          return {
+            name: v.name.trim(),
+            mrp,
+            price: sellingPrice,
+            sellingPrice,
+            stock: v.stock !== undefined ? Number(v.stock) : 99,
+            discount,
+            sku: v.sku || `${productData.sku}-V${idx + 1}`,
+          };
+        });
+
+      if (productData.variants.length > 0) {
+        if (!productData.price || productData.isSurgical) {
+          productData.price = productData.variants[0].sellingPrice;
+        }
+        if (!productData.originalPrice || productData.isSurgical) {
+          productData.originalPrice = productData.variants[0].mrp;
+        }
+      }
+    }
+
+    // Clean dynamic Highlights & Specifications (filter out blank values)
+    if (Array.isArray(productData.highlights)) {
+      productData.highlights = productData.highlights.filter(
+        (h) => h && h.label && h.label.trim() && h.value && h.value.trim()
+      );
+    }
+    if (Array.isArray(productData.specifications)) {
+      productData.specifications = productData.specifications.filter(
+        (s) => s && s.label && s.label.trim() && s.value && s.value.trim()
+      );
+    }
+
+    // Handle primary image synchronization
+    if (Array.isArray(productData.images) && productData.images.length > 0) {
+      if (!productData.image || !productData.images.includes(productData.image)) {
+        productData.image = productData.images[0];
+      }
+    } else if (productData.image) {
+      productData.images = [productData.image];
+    }
+
     // Handle In Stock Boolean Toggle
     const inStock = productData.inStock !== undefined ? !!productData.inStock : true;
     productData.inStock = inStock;
-    productData.stock = inStock ? 99 : 0;
+    productData.stock = productData.stock !== undefined ? Number(productData.stock) : inStock ? 99 : 0;
 
     // Auto badges based on inventory levels
     let badge = productData.badge || "";
@@ -369,7 +435,7 @@ export const createProduct = async (req, res, next) => {
       badge = "";
     }
 
-    // Resolve Category string name to ObjectId if needed
+    // Resolve Category string name to ObjectId if needed (for non-surgical or general categories)
     let categoryId = productData.category;
     if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
       const matchedCategory = await Category.findOne({
@@ -377,6 +443,20 @@ export const createProduct = async (req, res, next) => {
       });
       if (matchedCategory) {
         categoryId = matchedCategory._id;
+      }
+    }
+
+    // Resolve Surgical Category string name/slug to ObjectId if needed
+    let surgicalCategoryId = productData.surgicalCategory;
+    if (surgicalCategoryId && !mongoose.Types.ObjectId.isValid(surgicalCategoryId)) {
+      const matchedSurg = await SurgicalCategory.findOne({
+        $or: [
+          { slug: surgicalCategoryId.trim().toLowerCase() },
+          { name: { $regex: `^${escapeRegex(surgicalCategoryId.trim())}$`, $options: "i" } },
+        ],
+      });
+      if (matchedSurg) {
+        surgicalCategoryId = matchedSurg._id;
       }
     }
 
@@ -389,20 +469,20 @@ export const createProduct = async (req, res, next) => {
       }
     }
 
-    const product = await Product.create({
+    const payload = {
       ...productData,
-      category: categoryId,
       slug,
       badge,
       moleculeSlug,
-    });
+    };
+    if (categoryId) payload.category = categoryId;
+    if (surgicalCategoryId) payload.surgicalCategory = surgicalCategoryId;
+
+    const product = await Product.create(payload);
 
     // Increment category product count (category is now ObjectId)
     if (product.category) {
-      await Category.findByIdAndUpdate(
-        product.category,
-        { $inc: { count: 1 } }
-      );
+      await Category.findByIdAndUpdate(product.category, { $inc: { count: 1 } });
     }
 
     res.status(201).json({ success: true, product });
@@ -440,10 +520,54 @@ export const updateProduct = async (req, res, next) => {
       updateData.manufacturer = updateData.brand;
     }
 
+    // Clean & validate Variants if provided
+    if (Array.isArray(updateData.variants)) {
+      updateData.variants = updateData.variants
+        .filter((v) => v && v.name && v.name.trim())
+        .map((v, idx) => {
+          const mrp = Number(v.mrp) >= 0 ? Number(v.mrp) : 0;
+          const sellingPrice = Number(v.sellingPrice !== undefined ? v.sellingPrice : v.price) || 0;
+          const discount = mrp > sellingPrice && mrp > 0 ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+          return {
+            name: v.name.trim(),
+            mrp,
+            price: sellingPrice,
+            sellingPrice,
+            stock: v.stock !== undefined ? Number(v.stock) : 99,
+            discount,
+            sku: v.sku || `${product.sku}-V${idx + 1}`,
+          };
+        });
+
+      if (updateData.variants.length > 0 && (product.isSurgical || updateData.isSurgical)) {
+        updateData.price = updateData.variants[0].sellingPrice;
+        updateData.originalPrice = updateData.variants[0].mrp;
+      }
+    }
+
+    // Clean dynamic Highlights & Specifications
+    if (Array.isArray(updateData.highlights)) {
+      updateData.highlights = updateData.highlights.filter(
+        (h) => h && h.label && h.label.trim() && h.value && h.value.trim()
+      );
+    }
+    if (Array.isArray(updateData.specifications)) {
+      updateData.specifications = updateData.specifications.filter(
+        (s) => s && s.label && s.label.trim() && s.value && s.value.trim()
+      );
+    }
+
+    // Handle primary image synchronization
+    if (Array.isArray(updateData.images) && updateData.images.length > 0) {
+      if (!updateData.image || !updateData.images.includes(updateData.image)) {
+        updateData.image = updateData.images[0];
+      }
+    }
+
     // Handle In Stock Boolean Toggle
     if (updateData.inStock !== undefined) {
       const inStock = !!updateData.inStock;
-      updateData.stock = inStock ? 99 : 0;
+      updateData.stock = updateData.stock !== undefined ? Number(updateData.stock) : inStock ? 99 : 0;
 
       // Auto badges based on inventory levels
       if (!inStock) {
@@ -475,17 +599,28 @@ export const updateProduct = async (req, res, next) => {
       }
     }
 
+    // Resolve Surgical Category string name/slug to ObjectId if needed
+    if (updateData.surgicalCategory && !mongoose.Types.ObjectId.isValid(updateData.surgicalCategory)) {
+      const matchedSurg = await SurgicalCategory.findOne({
+        $or: [
+          { slug: updateData.surgicalCategory.trim().toLowerCase() },
+          { name: { $regex: `^${escapeRegex(updateData.surgicalCategory.trim())}$`, $options: "i" } },
+        ],
+      });
+      if (matchedSurg) {
+        updateData.surgicalCategory = matchedSurg._id;
+      }
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
 
     // Sync counts if category changed (compare ObjectIds)
-    if (updateData.category && updateData.category.toString() !== product.category.toString()) {
+    if (updateData.category && product.category && updateData.category.toString() !== product.category.toString()) {
       // Decrement old category
-      if (product.category) {
-        await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
-      }
+      await Category.findByIdAndUpdate(product.category, { $inc: { count: -1 } });
       // Increment new category
       await Category.findByIdAndUpdate(updateData.category, { $inc: { count: 1 } });
     }

@@ -42,6 +42,7 @@ const SurgicalLandingPage = lazy(() => import("../pages/SurgicalLandingPage"));
 const AllSurgicalProductsPage = lazy(() => import("../pages/AllSurgicalProductsPage"));
 const AllSurgicalCategoriesPage = lazy(() => import("../pages/AllSurgicalCategoriesPage"));
 const SurgicalCategoryPage = lazy(() => import("../pages/SurgicalCategoryPage"));
+const SurgicalProductDetailPage = lazy(() => import("../pages/SurgicalProductDetailPage"));
 const OffersPage = lazy(() => import("../pages/OffersPage"));
 const SearchResultsPage = lazy(() => import("../pages/SearchResultsPage"));
 const HowWeKeepYouSafePage = lazy(() => import("../pages/HowWeKeepYouSafePage"));
@@ -59,6 +60,8 @@ const DeliveryPage = lazy(() => import("../pages/DeliveryPage"));
 const Dashboard = lazy(() => import("../admin/AdminDashboard"));
 const ManageProducts = lazy(() => import("../admin/AdminProducts"));
 const AddNewProduct = lazy(() => import("../admin/AdminAddNewProduct"));
+const AdminSurgicalProducts = lazy(() => import("../admin/AdminSurgicalProducts"));
+const AddNewSurgicalProduct = lazy(() => import("../admin/AdminAddNewSurgicalProduct"));
 const ManageOrders = lazy(() => import("../admin/AdminOrders"));
 const ProductCategories = lazy(() => import("../admin/AdminCategories"));
 const AdminSurgicalCategories = lazy(() => import("../admin/AdminSurgicalCategories"));
@@ -114,6 +117,10 @@ const AppRoutes = () => {
             <Route path="products" element={<ManageProducts />} />
             <Route path="products/new" element={<AddNewProduct />} />
             <Route path="products/:id/edit" element={<AddNewProduct />} />
+            <Route path="surgical-products" element={<AdminSurgicalProducts />} />
+            <Route path="surgical-products/add" element={<AddNewSurgicalProduct />} />
+            <Route path="surgical-products/new" element={<AddNewSurgicalProduct />} />
+            <Route path="surgical-products/:id/edit" element={<AddNewSurgicalProduct />} />
             <Route path="orders" element={<ManageOrders />} />
             <Route path="categories" element={<ProductCategories />} />
             <Route path="surgical-categories" element={<AdminSurgicalCategories />} />
@@ -164,6 +171,8 @@ const AppRoutes = () => {
           <Route path="surgical/all" element={<AllSurgicalProductsPage />} />
           <Route path="surgical/categories" element={<AllSurgicalCategoriesPage />} />
           <Route path="surgical-categories" element={<AllSurgicalCategoriesPage />} />
+          <Route path="surgical/products/:slug" element={<SurgicalProductDetailPage />} />
+          <Route path="surgical/product/:slug" element={<SurgicalProductDetailPage />} />
           <Route path="surgical/:categorySlug" element={<SurgicalCategoryPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
@@ -228,6 +237,10 @@ const AppRoutes = () => {
           <Route path="products" element={<ManageProducts />} />
           <Route path="products/new" element={<AddNewProduct />} />
           <Route path="products/:id/edit" element={<AddNewProduct />} />
+          <Route path="surgical-products" element={<AdminSurgicalProducts />} />
+          <Route path="surgical-products/add" element={<AddNewSurgicalProduct />} />
+          <Route path="surgical-products/new" element={<AddNewSurgicalProduct />} />
+          <Route path="surgical-products/:id/edit" element={<AddNewSurgicalProduct />} />
           <Route path="orders" element={<ManageOrders />} />
           <Route path="categories" element={<ProductCategories />} />
           <Route path="surgical-categories" element={<AdminSurgicalCategories />} />

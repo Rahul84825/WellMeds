@@ -102,7 +102,7 @@ export const getCart = async (req, res, next) => {
 };
 
 export const addToCart = async (req, res, next) => {
-  const { productId, quantity } = req.body;
+  const { productId, quantity, variantName, variantId, price } = req.body;
 
   try {
     const product = await Product.findById(productId);
@@ -111,11 +111,27 @@ export const addToCart = async (req, res, next) => {
     }
 
     const requestedQuantity = quantity || 1;
+    const targetVariant = variantName ? String(variantName).trim() : "";
+    const targetVariantId = variantId ? String(variantId).trim() : "";
 
-    if (product.stock < requestedQuantity) {
+    // Determine variant stock & price
+    let effectiveStock = product.stock;
+    let effectivePrice = product.price;
+
+    if (targetVariant && Array.isArray(product.variants) && product.variants.length > 0) {
+      const foundVariant = product.variants.find(
+        (v) => (targetVariantId && v._id?.toString() === targetVariantId) || v.name?.toLowerCase() === targetVariant.toLowerCase()
+      );
+      if (foundVariant) {
+        effectiveStock = foundVariant.stock !== undefined ? foundVariant.stock : product.stock;
+        effectivePrice = foundVariant.sellingPrice !== undefined ? foundVariant.sellingPrice : foundVariant.price;
+      }
+    }
+
+    if (effectiveStock < requestedQuantity) {
       return res.status(400).json({ 
         success: false, 
-        message: `Insufficient stock. Only ${product.stock} item(s) available.` 
+        message: `Insufficient stock. Only ${effectiveStock} item(s) available.` 
       });
     }
 
@@ -127,20 +143,32 @@ export const addToCart = async (req, res, next) => {
     const itemIndex = cart.items.findIndex((item) => {
       if (!item || !item.product) return false;
       const pId = item.product._id ? item.product._id.toString() : item.product.toString();
-      return pId === productId;
+      const itemVar = item.variantName ? String(item.variantName).trim() : "";
+      return pId === productId && itemVar.toLowerCase() === targetVariant.toLowerCase();
     });
 
     if (itemIndex > -1) {
       const newQuantity = cart.items[itemIndex].quantity + requestedQuantity;
-      if (newQuantity > product.stock) {
+      if (newQuantity > effectiveStock) {
         return res.status(400).json({ 
           success: false, 
-          message: `Cannot add ${requestedQuantity} items. Total would be ${newQuantity}, but only ${product.stock} available.` 
+          message: `Cannot add ${requestedQuantity} items. Total would be ${newQuantity}, but only ${effectiveStock} available.` 
         });
       }
       cart.items[itemIndex].quantity = newQuantity;
+      if (targetVariant) {
+        cart.items[itemIndex].variantName = targetVariant;
+        cart.items[itemIndex].variantId = targetVariantId;
+        cart.items[itemIndex].price = effectivePrice;
+      }
     } else {
-      cart.items.push({ product: productId, quantity: requestedQuantity });
+      cart.items.push({
+        product: productId,
+        quantity: requestedQuantity,
+        variantName: targetVariant,
+        variantId: targetVariantId,
+        price: effectivePrice,
+      });
     }
 
     // Refresh and clean prescription status
@@ -165,7 +193,7 @@ export const addToCart = async (req, res, next) => {
 };
 
 export const updateQuantity = async (req, res, next) => {
-  const { productId, quantity } = req.body;
+  const { productId, quantity, variantName, variantId } = req.body;
 
   try {
     const product = await Product.findById(productId);
@@ -178,9 +206,15 @@ export const updateQuantity = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Cart not found" });
     }
 
+    const targetVariant = variantName ? String(variantName).trim().toLowerCase() : "";
+
     const itemIndex = cart.items.findIndex((item) => {
       if (!item || !item.product) return false;
       const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+      const itemVar = item.variantName ? String(item.variantName).trim().toLowerCase() : "";
+      if (targetVariant) {
+        return pId === productId && itemVar === targetVariant;
+      }
       return pId === productId;
     });
 
@@ -188,10 +222,15 @@ export const updateQuantity = async (req, res, next) => {
       if (quantity <= 0) {
         cart.items.splice(itemIndex, 1);
       } else {
-        if (quantity > product.stock) {
+        let maxStock = product.stock;
+        if (targetVariant && Array.isArray(product.variants)) {
+          const found = product.variants.find((v) => v.name?.toLowerCase() === targetVariant);
+          if (found && found.stock !== undefined) maxStock = found.stock;
+        }
+        if (quantity > maxStock) {
           return res.status(400).json({ 
             success: false, 
-            message: `Cannot set quantity to ${quantity}. Only ${product.stock} item(s) available.` 
+            message: `Cannot set quantity to ${quantity}. Only ${maxStock} item(s) available.` 
           });
         }
         cart.items[itemIndex].quantity = quantity;
@@ -219,6 +258,7 @@ export const updateQuantity = async (req, res, next) => {
 
 export const removeFromCart = async (req, res, next) => {
   const { productId } = req.params;
+  const variantName = req.query.variantName ? String(req.query.variantName).trim().toLowerCase() : "";
 
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
@@ -226,6 +266,10 @@ export const removeFromCart = async (req, res, next) => {
       cart.items = cart.items.filter((item) => {
         if (!item || !item.product) return false;
         const pId = item.product._id ? item.product._id.toString() : item.product.toString();
+        const itemVar = item.variantName ? String(item.variantName).trim().toLowerCase() : "";
+        if (variantName) {
+          return !(pId === productId && itemVar === variantName);
+        }
         return pId !== productId;
       });
       await cleanCartPrescription(cart);

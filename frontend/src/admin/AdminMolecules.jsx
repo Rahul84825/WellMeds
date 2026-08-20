@@ -120,7 +120,6 @@ const AdminMolecules = () => {
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={14} />
           <input
             type="text"
-            placeholder="Search by name or chemical aliases..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);

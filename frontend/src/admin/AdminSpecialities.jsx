@@ -327,7 +327,6 @@ const AdminSpecialities = () => {
           <Search className="absolute left-sm top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
             type="text"
-            placeholder="Search specialities by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-xl pr-md py-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl text-xs outline-none"
@@ -527,7 +526,6 @@ const AdminSpecialities = () => {
                             setSlug(generatedSlug);
                           }
                         }}
-                        placeholder="e.g. Cardiology"
                         className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                       />
                     </div>
@@ -539,7 +537,6 @@ const AdminSpecialities = () => {
                         required
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        placeholder="e.g. cardiology"
                         className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none font-mono"
                       />
                     </div>
@@ -551,7 +548,6 @@ const AdminSpecialities = () => {
                       rows={2}
                       value={shortDescription}
                       onChange={(e) => setShortDescription(e.target.value)}
-                      placeholder="Brief overview explaining this medical specialty..."
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                     />
                   </div>
@@ -659,7 +655,6 @@ const AdminSpecialities = () => {
                                     required
                                     value={sec.heading}
                                     onChange={(e) => updateRichSection(idx, "heading", e.target.value)}
-                                    placeholder="e.g. Core Indications & Usage"
                                     className="w-full p-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none"
                                   />
                                 </div>
@@ -670,7 +665,6 @@ const AdminSpecialities = () => {
                                     required
                                     value={sec.richTextDescription}
                                     onChange={(e) => updateRichSection(idx, "richTextDescription", e.target.value)}
-                                    placeholder="Detailed clinical explanation about this category section..."
                                     className="w-full p-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-primary rounded-xl outline-none"
                                   />
                                 </div>
@@ -696,7 +690,6 @@ const AdminSpecialities = () => {
                         type="text"
                         value={seoTitle}
                         onChange={(e) => setSeoTitle(e.target.value)}
-                        placeholder="e.g. Best Cardiology Drugs - WellMeds Store"
                         className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                       />
                     </div>
@@ -707,7 +700,6 @@ const AdminSpecialities = () => {
                         type="text"
                         value={seoKeywords}
                         onChange={(e) => setSeoKeywords(e.target.value)}
-                        placeholder="cardiology, heart medication, blood pressure, etc."
                         className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                       />
                     </div>
@@ -719,7 +711,6 @@ const AdminSpecialities = () => {
                       rows={3}
                       value={seoDescription}
                       onChange={(e) => setSeoDescription(e.target.value)}
-                      placeholder="e.g. Buy high-quality cardiology medications online. Get doctor-certified prescription heart medicines and blood pressure regulators delivered home..."
                       className="w-full p-sm bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 focus:bg-white focus:border-primary rounded-xl outline-none"
                     />
                   </div>
