@@ -39,7 +39,9 @@ export const registerUser = async (req, res, next) => {
       lastLogin: new Date(),
     });
 
-    const requiresMobile = !user.mobile || !user.mobile.trim();
+    const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+    const requiresMobile = !cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile);
+    const isProfileCompleted = user.role === "admin" || (!requiresMobile && Boolean(user.isProfileCompleted));
 
     const accessToken = generateToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id, user.role);
@@ -56,6 +58,7 @@ export const registerUser = async (req, res, next) => {
       success: true,
       message: "Account created successfully",
       requiresMobile,
+      profileComplete: isProfileCompleted,
       token: accessToken,
       refreshToken,
       user: {
@@ -66,7 +69,7 @@ export const registerUser = async (req, res, next) => {
         role: user.role,
         avatar: user.avatar || "",
         authProvider: user.authProvider,
-        isProfileCompleted: user.isProfileCompleted || !requiresMobile,
+        isProfileCompleted,
       },
     });
   } catch (error) {
@@ -98,7 +101,9 @@ export const loginUser = async (req, res, next) => {
     user.lastLogin = new Date();
     await user.save();
 
-    const requiresMobile = !user.mobile || !user.mobile.trim();
+    const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+    const requiresMobile = !cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile);
+    const isProfileCompleted = user.role === "admin" || (!requiresMobile && Boolean(user.isProfileCompleted));
 
     const accessToken = generateToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id, user.role);
@@ -115,6 +120,7 @@ export const loginUser = async (req, res, next) => {
       success: true,
       message: "Login successful",
       requiresMobile,
+      profileComplete: isProfileCompleted,
       token: accessToken,
       refreshToken,
       user: {
@@ -125,7 +131,7 @@ export const loginUser = async (req, res, next) => {
         role: user.role,
         avatar: user.avatar || "",
         authProvider: user.authProvider,
-        isProfileCompleted: user.isProfileCompleted || !requiresMobile,
+        isProfileCompleted,
       },
     });
   } catch (error) {
@@ -316,8 +322,15 @@ export const getProfile = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+    const isValidMobile = /^[6-9]\d{9}$/.test(cleanMobile);
+    const isComplete = user.role === "admin" || Boolean(isValidMobile && user.isProfileCompleted);
+    const requiresMobile = user.role !== "admin" && !isValidMobile;
+
     res.status(200).json({
       success: true,
+      profileComplete: isComplete,
+      requiresMobile,
       user: {
         id: user._id,
         name: user.name,
@@ -331,7 +344,7 @@ export const getProfile = async (req, res, next) => {
         authProvider: user.authProvider,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
-        isProfileCompleted: user.isProfileCompleted ?? (!!user.email && !!user.name && !user.name.startsWith("User ")),
+        isProfileCompleted: isComplete,
       },
     });
   } catch (error) {
@@ -359,36 +372,38 @@ export const updateProfile = async (req, res, next) => {
 
     if (mobile !== undefined && mobile !== null) {
       const cleanMobile = String(mobile).replace(/\D/g, "").slice(-10);
-      if (cleanMobile) {
-        if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
-          return res.status(400).json({
-            success: false,
-            message: "Please enter a valid 10-digit Indian mobile number",
-          });
-        }
-        // Check if another customer is already using this mobile number
-        const existing = await User.findOne({ mobile: cleanMobile, _id: { $ne: user._id } });
-        if (existing) {
-          return res.status(400).json({
-            success: false,
-            message: "This mobile number is already linked with another account.",
-          });
-        }
-        user.mobile = cleanMobile;
+      if (!cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid 10-digit Indian mobile number.",
+        });
       }
-    }
-
-    if (user.mobile && user.mobile.trim()) {
+      // Check if another customer is already using this mobile number
+      const existing = await User.findOne({ mobile: cleanMobile, _id: { $ne: user._id } });
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: "This mobile number is already linked with another account.",
+        });
+      }
+      user.mobile = cleanMobile;
+      user.isProfileCompleted = true;
+    } else if (user.mobile && /^[6-9]\d{9}$/.test(String(user.mobile).trim())) {
       user.isProfileCompleted = true;
     }
 
     await user.save();
 
-    secLog("[PROFILE_UPDATE]", { userId: user._id, mobile: user.mobile });
+    const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+    const isValidMobile = /^[6-9]\d{9}$/.test(cleanMobile);
+    const isComplete = user.role === "admin" || Boolean(isValidMobile && user.isProfileCompleted);
+
+    secLog("[PROFILE_UPDATE]", { userId: user._id, mobile: user.mobile, isProfileCompleted: isComplete });
 
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
+      profileComplete: isComplete,
       user: {
         id: user._id,
         name: user.name,
@@ -400,7 +415,7 @@ export const updateProfile = async (req, res, next) => {
         gender: user.gender || "",
         bloodGroup: user.bloodGroup || "",
         authProvider: user.authProvider,
-        isProfileCompleted: user.isProfileCompleted,
+        isProfileCompleted: isComplete,
       },
     });
   } catch (error) {

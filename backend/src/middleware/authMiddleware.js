@@ -49,3 +49,36 @@ export const optionalProtect = async (req, res, next) => {
     next();
   }
 };
+
+/**
+ * requireProfileComplete
+ * Verifies that an authenticated customer has a valid mobile number and completed profile.
+ * Admins bypass this requirement.
+ */
+export const requireProfileComplete = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized, please log in.",
+    });
+  }
+
+  // Admins bypass customer profile completion
+  if (req.user.role === "admin") {
+    return next();
+  }
+
+  const cleanMobile = req.user.mobile ? String(req.user.mobile).trim() : "";
+  const isValidMobile = /^[6-9]\d{9}$/.test(cleanMobile);
+  const isComplete = Boolean(isValidMobile && req.user.isProfileCompleted);
+
+  if (!isComplete) {
+    return res.status(403).json({
+      success: false,
+      code: "PROFILE_INCOMPLETE",
+      message: "Please complete your profile before continuing.",
+    });
+  }
+
+  next();
+};

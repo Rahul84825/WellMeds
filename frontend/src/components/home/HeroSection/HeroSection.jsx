@@ -20,7 +20,7 @@ const HeroSection = () => {
       </h1>
 
       {/* Prescription Pad Search Card */}
-      <div className="search-wrap hero-anim-card">
+      <div id="hero-search-anchor" className="search-wrap hero-anim-card">
         <div className="search-tape" aria-hidden="true" />
         <div className="search-card">
           <UniversalSearch variant="prescription" />

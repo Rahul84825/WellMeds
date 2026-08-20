@@ -210,7 +210,7 @@ const SurgicalHeroSection = ({ brands = SURGICAL_BRAND_LOGOS }) => {
                 onClick={() => handleManualSwitch(idx)}
                 className={`transition-all duration-300 cursor-pointer ${
                   idx === activeSlide
-                    ? "w-5 sm:w-6 h-2 rounded-full bg-sky-400 shadow-xs"
+                    ? "w-5 sm:w-6 h-2 rounded-full bg-[#157a6d] dark:bg-emerald-400 shadow-xs"
                     : "w-2 h-2 rounded-full bg-white/60 hover:bg-white"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}

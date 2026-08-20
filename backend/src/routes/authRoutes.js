@@ -13,7 +13,7 @@ import {
   clearSearchHistory,
 } from "../controllers/authController.js";
 import { googleAuth } from "../controllers/googleAuthController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, requireProfileComplete } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -31,10 +31,11 @@ router.post("/logout", protect, logout);
 router.post("/refresh", refresh);
 router.get("/me", protect, getProfile);
 router.put("/profile", protect, updateProfile);
+router.patch("/profile", protect, updateProfile);
 
 // ─── Search History Management ──────────────────────────────────────────────────
-router.get("/search-history", protect, getSearchHistory);
-router.post("/search-history", protect, addSearchHistory);
-router.delete("/search-history", protect, clearSearchHistory);
+router.get("/search-history", protect, requireProfileComplete, getSearchHistory);
+router.post("/search-history", protect, requireProfileComplete, addSearchHistory);
+router.delete("/search-history", protect, requireProfileComplete, clearSearchHistory);
 
 export default router;

@@ -1,11 +1,11 @@
 import express from "express";
 import { getCart, addToCart, updateQuantity, removeFromCart, clearCart } from "../controllers/cartController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, requireProfileComplete } from "../middleware/authMiddleware.js";
 import { checkCartLock } from "../middleware/cartLockMiddleware.js";
 
 const router = express.Router();
 
-router.use(protect);
+router.use(protect, requireProfileComplete);
 
 router.route("/")
   .get(getCart)

@@ -178,6 +178,13 @@ export const AuthProvider = ({ children }) => {
     setAuthModalRedirect(null);
   }, []);
 
+  const isAuthenticated = Boolean(user);
+  const isAdmin = user?.role === "admin";
+  const cleanMobile = user?.mobile ? String(user.mobile).trim() : "";
+  const profileComplete = Boolean(
+    user && (isAdmin || (cleanMobile && /^[6-9]\d{9}$/.test(cleanMobile) && user.isProfileCompleted))
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -188,7 +195,9 @@ export const AuthProvider = ({ children }) => {
         loginWithGoogle,
         logout,
         updateProfile,
-        isAdmin: user?.role === "admin",
+        isAuthenticated,
+        profileComplete,
+        isAdmin,
         registerLoginCallback,
         registerLogoutCallback,
         isAuthModalOpen,

@@ -20,6 +20,7 @@ import {
   MapPin,
   HelpCircle,
   PhoneCall,
+  Phone,
   Activity
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
@@ -51,7 +52,7 @@ const renderIcon = (name, className = "w-4 h-4") => {
 };
 
 const Navbar = () => {
-  const { user, logout, isAdmin, openLoginModal } = useAuth();
+  const { user, logout, isAdmin, profileComplete, openLoginModal } = useAuth();
   const { cartCount } = useCart();
   const { isDrawerOpen, setIsDrawerOpen, menuData } = useDrawer();
   const navigate = useNavigate();
@@ -127,6 +128,20 @@ const Navbar = () => {
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Synchronize search visibility on route transition
+  useEffect(() => {
+    const isHero = location.pathname === "/" || location.pathname === "/delivery";
+    if (!isHero) {
+      showSearchRef.current = true;
+      setShowNavbarSearch(true);
+    } else {
+      const heroAnchor = document.getElementById("hero-search-anchor");
+      const isPast = heroAnchor ? heroAnchor.getBoundingClientRect().bottom <= 75 : window.scrollY > 400;
+      showSearchRef.current = isPast;
+      setShowNavbarSearch(isPast);
+    }
+  }, [location.pathname]);
+
   // Single Discrete State Machine Scroll Engine (Passive & RAF Throttled)
   useEffect(() => {
     let ticking = false;
@@ -145,8 +160,19 @@ const Navbar = () => {
             setIsScrolled(nextIsScrolled);
           }
 
-          // 2. Search Bar Visibility State
-          const nextShowSearch = isHeroSearchPage ? currentScrollY > 180 : true;
+          // 2. Search Bar Visibility State (Zero-Collision with Hero Search)
+          let nextShowSearch = true;
+          if (isHeroSearchPage) {
+            const heroAnchor = document.getElementById("hero-search-anchor");
+            if (heroAnchor) {
+              const rect = heroAnchor.getBoundingClientRect();
+              // Only reveal navbar search once hero search card has scrolled completely past the top navbar
+              nextShowSearch = rect.bottom <= 75;
+            } else {
+              nextShowSearch = currentScrollY > 400;
+            }
+          }
+
           if (nextShowSearch !== showSearchRef.current) {
             showSearchRef.current = nextShowSearch;
             setShowNavbarSearch(nextShowSearch);
@@ -180,7 +206,7 @@ const Navbar = () => {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [location.pathname]);
+  }, [location.pathname, isHeroSearchPage]);
 
   // Click outside to close location & profile menus
   useEffect(() => {
@@ -270,6 +296,14 @@ const Navbar = () => {
         to: "/profile",
         label: "Profile",
         icon: User
+      });
+    } else if (!profileComplete) {
+      profileDropdownItems.push({
+        id: "complete-profile",
+        type: "link",
+        to: "/complete-profile",
+        label: "Complete Profile",
+        icon: Phone
       });
     } else {
       profileDropdownItems.push({
@@ -397,11 +431,11 @@ const Navbar = () => {
             <div className="flex items-center justify-center flex-grow flex-1 mx-4 relative z-10">
               <div
                 style={{
-                  transition: "opacity 280ms cubic-bezier(.22,.61,.36,1), transform 280ms cubic-bezier(.22,.61,.36,1), max-width 300ms ease",
-                  transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 32px, 0) scale(0.95)",
+                  transition: "opacity 180ms cubic-bezier(.22,.61,.36,1), transform 180ms cubic-bezier(.22,.61,.36,1)",
+                  transform: showNavbarSearch ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 16px, 0) scale(0.96)",
                   opacity: showNavbarSearch ? 1 : 0,
                 }}
-                className={`w-full max-w-[560px] transition-all duration-300 ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
+                className={`w-full max-w-[560px] ${showNavbarSearch ? "pointer-events-auto" : "pointer-events-none"}`}
               >
                 <UniversalSearch variant="default" />
               </div>
@@ -452,11 +486,25 @@ const Navbar = () => {
                     aria-label="User profile menu"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     onKeyDown={handleProfileKeyDown}
-                    className={`px-5 h-[38px] border border-slate-200/90 rounded-2xl flex items-center justify-center gap-2 text-slate-800 focus:outline-none transition-all duration-150 cursor-pointer shrink-0 text-[14.5px] font-semibold ${profileDropdownOpen ? "bg-slate-200/80 border-slate-300" : "bg-white hover:bg-slate-50 hover:border-slate-300"
-                      }`}
+                    className={`px-4 sm:px-5 h-[38px] border rounded-2xl flex items-center justify-center gap-2 text-slate-800 focus:outline-none transition-all duration-150 cursor-pointer shrink-0 text-[14.5px] font-semibold ${
+                      !isAdmin && !profileComplete
+                        ? "border-amber-400 bg-amber-50/70 hover:bg-amber-100 text-amber-900"
+                        : profileDropdownOpen
+                        ? "bg-slate-200/80 border-slate-300"
+                        : "border-slate-200/90 bg-white hover:bg-slate-50 hover:border-slate-300"
+                    }`}
                   >
-                    <User className="w-[18px] h-[18px] text-slate-700" />
-                    <span className="max-w-[100px] truncate">{user.name}</span>
+                    {!isAdmin && !profileComplete ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                        <span className="text-xs font-bold truncate">Complete Profile</span>
+                      </>
+                    ) : (
+                      <>
+                        <User className="w-[18px] h-[18px] text-slate-700" />
+                        <span className="max-w-[100px] truncate">{user.name}</span>
+                      </>
+                    )}
                   </button>
                 ) : (
                   <Link

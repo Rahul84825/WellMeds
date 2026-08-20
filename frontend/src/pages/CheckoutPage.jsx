@@ -38,15 +38,19 @@ const loadRazorpayScript = () => {
 
 const Checkout = () => {
   const { cartItems, subtotal, shipping, tax, total, requiresRx, isCartLocked, modifyCart, clearCart, resetCartPostOrder } = useCart();
-  const { user, loading: authLoading, openLoginModal } = useAuth();
+  const { user, loading: authLoading, profileComplete, isAdmin, openLoginModal } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      openLoginModal("/checkout");
-      navigate("/cart", { replace: true });
+    if (!authLoading) {
+      if (!user) {
+        openLoginModal("/checkout");
+        navigate("/cart", { replace: true });
+      } else if (!isAdmin && !profileComplete) {
+        navigate("/complete-profile?returnTo=/checkout", { replace: true });
+      }
     }
-  }, [authLoading, user, openLoginModal, navigate]);
+  }, [authLoading, user, profileComplete, isAdmin, openLoginModal, navigate]);
 
   // Payment Recovery check: if user returns with a paid draft order
   useEffect(() => {
@@ -1233,8 +1237,7 @@ export default Checkout;
 // CheckoutAuthGate (Google Authentication Gate)
 // ─────────────────────────────────────────────────────────────────────────────
 const CheckoutAuthGate = () => {
-  const { loginWithGoogle, updateProfile } = useAuth();
-  const [step, setStep] = useState("auth"); // auth | complete_profile
+  const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -1242,8 +1245,8 @@ const CheckoutAuthGate = () => {
     setErrorMsg("");
     try {
       const res = await loginWithGoogle(credential);
-      if (res.requiresMobile || (res.user && !res.user.mobile)) {
-        setStep("complete_profile");
+      if (res.requiresMobile || (res.user && !res.user.mobile) || !res.profileComplete) {
+        navigate("/complete-profile?returnTo=/checkout");
       }
     } catch (err) {
       setErrorMsg(err.response?.data?.message || err.message || "Google authentication failed. Please try again.");

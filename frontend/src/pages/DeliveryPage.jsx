@@ -227,7 +227,7 @@ const DeliveryPage = () => {
           </p>
 
           {/* Universal Search Bar */}
-          <div className="max-w-2xl mx-auto w-full text-left relative z-30">
+          <div id="hero-search-anchor" className="max-w-2xl mx-auto w-full text-left relative z-30">
             <UniversalSearch variant="default" />
           </div>
 

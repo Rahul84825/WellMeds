@@ -52,8 +52,10 @@ const AuthModal = () => {
     setErrorMsg("");
     try {
       const res = await loginWithGoogle(credential);
-      if (res.requiresMobile || (res.user && !res.user.mobile)) {
-        setStep(STEP_COMPLETE_PROFILE);
+      if (res.requiresMobile || (res.user && !res.user.mobile) || !res.profileComplete) {
+        closeAuthModal();
+        const returnTo = authModalRedirect || window.location.pathname + window.location.search;
+        navigate(`/complete-profile?returnTo=${encodeURIComponent(returnTo)}`);
       } else {
         closeAuthModal();
         if (authModalRedirect) {

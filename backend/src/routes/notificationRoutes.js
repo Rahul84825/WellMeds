@@ -1,6 +1,6 @@
 import express from "express";
 import { getNotifications, markAsRead, markAllAsRead, subscribeEmail } from "../controllers/notificationController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, requireProfileComplete } from "../middleware/authMiddleware.js";
 import { subscribeLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
 // Public subscribe endpoint for maintenance / coming soon page (with rate limiting)
 router.post("/subscribe", subscribeLimiter, subscribeEmail);
 
-router.use(protect);
+router.use(protect, requireProfileComplete);
 
 router.route("/")
   .get(getNotifications)

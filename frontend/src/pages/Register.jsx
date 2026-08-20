@@ -89,12 +89,17 @@ const Register = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && user.mobile) {
+    if (user) {
+      const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+      const isComplete = isAdmin || (cleanMobile && /^[6-9]\d{9}$/.test(cleanMobile) && user.isProfileCompleted);
       if (isAdmin) {
         navigate("/admin", { replace: true });
-      } else {
+      } else if (isComplete) {
         const destination = targetDestination.startsWith("/register") ? "/" : targetDestination;
         navigate(destination, { replace: true });
+      } else {
+        const dest = targetDestination.startsWith("/register") ? "/" : targetDestination;
+        navigate(`/complete-profile?returnTo=${encodeURIComponent(dest)}`, { replace: true });
       }
     }
   }, [user, isAdmin, navigate, targetDestination]);
@@ -128,10 +133,10 @@ const Register = () => {
 
     try {
       const res = await register(name.trim(), email.trim(), password);
-      if (res.requiresMobile || (res.user && !res.user.mobile)) {
-        setStep("complete_profile");
+      const dest = targetDestination.startsWith("/register") ? "/" : targetDestination;
+      if (res.requiresMobile || (res.user && !res.user.mobile) || !res.profileComplete) {
+        navigate(`/complete-profile?returnTo=${encodeURIComponent(dest)}`, { replace: true });
       } else {
-        const dest = targetDestination.startsWith("/register") ? "/" : targetDestination;
         if (res.user?.role === "admin") {
           navigate("/admin", { replace: true });
         } else {
@@ -154,10 +159,10 @@ const Register = () => {
     setErrorMsg("");
     try {
       const res = await loginWithGoogle(credential);
-      if (res.requiresMobile || (res.user && !res.user.mobile)) {
-        setStep("complete_profile");
+      const dest = targetDestination.startsWith("/register") ? "/" : targetDestination;
+      if (res.requiresMobile || (res.user && !res.user.mobile) || !res.profileComplete) {
+        navigate(`/complete-profile?returnTo=${encodeURIComponent(dest)}`, { replace: true });
       } else {
-        const dest = targetDestination.startsWith("/register") ? "/" : targetDestination;
         if (res.user?.role === "admin") {
           navigate("/admin", { replace: true });
         } else {

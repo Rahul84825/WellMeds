@@ -94,6 +94,16 @@ apiInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Guard 0: Check for PROFILE_INCOMPLETE 403
+    if (error.response?.status === 403 && error.response?.data?.code === "PROFILE_INCOMPLETE") {
+      const currentPath = window.location.pathname;
+      if (currentPath !== "/complete-profile" && !currentPath.startsWith("/login") && !currentPath.startsWith("/register")) {
+        const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/complete-profile?returnTo=${returnTo}`;
+      }
+      return Promise.reject(error);
+    }
+
     // Guard 1: Only attempt refresh on 401 errors
     if (error.response?.status !== 401) {
       return Promise.reject(error);

@@ -130,7 +130,15 @@ export const googleAuth = async (req, res, next) => {
       await user.save();
     }
 
-    const requiresMobile = !user.mobile || !user.mobile.trim();
+    const cleanMobile = user.mobile ? String(user.mobile).trim() : "";
+    const requiresMobile = user.role !== "admin" && (!cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile));
+    const isProfileCompleted = user.role === "admin" || (!requiresMobile && Boolean(user.isProfileCompleted));
+
+    // If customer has a valid mobile number but flag wasn't set, sync flag
+    if (!requiresMobile && !user.isProfileCompleted) {
+      user.isProfileCompleted = true;
+      await user.save();
+    }
 
     // Issue JWT access + refresh tokens
     const accessToken = generateToken(user._id, user.role);
@@ -146,6 +154,7 @@ export const googleAuth = async (req, res, next) => {
       success: true,
       message: "Google authentication successful",
       requiresMobile,
+      profileComplete: isProfileCompleted,
       token: accessToken,
       refreshToken: refreshToken,
       user: {
@@ -156,7 +165,7 @@ export const googleAuth = async (req, res, next) => {
         role: user.role,
         avatar: user.avatar || "",
         authProvider: user.authProvider,
-        isProfileCompleted: user.isProfileCompleted || !requiresMobile,
+        isProfileCompleted,
       },
     });
   } catch (error) {

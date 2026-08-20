@@ -17,6 +17,7 @@ import {
   MapPin,
   LogOut,
   PhoneCall,
+  Phone,
   HelpCircle,
   ShoppingCart
 } from "lucide-react";
@@ -46,7 +47,7 @@ const renderIcon = (name, className = "w-4 h-4") => {
 
 const GlobalDrawer = () => {
   const { isDrawerOpen, setIsDrawerOpen, menuData, menuLoading } = useDrawer();
-  const { user, logout, isAdmin, openLoginModal } = useAuth();
+  const { user, logout, isAdmin, profileComplete, openLoginModal } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
@@ -575,6 +576,18 @@ const GlobalDrawer = () => {
                       <span>Profile</span>
                     </Link>
                   </>
+                ) : !profileComplete ? (
+                  <Link
+                    to="/complete-profile"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="py-2.5 px-3 text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                  >
+                    <Phone className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div className="flex flex-col text-left">
+                      <span className="font-bold">Complete Profile</span>
+                      <span className="text-[10.5px] text-amber-700 font-normal">Add mobile number to activate account</span>
+                    </div>
+                  </Link>
                 ) : (
                   <>
                     <Link

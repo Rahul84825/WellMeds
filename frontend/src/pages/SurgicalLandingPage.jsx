@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
@@ -17,6 +17,7 @@ import {
   Thermometer, 
   Layers, 
   ChevronRight, 
+  ChevronLeft,
   Plus, 
   Minus,
   CheckCircle,
@@ -55,6 +56,142 @@ const SurgicalLandingPage = () => {
   const [loading, setLoading] = useState(true);
   const [faqOpen, setFaqOpen] = useState({});
 
+  // ── Carousel Controls ──────────────────────────────────────────────────
+  const sliderRef = useRef(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragScrollLeft = useRef(0);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(
+      Math.ceil(el.scrollLeft) < el.scrollWidth - el.clientWidth - 4
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    const ro = new ResizeObserver(updateArrows);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      ro.disconnect();
+    };
+  }, [categories, updateArrows]);
+
+  const SCROLL_AMOUNT = 560; // ~3-4 card widths
+
+  const scrollLeft = () => {
+    sliderRef.current?.scrollBy({ left: -SCROLL_AMOUNT, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    sliderRef.current?.scrollBy({ left: SCROLL_AMOUNT, behavior: "smooth" });
+  };
+
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    dragStartX.current = e.pageX - sliderRef.current.offsetLeft;
+    dragScrollLeft.current = sliderRef.current.scrollLeft;
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = "grabbing";
+      sliderRef.current.style.userSelect = "none";
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current || !sliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const delta = (x - dragStartX.current) * 1.4;
+    sliderRef.current.scrollLeft = dragScrollLeft.current - delta;
+  };
+
+  const stopDragging = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = "grab";
+      sliderRef.current.style.userSelect = "";
+    }
+  };
+
+  // ── Product Carousel Controls ──────────────────────────────────────────
+  const prodSliderRef = useRef(null);
+  const isProdDragging = useRef(false);
+  const prodDragStartX = useRef(0);
+  const prodDragScrollLeft = useRef(0);
+
+  const [canScrollProdLeft, setCanScrollProdLeft] = useState(false);
+  const [canScrollProdRight, setCanScrollProdRight] = useState(false);
+
+  const updateProdArrows = useCallback(() => {
+    const el = prodSliderRef.current;
+    if (!el) return;
+    setCanScrollProdLeft(el.scrollLeft > 4);
+    setCanScrollProdRight(
+      Math.ceil(el.scrollLeft) < el.scrollWidth - el.clientWidth - 4
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = prodSliderRef.current;
+    if (!el) return;
+    updateProdArrows();
+    el.addEventListener("scroll", updateProdArrows, { passive: true });
+    const ro = new ResizeObserver(updateProdArrows);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateProdArrows);
+      ro.disconnect();
+    };
+  }, [featuredProducts, updateProdArrows]);
+
+  const PROD_SCROLL_AMOUNT = 600; // ~2-3 product card widths
+
+  const scrollProdLeft = () => {
+    prodSliderRef.current?.scrollBy({ left: -PROD_SCROLL_AMOUNT, behavior: "smooth" });
+  };
+
+  const scrollProdRight = () => {
+    prodSliderRef.current?.scrollBy({ left: PROD_SCROLL_AMOUNT, behavior: "smooth" });
+  };
+
+  const handleProdMouseDown = (e) => {
+    isProdDragging.current = true;
+    prodDragStartX.current = e.pageX - prodSliderRef.current.offsetLeft;
+    prodDragScrollLeft.current = prodSliderRef.current.scrollLeft;
+    if (prodSliderRef.current) {
+      prodSliderRef.current.style.cursor = "grabbing";
+      prodSliderRef.current.style.userSelect = "none";
+    }
+  };
+
+  const handleProdMouseMove = (e) => {
+    if (!isProdDragging.current || !prodSliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - prodSliderRef.current.offsetLeft;
+    const delta = (x - prodDragStartX.current) * 1.4;
+    prodSliderRef.current.scrollLeft = prodDragScrollLeft.current - delta;
+  };
+
+  const stopProdDragging = () => {
+    if (!isProdDragging.current) return;
+    isProdDragging.current = false;
+    if (prodSliderRef.current) {
+      prodSliderRef.current.style.cursor = "grab";
+      prodSliderRef.current.style.userSelect = "";
+    }
+  };
+
   useEffect(() => {
     // SEO Optimization
     document.title = "Surgical Products & Clinical Supplies | WellMeds";
@@ -79,7 +216,7 @@ const SurgicalLandingPage = () => {
       try {
         const [cats, prodsData] = await Promise.all([
           api.getSurgicalCategories(),
-          api.getProducts({ isSurgical: "true", limit: 4 })
+          api.getProducts({ isSurgical: "true", limit: 12 })
         ]);
         setCategories(cats || []);
         setFeaturedProducts(prodsData.products || []);
@@ -132,24 +269,59 @@ const SurgicalLandingPage = () => {
       {/* Hero Section: Banner Carousel & Featured Brands */}
       <SurgicalHeroSection />
 
-      {/* Categories Grid Section */}
-      <section id="categories-section" className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+      {/* Categories Carousel Section */}
+      <section id="categories-section" className="py-12 md:py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+        <div className="flex flex-row items-center justify-between sm:items-end gap-4 mb-8">
           <div>
-            <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
+            <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
               Shop Surgical Categories
             </h2>
             <p className="text-slate-400 text-xs font-semibold max-w-md mt-1">
               Dynamic, admin-managed clinical categories providing specialized equipment and instruments.
             </p>
           </div>
-          <Link
-            to="/surgical/categories"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-[1.5px] border-[#004782] text-[#004782] dark:border-[#a4c9ff] dark:text-[#a4c9ff] hover:bg-[#004782] hover:text-white dark:hover:bg-[#a4c9ff] dark:hover:text-zinc-950 text-xs font-bold transition-all shrink-0 whitespace-nowrap self-start sm:self-auto cursor-pointer"
-          >
-            <span>View All Categories</span>
-            <ChevronRight size={15} />
-          </Link>
+
+          {/* Navigation Controls: ( ← ) [ View all ] ( → ) */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* Left Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              aria-label="Scroll surgical categories left"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollLeft
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] active:scale-95 shadow-2xs"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* View All Link */}
+            <Link
+              to="/surgical/categories"
+              className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
+              aria-label="View all categories"
+            >
+              <span>View all</span>
+            </Link>
+
+            {/* Right Arrow Button */}
+            <button
+              type="button"
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              aria-label="Scroll surgical categories right"
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                canScrollRight
+                  ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] active:scale-95 shadow-2xs"
+                  : "opacity-30 cursor-not-allowed"
+              }`}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -161,9 +333,27 @@ const SurgicalLandingPage = () => {
             <p className="text-slate-400 font-semibold text-xs">No categories configured yet. Add them in the Admin Panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 gap-x-4 justify-items-center">
+          <div
+            ref={sliderRef}
+            role="list"
+            aria-label="Surgical categories carousel"
+            className="no-scrollbar flex flex-row gap-3.5 sm:gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pt-2 pb-5 select-none cursor-grab active:cursor-grabbing"
+            style={{
+              WebkitOverflowScrolling: "touch",
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={stopDragging}
+            onMouseLeave={stopDragging}
+          >
             {categories.map((cat, idx) => (
-              <CategoryCard key={(cat.id || cat._id)?.toString()} category={cat} isSurgical={true} index={idx} />
+              <div
+                key={(cat.id || cat._id)?.toString()}
+                role="listitem"
+                className="shrink-0 snap-start"
+              >
+                <CategoryCard category={cat} isSurgical={true} index={idx} />
+              </div>
             ))}
           </div>
         )}
@@ -172,22 +362,57 @@ const SurgicalLandingPage = () => {
       {/* Featured Surgical Products Section */}
       <section className="bg-slate-100/50 dark:bg-zinc-900/20 py-16 border-y border-slate-100 dark:border-zinc-900">
         <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md mb-12">
+          <div className="flex flex-row items-center justify-between sm:items-end gap-4 mb-8">
             <div>
-              <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
+              <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight m-0">
                 Featured Surgical Products
               </h2>
               <p className="text-slate-400 text-xs font-semibold mt-1">
                 Top-rated clinical instruments and diagnostic devices in stock.
               </p>
             </div>
-            <Link
-              to="/surgical/all"
-              className="text-[#004782] dark:text-[#a4c9ff] hover:text-[#003c70] font-bold text-xs flex items-center gap-xs"
-            >
-              View All Products
-              <ChevronRight size={14} />
-            </Link>
+
+            {/* Navigation Controls: ( ← ) [ View all ] ( → ) */}
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              {/* Left Arrow Button */}
+              <button
+                type="button"
+                onClick={scrollProdLeft}
+                disabled={!canScrollProdLeft}
+                aria-label="Scroll surgical products left"
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                  canScrollProdLeft
+                    ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] active:scale-95 shadow-2xs"
+                    : "opacity-30 cursor-not-allowed"
+                }`}
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              {/* View All Link */}
+              <Link
+                to="/surgical/all"
+                className="inline-flex items-center justify-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-medium text-[#157a6d] dark:text-emerald-400 hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] transition-all duration-200 shrink-0"
+                aria-label="View all surgical products"
+              >
+                <span>View all</span>
+              </Link>
+
+              {/* Right Arrow Button */}
+              <button
+                type="button"
+                onClick={scrollProdRight}
+                disabled={!canScrollProdRight}
+                aria-label="Scroll surgical products right"
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center transition-all duration-200 ${
+                  canScrollProdRight
+                    ? "opacity-100 cursor-pointer hover:bg-[#157a6d] hover:text-white hover:border-[#157a6d] active:scale-95 shadow-2xs"
+                    : "opacity-30 cursor-not-allowed"
+                }`}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
 
           {loading ? (
@@ -199,9 +424,27 @@ const SurgicalLandingPage = () => {
               <p className="text-slate-400 font-semibold text-xs">No featured products available. Mark products as surgical in Admin.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-md">
+            <div
+              ref={prodSliderRef}
+              role="list"
+              aria-label="Featured surgical products carousel"
+              className="no-scrollbar flex flex-row gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pt-2 pb-6 select-none cursor-grab active:cursor-grabbing"
+              style={{
+                WebkitOverflowScrolling: "touch",
+              }}
+              onMouseDown={handleProdMouseDown}
+              onMouseMove={handleProdMouseMove}
+              onMouseUp={stopProdDragging}
+              onMouseLeave={stopProdDragging}
+            >
               {featuredProducts.map((prod) => (
-                <ProductCard key={prod.id || prod._id} product={prod} />
+                <div
+                  key={(prod.id || prod._id)?.toString()}
+                  role="listitem"
+                  className="shrink-0 w-[210px] sm:w-[230px] md:w-[250px] lg:w-[270px] snap-start"
+                >
+                  <ProductCard product={prod} />
+                </div>
               ))}
             </div>
           )}
@@ -211,7 +454,7 @@ const SurgicalLandingPage = () => {
       {/* Why Buy Surgical Products from WellMeds */}
       <section className="py-16 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop space-y-12">
         <div className="text-center space-y-xs">
-          <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
+          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight">
             Why Buy Surgical Supplies From WellMeds
           </h2>
           <p className="text-slate-400 text-xs font-semibold max-w-md mx-auto">
@@ -221,7 +464,7 @@ const SurgicalLandingPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-2xl space-y-sm text-left shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#086b53] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center">
               <Award size={20} />
             </div>
             <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-100">ISO &amp; CE Certified</h3>
@@ -230,7 +473,7 @@ const SurgicalLandingPage = () => {
             </p>
           </div>
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-2xl space-y-sm text-left shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-[#004782]/10 text-[#004782] dark:text-[#a4c9ff] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center">
               <Truck size={20} />
             </div>
             <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-100">Prioritized Dispatch</h3>
@@ -239,7 +482,7 @@ const SurgicalLandingPage = () => {
             </p>
           </div>
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-lg rounded-2xl space-y-sm text-left shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#086b53] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center">
               <ShieldCheck size={20} />
             </div>
             <h3 className="font-extrabold text-base text-slate-800 dark:text-zinc-100">Sterile Guarantee</h3>
@@ -282,7 +525,7 @@ const SurgicalLandingPage = () => {
       {/* FAQ Section */}
       <section className="py-16 max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop space-y-12">
         <div className="text-center space-y-xs">
-          <h2 className="font-extrabold text-2xl md:text-3xl text-slate-800 dark:text-zinc-100">
+          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#172b26] dark:text-zinc-100 leading-tight">
             Frequently Asked Questions
           </h2>
           <p className="text-slate-400 text-xs font-semibold max-w-sm mx-auto">
@@ -319,16 +562,16 @@ const SurgicalLandingPage = () => {
       </section>
 
       {/* Bottom CTA Section */}
-      <section className="bg-gradient-to-br from-[#004782] to-[#002b55] py-16 text-white border-t border-slate-100 dark:border-zinc-900">
+      <section className="bg-gradient-to-br from-[#0f3b34] via-[#157a6d] to-[#0a2e28] py-16 text-white border-t border-slate-100 dark:border-zinc-900">
         <div className="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop text-center space-y-6">
-          <h2 className="font-extrabold text-3xl">Professional Grade Medical Catalog</h2>
-          <p className="text-slate-200 text-sm max-w-xl mx-auto leading-relaxed font-medium">
+          <h2 className="font-editorial text-3xl font-semibold">Professional Grade Medical Catalog</h2>
+          <p className="text-emerald-100/90 text-sm max-w-xl mx-auto leading-relaxed font-medium">
             Order certified hospital consumables, dressings, syringes, and clinical equipment. Fast shipping directly to your facility or home.
           </p>
           <div className="pt-xs">
             <Link
               to="/surgical/all"
-              className="bg-white hover:bg-slate-100 text-[#004782] font-extrabold h-[48px] px-8 rounded-xl inline-flex items-center justify-center transition-all shadow-md select-none cursor-pointer text-sm"
+              className="bg-white hover:bg-emerald-50 text-[#157a6d] font-bold h-[48px] px-8 rounded-full inline-flex items-center justify-center transition-all shadow-md select-none cursor-pointer text-sm"
             >
               Shop All Surgical Supplies
             </Link>

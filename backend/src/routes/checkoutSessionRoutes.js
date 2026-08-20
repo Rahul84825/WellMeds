@@ -1,5 +1,5 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, requireProfileComplete } from "../middleware/authMiddleware.js";
 import {
   initSession,
   getSessionStatus,
@@ -9,10 +9,12 @@ import {
 
 const router = express.Router();
 
-router.post("/init", protect, initSession);
-router.get("/status", protect, getSessionStatus);
-router.get("/rx-status", protect, getCartRxStatus);
-router.post("/modify-cart", protect, modifyCart);
+router.use(protect, requireProfileComplete);
+
+router.post("/init", initSession);
+router.get("/status", getSessionStatus);
+router.get("/rx-status", getCartRxStatus);
+router.post("/modify-cart", modifyCart);
 
 export default router;
 

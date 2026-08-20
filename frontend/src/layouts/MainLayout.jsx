@@ -45,6 +45,7 @@ const MainLayout = () => {
   const isAuthPage =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
+    location.pathname === "/complete-profile" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password" ||
     location.pathname === "/sign-in";

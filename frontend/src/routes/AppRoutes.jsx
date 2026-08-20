@@ -24,6 +24,7 @@ const ContactPage = lazy(() => import("../pages/ContactPage"));
 const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
+const CompleteProfilePage = lazy(() => import("../pages/CompleteProfilePage"));
 const ProfilePage = lazy(() => import("../pages/Profile"));
 const OrdersPage = lazy(() => import("../pages/OrdersPage"));
 const UploadPrescriptionPage = lazy(() => import("../pages/UploadPrescriptionPage"));
@@ -83,12 +84,46 @@ const isMaintenanceMode =
   import.meta.env.VITE_MAINTENANCE_MODE === "true" ||
   import.meta.env.MAINTENANCE_MODE === "true";
 
+import { useAuth } from "../hooks/useAuth";
+import { useLocation } from "react-router-dom";
+
 // Legacy /sign-in redirect handler (e.g. /sign-in?mode=register -> /register)
 const SignInRedirect = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode");
   const target = mode === "register" ? "/register" : "/login";
   return <Navigate to={target} replace />;
+};
+
+/**
+ * ProfileCompletionGuard
+ * Enforces mandatory profile completion (mobile number) for authenticated customers.
+ * If a customer has an incomplete profile, intercepts any attempt to access
+ * normal customer routes and redirects them to /complete-profile.
+ */
+const ProfileCompletionGuard = ({ children }) => {
+  const { user, loading, profileComplete, isAdmin } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <PageFallback />;
+  }
+
+  const isAuthOrCompletionPath =
+    location.pathname === "/complete-profile" ||
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password" ||
+    location.pathname === "/sign-in" ||
+    location.pathname.startsWith("/admin");
+
+  if (user && !isAdmin && !profileComplete && !isAuthOrCompletionPath) {
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/complete-profile?returnTo=${returnTo}`} replace />;
+  }
+
+  return children;
 };
 
 const AppRoutes = () => {
@@ -149,7 +184,14 @@ const AppRoutes = () => {
     <Suspense fallback={<PageFallback />}>
       <Routes>
         {/* Client Portal Routes */}
-        <Route path="/" element={<MainLayout />}>
+        <Route
+          path="/"
+          element={
+            <ProfileCompletionGuard>
+              <MainLayout />
+            </ProfileCompletionGuard>
+          }
+        >
           <Route index element={<HomePage />} />
           <Route path="search" element={<SearchResultsPage />} />
           <Route path="products" element={<ProductsPage />} />
@@ -192,9 +234,10 @@ const AppRoutes = () => {
           <Route path="shipping-policy" element={<ShippingPolicyPage />} />
           <Route path="delivery" element={<DeliveryPage />} />
 
-          {/* Dedicated Customer Auth Routes */}
+          {/* Dedicated Customer Auth & Profile Completion Routes */}
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="complete-profile" element={<CompleteProfilePage />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="sign-in" element={<SignInRedirect />} />
           <Route path="verify-email" element={<Navigate to="/login" replace />} />
