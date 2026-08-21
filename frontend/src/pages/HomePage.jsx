@@ -29,7 +29,7 @@ const homeSchema = {
       "description": "India's trusted online pharmacy delivering authentic prescription medicines, cold-chain biologicals, surgical supplies, and specialty healthcare directly to your doorstep.",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+91-800-WELLMEDS",
+        "telephone": "+91 77987 95353",
         "contactType": "customer service",
         "areaServed": "IN",
         "availableLanguage": ["English", "Hindi", "Marathi"]
@@ -40,14 +40,14 @@ const homeSchema = {
       "@id": "https://wellmeds.in/#pharmacy",
       "name": "WellMeds Specialty Pharmacy",
       "url": "https://wellmeds.in",
-      "telephone": "+91-800-WELLMEDS",
+      "telephone": "+91 77987 95353",
       "priceRange": "₹₹",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Baner Main Road, High Street",
-        "addressLocality": "Baner, Pune",
+        "streetAddress": "Shop No 3, Echelon Apartment, Baner - Pashan Link Rd, Baner",
+        "addressLocality": "Pune",
         "addressRegion": "Maharashtra",
-        "postalCode": "411045",
+        "postalCode": "411021",
         "addressCountry": "IN"
       },
       "geo": {
@@ -58,8 +58,8 @@ const homeSchema = {
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "opens": "00:00",
-        "closes": "23:59"
+        "opens": "08:00",
+        "closes": "23:00"
       }
     },
     {

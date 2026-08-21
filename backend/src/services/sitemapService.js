@@ -139,28 +139,29 @@ export const generatePagesSitemap = async (siteUrl) => {
 
   const pages = [
     { url: "/", priority: "1.0", changefreq: "daily" },
+    { url: "/products", priority: "1.0", changefreq: "daily" },
+    { url: "/delivery", priority: "0.8", changefreq: "weekly" },
     { url: "/categories", priority: "0.9", changefreq: "daily" },
     { url: "/brands", priority: "0.9", changefreq: "daily" },
     { url: "/super-speciality", priority: "0.8", changefreq: "weekly" },
     { url: "/molecules", priority: "0.8", changefreq: "weekly" },
     { url: "/wellness", priority: "0.8", changefreq: "weekly" },
-    { url: "/surgical", priority: "0.8", changefreq: "weekly" },
+    { url: "/surgical", priority: "0.9", changefreq: "daily" },
     { url: "/surgical/all", priority: "0.8", changefreq: "weekly" },
     { url: "/surgical/categories", priority: "0.8", changefreq: "weekly" },
-    { url: "/search", priority: "0.6", changefreq: "monthly" },
-    { url: "/about", priority: "0.6", changefreq: "monthly" },
-    { url: "/contact", priority: "0.6", changefreq: "monthly" },
-    { url: "/upload-prescription", priority: "0.6", changefreq: "monthly" },
-    { url: "/delivery", priority: "0.9", changefreq: "weekly" },
+    { url: "/about", priority: "0.7", changefreq: "monthly" },
+    { url: "/contact", priority: "0.7", changefreq: "monthly" },
+    { url: "/upload-prescription", priority: "0.7", changefreq: "monthly" },
     { url: "/glp-1-medicines", priority: "0.8", changefreq: "weekly" },
+    { url: "/imported-medicines", priority: "0.8", changefreq: "weekly" },
     { url: "/health-supplements", priority: "0.8", changefreq: "weekly" },
-    { url: "/patient-assistance-program", priority: "0.6", changefreq: "monthly" },
-    { url: "/offers", priority: "0.6", changefreq: "monthly" },
-    { url: "/how-we-keep-you-safe", priority: "0.6", changefreq: "monthly" },
-    { url: "/privacy-policy", priority: "0.4", changefreq: "monthly" },
-    { url: "/terms-and-conditions", priority: "0.4", changefreq: "monthly" },
-    { url: "/refund-policy", priority: "0.4", changefreq: "monthly" },
-    { url: "/shipping-policy", priority: "0.4", changefreq: "monthly" },
+    { url: "/patient-assistance-program", priority: "0.7", changefreq: "monthly" },
+    { url: "/offers", priority: "0.7", changefreq: "monthly" },
+    { url: "/how-we-keep-you-safe", priority: "0.7", changefreq: "monthly" },
+    { url: "/privacy-policy", priority: "0.5", changefreq: "monthly" },
+    { url: "/terms-and-conditions", priority: "0.5", changefreq: "monthly" },
+    { url: "/refund-policy", priority: "0.5", changefreq: "monthly" },
+    { url: "/shipping-policy", priority: "0.5", changefreq: "monthly" },
   ];
 
   const today = new Date();
@@ -189,8 +190,9 @@ export const generateProductsSitemap = async (siteUrl, page = 1, limit = 50000) 
   const cleanSiteUrl = siteUrl.replace(/\/$/, "");
   const skip = (Math.max(1, page) - 1) * limit;
 
-  // Filter out deleted/hidden products
+  // Filter out deleted/hidden products and surgical products (which reside in surgical sitemap)
   const filter = {
+    isSurgical: { $ne: true },
     slug: { $exists: true, $ne: "" },
     isDeleted: { $ne: true },
     status: { $ne: "Disabled" },
@@ -429,23 +431,33 @@ export const generateSpecialitiesSitemap = async (siteUrl) => {
 export const generateSurgicalSitemap = async (siteUrl) => {
   const cleanSiteUrl = siteUrl.replace(/\/$/, "");
 
-  const filter = {
-    slug: { $exists: true, $ne: "" },
-    isActive: { $ne: false },
-  };
-
   let surgicalCategories = [];
+  let surgicalProducts = [];
   try {
-    surgicalCategories = await SurgicalCategory.find(filter)
-      .select("slug updatedAt createdAt name description image bannerImage")
-      .sort({ updatedAt: -1 })
-      .lean();
+    const catFilter = { slug: { $exists: true, $ne: "" }, isActive: { $ne: false } };
+    const prodFilter = {
+      isSurgical: true,
+      slug: { $exists: true, $ne: "" },
+      isDeleted: { $ne: true },
+      status: { $ne: "Disabled" },
+      visibility: { $ne: "Hidden" }
+    };
+    [surgicalCategories, surgicalProducts] = await Promise.all([
+      SurgicalCategory.find(catFilter).select("slug updatedAt createdAt name description image bannerImage").sort({ updatedAt: -1 }).lean(),
+      Product.find(prodFilter).select("slug updatedAt createdAt name description image images imagesData").sort({ updatedAt: -1 }).limit(50000).lean()
+    ]);
   } catch (err) {
     console.error("Surgical Sitemap: Error querying DB:", err.message);
   }
 
   let urlNodes = "";
 
+  // 1. Surgical Static Landing Pages
+  urlNodes += buildUrlNode({ loc: `${cleanSiteUrl}/surgical`, lastmod: new Date(), changefreq: "daily", priority: 0.9 });
+  urlNodes += buildUrlNode({ loc: `${cleanSiteUrl}/surgical/all`, lastmod: new Date(), changefreq: "weekly", priority: 0.8 });
+  urlNodes += buildUrlNode({ loc: `${cleanSiteUrl}/surgical/categories`, lastmod: new Date(), changefreq: "weekly", priority: 0.8 });
+
+  // 2. Surgical Categories
   surgicalCategories.forEach((sc) => {
     if (!sc.slug) return;
 
@@ -462,6 +474,29 @@ export const generateSurgicalSitemap = async (siteUrl) => {
     urlNodes += buildUrlNode({
       loc: `${cleanSiteUrl}/surgical/${sc.slug}`,
       lastmod: sc.updatedAt || sc.createdAt,
+      changefreq: "weekly",
+      priority: 0.8,
+      images: imageList,
+    });
+  });
+
+  // 3. Surgical Products
+  surgicalProducts.forEach((sp) => {
+    if (!sp.slug) return;
+
+    const imageList = [];
+    const normImage = normalizeImageUrl(sp.image, cleanSiteUrl);
+    if (normImage) {
+      imageList.push({
+        url: normImage,
+        title: sp.name,
+        caption: sp.description || "",
+      });
+    }
+
+    urlNodes += buildUrlNode({
+      loc: `${cleanSiteUrl}/surgical/products/${sp.slug}`,
+      lastmod: sp.updatedAt || sp.createdAt,
       changefreq: "weekly",
       priority: 0.8,
       images: imageList,

@@ -25,6 +25,8 @@ import ProductTabs from "../components/ProductDetail/ProductTabs";
 import SafetyAdviceCards from "../components/ProductDetail/SafetyAdviceCards";
 import SubstituteProducts from "../components/ProductDetail/SubstituteProducts";
 import ProductDetailSkeleton from "../components/ProductDetail/ProductDetailSkeleton";
+import MedicineNotFound from "../components/MedicineNotFound";
+import SEO from "../components/common/SEO";
 import { renderStorageContent } from "../utils/renderStorageContent";
 
 const ProductDetails = () => {
@@ -33,6 +35,7 @@ const ProductDetails = () => {
   const { cartItems, addToCart, updateQuantity } = useCart();
 
   const [product, setProduct] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [substituteProducts, setSubstituteProducts] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
@@ -48,19 +51,44 @@ const ProductDetails = () => {
   // Accordion state for FAQs
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
 
-  // Active section for sticky navigation
-  const [activeSection, setActiveSection] = useState("");
+  // Fullscreen image preview modal state
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+
+  // Active section tracking for sticky sidebar navigation
+  const [activeSection, setActiveSection] = useState("Introduction");
   const sectionRefs = useRef({});
 
-  // Fullscreen preview and image loading state
-  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true);
-
-  // Swipe gesture states for mobile gallery
+  // Mobile image gallery swipe touch state
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
+  // Image load state for skeleton shimmer
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
+  // Parse images safely: support both array of strings and product.image string fallback
+  const imagesList = useMemo(() => {
+    if (!product) return [];
+    const imgs = [];
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      product.images.forEach((img) => {
+        if (typeof img === "string" && img.trim().length > 0) imgs.push(img.trim());
+        else if (img && typeof img === "object" && img.url) imgs.push(img.url.trim());
+      });
+    }
+    if (imgs.length === 0 && product.image) {
+      imgs.push(product.image);
+    }
+    return imgs.length > 0 ? imgs : [DEFAULT_PRODUCT_IMAGE];
+  }, [product]);
+
+  // Discount percentage calculation
+  const discountPercent = useMemo(() => {
+    if (!product) return 0;
+    if (product.originalPrice && product.price && product.originalPrice > product.price) {
+      return calculateDiscountPercent(product.originalPrice, product.price);
+    }
+    return 0;
+  }, [product]);
 
   const getDeliveryDateRange = () => {
     const today = new Date();
@@ -83,29 +111,19 @@ const ProductDetails = () => {
     return qty > 0 ? (product.price / qty) : product.price;
   };
 
-  const imagesList = useMemo(() => {
-    if (!product) return [DEFAULT_PRODUCT_IMAGE];
-    const validImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
-    if (validImages.length > 0) return validImages;
-    if (product.image) return [product.image];
-    return [DEFAULT_PRODUCT_IMAGE];
-  }, [product]);
-
-  const discountPercent = useMemo(() => {
-    if (product?.originalPrice && product.originalPrice > product.price) {
-      return calculateDiscountPercent(product.originalPrice, product.price);
-    }
-    return 0;
-  }, [product]);
-
   useEffect(() => {
     let isMounted = true;
     const fetchProductDetails = async () => {
       setLoading(true);
+      setNotFound(false);
       try {
         const prod = await api.getProduct(slug);
         if (!isMounted) return;
-        if (prod && prod.isSurgical) {
+        if (!prod) {
+          setNotFound(true);
+          return;
+        }
+        if (prod.isSurgical) {
           navigate(`/surgical/products/${prod.slug || slug}`, { replace: true });
           return;
         }
@@ -156,7 +174,7 @@ const ProductDetails = () => {
         }
       } catch (err) {
         console.error("Product fetch failed", err);
-        if (isMounted) navigate("/products");
+        if (isMounted) setNotFound(true);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -203,67 +221,10 @@ const ProductDetails = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreenOpen, imagesList.length]);
 
-  // --- SEO & Schema.org JSON-LD Injector ---
-  useEffect(() => {
-    if (!product) return;
+  // --- Structured Data Schema.org Generator ---
+  const productJsonLd = useMemo(() => {
+    if (!product) return null;
 
-    // 1. Meta Title
-    document.title = product.seo?.metaTitle || `${product.name} - Buy Online | WellMeds`;
-
-    // 2. Meta Description
-    let metaDesc = document.querySelector("meta[name='description']");
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.setAttribute("name", "description");
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute("content", product.seo?.metaDescription || `Order ${product.name} online from WellMeds. Licensed pharmacist verification, 100% genuine medicines, and fast delivery.`);
-
-    // 3. Meta Keywords
-    let metaKeywords = document.querySelector("meta[name='keywords']");
-    if (!metaKeywords) {
-      metaKeywords = document.createElement("meta");
-      metaKeywords.setAttribute("name", "keywords");
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute("content", product.seo?.keywords || `${product.name}, ${product.brand}, buy ${product.name} online, WellMeds`);
-
-    // 4. Canonical Link
-    let canonical = document.querySelector("link[rel='canonical']");
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.setAttribute("rel", "canonical");
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute("href", product.seo?.canonicalUrl || window.location.href);
-
-    // 5. OpenGraph & Twitter Tags
-    const ogTags = {
-      "og:title": product.seo?.metaTitle || product.name,
-      "og:description": product.seo?.metaDescription || `Order ${product.name} online from WellMeds.`,
-      "og:image": product.seo?.ogImage || product.image,
-      "og:url": window.location.href,
-      "og:type": "product",
-      "twitter:card": "summary_large_image",
-      "twitter:title": product.seo?.metaTitle || product.name,
-      "twitter:description": product.seo?.metaDescription || `Order ${product.name} online from WellMeds.`
-    };
-
-    Object.entries(ogTags).forEach(([property, content]) => {
-      let tag = document.querySelector(`meta[property='${property}']`) || document.querySelector(`meta[name='${property}']`);
-      if (!tag) {
-        tag = document.createElement("meta");
-        if (property.startsWith("og:")) {
-          tag.setAttribute("property", property);
-        } else {
-          tag.setAttribute("name", property);
-        }
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute("content", content);
-    });
-
-    // 6. Schema.org JSON-LD Structured Data
     const faqSchemaList = (product.faqs || []).map(f => ({
       "@type": "Question",
       "name": f.question,
@@ -273,7 +234,7 @@ const ProductDetails = () => {
       }
     }));
 
-    const canonicalUrl = `https://wellmeds.in/products/${product.slug}`;
+    const canonicalUrl = `https://wellmeds.in/products/${product.slug || slug}`;
     const brandNameStr = typeof product.brand === "object" ? (product.brand?.name || "WellMeds") : (product.brand || product.manufacturer || "WellMeds");
 
     const jsonLd = {
@@ -375,17 +336,8 @@ const ProductDetails = () => {
       });
     }
 
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify(jsonLd);
-    script.id = "wellmeds-jsonld";
-    document.head.appendChild(script);
-
-    return () => {
-      const existingScript = document.getElementById("wellmeds-jsonld");
-      if (existingScript) existingScript.remove();
-    };
-  }, [product]);
+    return jsonLd;
+  }, [product, slug]);
 
   // Compile Dynamic Content Sections
   const computedSections = useMemo(() => {
@@ -790,13 +742,38 @@ const ProductDetails = () => {
     return <ProductDetailSkeleton />;
   }
 
-  if (!product) return null;
+  if (notFound || (!loading && !product)) {
+    return (
+      <div className="pdp-theme-container pdp-grid-bg min-h-screen py-12 text-black text-left font-sans">
+        <SEO title="Medicine Not Found — WellMeds" noindex={true} canonical="/products" />
+        <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10">
+          <MedicineNotFound searchQuery={slug} />
+        </div>
+      </div>
+    );
+  }
 
-
+  const categoryName = typeof product.category === "object" ? product.category?.name : (product.category || "Medicines");
+  const categorySlug = typeof product.category === "object" ? product.category?.slug : null;
 
   // Desktop View
   return (
     <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black animate-[fade-in_0.3s_ease-out] text-left font-sans">
+      <SEO
+        title={product.seo?.metaTitle || `${product.name} - Buy Online | WellMeds`}
+        description={product.seo?.metaDescription || product.description || `Order ${product.name} online from WellMeds. Licensed pharmacist verification, 100% genuine medicines, and fast delivery.`}
+        keywords={product.seo?.keywords || `${product.name}, ${product.brand}, buy ${product.name} online, WellMeds`}
+        canonical={`/products/${product.slug || slug}`}
+        image={product.seo?.ogImage || product.image}
+        schema={productJsonLd}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Products", url: "/products" },
+          { name: categoryName, url: categorySlug ? `/category/${categorySlug}` : "/products" },
+          { name: product.name, url: `/products/${product.slug || slug}` }
+        ]}
+      />
+
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 space-y-6">
 
         {/* Breadcrumbs */}
@@ -805,7 +782,11 @@ const ProductDetails = () => {
           <span className="text-[#888888]">/</span>
           <Link to="/products" className="hover:text-[#157a6d] transition-colors">Products</Link>
           <span className="text-[#888888]">/</span>
-          <Link to="/products" className="hover:text-[#157a6d] transition-colors">{product.category?.name || product.category}</Link>
+          {categorySlug ? (
+            <Link to={`/category/${categorySlug}`} className="hover:text-[#157a6d] transition-colors">{categoryName}</Link>
+          ) : (
+            <Link to="/products" className="hover:text-[#157a6d] transition-colors">{categoryName}</Link>
+          )}
           <span className="text-[#888888]">/</span>
           <span className="text-[#157a6d] font-extrabold truncate max-w-xs">{product.name}</span>
         </nav>

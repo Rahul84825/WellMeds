@@ -349,6 +349,7 @@ const SurgicalProductDetailPage = () => {
   if (!product) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center space-y-4 bg-white">
+        <SEO title="Surgical Product Not Found — WellMeds" noindex={true} canonical="/surgical" />
         <Package size={48} className="text-slate-400" />
         <h2 className="text-2xl font-bold text-slate-900">Surgical Product Not Found</h2>
         <p className="text-sm text-slate-500 max-w-md">

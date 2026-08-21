@@ -104,6 +104,7 @@ const SurgicalCategoryPage = () => {
   if (!category) {
     return (
       <div className="min-h-screen bg-clinical-grid py-12">
+        <SEO title="Surgical Category Not Found — WellMeds" noindex={true} canonical="/surgical/categories" />
         <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-8 text-center space-y-4">
           <Scissors size={40} className="mx-auto text-slate-400" />
           <h2 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">Category Not Found</h2>
