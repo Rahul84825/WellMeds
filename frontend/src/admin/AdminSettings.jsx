@@ -201,16 +201,6 @@ const AdminSettings = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Global GST / Tax Rate (%)</label>
-                <input
-                  type="number"
-                  value={taxRate}
-                  onChange={(e) => setTaxRate(Number(e.target.value))}
-                  className="w-full px-md py-xs text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-[#157A6D]"
-                />
-              </div>
-
-              <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Currency Symbol</label>
                 <input
                   type="text"

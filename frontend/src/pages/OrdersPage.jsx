@@ -143,7 +143,6 @@ const Orders = () => {
             <div>Subtotal: ₹${(order.subtotal || order.total).toFixed(2)}</div>
             ${order.discountAmount ? `<div>Discount: -₹${order.discountAmount.toFixed(2)}</div>` : ""}
             <div>Shipping charges: ₹${(order.shipping || 0).toFixed(2)}</div>
-            <div>GST (12%): ₹${(order.tax || 0).toFixed(2)}</div>
             <div class="totals-grand">Grand Total: ₹${(order.total || 0).toFixed(2)}</div>
           </div>
 
@@ -380,12 +379,6 @@ const Orders = () => {
                           <span className="font-medium text-slate-800 dark:text-zinc-200">
                             {order.shipping === 0 ? "FREE" : formatCurrency(order.shipping)}
                           </span>
-                        </div>
-                      )}
-                      {order.tax != null && (
-                        <div className="flex justify-between text-slate-500 dark:text-zinc-455">
-                          <span>GST (12%)</span>
-                          <span className="font-medium text-slate-800 dark:text-zinc-200">{formatCurrency(order.tax)}</span>
                         </div>
                       )}
                       <div className="flex justify-between border-t border-slate-150 dark:border-zinc-850 pt-xs font-bold text-sm text-slate-800 dark:text-zinc-100">

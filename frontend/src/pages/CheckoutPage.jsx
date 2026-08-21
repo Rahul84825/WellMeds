@@ -978,16 +978,11 @@ const Checkout = () => {
                 </div>
               )}
               
-              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
+              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
                 <span>Shipping {subtotal >= 499 && subtotal > 0 ? "(Free > ₹499)" : ""}</span>
                 <span className="text-[#172b26] dark:text-zinc-100 font-medium">
                   {activeShipping === 0 ? "FREE" : formatCurrency(activeShipping)}
                 </span>
-              </div>
-
-              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                <span>GST (12%)</span>
-                <span className="text-[#172b26] dark:text-zinc-100 font-medium">{formatCurrency(tax)}</span>
               </div>
 
               {/* Total Row */}

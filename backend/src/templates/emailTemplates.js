@@ -360,7 +360,6 @@ export const renderOrderConfirmation = ({ order }) => {
       <tr><td style="color:#64748b;">Subtotal</td><td style="text-align:right;">₹${fmtMoney(order.subtotal)}</td></tr>
       ${order.discountAmount ? `<tr><td style="color:#16a34a;">Discount</td><td style="text-align:right; color:#16a34a;">-₹${fmtMoney(order.discountAmount)}</td></tr>` : ""}
       <tr><td style="color:#64748b;">Shipping Fee</td><td style="text-align:right;">₹${fmtMoney(order.shipping)}</td></tr>
-      <tr><td style="color:#64748b;">Estimated GST (12%)</td><td style="text-align:right;">₹${fmtMoney(order.tax)}</td></tr>
       <tr style="font-size:16px; font-weight:700; border-top:2px solid #e2e8f0;"><td style="padding-top:8px;">Final Amount Paid</td><td style="text-align:right; padding-top:8px; color:#038076;">₹${fmtMoney(order.finalAmount || order.total)}</td></tr>
     </table>
 

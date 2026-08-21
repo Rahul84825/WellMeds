@@ -469,15 +469,6 @@ const OrderSuccess = () => {
                 </span>
               </div>
 
-              {order.tax > 0 && (
-                <div className="flex justify-between">
-                  <span>GST (12%)</span>
-                  <span className="font-medium text-[#172b26] dark:text-zinc-200">
-                    {formatCurrency(order.tax)}
-                  </span>
-                </div>
-              )}
-
               <div className="pt-3 border-t border-slate-100 dark:border-zinc-800 flex justify-between items-baseline font-bold text-lg text-[#172b26] dark:text-white">
                 <span>Total Paid</span>
                 <span className="text-[#157a6d] dark:text-emerald-400 font-editorial text-2xl">
