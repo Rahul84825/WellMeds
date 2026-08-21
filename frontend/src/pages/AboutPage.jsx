@@ -1,43 +1,16 @@
-import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
 import SEO from "../components/common/SEO";
 import heroBannerImg from "../assets/about/wellmeds-hero-banner.jpg";
+import ownerImg from "../assets/about/owner.png";
 
 const AboutPage = () => {
-  const containerRef = useRef(null);
-
   const breadcrumbs = [
     { name: "Home", url: "/" },
     { name: "About Us", url: "/about" },
   ];
 
-  // IntersectionObserver for gentle opacity fade-in
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const revealEls = container.querySelectorAll(".reveal");
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              io.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.15 }
-      );
-      revealEls.forEach((el) => io.observe(el));
-      return () => io.disconnect();
-    } else {
-      revealEls.forEach((el) => el.classList.add("is-visible"));
-    }
-  }, []);
-
   return (
-    <div className="about-page" ref={containerRef}>
+    <div className="about-page">
       {/* ── SEO METADATA ── */}
       <SEO
         title="About Wellmeds — Our Vision, Our Story"
@@ -99,80 +72,140 @@ const AboutPage = () => {
           margin-bottom: 18px;
         }
 
-        /* Gentle opacity-only fade */
-        .about-page .reveal {
-          opacity: 0;
-          transition: opacity 1.4s ease-out;
-        }
-        .about-page .reveal.is-visible {
-          opacity: 1;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .about-page .reveal {
-            opacity: 1;
-            transition: none;
-          }
-        }
-
-        /* ---------- Hero ---------- */
+        /* ---------- Full-Width Edge-to-Edge Hero Banner ---------- */
         .about-page .hero {
-          padding: 80px 0 70px;
-        }
-        .about-page .hero__tag {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 26px;
-        }
-        .about-page .stamp {
-          background: var(--rust);
-          color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: 11.5px;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          padding: 6px 11px;
-          border-radius: 7px;
-          transform: rotate(-4deg);
-        }
-        .about-page .hero__tag span {
-          font-size: 13px;
-          color: rgba(23,43,38,0.55);
-          font-weight: 500;
-        }
-        .about-page .hero h1 {
-          font-weight: 800;
-          font-size: clamp(34px, 5.4vw, 60px);
-          max-width: 18ch;
-          margin-bottom: 24px;
-        }
-        .about-page .hero h1 em {
-          font-style: normal;
-          font-weight: 800;
-          color: var(--teal);
-        }
-        .about-page .hero p.lede {
-          font-size: 19px;
-          max-width: 54ch;
-          color: rgba(23,43,38,0.75);
-          font-weight: 400;
-          line-height: 1.6;
-        }
-        .about-page .hero__banner {
-          margin-top: 48px;
-          border-radius: 20px;
+          width: 100%;
+          background: #EEF5F1;
+          padding: 0;
+          margin: 0 0 32px 0;
           overflow: hidden;
-          box-shadow: 0 4px 20px rgba(15, 59, 52, 0.08);
-          border: 1px solid var(--line);
+          line-height: 0;
+          border-bottom: 1px solid var(--line);
         }
-        .about-page .hero__banner img {
+        .about-page .hero__container {
+          width: 100%;
+          max-width: 100%;
+          margin: 0 auto;
+          line-height: 0;
+        }
+        .about-page .hero__image {
           width: 100%;
           height: auto;
-          max-height: 520px;
-          object-fit: cover;
+          aspect-ratio: 16 / 7.94;
+          max-height: 485px;
           display: block;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        /* ---------- Vision & Aim ---------- */
+        .about-page .vision {
+          padding: 40px 0 80px;
+        }
+        .about-page .vision__head {
+          margin-bottom: 48px;
+        }
+        .about-page .vision__head h2 {
+          font-size: clamp(28px, 4vw, 42px);
+          max-width: 20ch;
+        }
+        .about-page .vision__grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 48px;
+        }
+        .about-page .vision__col {
+          padding-right: 20px;
+        }
+        .about-page .vision__col + .vision__col {
+          border-left: 1px solid var(--line);
+          padding-left: 48px;
+          padding-right: 0;
+        }
+        .about-page .vision__col h3 {
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: var(--teal);
+          margin-bottom: 16px;
+        }
+        .about-page .vision__col p {
+          font-size: 18px;
+          line-height: 1.65;
+          color: var(--green);
+          font-weight: 500;
+        }
+
+        /* ---------- Founder's Story ---------- */
+        .about-page .story {
+          padding: 60px 0 90px;
+          border-top: 1px solid var(--line);
+        }
+        .about-page .story .wrap {
+          max-width: 1140px;
+        }
+        .about-page .story__inner {
+          display: grid;
+          grid-template-columns: minmax(380px, 480px) 1fr;
+          gap: 48px;
+          align-items: center;
+        }
+        .about-page .story__image-wrap {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 100%;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 8px 30px rgba(15, 59, 52, 0.08);
+          border: 1px solid var(--line);
+          background: #f1f5f3;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .about-page .story__image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
+          display: block;
+        }
+        .about-page .story__content {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .about-page .story h2 {
+          font-size: clamp(26px, 3.4vw, 38px);
+          margin-bottom: 20px;
+        }
+        .about-page .story p {
+          font-size: 16.5px;
+          color: rgba(23,43,38,0.78);
+          margin-bottom: 16px;
+          line-height: 1.65;
+        }
+        .about-page .story__signoff {
+          margin-top: 18px;
+          padding: 20px 24px;
+          background: #f8faf9;
+          border-left: 3px solid var(--teal);
+          border-radius: 0 12px 12px 0;
+          font-style: italic;
+          font-size: 16.5px;
+          color: var(--green);
+          line-height: 1.5;
+        }
+        .about-page .story__signoff span {
+          display: block;
+          margin-top: 8px;
+          font-style: normal;
+          font-weight: 700;
+          font-size: 12.5px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--teal);
         }
 
         /* ---------- Our Promise (full-bleed banner) ---------- */
@@ -198,107 +231,18 @@ const AboutPage = () => {
         }
         .about-page .promise p {
           color: rgba(243,238,224,0.72);
-          font-size: 16.5px;
-          max-width: 56ch;
+          font-size: 17px;
+          max-width: 50ch;
           margin: 0 auto;
           line-height: 1.65;
         }
 
-        /* ---------- Vision & Aim ---------- */
-        .about-page .vision {
-          padding: 20px 0 110px;
-          border-top: 1px solid var(--line);
-        }
-        .about-page .vision__head {
-          margin: 80px 0 48px;
-          max-width: 60ch;
-        }
-        .about-page .vision__head h2 {
-          font-size: clamp(28px, 3.6vw, 38px);
-        }
-        .about-page .vision__grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-        }
-        .about-page .vision__col {
-          padding: 0 40px 0 0;
-        }
-        .about-page .vision__col + .vision__col {
-          padding: 0 0 0 40px;
-          border-left: 1px solid var(--line);
-        }
-        .about-page .vision__col h3 {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--mustard);
-          margin-bottom: 18px;
-        }
-        .about-page .vision__col p {
-          font-size: 18px;
-          color: var(--ink);
-          line-height: 1.6;
-        }
-
-        /* ---------- Founder's Story ---------- */
-        .about-page .story {
-          padding: 20px 0 110px;
-          border-top: 1px solid var(--line);
-        }
-        .about-page .story__inner {
-          display: grid;
-          grid-template-columns: 0.4fr 0.6fr;
-          gap: 60px;
-          align-items: start;
-          margin-top: 80px;
-        }
-        .about-page .story__dropcap {
-          font-family: 'Inter', sans-serif;
-          font-size: 170px;
-          font-weight: 900;
-          line-height: 0.72;
-          color: var(--teal);
-          opacity: 0.13;
-          user-select: none;
-        }
-        .about-page .story h2 {
-          font-size: clamp(28px, 3.6vw, 38px);
-          margin-bottom: 24px;
-        }
-        .about-page .story p {
-          margin-bottom: 19px;
-          max-width: 60ch;
-          color: rgba(23,43,38,0.85);
-          font-size: 17px;
-        }
-        .about-page .story__signoff {
-          margin-top: 28px;
-          padding-top: 22px;
-          border-top: 1px solid var(--line);
-          font-style: italic;
-          font-weight: 500;
-          font-size: 19px;
-          color: var(--green);
-        }
-        .about-page .story__signoff span {
-          display: block;
-          font-style: normal;
-          font-size: 12.5px;
-          font-weight: 600;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--mustard);
-          margin-top: 8px;
-        }
-
-        /* ---------- Our Journey (timeline) ---------- */
+        /* ---------- Our Journey ---------- */
         .about-page .journey {
-          padding: 20px 0 130px;
-          border-top: 1px solid var(--line);
+          padding: 40px 0 100px;
         }
         .about-page .journey__head {
-          margin: 80px 0 72px;
+          margin: 60px 0 72px;
           max-width: 64ch;
         }
         .about-page .journey__head h2 {
@@ -448,13 +392,18 @@ const AboutPage = () => {
         /* ==========================================================
            RESPONSIVE REFINEMENTS
            ========================================================== */
-        @media (max-width: 760px) {
+        @media (max-width: 860px) {
           .about-page .story__inner {
             grid-template-columns: 1fr;
+            gap: 32px;
           }
-          .about-page .story__dropcap {
-            display: none;
+          .about-page .story__image-wrap {
+            height: 420px;
+            max-width: 100%;
           }
+        }
+
+        @media (max-width: 760px) {
           .about-page .timeline__line {
             display: none;
           }
@@ -512,27 +461,6 @@ const AboutPage = () => {
           .about-page .wrap {
             padding: 0 22px;
           }
-          .about-page .hero {
-            padding: 50px 0 40px;
-          }
-          .about-page .hero__tag {
-            flex-wrap: wrap;
-            row-gap: 8px;
-            margin-bottom: 20px;
-          }
-          .about-page .hero h1 {
-            font-size: clamp(28px, 8vw, 36px);
-            margin-bottom: 16px;
-            letter-spacing: -0.01em;
-          }
-          .about-page .hero p.lede {
-            font-size: 16px;
-            line-height: 1.6;
-          }
-          .about-page .hero__banner {
-            margin-top: 32px;
-            border-radius: 16px;
-          }
           .about-page .promise {
             padding: 56px 0;
           }
@@ -549,7 +477,7 @@ const AboutPage = () => {
             padding: 12px 0 64px;
           }
           .about-page .vision__head {
-            margin: 56px 0 32px;
+            margin: 32px 0 32px;
           }
           .about-page .vision__head h2 {
             font-size: clamp(24px, 7.5vw, 30px);
@@ -564,10 +492,6 @@ const AboutPage = () => {
           .about-page .story {
             padding: 12px 0 64px;
           }
-          .about-page .story__inner {
-            margin-top: 44px;
-            gap: 26px;
-          }
           .about-page .story h2 {
             font-size: clamp(24px, 7.5vw, 30px);
           }
@@ -581,7 +505,7 @@ const AboutPage = () => {
             padding: 12px 0 72px;
           }
           .about-page .journey__head {
-            margin: 56px 0 40px;
+            margin: 32px 0 40px;
           }
           .about-page .journey__head h2 {
             font-size: clamp(23px, 7.5vw, 29px);
@@ -611,9 +535,6 @@ const AboutPage = () => {
           .about-page .wrap {
             padding: 0 18px;
           }
-          .about-page .hero h1 {
-            font-size: clamp(26px, 9vw, 32px);
-          }
           .about-page .promise h2 {
             font-size: clamp(21px, 8.5vw, 25px);
           }
@@ -635,39 +556,26 @@ const AboutPage = () => {
       `}</style>
 
       <main>
-        {/* ── HERO ── */}
+        {/* ── FULL WIDTH HERO BANNER ── */}
         <section className="hero">
-          <div className="wrap reveal">
-            <div className="hero__tag">
-              <div className="stamp">Est. 2023</div>
-              <span>Pune, Maharashtra</span>
-            </div>
-            <h1>
-              We started with <em>one shop.</em> We're building something bigger.
-            </h1>
-            <p className="lede">
-              Wellmeds began as a single pharmacy counter in Pune — and grew into a mission: make genuine, affordable medicine easy to reach, for anyone who needs it.
-            </p>
-
-            {/* Hero Image Banner */}
-            <div className="hero__banner">
-              <img
-                src={heroBannerImg}
-                alt="WellMeds Pharmacy Storefront — Baner, Pune"
-                loading="eager"
-              />
-            </div>
+          <div className="hero__container">
+            <img
+              src={heroBannerImg}
+              alt="WellMeds — We started with one shop. We're building something bigger."
+              loading="eager"
+              className="hero__image"
+            />
           </div>
         </section>
 
         {/* ── VISION & AIM ── */}
         <section className="vision" id="vision">
           <div className="wrap">
-            <div className="vision__head reveal">
+            <div className="vision__head">
               <p className="eyebrow">Vision &amp; aim</p>
               <h2>What we're working toward.</h2>
             </div>
-            <div className="vision__grid reveal">
+            <div className="vision__grid">
               <div className="vision__col">
                 <h3>Our vision</h3>
                 <p>
@@ -687,8 +595,15 @@ const AboutPage = () => {
         {/* ── FOUNDER'S STORY ── */}
         <section className="story" id="story">
           <div className="wrap story__inner">
-            <div className="story__dropcap reveal">W</div>
-            <div className="reveal">
+            <div className="story__image-wrap">
+              <img
+                src={ownerImg}
+                alt="Ramesh Choudhary — Founder of WellMeds"
+                loading="lazy"
+                className="story__image"
+              />
+            </div>
+            <div className="story__content">
               <p className="eyebrow">Founder's story</p>
               <h2>It started with one counter in Pune.</h2>
               <p>
@@ -710,7 +625,7 @@ const AboutPage = () => {
 
         {/* ── OUR PROMISE ── */}
         <section className="promise">
-          <div className="wrap reveal">
+          <div className="wrap">
             <p className="eyebrow">Our promise</p>
             <h2>
               No one should have to <em>delay treatment</em> because a medicine was hard to find.
@@ -724,12 +639,12 @@ const AboutPage = () => {
         {/* ── OUR JOURNEY ── */}
         <section className="journey" id="journey">
           <div className="wrap">
-            <div className="journey__head reveal">
+            <div className="journey__head">
               <p className="eyebrow">Our journey</p>
               <h2>From a Neighbourhood Shop to a Digital Pharmacy</h2>
             </div>
 
-            <div className="timeline reveal">
+            <div className="timeline">
               <div className="timeline__line"></div>
               <div className="timeline__grid">
                 {/* 2023 */}
@@ -799,14 +714,14 @@ const AboutPage = () => {
         {/* ── WHAT WE WANT TO DO ── */}
         <section className="plans" id="plans">
           <div className="wrap">
-            <div className="plans__head reveal">
+            <div className="plans__head">
               <p className="eyebrow">What we want to do</p>
               <h2>Where Wellmeds goes from here.</h2>
               <p>
                 Our offline store stays home base. Everything we build next is about extending that same care further.
               </p>
             </div>
-            <div className="plans__list reveal">
+            <div className="plans__list">
               <div className="plans__item">
                 <div className="plans__mark"></div>
                 <p>

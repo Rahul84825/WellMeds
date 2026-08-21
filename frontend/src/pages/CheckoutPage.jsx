@@ -18,7 +18,6 @@ import UniversalAddressForm from "../components/address/UniversalAddressForm";
 import AddressCard from "../components/address/AddressCard";
 import AddressSelectorModal from "../components/address/AddressSelectorModal";
 import { validateDeliveryLocation } from "../services/googleMapsService";
-import GoogleMapPicker from "../components/common/GoogleMapPicker";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 import SEO from "../components/common/SEO";
@@ -133,6 +132,10 @@ const Checkout = () => {
   const [couponApplied, setCouponApplied] = useState(null); 
   const [couponLoading, setCouponLoading] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
+
+  // Active shipping fee & discount calculations
+  const activeShipping = selectedAddress ? dynamicShipping : (shipping !== undefined ? shipping : (subtotal >= 500 ? 0 : 50));
+  const discountAmount = Number(couponDiscount) || 0;
 
   // Derived totals with coupon
   const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeShipping));
@@ -352,13 +355,25 @@ const Checkout = () => {
 
     setIsSubmitting(true);
     try {
-      const orderItems = cartItems.map((item) => ({
-        product: item._id || item.id,
-        id: item._id || item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      }));
+      const orderItems = cartItems.map((item) => {
+        let cleanProdId = item.productId || item._id || item.id;
+        if (typeof cleanProdId === "string" && cleanProdId.includes("-")) {
+          const candidate = cleanProdId.split("-")[0];
+          if (/^[0-9a-fA-F]{24}$/.test(candidate)) {
+            cleanProdId = candidate;
+          }
+        }
+        return {
+          product: cleanProdId,
+          productId: cleanProdId,
+          id: cleanProdId,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          variantName: item.variantName || "",
+          variantId: item.variantId || "",
+        };
+      });
 
       const shippingAddressObj = {
         fullName: selectedAddress.fullName,
@@ -623,17 +638,6 @@ const Checkout = () => {
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0 bg-[#bbf7d0] text-[#15803d] border border-emerald-300/40">
                     ✔ Pan-India Delivery
                   </span>
-                </div>
-
-                {/* Interactive Route Map Preview */}
-                <div className="pt-1">
-                  <GoogleMapPicker
-                    latitude={selectedAddress.latitude}
-                    longitude={selectedAddress.longitude}
-                    height="180px"
-                    interactive={false}
-                    showRoute={true}
-                  />
                 </div>
 
                 <div className="flex items-center justify-end text-xs font-semibold pt-1">

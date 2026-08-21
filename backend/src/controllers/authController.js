@@ -160,7 +160,6 @@ export const forgotPassword = async (req, res, next) => {
       await user.save();
 
       secLog("[FORGOT_PASSWORD]", { userId: user._id, email: user.email });
-      console.log(`[AUTH][PASSWORD_RESET_TOKEN] Email: ${user.email} | Token: ${resetToken}`);
     }
 
     return res.status(200).json({

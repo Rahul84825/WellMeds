@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
 import { Coupon } from "../models/Coupon.js";
@@ -22,9 +23,16 @@ const computeOrderTotals = async (items, couponCode, userId) => {
   const validatedItems = [];
 
   for (const item of items) {
-    const product = await Product.findById(item.product || item.id);
+    let rawProductId = item.productId || item.product || item.id;
+    if (typeof rawProductId === "string" && rawProductId.includes("-")) {
+      const candidate = rawProductId.split("-")[0];
+      if (mongoose.Types.ObjectId.isValid(candidate)) {
+        rawProductId = candidate;
+      }
+    }
+    const product = await Product.findById(rawProductId);
     if (!product) {
-      throw new Error(`Product not found: ${item.name || item.product || item.id}`);
+      throw new Error(`Product not found: ${item.name || rawProductId}`);
     }
     if (!product.inStock) {
       throw new Error(`Product is out of stock: ${product.name}`);
@@ -176,8 +184,14 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
   if (order.items && Array.isArray(order.items)) {
     for (const item of order.items) {
       try {
-        const prodId = item.product || item.id;
-        if (prodId) {
+        let prodId = item.productId || item.product || item.id;
+        if (typeof prodId === "string" && prodId.includes("-")) {
+          const candidate = prodId.split("-")[0];
+          if (mongoose.Types.ObjectId.isValid(candidate)) {
+            prodId = candidate;
+          }
+        }
+        if (prodId && mongoose.Types.ObjectId.isValid(prodId)) {
           const product = await Product.findById(prodId);
           if (product && typeof product.stockQuantity === "number") {
             product.stockQuantity = Math.max(0, product.stockQuantity - (item.quantity || 1));

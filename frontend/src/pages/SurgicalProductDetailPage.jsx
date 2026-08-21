@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
@@ -87,6 +87,19 @@ const SurgicalProductDetailPage = () => {
   // Share tooltip
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Related products carousel ref & navigation
+  const carouselRef = useRef(null);
+  const handleScrollLeft = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: -320, behavior: "smooth" });
+    }
+  };
+  const handleScrollRight = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 320, behavior: "smooth" });
+    }
+  };
+
   // Derived Images List
   const imagesList = useMemo(() => {
     if (!product) return [DEFAULT_PRODUCT_IMAGE];
@@ -99,7 +112,37 @@ const SurgicalProductDetailPage = () => {
   // Derived Variants
   const variantsList = useMemo(() => {
     if (product && Array.isArray(product.variants) && product.variants.length > 0) {
-      return product.variants;
+      return product.variants.map((v, idx) => {
+        if (typeof v === "string") {
+          const strName = v.trim();
+          return {
+            name: strName || `Option ${idx + 1}`,
+            sellingPrice: product.price || 0,
+            mrp: product.originalPrice || product.price || 0,
+            stock: product.stock !== undefined ? product.stock : 99,
+          };
+        }
+        const resolvedName = (
+          v.name ||
+          v.variantName ||
+          v.title ||
+          v.label ||
+          v.size ||
+          v.value ||
+          v.option ||
+          v.packSize ||
+          v.type ||
+          v.sku ||
+          `Option ${idx + 1}`
+        );
+        return {
+          ...v,
+          name: String(resolvedName).trim() || `Option ${idx + 1}`,
+          sellingPrice: v.sellingPrice !== undefined && v.sellingPrice !== null ? Number(v.sellingPrice) : (v.price !== undefined && v.price !== null ? Number(v.price) : product.price || 0),
+          mrp: v.mrp !== undefined && v.mrp !== null ? Number(v.mrp) : (product.originalPrice || product.price || 0),
+          stock: v.stock !== undefined ? Number(v.stock) : 99,
+        };
+      });
     }
     if (product) {
       return [
@@ -194,7 +237,7 @@ const SurgicalProductDetailPage = () => {
         const surgCatId = prod.surgicalCategory?._id || prod.surgicalCategory;
         const relatedRes = await api.getProducts({
           isSurgical: true,
-          limit: 12,
+          limit: 16,
         });
 
         if (!isMounted) return;
@@ -211,7 +254,7 @@ const SurgicalProductDetailPage = () => {
           (p) => (p.surgicalCategory?._id || p.surgicalCategory)?.toString() !== surgCatId?.toString()
         );
 
-        setRelatedProducts([...sameCategory, ...others].slice(0, 4));
+        setRelatedProducts([...sameCategory, ...others].slice(0, 12));
       } catch (err) {
         console.error("Failed to load surgical product", err);
       } finally {
@@ -294,7 +337,7 @@ const SurgicalProductDetailPage = () => {
           "wellmeds_delivery_location",
           JSON.stringify({ pincode: pin, city: "", displayText: pin })
         );
-      } catch {}
+      } catch { }
     }, 350);
   };
 
@@ -419,11 +462,10 @@ const SurgicalProductDetailPage = () => {
                       type="button"
                       onClick={() => setActiveImageIdx(idx)}
                       onMouseEnter={() => setActiveImageIdx(idx)}
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white border p-1 flex items-center justify-center overflow-hidden shrink-0 transition-all cursor-pointer ${
-                        activeImageIdx === idx
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white border p-1 flex items-center justify-center overflow-hidden shrink-0 transition-all cursor-pointer ${activeImageIdx === idx
                           ? "border-[#157a6d] ring-1 ring-[#157a6d]"
                           : "border-slate-200 hover:border-slate-300"
-                      }`}
+                        }`}
                       aria-label={`View image ${idx + 1}`}
                     >
                       <img
@@ -560,27 +602,30 @@ const SurgicalProductDetailPage = () => {
               </div>
             </div>
 
-            {/* 6. Variation Selector (Matching reference button pills) */}
+            {/* 6. Variation Selector (WellMeds Theme Pill Buttons) */}
             {variantsList.length > 0 && (
               <div className="space-y-2 pt-1">
-                <label className="block text-sm font-bold text-slate-900">
-                  Variation:
-                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">Variation:</span>
+                  <span className="text-xs font-bold text-[#157a6d]">
+                    {currentVariant?.name || ""}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-2.5">
                   {variantsList.map((v, idx) => {
                     const isSelected = selectedVariantIdx === idx;
+                    const displayName = v.name || `Option ${idx + 1}`;
                     return (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => handleSelectVariant(idx)}
-                        className={`min-w-[72px] px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-                          isSelected
-                            ? "bg-[#fff7ed] text-slate-900 border-[#fb923c] shadow-2xs"
-                            : "bg-white text-slate-800 border-slate-200 hover:border-slate-300 shadow-2xs"
-                        }`}
+                        className={`min-w-[80px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border-2 text-center select-none ${isSelected
+                            ? "bg-[#ecfdf5] text-[#0f3b34] border-[#157a6d] shadow-sm ring-2 ring-[#157a6d]/20"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-[#157a6d]/40 hover:text-slate-900 shadow-2xs"
+                          }`}
                       >
-                        {v.name}
+                        <span>{displayName}</span>
                       </button>
                     );
                   })}
@@ -588,8 +633,8 @@ const SurgicalProductDetailPage = () => {
               </div>
             )}
 
-            {/* 7. Buying in Bulk? (Direct WhatsApp Redirect) */}
-            <div className="rounded-2xl border border-[#fb923c]/80 bg-white p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* 7. Buying in Bulk? (WellMeds Brand Theme Card) */}
+            <div className="rounded-2xl border-2 border-[#157a6d]/25 bg-gradient-to-br from-[#f0fdf4]/70 via-white to-white p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-[#157a6d]/40">
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -617,124 +662,129 @@ const SurgicalProductDetailPage = () => {
                 href={bulkWhatsAppUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-[#f97316] text-[#ea580c] hover:bg-orange-50 hover:border-[#ea580c] font-bold text-sm transition-all shadow-2xs group shrink-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-[#157a6d] bg-white text-[#157a6d] hover:bg-[#157a6d] hover:text-white font-bold text-sm transition-all shadow-xs group shrink-0 cursor-pointer"
               >
                 <span>Explore Bulk Pricing</span>
                 <ArrowRight size={17} className="group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
 
-            {/* 8. Pincode / Delivery Check (Clean & Simple) */}
-            <div className="space-y-2 pt-2">
-              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <MapPin size={14} className="text-[#157a6d]" />
-                <span>Check Delivery Pincode:</span>
-              </span>
-              <form onSubmit={handleCheckPincode} className="flex gap-2 max-w-sm">
-                <input
-                  type="text"
-                  maxLength={6}
-                  placeholder="Enter 6-digit PIN"
-                  value={pincodeInput}
-                  onChange={(e) => setPincodeInput(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm font-mono font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#157a6d]"
-                />
-                <button
-                  type="submit"
-                  disabled={checkingPincode}
-                  className="px-4 py-2 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  {checkingPincode ? <RefreshCw size={13} className="animate-spin" /> : "Check"}
-                </button>
-              </form>
-
-              {pincodeError && (
-                <p className="text-xs text-red-500 font-semibold">{pincodeError}</p>
-              )}
-
-              {pincodeResult.checked && (
-                <p className="text-xs text-slate-600">
-                  <span className="text-emerald-600 font-bold">✓ Delivery Available</span> to {pincodeResult.pincode} • <span className="font-semibold text-slate-800">{pincodeResult.datesText}</span>
-                </p>
-              )}
-            </div>
-
-            {/* 8. Quantity & Add to Cart / Buy Now */}
-            <div className="space-y-3 pt-3">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                {/* Quantity Stepper */}
-                <div className="flex items-center justify-between border border-slate-200 rounded-lg px-2 py-1.5 min-w-[110px] h-11 bg-slate-50">
+            {/* 8. Purchase & Delivery Section: Check delivery on LEFT, Cart & Buy on RIGHT */}
+            <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+              {/* LEFT: Check Delivery Pincode */}
+              <div className="md:col-span-5 space-y-2">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <MapPin size={14} className="text-[#157a6d]" />
+                  <span>Check Delivery Pincode:</span>
+                </span>
+                <form onSubmit={handleCheckPincode} className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="Enter 6-digit PIN"
+                    value={pincodeInput}
+                    onChange={(e) => setPincodeInput(e.target.value)}
+                    className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#157a6d] focus:ring-1 focus:ring-[#157a6d]"
+                  />
                   <button
-                    type="button"
-                    disabled={quantity <= 1 || isOutOfStock}
-                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    className="w-7 h-7 rounded bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                    aria-label="Decrease quantity"
+                    type="submit"
+                    disabled={checkingPincode}
+                    className="px-4 py-2.5 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer shrink-0"
                   >
-                    <Minus size={13} />
+                    {checkingPincode ? <RefreshCw size={14} className="animate-spin" /> : "Check"}
                   </button>
-                  <span className="font-mono font-bold text-sm text-slate-900 px-2">
-                    {quantity}
-                  </span>
+                </form>
+
+                {pincodeError && (
+                  <p className="text-xs text-red-500 font-semibold">{pincodeError}</p>
+                )}
+
+                {pincodeResult.checked && (
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    <span className="text-emerald-600 font-bold">✓ Delivery Available</span> to {pincodeResult.pincode} • <span className="font-semibold text-slate-800">{pincodeResult.datesText}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* RIGHT: Quantity + Add to Cart + Buy Now */}
+              <div className="md:col-span-7 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">Quantity &amp; Order:</span>
+                  {isInCart && (
+                    <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                      <CheckCircle size={13} />
+                      <span>{cartQuantity} in cart</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-stretch gap-2">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center justify-between border border-slate-200 rounded-xl px-2 py-1 min-w-[96px] h-11 bg-slate-50 shrink-0">
+                    <button
+                      type="button"
+                      disabled={quantity <= 1 || isOutOfStock}
+                      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                      className="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={13} />
+                    </button>
+                    <span className="font-mono font-bold text-sm text-slate-900 px-1.5">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={isOutOfStock}
+                      onClick={() => setQuantity((prev) => Math.min(30, prev + 1))}
+                      className="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={13} />
+                    </button>
+                  </div>
+
+                  {/* Add To Cart */}
                   <button
                     type="button"
                     disabled={isOutOfStock}
-                    onClick={() => setQuantity((prev) => Math.min(30, prev + 1))}
-                    className="w-7 h-7 rounded bg-white text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-200 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                    aria-label="Increase quantity"
+                    onClick={handleAddToCart}
+                    className="flex-1 h-11 px-3 rounded-xl bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer text-center"
                   >
-                    <Plus size={13} />
+                    <ShoppingCart size={15} className="shrink-0" />
+                    <span className="truncate">{isOutOfStock ? "Out of Stock" : isInCart ? "Update in Cart" : "Add to Cart"}</span>
+                  </button>
+
+                  {/* Buy Now */}
+                  <button
+                    type="button"
+                    disabled={isOutOfStock}
+                    onClick={handleBuyNow}
+                    className="w-28 sm:w-32 h-11 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-xs transition-all active:scale-[0.98] disabled:opacity-40 cursor-pointer shrink-0"
+                  >
+                    <span>Buy Now</span>
                   </button>
                 </div>
 
-                {/* Add To Cart */}
-                <button
-                  type="button"
-                  disabled={isOutOfStock}
-                  onClick={handleAddToCart}
-                  className="flex-1 h-11 px-6 rounded-lg bg-[#157a6d] hover:bg-[#0f6157] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
-                >
-                  <ShoppingCart size={15} />
-                  <span>{isOutOfStock ? "Out of Stock" : isInCart ? "Update in Cart" : "Add to Cart"}</span>
-                </button>
-
-                {/* Buy Now */}
-                <button
-                  type="button"
-                  disabled={isOutOfStock}
-                  onClick={handleBuyNow}
-                  className="sm:w-36 h-11 px-6 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-xs transition-all active:scale-[0.98] disabled:opacity-40 cursor-pointer"
-                >
-                  <span>Buy Now</span>
-                </button>
-              </div>
-
-              {/* Status indicator if in cart */}
-              {isInCart && (
-                <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                  <CheckCircle size={14} />
-                  <span>Item in your cart (Qty: {cartQuantity}).</span>
-                </p>
-              )}
-
-              {/* Institutional / Bulk inquiry & Share */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <button
-                  type="button"
-                  onClick={() => setBulkModalOpen(true)}
-                  className="text-[#157a6d] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-                >
-                  <Building2 size={13} />
-                  <span>Inquire for Bulk / Hospital Institutional Pricing</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="text-slate-500 hover:text-[#157a6d] font-semibold flex items-center gap-1 cursor-pointer"
-                >
-                  <Share2 size={13} />
-                  <span>{copiedLink ? "Copied!" : "Share"}</span>
-                </button>
+                {/* Institutional / Bulk inquiry & Share */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setBulkModalOpen(true)}
+                    className="text-[#157a6d] hover:underline font-bold flex items-center gap-1 cursor-pointer truncate mr-2"
+                  >
+                    <Building2 size={13} className="shrink-0" />
+                    <span className="truncate">Inquire for Hospital Pricing</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="text-slate-500 hover:text-[#157a6d] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <Share2 size={13} />
+                    <span>{copiedLink ? "Copied!" : "Share"}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -743,18 +793,18 @@ const SurgicalProductDetailPage = () => {
         {/* ═════════════════════════════════════════════════════════════════════
             SPECIFICATIONS & DESCRIPTION (CLEAN TEXT SECTIONS, NO BOXED CARDS)
         ═════════════════════════════════════════════════════════════════════ */}
-        <div className="pt-6 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="pt-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Specifications (5 Columns) */}
           {validSpecifications.length > 0 && (
-            <div className="lg:col-span-5 space-y-3">
-              <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-200">
+            <div className="lg:col-span-5 space-y-4">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 pb-2.5 border-b border-slate-200">
                 Technical Specifications
               </h3>
-              <div className="divide-y divide-slate-100 text-xs sm:text-sm">
+              <div className="divide-y divide-slate-100 text-sm sm:text-[15px]">
                 {validSpecifications.map((s, idx) => (
-                  <div key={idx} className="py-2.5 flex justify-between gap-4">
-                    <span className="text-slate-500">{s.label}</span>
-                    <span className="font-semibold text-slate-900 text-right">{s.value}</span>
+                  <div key={idx} className="py-3 flex justify-between gap-4">
+                    <span className="text-slate-500 font-medium">{s.label}</span>
+                    <span className="font-bold text-slate-900 text-right">{s.value}</span>
                   </div>
                 ))}
               </div>
@@ -762,11 +812,11 @@ const SurgicalProductDetailPage = () => {
           )}
 
           {/* Product Description (7 or 12 Columns) */}
-          <div className={`${validSpecifications.length > 0 ? "lg:col-span-7" : "lg:col-span-12"} space-y-3`}>
-            <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-200">
+          <div className={`${validSpecifications.length > 0 ? "lg:col-span-7" : "lg:col-span-12"} space-y-4`}>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 pb-2.5 border-b border-slate-200">
               Product Description
             </h3>
-            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line space-y-2">
+            <div className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line space-y-3">
               {product.description ? (
                 product.description
               ) : (
@@ -781,35 +831,35 @@ const SurgicalProductDetailPage = () => {
         {/* ═════════════════════════════════════════════════════════════════════
             WHY BUY FROM WELLMEDS (CLEAN UNBOXED TRUST SECTION)
         ═════════════════════════════════════════════════════════════════════ */}
-        <div className="pt-6 border-t border-slate-200 space-y-4">
-          <h3 className="text-base font-bold text-slate-900">Why Buy Surgical Supplies from WellMeds?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs sm:text-sm">
-            <div className="space-y-1">
-              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-[#157a6d]" />
+        <div className="pt-8 border-t border-slate-200 space-y-5">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900">Why Buy Surgical Supplies from WellMeds?</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm sm:text-base">
+            <div className="space-y-1.5">
+              <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                <ShieldCheck size={18} className="text-[#157a6d] shrink-0" />
                 <span>Certified Clinical Sourcing</span>
               </h4>
-              <p className="text-slate-500 leading-relaxed text-xs">
+              <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
                 Direct procurement from authorized pharmaceutical and medical device manufacturers with batch certifications.
               </p>
             </div>
 
-            <div className="space-y-1">
-              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                <Package size={16} className="text-[#157a6d]" />
-                <span>Sterile & Tamper-Proof Packaging</span>
+            <div className="space-y-1.5">
+              <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                <Package size={18} className="text-[#157a6d] shrink-0" />
+                <span>Sterile &amp; Tamper-Proof Packaging</span>
               </h4>
-              <p className="text-slate-500 leading-relaxed text-xs">
+              <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
                 Hospital consumables stored and packed in climate-regulated pharmaceutical fulfillment centers.
               </p>
             </div>
 
-            <div className="space-y-1">
-              <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                <Truck size={16} className="text-[#157a6d]" />
+            <div className="space-y-1.5">
+              <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                <Truck size={18} className="text-[#157a6d] shrink-0" />
                 <span>Reliable Healthcare Logistics</span>
               </h4>
-              <p className="text-slate-500 leading-relaxed text-xs">
+              <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
                 Expedited delivery across India with temperature-monitored routes and dedicated clinical tracking.
               </p>
             </div>
@@ -817,32 +867,61 @@ const SurgicalProductDetailPage = () => {
         </div>
 
         {/* ═════════════════════════════════════════════════════════════════════
-            RELATED SURGICAL PRODUCTS
+            RELATED SURGICAL PRODUCTS (CAROUSEL WITH ARROWS & VIEW ALL)
         ═════════════════════════════════════════════════════════════════════ */}
         {relatedProducts.length > 0 && (
-          <div className="space-y-4 pt-6 border-t border-slate-200">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                  Related Surgical Products
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Recommended clinical supplies from the same category and specialty lines.
-                </p>
-              </div>
+          <div className="space-y-5 pt-8 border-t border-slate-200">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Related Surgical Products
+              </h3>
 
-              <Link
-                to="/surgical/all"
-                className="text-xs font-bold text-[#157a6d] hover:underline flex items-center gap-1"
-              >
-                <span>View All Surgical</span>
-                <ChevronRight size={14} />
-              </Link>
+              <div className="flex items-center gap-3">
+                {/* Arrow navigation buttons */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleScrollLeft}
+                    className="w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer"
+                    aria-label="Previous products"
+                    title="Previous"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleScrollRight}
+                    className="w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer"
+                    aria-label="Next products"
+                    title="Next"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+
+                {/* View All button */}
+                <Link
+                  to="/surgical/all"
+                  className="px-4 py-2 rounded-xl border border-slate-200 hover:border-[#157a6d] bg-white text-xs sm:text-sm font-bold text-[#157a6d] hover:bg-[#157a6d] hover:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <span>View All Surgical</span>
+                  <ChevronRight size={15} />
+                </Link>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+            {/* Horizontal Carousel */}
+            <div
+              ref={carouselRef}
+              className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth pb-4 pt-1 snap-x snap-mandatory scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
+            >
               {relatedProducts.map((prod) => (
-                <ProductCard key={prod._id || prod.id} product={prod} />
+                <div
+                  key={prod._id || prod.id}
+                  className="w-[240px] sm:w-[270px] md:w-[285px] shrink-0 snap-start"
+                >
+                  <ProductCard product={prod} />
+                </div>
               ))}
             </div>
           </div>
@@ -922,11 +1001,10 @@ const SurgicalProductDetailPage = () => {
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIdx(idx)}
-                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-white p-1 overflow-hidden transition-all cursor-pointer shrink-0 ${
-                      activeImageIdx === idx
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-white p-1 overflow-hidden transition-all cursor-pointer shrink-0 ${activeImageIdx === idx
                         ? "ring-2 ring-[#157a6d] scale-105 shadow-md"
                         : "opacity-60 hover:opacity-100"
-                    }`}
+                      }`}
                   >
                     <img
                       src={getCardImageUrl(imgUrl, { width: 120 }) || DEFAULT_PRODUCT_IMAGE}
