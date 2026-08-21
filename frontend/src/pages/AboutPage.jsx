@@ -34,7 +34,7 @@ const AboutPage = () => {
 
           background: var(--bg);
           color: var(--ink);
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           line-height: 1.65;
           -webkit-font-smoothing: antialiased;
           text-align: left;
@@ -48,7 +48,7 @@ const AboutPage = () => {
         .about-page h2,
         .about-page h3,
         .about-page .display {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-weight: 700;
           line-height: 1.1;
           color: var(--green);
@@ -62,7 +62,7 @@ const AboutPage = () => {
         }
 
         .about-page .eyebrow {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
           font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.18em;

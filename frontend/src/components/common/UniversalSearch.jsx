@@ -181,9 +181,19 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
   if (isPrescription) {
     return (
-      <div ref={containerRef} className="relative w-full">
-        <div className="search-row">
-          <div className="search-rx">℞</div>
+      <div ref={containerRef} className="relative w-full font-sans">
+        <div className="search-row flex items-center">
+          {/* Location Delivery Selector (Inspired by Truemeds / PlatinumRx) */}
+          <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 select-none pr-3 border-r border-[#c3d4cc] shrink-0 font-sans">
+            <MapPin className="w-4 h-4 text-[#038076]" />
+            <span>Deliver to <strong className="text-slate-900">Pune</strong></span>
+            <ChevronDown className="w-3 h-3 text-slate-400" />
+          </div>
+
+          <div className="search-rx flex items-center justify-center">
+            <Search className="w-5 h-5 text-[#038076]" />
+          </div>
+          
           <div className="flex-1 flex items-center relative gap-1 min-w-0 h-full">
             <input
               ref={inputRef}
@@ -193,13 +203,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
-              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent"
+              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent font-sans"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
             />
             <SearchPlaceholderCarousel
               isFocused={focused}
               hasValue={!!query}
-              className="text-[#849e96] font-mono text-xs sm:text-base"
+              className="text-slate-400 font-sans text-xs sm:text-base font-medium"
             />
             {query && (
               <button
@@ -209,47 +219,53 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                   setResults({});
                   setActiveIndex(-1);
                 }}
-                className="p-1 hover:bg-[#e7dfc9]/40 rounded text-[#3f544d] transition-colors shrink-0"
+                className="p-1 hover:bg-slate-100 rounded text-slate-500 transition-colors shrink-0"
                 aria-label="Clear Search Input"
               >
                 <X size={16} />
               </button>
             )}
             {loading && (
-              <Loader2 className="animate-spin text-[#157a6d] shrink-0" size={16} />
+              <Loader2 className="animate-spin text-[#038076] shrink-0" size={16} />
             )}
           </div>
           <button
             type="button"
             onClick={handleSearchSubmit}
-            className="search-btn"
+            className="search-btn font-sans"
           >
             SEARCH
           </button>
         </div>
 
-        <p className="search-hint">
-          {["Oncology", "HIV", "Transplant", "Cardiac", "Rare disease"].map((tag) => (
-            <span key={tag}>{tag}</span>
+        <div className="search-hint font-sans pt-2 flex flex-wrap items-center gap-2 select-none">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">POPULAR:</span>
+          {["Janumet", "Mounjaro", "Glenza", "Oncology", "Transplant", "Cardiac"].map((tag) => (
+            <span
+              key={tag}
+              className="px-2.5 py-0.5 rounded-full bg-[#edf7f2] text-[#038076] border border-[#c3e6d6] text-xs font-semibold select-none cursor-default"
+            >
+              {tag}
+            </span>
           ))}
-        </p>
+        </div>
 
         {/* DROPDOWN AUTOCOMPLETE PANEL (PRESCRIPTION THEMED) */}
         {focused && query.trim().length >= 2 && (
           <div
             ref={dropdownRef}
-            className="rx-dropdown-panel absolute -left-3.5 -right-3.5 sm:-left-5 sm:-right-5 md:-left-8 md:-right-8 top-full mt-3 z-[300] overflow-y-auto max-h-[310px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
+            className="rx-dropdown-panel absolute -left-3.5 -right-3.5 sm:-left-5 sm:-right-5 md:-left-8 md:-right-8 top-full mt-3 z-[300] overflow-y-auto max-h-[310px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col font-sans"
           >
             {/* Prescription Catalog Header Strip */}
-            <div className="rx-dropdown-header select-none">
+            <div className="rx-dropdown-header select-none font-sans">
               <span>℞ WellMeds Catalog Matches</span>
-              <span className="opacity-75 font-normal text-[10px]">Specialty Care</span>
+              <span className="opacity-75 font-normal text-[10px] font-sans">Specialty Care</span>
             </div>
 
             {loading ? (
-              <div className="p-8 text-center flex items-center justify-center gap-2.5 select-none">
-                <Loader2 className="animate-spin text-[#157a6d] w-5 h-5" />
-                <span className="text-xs font-semibold text-[#3f544d] font-mono">Searching 3,000+ specialty SKUs...</span>
+              <div className="p-8 text-center flex items-center justify-center gap-2.5 select-none font-sans">
+                <Loader2 className="animate-spin text-[#038076] w-5 h-5" />
+                <span className="text-xs font-semibold text-slate-700 font-sans">Searching 3,000+ specialty SKUs...</span>
               </div>
             ) : (
               <div className="flex flex-col text-left">
@@ -340,12 +356,12 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       ref={containerRef}
       className={`relative w-full ${isHero ? "max-w-2xl mx-auto" : ""}`}
     >
-      {/* SEARCH BAR CONTAINER (NAVBAR PRESCRIPTION THEMED) */}
+      {/* SEARCH BAR CONTAINER (NAVBAR THEMED) */}
       <div
-        className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_4px_16px_rgba(23,43,38,0.06)] focus-within:border-[#157a6d] focus-within:ring-2 focus-within:ring-[#157a6d]/15 transition-all duration-300 w-full p-2 gap-3"
+        className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_4px_16px_rgba(23,43,38,0.06)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/15 transition-all duration-300 w-full p-2 gap-3 font-sans"
       >
         {/* Left: Rx Symbol */}
-        <div className="font-serif font-bold text-[#157a6d] text-2xl select-none pl-1 leading-none">
+        <div className="font-sans font-extrabold text-[#038076] text-xl select-none pl-1 leading-none">
           ℞
         </div>
 
@@ -359,13 +375,13 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
-            className="w-full bg-transparent border-none text-xs outline-none text-[#3f544d] focus:ring-0 focus:outline-none p-0 font-mono font-semibold relative z-10"
+            className="w-full bg-transparent border-none text-xs outline-none text-slate-800 focus:ring-0 focus:outline-none p-0 font-sans font-semibold relative z-10"
             style={{ outline: "none", border: "none", boxShadow: "none" }}
           />
           <SearchPlaceholderCarousel
             isFocused={focused}
             hasValue={!!query}
-            className="text-slate-400 font-mono text-xs font-semibold"
+            className="text-slate-400 font-sans text-xs font-semibold"
           />
           {query && (
             <button
@@ -375,14 +391,14 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                 setResults({});
                 setActiveIndex(-1);
               }}
-              className="p-1 hover:bg-[#e7dfc9]/40 rounded text-[#3f544d] transition-colors shrink-0"
+              className="p-1 hover:bg-slate-100 rounded text-slate-500 transition-colors shrink-0"
               aria-label="Clear Search Input"
             >
               <X size={14} />
             </button>
           )}
           {loading && (
-            <Loader2 className="animate-spin text-[#157a6d] shrink-0" size={14} />
+            <Loader2 className="animate-spin text-[#038076] shrink-0" size={14} />
           )}
         </div>
 
@@ -390,28 +406,28 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         <button
           type="button"
           onClick={handleSearchSubmit}
-          className="bg-[#157a6d] hover:bg-[#0f6157] text-white font-mono font-bold text-xs letter-spacing-[1.5px] px-5 py-2 rounded-full uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer"
+          className="bg-[#038076] hover:bg-[#02635c] text-white font-sans font-bold text-xs px-5 py-2 rounded-full uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer"
         >
           SEARCH
         </button>
       </div>
 
-      {/* DROPDOWN AUTOCOMPLETE PANEL (NAVBAR PRESCRIPTION THEMED) */}
+      {/* DROPDOWN AUTOCOMPLETE PANEL (NAVBAR THEMED) */}
       {focused && query.trim().length >= 2 && (
         <div
           ref={dropdownRef}
-          className="rx-dropdown-panel absolute left-0 right-0 top-full mt-2 z-[300] overflow-y-auto max-h-[350px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col"
+          className="rx-dropdown-panel absolute left-0 right-0 top-full mt-2 z-[300] overflow-y-auto max-h-[350px] custom-scrollbar animate-in fade-in slide-in-from-top-3 duration-150 flex flex-col font-sans"
         >
           {/* Prescription Catalog Header Strip */}
-          <div className="rx-dropdown-header select-none">
+          <div className="rx-dropdown-header select-none font-sans">
             <span>℞ WellMeds Catalog Matches</span>
-            <span className="opacity-75 font-normal text-[10px]">Specialty Care</span>
+            <span className="opacity-75 font-normal text-[10px] font-sans">Specialty Care</span>
           </div>
 
           {loading ? (
-            <div className="p-6 text-center flex items-center justify-center gap-2 select-none">
-              <Loader2 className="animate-spin text-[#157a6d] w-4 h-4" />
-              <span className="text-xs font-semibold text-[#3f544d] font-mono">Searching catalog...</span>
+            <div className="p-6 text-center flex items-center justify-center gap-2 select-none font-sans">
+              <Loader2 className="animate-spin text-[#038076] w-4 h-4" />
+              <span className="text-xs font-semibold text-slate-700 font-sans">Searching catalog...</span>
             </div>
           ) : (
             <div className="flex flex-col text-left">

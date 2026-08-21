@@ -103,10 +103,10 @@ const QuickActionCards = () => {
 
               {/* Center: Title and Action Label */}
               <div className="flex-grow min-w-0 px-2 sm:px-3 text-left quick-action-text-wrap">
-                <h3 className="font-bold text-slate-800 text-[11px] sm:text-[13px] md:text-[14px] lg:text-[15px] leading-tight mb-0.5 font-poppins truncate-two-lines quick-action-title">
+                <h3 className="font-bold text-slate-800 text-[11px] sm:text-[13px] md:text-[14px] lg:text-[15px] leading-tight mb-0.5 font-sans truncate-two-lines quick-action-title">
                   {card.title}
                 </h3>
-                <p className={`text-[8px] sm:text-[10px] md:text-[11px] font-extrabold tracking-wider uppercase font-poppins quick-action-cta ${card.colors.actionColor}`}>
+                <p className={`text-[8px] sm:text-[10px] md:text-[11px] font-extrabold tracking-wider uppercase font-sans quick-action-cta ${card.colors.actionColor}`}>
                   {card.actionText}
                 </p>
               </div>

@@ -121,16 +121,15 @@
 }
 
 .maintenance-page .rx-symbol {
-  font-family: 'Zilla Slab', serif;
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
   font-size: 34px;
   color: var(--teal);
-  font-style: italic;
 }
 
 .maintenance-page .rx-title {
-  font-family: 'Zilla Slab', serif;
-  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
   font-size: 15px;
   color: var(--ink);
   letter-spacing: 0.02em;
@@ -175,9 +174,9 @@
 }
 
 .maintenance-page .field .v.headline {
-  font-family: 'Zilla Slab', serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--teal);
 }
 
@@ -281,10 +280,10 @@
 }
 
 .maintenance-page .cta-lead {
-  font-family: 'Zilla Slab', serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   color: var(--card-cream);
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 14px;
   line-height: 1.5;
 }

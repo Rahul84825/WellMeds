@@ -29,7 +29,6 @@ import {
   RefreshCw,
   Send,
   AlertCircle,
-  Users,
   Lock,
   RotateCcw,
   Tag,
@@ -551,19 +550,7 @@ const SurgicalProductDetailPage = () => {
               By <span className="text-[#0284c7] font-semibold hover:underline cursor-pointer">{brandOrManufacturer}</span>
             </p>
 
-            {/* 3. Ratings & Units Sold (Social Proof Row) */}
-            <div className="flex items-center gap-4 text-xs sm:text-sm font-medium text-slate-600 flex-wrap">
-              <div className="flex items-center gap-1">
-                <span className="text-[#16a34a] font-bold">★ 4.34</span>
-                <span className="text-[#0284c7] font-medium">(1070 Reviews)</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                <Users size={15} className="text-[#16a34a]" />
-                <span>5374+ units sold recently</span>
-              </div>
-            </div>
-
-            {/* 4. Price Row */}
+            {/* 3. Price Row */}
             <div className="flex items-baseline gap-3 flex-wrap pt-1">
               <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
                 ₹{formatPrice(currentPrice)}

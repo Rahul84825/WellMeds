@@ -1,104 +1,127 @@
 /* ==========================================================================
-   WELLMEDS PRESCRIPTION HERO SECTION (PIXEL PERFECT CONVERSION)
-   Identity: Premium Editorial Pharmaceutical Theme
+   WELLMEDS PRESCRIPTION HERO SECTION
+   Identity: Modern Sans-Serif Pharmaceutical Theme
    ========================================================================== */
 
 .wellmeds-hero-section {
   --card: #ffffff;
   --card-edge: #dde8e3;
-  --ink: #172b26;
-  --ink-soft: #3f544d;
-  --teal: #157a6d;
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --teal: #038076;
   --mustard: #b08d3e;
-  --label: #5f776e;
+  --label: #475569;
   --line: #c3d4cc;
   --page-bg: #e7f0ea;
-  --grid-line: rgba(15, 59, 52, 0.06);
+  --grid-line: rgba(15, 59, 52, 0.05);
 
   width: 100%;
-  min-height: 496px;
+  min-height: 480px;
   position: relative;
   z-index: 20;
   overflow: visible;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background:
     repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 40px),
     repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 40px),
-    radial-gradient(ellipse at 50% 0%, #eef5f0 0%, #dfebe3 85%);
+    radial-gradient(ellipse at 50% 0%, #edf7f2 0%, #e2efe8 85%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 28px 60px;
+  padding: 36px 40px;
   box-sizing: border-box;
 }
 
 .wellmeds-hero-section .eyebrow {
   color: var(--teal);
-  font-size: 15px;
-  letter-spacing: 4px;
+  font-size: 13px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  margin-bottom: 16px;
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
-  font-weight: 500;
+  margin-bottom: 14px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  background: rgba(3, 128, 118, 0.08);
+  padding: 4px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(3, 128, 118, 0.15);
 }
 
 .wellmeds-hero-section .headline {
-  font-family: 'Fraunces', 'Liberation Serif', Georgia, serif;
-  font-weight: 500;
-  font-size: 44px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: clamp(20px, 2.4vw, 32px);
   color: var(--ink);
   text-align: center;
-  line-height: 1.2;
-  margin-bottom: 22px;
-  max-width: 980px;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  max-width: 1200px;
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 860px) {
+  .wellmeds-hero-section .headline {
+    white-space: nowrap;
+    font-size: clamp(23px, 2.35vw, 32px);
+  }
 }
 
 .wellmeds-hero-section .headline em {
-  font-style: italic;
+  font-style: normal;
   color: var(--teal);
+}
+
+.wellmeds-hero-section .subtitle-line {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 16px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 500;
 }
 
 .wellmeds-hero-section .search-wrap {
   position: relative;
   z-index: 50;
   width: 100%;
-  max-width: 980px;
+  max-width: 920px;
 }
 
 .wellmeds-hero-section .search-tape {
   position: absolute;
-  top: -14px;
+  top: -12px;
   left: 50%;
   transform: translateX(-50%) rotate(-2deg);
-  width: 100px;
-  height: 26px;
-  background: repeating-linear-gradient(45deg, var(--mustard), var(--mustard) 8px, #9c7a34 8px, #9c7a34 16px);
+  width: 90px;
+  height: 22px;
+  background: repeating-linear-gradient(45deg, #038076, #038076 8px, #02635c 8px, #02635c 16px);
   border-radius: 2px;
   z-index: 2;
   pointer-events: none;
+  opacity: 0.85;
 }
 
 .wellmeds-hero-section .search-card {
   background: var(--card);
   border: 1px solid var(--card-edge);
-  border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(23, 43, 38, 0.12), 0 4px 12px rgba(23, 43, 38, 0.06);
-  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+  padding: 20px 28px;
   position: relative;
 }
 
 .wellmeds-hero-section .search-row {
   display: flex;
   align-items: center;
-  gap: 18px;
-  border-bottom: 2px dashed var(--line);
+  gap: 16px;
+  border-bottom: 1.5px dashed var(--line);
   padding-bottom: 14px;
 }
 
 .wellmeds-hero-section .search-rx {
-  font-family: 'Fraunces', 'Liberation Serif', Georgia, serif;
-  font-size: 30px;
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--teal);
   user-select: none;
   line-height: 1;
@@ -106,9 +129,10 @@
 
 .wellmeds-hero-section .search-input-field {
   flex: 1;
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
-  font-size: 19px;
-  color: var(--ink-soft);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
   background: transparent;
   border: none !important;
   outline: none !important;
@@ -127,8 +151,9 @@
 }
 
 .wellmeds-hero-section .search-input-field::placeholder {
-  color: var(--ink-soft);
-  opacity: 0.75;
+  color: #64748b;
+  opacity: 0.85;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 .wellmeds-hero-section .cursor {
@@ -148,13 +173,13 @@
 
 .wellmeds-hero-section .search-btn {
   background: var(--teal);
-  color: var(--card);
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  padding: 11px 24px;
-  border-radius: 26px;
+  letter-spacing: 0.5px;
+  padding: 10px 22px;
+  border-radius: 9999px;
   white-space: nowrap;
   border: none;
   cursor: pointer;
@@ -162,8 +187,8 @@
 }
 
 .wellmeds-hero-section .search-btn:hover {
-  background: #0f6157;
-  box-shadow: 0 4px 14px rgba(21, 122, 109, 0.25);
+  background: #02635c;
+  box-shadow: 0 4px 14px rgba(3, 128, 118, 0.25);
   transform: translateY(-1px);
 }
 
@@ -173,41 +198,42 @@
 
 .wellmeds-hero-section .search-hint {
   margin-top: 12px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--label);
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 500;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
 }
 
 .wellmeds-hero-section .search-hint span {
   color: var(--ink-soft);
-  margin-right: 14px;
   cursor: default;
 }
 
 .wellmeds-hero-section .trust-line {
-  margin-top: 22px;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  color: var(--ink);
-  font-weight: 700;
+  margin-top: 20px;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  color: var(--ink-soft);
+  font-weight: 600;
   text-align: center;
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 /* ==========================================================================
-   PRESCRIPTION AUTOCOMPLETE DROPDOWN STYLING
+   AUTOCOMPLETE DROPDOWN STYLING (MODERN SANS-SERIF)
    ========================================================================== */
 .rx-dropdown-panel {
   background: var(--card, #ffffff) !important;
   border: 1px solid var(--card-edge, #dde8e3) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 24px 50px rgba(23, 43, 38, 0.16), 0 8px 20px rgba(23, 43, 38, 0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.14), 0 8px 20px rgba(15, 23, 42, 0.06) !important;
   overflow-y: auto !important;
-  max-height: 310px !important;
-  font-family: 'IBM Plex Mono', 'Liberation Mono', monospace;
+  max-height: 320px !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 .rx-dropdown-header {
@@ -215,12 +241,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: #f8fbfa;
-  border-bottom: 2px dashed var(--line, #c3d4cc);
+  background: #f4f9f7;
+  border-bottom: 1px solid #e2ece7;
   font-size: 11px;
   font-weight: 700;
-  color: var(--teal, #157a6d);
-  letter-spacing: 1.5px;
+  color: var(--teal, #038076);
+  letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 
@@ -231,67 +257,67 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .rx-dropdown-empty .rx-empty-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #f0f8f5;
+  background: #edf7f2;
   border: 1px solid #c3d4cc;
-  color: var(--teal, #157a6d);
+  color: var(--teal, #038076);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 22px;
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .rx-dropdown-empty h3 {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--ink, #172b26);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
   margin: 0;
 }
 
 .rx-dropdown-empty p {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--label, #5f776e);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  color: var(--label, #64748b);
   margin: 0;
   max-width: 380px;
 }
 
 .rx-dropdown-empty button {
   margin-top: 6px;
-  background: var(--teal, #157a6d);
+  background: var(--teal, #038076);
   color: #ffffff;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1px;
-  padding: 9px 24px;
-  border-radius: 20px;
+  letter-spacing: 0.5px;
+  padding: 9px 22px;
+  border-radius: 9999px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .rx-dropdown-empty button:hover {
-  background: #0f6157;
+  background: #02635c;
   transform: translateY(-1px);
 }
 
 .rx-section-title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--label, #5f776e);
+  letter-spacing: 0.8px;
+  color: #475569;
   padding: 10px 16px 4px 16px;
   display: flex;
   align-items: center;
@@ -303,26 +329,26 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #f4f9f7;
-  border: 1px solid #c3d4cc;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12.5px;
+  border: 1px solid #cce3d8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--ink, #172b26);
+  color: #0f172a;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .rx-molecule-badge .rx-arrow {
-  color: var(--teal, #157a6d);
+  color: var(--teal, #038076);
   transition: color 0.2s ease;
 }
 
 .rx-molecule-badge:hover,
 .rx-molecule-badge[data-active="true"] {
-  background: var(--teal, #157a6d);
-  border-color: var(--teal, #157a6d);
+  background: var(--teal, #038076);
+  border-color: var(--teal, #038076);
   color: #ffffff;
 }
 
@@ -331,81 +357,77 @@
   color: #ffffff !important;
 }
 
-.rx-molecule-badge:hover,
-.rx-molecule-badge[data-active="true"] {
-  background: var(--teal, #157a6d);
-  border-color: var(--teal, #157a6d);
-  color: #ffffff;
-}
-
 .rx-product-item {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid transparent;
   background: #ffffff;
   transition: all 0.2s ease;
   cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .rx-product-item:hover,
 .rx-product-item[data-active="true"] {
-  background: #f0f8f5;
+  background: #edf7f2;
   border-color: #c3d4cc;
 }
 
 .rx-product-item .product-title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink, #172b26);
-  line-height: 1.25;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+  line-height: 1.3;
 }
 
 .rx-product-item .product-subtitle {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--label, #5f776e);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  color: var(--label, #64748b);
   margin-top: 2px;
+  font-weight: 500;
 }
 
 .rx-product-item .rx-tag {
   display: inline-block;
-  border: 1px solid var(--teal, #157a6d);
-  color: var(--teal, #157a6d);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 3px;
+  background: rgba(3, 128, 118, 0.1);
+  border: 1px solid var(--teal, #038076);
+  color: var(--teal, #038076);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
   margin-left: 6px;
   text-transform: uppercase;
 }
 
 .rx-product-item .price-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink, #172b26);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink, #0f172a);
 }
 
 .rx-product-item .add-btn {
-  background: var(--teal, #157a6d);
+  background: var(--teal, #038076);
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .rx-product-item .add-btn:hover {
-  background: #0f6157;
+  background: #02635c;
 }
 
 /* Entry Scroll Animations */
@@ -437,16 +459,13 @@
 @media (max-width: 1024px) {
   .wellmeds-hero-section {
     padding: 28px 24px;
-    min-height: 425px;
-  }
-  .wellmeds-hero-section .headline {
-    font-size: 36px;
+    min-height: 400px;
   }
 }
 
 @media (max-width: 768px) {
   .wellmeds-hero-section {
-    padding: 36px 16px 28px 16px;
+    padding: 24px 16px 20px 16px;
     min-height: auto;
     display: flex;
     flex-direction: column;
@@ -454,11 +473,29 @@
     align-items: center;
   }
 
-  /* Hide headline, eyebrow, and trust line on mobile */
-  .wellmeds-hero-section .eyebrow,
-  .wellmeds-hero-section .headline,
+  .wellmeds-hero-section .eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    padding: 3px 10px;
+  }
+
+  .wellmeds-hero-section .headline {
+    font-size: 22px;
+    margin-bottom: 6px;
+    line-height: 1.25;
+    padding: 0 4px;
+  }
+
+  .wellmeds-hero-section .subtitle-line {
+    font-size: 13px;
+    margin-bottom: 16px;
+    padding: 0 6px;
+  }
+
   .wellmeds-hero-section .trust-line {
-    display: none !important;
+    font-size: 11.5px;
+    margin-top: 14px;
   }
 
   .wellmeds-hero-section .search-wrap {
@@ -468,22 +505,20 @@
     position: relative;
   }
 
-  /* Golden tape visible at top center of search card */
   .wellmeds-hero-section .search-tape {
     display: block !important;
-    top: -12px;
+    top: -10px;
     width: 80px;
-    height: 22px;
+    height: 20px;
   }
 
   .wellmeds-hero-section .search-card {
-    padding: 16px 16px 14px 16px;
+    padding: 16px;
     border-radius: 14px;
   }
 
-  /* Dashed horizontal divider line */
   .wellmeds-hero-section .search-row {
-    border-bottom: 2px dashed var(--line) !important;
+    border-bottom: 1.5px dashed var(--line) !important;
     padding-bottom: 12px !important;
     gap: 10px;
   }
@@ -501,48 +536,12 @@
     font-size: 12px;
   }
 
-  /* Category chips under dashed line */
   .wellmeds-hero-section .search-hint {
     display: flex !important;
     flex-wrap: wrap;
     gap: 8px 12px;
-    font-size: 11px;
+    font-size: 11.5px;
     margin-top: 10px;
-    opacity: 0.85;
-    font-family: 'IBM Plex Mono', 'Liberation Mono', monospace;
-  }
-}
-
-@media (max-width: 480px) {
-  .wellmeds-hero-section {
-    padding: 30px 12px 24px 12px;
-  }
-  .wellmeds-hero-section .search-tape {
-    width: 70px;
-    height: 20px;
-    top: -10px;
-  }
-  .wellmeds-hero-section .search-card {
-    padding: 14px 12px 12px 12px;
-  }
-  .wellmeds-hero-section .search-row {
-    gap: 8px;
-    padding-bottom: 10px !important;
-  }
-  .wellmeds-hero-section .search-rx {
-    font-size: 20px;
-  }
-  .wellmeds-hero-section .search-input-field {
-    font-size: 13px;
-  }
-  .wellmeds-hero-section .search-btn {
-    padding: 7px 12px;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-  }
-  .wellmeds-hero-section .search-hint {
-    font-size: 10.5px;
-    gap: 6px 10px;
-    margin-top: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }

@@ -102,7 +102,7 @@ const MoleculesPage = () => {
 
           {/* Eyebrow */}
           <p className="text-xs font-mono font-bold uppercase tracking-[2.5px] text-[#b08d3e] mb-3">
-            <span className="font-serif font-black">℞</span> WellMeds Clinical Reference
+            <span className="font-sans font-extrabold">℞</span> WellMeds Clinical Reference
           </p>
 
           {/* Headline */}

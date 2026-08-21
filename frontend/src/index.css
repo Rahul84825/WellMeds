@@ -9,7 +9,7 @@
   }
   html, body {
     @apply text-on-surface font-sans antialiased overflow-x-clip;
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: #ecf3ef;
     background-image:
       linear-gradient(to right, rgba(15, 59, 52, 0.05) 1px, transparent 1px),
@@ -61,11 +61,13 @@
 }
 
 .font-editorial {
-  font-family: 'Fraunces', 'Liberation Serif', Georgia, serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-clinical-mono {
-  font-family: 'IBM Plex Mono', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.03em;
 }
 
 .editorial-card {
@@ -473,15 +475,15 @@
   color: #a1a1aa; /* zinc-400 */
 }
 
-/* Poppins Search Input override */
+/* Search Input Modern Typography */
 .search-input-poppins {
-  font-family: 'Poppins', sans-serif !important;
-  font-weight: 400 !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 500 !important;
 }
 
 .search-input-poppins::placeholder {
-  font-family: 'Poppins', sans-serif !important;
-  font-weight: 400 !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 500 !important;
 }
 
 /* GPU Acceleration for smooth transforms */

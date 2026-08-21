@@ -184,7 +184,7 @@ const ProductCard = ({ product }) => {
                              transition-transform hover:scale-110 active:scale-95 border border-[#157a6d]"
                   aria-label="Prescription Required"
                 >
-                  <span className="text-[12px] font-extrabold font-serif leading-none">Rx</span>
+                  <span className="text-[11px] font-extrabold font-sans leading-none">Rx</span>
                 </button>
                 <MiniTooltip
                   text="Prescription Required"

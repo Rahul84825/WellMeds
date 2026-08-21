@@ -31,7 +31,7 @@ const ColdChainInfoButton = ({ isColdChain }) => {
         title="Cold Chain Storage Info"
         className="inline-flex items-center justify-center w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] rounded-full border border-[#157a6d] text-[#157a6d] bg-white hover:bg-[#157a6d] hover:text-white cursor-pointer shrink-0 select-none ml-1.5"
       >
-        <span className="font-serif italic text-[11px] sm:text-[12px] font-bold leading-none select-none">
+        <span className="font-sans text-[11px] sm:text-[12px] font-bold leading-none select-none">
           i
         </span>
       </button>

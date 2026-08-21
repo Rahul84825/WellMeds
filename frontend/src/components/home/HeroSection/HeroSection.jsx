@@ -15,20 +15,25 @@ const HeroSection = () => {
       </div>
 
       {/* Main Headline */}
-      <h1 className="headline hero-anim-headline">
-        Search for your medicine. We probably <em>already</em> have it.
+      <h1 className="headline hero-anim-headline font-sans">
+        Find Medicines & Surgical Products at Better Prices
       </h1>
+      
+      {/* Subtitle */}
+      <p className="subtitle-line hero-anim-headline font-sans">
+        Save up to 70% on selected products
+      </p>
 
       {/* Prescription Pad Search Card */}
-      <div id="hero-search-anchor" className="search-wrap hero-anim-card">
+      <div id="hero-search-anchor" className="search-wrap hero-anim-card font-sans">
         <div className="search-tape" aria-hidden="true" />
-        <div className="search-card">
+        <div className="search-card font-sans">
           <UniversalSearch variant="prescription" />
         </div>
       </div>
 
       {/* Trust & Guarantees Line */}
-      <div className="trust-line hero-anim-trust">
+      <div className="trust-line hero-anim-trust font-sans">
         100% genuine medicines &nbsp;·&nbsp; fast delivery &nbsp;·&nbsp; easy repeat orders
       </div>
     </section>

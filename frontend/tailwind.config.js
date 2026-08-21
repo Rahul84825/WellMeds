@@ -126,17 +126,17 @@ export default {
         "xs": "6px"
       },
       fontFamily: {
-        sans: ["'IBM Plex Sans'", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "Roboto", "sans-serif"],
-        "headline-lg": ["'IBM Plex Sans'", "sans-serif"],
-        "label-sm": ["'IBM Plex Sans'", "sans-serif"],
-        "headline-md": ["'IBM Plex Sans'", "sans-serif"],
-        "headline-sm": ["'IBM Plex Sans'", "sans-serif"],
-        "label-md": ["'IBM Plex Sans'", "sans-serif"],
-        "body-lg": ["'IBM Plex Sans'", "sans-serif"],
-        "body-sm": ["'IBM Plex Sans'", "sans-serif"],
-        "body-md": ["'IBM Plex Sans'", "sans-serif"],
-        "headline-lg-mobile": ["'IBM Plex Sans'", "sans-serif"],
-        "poppins": ["'IBM Plex Sans'", "sans-serif"]
+        sans: ["'Plus Jakarta Sans'", "Inter", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "Roboto", "sans-serif"],
+        "headline-lg": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "label-sm": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "headline-md": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "headline-sm": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "label-md": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "body-lg": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "body-sm": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "body-md": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "headline-lg-mobile": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        "poppins": ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
       },
       fontSize: {
         "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],

@@ -690,7 +690,7 @@ const Navbar = () => {
               <button
                 id="trigger-medicines"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "medicines")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "medicines"
+                className={`flex items-center gap-1.5 text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "medicines"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`}
@@ -842,7 +842,7 @@ const Navbar = () => {
               <button
                 id="trigger-surgical"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "surgical")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "surgical"
+                className={`flex items-center gap-1.5 text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "surgical"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`}
@@ -906,7 +906,7 @@ const Navbar = () => {
               <NavLink
                 to="/wellness"
                 className={({ isActive }) =>
-                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
+                  `flex items-center text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
                     ? "bg-slate-200/80 text-[#038076] font-semibold"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`
@@ -925,7 +925,7 @@ const Navbar = () => {
               <button
                 id="trigger-library"
                 onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "library"
+                className={`flex items-center gap-1.5 text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "library"
                     ? "bg-slate-200/80 text-slate-900"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`}
@@ -974,7 +974,7 @@ const Navbar = () => {
               <NavLink
                 to="/patient-assistance-program"
                 className={({ isActive }) =>
-                  `flex items-center text-[17.8px] font-medium transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
+                  `flex items-center text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
                     ? "bg-slate-200/80 text-[#038076] font-semibold"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
                   }`
