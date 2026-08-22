@@ -10,6 +10,7 @@ import WellnessProductsSection from "../components/WellnessProductsSection";
 import SurgicalProductsSection from "../components/SurgicalProductsSection";
 import BestSellerSection from "../components/BestSellerSection";
 import GLP1ProductsSection from "../components/GLP1ProductsSection";
+import PharmaciesNearYou from "../components/PharmaciesNearYou";
 import TestimonialsSection from "../components/TestimonialsSection";
 import OrderPromoBanner from "../components/OrderPromoBanner";
 import ConsultationModal from "../components/ConsultationModal";
@@ -138,6 +139,11 @@ const HomePage = () => {
 
       <LazySection minHeight="300px">
         <GLP1ProductsSection />
+      </LazySection>
+
+      {/* Pharmacies Near You — Retail Stores Locator */}
+      <LazySection minHeight="280px">
+        <PharmaciesNearYou />
       </LazySection>
 
       <LazySection minHeight="200px">
