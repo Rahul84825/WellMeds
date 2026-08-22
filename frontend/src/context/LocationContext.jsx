@@ -24,16 +24,31 @@ export const LocationProvider = ({ children }) => {
       const saved = localStorage.getItem("wellmeds_delivery_location");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && (parsed.pincode || parsed.city || parsed.state || parsed.name)) {
+        if (parsed && (parsed.pincode || parsed.city || parsed.state || parsed.name || parsed.displayText)) {
+          const isPune = Boolean(
+            parsed.isPune ||
+            (parsed.pincode && (parsed.pincode.startsWith("411") || parsed.pincode.startsWith("412"))) ||
+            (parsed.city && parsed.city.toLowerCase().includes("pune")) ||
+            (parsed.district && parsed.district.toLowerCase().includes("pune")) ||
+            (parsed.displayText && parsed.displayText.toLowerCase().includes("pune")) ||
+            (parsed.name === "Pune")
+          );
+
+          const cityOrDistrict = isPune ? "Pune" : (parsed.district || parsed.city || parsed.state || "India");
+          const cleanDisplayText = parsed.pincode
+            ? `${parsed.pincode}, ${cityOrDistrict}`
+            : (parsed.displayText || cityOrDistrict);
+
           return {
-            pincode: parsed.pincode || (parsed.name === "Pune" ? "411021" : ""),
-            city: parsed.city || parsed.name || "Pune",
-            state: parsed.state || "Maharashtra",
+            pincode: parsed.pincode || (isPune ? "411021" : ""),
+            city: parsed.city || (isPune ? "Pune" : ""),
+            district: parsed.district || (isPune ? "Pune" : ""),
+            state: parsed.state || (isPune ? "Maharashtra" : ""),
             country: parsed.country || "India",
-            displayText: parsed.displayText || (parsed.pincode ? `${parsed.pincode}, ${parsed.city || parsed.state || "Pune"}` : (parsed.name || "Pune")),
+            displayText: cleanDisplayText,
             deliverable: parsed.deliverable !== undefined ? parsed.deliverable : true,
-            isPune: parsed.isPune !== undefined ? parsed.isPune : (parsed.name === "Pune" || parsed.city === "Pune" || (parsed.pincode && parsed.pincode.startsWith("411"))),
-            estimatedDelivery: parsed.estimatedDelivery || (parsed.name === "Pune" || parsed.city === "Pune" ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)"),
+            isPune,
+            estimatedDelivery: parsed.estimatedDelivery || (isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)"),
           };
         }
       }
@@ -63,18 +78,20 @@ export const LocationProvider = ({ children }) => {
       loc.isPune ||
       (loc.pincode && (loc.pincode.startsWith("411") || loc.pincode.startsWith("412"))) ||
       (loc.city && loc.city.toLowerCase().includes("pune")) ||
+      (loc.district && loc.district.toLowerCase().includes("pune")) ||
       (loc.locality && loc.locality.toLowerCase().includes("pune")) ||
+      (loc.displayText && loc.displayText.toLowerCase().includes("pune")) ||
       (loc.name && loc.name.toLowerCase().includes("pune"))
     );
 
-    const displayLocality = loc.locality || loc.city || loc.name || (isPune ? "Pune" : "");
-    const displayText = loc.displayText || (loc.pincode ? `${loc.pincode}, ${displayLocality}` : displayLocality || "Pune");
+    const cityOrDistrict = isPune ? "Pune" : (loc.district || loc.city || loc.state || "India");
+    const displayText = loc.pincode ? `${loc.pincode}, ${cityOrDistrict}` : (loc.displayText || cityOrDistrict);
 
     const formattedLocation = {
       pincode: loc.pincode || "",
-      locality: loc.locality || displayLocality,
-      city: loc.city || loc.name || (isPune ? "Pune" : ""),
-      district: loc.district || "",
+      locality: loc.locality || cityOrDistrict,
+      city: isPune ? "Pune" : (loc.city || loc.district || ""),
+      district: loc.district || (isPune ? "Pune" : ""),
       state: loc.state || (isPune ? "Maharashtra" : ""),
       country: loc.country || "India",
       displayText,

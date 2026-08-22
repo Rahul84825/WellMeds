@@ -308,16 +308,16 @@ export const reverseGeocodeGoogle = async (lat, lng) => {
 
       const specificLocality = cleanAreaName(sublocality || neighborhood || postOfficeName);
       const administrativeCity = localityCity || subDistrict || district || (pincode.startsWith("411") ? "Pune" : "");
-      const finalDisplayLocality = specificLocality || administrativeCity || state || "Location Detected";
-
+      
       const isPune =
         (pincode && (pincode.startsWith("411") || pincode.startsWith("412"))) ||
         (administrativeCity && (administrativeCity.toLowerCase().includes("pune") || administrativeCity.toLowerCase().includes("pimpri-chinchwad"))) ||
         (district && district.toLowerCase().includes("pune"));
 
+      const cityDisplay = isPune ? "Pune" : (administrativeCity || specificLocality || state || "India");
       const displayText = pincode
-        ? `${pincode}, ${finalDisplayLocality}`
-        : finalDisplayLocality;
+        ? `${pincode}, ${cityDisplay}`
+        : cityDisplay;
 
       return {
         success: true,
@@ -330,7 +330,7 @@ export const reverseGeocodeGoogle = async (lat, lng) => {
         street,
         landmark,
         locality: specificLocality || administrativeCity,
-        city: administrativeCity,
+        city: administrativeCity || (isPune ? "Pune" : ""),
         district: district || "",
         state: state || (isPune ? "Maharashtra" : ""),
         country: country || "India",
@@ -340,7 +340,7 @@ export const reverseGeocodeGoogle = async (lat, lng) => {
         estimatedDelivery: isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)",
         displayText,
         message: isPune
-          ? `✓ Express 1-Day Delivery available in ${finalDisplayLocality}`
+          ? `✓ Express 1-Day Delivery available in ${cityDisplay}`
           : `✓ We deliver to ${displayText}`,
       };
     }
@@ -438,7 +438,6 @@ export const validatePincodeService = async (pincode) => {
   //    POST OFFICE / LOCALITY -> SUBLOCALITY -> NEIGHBORHOOD -> POSTAL TOWN -> CITY -> DISTRICT -> STATE
   const resolvedSpecificLocality = cleanAreaName(sublocality || neighborhood || postOfficeName || postalTown);
   const resolvedCity = localityCity || subDistrict || district || (pin.startsWith("411") ? "Pune" : pin.startsWith("400") ? "Mumbai" : "");
-  const displayLocality = resolvedSpecificLocality || resolvedCity || district || state || "India";
 
   const isPune =
     pin.startsWith("411") ||
@@ -446,14 +445,15 @@ export const validatePincodeService = async (pincode) => {
     (resolvedCity && (resolvedCity.toLowerCase().includes("pune") || resolvedCity.toLowerCase().includes("pimpri-chinchwad"))) ||
     (district && district.toLowerCase().includes("pune"));
 
+  const cityDisplay = isPune ? "Pune" : (resolvedCity || resolvedSpecificLocality || district || state || "India");
   const deliveryTime = isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)";
-  const displayText = `${pin}, ${displayLocality}`;
+  const displayText = `${pin}, ${cityDisplay}`;
 
   return {
     success: true,
     deliverable: true,
     pincode: pin,
-    locality: resolvedSpecificLocality || displayLocality,
+    locality: resolvedSpecificLocality || cityDisplay,
     city: resolvedCity || (isPune ? "Pune" : ""),
     district: district || "",
     state: state || (isPune ? "Maharashtra" : ""),
@@ -462,7 +462,7 @@ export const validatePincodeService = async (pincode) => {
     estimatedDelivery: deliveryTime,
     displayText,
     message: isPune
-      ? `✓ Express 1-Day Delivery available in ${displayLocality}`
+      ? `✓ Express 1-Day Delivery available in ${cityDisplay}`
       : `✓ We deliver to ${displayText}`,
   };
 };

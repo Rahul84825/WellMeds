@@ -760,9 +760,19 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   }
 
   if (isPrescription) {
-    const locCity = globalLocation?.locality || globalLocation?.city || globalLocation?.state || "Pune";
-    const isPune = globalLocation?.isPune !== undefined ? globalLocation.isPune : (locCity === "Pune" || (globalLocation?.pincode && globalLocation.pincode.startsWith("411")));
-    const estDelivery = globalLocation?.estimatedDelivery || (isPune ? "⚡ 1 Day in Pune" : "🚚 > 2 Days");
+    const isPune = Boolean(
+      globalLocation?.isPune ||
+      (globalLocation?.pincode && (globalLocation.pincode.startsWith("411") || globalLocation.pincode.startsWith("412"))) ||
+      (globalLocation?.city && globalLocation.city.toLowerCase().includes("pune")) ||
+      (globalLocation?.district && globalLocation.district.toLowerCase().includes("pune")) ||
+      (globalLocation?.displayText && globalLocation.displayText.toLowerCase().includes("pune"))
+    );
+
+    const cityOrDistrict = isPune ? "Pune" : (globalLocation?.district || globalLocation?.city || globalLocation?.state || "Pune");
+    const displayLocation = globalLocation?.pincode
+      ? `${globalLocation.pincode}, ${cityOrDistrict}`
+      : (globalLocation?.displayText || cityOrDistrict);
+    const estDelivery = globalLocation?.estimatedDelivery || (isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)");
 
     return (
       <div ref={containerRef} className="relative w-full font-sans">
@@ -773,14 +783,14 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               type="button"
               onClick={openLocationModal}
               className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#038076] transition-colors select-none pr-3 border-r border-[#c3d4cc] py-1 cursor-pointer group"
-              title="Select delivery state & check estimated delivery time"
+              title="Select delivery location & check estimated delivery time"
             >
               <MapPin className="w-4 h-4 text-[#038076] group-hover:scale-110 transition-transform shrink-0" />
               <div className="flex flex-col text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="text-slate-500 font-medium text-[11px]">Deliver to</span>
                   <strong className="text-slate-900 font-extrabold text-xs group-hover:text-[#038076] transition-colors">
-                    {locCity}
+                    {displayLocation}
                   </strong>
                 </div>
                 <span className={`text-[10px] font-bold leading-tight ${isPune ? "text-emerald-700 font-extrabold" : "text-amber-700 font-semibold"}`}>
