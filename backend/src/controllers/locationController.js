@@ -4,6 +4,7 @@ import {
   fetchGooglePlaceDetails,
   geocodeAddressGoogle,
   reverseGeocodeGoogle,
+  validatePincodeService,
   calculateDistanceMatrixGoogle,
 } from "../services/locationService.js";
 
@@ -72,14 +73,63 @@ export const geocodeAddress = async (req, res, next) => {
 export const reverseGeocodeCoords = async (req, res, next) => {
   try {
     const { latitude, longitude } = req.body;
-    if (!latitude || !longitude) {
-      return res.status(400).json({ success: false, message: "Latitude and Longitude are required" });
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+
+    if (
+      latitude === undefined ||
+      longitude === undefined ||
+      isNaN(lat) ||
+      isNaN(lng) ||
+      !isFinite(lat) ||
+      !isFinite(lng) ||
+      lat < -90 ||
+      lat > 90 ||
+      lng < -180 ||
+      lng > 180
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid numeric latitude (-90 to 90) and longitude (-180 to 180) are required.",
+      });
     }
-    const result = await reverseGeocodeGoogle(latitude, longitude);
+
+    const result = await reverseGeocodeGoogle(lat, lng);
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Could not resolve address for provided coordinates.",
+      });
+    }
+
     return res.status(200).json({
       success: true,
+      ...result,
       result,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/location/check-pincode
+export const checkPincodeLocation = async (req, res, next) => {
+  try {
+    const { pincode } = req.body;
+    if (!pincode) {
+      return res.status(400).json({
+        success: false,
+        deliverable: false,
+        message: "Pincode is required.",
+      });
+    }
+
+    const result = await validatePincodeService(pincode);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }

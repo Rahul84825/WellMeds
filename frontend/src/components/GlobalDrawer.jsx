@@ -24,6 +24,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { useDrawer } from "../context/DrawerContext";
 import { useCart } from "../hooks/useCart";
+import { useLocationContext } from "../context/LocationContext";
 import { api } from "../services/api";
 import logoImg from "../assets/logos/logo.png";
 
@@ -49,6 +50,7 @@ const GlobalDrawer = () => {
   const { isDrawerOpen, setIsDrawerOpen, menuData, menuLoading } = useDrawer();
   const { user, logout, isAdmin, profileComplete, openLoginModal } = useAuth();
   const { cartCount } = useCart();
+  const { selectedLocation, openLocationModal } = useLocationContext();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -245,6 +247,30 @@ const GlobalDrawer = () => {
                 {user ? user.name : "Login"}
               </p>
             </div>
+          </div>
+
+          {/* Delivery Location Selector in Drawer */}
+          <div 
+            onClick={() => {
+              setIsDrawerOpen(false);
+              openLocationModal();
+            }}
+            className="mx-4 mb-4 p-3 border border-[#c3e6d6] rounded-2xl flex items-center justify-between bg-[#edf7f2] hover:bg-[#e0f3eb] cursor-pointer shadow-2xs select-none transition-colors"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[#038076]/15 text-[#038076] flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block leading-none">Deliver to</span>
+                <p className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                  {selectedLocation?.displayText || "411021, Pune"}
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-700 text-white shrink-0">
+              Change
+            </span>
           </div>
 
           <div className="px-4 space-y-4">

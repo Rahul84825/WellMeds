@@ -32,6 +32,8 @@ import PrescriptionUpload from "./PrescriptionUpload";
 import logoImg from "../assets/logos/logo.png";
 import { api } from "../services/api";
 import { UniversalSearch } from "./common/UniversalSearch";
+import { useLocationContext } from "../context/LocationContext";
+import LocationSelectorModal from "./location/LocationSelectorModal";
 
 const iconMap = {
   Globe,
@@ -91,29 +93,8 @@ const Navbar = () => {
     };
   }, []);
 
-  // Location selector states
-  const [selectedLocation, setSelectedLocation] = useState(() => {
-    return localStorage.getItem("wellmeds_location") || "Pune, 411021";
-  });
-  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
-
-  // Sync location with custom events and localStorage
-  useEffect(() => {
-    const handleLocationChange = (e) => {
-      setSelectedLocation(e.detail);
-    };
-    window.addEventListener("wellmeds_location_changed", handleLocationChange);
-    return () => {
-      window.removeEventListener("wellmeds_location_changed", handleLocationChange);
-    };
-  }, []);
-
-  const handleSelectLocation = (loc) => {
-    setSelectedLocation(loc);
-    localStorage.setItem("wellmeds_location", loc);
-    window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
-    setLocationMenuOpen(false);
-  };
+  // Location from centralized LocationContext
+  const { selectedLocation, openLocationModal } = useLocationContext();
 
   // Mobile search drawer expansion state
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
@@ -425,8 +406,8 @@ const Navbar = () => {
 
           {/* Desktop Only Header (Visible on desktop only) */}
           <div className="hidden lg:flex items-center justify-between w-full h-full">
-            {/* Logo */}
-            <div className="flex items-center shrink-0">
+            {/* Logo & Location Badge */}
+            <div className="flex items-center gap-3.5 shrink-0">
               <NavLink
                 to="/"
                 onClick={() => setIsDrawerOpen(false)}
@@ -438,6 +419,24 @@ const Navbar = () => {
                   className="h-[60px] lg:h-[70px] object-contain"
                 />
               </NavLink>
+
+              {/* Location Selector Button (Desktop - Slim width, exact 38px search bar height match) */}
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="h-[38px] px-2.5 rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-slate-50/80 hover:bg-[#edf7f2] dark:bg-zinc-900 dark:hover:bg-[#122822] text-slate-700 dark:text-slate-200 hover:text-[#038076] hover:border-[#c3e6d6] transition-all cursor-pointer shrink-0 group flex items-center gap-1.5 shadow-2xs select-none"
+                aria-label="Select delivery location"
+                title="Change delivery location / pincode"
+              >
+                <MapPin className="w-3.5 h-3.5 text-[#038076] group-hover:scale-110 transition-transform shrink-0" />
+                <div className="flex flex-col text-left justify-center leading-none">
+                  <span className="text-[9px] text-slate-400 font-medium leading-none mb-0.5">Deliver to</span>
+                  <span className="max-w-[125px] truncate text-[11px] font-bold text-slate-800 dark:text-zinc-100 leading-none">
+                    {selectedLocation?.displayText || "411021, Pune"}
+                  </span>
+                </div>
+                <ChevronDown className="w-2.5 h-2.5 text-slate-400 group-hover:text-[#038076] transition-colors shrink-0 ml-0.5" />
+              </button>
             </div>
 
             {/* Search bar & Location selector container */}
@@ -591,7 +590,7 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              className="w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 cursor-pointer shrink-0"
+              className="w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 cursor-pointer shrink-0 z-10"
               aria-label="Toggle Navigation Drawer"
             >
               {isDrawerOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -615,7 +614,7 @@ const Navbar = () => {
             {/* Right: Cart */}
             <Link
               to="/cart"
-              className="relative w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 transition-colors shrink-0"
+              className="relative w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 transition-colors shrink-0 z-10"
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-[15px] h-[15px]" />
@@ -650,6 +649,27 @@ const Navbar = () => {
             document.body
           )}
         </div>
+      </div>
+
+      {/* Mobile Location Sub-Bar */}
+      <div className="w-full bg-slate-50/90 dark:bg-zinc-900/90 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-1.5 lg:hidden flex items-center justify-between font-sans">
+        <button
+          type="button"
+          onClick={openLocationModal}
+          className="flex items-center gap-1.5 min-w-0 text-left text-slate-700 dark:text-slate-200 hover:text-[#038076] transition-colors cursor-pointer"
+          aria-label="Select delivery location"
+        >
+          <MapPin className="w-3.5 h-3.5 text-[#038076] shrink-0" />
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0">Deliver to:</span>
+          <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-[260px]">
+            {selectedLocation?.displayText || "411021, Pune"}
+          </span>
+          <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+        </button>
+
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">
+          {selectedLocation?.isPune ? "⚡ 1 Day" : "🚚 2–4 Days"}
+        </span>
       </div>
 
       {/* Mobile Sub-Navbar: Search bar (Visible on scroll in mobile/tablet) */}
@@ -1021,6 +1041,9 @@ const Navbar = () => {
           />
         </div>
       </Modal>
+
+      {/* Location Selector Modal */}
+      <LocationSelectorModal />
     </nav>
   );
 };

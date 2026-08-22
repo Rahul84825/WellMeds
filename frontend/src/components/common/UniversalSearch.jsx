@@ -4,6 +4,7 @@ import {
   Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, Check, Clock, Sparkles
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useLocationContext } from "../../context/LocationContext";
 import api from "../../services/api";
 import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
 import SearchPlaceholderCarousel from "./SearchPlaceholderCarousel";
@@ -311,6 +312,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { addToCart } = useCart();
+  const { selectedLocation: globalLocation, openLocationModal } = useLocationContext();
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState({});
@@ -758,14 +760,18 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   }
 
   if (isPrescription) {
+    const locCity = globalLocation?.locality || globalLocation?.city || globalLocation?.state || "Pune";
+    const isPune = globalLocation?.isPune !== undefined ? globalLocation.isPune : (locCity === "Pune" || (globalLocation?.pincode && globalLocation.pincode.startsWith("411")));
+    const estDelivery = globalLocation?.estimatedDelivery || (isPune ? "⚡ 1 Day in Pune" : "🚚 > 2 Days");
+
     return (
       <div ref={containerRef} className="relative w-full font-sans">
         <div className="search-row flex items-center">
-          {/* Location Delivery Selector (Interactive with all Indian States & delivery times) */}
-          <div className="relative hidden sm:block shrink-0 font-sans" ref={locationMenuRef}>
+          {/* Location Delivery Selector (Triggers LocationSelectorModal with GPS & Pincode check) */}
+          <div className="relative hidden sm:block shrink-0 font-sans">
             <button
               type="button"
-              onClick={() => setLocationMenuOpen((prev) => !prev)}
+              onClick={openLocationModal}
               className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#038076] transition-colors select-none pr-3 border-r border-[#c3d4cc] py-1 cursor-pointer group"
               title="Select delivery state & check estimated delivery time"
             >
@@ -774,139 +780,15 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
                 <div className="flex items-center gap-1.5">
                   <span className="text-slate-500 font-medium text-[11px]">Deliver to</span>
                   <strong className="text-slate-900 font-extrabold text-xs group-hover:text-[#038076] transition-colors">
-                    {selectedLocation.name}
+                    {locCity}
                   </strong>
                 </div>
-                <span className={`text-[10px] font-bold leading-tight ${selectedLocation.name === "Pune" ? "text-emerald-700 font-extrabold" : "text-amber-700 font-semibold"}`}>
-                  {selectedLocation.name === "Pune" ? "⚡ 1 Day in Pune" : "🚚 More than 2 days"}
+                <span className={`text-[10px] font-bold leading-tight ${isPune ? "text-emerald-700 font-extrabold" : "text-amber-700 font-semibold"}`}>
+                  {estDelivery}
                 </span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-[#038076] transition-transform duration-200 ml-0.5 ${locationMenuOpen ? "rotate-180 text-[#038076]" : ""}`} />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#038076] transition-transform duration-200 ml-0.5" />
             </button>
-
-            {/* Location Selector Dropdown Popover */}
-            {locationMenuOpen && (
-              <div className="absolute left-0 top-full mt-2 w-[340px] sm:w-[380px] bg-white rounded-xl shadow-2xl border border-slate-200 z-[400] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 font-sans text-left">
-                {/* Header Strip */}
-                <div className="bg-[#038076] text-white p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-emerald-200 shrink-0" />
-                    <div>
-                      <h4 className="text-xs font-bold leading-tight">Choose Delivery Location</h4>
-                      <p className="text-[10px] text-emerald-100">Live delivery timeline estimate</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setLocationMenuOpen(false)}
-                    className="p-1 hover:bg-white/20 rounded-md transition-colors text-white/80 hover:text-white"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-
-                {/* Delivery Timeline Notice Banner */}
-                <div className="p-2.5 bg-slate-50 border-b border-slate-200 space-y-1.5 text-[11px]">
-                  <div className="flex items-center justify-between p-1.5 bg-emerald-50 border border-emerald-200 rounded-md text-emerald-900 font-semibold">
-                    <span className="flex items-center gap-1.5">
-                      <span>⚡</span>
-                      <span>Pune Local Delivery:</span>
-                    </span>
-                    <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                      1 Day in Pune
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-1.5 bg-amber-50 border border-amber-200 rounded-md text-amber-900 font-semibold">
-                    <span className="flex items-center gap-1.5">
-                      <span>🚚</span>
-                      <span>All Other States:</span>
-                    </span>
-                    <span className="bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                      More than 2 Days
-                    </span>
-                  </div>
-                </div>
-
-                {/* Search Filter Input */}
-                <div className="p-2 bg-white border-b border-slate-100">
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-100 rounded-lg border border-slate-200 focus-within:border-[#038076] focus-within:bg-white transition-all">
-                    <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <input
-                      type="text"
-                      placeholder="Search state or city..."
-                      value={locationSearchQuery}
-                      onChange={(e) => setLocationSearchQuery(e.target.value)}
-                      className="w-full bg-transparent text-xs text-slate-800 outline-none border-none focus:ring-0 p-0 font-medium placeholder-slate-400"
-                      autoFocus
-                    />
-                    {locationSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setLocationSearchQuery("")}
-                        className="text-slate-400 hover:text-slate-600 p-0.5"
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* States & UTs List */}
-                <div className="max-h-[240px] overflow-y-auto divide-y divide-slate-100">
-                  {filteredLocations.length === 0 ? (
-                    <div className="p-6 text-center text-xs text-slate-500">
-                      No states found matching "{locationSearchQuery}"
-                    </div>
-                  ) : (
-                    filteredLocations.map((loc) => {
-                      const isSelected = selectedLocation.name === loc.name;
-                      return (
-                        <button
-                          key={loc.name}
-                          type="button"
-                          onClick={() => handleSelectLocation(loc)}
-                          className={`w-full px-3 py-2 text-left flex items-center justify-between transition-colors ${
-                            isSelected
-                              ? "bg-[#edf7f2] text-[#038076] font-bold"
-                              : "hover:bg-slate-50 text-slate-700"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0 pr-2">
-                            <MapPin className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-[#038076]" : "text-slate-400"}`} />
-                            <div className="truncate">
-                              <div className="text-xs font-semibold flex items-center gap-1.5 truncate">
-                                <span>{loc.name}</span>
-                                {loc.name === "Pune" && (
-                                  <span className="text-[9px] bg-emerald-600 text-white font-extrabold px-1.5 py-0.2 rounded uppercase">
-                                    FASTEST
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[10px] text-slate-400 font-normal truncate block">
-                                {loc.subtext}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
-                              loc.name === "Pune"
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                                : "bg-amber-100 text-amber-800 border-amber-300"
-                            }`}>
-                              {loc.name === "Pune" ? "⚡ 1 Day in Pune" : "🚚 > 2 Days"}
-                            </span>
-                            {isSelected && (
-                              <Check className="w-3.5 h-3.5 text-[#038076] stroke-[3]" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="search-rx flex items-center justify-center">
@@ -1083,10 +965,10 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     >
       {/* SEARCH BAR CONTAINER (NAVBAR THEMED) */}
       <div
-        className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_4px_16px_rgba(23,43,38,0.06)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/15 transition-all duration-300 w-full p-2 gap-3 font-sans"
+        className="flex items-center bg-white border border-[#dde8e3] rounded-xl flex-row relative shadow-[0_2px_8px_rgba(23,43,38,0.04)] focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/15 transition-all duration-300 w-full h-[38px] px-2.5 gap-2.5 font-sans"
       >
         {/* Left: Rx Symbol */}
-        <div className="font-sans font-extrabold text-[#038076] text-xl select-none pl-1 leading-none">
+        <div className="font-sans font-extrabold text-[#038076] text-base select-none pl-0.5 leading-none">
           ℞
         </div>
 
@@ -1131,7 +1013,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
         <button
           type="button"
           onClick={handleSearchSubmit}
-          className="bg-[#038076] hover:bg-[#02635c] text-white font-sans font-bold text-xs px-5 py-2 rounded-full uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer"
+          className="bg-[#038076] hover:bg-[#02635c] text-white font-sans font-bold text-[11px] h-[28px] px-3.5 rounded-lg uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer flex items-center justify-center tracking-wider"
         >
           SEARCH
         </button>

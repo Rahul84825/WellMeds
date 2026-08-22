@@ -91,6 +91,31 @@ export const AddressProvider = ({ children }) => {
     }
   };
 
+  const selectAddress = useCallback((id) => {
+    setSelectedAddressId(id);
+    const addr = addresses.find((a) => a._id === id || a.id === id);
+    if (addr) {
+      const isPune = (addr.pincode && (addr.pincode.startsWith("411") || addr.pincode.startsWith("412"))) ||
+                     (addr.city && addr.city.toLowerCase().includes("pune"));
+      const loc = {
+        pincode: addr.pincode || "",
+        city: addr.city || (isPune ? "Pune" : ""),
+        state: addr.state || (isPune ? "Maharashtra" : ""),
+        country: addr.country || "India",
+        displayText: addr.pincode ? `${addr.pincode}, ${addr.city || addr.state || "India"}` : addr.city || "Pune",
+        deliverable: true,
+        isPune,
+        estimatedDelivery: isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)",
+        formattedAddress: addr.formattedAddress || `${addr.houseNo ? addr.houseNo + ", " : ""}${addr.street ? addr.street + ", " : ""}${addr.city}`,
+      };
+      try {
+        localStorage.setItem("wellmeds_delivery_location", JSON.stringify(loc));
+        localStorage.setItem("wellmeds_location", loc.city || loc.state || "Pune");
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
+    }
+  }, [addresses]);
+
   return (
     <AddressContext.Provider
       value={{
@@ -98,6 +123,7 @@ export const AddressProvider = ({ children }) => {
         loading,
         selectedAddressId,
         setSelectedAddressId,
+        selectAddress,
         selectedAddress,
         defaultAddress,
         fetchAddresses,

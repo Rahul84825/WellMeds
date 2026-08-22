@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { DrawerProvider } from "./context/DrawerContext";
 import { AddressProvider } from "./context/AddressContext";
+import { LocationProvider } from "./context/LocationContext";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
@@ -42,15 +43,17 @@ function App() {
   return (
     <AuthProvider>
       <AddressProvider>
-        <CartProvider>
-          <BrowserRouter>
-            <DrawerProvider>
-              <ScrollToTop />
-              <SyncBridge />
-              <AppRoutes />
-            </DrawerProvider>
-          </BrowserRouter>
-        </CartProvider>
+        <LocationProvider>
+          <CartProvider>
+            <BrowserRouter>
+              <DrawerProvider>
+                <ScrollToTop />
+                <SyncBridge />
+                <AppRoutes />
+              </DrawerProvider>
+            </BrowserRouter>
+          </CartProvider>
+        </LocationProvider>
       </AddressProvider>
     </AuthProvider>
   );

@@ -1,4 +1,4 @@
-import { api } from "./api";
+import apiInstance from "./api/api";
 
 let mapsScriptPromise = null;
 
@@ -74,11 +74,11 @@ export const getUserCurrentPosition = () => {
       (error) => {
         let msg = "Unable to retrieve your location";
         if (error.code === error.PERMISSION_DENIED) {
-          msg = "Location permission denied. Please allow location access in your browser settings.";
+          msg = "Location permission denied. Please enter your pincode manually.";
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = "Location information unavailable.";
+          msg = "Location information is unavailable.";
         } else if (error.code === error.TIMEOUT) {
-          msg = "Location request timed out.";
+          msg = "Location request timed out. Please try again or enter pincode manually.";
         }
         reject(new Error(msg));
       },
@@ -96,7 +96,7 @@ export const getUserCurrentPosition = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const fetchStoreLocation = async () => {
   try {
-    const res = await api.get("/location/store");
+    const res = await apiInstance.get("/location/store");
     return res.store || null;
   } catch (err) {
     console.error("fetchStoreLocation Error:", err);
@@ -107,7 +107,7 @@ export const fetchStoreLocation = async () => {
 export const fetchAutocompleteSuggestions = async (input) => {
   if (!input || input.trim().length < 2) return [];
   try {
-    const res = await api.post("/location/autocomplete", { input });
+    const res = await apiInstance.post("/location/autocomplete", { input });
     return res.predictions || [];
   } catch (err) {
     console.error("fetchAutocompleteSuggestions Error:", err);
@@ -118,7 +118,7 @@ export const fetchAutocompleteSuggestions = async (input) => {
 export const fetchPlaceDetailsById = async (placeId) => {
   if (!placeId) return null;
   try {
-    const res = await api.post("/location/place-details", { placeId });
+    const res = await apiInstance.post("/location/place-details", { placeId });
     return res.details || null;
   } catch (err) {
     console.error("fetchPlaceDetailsById Error:", err);
@@ -127,20 +127,35 @@ export const fetchPlaceDetailsById = async (placeId) => {
 };
 
 export const reverseGeocodeCoordinates = async (latitude, longitude) => {
-  if (!latitude || !longitude) return null;
+  if (latitude === undefined || longitude === undefined) return null;
   try {
-    const res = await api.post("/location/reverse-geocode", { latitude, longitude });
-    return res.result || null;
+    const res = await apiInstance.post("/location/reverse-geocode", { latitude, longitude });
+    return res.result || res || null;
   } catch (err) {
     console.error("reverseGeocodeCoordinates Error:", err);
     return null;
   }
 };
 
+export const checkPincodeValidation = async (pincode) => {
+  if (!pincode) return { success: false, deliverable: false, message: "Pincode is required." };
+  try {
+    const res = await apiInstance.post("/location/check-pincode", { pincode: String(pincode).trim() });
+    return res;
+  } catch (err) {
+    console.error("checkPincodeValidation Error:", err);
+    return {
+      success: false,
+      deliverable: false,
+      message: err.response?.data?.message || "Failed to validate pincode",
+    };
+  }
+};
+
 export const geocodeAddressString = async (address) => {
   if (!address) return null;
   try {
-    const res = await api.post("/location/geocode", { address });
+    const res = await apiInstance.post("/location/geocode", { address });
     return res.result || null;
   } catch (err) {
     console.error("geocodeAddressString Error:", err);
@@ -150,7 +165,7 @@ export const geocodeAddressString = async (address) => {
 
 export const validateDeliveryLocation = async (latitude, longitude) => {
   try {
-    const res = await api.post("/location/validate-delivery", { latitude, longitude });
+    const res = await apiInstance.post("/location/validate-delivery", { latitude, longitude });
     return res;
   } catch (err) {
     console.error("validateDeliveryLocation Error:", err);
@@ -158,7 +173,7 @@ export const validateDeliveryLocation = async (latitude, longitude) => {
       success: false,
       isEligible: true,
       distanceKm: 0,
-      deliveryFee: 40,
+      deliveryFee: 50,
       displayText: "Standard Delivery",
       message: "Delivery validation fallback",
     };

@@ -221,13 +221,24 @@ export const geocodeAddressGoogle = async (addressString) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GOOGLE REVERSE GEOCODING SERVICE (Lat/Lng -> Address)
+// HELPER: CLEAN POST OFFICE OR AREA NAME
+// ─────────────────────────────────────────────────────────────────────────────
+const cleanAreaName = (name) => {
+  if (!name) return "";
+  return String(name)
+    .trim()
+    .replace(/\s+(S\.O|B\.O|H\.O|SO|BO|HO)$/i, "")
+    .trim();
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GOOGLE REVERSE GEOCODING SERVICE (Lat/Lng -> Address & Delivery Info)
 // ─────────────────────────────────────────────────────────────────────────────
 export const reverseGeocodeGoogle = async (lat, lng) => {
   const apiKey =
     process.env.GOOGLE_GEOCODING_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 
-  if (!apiKey || !lat || !lng) {
+  if (!apiKey || lat === undefined || lng === undefined) {
     return null;
   }
 
@@ -241,38 +252,96 @@ export const reverseGeocodeGoogle = async (lat, lng) => {
     });
 
     if (response.data.status === "OK" && response.data.results.length > 0) {
-      const first = response.data.results[0];
-      const components = first.address_components || [];
+      let pincode = "";
+      let sublocality = "";
+      let neighborhood = "";
+      let localityCity = "";
+      let subDistrict = "";
+      let district = "";
+      let state = "";
+      let country = "India";
+      let houseNo = "";
+      let building = "";
+      let street = "";
+      let landmark = "";
+      const formattedAddress = response.data.results[0].formatted_address || "";
+      const placeId = response.data.results[0].place_id || "";
 
-      const getComponent = (types) => {
-        const c = components.find((comp) =>
-          types.some((t) => comp.types.includes(t))
-        );
-        return c ? c.long_name : "";
-      };
+      for (const result of response.data.results) {
+        const components = result.address_components || [];
+        const getComp = (types) => {
+          const c = components.find((comp) =>
+            types.some((t) => comp.types.includes(t))
+          );
+          return c ? c.long_name : "";
+        };
 
-      const pincode = getComponent(["postal_code"]);
-      const city = getComponent(["locality", "administrative_area_level_3", "administrative_area_level_2"]) || "";
-      const state = getComponent(["administrative_area_level_1"]) || "";
-      const country = getComponent(["country"]) || "India";
-      const houseNo = getComponent(["street_number", "premise", "subpremise"]) || "";
-      const building = getComponent(["building", "premise"]) || "";
-      const street = getComponent(["route", "sublocality_level_1", "neighborhood"]) || "";
-      const landmark = getComponent(["sublocality_level_2"]) || "";
+        if (!pincode) pincode = getComp(["postal_code"]);
+        if (!sublocality) sublocality = getComp(["sublocality_level_1", "sublocality_level_2", "sublocality"]);
+        if (!neighborhood) neighborhood = getComp(["neighborhood"]);
+        if (!localityCity) localityCity = getComp(["locality", "postal_town"]);
+        if (!subDistrict) subDistrict = getComp(["administrative_area_level_3"]);
+        if (!district) district = getComp(["administrative_area_level_2"]);
+        if (!state) state = getComp(["administrative_area_level_1"]);
+        if (!country) country = getComp(["country"]) || "India";
+        if (!houseNo) houseNo = getComp(["street_number", "premise", "subpremise"]);
+        if (!building) building = getComp(["building", "premise"]);
+        if (!street) street = getComp(["route", "sublocality_level_1", "neighborhood"]);
+        if (!landmark) landmark = getComp(["sublocality_level_2"]);
+
+        if (pincode && (sublocality || neighborhood) && localityCity && state) break;
+      }
+
+      // If sublocality is missing but we have pincode, fallback to India Post
+      let postOfficeName = "";
+      if (pincode && !sublocality && !neighborhood) {
+        try {
+          const postRes = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`, { timeout: 2500 });
+          if (postRes.data?.[0]?.Status === "Success" && postRes.data[0]?.PostOffice?.length > 0) {
+            postOfficeName = cleanAreaName(postRes.data[0].PostOffice[0].Name);
+            if (!district) district = postRes.data[0].PostOffice[0].District || "";
+          }
+        } catch (e) {
+          // Non-blocking fallback
+        }
+      }
+
+      const specificLocality = cleanAreaName(sublocality || neighborhood || postOfficeName);
+      const administrativeCity = localityCity || subDistrict || district || (pincode.startsWith("411") ? "Pune" : "");
+      const finalDisplayLocality = specificLocality || administrativeCity || state || "Location Detected";
+
+      const isPune =
+        (pincode && (pincode.startsWith("411") || pincode.startsWith("412"))) ||
+        (administrativeCity && (administrativeCity.toLowerCase().includes("pune") || administrativeCity.toLowerCase().includes("pimpri-chinchwad"))) ||
+        (district && district.toLowerCase().includes("pune"));
+
+      const displayText = pincode
+        ? `${pincode}, ${finalDisplayLocality}`
+        : finalDisplayLocality;
 
       return {
-        formattedAddress: first.formatted_address,
-        placeId: first.place_id,
+        success: true,
+        formattedAddress,
+        placeId,
         latitude: parseFloat(lat),
         longitude: parseFloat(lng),
         houseNo,
         building,
         street,
         landmark,
-        city,
-        state,
-        country,
-        pincode,
+        locality: specificLocality || administrativeCity,
+        city: administrativeCity,
+        district: district || "",
+        state: state || (isPune ? "Maharashtra" : ""),
+        country: country || "India",
+        pincode: pincode || "",
+        deliverable: true,
+        isPune: Boolean(isPune),
+        estimatedDelivery: isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)",
+        displayText,
+        message: isPune
+          ? `✓ Express 1-Day Delivery available in ${finalDisplayLocality}`
+          : `✓ We deliver to ${displayText}`,
       };
     }
     return null;
@@ -280,6 +349,122 @@ export const reverseGeocodeGoogle = async (lat, lng) => {
     console.error("Google Reverse Geocoding Error:", error.message);
     return null;
   }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PINCODE VALIDATION & DYNAMIC LOCALITY RESOLUTION SERVICE
+// ─────────────────────────────────────────────────────────────────────────────
+export const validatePincodeService = async (pincode) => {
+  const pin = String(pincode || "").trim();
+  if (!/^[1-9][0-9]{5}$/.test(pin)) {
+    return {
+      success: false,
+      deliverable: false,
+      message: "Please enter a valid 6-digit Indian PIN code.",
+    };
+  }
+
+  let sublocality = "";
+  let neighborhood = "";
+  let postalTown = "";
+  let localityCity = "";
+  let subDistrict = "";
+  let district = "";
+  let state = "";
+  let country = "India";
+  let postOfficeName = "";
+
+  const apiKey =
+    process.env.GOOGLE_GEOCODING_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+
+  // 1. Query Google Geocoding for structured geographic components
+  if (apiKey) {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json`;
+      const response = await axios.get(url, {
+        params: {
+          address: pin,
+          components: "country:IN",
+          key: apiKey,
+        },
+        timeout: 4000,
+      });
+
+      if (response.data.status === "OK" && response.data.results?.length > 0) {
+        for (const result of response.data.results) {
+          const components = result.address_components || [];
+          const getComp = (types) => {
+            const c = components.find((comp) =>
+              types.some((t) => comp.types.includes(t))
+            );
+            return c ? c.long_name : "";
+          };
+
+          if (!sublocality) sublocality = getComp(["sublocality_level_1", "sublocality_level_2", "sublocality"]);
+          if (!neighborhood) neighborhood = getComp(["neighborhood"]);
+          if (!postalTown) postalTown = getComp(["postal_town"]);
+          if (!localityCity) localityCity = getComp(["locality", "postal_town"]);
+          if (!subDistrict) subDistrict = getComp(["administrative_area_level_3"]);
+          if (!district) district = getComp(["administrative_area_level_2"]);
+          if (!state) state = getComp(["administrative_area_level_1"]);
+          if (!country) country = getComp(["country"]) || "India";
+
+          if (sublocality && localityCity && state) break;
+        }
+      }
+    } catch (e) {
+      console.warn("Google Geocoding lookup error:", e.message);
+    }
+  }
+
+  // 2. Query India Post API for official Post Office and locality fallback
+  try {
+    const postRes = await axios.get(`https://api.postalpincode.in/pincode/${pin}`, { timeout: 3000 });
+    if (postRes.data?.[0]?.Status === "Success" && postRes.data[0]?.PostOffice?.length > 0) {
+      const poList = postRes.data[0].PostOffice;
+      const primaryPO = poList[0];
+      postOfficeName = cleanAreaName(primaryPO.Name);
+      if (!district) district = primaryPO.District || "";
+      if (!state) state = primaryPO.State || "";
+      if (!localityCity) {
+        localityCity = primaryPO.Block !== "NA" && primaryPO.Block ? primaryPO.Block : primaryPO.District;
+      }
+    }
+  } catch (e) {
+    console.warn("India Post API lookup error:", e.message);
+  }
+
+  // 3. Resolve user-facing locality priority:
+  //    POST OFFICE / LOCALITY -> SUBLOCALITY -> NEIGHBORHOOD -> POSTAL TOWN -> CITY -> DISTRICT -> STATE
+  const resolvedSpecificLocality = cleanAreaName(sublocality || neighborhood || postOfficeName || postalTown);
+  const resolvedCity = localityCity || subDistrict || district || (pin.startsWith("411") ? "Pune" : pin.startsWith("400") ? "Mumbai" : "");
+  const displayLocality = resolvedSpecificLocality || resolvedCity || district || state || "India";
+
+  const isPune =
+    pin.startsWith("411") ||
+    pin.startsWith("412") ||
+    (resolvedCity && (resolvedCity.toLowerCase().includes("pune") || resolvedCity.toLowerCase().includes("pimpri-chinchwad"))) ||
+    (district && district.toLowerCase().includes("pune"));
+
+  const deliveryTime = isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)";
+  const displayText = `${pin}, ${displayLocality}`;
+
+  return {
+    success: true,
+    deliverable: true,
+    pincode: pin,
+    locality: resolvedSpecificLocality || displayLocality,
+    city: resolvedCity || (isPune ? "Pune" : ""),
+    district: district || "",
+    state: state || (isPune ? "Maharashtra" : ""),
+    country: country || "India",
+    isPune: Boolean(isPune),
+    estimatedDelivery: deliveryTime,
+    displayText,
+    message: isPune
+      ? `✓ Express 1-Day Delivery available in ${displayLocality}`
+      : `✓ We deliver to ${displayText}`,
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

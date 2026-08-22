@@ -5,6 +5,7 @@ import {
   getPlaceDetails,
   geocodeAddress,
   reverseGeocodeCoords,
+  checkPincodeLocation,
   calculateDistance,
   validateDelivery,
 } from "../controllers/locationController.js";
@@ -24,6 +25,7 @@ router.post("/autocomplete", locationLimiter, getPlacesAutocomplete);
 router.post("/place-details", locationLimiter, getPlaceDetails);
 router.post("/geocode", locationLimiter, geocodeAddress);
 router.post("/reverse-geocode", locationLimiter, reverseGeocodeCoords);
+router.post("/check-pincode", locationLimiter, checkPincodeLocation);
 router.post("/calculate-distance", locationLimiter, calculateDistance);
 router.post("/validate-delivery", locationLimiter, validateDelivery);
 
