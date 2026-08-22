@@ -681,7 +681,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  "Janumet", "Mounjaro", "Glenza", "Lonopin", "Albumin", "Keytruda", "Tagrisso", "Forxiga", "Oncology", "Transplant"
+                  "Mounjaro", "Glenza", "Knee cap", "Cancer", "Transplant", "Hospital Bed", "Lonopin", "Albumin"
                 ].map((tag) => (
                   <button
                     key={tag}
@@ -959,13 +959,19 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
         <div className="search-hint font-sans pt-2 hidden md:flex flex-wrap items-center gap-2 select-none">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">POPULAR:</span>
-          {["Janumet", "Mounjaro", "Glenza", "Oncology", "Transplant", "Cardiac"].map((tag) => (
-            <span
+          {["Mounjaro", "Glenza", "Knee cap", "Cancer", "Transplant", "Hospital Bed"].map((tag) => (
+            <button
               key={tag}
-              className="px-2.5 py-0.5 rounded-full bg-[#edf7f2] text-[#038076] border border-[#c3e6d6] text-xs font-semibold select-none cursor-default"
+              type="button"
+              onClick={() => {
+                setQuery(tag);
+                triggerSearch(tag);
+                if (inputRef.current) inputRef.current.focus();
+              }}
+              className="px-2.5 py-0.5 rounded-full bg-[#edf7f2] hover:bg-[#d6f0e4] text-[#038076] border border-[#c3e6d6] text-xs font-semibold select-none cursor-pointer transition-colors"
             >
               {tag}
-            </span>
+            </button>
           ))}
         </div>
 
