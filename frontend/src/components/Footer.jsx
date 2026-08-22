@@ -273,8 +273,8 @@ const Footer = () => {
 
         </div>
 
-        {/* 4. BUSINESS, REGISTERED ADDRESS & DRUG LICENSES (PlatinumRx Style) */}
-        <div className="py-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-left border-b border-[#c8e6d9] dark:border-[#1a2e28]">
+        {/* 4. BUSINESS & REGISTERED ADDRESS */}
+        <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-b border-[#c8e6d9] dark:border-[#1a2e28]">
           
           {/* Contacts */}
           <div className="space-y-1.5">
@@ -303,36 +303,10 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Drug License Numbers & Regulatory */}
-          <div className="space-y-1.5">
-            <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white mb-2">
-              DRUG LICENSE & REGULATORY
-            </h5>
-            <div className="text-xs text-slate-700 dark:text-zinc-300 space-y-0.5 font-medium">
-              <p>1. Form 20B: <strong className="text-slate-900 dark:text-white">MH-PUN-514238</strong></p>
-              <p>2. Form 21B: <strong className="text-slate-900 dark:text-white">MH-PUN-514239</strong></p>
-              <p>GSTIN: <strong className="text-slate-900 dark:text-white">27AABCP8482N1Z8</strong></p>
-              <p>CIN: <strong className="text-slate-900 dark:text-white">U47910PN2025PTC201566</strong></p>
-              <p>FSSAI: <strong className="text-slate-900 dark:text-white">11524036000123</strong></p>
-            </div>
-          </div>
-
         </div>
 
         {/* 5. TRUST ACCREDITATIONS & SECURITY BADGES */}
         <div className="py-6 border-b border-[#c8e6d9] dark:border-[#1a2e28] flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-800 dark:text-zinc-200">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#038076]/15 flex items-center justify-center text-[#038076] dark:text-[#84d6b9]">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <span>LegitScript Certified Healthcare Platform</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#038076]/15 flex items-center justify-center text-[#038076] dark:text-[#84d6b9]">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <span>CDSCO Licensed Retail Pharmacy</span>
-          </div>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-[#038076]/15 flex items-center justify-center text-[#038076] dark:text-[#84d6b9]">
               <Thermometer className="w-4 h-4" />
