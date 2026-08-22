@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -116,6 +117,18 @@ const Navbar = () => {
 
   // Mobile search drawer expansion state
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
+
+  // Lock body scroll when mobile search modal is active
+  useEffect(() => {
+    if (mobileSearchExpanded) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileSearchExpanded]);
 
   // Scroll search bar visibility state (For Homepage and /delivery scroll)
   const isHeroSearchPage = location.pathname === "/" || location.pathname === "/delivery";
@@ -614,26 +627,27 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Mobile Fullscreen Search Expansion */}
-          {mobileSearchExpanded && (
-            <div className="flex flex-col w-full h-[100vh] bg-white z-[300] fixed inset-0 p-4 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-center gap-2 mb-4 shrink-0">
+          {/* Mobile Fullscreen Search Expansion via Portal */}
+          {mobileSearchExpanded && createPortal(
+            <div className="flex flex-col w-full h-[100dvh] bg-white dark:bg-zinc-950 z-[999999] fixed inset-0 p-4 font-sans animate-in fade-in duration-150">
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100 dark:border-zinc-800 shrink-0">
                 <button
                   onClick={() => setMobileSearchExpanded(false)}
-                  className="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-50 transition-colors"
+                  className="p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                   aria-label="Close Search"
                 >
                   <ArrowLeft size={20} />
                 </button>
-                <div className="text-sm font-black text-slate-800">Search WellMeds</div>
+                <div className="text-sm font-extrabold text-slate-900 dark:text-white">Search WellMeds</div>
               </div>
-              <div className="flex-grow overflow-y-auto">
+              <div className="flex-grow overflow-y-auto custom-scrollbar">
                 <UniversalSearch
                   variant="mobile"
                   onCloseMobile={() => setMobileSearchExpanded(false)}
                 />
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       </div>
@@ -641,23 +655,23 @@ const Navbar = () => {
       {/* Mobile Sub-Navbar: Search bar (Visible on scroll in mobile/tablet) */}
       <div
         className={`w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-300 ease-in-out border-slate-200 ${showNavbarSearch
-            ? "grid-rows-[1fr] opacity-100 px-6 py-2.5 border-t pointer-events-auto"
-            : "grid-rows-[0fr] opacity-0 px-6 py-0 border-t-0 pointer-events-none"
+            ? "grid-rows-[1fr] opacity-100 px-4 py-2 border-t pointer-events-auto shadow-sm"
+            : "grid-rows-[0fr] opacity-0 px-4 py-0 border-t-0 pointer-events-none"
           }`}
       >
         <div className="overflow-hidden">
-          <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-sm border border-slate-205 dark:border-zinc-850 w-full">
-            <Search className="text-slate-400 w-4 h-4 shrink-0" />
+          <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-xs border border-slate-200 dark:border-zinc-800 w-full">
+            <Search className="text-[#038076] w-4 h-4 shrink-0" />
             <input
               type="text"
-              placeholder="Search Medicines..."
+              placeholder="Search 3,000+ medicines, molecules..."
               readOnly
               onClick={() => setMobileSearchExpanded(true)}
-              className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-4 py-1.5 flex-grow cursor-pointer placeholder-slate-400 animate-none"
+              className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-2 py-1.5 flex-grow cursor-pointer placeholder-slate-400"
             />
             <button
               onClick={() => navigate("/upload-prescription")}
-              className="bg-[#086b53] hover:bg-[#055746] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
+              className="bg-[#038076] hover:bg-[#02635c] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
             >
               <span>Upload</span>
               <FileText className="w-[11px] h-[11px]" />

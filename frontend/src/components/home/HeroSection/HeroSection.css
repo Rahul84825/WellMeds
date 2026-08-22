@@ -465,7 +465,7 @@
 
 @media (max-width: 768px) {
   .wellmeds-hero-section {
-    padding: 24px 16px 20px 16px;
+    padding: 16px 14px 16px 14px;
     min-height: auto;
     display: flex;
     flex-direction: column;
@@ -474,28 +474,25 @@
   }
 
   .wellmeds-hero-section .eyebrow {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-    padding: 3px 10px;
+    display: none !important;
   }
 
   .wellmeds-hero-section .headline {
-    font-size: 22px;
-    margin-bottom: 6px;
-    line-height: 1.25;
-    padding: 0 4px;
+    display: none !important;
   }
 
   .wellmeds-hero-section .subtitle-line {
-    font-size: 13px;
-    margin-bottom: 16px;
-    padding: 0 6px;
+    font-size: 13.5px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.4;
   }
 
   .wellmeds-hero-section .trust-line {
-    font-size: 11.5px;
-    margin-top: 14px;
+    display: none !important;
   }
 
   .wellmeds-hero-section .search-wrap {
@@ -506,25 +503,23 @@
   }
 
   .wellmeds-hero-section .search-tape {
-    display: block !important;
-    top: -10px;
-    width: 80px;
-    height: 20px;
+    display: none !important;
   }
 
   .wellmeds-hero-section .search-card {
-    padding: 16px;
+    padding: 10px 14px;
     border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   }
 
   .wellmeds-hero-section .search-row {
-    border-bottom: 1.5px dashed var(--line) !important;
-    padding-bottom: 12px !important;
-    gap: 10px;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    gap: 8px;
   }
 
   .wellmeds-hero-section .search-rx {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .wellmeds-hero-section .search-input-field {
@@ -532,16 +527,12 @@
   }
 
   .wellmeds-hero-section .search-btn {
-    padding: 8px 16px;
-    font-size: 12px;
+    padding: 7px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
   }
 
   .wellmeds-hero-section .search-hint {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    font-size: 11.5px;
-    margin-top: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: none !important;
   }
 }

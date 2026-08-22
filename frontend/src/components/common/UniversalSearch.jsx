@@ -1,12 +1,311 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag
+  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, Check, Clock, Sparkles
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import api from "../../services/api";
 import { DEFAULT_PRODUCT_IMAGE } from "../../utils/placeholder";
 import SearchPlaceholderCarousel from "./SearchPlaceholderCarousel";
+
+export const INDIAN_DELIVERY_LOCATIONS = [
+  {
+    name: "Pune",
+    state: "Maharashtra",
+    deliveryTime: "1 Day Delivery",
+    deliveryBadge: "⚡ 1 Day in Pune",
+    isExpress: true,
+    subtext: "Baner local dispatch hub • Same Day / Next Day"
+  },
+  {
+    name: "Maharashtra (Other)",
+    state: "Maharashtra",
+    deliveryTime: "More than 2 Days (1–2 Days)",
+    deliveryBadge: "🚚 1–2 Days",
+    isExpress: false,
+    subtext: "Mumbai, Thane, Nagpur, Nashik, Aurangabad"
+  },
+  {
+    name: "Delhi / NCR",
+    state: "Delhi",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "New Delhi, Noida, Gurugram, Ghaziabad"
+  },
+  {
+    name: "Karnataka",
+    state: "Karnataka",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Bengaluru, Mysuru, Hubballi, Mangaluru"
+  },
+  {
+    name: "Gujarat",
+    state: "Gujarat",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Ahmedabad, Surat, Vadodara, Rajkot"
+  },
+  {
+    name: "Telangana",
+    state: "Telangana",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Hyderabad, Secunderabad, Warangal"
+  },
+  {
+    name: "Tamil Nadu",
+    state: "Tamil Nadu",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Chennai, Coimbatore, Madurai, Salem"
+  },
+  {
+    name: "Andhra Pradesh",
+    state: "Andhra Pradesh",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Visakhapatnam, Vijayawada, Guntur"
+  },
+  {
+    name: "Arunachal Pradesh",
+    state: "Arunachal Pradesh",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Itanagar, Tawang, Pasighat"
+  },
+  {
+    name: "Assam",
+    state: "Assam",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Guwahati, Silchar, Dibrugarh"
+  },
+  {
+    name: "Bihar",
+    state: "Bihar",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Patna, Gaya, Muzaffarpur, Bhagalpur"
+  },
+  {
+    name: "Chandigarh",
+    state: "Chandigarh",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Tricity Express Logistics"
+  },
+  {
+    name: "Chhattisgarh",
+    state: "Chhattisgarh",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Raipur, Bhilai, Bilaspur"
+  },
+  {
+    name: "Goa",
+    state: "Goa",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Panaji, Margao, Vasco"
+  },
+  {
+    name: "Haryana",
+    state: "Haryana",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Faridabad, Panipat, Ambala, Karnal"
+  },
+  {
+    name: "Himachal Pradesh",
+    state: "Himachal Pradesh",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Shimla, Dharamshala, Solan, Mandi"
+  },
+  {
+    name: "Jammu and Kashmir",
+    state: "Jammu and Kashmir",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Srinagar, Jammu, Anantnag"
+  },
+  {
+    name: "Jharkhand",
+    state: "Jharkhand",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Ranchi, Jamshedpur, Dhanbad, Bokaro"
+  },
+  {
+    name: "Kerala",
+    state: "Kerala",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Kochi, Thiruvananthapuram, Kozhikode"
+  },
+  {
+    name: "Ladakh",
+    state: "Ladakh",
+    deliveryTime: "More than 2 Days (4–6 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Leh, Kargil"
+  },
+  {
+    name: "Madhya Pradesh",
+    state: "Madhya Pradesh",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Indore, Bhopal, Jabalpur, Gwalior"
+  },
+  {
+    name: "Manipur",
+    state: "Manipur",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Imphal, Churachandpur"
+  },
+  {
+    name: "Meghalaya",
+    state: "Meghalaya",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Shillong, Tura, Jowai"
+  },
+  {
+    name: "Mizoram",
+    state: "Mizoram",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Aizawl, Lunglei"
+  },
+  {
+    name: "Nagaland",
+    state: "Nagaland",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Kohima, Dimapur, Mokokchung"
+  },
+  {
+    name: "Odisha",
+    state: "Odisha",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Bhubaneswar, Cuttack, Rourkela"
+  },
+  {
+    name: "Puducherry",
+    state: "Puducherry",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Puducherry, Karaikal, Ozhukarai"
+  },
+  {
+    name: "Punjab",
+    state: "Punjab",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Ludhiana, Amritsar, Jalandhar, Patiala"
+  },
+  {
+    name: "Rajasthan",
+    state: "Rajasthan",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Jaipur, Jodhpur, Udaipur, Kota"
+  },
+  {
+    name: "Sikkim",
+    state: "Sikkim",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Gangtok, Namchi, Geyzing"
+  },
+  {
+    name: "Tripura",
+    state: "Tripura",
+    deliveryTime: "More than 2 Days (3–5 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Agartala, Dharmanagar, Udaipur"
+  },
+  {
+    name: "Uttar Pradesh",
+    state: "Uttar Pradesh",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Lucknow, Kanpur, Varanasi, Agra, Prayagraj"
+  },
+  {
+    name: "Uttarakhand",
+    state: "Uttarakhand",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Dehradun, Haridwar, Haldwani, Roorkee"
+  },
+  {
+    name: "West Bengal",
+    state: "West Bengal",
+    deliveryTime: "More than 2 Days (2–4 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Kolkata, Howrah, Siliguri, Durgapur"
+  },
+  {
+    name: "Andaman and Nicobar Islands",
+    state: "Andaman and Nicobar Islands",
+    deliveryTime: "More than 2 Days (5–7 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Port Blair, Island Air & Sea Cargo"
+  },
+  {
+    name: "Dadra & Nagar Haveli and Daman & Diu",
+    state: "Dadra and Nagar Haveli and Daman and Diu",
+    deliveryTime: "More than 2 Days (2–3 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Daman, Silvassa"
+  },
+  {
+    name: "Lakshadweep",
+    state: "Lakshadweep",
+    deliveryTime: "More than 2 Days (5–7 Days)",
+    deliveryBadge: "🚚 > 2 Days",
+    isExpress: false,
+    subtext: "Kavaratti, Agatti"
+  }
+];
 
 export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const navigate = useNavigate();
@@ -21,27 +320,83 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
 
   // Delivery selector states
   const [selectedLocation, setSelectedLocation] = useState(() => {
-    return localStorage.getItem("wellmeds_location") || "Mumbai, 400001";
+    try {
+      const saved = localStorage.getItem("wellmeds_delivery_location");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.name) return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to load saved delivery location", e);
+    }
+    return INDIAN_DELIVERY_LOCATIONS[0]; // Default: Pune (1 Day Delivery)
   });
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
 
   const containerRef = useRef(null);
+  const locationMenuRef = useRef(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   const timeoutRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  // Handle outside clicks to close the dropdown
+  // Handle outside clicks to close the dropdowns
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setFocused(false);
         setActiveIndex(-1);
       }
+      if (locationMenuRef.current && !locationMenuRef.current.contains(e.target)) {
+        setLocationMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  // Sync location across components
+  useEffect(() => {
+    const handleLocationChange = (e) => {
+      if (e.detail) {
+        if (typeof e.detail === "object" && e.detail.name) {
+          setSelectedLocation(e.detail);
+        } else if (typeof e.detail === "string") {
+          const matched = INDIAN_DELIVERY_LOCATIONS.find(
+            (l) => l.name.toLowerCase() === e.detail.toLowerCase() || e.detail.toLowerCase().includes(l.name.toLowerCase())
+          );
+          if (matched) setSelectedLocation(matched);
+        }
+      }
+    };
+    window.addEventListener("wellmeds_location_changed", handleLocationChange);
+    return () => {
+      window.removeEventListener("wellmeds_location_changed", handleLocationChange);
+    };
+  }, []);
+
+  const handleSelectLocation = (loc) => {
+    setSelectedLocation(loc);
+    try {
+      localStorage.setItem("wellmeds_delivery_location", JSON.stringify(loc));
+      localStorage.setItem("wellmeds_location", loc.name);
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent("wellmeds_location_changed", { detail: loc }));
+    setLocationMenuOpen(false);
+    setLocationSearchQuery("");
+  };
+
+  // Filtered locations based on search query
+  const filteredLocations = INDIAN_DELIVERY_LOCATIONS.filter((loc) => {
+    if (!locationSearchQuery.trim()) return true;
+    const q = locationSearchQuery.toLowerCase();
+    return (
+      loc.name.toLowerCase().includes(q) ||
+      loc.state.toLowerCase().includes(q) ||
+      loc.subtext.toLowerCase().includes(q)
+    );
+  });
 
   // Sync state with URL search query if on the Products page
   useEffect(() => {
@@ -179,15 +534,379 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
   const isMobile = variant === "mobile";
   const isPrescription = variant === "prescription";
 
+  if (isMobile) {
+    return (
+      <div className="flex flex-col w-full font-sans pb-16">
+        {/* Search Input Bar */}
+        <div className="sticky top-0 z-20 bg-white dark:bg-zinc-950 pb-3">
+          <div className="flex items-center bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-2 gap-2 shadow-xs focus-within:border-[#038076] focus-within:ring-2 focus-within:ring-[#038076]/20 transition-all">
+            <Search className="w-5 h-5 text-[#038076] shrink-0 ml-1" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search 3,000+ medicines, molecules, surgicals..."
+              value={query}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="flex-1 bg-transparent border-none text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-0 p-0 font-medium"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setResults({});
+                  setActiveIndex(-1);
+                  if (inputRef.current) inputRef.current.focus();
+                }}
+                className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-full text-slate-500 transition-colors shrink-0"
+                aria-label="Clear Search"
+              >
+                <X size={16} />
+              </button>
+            )}
+            {loading && (
+              <Loader2 className="animate-spin text-[#038076] shrink-0" size={16} />
+            )}
+            <button
+              type="button"
+              onClick={handleSearchSubmit}
+              disabled={!query.trim()}
+              className="bg-[#038076] disabled:opacity-50 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shrink-0 transition-colors"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        {/* CONTENT AREA: Results vs Default Suggestions */}
+        {query.trim().length >= 2 ? (
+          /* ACTIVE SEARCH RESULTS */
+          <div className="flex flex-col space-y-4 pt-1">
+            {loading ? (
+              <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                <Loader2 className="animate-spin text-[#038076] w-7 h-7" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Searching 3,000+ specialty SKUs...
+                </span>
+              </div>
+            ) : !hasResults() ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 my-2">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-[#038076] flex items-center justify-center font-bold text-xl mb-3">
+                  ℞
+                </div>
+                <h3 className="font-extrabold text-sm text-slate-800 dark:text-white">
+                  No direct match found for "{query}"
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
+                  We source hard-to-find & cold-chain medicines on demand across India.
+                </p>
+                <button
+                  onClick={() => {
+                    if (onCloseMobile) onCloseMobile();
+                    navigate("/upload-prescription");
+                  }}
+                  className="mt-4 bg-[#038076] hover:bg-[#02635c] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all"
+                >
+                  Upload Prescription for Instant Quote
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Molecule Matches */}
+                {results.molecules?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                      <Search className="w-3.5 h-3.5 text-[#038076]" />
+                      <span>Salt & Molecules ({results.molecules.length})</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {results.molecules.map((mol) => (
+                        <button
+                          key={mol.slug}
+                          type="button"
+                          onClick={() => handleSelectItem({ type: "molecule", value: mol })}
+                          className="px-3 py-1.5 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#038076] dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold hover:bg-teal-100 transition-colors flex items-center gap-1.5"
+                        >
+                          <span>{mol.name}</span>
+                          <span className="text-[11px] opacity-70">&rarr;</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Medicine / Product Matches */}
+                {results.products?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                      <ShoppingBag className="w-3.5 h-3.5 text-[#038076]" />
+                      <span>Medicines & Products ({results.products.length})</span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {results.products.map((prod) => (
+                        <ProductListItem
+                          key={prod.id || prod._id}
+                          product={prod}
+                          active={false}
+                          onSelect={() => handleSelectItem({ type: "product", value: prod })}
+                          onAddToCart={(p) => addToCart(p, 1)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* View All Search Results Button */}
+                <button
+                  type="button"
+                  onClick={handleSearchSubmit}
+                  className="w-full py-3 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 mt-2"
+                >
+                  <span>View all results for "{query}"</span>
+                  <span>&rarr;</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* DEFAULT SUGGESTIONS & POPULAR CATEGORIES (WHEN EMPTY) */
+          <div className="flex flex-col space-y-5 pt-2">
+            {/* Trending Searches */}
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider mb-2.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Trending Searches</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Janumet", "Mounjaro", "Glenza", "Lonopin", "Albumin", "Keytruda", "Tagrisso", "Forxiga", "Oncology", "Transplant"
+                ].map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => {
+                      setQuery(tag);
+                      triggerSearch(tag);
+                    }}
+                    className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-zinc-900 hover:bg-teal-50 hover:text-[#038076] hover:border-teal-200 border border-slate-200/80 dark:border-zinc-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Categories */}
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider mb-2.5">
+                <Clock className="w-3.5 h-3.5 text-[#038076]" />
+                <span>Popular Specialities</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { name: "Oncology Care", icon: "🎗️", link: "/specialities/oncology" },
+                  { name: "Cardiology", icon: "🫀", link: "/specialities/cardiology" },
+                  { name: "Organ Transplant", icon: "🧬", link: "/specialities/transplant" },
+                  { name: "Surgical Supplies", icon: "🩺", link: "/surgicals" },
+                  { name: "Nephrology / Renal", icon: "🩸", link: "/specialities/nephrology" },
+                  { name: "Cold-Chain Care", icon: "❄️", link: "/specialities/cold-chain" }
+                ].map((cat) => (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => {
+                      if (onCloseMobile) onCloseMobile();
+                      navigate(cat.link);
+                    }}
+                    className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-zinc-900/60 hover:bg-teal-50/50 dark:hover:bg-zinc-800 rounded-xl border border-slate-100 dark:border-zinc-800 text-left transition-colors cursor-pointer"
+                  >
+                    <span className="text-base">{cat.icon}</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                      {cat.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Upload Prescription Promo Card */}
+            <div
+              onClick={() => {
+                if (onCloseMobile) onCloseMobile();
+                navigate("/upload-prescription");
+              }}
+              className="p-4 bg-gradient-to-br from-[#038076] to-[#02635c] rounded-2xl text-white flex items-center justify-between cursor-pointer shadow-md active:scale-[0.99] transition-all"
+            >
+              <div>
+                <div className="text-xs font-extrabold flex items-center gap-1.5">
+                  <span>📋 Have a Doctor's Prescription?</span>
+                </div>
+                <p className="text-[11px] text-teal-100 mt-1">
+                  Upload prescription for verified pricing & fast doorstep dispatch.
+                </p>
+              </div>
+              <span className="bg-white text-[#038076] text-xs font-extrabold px-3 py-1.5 rounded-lg shrink-0 ml-2">
+                Upload &rarr;
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (isPrescription) {
     return (
       <div ref={containerRef} className="relative w-full font-sans">
         <div className="search-row flex items-center">
-          {/* Location Delivery Selector (Inspired by Truemeds / PlatinumRx) */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 select-none pr-3 border-r border-[#c3d4cc] shrink-0 font-sans">
-            <MapPin className="w-4 h-4 text-[#038076]" />
-            <span>Deliver to <strong className="text-slate-900">Pune</strong></span>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
+          {/* Location Delivery Selector (Interactive with all Indian States & delivery times) */}
+          <div className="relative hidden sm:block shrink-0 font-sans" ref={locationMenuRef}>
+            <button
+              type="button"
+              onClick={() => setLocationMenuOpen((prev) => !prev)}
+              className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#038076] transition-colors select-none pr-3 border-r border-[#c3d4cc] py-1 cursor-pointer group"
+              title="Select delivery state & check estimated delivery time"
+            >
+              <MapPin className="w-4 h-4 text-[#038076] group-hover:scale-110 transition-transform shrink-0" />
+              <div className="flex flex-col text-left">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 font-medium text-[11px]">Deliver to</span>
+                  <strong className="text-slate-900 font-extrabold text-xs group-hover:text-[#038076] transition-colors">
+                    {selectedLocation.name}
+                  </strong>
+                </div>
+                <span className={`text-[10px] font-bold leading-tight ${selectedLocation.name === "Pune" ? "text-emerald-700 font-extrabold" : "text-amber-700 font-semibold"}`}>
+                  {selectedLocation.name === "Pune" ? "⚡ 1 Day in Pune" : "🚚 More than 2 days"}
+                </span>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-[#038076] transition-transform duration-200 ml-0.5 ${locationMenuOpen ? "rotate-180 text-[#038076]" : ""}`} />
+            </button>
+
+            {/* Location Selector Dropdown Popover */}
+            {locationMenuOpen && (
+              <div className="absolute left-0 top-full mt-2 w-[340px] sm:w-[380px] bg-white rounded-xl shadow-2xl border border-slate-200 z-[400] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 font-sans text-left">
+                {/* Header Strip */}
+                <div className="bg-[#038076] text-white p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-emerald-200 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-bold leading-tight">Choose Delivery Location</h4>
+                      <p className="text-[10px] text-emerald-100">Live delivery timeline estimate</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLocationMenuOpen(false)}
+                    className="p-1 hover:bg-white/20 rounded-md transition-colors text-white/80 hover:text-white"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                {/* Delivery Timeline Notice Banner */}
+                <div className="p-2.5 bg-slate-50 border-b border-slate-200 space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between p-1.5 bg-emerald-50 border border-emerald-200 rounded-md text-emerald-900 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span>⚡</span>
+                      <span>Pune Local Delivery:</span>
+                    </span>
+                    <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      1 Day in Pune
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-1.5 bg-amber-50 border border-amber-200 rounded-md text-amber-900 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span>🚚</span>
+                      <span>All Other States:</span>
+                    </span>
+                    <span className="bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      More than 2 Days
+                    </span>
+                  </div>
+                </div>
+
+                {/* Search Filter Input */}
+                <div className="p-2 bg-white border-b border-slate-100">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-100 rounded-lg border border-slate-200 focus-within:border-[#038076] focus-within:bg-white transition-all">
+                    <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search state or city..."
+                      value={locationSearchQuery}
+                      onChange={(e) => setLocationSearchQuery(e.target.value)}
+                      className="w-full bg-transparent text-xs text-slate-800 outline-none border-none focus:ring-0 p-0 font-medium placeholder-slate-400"
+                      autoFocus
+                    />
+                    {locationSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setLocationSearchQuery("")}
+                        className="text-slate-400 hover:text-slate-600 p-0.5"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* States & UTs List */}
+                <div className="max-h-[240px] overflow-y-auto divide-y divide-slate-100">
+                  {filteredLocations.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-slate-500">
+                      No states found matching "{locationSearchQuery}"
+                    </div>
+                  ) : (
+                    filteredLocations.map((loc) => {
+                      const isSelected = selectedLocation.name === loc.name;
+                      return (
+                        <button
+                          key={loc.name}
+                          type="button"
+                          onClick={() => handleSelectLocation(loc)}
+                          className={`w-full px-3 py-2 text-left flex items-center justify-between transition-colors ${
+                            isSelected
+                              ? "bg-[#edf7f2] text-[#038076] font-bold"
+                              : "hover:bg-slate-50 text-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0 pr-2">
+                            <MapPin className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-[#038076]" : "text-slate-400"}`} />
+                            <div className="truncate">
+                              <div className="text-xs font-semibold flex items-center gap-1.5 truncate">
+                                <span>{loc.name}</span>
+                                {loc.name === "Pune" && (
+                                  <span className="text-[9px] bg-emerald-600 text-white font-extrabold px-1.5 py-0.2 rounded uppercase">
+                                    FASTEST
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-normal truncate block">
+                                {loc.subtext}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
+                              loc.name === "Pune"
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                : "bg-amber-100 text-amber-800 border-amber-300"
+                            }`}>
+                              {loc.name === "Pune" ? "⚡ 1 Day in Pune" : "🚚 > 2 Days"}
+                            </span>
+                            {isSelected && (
+                              <Check className="w-3.5 h-3.5 text-[#038076] stroke-[3]" />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="search-rx flex items-center justify-center">
@@ -238,7 +957,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
           </button>
         </div>
 
-        <div className="search-hint font-sans pt-2 flex flex-wrap items-center gap-2 select-none">
+        <div className="search-hint font-sans pt-2 hidden md:flex flex-wrap items-center gap-2 select-none">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">POPULAR:</span>
           {["Janumet", "Mounjaro", "Glenza", "Oncology", "Transplant", "Cardiac"].map((tag) => (
             <span
