@@ -16,7 +16,7 @@
   --grid-line: rgba(15, 59, 52, 0.05);
 
   width: 100%;
-  min-height: 480px;
+  min-height: 412px;
   position: relative;
   z-index: 20;
   overflow: visible;
@@ -29,7 +29,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 36px 40px;
+  padding: 30px 40px;
   box-sizing: border-box;
 }
 
@@ -76,7 +76,7 @@
   font-size: 16px;
   color: var(--ink-soft);
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   font-weight: 500;
 }
 
@@ -106,7 +106,7 @@
   border: 1px solid var(--card-edge);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
-  padding: 20px 28px;
+  padding: 17px 24px;
   position: relative;
 }
 
@@ -458,14 +458,14 @@
 /* Responsive Adaptation */
 @media (max-width: 1024px) {
   .wellmeds-hero-section {
-    padding: 28px 24px;
-    min-height: 400px;
+    padding: 24px 20px;
+    min-height: 344px;
   }
 }
 
 @media (max-width: 768px) {
   .wellmeds-hero-section {
-    padding: 16px 14px 16px 14px;
+    padding: 14px 12px 14px 12px;
     min-height: auto;
     display: flex;
     flex-direction: column;
@@ -483,7 +483,7 @@
 
   .wellmeds-hero-section .subtitle-line {
     font-size: 13.5px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     padding: 0 4px;
     font-weight: 600;
     color: var(--ink-soft);
