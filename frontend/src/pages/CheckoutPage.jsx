@@ -595,15 +595,6 @@ const Checkout = () => {
               <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#172b26] dark:text-white">
                 Shipping Information
               </h3>
-              {addresses.length > 0 && !showAddForm && (
-                <button
-                  type="button"
-                  onClick={() => setAddressModalOpen(true)}
-                  className="text-xs font-bold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <MapPin size={14} /> Change Address ({addresses.length} Saved)
-                </button>
-              )}
             </div>
 
             {requiresRx && rxStatus !== "Verified" && (
@@ -618,33 +609,109 @@ const Checkout = () => {
               </div>
             )}
 
-            {/* Address Display with Interactive Google Map & Delivery Distance Matrix */}
+            {/* Address Display & Selector */}
             {selectedAddress && !showAddForm ? (
-              <div className="space-y-3">
-                <AddressCard
-                  address={selectedAddress}
-                  isSelected={true}
-                  showActions={false}
-                />
+              <div className="space-y-4">
+                {/* If multiple saved addresses exist, provide a 1-tap quick selector grid */}
+                {addresses.length > 1 && (
+                  <div className="space-y-2 pb-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                        Select Delivery Address ({addresses.length} Saved)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setAddressModalOpen(true)}
+                        className="text-xs font-bold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        Manage All Addresses
+                      </button>
+                    </div>
 
-                {/* Google Maps Nationwide Delivery Badge */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {addresses.map((addr) => {
+                        const id = addr._id || addr.id;
+                        const isSelected = id === (selectedAddress?._id || selectedAddress?.id || selectedAddressId);
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => selectAddress(id)}
+                            className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                              isSelected
+                                ? "border-[#038076] bg-[#edf7f2] dark:bg-[#122822] text-[#038076] dark:text-[#84d6b9] ring-1 ring-[#038076] shadow-2xs"
+                                : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between w-full mb-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#038076]/10 text-[#038076] dark:bg-[#038076]/20 dark:text-[#84d6b9]">
+                                  {addr.type || "Home"}
+                                </span>
+                                {addr.isDefault && (
+                                  <span className="text-[9px] font-extrabold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200/50">
+                                    Default
+                                  </span>
+                                )}
+                              </div>
+                              {isSelected && (
+                                <span className="w-4 h-4 rounded-full bg-[#038076] text-white flex items-center justify-center">
+                                  <CheckCircle2 size={12} />
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate mt-0.5">
+                              {addr.fullName} <span className="text-[11px] font-normal text-slate-400">({addr.mobile})</span>
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-2 mt-0.5 leading-snug">
+                              {addr.houseNo ? `${addr.houseNo}, ` : ""}{addr.building ? `${addr.building}, ` : ""}{addr.street ? `${addr.street}, ` : ""}{addr.city} {addr.pincode}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Detailed Active Address Card */}
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">
+                    Delivering To
+                  </span>
+                  <AddressCard
+                    address={selectedAddress}
+                    isSelected={true}
+                    showActions={false}
+                  />
+                </div>
+
+                {/* Delivery Turnaround & Nationwide Dispatch Badge */}
                 <div className="p-3 rounded-2xl bg-teal-50/70 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-2 text-[#157a6d] dark:text-emerald-300 font-bold">
                     <Navigation size={15} className="shrink-0 text-[#157a6d]" />
                     <span>
-                      Pan-India Express Shipping & Dispatch
+                      {selectedAddress.pincode?.startsWith("411") || selectedAddress.pincode?.startsWith("412") || selectedAddress.city?.toLowerCase().includes("pune")
+                        ? "⚡ Express 1-Day Dispatch in Pune"
+                        : "🚚 Pan-India Express Shipping & Dispatch"}
                     </span>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0 bg-[#bbf7d0] text-[#15803d] border border-emerald-300/40">
-                    ✔ Pan-India Delivery
+                    {selectedAddress.pincode?.startsWith("411") ? "⚡ 1 Day" : "✔ Pan-India"}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-end text-xs font-semibold pt-1">
+                <div className="flex items-center justify-between text-xs font-semibold pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setAddressModalOpen(true)}
+                    className="text-slate-500 hover:text-[#157a6d] dark:text-zinc-400 font-semibold cursor-pointer"
+                  >
+                    View All Saved Addresses
+                  </button>
                   <button
                     type="button"
                     onClick={() => setShowAddForm(true)}
-                    className="text-[#157a6d] dark:text-emerald-400 font-bold hover:underline cursor-pointer"
+                    className="text-[#157a6d] dark:text-emerald-400 font-bold hover:underline cursor-pointer flex items-center gap-1"
                   >
                     + Add New Address
                   </button>
@@ -658,6 +725,9 @@ const Checkout = () => {
                 <UniversalAddressForm
                   onSubmit={async (cleanData) => {
                     const newAddr = await addAddress(cleanData);
+                    if (newAddr) {
+                      selectAddress(newAddr._id || newAddr.id);
+                    }
                     setShowAddForm(false);
                   }}
                   onCancel={addresses.length > 0 ? () => setShowAddForm(false) : null}

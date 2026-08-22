@@ -128,6 +128,30 @@ const UniversalAddressForm = ({
     }, 300);
   };
 
+  // Handle 6-digit Pincode Auto-Resolution
+  const handlePincodeChange = async (val) => {
+    const clean = val.replace(/\D/g, "").slice(0, 6);
+    handleChange("pincode", clean);
+
+    if (clean.length === 6) {
+      try {
+        const res = await checkPincodeValidation(clean);
+        if (res && res.success) {
+          setFormData((prev) => ({
+            ...prev,
+            pincode: clean,
+            city: res.city || prev.city,
+            state: res.state || prev.state,
+            street: prev.street || (res.locality && res.locality !== res.city ? res.locality : prev.street),
+          }));
+          setLocationStatus(`✔ Delivery available to ${res.displayText}`);
+        }
+      } catch (e) {
+        console.warn("Pincode validation error:", e);
+      }
+    }
+  };
+
   // Handle Place Selection
   const handleSelectPrediction = async (prediction) => {
     setSearchQuery(prediction.description);
@@ -311,17 +335,19 @@ const UniversalAddressForm = ({
           <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1">
             Mobile Number <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">+91</span>
+          <div className="relative flex items-center">
+            <span className="absolute left-3 inset-y-0 flex items-center pointer-events-none text-xs font-bold text-slate-400 select-none leading-none">
+              +91
+            </span>
             <input
               type="tel"
               maxLength={10}
               placeholder="7798795353"
               value={formData.mobile}
               onChange={(e) => handleChange("mobile", e.target.value.replace(/\D/g, ""))}
-              className={`w-full pl-10 bg-white dark:bg-zinc-900 border ${
+              className={`w-full bg-white dark:bg-zinc-900 border ${
                 errors.mobile ? "border-red-500" : "border-slate-250 dark:border-zinc-800"
-              } rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all`}
+              } rounded-xl pl-11 pr-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all`}
             />
           </div>
           {errors.mobile && (
@@ -337,17 +363,19 @@ const UniversalAddressForm = ({
         <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1">
           Alternate Mobile Number <span className="text-slate-400 font-normal">(Optional)</span>
         </label>
-        <div className="relative">
-          <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">+91</span>
+        <div className="relative flex items-center">
+          <span className="absolute left-3 inset-y-0 flex items-center pointer-events-none text-xs font-bold text-slate-400 select-none leading-none">
+            +91
+          </span>
           <input
             type="tel"
             maxLength={10}
             placeholder="Alternate contact for delivery updates"
             value={formData.altMobile}
             onChange={(e) => handleChange("altMobile", e.target.value.replace(/\D/g, ""))}
-            className={`w-full pl-10 bg-white dark:bg-zinc-900 border ${
+            className={`w-full bg-white dark:bg-zinc-900 border ${
               errors.altMobile ? "border-red-500" : "border-slate-250 dark:border-zinc-800"
-            } rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all`}
+            } rounded-xl pl-11 pr-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all`}
           />
         </div>
         {errors.altMobile && (
@@ -532,7 +560,7 @@ const UniversalAddressForm = ({
             maxLength={6}
             placeholder="411045"
             value={formData.pincode}
-            onChange={(e) => handleChange("pincode", e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => handlePincodeChange(e.target.value)}
             className={`w-full bg-white dark:bg-zinc-900 border ${
               errors.pincode ? "border-red-500" : "border-slate-250 dark:border-zinc-800"
             } rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038076] transition-all`}

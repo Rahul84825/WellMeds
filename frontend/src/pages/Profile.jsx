@@ -64,6 +64,8 @@ const Profile = () => {
     updateAddress,
     deleteAddress,
     setDefaultAddress,
+    selectAddress,
+    selectedAddressId,
   } = useAddress();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -378,19 +380,24 @@ const Profile = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {addresses.map((addr) => (
-                  <AddressCard
-                    key={addr._id || addr.id}
-                    address={addr}
-                    isSelected={addr.isDefault}
-                    onEdit={(a) => {
-                      setEditingAddress(a);
-                      setAddressModalOpen(true);
-                    }}
-                    onDelete={deleteAddress}
-                    onSetDefault={setDefaultAddress}
-                  />
-                ))}
+                {addresses.map((addr) => {
+                  const id = addr._id || addr.id;
+                  const isSelected = id === selectedAddressId || (!selectedAddressId && addr.isDefault);
+                  return (
+                    <AddressCard
+                      key={id}
+                      address={addr}
+                      isSelected={isSelected}
+                      onSelect={(addrId) => selectAddress(addrId)}
+                      onEdit={(a) => {
+                        setEditingAddress(a);
+                        setAddressModalOpen(true);
+                      }}
+                      onDelete={deleteAddress}
+                      onSetDefault={setDefaultAddress}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -649,7 +656,10 @@ const Profile = () => {
                 if (editingAddress) {
                   await updateAddress(editingAddress._id || editingAddress.id, cleanData);
                 } else {
-                  await addAddress(cleanData);
+                  const newAddr = await addAddress(cleanData);
+                  if (newAddr && selectAddress) {
+                    selectAddress(newAddr._id || newAddr.id);
+                  }
                 }
                 setAddressModalOpen(false);
                 setEditingAddress(null);

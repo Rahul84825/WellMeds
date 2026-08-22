@@ -322,15 +322,13 @@ export const LocationSelectorModal = () => {
   return createPortal(
     <div
       className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans animate-in fade-in duration-150"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) closeLocationModal();
-      }}
     >
       <div
         className="bg-white dark:bg-zinc-950 text-slate-900 dark:text-white rounded-2xl shadow-2xl border border-slate-200/80 dark:border-zinc-800 w-full max-w-[460px] overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150"
         role="dialog"
         aria-modal="true"
         aria-labelledby="location-modal-title"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
@@ -626,8 +624,10 @@ export const LocationSelectorModal = () => {
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-2.5 text-xs text-slate-400 font-semibold">+91</span>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 inset-y-0 flex items-center pointer-events-none text-xs font-bold text-slate-400 select-none leading-none">
+                      +91
+                    </span>
                     <input
                       type="tel"
                       maxLength={10}
@@ -637,7 +637,7 @@ export const LocationSelectorModal = () => {
                         setConfirmForm({ ...confirmForm, mobile: e.target.value.replace(/\D/g, "") });
                         if (formErrors.mobile) setFormErrors({ ...formErrors, mobile: undefined });
                       }}
-                      className={`w-full h-10 pl-9 pr-3 rounded-xl border ${
+                      className={`w-full h-10 pl-11 pr-3 rounded-xl border ${
                         formErrors.mobile ? "border-red-500" : "border-slate-300 dark:border-zinc-700"
                       } bg-white dark:bg-zinc-900 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-[#038076]`}
                     />
