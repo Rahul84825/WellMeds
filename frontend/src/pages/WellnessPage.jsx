@@ -137,7 +137,7 @@ const WellnessPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
         title="Premium Wellness Storefront | WellMeds Healthcare"
         description="Explore WellMeds dedicated wellness storefront. Shop authentic vitamins, natural supplements, premium personal care, and certified health devices online."
@@ -145,54 +145,21 @@ const WellnessPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
-
-        {/* ── 1. HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-[#b08d3e]/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-6 max-w-3xl">
-            {/* Breadcrumb Nav */}
-            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
-              <span className="cursor-pointer hover:text-[#157a6d] transition-colors" onClick={() => navigate("/")}>Home</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">Wellness</span>
-            </nav>
-
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3.5 py-1.5 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>PREVENTATIVE HEALTH &amp; WELLNESS</span>
-              </div>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight leading-tight">
-                Wellness Essentials
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                Discover carefully selected vitamins, supplements, personal care, and diagnostics designed for active preventative care and healthier living.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <button
-                type="button"
-                onClick={handleShopClick}
-                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-7 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-              >
-                <ShoppingBag size={16} />
-                <span>Shop Wellness</span>
-              </button>
-
-            </div>
-          </div>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight leading-tight">
+            Wellness Essentials
+          </h1>
         </div>
+      </div>
 
-        {/* ── 2. FEATURED WELLNESS SELECTION ── */}
-        {!featuredLoading && featuredProducts.length > 0 && (
-          <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-sm space-y-4">
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* ── 2. FEATURED WELLNESS SELECTION ── */}
+          {!featuredLoading && featuredProducts.length > 0 && (
+            <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-300 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-clinical-mono text-[10px] font-bold text-[#157a6d] uppercase tracking-widest">
@@ -315,7 +282,7 @@ const WellnessPage = () => {
 
         {/* ── 5. REUSABLE WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
-
+        </div>
       </div>
 
       {/* ── 7. CONSULTATION MODAL INTEGRATION ── */}

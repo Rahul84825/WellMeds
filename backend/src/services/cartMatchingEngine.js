@@ -50,7 +50,7 @@ export const normalizeRxItems = (items = []) => {
  * @param {Array} rxCartItems List of normalized Rx cart items
  * @returns {Object} { isMatch, matchType, reason }
  */
-export const evaluatePrescriptionCartMatch = (prescription, rxCartItems = []) => {
+export const evaluatePrescriptionCartMatch = (prescription, rxCartItems = [], { requireApproved = true } = {}) => {
   if (!prescription) {
     return {
       isMatch: false,
@@ -59,7 +59,7 @@ export const evaluatePrescriptionCartMatch = (prescription, rxCartItems = []) =>
     };
   }
 
-  if (prescription.status !== "Approved") {
+  if (requireApproved && prescription.status !== "Approved") {
     return {
       isMatch: false,
       matchType: "NO_MATCH",

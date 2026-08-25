@@ -8,6 +8,18 @@ import {
   evaluateAllUserPrescriptions,
 } from "../services/cartMatchingEngine.js";
 
+const LIVE_SESSION_STATUSES = ["ACTIVE", "LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"];
+const CART_LOCKED_STATUSES = ["LOCKED", "PENDING_VERIFICATION"];
+
+const findLatestLiveSession = (userId, populatePrescription = false) => {
+  let query = CheckoutSession.findOne({
+    user: userId,
+    status: { $in: LIVE_SESSION_STATUSES },
+  }).sort({ updatedAt: -1 });
+  if (populatePrescription) query = query.populate("prescription");
+  return query;
+};
+
 // Helper to check if session expired and auto-expire it
 const checkExpiry = async (session) => {
   if (!session) return null;
@@ -24,10 +36,7 @@ export const initSession = async (req, res, next) => {
     const userId = req.user._id;
 
     // Check existing active/locked session
-    let session = await CheckoutSession.findOne({
-      user: userId,
-      status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
-    }).populate("prescription");
+    let session = await findLatestLiveSession(userId, true);
 
     if (session) {
       await checkExpiry(session);
@@ -138,10 +147,7 @@ export const getCartRxStatus = async (req, res, next) => {
     const matchingApproved = findMatchingApprovedPrescriptions(userPrescriptions, rxCartItems);
 
     // Check CheckoutSession status
-    let session = await CheckoutSession.findOne({
-      user: userId,
-      status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
-    }).populate("prescription");
+    let session = await findLatestLiveSession(userId, true);
 
     if (session) {
       await checkExpiry(session);
@@ -175,14 +181,15 @@ export const getCartRxStatus = async (req, res, next) => {
         targetPrescription.status === "Pending Review" ||
         targetPrescription.status === "Under Verification"
       ) {
-        if (evalResult.isMatch) {
+        const pendingEvalResult = evaluatePrescriptionCartMatch(targetPrescription, rxCartItems, { requireApproved: false });
+        if (pendingEvalResult.isMatch) {
           rxStatus = "Pending Verification";
           isEligible = false;
           lockReason = "Prescription is under pharmacist verification. Please wait.";
         } else {
           rxStatus = "Needs Re-verification";
           isEligible = false;
-          reason = "Your cart items have changed since uploading your prescription.";
+          reason = pendingEvalResult.reason || "Your cart items have changed since uploading your prescription.";
         }
       } else if (targetPrescription.status === "Rejected") {
         rxStatus = "Rejected";
@@ -242,10 +249,7 @@ export const getSessionStatus = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    let session = await CheckoutSession.findOne({
-      user: userId,
-      status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
-    }).populate("prescription");
+    let session = await findLatestLiveSession(userId, true);
 
     if (session) {
       await checkExpiry(session);
@@ -269,11 +273,29 @@ export const modifyCart = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // Find active locked session
+    const paymentSession = await CheckoutSession.exists({
+      user: userId,
+      status: "PAYMENT_PENDING",
+      isLocked: true,
+      expiresAt: { $gt: new Date() },
+    });
+    if (paymentSession) {
+      return res.status(409).json({
+        success: false,
+        code: "PAYMENT_IN_PROGRESS",
+        message: "Payment is currently processing. Please wait for its result before modifying your cart.",
+      });
+    }
+
+    // Only an in-progress prescription review can be cancelled to modify a
+    // cart. A payment lock must be released by the payment lifecycle, not by
+    // a generic cart endpoint.
     const session = await CheckoutSession.findOne({
       user: userId,
-      status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
-    });
+      status: { $in: CART_LOCKED_STATUSES },
+      isLocked: true,
+      expiresAt: { $gt: new Date() },
+    }).sort({ updatedAt: -1 });
 
     if (session) {
       session.status = "CANCELLED";
@@ -282,9 +304,10 @@ export const modifyCart = async (req, res, next) => {
       await session.save();
     }
 
-    // Reset prescription link on cart
+    // Reset prescription link only when a verification lock was actually
+    // cancelled. Calling this endpoint against an unlocked cart is a no-op.
     const cart = await Cart.findOne({ user: userId });
-    if (cart) {
+    if (cart && session) {
       cart.prescription = null;
       cart.prescriptionStatus = "Pending";
       await cart.save();
@@ -295,6 +318,32 @@ export const modifyCart = async (req, res, next) => {
       message: "Cart unlocked. Current prescription verification has been cancelled. Please upload a new prescription for your updated medicines.",
       isLocked: false,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Release only a payment lock that the same customer has dismissed or whose
+// gateway attempt failed. The verified prescription remains linked to the cart.
+export const releasePaymentLock = async (req, res, next) => {
+  try {
+    const session = await CheckoutSession.findOne({
+      user: req.user._id,
+      status: "PAYMENT_PENDING",
+      isLocked: true,
+    }).sort({ updatedAt: -1 });
+
+    if (!session) {
+      return res.status(200).json({ success: true, isLocked: false, status: "ACTIVE" });
+    }
+
+    session.status = session.prescription ? "VERIFIED" : "ACTIVE";
+    session.isLocked = false;
+    session.lockReason = "Payment attempt ended. Cart is available for checkout again.";
+    session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await session.save();
+
+    res.status(200).json({ success: true, isLocked: false, status: session.status });
   } catch (error) {
     next(error);
   }

@@ -262,29 +262,33 @@ const UploadPrescriptionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fbfa] dark:bg-zinc-950 py-8 md:py-12 select-none text-left">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Upload Prescription (Rx) | WellMeds Super Speciality"
         description="Upload doctor's prescription for authentic medicine verification by licensed clinical pharmacists with express nationwide delivery."
       />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Upload Doctor's Prescription
+          </h1>
+        </div>
+      </div>
 
-        {/* ── UNIFORM HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-center justify-between gap-4 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs">
             <div className="space-y-1">
               <span className="inline-flex items-center gap-1.5 bg-[#038076]/10 text-[#038076] dark:text-[#84d6b9] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 <Stethoscope size={14} /> Licensed Pharmacist Verification
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Upload Doctor's Prescription
-              </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
                 Upload a clear image or PDF of your doctor's prescription for quick verification and fast dispatch.
               </p>
             </div>
-
             <div className="flex items-center gap-3 bg-slate-50 dark:bg-zinc-950 p-3 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shrink-0">
               <ShieldCheck className="w-6 h-6 text-[#038076]" />
               <div className="text-xs">
@@ -293,7 +297,6 @@ const UploadPrescriptionPage = () => {
               </div>
             </div>
           </div>
-        </div>
 
         {/* ── BALANCED TWO-COLUMN RESPONSIVE GRID ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -703,6 +706,7 @@ const UploadPrescriptionPage = () => {
         </div>
 
       </div>
+    </div>
 
       {/* ── ADDRESS SELECTOR MODAL ── */}
       <AddressSelectorModal
@@ -782,7 +786,6 @@ const UploadPrescriptionPage = () => {
           </div>
         </div>
       </Modal>
-
     </div>
   );
 };

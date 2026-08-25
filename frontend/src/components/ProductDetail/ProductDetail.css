@@ -6,7 +6,7 @@
 .pdp-theme-container {
   --pdp-card: #ffffff;
   --pdp-card-pure: #ffffff;
-  --pdp-card-edge: #dde8e3;
+  --pdp-card-edge: #cbd5e1;
   --pdp-ink: #000000;
   --pdp-ink-soft: #000000;
   --pdp-teal: #157a6d;
@@ -15,9 +15,9 @@
   --pdp-mustard: #b08d3e;
   --pdp-mustard-dark: #9c7a34;
   --pdp-label: #000000;
-  --pdp-line: #c3d4cc;
-  --pdp-bg: #e7f0ea;
-  --pdp-grid-line: rgba(15, 59, 52, 0.045);
+  --pdp-line: #cbd5e1;
+  --pdp-bg: #ffffff;
+  --pdp-grid-line: rgba(15, 59, 52, 0.03);
 
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #000000;
@@ -25,18 +25,15 @@
 
 /* Background Prescription Grid */
 .pdp-grid-bg {
-  background: 
-    repeating-linear-gradient(0deg, rgba(15,59,52,0.045) 0px, rgba(15,59,52,0.045) 1px, transparent 1px, transparent 40px),
-    repeating-linear-gradient(90deg, rgba(15,59,52,0.045) 0px, rgba(15,59,52,0.045) 1px, transparent 1px, transparent 40px),
-    radial-gradient(ellipse at 70% 0%, #eef5f0 0%, #dce9e2 100%);
+  background: #ffffff;
 }
 
 /* Editorial Paper Card */
 .pdp-paper-card {
   background: #ffffff;
-  border: 1px solid #dde8e3;
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(23, 43, 38, 0.05);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(23, 43, 38, 0.04);
   position: relative;
   transition: all 0.2s ease;
   color: #000000;

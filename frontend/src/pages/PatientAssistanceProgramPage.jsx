@@ -156,7 +156,7 @@ const PatientAssistanceProgramPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
         title="Patient Assistance Program (PAP) | WellMeds Subsidized Healthcare"
         description="Access manufacturer-backed subsidies, co-pay support, and dedicated case manager assistance for high-cost specialty therapies through WellMeds."
@@ -164,57 +164,55 @@ const PatientAssistanceProgramPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight leading-tight">
+            Patient Assistance Program (PAP)
+          </h1>
+        </div>
+      </div>
 
-        {/* ── 1. HERO SECTION ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 md:p-12 shadow-sm relative overflow-hidden text-left">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-[#b08d3e]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* ── 1. INTRO BANNER ── */}
+          <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-300 dark:border-zinc-800 p-6 sm:p-10 md:p-12 shadow-xs relative overflow-hidden text-left">
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="space-y-4 max-w-2xl">
+                <p className="text-slate-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed font-sans">
+                  Helping patients access high-cost specialty therapies at affordable prices. Get guided support through corporate co-payment subsidies, manufacturer assistance schemes, and dedicated clinical pharmacist coordinators.
+                </p>
 
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-            <div className="space-y-4 max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3.5 py-1.5 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>THERAPY CO-PAY SUPPORT</span>
+                <div className="pt-2 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleApplyClick}
+                    className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>Apply Now</span>
+                    <ArrowRight size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExpertClick}
+                    className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Phone size={16} />
+                    <span>Talk to a Pharmacist</span>
+                  </button>
+                </div>
               </div>
 
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight leading-tight">
-                Patient Assistance Program (PAP)
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed font-sans">
-                Helping patients access high-cost specialty therapies at affordable prices. Get guided support through corporate co-payment subsidies, manufacturer assistance schemes, and dedicated clinical pharmacist coordinators.
-              </p>
-
-              <div className="pt-2 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleApplyClick}
-                  className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                >
-                  <span>Apply Now</span>
-                  <ArrowRight size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExpertClick}
-                  className="bg-[#f4f9f7] hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#172b26] dark:text-zinc-200 px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold transition-all border border-slate-200 dark:border-zinc-700 flex items-center gap-2 cursor-pointer"
-                >
-                  <Phone size={16} />
-                  <span>Talk to a Pharmacist</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Premium Right Illustration Badge */}
-            <div className="flex-shrink-0 relative">
-              <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-full bg-[#f4f9f7] dark:bg-emerald-950/40 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/60 shadow-lg relative">
-                <div className="absolute inset-2 rounded-full border border-dashed border-[#157a6d]/30 dark:border-emerald-500/30 animate-[spin_30s_linear_infinite]" />
-                <Handshake size={68} className="relative z-10 text-[#157a6d] dark:text-emerald-400" />
+              {/* Premium Right Illustration Badge */}
+              <div className="flex-shrink-0 relative">
+                <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-full bg-[#f4f9f7] dark:bg-emerald-950/40 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/60 shadow-lg relative">
+                  <div className="absolute inset-2 rounded-full border border-dashed border-[#157a6d]/30 dark:border-emerald-500/30 animate-[spin_30s_linear_infinite]" />
+                  <Handshake size={68} className="relative z-10 text-[#157a6d] dark:text-emerald-400" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* ── 2. TRUST METRICS GRID ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
@@ -597,6 +595,7 @@ const PatientAssistanceProgramPage = () => {
           </p>
         </div>
 
+        </div>
       </div>
 
       {/* ── 12. CONSULTATION MODAL INTEGRATION (PHASE 12) ── */}

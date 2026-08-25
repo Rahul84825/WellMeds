@@ -62,7 +62,7 @@ const BrandDetailPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
         title={`${brandName} Medicines & Formulations | WellMeds`}
         description={`Buy authentic ${brandName} prescription formulations and healthcare products online at WellMeds. Verified licensed pharmacy.`}
@@ -70,52 +70,32 @@ const BrandDetailPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
-        {/* ── HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-4 max-w-3xl">
-            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
-              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
-              <ChevronRight size={14} className="text-slate-300" />
-              <Link to="/brands" className="hover:text-[#157a6d]">Brands</Link>
-              <ChevronRight size={14} className="text-slate-300" />
-              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{brandName}</span>
-            </nav>
-
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>PHARMACEUTICAL MANUFACTURER</span>
-              </div>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
-                {brandName}
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                Explore authentic clinical formulations, specialty medicines, and chronic care therapeutics manufactured by {brandName}.
-              </p>
-            </div>
-
-          </div>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            {brandName}
+          </h1>
         </div>
+      </div>
 
-        {/* ── PRODUCT GRID OR SKELETONS ── */}
-        <div>
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(8)].map((_, idx) => (
-                <div key={idx} className="bg-white dark:bg-zinc-900 rounded-[24px] border border-slate-200 dark:border-zinc-800 p-4 space-y-3 animate-pulse">
-                  <div className="w-full h-40 bg-slate-100 dark:bg-zinc-800 rounded-2xl" />
-                  <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
-                </div>
-              ))}
-            </div>
-          ) : products.length > 0 ? (
-            <div className="space-y-6">
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* ── PRODUCT GRID OR SKELETONS ── */}
+          <div>
+            {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                {[...Array(8)].map((_, idx) => (
+                  <div key={idx} className="bg-white dark:bg-zinc-900 rounded-[24px] border border-slate-300 dark:border-zinc-800 p-4 space-y-3 animate-pulse">
+                    <div className="w-full h-40 bg-slate-100 dark:bg-zinc-800 rounded-2xl" />
+                    <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : products.length > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((prod) => (
                   <ProductCard key={(prod._id || prod.id)?.toString()} product={prod} />
                 ))}
@@ -140,6 +120,7 @@ const BrandDetailPage = () => {
 
         {/* ── WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
+        </div>
       </div>
 
       {/* ── CONSULTATION MODAL ── */}

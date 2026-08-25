@@ -25,5 +25,9 @@ export const checkoutSessionService = {
     const data = await apiInstance.post("/checkout-session/modify-cart");
     return data;
   },
-};
 
+  async releasePaymentLock() {
+    const data = await apiInstance.post("/checkout-session/payment-cancelled");
+    return data;
+  },
+};

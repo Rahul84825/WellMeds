@@ -81,16 +81,16 @@ const SpecialityPage = () => {
     { name: speciality?.name || "Speciality", url: `/speciality/${slug}` },
   ];
 
-  if (loading) {
+  if (loadingSpeciality) {
     return (
-      <div className="min-h-screen bg-clinical-grid py-12 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-zinc-950 py-12 flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-4 border-[#157a6d] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
         title={`${speciality?.name || "Speciality"} Formulations | WellMeds`}
         description={speciality?.description || `Explore ${speciality?.name} prescription medications and clinical care at WellMeds.`}
@@ -98,48 +98,28 @@ const SpecialityPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
-        {/* ── HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-4 max-w-3xl">
-            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
-              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
-              <ChevronRight size={14} className="text-slate-300" />
-              <Link to="/super-speciality" className="hover:text-[#157a6d]">Specialities</Link>
-              <ChevronRight size={14} className="text-slate-300" />
-              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">{speciality?.name}</span>
-            </nav>
-
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>CLINICAL SPECIALITY</span>
-              </div>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
-                {speciality?.name}
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                {speciality?.description || `Explore authentic ${speciality?.name} medications, specialty care regimens, and formulations verified by clinical pharmacists.`}
-              </p>
-            </div>
-
-          </div>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            {speciality?.name}
+          </h1>
         </div>
+      </div>
 
-        {/* ── MAIN CONTENT: SIDEBAR + PRODUCT GRID ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Sidebar: All Specialities Navigation */}
-          <aside className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-5 shadow-sm space-y-4 text-left">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
-              <Layers size={18} className="text-[#157a6d]" />
-              <h3 className="font-bold text-xs uppercase tracking-wider font-clinical-mono text-[#172b26] dark:text-white">
-                All Specialities
-              </h3>
-            </div>
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* ── MAIN CONTENT: SIDEBAR + PRODUCT GRID ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Sidebar: All Specialities Navigation */}
+            <aside className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 rounded-[28px] p-5 shadow-xs space-y-4 text-left">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-zinc-800">
+                <Layers size={18} className="text-[#157a6d]" />
+                <h3 className="font-bold text-xs uppercase tracking-wider font-clinical-mono text-[#172b26] dark:text-white">
+                  All Specialities
+                </h3>
+              </div>
             <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
               {allSpecialities.map((item) => {
                 const isActive = item.slug === slug;
@@ -195,6 +175,7 @@ const SpecialityPage = () => {
 
         {/* ── WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
+        </div>
       </div>
 
       {/* ── CONSULTATION MODAL ── */}

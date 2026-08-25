@@ -151,7 +151,7 @@ const ProductsPage = () => {
   if (categoryParam) breadcrumbs.push({ name: categoryParam, url: `/products?category=${encodeURIComponent(categoryParam)}` });
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
         title={pageTitle}
         description="Browse authentic prescription medicines, chronic disease care, vitamins, and healthcare products online at WellMeds. Licensed pharmacy fulfillment and express delivery across India."
@@ -159,53 +159,21 @@ const ProductsPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
-
-        {/* ── 1. HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-[#b08d3e]/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-6 max-w-3xl">
-            {/* Breadcrumb nav */}
-            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
-              <span className="cursor-pointer hover:text-[#157a6d] transition-colors" onClick={() => navigate("/")}>Home</span>
-              <span className="text-slate-300">/</span>
-              <span className="cursor-pointer hover:text-[#157a6d] transition-colors" onClick={() => navigate("/products")}>Products</span>
-              {categoryParam && (
-                <>
-                  <span className="text-slate-300">/</span>
-                  <span className="text-[#157a6d] dark:text-emerald-400">{categoryParam}</span>
-                </>
-              )}
-              {specialityParam && (
-                <>
-                  <span className="text-slate-300">/</span>
-                  <span className="text-[#157a6d] dark:text-emerald-400">{specialityParam}</span>
-                </>
-              )}
-            </nav>
-
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3.5 py-1.5 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>CLINICAL DRUG CATALOG</span>
-              </div>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight leading-tight">
-                {categoryParam ? categoryParam : specialityParam ? specialityParam : "Explore Medicines"}
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                Explore thousands of genuine prescription medicines, specialty therapies, surgical products, and wellness formulations with guaranteed cold-chain integrity.
-              </p>
-            </div>
-          </div>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight leading-tight">
+            {categoryParam ? categoryParam : specialityParam ? specialityParam : "Explore Medicines"}
+          </h1>
         </div>
+      </div>
 
-        {/* ── 2. MATCHING MOLECULES WIDGET ── */}
-        {!loading && matchedMolecules.length > 0 && (
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[24px] p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* ── 2. MATCHING MOLECULES WIDGET ── */}
+          {!loading && matchedMolecules.length > 0 && (
+            <div className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 rounded-[24px] p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] dark:bg-emerald-950/40 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center border border-emerald-200 shrink-0">
                 <FlaskConical size={20} />
@@ -295,7 +263,7 @@ const ProductsPage = () => {
 
         {/* ── 4. REUSABLE WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
-
+        </div>
       </div>
 
       {/* ── 6. CONSULTATION MODAL INTEGRATION ── */}

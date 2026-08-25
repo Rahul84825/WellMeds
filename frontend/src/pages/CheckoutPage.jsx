@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
+import { checkoutSessionService } from "../services/api/checkoutSessionService";
 import Loader from "../components/Loader";
 import PrescriptionUpload from "../components/PrescriptionUpload";
 import Modal from "../components/Modal";
@@ -37,7 +38,7 @@ const loadRazorpayScript = () => {
 };
 
 const Checkout = () => {
-  const { cartItems, subtotal, shipping, tax, total, requiresRx, isCartLocked, modifyCart, clearCart, resetCartPostOrder } = useCart();
+  const { cartItems, subtotal, shipping, tax, total, requiresRx, isCartLocked, modifyCart, clearCart, resetCartPostOrder, refreshCartLockStatus } = useCart();
   const { user, loading: authLoading, profileComplete, isAdmin, openLoginModal } = useAuth();
   const navigate = useNavigate();
 
@@ -159,6 +160,14 @@ const Checkout = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [pollingTimeout, setPollingTimeout] = useState(false);
 
+  const releasePaymentLock = useCallback(async () => {
+    try {
+      await checkoutSessionService.releasePaymentLock();
+    } catch (err) {
+      console.warn("Could not release payment cart lock:", err.message);
+    }
+  }, []);
+
   // Fetch available coupons on checkout page load
   useEffect(() => {
     const fetchAvailableCoupons = async () => {
@@ -244,9 +253,10 @@ const Checkout = () => {
     try {
       const res = await api.selectPrescriptionForCart(prescriptionId);
       if (res && res.success) {
-        setRxStatus("Verified");
-        setHasApprovedRx(true);
+        setRxStatus(res.rxStatus || "Pending Verification");
+        setHasApprovedRx(!!res.isEligible);
         if (res.prescription) setMatchingRxDoc(res.prescription);
+        await refreshCartLockStatus();
         await checkRxStatus();
       }
     } catch (err) {
@@ -513,6 +523,7 @@ const Checkout = () => {
         modal: {
           ondismiss: function () {
             setIsSubmitting(false);
+            releasePaymentLock();
           },
         },
       };
@@ -521,6 +532,7 @@ const Checkout = () => {
       rzp.on("payment.failed", function (response) {
         setIsSubmitting(false);
         setOrderError("Payment failed or was cancelled. Please try again.");
+        releasePaymentLock();
       });
       rzp.open();
     } catch (err) {
@@ -536,6 +548,7 @@ const Checkout = () => {
     setRxAttached(true);
     setRxModalOpen(false);
     setRxSuccessModalOpen(true);
+    refreshCartLockStatus();
     checkRxStatus();
   };
 
@@ -814,6 +827,37 @@ const Checkout = () => {
                       </div>
                     </div>
                   ) : null}
+
+                  {/* A document uploaded before products were added can be
+                      attached here for pharmacist review; no re-upload is needed. */}
+                  {allPrescriptions.filter((rx) => ["Pending Review", "Under Verification"].includes(rx.status)).length > 0 && rxStatus !== "Pending Verification" && (
+                    <div className="space-y-3 pt-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-extrabold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                          <FileText size={16} className="text-[#038076]" />
+                          Previously Uploaded Prescription(s)
+                        </p>
+                        <span className="text-[11px] text-slate-400">Use one for this cart’s review</span>
+                      </div>
+                      {allPrescriptions
+                        .filter((rx) => ["Pending Review", "Under Verification"].includes(rx.status))
+                        .map((rx) => (
+                          <div key={rx._id} className="p-4 rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">{rx.name}</h4>
+                                <span className="bg-teal-100 dark:bg-teal-900/60 text-[#038076] dark:text-teal-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">{rx.status}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Uploaded on {new Date(rx.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                            </div>
+                            <button type="button" onClick={() => handleSelectPrescription(rx._id)} disabled={selectingRxId === rx._id} className="w-full sm:w-auto bg-[#038076] hover:bg-[#026860] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                              {selectingRxId === rx._id ? <span className="inline-block animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5" /> : <RefreshCcw size={15} />}
+                              <span>Use for Verification</span>
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
 
                   {/* Matching Approved Prescriptions Section (Scenario A, B & D) */}
                   {matchingPrescriptions.length > 0 ? (

@@ -34,15 +34,21 @@ const computeOrderTotals = async (items, couponCode, userId) => {
     if (!product) {
       throw new Error(`Product not found: ${item.name || rawProductId}`);
     }
+    const requestedQuantity = Number(item.quantity);
+    if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+      throw new Error(`Invalid quantity for product: ${product.name}`);
+    }
     if (!product.inStock) {
       throw new Error(`Product is out of stock: ${product.name}`);
     }
-    if (product.requiresRx || product.isPrescriptionRequired) {
+    const itemRequiresRx = !!(product.requiresRx || product.isPrescriptionRequired);
+    if (itemRequiresRx) {
       orderRequiresRx = true;
     }
 
     let itemPrice = product.price;
     let displayName = product.name;
+    let availableStock = product.stock;
     const targetVariant = item.variantName ? String(item.variantName).trim() : "";
     const targetVariantId = item.variantId ? String(item.variantId).trim() : "";
 
@@ -51,20 +57,32 @@ const computeOrderTotals = async (items, couponCode, userId) => {
         (v) => (targetVariantId && v._id?.toString() === targetVariantId) || v.name?.toLowerCase() === targetVariant.toLowerCase()
       );
       if (foundVariant) {
+        if (foundVariant.stock < requestedQuantity) {
+          throw new Error(`Selected variant is out of stock: ${product.name} - ${foundVariant.name}`);
+        }
+        availableStock = foundVariant.stock;
         itemPrice = foundVariant.sellingPrice !== undefined ? foundVariant.sellingPrice : foundVariant.price;
         displayName = `${product.name} - ${foundVariant.name}`;
+      } else {
+        throw new Error(`Selected variant is unavailable for product: ${product.name}`);
       }
     }
 
-    subtotal += itemPrice * item.quantity;
+    if (availableStock < requestedQuantity) {
+      throw new Error(`Insufficient stock for product: ${product.name}`);
+    }
+
+    subtotal += itemPrice * requestedQuantity;
 
     validatedItems.push({
       product: product._id,
       name: displayName,
-      quantity: item.quantity,
+      quantity: requestedQuantity,
       price: itemPrice,
       variantName: targetVariant,
       variantId: targetVariantId,
+      requiresRx: itemRequiresRx,
+      isPrescriptionRequired: itemRequiresRx,
     });
   }
 
@@ -180,7 +198,9 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
 
   await order.save();
 
-  // 1. Safely Decrement Product Stock Inventory (if stockQuantity is tracked)
+  // 1. Atomically decrement the inventory field that the cart and product
+  // APIs actually use. Each write includes a stock guard so concurrent paid
+  // orders can never drive inventory below zero.
   if (order.items && Array.isArray(order.items)) {
     for (const item of order.items) {
       try {
@@ -192,13 +212,33 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
           }
         }
         if (prodId && mongoose.Types.ObjectId.isValid(prodId)) {
-          const product = await Product.findById(prodId);
-          if (product && typeof product.stockQuantity === "number") {
-            product.stockQuantity = Math.max(0, product.stockQuantity - (item.quantity || 1));
-            if (product.stockQuantity === 0) {
-              product.inStock = false;
+          const quantity = Number(item.quantity) || 1;
+          const variantName = item.variantName ? String(item.variantName).trim() : "";
+          const variantId = item.variantId ? String(item.variantId).trim() : "";
+
+          if (variantName) {
+            const variantMatch = variantId
+              ? { _id: variantId, stock: { $gte: quantity } }
+              : { name: variantName, stock: { $gte: quantity } };
+            const updated = await Product.findOneAndUpdate(
+              { _id: prodId, variants: { $elemMatch: variantMatch } },
+              { $inc: { "variants.$.stock": -quantity } },
+              { new: true }
+            );
+            if (!updated) {
+              console.error(`[Inventory] Unable to decrement variant stock for paid order ${order.orderId}: ${item.name}`);
             }
-            await product.save();
+          } else {
+            const updated = await Product.findOneAndUpdate(
+              { _id: prodId, stock: { $gte: quantity } },
+              { $inc: { stock: -quantity } },
+              { new: true }
+            );
+            if (!updated) {
+              console.error(`[Inventory] Unable to decrement stock for paid order ${order.orderId}: ${item.name}`);
+            } else if (updated.stock === 0) {
+              await Product.updateOne({ _id: prodId }, { $set: { inStock: false } });
+            }
           }
         }
       } catch (stockErr) {
@@ -249,7 +289,7 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
     await cart.save();
   }
 
-  await CheckoutSession.findOneAndUpdate(
+  await CheckoutSession.updateMany(
     { user: order.user, status: { $ne: "PAYMENT_SUCCESS" } },
     {
       status: "PAYMENT_SUCCESS",
@@ -444,6 +484,34 @@ export const createRazorpayOrder = async (req, res, next) => {
         timeline,
       });
     }
+
+    // Lock the exact cart while a gateway order is open. This prevents cart
+    // changes from diverging from the paid Razorpay order. The lock is short
+    // lived and is explicitly released by the client on failure/dismissal.
+    const paymentLockExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    await CheckoutSession.findOneAndUpdate(
+      { user: req.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+      {
+        user: req.user._id,
+        prescription: verifiedRxDoc ? verifiedRxDoc._id : null,
+        cartSnapshot: {
+          items: totals.validatedItems.map((item) => ({
+            productId: item.product.toString(),
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            requiresRx: item.requiresRx,
+          })),
+          subtotal: totals.subtotal,
+          requiresRx: totals.orderRequiresRx,
+        },
+        status: "PAYMENT_PENDING",
+        isLocked: true,
+        lockReason: "Payment is currently processing. Cart items cannot be modified.",
+        expiresAt: paymentLockExpiry,
+      },
+      { upsert: true, new: true, sort: { updatedAt: -1 } }
+    );
 
 
 

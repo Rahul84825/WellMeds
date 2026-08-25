@@ -112,33 +112,33 @@ const Cart = () => {
 
   // ── Populated Cart ──
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SEO title="Shopping Cart" noindex={true} />
-      
-      {/* Header section */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mb-1.5 flex items-center gap-2">
-            <span>CLINICAL BASKET</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
-            <span>CHECKOUT READY</span>
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+      <SEO title="Shopping Cart" noindex={true} />
+
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+              Shopping Cart
+            </h1>
+            <p className="text-slate-600 dark:text-zinc-400 mt-2 text-xs sm:text-sm font-medium">
+              {cartCount} {cartCount === 1 ? "Item" : "Items"} • {rxItemsCount > 0 ? (
+                <span className="text-[#157a6d] dark:text-emerald-400 font-semibold">{rxItemsCount} Prescription Required</span>
+              ) : "No Prescription Required"}
+            </p>
           </div>
-          <h1 className="font-editorial text-2xl sm:text-4xl font-semibold text-[#172b26] dark:text-white tracking-tight">
-            Shopping Cart
-          </h1>
-          <p className="text-slate-500 dark:text-zinc-400 mt-1.5 text-sm">
-            {cartCount} {cartCount === 1 ? "Item" : "Items"} • {rxItemsCount > 0 ? (
-              <span className="text-[#157a6d] dark:text-emerald-400 font-medium">{rxItemsCount} Prescription Required</span>
-            ) : "No Prescription Required"}
-          </p>
+          {!isCartLocked && (
+            <Link to="/products" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5">
+              <Plus size={16} /> Add more items
+            </Link>
+          )}
         </div>
-        {!isCartLocked && (
-          <Link to="/products" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5">
-            <Plus size={16} /> Add more items
-          </Link>
-        )}
       </div>
+
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       {/* Cart Locked Alert Banner */}
       {isCartLocked && (
@@ -493,6 +493,7 @@ const Cart = () => {
           </div>
         </div>
       </Modal>
+        </div>
       </div>
     </div>
   );

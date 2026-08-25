@@ -23,7 +23,7 @@ const TermsAndConditionsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background dark:bg-zinc-950 font-sans text-on-surface transition-colors duration-300 pb-16 select-none">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-on-surface transition-colors duration-300 pb-16 text-left">
       <SEO
         title="Terms & Conditions | Legal Pharmacy Terms"
         description="Review WellMeds terms of service for online medication orders, prescription requirements under Drugs and Cosmetics Rules, patient obligations, and service policies."
@@ -31,50 +31,21 @@ const TermsAndConditionsPage = () => {
         breadcrumbs={breadcrumbs}
       />
 
-      {/* ── 1. HERO SECTION ── */}
-      <section className="relative bg-[#f4f9f7] dark:bg-zinc-900/80 border-b border-slate-200/80 dark:border-zinc-800 py-12 md:py-16 overflow-hidden text-left">
-        <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(#157a6d 1px, transparent 1px)`,
-            backgroundSize: '24px 24px'
-          }}
-        />
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-72 h-72 bg-[#157a6d]/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-4">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-400">
-            <Link to="/" className="hover:text-[#157a6d] transition-colors">Home</Link>
-            <ChevronRight size={12} />
-            <span className="text-[#157a6d] dark:text-emerald-400 font-bold">Terms & Conditions</span>
-          </nav>
-
-          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-xs border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-            <FileText size={14} className="text-[#b08d3e]" />
-            <span>PHARMACY ACT 1948 & DRUGS AND COSMETICS ACT COMPLIANT</span>
-          </div>
-
-          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight leading-tight max-w-3xl">
-            Terms & Conditions of <span className="text-[#157a6d] dark:text-emerald-400">Pharmacy Service</span>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Terms & Conditions
           </h1>
-
-          <p className="text-slate-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed max-w-2xl font-sans">
-            Please read these legal terms carefully before placing orders for prescription medicines, surgical supplies, or specialty biological products on WellMeds.
-          </p>
-
-          <div className="pt-2 text-xs font-clinical-mono text-slate-500 dark:text-zinc-400 font-semibold">
-            Effective Version: July 2026 | Governing Body: CDSCO / Maharashtra FDA
-          </div>
         </div>
-      </section>
+      </div>
 
       {/* ── 2. MAIN TERMS CONTENT ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 text-left">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-8 text-left">
         
         {/* Core Pillars Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-[24px] shadow-xs space-y-3">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 p-6 rounded-[24px] shadow-xs space-y-3">
             <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-[#157a6d] dark:text-emerald-400 flex items-center justify-center">
               <Pill size={20} />
             </div>

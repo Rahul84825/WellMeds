@@ -5,6 +5,7 @@ import {
   getSessionStatus,
   getCartRxStatus,
   modifyCart,
+  releasePaymentLock,
 } from "../controllers/checkoutSessionController.js";
 
 const router = express.Router();
@@ -15,6 +16,6 @@ router.post("/init", initSession);
 router.get("/status", getSessionStatus);
 router.get("/rx-status", getCartRxStatus);
 router.post("/modify-cart", modifyCart);
+router.post("/payment-cancelled", releasePaymentLock);
 
 export default router;
-

@@ -259,34 +259,39 @@ const Orders = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-xl animate-[fade-in_0.3s_ease-out] text-left space-y-xl">
-      <div>
-        <h1 className="font-bold text-2xl text-slate-800 dark:text-zinc-100 mb-xs">Order History</h1>
-        <p className="text-xs text-slate-450 dark:text-zinc-450 font-bold">
-          {userOrders.length} order{userOrders.length !== 1 ? "s" : ""} placed
-        </p>
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Order History
+          </h1>
+        </div>
       </div>
 
-      {userOrders.length === 0 ? (
-        <div className="text-center py-xxl bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800/80">
-          <span className="material-symbols-outlined text-5xl text-outline mb-md">shopping_bag</span>
-          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">No Orders Found</h3>
-          <p className="font-body-sm text-on-surface-variant dark:text-surface-variant mt-xs">
-            You haven't placed any orders with this account yet.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-md">
-          {userOrders.map((order) => {
-            const displayId = order.orderId;
-            const displayDate = formatDate(order.createdAt);
-            const { badge: badgeClass, dot: dotClass } = getStatusStyle(order.status);
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {userOrders.length === 0 ? (
+            <div className="text-center py-16 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-300 dark:border-zinc-800 p-8 shadow-xs">
+              <span className="material-symbols-outlined text-5xl text-outline mb-md">shopping_bag</span>
+              <h3 className="font-editorial text-2xl font-semibold text-[#172b26] dark:text-white">No Orders Found</h3>
+              <p className="text-xs text-slate-500 font-sans mt-2">
+                You haven't placed any orders with this account yet.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {userOrders.map((order) => {
+                const displayId = order.orderId;
+                const displayDate = formatDate(order.createdAt);
+                const { badge: badgeClass, dot: dotClass } = getStatusStyle(order.status);
 
-            return (
-              <div
-                key={displayId}
-                className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-3xl p-lg shadow-xs space-y-lg relative overflow-hidden"
-              >
+                return (
+                  <div
+                    key={displayId}
+                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 relative overflow-hidden"
+                  >
                 {/* Header info */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md pb-md border-b border-slate-100 dark:border-zinc-850">
                   <div className="flex flex-wrap gap-x-lg gap-y-xs text-xs text-slate-450 dark:text-zinc-450 font-semibold">
@@ -425,6 +430,8 @@ const Orders = () => {
           })}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -21,6 +21,20 @@ import {
 // ─────────────────────────────────────────────
 export const uploadPrescription = async (req, res, next) => {
   try {
+    const paymentInProgress = await CheckoutSession.exists({
+      user: req.user._id,
+      status: "PAYMENT_PENDING",
+      isLocked: true,
+      expiresAt: { $gt: new Date() },
+    });
+    if (paymentInProgress) {
+      return res.status(409).json({
+        success: false,
+        code: "PAYMENT_IN_PROGRESS",
+        message: "Payment is currently processing. Please wait for its result before changing prescription details.",
+      });
+    }
+
     const files = req.files || (req.file ? [req.file] : []);
     if (files.length === 0) {
       return res.status(400).json({ success: false, message: "Please select a prescription document to upload" });
@@ -44,7 +58,11 @@ export const uploadPrescription = async (req, res, next) => {
     const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
     let snapshotData = req.body.cartSnapshot ? JSON.parse(req.body.cartSnapshot) : null;
 
-    if (!snapshotData && cart && cart.items.length > 0) {
+    const cartHasRxItems = !!cart?.items?.some(
+      (item) => item.product && (item.product.requiresRx || item.product.isPrescriptionRequired)
+    );
+
+    if (!snapshotData && cartHasRxItems) {
       const itemsSnapshot = cart.items.map((i) => ({
         productId: (i.product._id || i.product.id || i.product).toString(),
         name: i.product?.name || "",
@@ -75,8 +93,10 @@ export const uploadPrescription = async (req, res, next) => {
       timeline: initialTimeline,
     });
 
-    // Link prescription to user's active cart and lock checkout session
-    if (cart) {
+    // A standalone upload remains available in the customer's prescription
+    // library. Only a cart that actually contains Rx items is linked and
+    // locked for pharmacist review.
+    if (cart && cartHasRxItems) {
       cart.prescription = prescription._id;
       cart.prescriptionStatus = "Uploaded";
       await cart.save();
@@ -398,6 +418,26 @@ export const updatePrescriptionStatus = async (req, res, next) => {
       await cart.save();
     }
 
+    // Keep the lock lifecycle synchronized even when an admin uses the
+    // generic status endpoint instead of the dedicated approve/reject action.
+    if (status === "Pending Review" || status === "Under Verification") {
+      await CheckoutSession.updateMany(
+        { user: prescription.user._id, prescription: prescription._id, status: { $ne: "PAYMENT_SUCCESS" } },
+        { $set: { status: "PENDING_VERIFICATION", isLocked: true, lockReason: "Prescription is under pharmacist verification. Cart is locked.", expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } }
+      );
+    } else if (status === "Approved") {
+      await CheckoutSession.findOneAndUpdate(
+        { user: prescription.user._id, status: { $ne: "PAYMENT_SUCCESS" } },
+        { user: prescription.user._id, prescription: prescription._id, status: "VERIFIED", isLocked: false, lockReason: "Prescription verified by pharmacist. Cart is ready for checkout payment.", expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+        { upsert: true, new: true, sort: { updatedAt: -1 } }
+      );
+    } else if (status === "Rejected" || status === "Expired") {
+      await CheckoutSession.updateMany(
+        { user: prescription.user._id, prescription: prescription._id, status: { $ne: "PAYMENT_SUCCESS" } },
+        { $set: { status: status === "Rejected" ? "CANCELLED" : "EXPIRED", isLocked: false, lockReason: status === "Rejected" ? "Prescription rejected by pharmacist." : "Prescription expired." } }
+      );
+    }
+
     // Create Notification
     await Notification.create({
       user: prescription.user._id,
@@ -617,11 +657,25 @@ export const rejectPrescription = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// PATIENT — Select an approved prescription for active cart
+// PATIENT — Use an existing prescription for the current Rx cart
 // ─────────────────────────────────────────────
 export const selectPrescriptionForCart = async (req, res, next) => {
   const { id } = req.params;
   try {
+    const paymentInProgress = await CheckoutSession.exists({
+      user: req.user._id,
+      status: "PAYMENT_PENDING",
+      isLocked: true,
+      expiresAt: { $gt: new Date() },
+    });
+    if (paymentInProgress) {
+      return res.status(409).json({
+        success: false,
+        code: "PAYMENT_IN_PROGRESS",
+        message: "Payment is currently processing. Please wait for its result before changing prescription details.",
+      });
+    }
+
     const prescription = await Prescription.findOne({ _id: id, user: req.user._id });
     if (!prescription) {
       return res.status(404).json({
@@ -630,10 +684,10 @@ export const selectPrescriptionForCart = async (req, res, next) => {
       });
     }
 
-    if (prescription.status !== "Approved") {
+    if (!["Approved", "Pending Review", "Under Verification"].includes(prescription.status)) {
       return res.status(400).json({
         success: false,
-        message: `Only approved prescriptions can be selected for checkout (Current status: ${prescription.status}).`,
+        message: `This prescription cannot be used for checkout (Current status: ${prescription.status}).`,
       });
     }
 
@@ -646,17 +700,45 @@ export const selectPrescriptionForCart = async (req, res, next) => {
     }
 
     const rxCartItems = normalizeRxItems(cart.items);
-    const evalResult = evaluatePrescriptionCartMatch(prescription, rxCartItems);
+    if (rxCartItems.length === 0) {
+      return res.status(400).json({ success: false, message: "Your cart does not contain any prescription-required products." });
+    }
 
-    if (!evalResult.isMatch) {
+    const isApproved = prescription.status === "Approved";
+    const evalResult = evaluatePrescriptionCartMatch(prescription, rxCartItems, { requireApproved: isApproved });
+
+    if (isApproved && !evalResult.isMatch) {
       return res.status(400).json({
         success: false,
         message: evalResult.reason || "This prescription does not match your current cart items.",
       });
     }
 
+    const itemsSnapshot = cart.items.map((item) => ({
+      productId: (item.product._id || item.product.id || item.product).toString(),
+      name: item.product?.name || "",
+      quantity: item.quantity,
+      price: item.product?.price || item.price || 0,
+      requiresRx: !!(item.product?.requiresRx || item.product?.isPrescriptionRequired),
+    }));
+
+    if (!isApproved) {
+      prescription.cartSnapshot = {
+        items: itemsSnapshot,
+        subtotal: itemsSnapshot.reduce((acc, item) => acc + item.price * item.quantity, 0),
+        requiresRx: true,
+      };
+      prescription.timeline.push({
+        status: prescription.status,
+        title: "Prescription Linked to Cart",
+        description: "Customer selected this prescription for pharmacist review against the current cart.",
+        timestamp: new Date(),
+      });
+      await prescription.save();
+    }
+
     cart.prescription = prescription._id;
-    cart.prescriptionStatus = "Approved";
+    cart.prescriptionStatus = isApproved ? "Approved" : "Uploaded";
     await cart.save();
 
     await CheckoutSession.findOneAndUpdate(
@@ -664,17 +746,29 @@ export const selectPrescriptionForCart = async (req, res, next) => {
       {
         user: req.user._id,
         prescription: prescription._id,
-        status: "VERIFIED",
-        isLocked: false,
-        lockReason: "Prescription selected and verified for current cart.",
+        cartSnapshot: {
+          items: itemsSnapshot,
+          subtotal: itemsSnapshot.reduce((acc, item) => acc + item.price * item.quantity, 0),
+          requiresRx: true,
+        },
+        status: isApproved ? "VERIFIED" : "PENDING_VERIFICATION",
+        isLocked: !isApproved,
+        lockReason: isApproved
+          ? "Prescription selected and verified for current cart."
+          : "Prescription is under pharmacist verification. Cart is locked.",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
       { upsert: true, new: true }
     );
 
     res.status(200).json({
       success: true,
-      message: "Prescription linked and verified for checkout.",
+      message: isApproved
+        ? "Prescription linked and verified for checkout."
+        : "Prescription linked to your cart and queued for pharmacist verification.",
       prescription,
+      rxStatus: isApproved ? "Verified" : "Pending Verification",
+      isEligible: isApproved,
     });
   } catch (error) {
     next(error);

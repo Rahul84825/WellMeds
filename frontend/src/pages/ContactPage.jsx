@@ -53,67 +53,31 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
       <SEO
-        title="Contact Us & Store Location | WellMeds Pharmacy Baner Pune"
-        description="Visit WellMeds Pharmacy at Baner, Pune or contact our registered clinical pharmacists. Toll-free support, store map, prescription inquiries."
+        title="Contact WellMeds | Licensed Pharmacy Support & Helpdesk"
+        description="Get in touch with WellMeds licensed pharmacists. 24/7 patient support, prescription consultation, cold-chain delivery inquiries, and pharmacy desk."
         canonical="/contact"
         breadcrumbs={breadcrumbs}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
-        {/* ── HERO HEADER ── */}
-        <div className="bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#157a6d]/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-4 max-w-3xl">
-            <nav className="flex items-center text-xs text-slate-400 gap-1.5 font-semibold select-none">
-              <Link to="/" className="hover:text-[#157a6d]">Home</Link>
-              <ChevronRight size={14} className="text-slate-300" />
-              <span className="text-[#157a6d] dark:text-emerald-400 font-bold">Contact Us</span>
-            </nav>
-
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-[#f4f9f7] dark:bg-emerald-950/60 border border-[#157a6d]/20 px-3 py-1 rounded-full font-clinical-mono text-xs font-semibold text-[#157a6d] dark:text-emerald-400 uppercase tracking-widest">
-                <Sparkles size={14} className="text-[#b08d3e]" />
-                <span>24/7 PATIENT SUPPORT & PHARMACY DESK</span>
-              </div>
-
-              <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#172b26] dark:text-white tracking-tight">
-                We Are Here to Help
-              </h1>
-
-              <p className="text-slate-600 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed font-sans max-w-2xl">
-                Have a query regarding prescriptions, cold-chain delivery, or specialized formulations? Contact our licensed medical team.
-              </p>
-            </div>
-
-            <div className="pt-2 flex flex-wrap gap-3">
-              <Link
-                to="/upload-prescription"
-                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
-              >
-                <FileText size={15} />
-                <span>Upload Prescription</span>
-              </Link>
-              <a
-                href={BUSINESS_INFO.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#25D366] hover:bg-[#1ebe5d] text-white px-6 py-2.5 rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
-              >
-                <MessageSquare size={15} />
-                <span>WhatsApp Us</span>
-              </a>
-            </div>
-          </div>
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Contact Us
+          </h1>
         </div>
+      </div>
 
-        {/* ── CONTACT GRID: CARDS & FORM ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Store Info Cards */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] p-6 space-y-4 shadow-sm">
+      {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
+      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* ── CONTACT GRID: CARDS & FORM ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Store Info Cards */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 rounded-[28px] p-6 space-y-4 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#f4f9f7] text-[#157a6d] flex items-center justify-center border border-emerald-200 shrink-0">
                   <MapPin size={20} />
@@ -229,6 +193,7 @@ const Contact = () => {
 
         {/* ── WHY WELLMEDS BAR ── */}
         <WhyWellMedsBar />
+        </div>
       </div>
 
       {/* ── CONSULTATION MODAL ── */}

@@ -124,17 +124,17 @@ const ProductCard = ({ product }) => {
       }}
       className="group relative flex h-full flex-col justify-between
                  cursor-pointer select-none rounded-xl
-                 bg-white dark:bg-zinc-900 border border-[#dde8e3] dark:border-zinc-800
-                 hover:border-[#157a6d]/40 dark:hover:border-[#157a6d]/60
-                 hover:shadow-[0_12px_32px_rgba(23,43,38,0.08)] transition-all duration-250
+                 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700
+                 hover:border-[#157a6d] dark:hover:border-[#157a6d]
+                 hover:shadow-[0_12px_32px_rgba(23,43,38,0.1)] transition-all duration-250
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#157a6d]
-                 overflow-hidden text-left"
+                 overflow-hidden text-left shadow-2xs"
     >
       {/* Top Image Frame matching Reference Design */}
       <div className="relative flex items-center justify-center overflow-hidden
                       bg-white dark:bg-zinc-950
                       h-[160px] sm:h-[180px] md:h-[215px] lg:h-[225px] w-full shrink-0
-                      border-b border-slate-100 dark:border-zinc-800 p-3 md:p-5 lg:p-6">
+                      border-b border-slate-200 dark:border-zinc-800 p-3 md:p-5 lg:p-6">
         <img
           alt={product.name}
           src={getCardImageUrl(product.image) || DEFAULT_PRODUCT_IMAGE}
@@ -266,7 +266,7 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Savings Section with Dashed Divider Above */}
-          <div className="mt-2.5 pt-2 border-t border-dashed border-[#dde8e3] dark:border-zinc-800 min-h-[1.75rem] flex items-center">
+          <div className="mt-2.5 pt-2 border-t border-dashed border-slate-200 dark:border-zinc-700 min-h-[1.75rem] flex items-center">
             {savings > 0 ? (
               <div className="font-sans text-xs sm:text-sm text-[#4B5563] dark:text-zinc-300 font-normal">
                 You Save:{" "}

@@ -136,49 +136,41 @@ const ImportedMedicinesPage = () => {
   ];
 
   return (
-    <div className="bg-background text-on-surface min-h-screen text-left">
+    <div className="bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-screen text-left">
       <SEO
         title="Imported Medicines Made Accessible | WellMeds Global Access"
         description="Source genuine imported medicines under clinical supervision from trusted global manufacturers with WellMeds. CDSCO compliant personal use import assistance."
         canonical="/imported-medicines"
         breadcrumbs={breadcrumbs}
       />
-      {/* Breadcrumbs */}
-      <div className="border-b border-outline-variant/30 bg-surface-container-lowest/50 py-sm">
-        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-xs font-semibold text-on-surface-variant flex items-center gap-xs">
-          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-          <span>/</span>
-          <span className="text-primary font-bold">Imported Medicines</span>
+
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Imported Medicines
+          </h1>
         </div>
       </div>
 
-      {/* Hero Section */}
-      <section className="py-xxl bg-gradient-to-b from-[#038076]/5 via-background to-background relative overflow-hidden">
-        {/* Decorative Grid BG */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none medical-pattern"></div>
-        
-        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl items-center relative z-10">
-          <div className="lg:col-span-7 space-y-md">
-            <span className="inline-flex items-center gap-xs bg-primary/10 text-primary border border-primary/20 px-md py-xs rounded-full text-xs font-bold uppercase tracking-wider">
-              <span className="material-symbols-outlined text-[14px]">public</span> Global Medical Access
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-on-surface tracking-tight leading-tight">
-              Imported Medicines <br/>
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Made Accessible</span>
-            </h1>
-            <p className="text-body-lg text-on-surface-variant leading-relaxed max-w-xl">
+      {/* Hero Intro Section */}
+      <section className="py-8 md:py-10 bg-white dark:bg-zinc-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed max-w-xl">
               Helping patients source genuine imported medicines under clinical supervision from trusted global manufacturers. Complete legal compliance and safe cold-chain delivery.
             </p>
-            <div className="flex flex-wrap gap-md pt-sm">
+            <div className="flex flex-wrap gap-3 pt-2">
               <button 
                 onClick={handleBrowseClick}
-                className="bg-primary hover:bg-[#086b53] text-white px-xl py-sm rounded-xl font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-xs text-sm"
+                className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-7 py-3 rounded-full font-bold transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-2 text-xs"
               >
-                Browse Medicines <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+                <span>Browse Medicines</span>
+                <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
               </button>
               <button 
                 onClick={handleContactClick}
-                className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-zinc-800 text-on-surface px-xl py-sm rounded-xl font-bold transition-all active:scale-95 cursor-pointer text-sm"
+                className="border border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 px-7 py-3 rounded-full font-bold transition-all active:scale-95 cursor-pointer text-xs"
               >
                 Contact Support
               </button>

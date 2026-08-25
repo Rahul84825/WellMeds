@@ -14,7 +14,7 @@ export const checkCartLock = async (req, res, next) => {
       user: req.user._id,
       status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "PAYMENT_PENDING"] },
       expiresAt: { $gt: new Date() },
-    });
+    }).sort({ updatedAt: -1 });
 
     if (session && session.isLocked && session.status !== "VERIFIED") {
       let msg = "Your cart is currently locked because your prescription is under pharmacist verification.";

@@ -82,47 +82,17 @@ const MoleculesPage = () => {
         schema={moleculesSchema}
       />
 
-      {/* ── HERO HEADER (Aligned with Navbar max-w-[1400px] & px-6 lg:px-10) ── */}
-      <div
-        style={BG_STYLE}
-        className="border-b border-[#c3d4cc]"
-      >
-        <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 pt-8 pb-9">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 mb-5 select-none" aria-label="Breadcrumb">
-            <span
-              onClick={() => navigate("/")}
-              className="text-xs font-mono uppercase tracking-widest text-black font-semibold cursor-pointer hover:text-[#157a6d] transition-colors"
-            >Home</span>
-            <ChevronRight size={11} className="text-[#888888]" />
-            <span className="text-xs font-mono uppercase tracking-widest text-[#157a6d] font-bold">
-              Molecule Index
-            </span>
-          </nav>
-
-          {/* Eyebrow */}
-          <p className="text-xs font-mono font-bold uppercase tracking-[2.5px] text-[#b08d3e] mb-3">
-            <span className="font-sans font-extrabold">℞</span> WellMeds Clinical Reference
-          </p>
-
-          {/* Headline */}
-          <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-3 leading-tight"
-            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-          >
-            Molecule <em style={{ fontStyle: "italic", color: "#157a6d" }}>Reference</em> Index
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
+      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+        <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10">
+          <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
+            Molecule Reference Index
           </h1>
-          <p className="text-base sm:text-lg text-black font-mono font-semibold max-w-2xl">
-            {loading ? "Loading active monograph library..." : `${molecules.length.toLocaleString()} active pharmaceutical ingredients documented`}
-          </p>
         </div>
       </div>
 
-      {/* ── ALPHABET INDEX NAV (sticky & enlarged by 23%) ─────────────────────────────────── */}
-      <div
-        className="sticky top-16 z-30 border-b border-[#c3d4cc] backdrop-blur-md"
-        style={{ background: "rgba(231,240,234,0.95)" }}
-      >
+      {/* ── ALPHABET INDEX NAV ── */}
+      <div className="sticky top-16 z-30 border-b border-slate-200 dark:border-zinc-800 backdrop-blur-md bg-white/95 dark:bg-zinc-900/95">
         <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-3.5 flex flex-wrap items-center gap-1.5 select-none">
           <button
             onClick={() => handleLetterClick("ALL")}

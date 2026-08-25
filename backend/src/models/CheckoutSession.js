@@ -63,4 +63,10 @@ checkoutSessionSchema.virtual("isExpired").get(function () {
   return Date.now() > this.expiresAt.getTime();
 });
 
+// Sessions are queried by user and lifecycle state on every cart mutation.
+// This non-unique index is safe for existing data and also makes cleanup of
+// legacy duplicate sessions deterministic without requiring a data migration.
+checkoutSessionSchema.index({ user: 1, status: 1, updatedAt: -1 });
+checkoutSessionSchema.index({ expiresAt: 1 });
+
 export const CheckoutSession = mongoose.model("CheckoutSession", checkoutSessionSchema);
