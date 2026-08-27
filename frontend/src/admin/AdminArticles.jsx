@@ -17,7 +17,6 @@ import {
   Eye,
   ExternalLink,
   ShieldCheck,
-  RotateCcw,
   Clock,
   FileText,
   Layers,
@@ -225,21 +224,6 @@ const AdminArticles = () => {
     }
   };
 
-  const handleSeedArticles = async () => {
-    if (!window.confirm("Seed default clinical articles into database? Existing articles will be safely preserved/updated.")) return;
-    setActionLoading(true);
-    try {
-      const res = await api.seedArticles();
-      showToast(res.message || "Articles seeded successfully!");
-      fetchArticles(1);
-    } catch (err) {
-      console.error("Seeding failed", err);
-      showToast("Seeding failed", "error");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       
@@ -269,16 +253,6 @@ const AdminArticles = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={handleSeedArticles}
-            disabled={actionLoading}
-            className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-1.5 cursor-pointer"
-            title="Populate initial articles from curated medical catalog"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-[#038076]" />
-            <span>Seed Default Articles</span>
-          </button>
-
           <button
             onClick={openCreateModal}
             className="px-4 py-2 text-xs font-bold rounded-xl bg-[#038076] hover:bg-[#02665e] text-white shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"

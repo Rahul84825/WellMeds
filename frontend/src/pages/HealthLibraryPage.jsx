@@ -5,9 +5,6 @@ import Loader from "../components/Loader";
 import {
   Search,
   BookOpen,
-  ShieldCheck,
-  Award,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -15,13 +12,9 @@ import {
   HeartPulse,
   Pill,
   Activity,
-  Flame,
   Apple,
   Stethoscope,
   Clock,
-  User,
-  Share2,
-  Bookmark,
 } from "lucide-react";
 
 // Fallback curated articles to ensure instant zero-latency visual pop
@@ -285,49 +278,9 @@ const HealthLibraryPage = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1411] text-[#172B26] dark:text-zinc-100 font-sans transition-colors duration-300">
-      
-      {/* 1. TOP HERO HEADER & TRUST BADGES (Wellness, Simplified!) */}
-      <section className="pt-10 pb-6 px-4 sm:px-6 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 text-xs font-bold text-[#157A6D] dark:text-[#84d6b9] uppercase tracking-widest mb-3 bg-[#157A6D]/10 px-3.5 py-1 rounded-full border border-[#157A6D]/20">
-          <BookOpen className="w-3.5 h-3.5" />
-          <span>WELLMEDS CLINICAL HEALTH LIBRARY</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F3B34] dark:text-emerald-400 tracking-tight mb-3">
-          Wellness, Simplified!
-        </h1>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-          Evidence-based medical guides, prescription clarity, disease awareness, and practical health advice reviewed by licensed clinical pharmacists and specialists.
-        </p>
-
-        {/* Reference Badges: Integrity | Verified | Reliable */}
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-4 border-t border-[#E4DFCF] dark:border-zinc-800 max-w-xl mx-auto">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
-            <div className="w-8 h-8 rounded-full bg-[#157A6D]/10 dark:bg-[#157A6D]/20 flex items-center justify-center text-[#157A6D] dark:text-[#84d6b9]">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <span>Integrity First</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
-            <div className="w-8 h-8 rounded-full bg-[#B08D3E]/10 dark:bg-[#B08D3E]/20 flex items-center justify-center text-[#B08D3E] dark:text-amber-400">
-              <Award className="w-4 h-4" />
-            </div>
-            <span>Clinically Verified</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
-            <div className="w-8 h-8 rounded-full bg-[#0F3B34]/10 dark:bg-emerald-900/30 flex items-center justify-center text-[#0F3B34] dark:text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <span>Reliable Medicine Advice</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. HERO FEATURED CAROUSEL */}
+      {/* 1. HERO FEATURED CAROUSEL */}
       {featuredArticles.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 my-4">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
           <div
             className="relative h-[290px] sm:h-[340px] md:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-[#0F3B34]/20"
             onMouseEnter={() => setIsHoveringCarousel(true)}
