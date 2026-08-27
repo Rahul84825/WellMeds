@@ -56,6 +56,8 @@ const TermsAndConditionsPage = lazy(() => import("../pages/TermsAndConditionsPag
 const RefundPolicyPage = lazy(() => import("../pages/RefundPolicyPage"));
 const ShippingPolicyPage = lazy(() => import("../pages/ShippingPolicyPage"));
 const DeliveryPage = lazy(() => import("../pages/DeliveryPage"));
+const HealthLibraryPage = lazy(() => import("../pages/HealthLibraryPage"));
+const ArticleDetailPage = lazy(() => import("../pages/ArticleDetailPage"));
 
 // Admin Pages (Lazy Loaded)
 const Dashboard = lazy(() => import("../admin/AdminDashboard"));
@@ -72,6 +74,7 @@ const AdminAddNewMolecule = lazy(() => import("../admin/AdminAddNewMolecule"));
 const AdminPrescriptions = lazy(() => import("../admin/AdminPrescriptions"));
 const AdminCoupons = lazy(() => import("../admin/AdminCoupons"));
 const AdminUsers = lazy(() => import("../admin/AdminUsers"));
+const AdminArticles = lazy(() => import("../admin/AdminArticles"));
 const AdminSettings = lazy(() => import("../admin/AdminSettings"));
 const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
 const AdminWaitlist = lazy(() => import("../admin/AdminWaitlist"));
@@ -166,6 +169,7 @@ const AppRoutes = () => {
             <Route path="prescriptions" element={<AdminPrescriptions />} />
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="articles" element={<AdminArticles />} />
             <Route path="waitlist" element={<AdminWaitlist />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="megamenu" element={<AdminMegaMenu />} />
@@ -234,6 +238,14 @@ const AppRoutes = () => {
           <Route path="shipping-policy" element={<ShippingPolicyPage />} />
           <Route path="delivery" element={<DeliveryPage />} />
 
+          {/* Health Library & Clinical Articles */}
+          <Route path="health-library" element={<HealthLibraryPage />} />
+          <Route path="health-library/:slug" element={<ArticleDetailPage />} />
+          <Route path="library/articles" element={<HealthLibraryPage />} />
+          <Route path="library/articles/:slug" element={<ArticleDetailPage />} />
+          <Route path="articles/:slug" element={<ArticleDetailPage />} />
+          <Route path="library/*" element={<Navigate to="/health-library" replace />} />
+
           {/* Dedicated Customer Auth & Profile Completion Routes */}
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
@@ -294,6 +306,7 @@ const AppRoutes = () => {
           <Route path="prescriptions" element={<AdminPrescriptions />} />
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="articles" element={<AdminArticles />} />
           <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="megamenu" element={<AdminMegaMenu />} />

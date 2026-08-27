@@ -950,57 +950,19 @@ const Navbar = () => {
               </NavLink>
             </div>
 
-            {/* 4. HEALTH LIBRARY (Dropdown) */}
-            <div
-              className="relative flex h-full items-center"
-              onMouseEnter={() => handleMouseEnter("library")}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                id="trigger-library"
-                onKeyDown={(e) => handleDropdownKeyDown(e, "library")}
-                className={`flex items-center gap-1.5 text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${activeDropdown === "library"
-                    ? "bg-slate-200/80 text-slate-900"
+            {/* 4. HEALTH LIBRARY (Direct Link) */}
+            <div className="relative flex h-full items-center">
+              <NavLink
+                to="/health-library"
+                className={({ isActive }) =>
+                  `flex items-center text-[17.8px] font-semibold transition-all duration-200 outline-none border-none cursor-pointer px-3.5 py-1.5 rounded-xl ${isActive
+                    ? "bg-slate-200/80 text-[#038076] font-semibold"
                     : "text-slate-800 hover:bg-slate-200/50 hover:text-[#038076]"
-                  }`}
+                  }`
+                }
               >
-                <span>Health Library</span>
-                <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${activeDropdown === "library" ? "rotate-180" : ""}`} />
-              </button>
-
-              <div
-                id="dropdown-library"
-                onMouseEnter={() => handleMouseEnter("library")}
-                onMouseLeave={handleMouseLeave}
-                className={`absolute left-0 top-full z-[200] mt-2 w-80 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-3 transition-all duration-200 ease-out transform origin-top before:absolute before:top-[-12px] before:left-0 before:right-0 before:h-[12px] before:content-[''] ${activeDropdown === "library"
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                  }`}
-              >
-                {/* Top Caret Triangle Arrow */}
-                <div className="absolute -top-2 left-6 w-3.5 h-3.5 bg-white border-t border-l border-slate-200/80 rotate-45 z-20" />
-
-                <div className="flex flex-col gap-0.5 text-left relative z-30">
-                  {[
-                    { label: "Articles", to: "/library/articles" },
-                    { label: "Health Guides", to: "/library/health-guides" },
-                    { label: "Medicine Guides", to: "/library/medicine-guides" },
-                    { label: "Disease Awareness", to: "/library/disease-awareness" },
-                    { label: "Lifestyle", to: "/library/lifestyle" },
-                    { label: "Nutrition", to: "/library/nutrition" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setActiveDropdown(null)}
-                      onKeyDown={(e) => handleLinkKeyDown(e, "library")}
-                      className="px-4 py-2.5 text-[15.5px] font-medium text-slate-800 rounded-lg hover:bg-slate-50 hover:text-[#038076] transition-all whitespace-nowrap block"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
+                Health Library
+              </NavLink>
             </div>
 
             {/* 5. Patient Assistance Program (Direct Link) */}

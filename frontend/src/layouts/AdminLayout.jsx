@@ -25,7 +25,8 @@ import {
   FlaskConical,
   Scissors,
   Layers,
-  MailSearch
+  MailSearch,
+  BookOpen,
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -84,6 +85,7 @@ const AdminLayout = () => {
     { to: "/admin/surgical-categories", label: "Surgical Categories", icon: Layers },
     { to: "/admin/specialities", label: "Specialities", icon: HeartPulse },
     { to: "/admin/molecules", label: "Molecules", icon: FlaskConical },
+    { to: "/admin/articles", label: "Health Articles", icon: BookOpen },
     { to: "/admin/orders", label: "Orders", icon: ClipboardList },
     { to: "/admin/prescriptions", label: "Prescriptions", icon: FileCheck2 },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },

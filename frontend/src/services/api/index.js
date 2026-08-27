@@ -13,6 +13,7 @@ import { megaMenuService } from "./megaMenuService";
 import { addressService } from "./addressService";
 import { deliveryRuleService } from "./deliveryRuleService";
 import { checkoutSessionService } from "./checkoutSessionService";
+import { articleService } from "./articleService";
 
 
 import apiInstance from "./api";
@@ -145,6 +146,7 @@ export const api = {
   ...contactService,
   ...addressService,
   ...deliveryRuleService,
+  ...articleService,
 };
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

@@ -80,6 +80,10 @@ const Footer = () => {
                 Patient Assistance (PAP)
               </Link>
               <span className="text-[#a4d4c2] dark:text-zinc-700">|</span>
+              <Link to="/health-library" className="hover:text-[#038076] dark:hover:text-[#84d6b9] transition-colors">
+                Health Library
+              </Link>
+              <span className="text-[#a4d4c2] dark:text-zinc-700">|</span>
               <Link to="/delivery" className="hover:text-[#038076] dark:hover:text-[#84d6b9] transition-colors font-semibold text-[#038076] dark:text-[#84d6b9]">
                 Express Delivery in Pune →
               </Link>
@@ -211,6 +215,11 @@ const Footer = () => {
               <li>
                 <Link to="/patient-assistance-program" className="hover:text-[#038076] dark:hover:text-[#84d6b9] transition-colors">
                   Patient Assistance Program (PAP)
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-library" className="hover:text-[#038076] dark:hover:text-[#84d6b9] transition-colors font-semibold">
+                  Clinical Health Library
                 </Link>
               </li>
               <li>

@@ -523,37 +523,15 @@ const GlobalDrawer = () => {
               </Link>
             </div>
 
-            {/* 4. Health Library Accordion */}
+            {/* 4. Health Library (Direct Link) */}
             <div className="border-b border-slate-50 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveMobileAccordion(activeMobileAccordion === "lib" ? null : "lib")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer"
+              <Link
+                to="/health-library"
+                onClick={() => setIsDrawerOpen(false)}
+                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
-                <span>Health Library</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "lib" ? "rotate-180" : ""}`} />
-              </button>
-              {activeMobileAccordion === "lib" && (
-                <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
-                  {[
-                    { label: "Articles", to: "/library/articles" },
-                    { label: "Health Guides", to: "/library/health-guides" },
-                    { label: "Medicine Guides", to: "/library/medicine-guides" },
-                    { label: "Disease Awareness", to: "/library/disease-awareness" },
-                    { label: "Lifestyle", to: "/library/lifestyle" },
-                    { label: "Nutrition", to: "/library/nutrition" }
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                Health Library
+              </Link>
             </div>
 
             {/* 5. Patient Assistance Program (PAP) (Direct Link) */}

@@ -28,6 +28,7 @@ import contactRoutes from "./src/routes/contactRoutes.js";
 import locationRoutes from "./src/routes/locationRoutes.js";
 import addressRoutes from "./src/routes/addressRoutes.js";
 import deliveryRuleRoutes from "./src/routes/deliveryRuleRoutes.js";
+import articleRoutes from "./src/routes/articleRoutes.js";
 
 
 const app = express();
@@ -216,6 +217,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/delivery-rules", deliveryRuleRoutes);
+app.use("/api/articles", articleRoutes);
 
 
 // Unmatched catches & Error boundaries
