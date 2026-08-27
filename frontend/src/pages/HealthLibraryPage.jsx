@@ -162,30 +162,8 @@ const HealthLibraryPage = () => {
         });
 
         if (isMounted) {
-          if (res.articles && res.articles.length > 0) {
-            setArticles(res.articles);
-            setTotalCount(res.total || res.articles.length);
-          } else {
-            // If backend is empty before seeding, trigger background seed and retry once
-            const seedRes = await api.seedArticles().catch(() => null);
-            if (seedRes) {
-              const retryRes = await api.getArticles({
-                category: categoryParam,
-                topic: topicParam,
-                search: searchQuery,
-                sort: sortBy,
-                page: 1,
-                limit: 100,
-              });
-              if (retryRes && retryRes.articles) {
-                setArticles(retryRes.articles);
-                setTotalCount(retryRes.total || retryRes.articles.length);
-              }
-            } else {
-              setArticles([]);
-              setTotalCount(0);
-            }
-          }
+          setArticles(res.articles || []);
+          setTotalCount(res.total || (res.articles ? res.articles.length : 0));
         }
       } catch (err) {
         console.error("Failed to load articles", err);
