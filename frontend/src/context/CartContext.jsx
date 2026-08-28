@@ -428,7 +428,7 @@ export const CartProvider = ({ children }) => {
   const deliveryFee = getDeliveryFee(subtotal);
   const shipping = deliveryFee; // for backwards compatibility with any existing components
 
-  // Handling & Packaging Fee: Regular (₹12) or Cold (₹59)
+  // Handling & Packaging Fee: Regular (₹19) or Cold (₹79)
   const packagingOption = getPackagingOption(packagingType);
   const packagingFee = subtotal === 0 ? 0 : packagingOption.price;
 

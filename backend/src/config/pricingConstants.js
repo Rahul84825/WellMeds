@@ -3,8 +3,8 @@
  * 
  * Rules:
  * - Delivery Fee: Free for cart values ABOVE ₹2000, else ₹99
- * - Regular Packaging: MRP ₹19, Selling Price ₹12
- * - Cold Packaging: MRP ₹79, Selling Price ₹59
+ * - Regular Packaging: Selling Price ₹19
+ * - Cold Packaging: Selling Price ₹79
  */
 
 export const PRICING_CONFIG = {
@@ -14,13 +14,13 @@ export const PRICING_CONFIG = {
     regular: {
       type: "regular",
       name: "Regular Packaging",
-      price: 12,
+      price: 19,
       description: "Standard tamper-evident secure clinical packaging",
     },
     cold: {
       type: "cold",
       name: "Cold Packaging",
-      price: 59,
+      price: 79,
       description: "Temperature-controlled insulated packaging with cold gel packs for sensitive medicines",
     },
   },

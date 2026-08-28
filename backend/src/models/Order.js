@@ -75,7 +75,7 @@ const orderSchema = new mongoose.Schema(
       },
       price: {
         type: Number,
-        default: 12,
+        default: 19,
       },
     },
     tax: {

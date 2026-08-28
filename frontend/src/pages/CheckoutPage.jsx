@@ -159,7 +159,7 @@ const Checkout = () => {
   // Active delivery fee & packaging calculations
   const hasFreeDeliveryCoupon = !!(couponApplied && couponApplied.freeDelivery);
   const activeDeliveryFee = hasFreeDeliveryCoupon ? 0 : (selectedAddress && dynamicShipping !== undefined ? dynamicShipping : (deliveryFee !== undefined ? deliveryFee : (subtotal > 2000 ? 0 : 99)));
-  const activePackagingFee = subtotal === 0 ? 0 : (packagingFee !== undefined ? packagingFee : packagingOption?.price || 12);
+  const activePackagingFee = subtotal === 0 ? 0 : (packagingFee !== undefined ? packagingFee : packagingOption?.price || PRICING_CONFIG.PACKAGING.regular.price);
   const discountAmount = Number(couponDiscount) || 0;
 
   // Item Total (MRP) and Discount on MRP
