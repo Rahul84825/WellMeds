@@ -22,6 +22,7 @@ import { validateDeliveryLocation } from "../services/googleMapsService";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 import PackagingSelector from "../components/checkout/PackagingSelector";
+import { PRICING_CONFIG } from "../constants/pricing";
 import SEO from "../components/common/SEO";
 
 const loadRazorpayScript = () => {
@@ -153,6 +154,7 @@ const Checkout = () => {
   const [couponApplied, setCouponApplied] = useState(null); 
   const [couponLoading, setCouponLoading] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [showDeliveryTooltip, setShowDeliveryTooltip] = useState(false);
 
   // Active delivery fee & packaging calculations
   const hasFreeDeliveryCoupon = !!(couponApplied && couponApplied.freeDelivery);
@@ -1145,8 +1147,43 @@ const Checkout = () => {
                 </div>
               )}
               
-              <div className="flex justify-between items-center text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
-                <span>Delivery Fee</span>
+              {/* Delivery Fee Row with Hover Tooltip Popover matching reference */}
+              <div className="relative flex justify-between items-center text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
+                <div 
+                  className="relative inline-flex items-center gap-1 cursor-pointer select-none text-slate-700 dark:text-zinc-300"
+                  onMouseEnter={() => setShowDeliveryTooltip(true)}
+                  onMouseLeave={() => setShowDeliveryTooltip(false)}
+                >
+                  <span className="font-medium">Delivery Fee:</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeliveryTooltip(!showDeliveryTooltip);
+                    }}
+                    className="text-slate-400 hover:text-[#157a6d] dark:hover:text-emerald-400 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
+                    title="Delivery fee details"
+                    aria-label="Delivery fee details"
+                  >
+                    <Info size={14} />
+                  </button>
+
+                  {/* ── Exact Reference Hover Popover (with Caret Arrow) ── */}
+                  {showDeliveryTooltip && (
+                    <div 
+                      className="absolute bottom-full left-0 mb-3 z-50 bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-700/90 rounded-2xl px-4 py-2.5 shadow-xl text-left animate-[fade-in_0.15s_ease-out] whitespace-nowrap pointer-events-auto"
+                      onMouseEnter={() => setShowDeliveryTooltip(true)}
+                      onMouseLeave={() => setShowDeliveryTooltip(false)}
+                    >
+                      <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-100">
+                        FREE Delivery above order value of ₹{PRICING_CONFIG.DELIVERY_THRESHOLD}
+                      </p>
+                      {/* Caret / Arrow pointing down to the (i) info icon */}
+                      <div className="absolute -bottom-1.5 left-24 sm:left-26 w-3 h-3 bg-white dark:bg-zinc-900 border-r border-b border-slate-200/90 dark:border-zinc-700/90 transform rotate-45" />
+                    </div>
+                  )}
+                </div>
+
                 <span className={`font-semibold ${activeDeliveryFee === 0 ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-[#172b26] dark:text-zinc-100"}`}>
                   {activeDeliveryFee === 0 ? "FREE" : formatCurrency(activeDeliveryFee)}
                 </span>
