@@ -141,31 +141,31 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
           )}
         </div>
 
-        {/* Clickable selector trigger showing current selection */}
+        {/* Clickable selector trigger showing current selection in compact, elegant pill */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-1.5 bg-[#f4f9f7] hover:bg-[#e8f4f0] dark:bg-zinc-800 dark:hover:bg-zinc-750 px-2.5 py-1.5 rounded-lg border border-[#157a6d]/20 dark:border-zinc-700 transition-all cursor-pointer group select-none text-left shrink-0 whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 bg-[#f0f9f6] hover:bg-[#e4f4ef] active:bg-[#daf0e8] dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-[#157a6d]/30 dark:border-emerald-600/30 transition-all cursor-pointer group select-none shrink-0"
         >
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {packagingType === "cold" ? (
               <Snowflake size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
             ) : (
               <Package size={13} className="text-[#157a6d] dark:text-emerald-400 shrink-0" />
             )}
-            <span className="font-semibold text-slate-800 dark:text-zinc-200 text-xs whitespace-nowrap">
-              {packagingOption.name}
+            <span className="font-semibold text-slate-800 dark:text-zinc-100 text-xs">
+              {packagingType === "cold" ? "Cold" : "Regular"}
             </span>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0 ml-1">
-            <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs whitespace-nowrap">
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs">
               ₹{packagingOption.price}
             </span>
             <ChevronDown
-              size={13}
-              className={`text-slate-400 transition-transform duration-200 shrink-0 ${
-                isOpen ? "rotate-180 text-[#157a6d]" : "group-hover:text-slate-600"
+              size={12}
+              className={`text-[#157a6d]/70 dark:text-emerald-400/70 transition-transform duration-200 shrink-0 ${
+                isOpen ? "rotate-180 text-[#157a6d]" : "group-hover:text-[#157a6d]"
               }`}
             />
           </div>

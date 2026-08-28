@@ -22,7 +22,7 @@ import { validateDeliveryLocation } from "../services/googleMapsService";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
 import PackagingSelector from "../components/checkout/PackagingSelector";
-import { PRICING_CONFIG } from "../constants/pricing";
+import { PRICING_CONFIG, getDeliveryFee } from "../constants/pricing";
 import SEO from "../components/common/SEO";
 
 const loadRazorpayScript = () => {
@@ -113,12 +113,15 @@ const Checkout = () => {
   const [showAddForm, setShowAddForm] = useState(false);
 
   // Dynamic Delivery Fee & Google Distance Matrix calculation
-  const [dynamicShipping, setDynamicShipping] = useState(deliveryFee !== undefined ? deliveryFee : (subtotal > 2000 ? 0 : 99));
+  const [dynamicShipping, setDynamicShipping] = useState(
+    deliveryFee !== undefined ? deliveryFee : (subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : PRICING_CONFIG.DELIVERY_FEE)
+  );
   const [shippingMsg, setShippingMsg] = useState("");
   const [deliveryMatrix, setDeliveryMatrix] = useState(null);
 
   useEffect(() => {
     const calcShipping = async () => {
+      const standardFee = subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : PRICING_CONFIG.DELIVERY_FEE;
       if (selectedAddress) {
         try {
           // Check road distance & delivery matrix via Google Maps Platform
@@ -126,7 +129,8 @@ const Checkout = () => {
           setDeliveryMatrix(matrix);
 
           if (matrix && matrix.success) {
-            setDynamicShipping(matrix.deliveryFee !== undefined ? matrix.deliveryFee : (subtotal > 2000 ? 0 : 99));
+            const fee = subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : (matrix.deliveryFee === 0 ? 0 : PRICING_CONFIG.DELIVERY_FEE);
+            setDynamicShipping(fee);
             setShippingMsg(matrix.message || `Driving Distance: ${matrix.distanceKm} km | Est. ${matrix.displayText}`);
           } else {
             const res = await api.calculateDeliveryFee({
@@ -134,14 +138,15 @@ const Checkout = () => {
               pincode: selectedAddress.pincode,
               state: selectedAddress.state,
             });
-            setDynamicShipping(res.charge !== undefined ? res.charge : (subtotal > 2000 ? 0 : 99));
+            const fee = subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : (res.charge === 0 ? 0 : PRICING_CONFIG.DELIVERY_FEE);
+            setDynamicShipping(fee);
             setShippingMsg(res.message);
           }
         } catch (e) {
-          setDynamicShipping(subtotal > 2000 ? 0 : 99);
+          setDynamicShipping(standardFee);
         }
       } else {
-        setDynamicShipping(subtotal > 2000 ? 0 : 99);
+        setDynamicShipping(standardFee);
       }
     };
     calcShipping();
@@ -158,7 +163,9 @@ const Checkout = () => {
 
   // Active delivery fee & packaging calculations
   const hasFreeDeliveryCoupon = !!(couponApplied && couponApplied.freeDelivery);
-  const activeDeliveryFee = hasFreeDeliveryCoupon ? 0 : (selectedAddress && dynamicShipping !== undefined ? dynamicShipping : (deliveryFee !== undefined ? deliveryFee : (subtotal > 2000 ? 0 : 99)));
+  const activeDeliveryFee = hasFreeDeliveryCoupon || subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD
+    ? 0
+    : (dynamicShipping !== undefined && dynamicShipping !== null ? dynamicShipping : (deliveryFee !== undefined ? deliveryFee : PRICING_CONFIG.DELIVERY_FEE));
   const activePackagingFee = subtotal === 0 ? 0 : (packagingFee !== undefined ? packagingFee : packagingOption?.price || PRICING_CONFIG.PACKAGING.regular.price);
   const discountAmount = Number(couponDiscount) || 0;
 
