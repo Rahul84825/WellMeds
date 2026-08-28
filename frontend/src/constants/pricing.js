@@ -10,15 +10,13 @@ export const PRICING_CONFIG = {
     regular: {
       type: "regular",
       name: "Regular Packaging",
-      mrp: 29,
-      price: 19,
+      price: 12,
       description: "Standard tamper-evident secure clinical packaging",
     },
     cold: {
       type: "cold",
       name: "Cold Packaging",
-      mrp: 99,
-      price: 79,
+      price: 59,
       description: "Temperature-controlled insulated packaging with cold gel packs",
     },
   },

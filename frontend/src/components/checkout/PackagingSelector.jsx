@@ -113,9 +113,6 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                      ₹{PRICING_CONFIG.PACKAGING.regular.mrp}
-                    </span>
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.regular.price}
                     </span>
@@ -131,9 +128,6 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                      ₹{PRICING_CONFIG.PACKAGING.cold.mrp}
-                    </span>
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.cold.price}
                     </span>
@@ -151,31 +145,26 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 bg-[#f4f9f7] hover:bg-[#e8f4f0] dark:bg-zinc-800 dark:hover:bg-zinc-750 px-2.5 py-1 rounded-lg border border-[#157a6d]/20 dark:border-zinc-700 transition-all cursor-pointer group select-none text-left"
+          className="inline-flex items-center gap-1.5 bg-[#f4f9f7] hover:bg-[#e8f4f0] dark:bg-zinc-800 dark:hover:bg-zinc-750 px-2.5 py-1.5 rounded-lg border border-[#157a6d]/20 dark:border-zinc-700 transition-all cursor-pointer group select-none text-left shrink-0 whitespace-nowrap"
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {packagingType === "cold" ? (
               <Snowflake size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
             ) : (
               <Package size={13} className="text-[#157a6d] dark:text-emerald-400 shrink-0" />
             )}
-            <span className="font-semibold text-slate-800 dark:text-zinc-200 text-xs">
+            <span className="font-semibold text-slate-800 dark:text-zinc-200 text-xs whitespace-nowrap">
               {packagingOption.name}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 ml-1">
-            {packagingOption.mrp && (
-              <span className="line-through text-[11px] text-slate-400 dark:text-zinc-500 font-normal">
-                ₹{packagingOption.mrp}
-              </span>
-            )}
-            <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs">
+          <div className="flex items-center gap-1 shrink-0 ml-1">
+            <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs whitespace-nowrap">
               ₹{packagingOption.price}
             </span>
             <ChevronDown
               size={13}
-              className={`text-slate-400 transition-transform duration-200 ${
+              className={`text-slate-400 transition-transform duration-200 shrink-0 ${
                 isOpen ? "rotate-180 text-[#157a6d]" : "group-hover:text-slate-600"
               }`}
             />
@@ -185,7 +174,7 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
 
       {/* ── Dropdown / Popover Options List ── */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 p-3 shadow-2xl space-y-2 animate-[fade-in_0.2s_ease-out]">
+        <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 max-w-[calc(100vw-32px)] bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 p-3 shadow-2xl space-y-2 animate-[fade-in_0.2s_ease-out]">
           <p className="text-[11.5px] text-slate-500 dark:text-zinc-400 font-medium px-1 leading-snug">
             Basic fee to ensure quality and secure packaging
           </p>
@@ -210,7 +199,7 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-slate-800 dark:text-zinc-100">
+                        <span className="font-bold text-xs text-slate-800 dark:text-zinc-100 whitespace-nowrap">
                           {option.name}
                         </span>
                         {isSelected && (
@@ -224,16 +213,9 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <div className="text-right">
-                      {option.mrp && (
-                        <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1 font-normal">
-                          ₹{option.mrp}
-                        </span>
-                      )}
-                      <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400">
-                        ₹{option.price}
-                      </span>
-                    </div>
+                    <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400 whitespace-nowrap">
+                      ₹{option.price}
+                    </span>
 
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border transition-colors ${

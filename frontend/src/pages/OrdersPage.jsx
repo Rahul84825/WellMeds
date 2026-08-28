@@ -387,7 +387,7 @@ const Orders = () => {
                       <div className="flex justify-between text-slate-500 dark:text-zinc-455">
                         <span>Handling & Packaging</span>
                         <span className="font-medium text-slate-800 dark:text-zinc-200">
-                          {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹19)"}
+                          {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹12)"}
                         </span>
                       </div>
                       <div className="flex justify-between border-t border-slate-150 dark:border-zinc-850 pt-xs font-bold text-sm text-slate-800 dark:text-zinc-100">
