@@ -624,14 +624,9 @@ const Checkout = () => {
       <SEO title="Secure Checkout — WellMeds" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <Link to="/cart" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5 w-fit">
+        <Link to="/cart" className="text-xs sm:text-sm font-semibold text-[#157a6d] dark:text-emerald-400 hover:underline flex items-center gap-1.5 w-fit mb-3">
           <ArrowLeft size={16} /> Back to Cart
         </Link>
-        <div className="font-clinical-mono text-xs font-semibold tracking-widest text-[#157a6d] uppercase mt-4 mb-1 flex items-center gap-2">
-          <span>SECURE CHECKOUT</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#b08d3e]" />
-          <span>CLINICAL DISPATCH</span>
-        </div>
         <h1 className="font-editorial text-2xl sm:text-4xl font-semibold text-[#172b26] dark:text-white tracking-tight">
           Checkout
         </h1>
