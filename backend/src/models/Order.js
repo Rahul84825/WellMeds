@@ -59,6 +59,25 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    deliveryFee: {
+      type: Number,
+      default: 99,
+    },
+    packaging: {
+      type: {
+        type: String,
+        enum: ["regular", "cold"],
+        default: "regular",
+      },
+      name: {
+        type: String,
+        default: "Regular Packaging",
+      },
+      price: {
+        type: Number,
+        default: 12,
+      },
+    },
     tax: {
       type: Number,
       required: true,

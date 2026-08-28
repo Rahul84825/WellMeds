@@ -18,6 +18,9 @@ const Cart = () => {
     cartItems,
     cartCount,
     subtotal,
+    deliveryFee,
+    amountNeededForFreeDelivery,
+    isFreeDeliveryEligible,
     shipping,
     tax,
     total,
@@ -385,6 +388,21 @@ const Cart = () => {
               )}
             </div>
 
+            {/* Free Delivery Threshold Banner */}
+            <div className="px-6 pt-5 pb-0">
+              {isFreeDeliveryEligible || subtotal > 2000 ? (
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl p-3 text-xs text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2 animate-[fade-in_0.2s_ease-out]">
+                  <span className="text-base">🎉</span>
+                  <span>Free delivery (cart value above ₹2000)</span>
+                </div>
+              ) : subtotal > 0 ? (
+                <div className="bg-[#f4f9f7] dark:bg-zinc-800/60 border border-[#157a6d]/20 dark:border-zinc-700 rounded-2xl p-3 text-xs text-[#157a6d] dark:text-emerald-400 font-medium flex items-center justify-between animate-[fade-in_0.2s_ease-out]">
+                  <span>🚚 Add <strong className="font-bold">₹{amountNeededForFreeDelivery}</strong> more for <strong>FREE Delivery</strong></span>
+                  <Link to="/products" className="font-bold underline text-[11px] hover:text-[#0f5c52] shrink-0 ml-2">Add Items</Link>
+                </div>
+              ) : null}
+            </div>
+
             {/* Cost Breakdown */}
             <div className="p-6 space-y-4">
               <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
@@ -406,16 +424,25 @@ const Cart = () => {
                 </div>
               )}
               
+              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
+                <span>Delivery Fee</span>
+                <span className={subtotal > 2000 ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-800 dark:text-zinc-200 font-medium"}>
+                  {subtotal > 2000 ? "FREE" : "₹99"}
+                </span>
+              </div>
+
               <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                <span>Shipping & Handling</span>
-                <span className="text-[#172b26] dark:text-zinc-100">Calculated at checkout</span>
+                <span>Handling & Packaging</span>
+                <span className="text-slate-800 dark:text-zinc-200 font-medium">
+                  ₹19 / ₹79
+                </span>
               </div>
 
               {/* Total Row */}
               <div className="flex justify-between items-center pt-2">
-                <span className="text-base font-bold text-[#172b26] dark:text-white">Order Total</span>
-                <span className="text-xl font-bold text-[#172b26] dark:text-white tracking-tight">
-                  {formatCurrency(finalTotal)}
+                <span className="text-base font-bold text-[#172b26] dark:text-white">Estimated Total</span>
+                <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
+                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > 2000 ? 0 : 99) + 19)))}
                 </span>
               </div>
 

@@ -14,10 +14,15 @@ import {
   sendOrderCancelled,
   sendOrderStatusEmail,
 } from "../services/emailService.js";
+import {
+  PRICING_CONFIG,
+  calculateDeliveryFee,
+  resolvePackaging,
+} from "../config/pricingConstants.js";
 
 
 // Helper to compute order details from product database prices
-const computeOrderTotals = async (items, couponCode, userId) => {
+const computeOrderTotals = async (items, couponCode, userId, packagingType = "regular") => {
   let subtotal = 0;
   let orderRequiresRx = false;
   const validatedItems = [];
@@ -86,7 +91,6 @@ const computeOrderTotals = async (items, couponCode, userId) => {
     });
   }
 
-  let shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
   let discountAmount = 0;
   let couponObj = null;
 
@@ -126,22 +130,30 @@ const computeOrderTotals = async (items, couponCode, userId) => {
     } else {
       discountAmount = Math.min(discountVal, subtotal);
     }
-
-    if (couponObj.freeDelivery) {
-      shipping = 0;
-    }
   }
+
+  const hasFreeDeliveryCoupon = !!(couponObj && couponObj.freeDelivery);
+  const deliveryFee = calculateDeliveryFee(subtotal, hasFreeDeliveryCoupon);
+  const packaging = resolvePackaging(packagingType);
+  const packagingFee = subtotal === 0 ? 0 : packaging.price;
 
   const roundMoney = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
   const roundedSubtotal = roundMoney(subtotal);
   const roundedDiscountAmount = roundMoney(discountAmount);
   // GST is already included in product prices
   const tax = 0;
-  const finalAmount = roundMoney(Math.max(0, roundedSubtotal - roundedDiscountAmount + shipping));
+  const finalAmount = roundMoney(Math.max(0, roundedSubtotal - roundedDiscountAmount + deliveryFee + packagingFee));
 
   return {
     subtotal: roundedSubtotal,
-    shipping,
+    shipping: deliveryFee,
+    deliveryFee,
+    packaging: {
+      type: packaging.type,
+      name: packaging.name,
+      price: packaging.price,
+    },
+    packagingFee,
     tax,
     discountAmount: roundedDiscountAmount,
     finalAmount,
@@ -315,7 +327,7 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
 
 // Create Razorpay Order & Save DRAFT Order in DB (Exclusive Razorpay Gateway)
 export const createRazorpayOrder = async (req, res, next) => {
-  const { items, couponCode, customer, email, shippingAddress, rxFile, requiresRx, deliveryCoordinates } = req.body;
+  const { items, couponCode, customer, email, shippingAddress, rxFile, requiresRx, deliveryCoordinates, packagingType } = req.body;
 
   try {
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -335,7 +347,7 @@ export const createRazorpayOrder = async (req, res, next) => {
       }
     }
 
-    const totals = await computeOrderTotals(items, couponCode, req.user._id);
+    const totals = await computeOrderTotals(items, couponCode, req.user._id, packagingType);
 
     // Strict Backend Rx Guard: If order contains Rx products, verify matching approved prescription exists
     let verifiedRxDoc = null;
@@ -433,6 +445,8 @@ export const createRazorpayOrder = async (req, res, next) => {
       existingDraft.discountAmount = totals.discountAmount;
       existingDraft.subtotal = totals.subtotal;
       existingDraft.shipping = totals.shipping;
+      existingDraft.deliveryFee = totals.deliveryFee;
+      existingDraft.packaging = totals.packaging;
       existingDraft.tax = totals.tax;
       existingDraft.total = totals.finalAmount;
       existingDraft.finalAmount = totals.finalAmount;
@@ -468,6 +482,8 @@ export const createRazorpayOrder = async (req, res, next) => {
         discountAmount: totals.discountAmount,
         subtotal: totals.subtotal,
         shipping: totals.shipping,
+        deliveryFee: totals.deliveryFee,
+        packaging: totals.packaging,
         tax: totals.tax,
         total: totals.finalAmount,
         finalAmount: totals.finalAmount,
@@ -513,13 +529,14 @@ export const createRazorpayOrder = async (req, res, next) => {
       { upsert: true, new: true, sort: { updatedAt: -1 } }
     );
 
-
-
     res.status(200).json({
       success: true,
       razorpayOrder,
       subtotal: totals.subtotal,
       shipping: totals.shipping,
+      deliveryFee: totals.deliveryFee,
+      packaging: totals.packaging,
+      packagingFee: totals.packagingFee,
       tax: totals.tax,
       discountAmount: totals.discountAmount,
       finalAmount: totals.finalAmount,

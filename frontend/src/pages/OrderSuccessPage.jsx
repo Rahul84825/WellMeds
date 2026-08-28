@@ -461,11 +461,18 @@ const OrderSuccess = () => {
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
                 <span className="font-medium text-[#172b26] dark:text-zinc-200">
-                  {order.shipping === 0 ? (
+                  {order.shipping === 0 || order.deliveryFee === 0 ? (
                     <span className="text-emerald-600 font-bold">FREE</span>
                   ) : (
-                    formatCurrency(order.shipping || 0)
+                    formatCurrency(order.deliveryFee || order.shipping || 0)
                   )}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Handling & Packaging</span>
+                <span className="font-medium text-[#172b26] dark:text-zinc-200">
+                  {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹19)"}
                 </span>
               </div>
 

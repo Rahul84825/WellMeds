@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { cartService } from "../services/api/cartService";
 import { checkoutSessionService } from "../services/api/checkoutSessionService";
 import { roundPrice } from "../utils/currency";
+import {
+  PRICING_CONFIG,
+  PACKAGING_OPTIONS,
+  getDeliveryFee,
+  getPackagingOption,
+  getAmountNeededForFreeDelivery,
+} from "../constants/pricing";
 
 export const CartContext = createContext();
 
@@ -21,6 +28,7 @@ export const CartProvider = ({ children }) => {
     return [];
   });
 
+  const [packagingType, setPackagingType] = useState("regular");
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingRxFile, setPendingRxFile] = useState(null);
 
@@ -63,6 +71,7 @@ export const CartProvider = ({ children }) => {
   // Complete hard purge on user logout
   const purgeCartOnLogout = useCallback(() => {
     setCartItems([]);
+    setPackagingType("regular");
     setIsCartLocked(false);
     setCheckoutSessionStatus("ACTIVE");
     setLockReason("");
@@ -361,6 +370,7 @@ export const CartProvider = ({ children }) => {
     }
 
     setCartItems([]);
+    setPackagingType("regular");
     localStorage.removeItem("medishop_cart");
     localStorage.removeItem("medishop_guest_cart");
 
@@ -378,6 +388,7 @@ export const CartProvider = ({ children }) => {
   // Production Post-Order Reset: Safely bypasses locks, resets state, and syncs tabs
   const resetCartPostOrder = useCallback(() => {
     setCartItems([]);
+    setPackagingType("regular");
     setIsCartLocked(false);
     setCheckoutSessionStatus("PAYMENT_SUCCESS");
     setLockReason("");
@@ -408,15 +419,26 @@ export const CartProvider = ({ children }) => {
   }, [syncCartForUser]);
 
   // ─────────────────────────────────────────────────────
-  // Derived values
+  // Derived pricing values
   // ─────────────────────────────────────────────────────
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = roundPrice(cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * item.quantity, 0));
-  // Indian shipping: free above ₹499, else ₹49 flat fee
-  const shipping = subtotal === 0 ? 0 : subtotal >= 499 ? 0 : 49;
+
+  // Delivery Fee: Free for cart values > ₹2000, else ₹99
+  const deliveryFee = getDeliveryFee(subtotal);
+  const shipping = deliveryFee; // for backwards compatibility with any existing components
+
+  // Handling & Packaging Fee: Regular (₹12) or Cold (₹59)
+  const packagingOption = getPackagingOption(packagingType);
+  const packagingFee = subtotal === 0 ? 0 : packagingOption.price;
+
+  // Threshold helpers for UI banners
+  const amountNeededForFreeDelivery = getAmountNeededForFreeDelivery(subtotal);
+  const isFreeDeliveryEligible = subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD;
+
   // GST is already included in product prices
   const tax = 0;
-  const total = roundPrice(subtotal + shipping);
+  const total = roundPrice(subtotal + deliveryFee + packagingFee);
   const requiresRx = cartItems.some((item) => item.requiresRx);
 
   return (
@@ -426,6 +448,13 @@ export const CartProvider = ({ children }) => {
         cartCount,
         subtotal,
         shipping,
+        deliveryFee,
+        packagingType,
+        setPackagingType,
+        packagingOption,
+        packagingFee,
+        amountNeededForFreeDelivery,
+        isFreeDeliveryEligible,
         tax,
         total,
         requiresRx,
@@ -445,6 +474,8 @@ export const CartProvider = ({ children }) => {
         saveCartToLocalOnLogout,
         pendingRxFile,
         setPendingRxFile,
+        PRICING_CONFIG,
+        PACKAGING_OPTIONS,
       }}
     >
       {children}
@@ -457,4 +488,3 @@ export const useCart = () => {
   if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 };
-

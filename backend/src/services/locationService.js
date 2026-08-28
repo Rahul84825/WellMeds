@@ -59,11 +59,11 @@ export const calculateHaversineDistance = (lat1, lon1, lat2, lon2) => {
 // DECOUPLED DELIVERY FEE CALCULATION (Decoupled from Distance/Radius)
 // ─────────────────────────────────────────────────────────────────────────────
 export const calculateDeliveryFee = (orderAmount = 0) => {
-  const freeThreshold = parseFloat(process.env.FREE_DELIVERY_THRESHOLD || "500");
-  if (orderAmount >= freeThreshold) {
-    return 0; // Free delivery for orders >= ₹500
+  const freeThreshold = parseFloat(process.env.FREE_DELIVERY_THRESHOLD || "2000");
+  if (orderAmount > freeThreshold) {
+    return 0; // Free delivery for orders > ₹2000
   }
-  return 50; // Standard flat delivery fee
+  return 99; // Standard flat delivery fee
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

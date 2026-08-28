@@ -1,4 +1,5 @@
 import { DeliveryRule } from "../models/DeliveryRule.js";
+import { PRICING_CONFIG } from "../config/pricingConstants.js";
 
 // @desc    Calculate dynamic delivery charge
 // @route   POST /api/delivery-rules/calculate
@@ -11,12 +12,12 @@ export const calculateDeliveryFee = async (req, res) => {
     // Fetch active delivery rules sorted by priority descending
     const rules = await DeliveryRule.find({ isActive: true }).sort({ priority: -1 });
 
-    // Free delivery threshold check (default: orders above ₹500 get free shipping)
-    const defaultFreeThreshold = 500;
-    const defaultFlatFee = 50;
+    // Free delivery threshold check (orders above ₹2000 get free shipping, else ₹99)
+    const defaultFreeThreshold = PRICING_CONFIG.DELIVERY_THRESHOLD;
+    const defaultFlatFee = PRICING_CONFIG.DELIVERY_FEE;
 
     if (rules.length === 0) {
-      const charge = amount >= defaultFreeThreshold ? 0 : defaultFlatFee;
+      const charge = amount > defaultFreeThreshold ? 0 : defaultFlatFee;
       return res.json({
         success: true,
         charge,
@@ -30,7 +31,7 @@ export const calculateDeliveryFee = async (req, res) => {
     let threshold = defaultFreeThreshold;
 
     for (const rule of rules) {
-      if (rule.freeDeliveryThreshold && amount >= rule.freeDeliveryThreshold) {
+      if (rule.freeDeliveryThreshold && amount > rule.freeDeliveryThreshold) {
         appliedCharge = 0;
         threshold = rule.freeDeliveryThreshold;
         break;

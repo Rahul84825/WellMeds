@@ -378,14 +378,18 @@ const Orders = () => {
                           <span>-{formatCurrency(order.discountAmount)}</span>
                         </div>
                       )}
-                      {order.shipping != null && (
-                        <div className="flex justify-between text-slate-500 dark:text-zinc-455">
-                          <span>Shipping charges</span>
-                          <span className="font-medium text-slate-800 dark:text-zinc-200">
-                            {order.shipping === 0 ? "FREE" : formatCurrency(order.shipping)}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex justify-between text-slate-500 dark:text-zinc-455">
+                        <span>Delivery Fee</span>
+                        <span className="font-medium text-slate-800 dark:text-zinc-200">
+                          {order.shipping === 0 || order.deliveryFee === 0 ? "FREE" : formatCurrency(order.deliveryFee || order.shipping || 99)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-slate-500 dark:text-zinc-455">
+                        <span>Handling & Packaging</span>
+                        <span className="font-medium text-slate-800 dark:text-zinc-200">
+                          {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹19)"}
+                        </span>
+                      </div>
                       <div className="flex justify-between border-t border-slate-150 dark:border-zinc-850 pt-xs font-bold text-sm text-slate-800 dark:text-zinc-100">
                         <span>Grand Total</span>
                         <span className="text-primary dark:text-[#a4c9ff]">{formatCurrency(order.total || 0)}</span>

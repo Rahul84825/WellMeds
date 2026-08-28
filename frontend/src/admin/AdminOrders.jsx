@@ -657,6 +657,39 @@ const ManageOrders = () => {
                 </div>
               </AdminCard>
 
+              {/* 3.5. Pricing & Packaging Breakdown Card */}
+              <AdminCard>
+                <AdminCardHeader title="Order Pricing Breakdown" />
+                <div className="space-y-2 text-slate-700 dark:text-zinc-300">
+                  <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400">
+                    <span>Subtotal:</span>
+                    <span className="font-medium text-slate-900 dark:text-zinc-100">{formatCurrency(selectedOrder.subtotal)}</span>
+                  </div>
+                  {selectedOrder.discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-emerald-600 font-medium">
+                      <span>Coupon Discount ({selectedOrder.couponCode || "Applied"}):</span>
+                      <span>-{formatCurrency(selectedOrder.discountAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400">
+                    <span>Delivery Fee:</span>
+                    <span className={selectedOrder.shipping === 0 || selectedOrder.deliveryFee === 0 ? "text-emerald-600 font-bold" : "font-medium text-slate-900 dark:text-zinc-100"}>
+                      {selectedOrder.shipping === 0 || selectedOrder.deliveryFee === 0 ? "FREE" : formatCurrency(selectedOrder.deliveryFee || selectedOrder.shipping || 99)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400">
+                    <span>Handling & Packaging:</span>
+                    <span className="font-medium text-slate-900 dark:text-zinc-100">
+                      {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} — ${formatCurrency(selectedOrder.packaging.price)}` : "Regular Packaging — ₹19"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-slate-150 dark:border-zinc-800 pt-2 font-bold text-sm text-slate-900 dark:text-white">
+                    <span>Grand Total:</span>
+                    <span className="text-[#157a6d] dark:text-emerald-400 text-base">{formatCurrency(selectedOrder.finalAmount || selectedOrder.total)}</span>
+                  </div>
+                </div>
+              </AdminCard>
+
               {/* 4. Vertical Timeline Card */}
               <AdminCard>
                 <AdminCardHeader title="Order Timeline Lifecycle" />
@@ -815,7 +848,7 @@ const ManageOrders = () => {
               </div>
 
               {/* Totals */}
-              <div className="space-y-1.5 w-56 ml-auto text-xs">
+              <div className="space-y-1.5 w-64 ml-auto text-xs">
                 <div className="flex justify-between text-slate-500">
                   <span>Subtotal:</span>
                   <span className="font-medium">{formatCurrency(selectedOrder.subtotal)}</span>
@@ -827,8 +860,16 @@ const ManageOrders = () => {
                   </div>
                 )}
                 <div className="flex justify-between text-slate-500">
-                  <span>Shipping:</span>
-                  <span>{selectedOrder.shipping === 0 ? "FREE" : formatCurrency(selectedOrder.shipping)}</span>
+                  <span>Delivery Fee:</span>
+                  <span className={selectedOrder.shipping === 0 || selectedOrder.deliveryFee === 0 ? "text-emerald-600 font-semibold" : "font-medium"}>
+                    {selectedOrder.shipping === 0 || selectedOrder.deliveryFee === 0 ? "FREE" : formatCurrency(selectedOrder.deliveryFee || selectedOrder.shipping || 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Handling & Packaging:</span>
+                  <span className="font-medium">
+                    {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} (${formatCurrency(selectedOrder.packaging.price)})` : "Regular Packaging (₹19)"}
+                  </span>
                 </div>
                 <div className="flex justify-between border-t border-slate-200 dark:border-zinc-800 pt-2 font-semibold text-sm text-slate-900 dark:text-white">
                   <span>Grand Total:</span>

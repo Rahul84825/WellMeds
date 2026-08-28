@@ -21,6 +21,7 @@ import AddressSelectorModal from "../components/address/AddressSelectorModal";
 import { validateDeliveryLocation } from "../services/googleMapsService";
 import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import CompleteProfileModal from "../components/auth/CompleteProfileModal";
+import PackagingSelector from "../components/checkout/PackagingSelector";
 import SEO from "../components/common/SEO";
 
 const loadRazorpayScript = () => {
@@ -38,7 +39,26 @@ const loadRazorpayScript = () => {
 };
 
 const Checkout = () => {
-  const { cartItems, subtotal, shipping, tax, total, requiresRx, isCartLocked, modifyCart, clearCart, resetCartPostOrder, refreshCartLockStatus } = useCart();
+  const {
+    cartItems,
+    subtotal,
+    deliveryFee,
+    shipping,
+    packagingType,
+    setPackagingType,
+    packagingOption,
+    packagingFee,
+    amountNeededForFreeDelivery,
+    isFreeDeliveryEligible,
+    tax,
+    total,
+    requiresRx,
+    isCartLocked,
+    modifyCart,
+    clearCart,
+    resetCartPostOrder,
+    refreshCartLockStatus,
+  } = useCart();
   const { user, loading: authLoading, profileComplete, isAdmin, openLoginModal } = useAuth();
   const navigate = useNavigate();
 
@@ -91,7 +111,7 @@ const Checkout = () => {
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Dynamic Shipping & Google Distance Matrix calculation
+  // Dynamic Delivery Fee & Google Distance Matrix calculation
   const [dynamicShipping, setDynamicShipping] = useState(0);
   const [shippingMsg, setShippingMsg] = useState("");
   const [deliveryMatrix, setDeliveryMatrix] = useState(null);
@@ -105,7 +125,7 @@ const Checkout = () => {
           setDeliveryMatrix(matrix);
 
           if (matrix && matrix.success) {
-            setDynamicShipping(matrix.deliveryFee !== undefined ? matrix.deliveryFee : 40);
+            setDynamicShipping(matrix.deliveryFee !== undefined ? matrix.deliveryFee : (subtotal > 2000 ? 0 : 99));
             setShippingMsg(matrix.message || `Driving Distance: ${matrix.distanceKm} km | Est. ${matrix.displayText}`);
           } else {
             const res = await api.calculateDeliveryFee({
@@ -117,10 +137,10 @@ const Checkout = () => {
             setShippingMsg(res.message);
           }
         } catch (e) {
-          setDynamicShipping(subtotal >= 500 ? 0 : 50);
+          setDynamicShipping(subtotal > 2000 ? 0 : 99);
         }
       } else {
-        setDynamicShipping(subtotal >= 500 ? 0 : 50);
+        setDynamicShipping(subtotal > 2000 ? 0 : 99);
       }
     };
     calcShipping();
@@ -134,12 +154,22 @@ const Checkout = () => {
   const [couponLoading, setCouponLoading] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
 
-  // Active shipping fee & discount calculations
-  const activeShipping = selectedAddress ? dynamicShipping : (shipping !== undefined ? shipping : (subtotal >= 500 ? 0 : 50));
+  // Active delivery fee & packaging calculations
+  const hasFreeDeliveryCoupon = !!(couponApplied && couponApplied.freeDelivery);
+  const activeDeliveryFee = hasFreeDeliveryCoupon ? 0 : (selectedAddress && dynamicShipping !== undefined ? dynamicShipping : (deliveryFee !== undefined ? deliveryFee : (subtotal > 2000 ? 0 : 99)));
+  const activePackagingFee = subtotal === 0 ? 0 : (packagingFee !== undefined ? packagingFee : packagingOption?.price || 12);
   const discountAmount = Number(couponDiscount) || 0;
 
-  // Derived totals with coupon
-  const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeShipping));
+  // Item Total (MRP) and Discount on MRP
+  const totalMrp = roundPrice(cartItems.reduce((acc, item) => {
+    const origPrice = item.originalPrice && item.originalPrice > item.price ? item.originalPrice : item.price;
+    return acc + (Number(origPrice) * item.quantity);
+  }, 0));
+  const discountOnMrp = totalMrp > subtotal ? roundPrice(totalMrp - subtotal) : 0;
+
+  // Derived totals with coupon, delivery, and packaging
+  const finalTotal = roundPrice(Math.max(0, subtotal - discountAmount + activeDeliveryFee + activePackagingFee));
+
   const [rxAttached, setRxAttached] = useState(false);
   const [rxFileName, setRxFileName] = useState("");
   const [rxModalOpen, setRxModalOpen] = useState(false);
@@ -270,7 +300,6 @@ const Checkout = () => {
   useEffect(() => {
     checkRxStatus();
   }, [checkRxStatus]);
-
 
   // Dynamic automatic status checking (polling every 4 seconds when Pending Verification & multi-tab sync)
   useEffect(() => {
@@ -405,7 +434,7 @@ const Checkout = () => {
         formattedAddress: selectedAddress.formattedAddress || "",
         distanceKm: deliveryMatrix?.distanceKm || null,
         estimatedTimeMinutes: deliveryMatrix?.durationMinutes || null,
-        deliveryFee: activeShipping,
+        deliveryFee: activeDeliveryFee,
       };
 
       const formattedAddressStr = [
@@ -422,7 +451,9 @@ const Checkout = () => {
         email: user?.email || "",
         items: orderItems,
         subtotal,
-        shipping: activeShipping,
+        shipping: activeDeliveryFee,
+        deliveryFee: activeDeliveryFee,
+        packagingType: packagingType || "regular",
         tax,
         total: finalTotal,
         discount: discountAmount,
@@ -439,6 +470,7 @@ const Checkout = () => {
       const orderSession = await api.createRazorpayOrder({
         items: orderItems,
         couponCode: couponApplied?.code || null,
+        packagingType: packagingType || "regular",
         customer: selectedAddress.fullName || user?.name || "Valued Customer",
         email: user?.email || "",
         shippingAddress: formattedAddressStr,
@@ -446,7 +478,6 @@ const Checkout = () => {
         rxFile: matchingRxDoc?.fileUrl || rxFileName || null,
         requiresRx,
       });
-
 
       if (!orderSession.success || !orderSession.razorpayOrder) {
         throw new Error(orderSession.message || "Failed to initialize payment session.");
@@ -1078,30 +1109,57 @@ const Checkout = () => {
               )}
             </div>
 
+            {/* Free Delivery Threshold Banner */}
+            <div className="px-6 pt-5 pb-0">
+              {isFreeDeliveryEligible || subtotal > 2000 ? (
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl p-3 text-xs text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2 animate-[fade-in_0.2s_ease-out]">
+                  <span className="text-base">🎉</span>
+                  <span>Free delivery (cart value above ₹2000)</span>
+                </div>
+              ) : subtotal > 0 ? (
+                <div className="bg-[#f4f9f7] dark:bg-zinc-800/60 border border-[#157a6d]/20 dark:border-zinc-700 rounded-2xl p-3 text-xs text-[#157a6d] dark:text-emerald-400 font-medium flex items-center justify-between animate-[fade-in_0.2s_ease-out]">
+                  <span>🚚 Add <strong className="font-bold">₹{amountNeededForFreeDelivery}</strong> more for <strong>FREE Delivery</strong></span>
+                  <Link to="/products" className="font-bold underline text-[11px] hover:text-[#0f5c52] shrink-0 ml-2">Add Items</Link>
+                </div>
+              ) : null}
+            </div>
+
             {/* Cost Breakdown */}
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-3.5">
               <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
-                <span>Subtotal</span>
-                <span className="font-medium text-[#172b26] dark:text-zinc-100">{formatCurrency(subtotal)}</span>
+                <span>Item Total (MRP)</span>
+                <span className="font-medium text-[#172b26] dark:text-zinc-100">{formatCurrency(totalMrp || subtotal)}</span>
               </div>
+
+              {discountOnMrp > 0 && (
+                <div className="flex justify-between text-xs sm:text-sm text-[#157a6d] dark:text-emerald-400 font-medium">
+                  <span>Discount on MRP</span>
+                  <span>-{formatCurrency(discountOnMrp)}</span>
+                </div>
+              )}
               
               {couponApplied && discountAmount > 0 && (
                 <div className="flex justify-between text-xs sm:text-sm text-[#157a6d] dark:text-emerald-400 font-medium">
-                  <span>Coupon Discount</span>
+                  <span>Coupon Discount ({couponApplied.code})</span>
                   <span>-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
               
-              <div className="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                <span>Shipping {subtotal >= 499 && subtotal > 0 ? "(Free > ₹499)" : ""}</span>
-                <span className="text-[#172b26] dark:text-zinc-100 font-medium">
-                  {activeShipping === 0 ? "FREE" : formatCurrency(activeShipping)}
+              <div className="flex justify-between items-center text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
+                <span>Delivery Fee</span>
+                <span className={`font-semibold ${activeDeliveryFee === 0 ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-[#172b26] dark:text-zinc-100"}`}>
+                  {activeDeliveryFee === 0 ? "FREE" : formatCurrency(activeDeliveryFee)}
                 </span>
               </div>
 
+              {/* Handling & Packaging Selector */}
+              <div className="pt-1 pb-3 border-b border-slate-100 dark:border-zinc-800">
+                <PackagingSelector />
+              </div>
+
               {/* Total Row */}
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-base font-bold text-[#172b26] dark:text-white">Final Total</span>
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-base font-bold text-[#172b26] dark:text-white">Total Amount</span>
                 <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
                   {formatCurrency(finalTotal)}
                 </span>
