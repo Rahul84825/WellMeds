@@ -508,18 +508,18 @@ const Cart = () => {
               {/* Handling & Packaging with Hover Tooltip Popover */}
               <div className="relative flex justify-between items-center text-xs sm:text-sm text-slate-600 dark:text-zinc-400 pb-4 border-b border-slate-100 dark:border-zinc-800">
                 <div 
-                  className="relative inline-flex items-center gap-1 cursor-pointer select-none text-slate-700 dark:text-zinc-300"
+                  className="relative inline-flex items-center gap-1 cursor-pointer select-none text-slate-700 dark:text-zinc-300 shrink-0"
                   onMouseEnter={() => setShowPackagingTooltip(true)}
                   onMouseLeave={() => setShowPackagingTooltip(false)}
                 >
-                  <span className="font-medium">Handling & Packaging:</span>
+                  <span className="font-medium whitespace-nowrap">Handling & Packaging:</span>
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowPackagingTooltip(!showPackagingTooltip);
                     }}
-                    className="text-slate-400 hover:text-[#157a6d] dark:hover:text-emerald-400 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
+                    className="text-slate-400 hover:text-[#157a6d] dark:hover:text-emerald-400 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer inline-flex items-center justify-center shrink-0"
                     title="Packaging details"
                     aria-label="Packaging details"
                   >
@@ -546,10 +546,7 @@ const Cart = () => {
                             </span>
                           </div>
                           <div className="text-right">
-                            <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                              ₹{PRICING_CONFIG.PACKAGING.regular.mrp}
-                            </span>
-                            <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
+                            <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                               ₹{PRICING_CONFIG.PACKAGING.regular.price}
                             </span>
                           </div>
@@ -563,10 +560,7 @@ const Cart = () => {
                             </span>
                           </div>
                           <div className="text-right">
-                            <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                              ₹{PRICING_CONFIG.PACKAGING.cold.mrp}
-                            </span>
-                            <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
+                            <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                               ₹{PRICING_CONFIG.PACKAGING.cold.price}
                             </span>
                           </div>
@@ -579,7 +573,7 @@ const Cart = () => {
                 </div>
 
                 <span className="text-slate-800 dark:text-zinc-200 font-medium">
-                  ₹19 / ₹79
+                  ₹12 / ₹59
                 </span>
               </div>
 
@@ -587,7 +581,7 @@ const Cart = () => {
               <div className="flex justify-between items-center pt-2">
                 <span className="text-base font-bold text-[#172b26] dark:text-white">Estimated Total</span>
                 <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
-                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > 2000 ? 0 : 99) + 19)))}
+                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > 2000 ? 0 : 99) + 12)))}
                 </span>
               </div>
 

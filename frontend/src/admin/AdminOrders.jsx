@@ -680,7 +680,7 @@ const ManageOrders = () => {
                   <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400">
                     <span>Handling & Packaging:</span>
                     <span className="font-medium text-slate-900 dark:text-zinc-100">
-                      {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} — ${formatCurrency(selectedOrder.packaging.price)}` : "Regular Packaging — ₹19"}
+                      {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} — ${formatCurrency(selectedOrder.packaging.price)}` : "Regular Packaging — ₹12"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-150 dark:border-zinc-800 pt-2 font-bold text-sm text-slate-900 dark:text-white">
@@ -868,7 +868,7 @@ const ManageOrders = () => {
                 <div className="flex justify-between text-slate-500">
                   <span>Handling & Packaging:</span>
                   <span className="font-medium">
-                    {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} (${formatCurrency(selectedOrder.packaging.price)})` : "Regular Packaging (₹19)"}
+                    {selectedOrder.packaging?.name ? `${selectedOrder.packaging.name} (${formatCurrency(selectedOrder.packaging.price)})` : "Regular Packaging (₹12)"}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-slate-200 dark:border-zinc-800 pt-2 font-semibold text-sm text-slate-900 dark:text-white">

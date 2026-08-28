@@ -173,7 +173,7 @@ export const validateDeliveryLocation = async (latitude, longitude) => {
       success: false,
       isEligible: true,
       distanceKm: 0,
-      deliveryFee: 50,
+      deliveryFee: 99,
       displayText: "Standard Delivery",
       message: "Delivery validation fallback",
     };

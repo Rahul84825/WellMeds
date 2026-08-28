@@ -8,11 +8,11 @@ export const deliveryRuleService = {
     } catch (err) {
       console.warn("Delivery rule calculation fallback:", err);
       const amount = Number(subtotal) || 0;
-      const charge = amount >= 500 ? 0 : 50;
+      const charge = amount > 2000 ? 0 : 99;
       return {
         success: true,
         charge,
-        freeDeliveryThreshold: 500,
+        freeDeliveryThreshold: 2000,
         message: charge === 0 ? "Eligible for Free Delivery" : `Standard delivery charge ₹${charge}`,
       };
     }

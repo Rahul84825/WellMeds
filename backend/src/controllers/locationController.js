@@ -158,7 +158,7 @@ export const validateDelivery = async (req, res, next) => {
     let distanceResult = {
       distanceKm: 0,
       displayText: "Pan-India Express Dispatch",
-      deliveryFee: 50,
+      deliveryFee: 99,
     };
 
     if (latitude && longitude) {

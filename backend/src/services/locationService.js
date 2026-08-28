@@ -481,7 +481,7 @@ export const calculateDistanceMatrixGoogle = async (destLat, destLng) => {
       durationMinutes: 0,
       displayText: "Pan-India Express Dispatch",
       isEligible: true,
-      deliveryFee: 50,
+      deliveryFee: 99,
     };
   }
 
@@ -497,7 +497,7 @@ export const calculateDistanceMatrixGoogle = async (destLat, destLng) => {
       durationMinutes: 1440,
       displayText: "Pan-India Express Dispatch",
       isEligible: true,
-      deliveryFee: 50,
+      deliveryFee: 99,
     };
   }
 
@@ -528,7 +528,7 @@ export const calculateDistanceMatrixGoogle = async (destLat, destLng) => {
         durationMinutes,
         displayText: `${distanceKm} km | Est. ${durationMinutes} mins`,
         isEligible: true, // Always eligible across India
-        deliveryFee: 50,
+        deliveryFee: 99,
       };
     }
 
@@ -544,7 +544,7 @@ export const calculateDistanceMatrixGoogle = async (destLat, destLng) => {
       durationMinutes: 1440,
       displayText: "Pan-India Express Dispatch",
       isEligible: true,
-      deliveryFee: 50,
+      deliveryFee: 99,
     };
   } catch (error) {
     console.error("Google Distance Matrix Error:", error.message);
@@ -553,7 +553,7 @@ export const calculateDistanceMatrixGoogle = async (destLat, destLng) => {
       durationMinutes: 1440,
       displayText: "Pan-India Express Dispatch",
       isEligible: true,
-      deliveryFee: 50,
+      deliveryFee: 99,
     };
   }
 };

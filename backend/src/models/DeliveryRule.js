@@ -24,12 +24,12 @@ const deliveryRuleSchema = new mongoose.Schema(
     charge: {
       type: Number,
       required: [true, "Delivery charge is required"],
-      default: 0,
+      default: 99,
       min: 0,
     },
     freeDeliveryThreshold: {
       type: Number,
-      default: 500, // Free delivery on orders above ₹500
+      default: 2000, // Free delivery on orders above ₹2000
     },
     isActive: {
       type: Boolean,

@@ -4,7 +4,7 @@ import { useCart } from "../../hooks/useCart";
 import { PACKAGING_OPTIONS, PRICING_CONFIG } from "../../constants/pricing";
 import { formatCurrency } from "../../utils/currency";
 
-// Custom Parcel Illustration Icons matching screenshot
+// Custom Parcel Illustration Icons matching reference
 const RegularParcelIcon = () => (
   <div className="relative w-8 h-8 shrink-0">
     <svg viewBox="0 0 40 40" className="w-8 h-8 rounded-lg shadow-2xs">
@@ -70,29 +70,29 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
   return (
     <div className="relative w-full" ref={dropdownRef}>
       {/* ── Summary Row / Dropdown Trigger ── */}
-      <div className="flex items-center justify-between text-xs sm:text-sm">
+      <div className="flex items-center justify-between gap-1.5 text-xs sm:text-sm">
         {/* Left Label with Hover Tooltip Popover */}
         <div 
           ref={infoRef}
-          className="relative inline-flex items-center gap-1 text-slate-700 dark:text-zinc-300 select-none"
+          className="relative inline-flex items-center gap-1 text-slate-700 dark:text-zinc-300 select-none shrink-0"
           onMouseEnter={() => setShowInfo(true)}
           onMouseLeave={() => setShowInfo(false)}
         >
-          <span className="font-medium">Handling & Packaging:</span>
+          <span className="font-medium whitespace-nowrap">Handling & Packaging:</span>
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setShowInfo(!showInfo);
             }}
-            className="text-slate-400 hover:text-[#157a6d] dark:hover:text-emerald-400 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
+            className="text-slate-400 hover:text-[#157a6d] dark:hover:text-emerald-400 transition-colors p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer inline-flex items-center justify-center shrink-0"
             title="Packaging details"
             aria-label="Packaging details"
           >
             <Info size={14} />
           </button>
 
-          {/* ── Exact Reference Hover Popover (with Caret Arrow) ── */}
+          {/* ── Hover Popover (with Caret Arrow) ── */}
           {showInfo && (
             <div 
               className="absolute bottom-full left-0 mb-3 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-700/90 rounded-2xl p-4 shadow-xl text-left animate-[fade-in_0.15s_ease-out] pointer-events-auto"
@@ -113,10 +113,7 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                      ₹{PRICING_CONFIG.PACKAGING.regular.mrp}
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
+                    <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.regular.price}
                     </span>
                   </div>
@@ -131,10 +128,7 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
-                      ₹{PRICING_CONFIG.PACKAGING.cold.mrp}
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
+                    <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.cold.price}
                     </span>
                   </div>
@@ -165,9 +159,6 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
           </div>
 
           <div className="flex items-center gap-1.5 ml-1">
-            <span className="line-through text-[11px] text-slate-400 dark:text-zinc-500">
-              ₹{packagingOption.mrp}
-            </span>
             <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs">
               ₹{packagingOption.price}
             </span>
@@ -183,15 +174,10 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
 
       {/* ── Dropdown / Popover Options List ── */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 p-2 shadow-2xl space-y-1.5 animate-[fade-in_0.2s_ease-out]">
-          <div className="px-2.5 py-1.5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Select Packaging Type
-            </span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-              Instant Update
-            </span>
-          </div>
+        <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 p-3 shadow-2xl space-y-2 animate-[fade-in_0.2s_ease-out]">
+          <p className="text-[11.5px] text-slate-500 dark:text-zinc-400 font-medium px-1 leading-snug">
+            Basic fee to ensure quality and secure packaging
+          </p>
 
           <div className="space-y-1.5 pt-1">
             {PACKAGING_OPTIONS.map((option) => {
@@ -209,17 +195,7 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        isSelected
-                          ? isCold
-                            ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300"
-                            : "bg-[#157a6d]/15 text-[#157a6d] dark:bg-emerald-950/60 dark:text-emerald-300"
-                          : "bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400"
-                      }`}
-                    >
-                      {isCold ? <Snowflake size={16} /> : <Package size={16} />}
-                    </div>
+                    {isCold ? <ColdParcelIcon /> : <RegularParcelIcon />}
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -237,14 +213,9 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <div className="text-right">
-                      <span className="line-through text-[11px] text-slate-400 dark:text-zinc-500 block leading-tight">
-                        ₹{option.mrp}
-                      </span>
-                      <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400 block leading-tight">
-                        ₹{option.price}
-                      </span>
-                    </div>
+                    <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400 block">
+                      ₹{option.price}
+                    </span>
 
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border transition-colors ${
