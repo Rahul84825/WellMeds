@@ -1,5 +1,9 @@
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import { Routes, Route, Navigate, useSearchParams } from "react-router-dom";
+import lazyWithRetry from "../utils/lazyWithRetry";
+
+// Wrap standard lazy with auto-recovery on deployment chunk hash changes
+const lazy = lazyWithRetry;
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
