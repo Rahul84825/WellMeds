@@ -472,7 +472,7 @@ const OrderSuccess = () => {
               <div className="flex justify-between">
                 <span>Handling & Packaging</span>
                 <span className="font-medium text-[#172b26] dark:text-zinc-200">
-                  {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹12)"}
+                  {order.packaging?.name ? `${order.packaging.name} (${formatCurrency(order.packaging.price)})` : "Regular Packaging (₹19)"}
                 </span>
               </div>
 

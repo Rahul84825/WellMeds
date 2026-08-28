@@ -546,6 +546,9 @@ const Cart = () => {
                             </span>
                           </div>
                           <div className="text-right">
+                            <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
+                              ₹{PRICING_CONFIG.PACKAGING.regular.mrp}
+                            </span>
                             <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                               ₹{PRICING_CONFIG.PACKAGING.regular.price}
                             </span>
@@ -560,6 +563,9 @@ const Cart = () => {
                             </span>
                           </div>
                           <div className="text-right">
+                            <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
+                              ₹{PRICING_CONFIG.PACKAGING.cold.mrp}
+                            </span>
                             <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                               ₹{PRICING_CONFIG.PACKAGING.cold.price}
                             </span>
@@ -573,7 +579,7 @@ const Cart = () => {
                 </div>
 
                 <span className="text-slate-800 dark:text-zinc-200 font-medium">
-                  ₹12 / ₹59
+                  ₹19 / ₹79
                 </span>
               </div>
 
@@ -581,7 +587,7 @@ const Cart = () => {
               <div className="flex justify-between items-center pt-2">
                 <span className="text-base font-bold text-[#172b26] dark:text-white">Estimated Total</span>
                 <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
-                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > 2000 ? 0 : 99) + 12)))}
+                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > 2000 ? 0 : 99) + 19)))}
                 </span>
               </div>
 

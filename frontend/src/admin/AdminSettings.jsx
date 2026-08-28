@@ -29,8 +29,8 @@ const AdminSettings = () => {
   const [phone, setPhone] = useState(user?.phone || "+91 7798795353");
 
   // Shop Settings
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(499);
-  const [standardDeliveryFee, setStandardDeliveryFee] = useState(49);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(2000);
+  const [standardDeliveryFee, setStandardDeliveryFee] = useState(99);
   const [taxRate, setTaxRate] = useState(12); // GST 12%
   const [currencySymbol, setCurrencySymbol] = useState("₹");
 

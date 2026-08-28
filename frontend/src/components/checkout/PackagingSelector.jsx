@@ -113,6 +113,9 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
+                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
+                      ₹{PRICING_CONFIG.PACKAGING.regular.mrp}
+                    </span>
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.regular.price}
                     </span>
@@ -128,6 +131,9 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                     </span>
                   </div>
                   <div className="text-right">
+                    <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1.5 font-normal">
+                      ₹{PRICING_CONFIG.PACKAGING.cold.mrp}
+                    </span>
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
                       ₹{PRICING_CONFIG.PACKAGING.cold.price}
                     </span>
@@ -159,6 +165,11 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
           </div>
 
           <div className="flex items-center gap-1.5 ml-1">
+            {packagingOption.mrp && (
+              <span className="line-through text-[11px] text-slate-400 dark:text-zinc-500 font-normal">
+                ₹{packagingOption.mrp}
+              </span>
+            )}
             <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs">
               ₹{packagingOption.price}
             </span>
@@ -213,9 +224,16 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400 block">
-                      ₹{option.price}
-                    </span>
+                    <div className="text-right">
+                      {option.mrp && (
+                        <span className="line-through text-xs text-slate-400 dark:text-zinc-500 mr-1 font-normal">
+                          ₹{option.mrp}
+                        </span>
+                      )}
+                      <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400">
+                        ₹{option.price}
+                      </span>
+                    </div>
 
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border transition-colors ${
