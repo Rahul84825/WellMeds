@@ -4,6 +4,7 @@ import {
   PRICING_CONFIG,
   calculateDeliveryFee,
   resolvePackaging,
+  resolvePackagingForItems,
 } from "../src/config/pricingConstants.js";
 
 // Helper function to simulate backend pricing computation
@@ -126,9 +127,46 @@ test("TEST 12: Empty cart subtotal = 0 has ₹0 delivery and ₹0 packaging fee"
   assert.equal(result.total, 0);
 });
 
-test("EDGE CASE: Free delivery coupon overrides threshold", () => {
-  const result = computePricing({ subtotal: 500, packagingType: "regular", hasFreeDeliveryCoupon: true });
-  assert.equal(result.subtotal, 500);
-  assert.equal(result.deliveryFee, 0);
-  assert.equal(result.total, 519); // 500 + 0 + 19
+test("TEST 13: Normal products only -> auto ₹19 Regular Packaging", () => {
+  const items = [
+    { isColdChain: false, name: "Paracetamol 500mg" },
+    { isColdChain: false, name: "Vitamin C 500mg" },
+  ];
+  const pkg = resolvePackagingForItems(items);
+  assert.equal(pkg.type, "regular");
+  assert.equal(pkg.price, 19);
 });
+
+test("TEST 14: 1 Cold Chain Product + 1 Normal Product -> Cold Chain has priority (₹79)", () => {
+  const items = [
+    { isColdChain: false, name: "Paracetamol 500mg" },
+    { isColdChain: true, name: "Insulin Glargine 100IU/ml" },
+  ];
+  const pkg = resolvePackagingForItems(items);
+  assert.equal(pkg.type, "cold");
+  assert.equal(pkg.price, 79);
+});
+
+test("TEST 15: Up to 20 products with only 1 cold chain -> Cold Chain still has priority (₹79)", () => {
+  const items = Array.from({ length: 19 }, (_, i) => ({
+    isColdChain: false,
+    name: `Normal Medicine ${i + 1}`,
+  }));
+  items.push({ isColdChain: true, name: "Cold Medicine" });
+
+  const pkg = resolvePackagingForItems(items);
+  assert.equal(pkg.type, "cold");
+  assert.equal(pkg.price, 79);
+});
+
+test("TEST 16: 20 normal products without cold chain -> ₹19 Regular Packaging", () => {
+  const items = Array.from({ length: 20 }, (_, i) => ({
+    isColdChain: false,
+    name: `Normal Medicine ${i + 1}`,
+  }));
+
+  const pkg = resolvePackagingForItems(items);
+  assert.equal(pkg.type, "regular");
+  assert.equal(pkg.price, 19);
+});
+

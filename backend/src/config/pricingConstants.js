@@ -53,3 +53,46 @@ export const resolvePackaging = (packagingType) => {
   }
   return { ...PRICING_CONFIG.PACKAGING.regular };
 };
+
+/**
+ * Checks if a product requires cold chain packaging.
+ * @param {object} product
+ * @returns {boolean}
+ */
+export const isColdChainProduct = (product) => {
+  if (!product) return false;
+  if (product.isColdChain === true || product.coldChain === true) return true;
+  if (typeof product.isColdChain === "string" && (product.isColdChain.toLowerCase() === "yes" || product.isColdChain.toLowerCase() === "true")) return true;
+  if (Array.isArray(product.specifications)) {
+    return product.specifications.some(
+      (s) =>
+        s &&
+        s.label &&
+        s.label.toLowerCase().includes("cold") &&
+        (s.value === true || String(s.value).toLowerCase() === "yes")
+    );
+  }
+  if (product.specifications && typeof product.specifications === "object") {
+    const val = product.specifications.coldChain ?? product.specifications.isColdChain;
+    if (val === true || String(val).toLowerCase() === "yes") return true;
+  }
+  return false;
+};
+
+/**
+ * Authoritatively resolves packaging for a collection of cart/order items.
+ * If ANY product is cold chain, Cold Packaging (₹79) has mandatory priority.
+ * @param {Array} items
+ * @param {string} requestedType
+ * @returns {{ type: string, name: string, price: number, description: string }}
+ */
+export const resolvePackagingForItems = (items = [], requestedType = "regular") => {
+  const hasCold = Array.isArray(items) && items.some((item) => {
+    const prod = item.product && typeof item.product === "object" ? item.product : item;
+    return isColdChainProduct(prod);
+  });
+  if (hasCold) {
+    return { ...PRICING_CONFIG.PACKAGING.cold };
+  }
+  return resolvePackaging(requestedType);
+};

@@ -42,7 +42,7 @@ const ColdParcelIcon = () => (
 );
 
 export const PackagingSelector = ({ compact = false, inline = false }) => {
-  const { packagingType, setPackagingType, packagingOption } = useCart();
+  const { packagingType, setPackagingType, packagingOption, hasColdChain } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const dropdownRef = useRef(null);
@@ -63,6 +63,9 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
   }, []);
 
   const handleSelect = (type) => {
+    if (hasColdChain && type === "regular") {
+      return; // Cannot downgrade when cold chain products exist in cart
+    }
     setPackagingType(type);
     setIsOpen(false);
   };
@@ -183,15 +186,18 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
             {PACKAGING_OPTIONS.map((option) => {
               const isSelected = packagingType === option.type;
               const isCold = option.type === "cold";
+              const isDisabled = hasColdChain && !isCold;
 
               return (
                 <div
                   key={option.type}
-                  onClick={() => handleSelect(option.type)}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                    isSelected
-                      ? "border-[#157a6d] bg-[#f4f9f7] dark:bg-[#157a6d]/10 dark:border-emerald-500/50 shadow-xs"
-                      : "border-slate-150 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/60"
+                  onClick={() => !isDisabled && handleSelect(option.type)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all select-none ${
+                    isDisabled
+                      ? "opacity-50 border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/50 cursor-not-allowed"
+                      : isSelected
+                      ? "border-[#157a6d] bg-[#f4f9f7] dark:bg-[#157a6d]/10 dark:border-emerald-500/50 shadow-xs cursor-pointer"
+                      : "border-slate-150 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/60 cursor-pointer"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -204,6 +210,11 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                         </span>
                         {isSelected && (
                           <span className="w-1.5 h-1.5 rounded-full bg-[#157a6d] dark:bg-emerald-400 shrink-0"></span>
+                        )}
+                        {isDisabled && (
+                          <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">
+                            Cold item in cart
+                          </span>
                         )}
                       </div>
                       <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate max-w-[140px] sm:max-w-[160px]">

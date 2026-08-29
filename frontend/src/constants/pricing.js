@@ -29,6 +29,42 @@ export const PACKAGING_OPTIONS = [
 ];
 
 /**
+ * Checks if a cart item or product requires cold-chain packaging.
+ * Supports isColdChain boolean, coldChain, or specifications inspection.
+ * @param {object} item 
+ * @returns {boolean}
+ */
+export const isColdChainItem = (item) => {
+  if (!item) return false;
+  if (item.isColdChain === true || item.coldChain === true) return true;
+  if (typeof item.isColdChain === "string" && (item.isColdChain.toLowerCase() === "yes" || item.isColdChain.toLowerCase() === "true")) return true;
+  if (Array.isArray(item.specifications)) {
+    return item.specifications.some(
+      (s) =>
+        s &&
+        s.label &&
+        s.label.toLowerCase().includes("cold") &&
+        (s.value === true || String(s.value).toLowerCase() === "yes")
+    );
+  }
+  if (item.specifications && typeof item.specifications === "object") {
+    const val = item.specifications.coldChain ?? item.specifications.isColdChain;
+    if (val === true || String(val).toLowerCase() === "yes") return true;
+  }
+  return false;
+};
+
+/**
+ * Checks if any item in the cart is a cold chain product.
+ * @param {Array} items 
+ * @returns {boolean}
+ */
+export const hasColdChainItems = (items = []) => {
+  if (!Array.isArray(items)) return false;
+  return items.some(isColdChainItem);
+};
+
+/**
  * Calculates delivery fee for a given subtotal.
  * @param {number} subtotal 
  * @param {boolean} hasFreeDeliveryCoupon 
@@ -42,11 +78,16 @@ export const getDeliveryFee = (subtotal = 0, hasFreeDeliveryCoupon = false) => {
 };
 
 /**
- * Calculates packaging info based on selected type.
+ * Calculates packaging info based on selected type and cart items.
+ * If ANY cold-chain product is present in the cart, Cold Packaging (₹79) has mandatory priority.
  * @param {string} packagingType 
+ * @param {Array} items
  * @returns {typeof PRICING_CONFIG.PACKAGING.regular}
  */
-export const getPackagingOption = (packagingType) => {
+export const getPackagingOption = (packagingType, items = []) => {
+  if (hasColdChainItems(items)) {
+    return PRICING_CONFIG.PACKAGING.cold;
+  }
   if (packagingType === "cold") {
     return PRICING_CONFIG.PACKAGING.cold;
   }

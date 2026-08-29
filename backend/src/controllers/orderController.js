@@ -18,6 +18,7 @@ import {
   PRICING_CONFIG,
   calculateDeliveryFee,
   resolvePackaging,
+  isColdChainProduct,
 } from "../config/pricingConstants.js";
 
 
@@ -25,6 +26,7 @@ import {
 const computeOrderTotals = async (items, couponCode, userId, packagingType = "regular") => {
   let subtotal = 0;
   let orderRequiresRx = false;
+  let orderHasColdChain = false;
   const validatedItems = [];
 
   for (const item of items) {
@@ -49,6 +51,10 @@ const computeOrderTotals = async (items, couponCode, userId, packagingType = "re
     const itemRequiresRx = !!(product.requiresRx || product.isPrescriptionRequired);
     if (itemRequiresRx) {
       orderRequiresRx = true;
+    }
+    const itemIsColdChain = isColdChainProduct(product);
+    if (itemIsColdChain) {
+      orderHasColdChain = true;
     }
 
     let itemPrice = product.price;
@@ -88,6 +94,7 @@ const computeOrderTotals = async (items, couponCode, userId, packagingType = "re
       variantId: targetVariantId,
       requiresRx: itemRequiresRx,
       isPrescriptionRequired: itemRequiresRx,
+      isColdChain: itemIsColdChain,
     });
   }
 
@@ -134,7 +141,9 @@ const computeOrderTotals = async (items, couponCode, userId, packagingType = "re
 
   const hasFreeDeliveryCoupon = !!(couponObj && couponObj.freeDelivery);
   const deliveryFee = calculateDeliveryFee(subtotal, hasFreeDeliveryCoupon);
-  const packaging = resolvePackaging(packagingType);
+  // Cold chain priority: If any cold chain product is present, enforce Cold Packaging (₹79)
+  const effectivePackagingType = orderHasColdChain ? "cold" : (packagingType || "regular");
+  const packaging = resolvePackaging(effectivePackagingType);
   const packagingFee = subtotal === 0 ? 0 : packaging.price;
 
   const roundMoney = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
@@ -158,6 +167,7 @@ const computeOrderTotals = async (items, couponCode, userId, packagingType = "re
     discountAmount: roundedDiscountAmount,
     finalAmount,
     orderRequiresRx,
+    orderHasColdChain,
     validatedItems,
     couponObj,
   };

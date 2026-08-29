@@ -64,6 +64,9 @@ const Cart = () => {
     tax,
     total,
     requiresRx,
+    packagingFee,
+    packagingOption,
+    hasColdChain,
     isCartLocked,
     checkoutSessionStatus,
     lockReason,
@@ -524,16 +527,21 @@ const Cart = () => {
                       onMouseLeave={() => setShowPackagingTooltip(false)}
                     >
                       <p className="text-xs text-slate-800 dark:text-zinc-200 font-medium mb-3.5 leading-snug">
-                        Basic fee to ensure quality and secure packaging
+                        {hasColdChain
+                          ? "Cold packaging auto-applied for temperature-sensitive items"
+                          : "Basic fee to ensure quality and secure packaging"}
                       </p>
 
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
+                        <div className={`flex items-center justify-between p-2 rounded-xl transition-all ${!hasColdChain ? 'bg-[#f4f9f7] dark:bg-emerald-950/20 border border-[#157a6d]/20' : 'opacity-60'}`}>
                           <div className="flex items-center gap-3">
                             <RegularParcelIcon />
-                            <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
-                              Regular Packaging
-                            </span>
+                            <div>
+                              <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100 block">
+                                Regular Packaging
+                              </span>
+                              {!hasColdChain && <span className="text-[10px] text-[#157a6d] dark:text-emerald-400 font-bold">Standard products</span>}
+                            </div>
                           </div>
                           <div className="text-right">
                             <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
@@ -542,12 +550,15 @@ const Cart = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
+                        <div className={`flex items-center justify-between p-2 rounded-xl transition-all ${hasColdChain ? 'bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50' : 'opacity-60'}`}>
                           <div className="flex items-center gap-3">
                             <ColdParcelIcon />
-                            <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
-                              Cold Packaging
-                            </span>
+                            <div>
+                              <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100 block">
+                                Cold Packaging
+                              </span>
+                              {hasColdChain && <span className="text-[10px] text-sky-600 dark:text-sky-400 font-bold">Priority Applied (Cold item in cart)</span>}
+                            </div>
                           </div>
                           <div className="text-right">
                             <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
@@ -562,8 +573,13 @@ const Cart = () => {
                   )}
                 </div>
 
-                <span className="text-slate-800 dark:text-zinc-200 font-medium">
-                  ₹{PRICING_CONFIG.PACKAGING.regular.price} / ₹{PRICING_CONFIG.PACKAGING.cold.price}
+                <span className="text-slate-800 dark:text-zinc-200 font-semibold flex items-center gap-1.5">
+                  {hasColdChain && (
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                      Cold Chain
+                    </span>
+                  )}
+                  ₹{subtotal === 0 ? 0 : packagingFee}
                 </span>
               </div>
 
@@ -571,7 +587,7 @@ const Cart = () => {
               <div className="flex justify-between items-center pt-2">
                 <span className="text-base font-bold text-[#172b26] dark:text-white">Estimated Total</span>
                 <span className="text-xl font-bold text-[#157a6d] dark:text-emerald-400 tracking-tight">
-                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : PRICING_CONFIG.DELIVERY_FEE) + (subtotal === 0 ? 0 : PRICING_CONFIG.PACKAGING.regular.price))))}
+                  {formatCurrency(roundPrice(Math.max(0, subtotal - couponDiscount + (subtotal > PRICING_CONFIG.DELIVERY_THRESHOLD ? 0 : PRICING_CONFIG.DELIVERY_FEE) + (subtotal === 0 ? 0 : packagingFee))))}
                 </span>
               </div>
 

@@ -8,6 +8,8 @@ import {
   getDeliveryFee,
   getPackagingOption,
   getAmountNeededForFreeDelivery,
+  hasColdChainItems,
+  isColdChainItem,
 } from "../constants/pricing";
 
 export const CartContext = createContext();
@@ -149,6 +151,7 @@ export const CartProvider = ({ children }) => {
           manufacturer: product.manufacturer || product.brand || "",
           stock: product.stock ?? 999,
           requiresRx: product.requiresRx || false,
+          isColdChain: isColdChainItem(product),
           badge: product.badge || "",
           quantity: item?.quantity || 1,
           isSurgical: product.isSurgical || false,
@@ -263,6 +266,7 @@ export const CartProvider = ({ children }) => {
           price: effectivePrice,
           name: variantName ? `${product.name} (${variantName})` : product.name,
           rawName: product.name,
+          isColdChain: isColdChainItem(product),
           quantity: Math.min(30, quantity),
         },
       ];
@@ -298,13 +302,22 @@ export const CartProvider = ({ children }) => {
     let targetVariant = variantName;
 
     // If id is composite (e.g. 123-Small)
-    if (id.includes("-") && !variantName) {
+    if (typeof id === "string" && id.includes("-")) {
       const parts = id.split("-");
       productId = parts[0];
-      targetVariant = parts.slice(1).join("-");
+      targetVariant = targetVariant || parts.slice(1).join("-");
     }
 
-    setCartItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id));
+    setCartItems((prev) =>
+      prev.filter((item) => {
+        const itemPId = item.productId || item.id;
+        const itemVar = item.variantName || "";
+        if (targetVariant) {
+          return !(itemPId === productId && itemVar === targetVariant);
+        }
+        return itemPId !== productId;
+      })
+    );
 
     if (hasToken()) {
       try {
@@ -327,29 +340,36 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    if (quantity <= 0) {
-      removeFromCart(id, variantName);
-      return;
-    }
-
     let productId = id;
     let targetVariant = variantName;
 
-    if (id.includes("-") && !variantName) {
+    if (typeof id === "string" && id.includes("-")) {
       const parts = id.split("-");
       productId = parts[0];
-      targetVariant = parts.slice(1).join("-");
+      targetVariant = targetVariant || parts.slice(1).join("-");
     }
 
+    if (quantity <= 0) {
+      removeFromCart(id, targetVariant);
+      return;
+    }
+
+    const clampedQty = Math.min(30, quantity);
+
     setCartItems((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, quantity: Math.min(i.stock || 999, quantity) } : i
-      )
+      prev.map((item) => {
+        const itemPId = item.productId || item.id;
+        const itemVar = item.variantName || "";
+        const match = targetVariant
+          ? itemPId === productId && itemVar === targetVariant
+          : itemPId === productId;
+        return match ? { ...item, quantity: clampedQty } : item;
+      })
     );
 
     if (hasToken()) {
       try {
-        const serverItems = await cartService.updateCartQuantity(productId, quantity, {
+        const serverItems = await cartService.updateCartQuantity(productId, clampedQty, {
           variantName: targetVariant,
         });
         if (serverItems) {
@@ -373,17 +393,19 @@ export const CartProvider = ({ children }) => {
     setPackagingType("regular");
     localStorage.removeItem("medishop_cart");
     localStorage.removeItem("medishop_guest_cart");
+    setPendingRxFile(null);
 
     if (hasToken()) {
       try {
         await cartService.clearCart();
+        refreshCartLockStatus();
       } catch (err) {
         if (!handleLockError(err)) {
           console.warn("Backend clearCart failed:", err.message);
         }
       }
     }
-  }, [isCartLocked]);
+  }, [isCartLocked, refreshCartLockStatus]);
 
   // Production Post-Order Reset: Safely bypasses locks, resets state, and syncs tabs
   const resetCartPostOrder = useCallback(() => {
@@ -428,8 +450,10 @@ export const CartProvider = ({ children }) => {
   const deliveryFee = getDeliveryFee(subtotal);
   const shipping = deliveryFee; // for backwards compatibility with any existing components
 
-  // Handling & Packaging Fee: Regular (₹19) or Cold (₹79)
-  const packagingOption = getPackagingOption(packagingType);
+  // Cold Chain Priority: If ANY cold chain product is in cart, Cold Packaging (₹79) is automatically enforced
+  const hasColdChain = hasColdChainItems(cartItems);
+  const effectivePackagingType = hasColdChain ? "cold" : packagingType;
+  const packagingOption = getPackagingOption(effectivePackagingType, cartItems);
   const packagingFee = subtotal === 0 ? 0 : packagingOption.price;
 
   // Threshold helpers for UI banners
@@ -449,7 +473,8 @@ export const CartProvider = ({ children }) => {
         subtotal,
         shipping,
         deliveryFee,
-        packagingType,
+        hasColdChain,
+        packagingType: effectivePackagingType,
         setPackagingType,
         packagingOption,
         packagingFee,
