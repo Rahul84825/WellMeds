@@ -33,16 +33,25 @@ export const articleService = {
     });
   },
 
-  // Public: Get single article by slug
-  async getArticleBySlug(slug) {
+  // Public: Get single article by slug (optional preview parameter)
+  async getArticleBySlug(slug, preview = false) {
     const cleanSlug = slug.replace(/\.html$/i, "");
-    return fetchWithCache(`article:${cleanSlug}`, async () => {
-      const data = await apiInstance.get(`/articles/${cleanSlug}`);
+    const cacheKey = preview ? null : `article:${cleanSlug}`;
+    
+    const fetcher = async () => {
+      const data = await apiInstance.get(`/articles/${cleanSlug}`, {
+        params: preview ? { preview: "true" } : {},
+      });
       return {
         article: data.article,
         related: data.related || [],
       };
-    });
+    };
+
+    if (cacheKey) {
+      return fetchWithCache(cacheKey, fetcher);
+    }
+    return fetcher();
   },
 
   // Admin: Get paginated articles with status filters
@@ -65,6 +74,12 @@ export const articleService = {
     };
   },
 
+  // Admin: Get single article by ID for editor
+  async adminGetArticleById(id) {
+    const data = await apiInstance.get(`/articles/admin/${id}`);
+    return data.article;
+  },
+
   // Admin: Create article
   async createArticle(articleData) {
     const data = await apiInstance.post("/articles", articleData);
@@ -75,6 +90,13 @@ export const articleService = {
   // Admin: Update article
   async updateArticle(id, articleData) {
     const data = await apiInstance.put(`/articles/${id}`, articleData);
+    clearCache("article");
+    return data.article;
+  },
+
+  // Admin: Toggle publish status
+  async togglePublishArticle(id) {
+    const data = await apiInstance.put(`/articles/${id}/status`);
     clearCache("article");
     return data.article;
   },

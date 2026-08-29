@@ -79,6 +79,7 @@ const AdminPrescriptions = lazy(() => import("../admin/AdminPrescriptions"));
 const AdminCoupons = lazy(() => import("../admin/AdminCoupons"));
 const AdminUsers = lazy(() => import("../admin/AdminUsers"));
 const AdminArticles = lazy(() => import("../admin/AdminArticles"));
+const AdminAddNewArticle = lazy(() => import("../admin/AdminAddNewArticle"));
 const AdminSettings = lazy(() => import("../admin/AdminSettings"));
 const AdminMegaMenu = lazy(() => import("../admin/AdminMegaMenu"));
 const AdminWaitlist = lazy(() => import("../admin/AdminWaitlist"));
@@ -174,6 +175,8 @@ const AppRoutes = () => {
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="articles" element={<AdminArticles />} />
+            <Route path="articles/new" element={<AdminAddNewArticle />} />
+            <Route path="articles/:id/edit" element={<AdminAddNewArticle />} />
             <Route path="waitlist" element={<AdminWaitlist />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="megamenu" element={<AdminMegaMenu />} />
@@ -243,11 +246,12 @@ const AppRoutes = () => {
           <Route path="delivery" element={<DeliveryPage />} />
 
           {/* Health Library & Clinical Articles */}
+          <Route path="articles" element={<HealthLibraryPage />} />
+          <Route path="articles/:slug" element={<ArticleDetailPage />} />
           <Route path="health-library" element={<HealthLibraryPage />} />
           <Route path="health-library/:slug" element={<ArticleDetailPage />} />
           <Route path="library/articles" element={<HealthLibraryPage />} />
           <Route path="library/articles/:slug" element={<ArticleDetailPage />} />
-          <Route path="articles/:slug" element={<ArticleDetailPage />} />
           <Route path="library/*" element={<Navigate to="/health-library" replace />} />
 
           {/* Dedicated Customer Auth & Profile Completion Routes */}
@@ -311,6 +315,8 @@ const AppRoutes = () => {
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="articles" element={<AdminArticles />} />
+          <Route path="articles/new" element={<AdminAddNewArticle />} />
+          <Route path="articles/:id/edit" element={<AdminAddNewArticle />} />
           <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="megamenu" element={<AdminMegaMenu />} />

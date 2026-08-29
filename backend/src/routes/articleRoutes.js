@@ -4,9 +4,11 @@ import {
   getFeaturedArticles,
   getArticleBySlug,
   adminGetArticles,
+  adminGetArticleById,
   createArticle,
   updateArticle,
   deleteArticle,
+  togglePublishArticle,
   seedArticles,
 } from "../controllers/articleController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -23,6 +25,7 @@ router.get("/featured", getFeaturedArticles);
 
 // Admin routes (protected)
 router.get("/admin/all", protect, admin, adminGetArticles);
+router.get("/admin/:id", protect, admin, adminGetArticleById);
 router.post("/seed", protect, admin, seedArticles);
 
 // Public list & Admin create
@@ -37,5 +40,7 @@ router.get("/:slug", getArticleBySlug);
 router.route("/:id")
   .put(protect, admin, updateArticle)
   .delete(protect, admin, deleteArticle);
+
+router.put("/:id/status", protect, admin, togglePublishArticle);
 
 export default router;
