@@ -20,7 +20,6 @@ import {
   SlidersHorizontal,
   Check,
   AlertTriangle,
-  Sparkles,
 } from "lucide-react";
 
 export const ARTICLE_CATEGORIES = [
@@ -163,22 +162,6 @@ const AdminArticles = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                const res = await api.seedArticles();
-                fetchArticles();
-                alert(res.message || "10 articles seeded successfully!");
-              } catch (err) {
-                alert("Failed to seed articles: " + err.message);
-              }
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-[#157A6D]/30 bg-[#157A6D]/10 text-xs font-bold text-[#157A6D] dark:text-emerald-400 hover:bg-[#157A6D]/20 transition shadow-2xs cursor-pointer"
-          >
-            <Sparkles size={15} />
-            Seed 10 Articles
-          </button>
           <Link
             to="/health-library"
             target="_blank"
