@@ -6,8 +6,9 @@ import { formatCurrency, roundPrice, calculateDiscountPercent } from "../utils/c
 import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { api } from "../services/api";
 import Modal from "../components/Modal";
+import EmptyCart from "../components/cart/EmptyCart";
 import { 
-  Trash2, ShoppingCart, Phone, Mail, ChevronRight, ChevronDown, 
+  Trash2, Phone, Mail, ChevronRight, ChevronDown, 
   Home, Plus, Minus, ArrowRight, ShieldCheck, Tag, Info, Lock, AlertTriangle
 } from "lucide-react";
 import SEO from "../components/common/SEO";
@@ -135,21 +136,10 @@ const Cart = () => {
   // ── Empty State ──
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-24 sm:py-32 animate-[fade-in_0.3s_ease-out] flex flex-col items-center text-center">
-        <div className="w-24 h-24 rounded-full bg-[#f4f9f7] dark:bg-zinc-900 flex items-center justify-center mb-6 shadow-sm border border-[#157a6d]/20">
-          <ShoppingCart size={36} className="text-[#157a6d] dark:text-emerald-400" />
-        </div>
-        <h2 className="font-editorial text-2xl sm:text-4xl font-semibold text-[#172b26] dark:text-white mb-3 tracking-tight">Your cart is empty</h2>
-        <p className="font-sans text-slate-500 dark:text-zinc-400 mb-8 max-w-sm leading-relaxed text-sm">
-          Looks like you haven't added any medicines or health essentials to your cart yet.
-        </p>
-        <Link
-          to="/products"
-          className="bg-[#157a6d] hover:bg-[#0f5c52] text-white px-8 py-3.5 rounded-full font-semibold transition-all shadow-sm active:scale-95 text-sm tracking-wide"
-        >
-          Continue Shopping
-        </Link>
-      </div>
+      <>
+        <SEO title="Shopping Cart" noindex={true} />
+        <EmptyCart />
+      </>
     );
   }
 
