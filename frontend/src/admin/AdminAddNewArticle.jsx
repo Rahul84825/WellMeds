@@ -161,6 +161,9 @@ const AdminAddNewArticle = () => {
   const [status, setStatus] = useState("published");
   const [isFeatured, setIsFeatured] = useState(false);
   const [heroImage, setHeroImage] = useState("");
+  const [secondaryImage, setSecondaryImage] = useState("");
+  const [secondaryImageCaption, setSecondaryImageCaption] = useState("");
+  const [uploadingSecondary, setUploadingSecondary] = useState(false);
 
   // Dates
   const [publishedAt, setPublishedAt] = useState(() => new Date().toISOString().slice(0, 16));
@@ -221,6 +224,7 @@ const AdminAddNewArticle = () => {
   });
 
   const fileInputRef = useRef(null);
+  const secondaryFileInputRef = useRef(null);
 
   const showToast = (msg, type = "success") => {
     setToastMessage({ msg, type });
@@ -248,6 +252,8 @@ const AdminAddNewArticle = () => {
         setStatus(art.status || "published");
         setIsFeatured(Boolean(art.isFeatured));
         setHeroImage(art.heroImage || art.coverImage || "");
+        setSecondaryImage(art.secondaryImage || "");
+        setSecondaryImageCaption(art.secondaryImageCaption || "");
 
         if (art.publishedAt) {
           setPublishedAt(new Date(art.publishedAt).toISOString().slice(0, 16));
@@ -319,7 +325,7 @@ const AdminAddNewArticle = () => {
     }
   };
 
-  // Image Upload handler
+  // Hero Image Upload handler
   const handleHeroUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -336,6 +342,26 @@ const AdminAddNewArticle = () => {
       showToast("Failed to upload image. Please check file format.", "error");
     } finally {
       setUploadingHero(false);
+    }
+  };
+
+  // Secondary / Mid-Article Image Upload handler
+  const handleSecondaryUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingSecondary(true);
+    try {
+      const res = await api.uploadImage(file);
+      if (res && res.url) {
+        setSecondaryImage(res.url);
+        showToast("Mid-content image uploaded successfully!");
+      }
+    } catch (err) {
+      console.error("Secondary image upload failed", err);
+      showToast("Failed to upload image. Please check file format.", "error");
+    } finally {
+      setUploadingSecondary(false);
     }
   };
 
@@ -576,6 +602,8 @@ const AdminAddNewArticle = () => {
       isFeatured,
       heroImage: heroImage || "",
       coverImage: heroImage || "",
+      secondaryImage: secondaryImage || "",
+      secondaryImageCaption: (secondaryImageCaption || "").trim(),
       publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
       author: {
         name: (authorName || "").trim(),
@@ -924,88 +952,188 @@ const AdminAddNewArticle = () => {
 
       {/* ── TAB 2: HERO & MEDIA ── */}
       {activeTab === "hero" && (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-zinc-800 shadow-sm space-y-6">
-          <h2 className="text-base font-extrabold text-[#0F3B34] dark:text-zinc-100 border-b border-slate-100 dark:border-zinc-800 pb-3">
-            Hero Image & Display Badge
-          </h2>
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-zinc-800 shadow-sm space-y-10">
+          <div>
+            <h2 className="text-base font-extrabold text-[#0F3B34] dark:text-zinc-100 border-b border-slate-100 dark:border-zinc-800 pb-3">
+              Article Images & Media Options
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+              Provide up to 2 images: a primary hero banner for the top, and a secondary illustration for the middle of the article content.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                  Category Badge (Pill text displayed over hero image)
-                </label>
-                <input
-                  type="text"
-                  value={categoryBadge}
-                  onChange={(e) => setCategoryBadge(e.target.value)}
-                  placeholder="e.g. Oral Hygiene, Cardiology, Diabetes"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                  Image URL or Direct Link
-                </label>
-                <input
-                  type="text"
-                  value={heroImage}
-                  onChange={(e) => setHeroImage(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
-                />
-              </div>
-
-              {/* Upload button */}
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleHeroUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingHero}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#157A6D]/10 hover:bg-[#157A6D]/20 text-[#157A6D] dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
-                >
-                  <UploadCloud size={16} />
-                  <span>{uploadingHero ? "Uploading..." : "Upload from Computer"}</span>
-                </button>
-              </div>
+          {/* ── OPTION 1: PRIMARY HERO IMAGE ── */}
+          <div className="p-6 rounded-3xl bg-slate-50/80 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-700 space-y-4">
+            <div className="flex items-center gap-2 text-[#0F3B34] dark:text-zinc-100 font-bold text-sm">
+              <span className="w-6 h-6 rounded-full bg-[#157A6D] text-white text-xs flex items-center justify-center">1</span>
+              <span>Option 1: Primary Hero Banner (Top of Article)</span>
             </div>
 
-            {/* Preview Box */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Hero Image Preview
-              </label>
-              <div className="relative w-full aspect-[16/9] rounded-2xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center">
-                {heroImage ? (
-                  <>
-                    <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
-                    {categoryBadge && (
-                      <div className="absolute top-3 left-3 bg-[#0F3B34]/90 backdrop-blur-md text-[#F3EEE0] text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">
-                        {categoryBadge}
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setHeroImage("")}
-                      className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
-                    >
-                      <X size={14} />
-                    </button>
-                  </>
-                ) : (
-                  <div className="text-center p-6 text-slate-400">
-                    <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">No hero image uploaded</p>
-                  </div>
-                )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Category Badge (Pill text over hero image)
+                  </label>
+                  <input
+                    type="text"
+                    value={categoryBadge}
+                    onChange={(e) => setCategoryBadge(e.target.value)}
+                    placeholder="e.g. Oral Hygiene, Cardiology, Diabetes"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Hero Image URL or Direct Link
+                  </label>
+                  <input
+                    type="text"
+                    value={heroImage}
+                    onChange={(e) => setHeroImage(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleHeroUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingHero}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#157A6D]/10 hover:bg-[#157A6D]/20 text-[#157A6D] dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
+                  >
+                    <UploadCloud size={16} />
+                    <span>{uploadingHero ? "Uploading Hero..." : "Upload Hero Image"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Hero Preview Box */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Hero Image Preview
+                </label>
+                <div className="relative w-full aspect-[16/9] rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center">
+                  {heroImage ? (
+                    <>
+                      <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
+                      {categoryBadge && (
+                        <div className="absolute top-3 left-3 bg-[#0F3B34]/90 backdrop-blur-md text-[#F3EEE0] text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">
+                          {categoryBadge}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setHeroImage("")}
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                      >
+                        <X size={14} />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center p-6 text-slate-400">
+                      <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs">No hero image uploaded</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── OPTION 2: SECONDARY / MID-CONTENT IMAGE ── */}
+          <div className="p-6 rounded-3xl bg-slate-50/80 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-700 space-y-4">
+            <div className="flex items-center gap-2 text-[#0F3B34] dark:text-zinc-100 font-bold text-sm">
+              <span className="w-6 h-6 rounded-full bg-[#0066FF] text-white text-xs flex items-center justify-center">2</span>
+              <span>Option 2: Secondary Image (Middle of Article Content)</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Secondary Image URL or Direct Link
+                  </label>
+                  <input
+                    type="text"
+                    value={secondaryImage}
+                    onChange={(e) => setSecondaryImage(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#0066FF]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Figure Caption / Description (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={secondaryImageCaption}
+                    onChange={(e) => setSecondaryImageCaption(e.target.value)}
+                    placeholder="e.g. Figure 1: Clinical illustration of tongue papillae and pigmentation"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs italic text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="file"
+                    ref={secondaryFileInputRef}
+                    onChange={handleSecondaryUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => secondaryFileInputRef.current?.click()}
+                    disabled={uploadingSecondary}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0066FF]/10 hover:bg-[#0066FF]/20 text-[#0066FF] dark:text-blue-400 text-xs font-bold transition cursor-pointer"
+                  >
+                    <UploadCloud size={16} />
+                    <span>{uploadingSecondary ? "Uploading Mid Image..." : "Upload Mid-Content Image"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Secondary Preview Box */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Mid-Content Image Preview
+                </label>
+                <div className="relative w-full aspect-[16/9] rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center">
+                  {secondaryImage ? (
+                    <>
+                      <img src={secondaryImage} alt="Mid Article" className="w-full h-full object-cover" />
+                      {secondaryImageCaption && (
+                        <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-white text-[11px] p-2 text-center italic">
+                          {secondaryImageCaption}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setSecondaryImage("")}
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                      >
+                        <X size={14} />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center p-6 text-slate-400">
+                      <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-50 text-[#0066FF]" />
+                      <p className="text-xs">No secondary image uploaded</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

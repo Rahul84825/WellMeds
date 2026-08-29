@@ -563,6 +563,38 @@ const ArticleDetailPage = () => {
                     <span>{sec.callout}</span>
                   </div>
                 )}
+
+                {/* Inline Section Images */}
+                {sec.images && sec.images.length > 0 && (
+                  <div className="my-5 space-y-4">
+                    {sec.images.map((imgItem, iIdx) => (
+                      <figure key={iIdx} className="rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-800 shadow-2xs">
+                        <img src={imgItem.url} alt={imgItem.alt || imgItem.caption || sec.heading} className="w-full max-h-[420px] object-cover" />
+                        {imgItem.caption && (
+                          <figcaption className="p-2.5 text-center text-xs text-slate-500 dark:text-zinc-400 italic bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800">
+                            {imgItem.caption}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                )}
+
+                {/* ── OPTIONAL SECONDARY / MID-CONTENT ARTICLE IMAGE (Rendered in Middle of Article) ── */}
+                {article.secondaryImage && idx === Math.min(1, (article.sections || []).length - 1) && (
+                  <figure className="my-8 rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-850 shadow-sm">
+                    <img
+                      src={article.secondaryImage}
+                      alt={article.secondaryImageCaption || article.title}
+                      className="w-full max-h-[440px] object-cover"
+                    />
+                    {article.secondaryImageCaption && (
+                      <figcaption className="p-3.5 text-center text-xs sm:text-[13px] text-slate-600 dark:text-zinc-300 italic font-medium bg-slate-50/90 dark:bg-zinc-900 border-t border-slate-200/80 dark:border-zinc-800">
+                        {article.secondaryImageCaption}
+                      </figcaption>
+                    )}
+                  </figure>
+                )}
               </section>
             ))}
 

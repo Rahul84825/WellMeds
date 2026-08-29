@@ -139,6 +139,14 @@ const articleSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    secondaryImage: {
+      type: String,
+      default: "",
+    },
+    secondaryImageCaption: {
+      type: String,
+      default: "",
+    },
     author: {
       name: { type: String, default: "Wellmeds Health Team" },
       title: { type: String, default: "Clinical Editorial Team" },

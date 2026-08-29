@@ -1038,6 +1038,9 @@ const sanitizeArticleData = (raw) => {
     };
   }
 
+  data.secondaryImage = (data.secondaryImage || "").trim();
+  data.secondaryImageCaption = (data.secondaryImageCaption || "").trim();
+
   return data;
 };
 
