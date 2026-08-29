@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Package, Snowflake, Info, ChevronDown, Check } from "lucide-react";
+import { Package, Snowflake, Info } from "lucide-react";
 import { useCart } from "../../hooks/useCart";
-import { PACKAGING_OPTIONS, PRICING_CONFIG } from "../../constants/pricing";
+import { PRICING_CONFIG } from "../../constants/pricing";
 import { formatCurrency } from "../../utils/currency";
 
-// Custom Parcel Illustration Icons matching reference
+// Custom Parcel Illustration Icons
 const RegularParcelIcon = () => (
   <div className="relative w-8 h-8 shrink-0">
     <svg viewBox="0 0 40 40" className="w-8 h-8 rounded-lg shadow-2xs">
@@ -42,18 +42,13 @@ const ColdParcelIcon = () => (
 );
 
 export const PackagingSelector = ({ compact = false, inline = false }) => {
-  const { packagingType, setPackagingType, packagingOption, hasColdChain } = useCart();
-  const [isOpen, setIsOpen] = useState(false);
+  const { packagingType, packagingOption, packagingFee, hasColdChain, subtotal } = useCart();
   const [showInfo, setShowInfo] = useState(false);
-  const dropdownRef = useRef(null);
   const infoRef = useRef(null);
 
   // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
       if (infoRef.current && !infoRef.current.contains(event.target)) {
         setShowInfo(false);
       }
@@ -62,17 +57,11 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (type) => {
-    if (hasColdChain && type === "regular") {
-      return; // Cannot downgrade when cold chain products exist in cart
-    }
-    setPackagingType(type);
-    setIsOpen(false);
-  };
+  const displayFee = subtotal === 0 ? 0 : (packagingFee !== undefined ? packagingFee : packagingOption?.price || (hasColdChain ? 79 : 19));
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
-      {/* ── Summary Row / Dropdown Trigger ── */}
+    <div className="relative w-full">
+      {/* ── Summary Row ── */}
       <div className="flex items-center justify-between gap-1.5 text-xs sm:text-sm">
         {/* Left Label with Hover Tooltip Popover */}
         <div 
@@ -103,17 +92,22 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
               onMouseLeave={() => setShowInfo(false)}
             >
               <p className="text-xs text-slate-800 dark:text-zinc-200 font-medium mb-3.5 leading-snug">
-                Basic fee to ensure quality and secure packaging
+                {hasColdChain 
+                  ? "Cold packaging auto-applied for temperature-sensitive items" 
+                  : "Basic fee to ensure quality and secure clinical packaging"}
               </p>
 
               <div className="space-y-3">
                 {/* Regular Packaging Row */}
-                <div className="flex items-center justify-between">
+                <div className={`flex items-center justify-between p-2 rounded-xl transition-all ${!hasColdChain ? 'bg-[#f4f9f7] dark:bg-emerald-950/20 border border-[#157a6d]/20' : 'opacity-60'}`}>
                   <div className="flex items-center gap-3">
                     <RegularParcelIcon />
-                    <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
-                      Regular Packaging
-                    </span>
+                    <div>
+                      <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100 block">
+                        Regular Packaging
+                      </span>
+                      {!hasColdChain && <span className="text-[10px] text-[#157a6d] dark:text-emerald-400 font-bold">Auto-applied (Standard medicines)</span>}
+                    </div>
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
@@ -123,12 +117,15 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
                 </div>
 
                 {/* Cold Packaging Row */}
-                <div className="flex items-center justify-between">
+                <div className={`flex items-center justify-between p-2 rounded-xl transition-all ${hasColdChain ? 'bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50' : 'opacity-60'}`}>
                   <div className="flex items-center gap-3">
                     <ColdParcelIcon />
-                    <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
-                      Cold Packaging
-                    </span>
+                    <div>
+                      <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-100 block">
+                        Cold Packaging
+                      </span>
+                      {hasColdChain && <span className="text-[10px] text-sky-600 dark:text-sky-400 font-bold">Auto-applied (Cold chain product in cart)</span>}
+                    </div>
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-zinc-100">
@@ -144,108 +141,29 @@ export const PackagingSelector = ({ compact = false, inline = false }) => {
           )}
         </div>
 
-        {/* Clickable selector trigger showing current selection in compact, elegant pill */}
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-1.5 bg-[#f0f9f6] hover:bg-[#e4f4ef] active:bg-[#daf0e8] dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-[#157a6d]/30 dark:border-emerald-600/30 transition-all cursor-pointer group select-none shrink-0"
-        >
+        {/* Static Auto-Assigned Badge Display */}
+        <div className="inline-flex items-center gap-1.5 bg-[#f0f9f6] dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-[#157a6d]/30 dark:border-emerald-600/30 select-none shrink-0">
           <div className="flex items-center gap-1 shrink-0">
-            {packagingType === "cold" ? (
+            {hasColdChain ? (
               <Snowflake size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
             ) : (
               <Package size={13} className="text-[#157a6d] dark:text-emerald-400 shrink-0" />
             )}
             <span className="font-semibold text-slate-800 dark:text-zinc-100 text-xs">
-              {packagingType === "cold" ? "Cold" : "Regular"}
+              {hasColdChain ? "Cold Chain" : "Regular"}
             </span>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
             <span className="font-bold text-[#157a6d] dark:text-emerald-400 text-xs">
-              ₹{packagingOption.price}
+              ₹{displayFee}
             </span>
-            <ChevronDown
-              size={12}
-              className={`text-[#157a6d]/70 dark:text-emerald-400/70 transition-transform duration-200 shrink-0 ${
-                isOpen ? "rotate-180 text-[#157a6d]" : "group-hover:text-[#157a6d]"
-              }`}
-            />
-          </div>
-        </button>
-      </div>
-
-      {/* ── Dropdown / Popover Options List ── */}
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 max-w-[calc(100vw-32px)] bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 p-3 shadow-2xl space-y-2 animate-[fade-in_0.2s_ease-out]">
-          <p className="text-[11.5px] text-slate-500 dark:text-zinc-400 font-medium px-1 leading-snug">
-            Basic fee to ensure quality and secure packaging
-          </p>
-
-          <div className="space-y-1.5 pt-1">
-            {PACKAGING_OPTIONS.map((option) => {
-              const isSelected = packagingType === option.type;
-              const isCold = option.type === "cold";
-              const isDisabled = hasColdChain && !isCold;
-
-              return (
-                <div
-                  key={option.type}
-                  onClick={() => !isDisabled && handleSelect(option.type)}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all select-none ${
-                    isDisabled
-                      ? "opacity-50 border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/50 cursor-not-allowed"
-                      : isSelected
-                      ? "border-[#157a6d] bg-[#f4f9f7] dark:bg-[#157a6d]/10 dark:border-emerald-500/50 shadow-xs cursor-pointer"
-                      : "border-slate-150 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/60 cursor-pointer"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {isCold ? <ColdParcelIcon /> : <RegularParcelIcon />}
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-slate-800 dark:text-zinc-100 whitespace-nowrap">
-                          {option.name}
-                        </span>
-                        {isSelected && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#157a6d] dark:bg-emerald-400 shrink-0"></span>
-                        )}
-                        {isDisabled && (
-                          <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">
-                            Cold item in cart
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate max-w-[140px] sm:max-w-[160px]">
-                        {isCold ? "Insulated + ice gel packs" : "Standard clinical box"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <span className="font-bold text-sm text-[#157a6d] dark:text-emerald-400 whitespace-nowrap">
-                      ₹{option.price}
-                    </span>
-
-                    <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-colors ${
-                        isSelected
-                          ? "border-[#157a6d] bg-[#157a6d] text-white dark:border-emerald-500 dark:bg-emerald-500"
-                          : "border-slate-300 dark:border-zinc-700"
-                      }`}
-                    >
-                      {isSelected && <Check size={12} strokeWidth={3} />}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default PackagingSelector;
+
