@@ -1,0 +1,381 @@
+/* WellMeds Production Footer Styles */
+:root {
+  --wm-footer-bg: #edf7f2;
+  --wm-footer-ink: #172b26;
+  --wm-footer-ink-dim: rgba(23, 43, 38, 0.78);
+  --wm-footer-ink-faint: rgba(23, 43, 38, 0.58);
+  --wm-footer-teal: #157a6d;
+  --wm-footer-teal-hover: #0e5a50;
+  --wm-footer-hairline: rgba(23, 43, 38, 0.14);
+}
+
+.dark {
+  --wm-footer-bg: #0c1613;
+  --wm-footer-ink: #e6ede8;
+  --wm-footer-ink-dim: rgba(230, 237, 232, 0.78);
+  --wm-footer-ink-faint: rgba(230, 237, 232, 0.58);
+  --wm-footer-teal: #84d6b9;
+  --wm-footer-teal-hover: #a3e4cd;
+  --wm-footer-hairline: rgba(230, 237, 232, 0.14);
+}
+
+.wm-footer {
+  background-color: var(--wm-footer-bg);
+  color: var(--wm-footer-ink-dim);
+  padding: 72px 64px 32px;
+  border-top: 1px solid var(--wm-footer-hairline);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wm-footer-top {
+  display: grid;
+  grid-template-columns: 1.3fr 3.6fr;
+  gap: 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.wm-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wm-logo-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.wm-logo {
+  height: 118px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.dark .wm-logo {
+  filter: brightness(0) invert(1);
+}
+
+.wm-tagline {
+  margin: 0 0 24px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--wm-footer-ink-dim);
+  max-width: 34ch;
+  font-weight: 400;
+  text-align: center;
+}
+
+.wm-socials {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.wm-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.wm-socials a:hover,
+.wm-socials a:focus-visible {
+  transform: translateY(-2px) scale(1.06);
+  opacity: 0.92;
+  outline: none;
+}
+
+.wm-social-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+  border-radius: 7px;
+}
+
+.wm-footer-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+.wm-link-col h4 {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--wm-footer-ink);
+  letter-spacing: 0.02em;
+  margin: 0 0 20px;
+  text-transform: none;
+}
+
+.wm-link-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.wm-link-col a {
+  color: var(--wm-footer-ink-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s ease, transform 0.15s ease;
+  display: inline-block;
+}
+
+.wm-link-col a:hover,
+.wm-link-col a:focus-visible {
+  color: var(--wm-footer-teal-hover);
+  outline: none;
+  transform: translateX(2px);
+}
+
+.wm-contact-highlight {
+  color: var(--wm-footer-teal) !important;
+  font-weight: 600;
+}
+
+.wm-contact-highlight:hover,
+.wm-contact-highlight:focus-visible {
+  color: var(--wm-footer-teal-hover) !important;
+}
+
+/* Mobile Accordion Styles */
+.wm-footer-accordion {
+  display: none;
+}
+
+.wm-accordion-item {
+  border-bottom: 1px solid var(--wm-footer-hairline);
+}
+
+.wm-accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--wm-footer-ink);
+  cursor: pointer;
+  list-style: none;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  transition: color 0.15s ease;
+}
+
+.wm-accordion-summary:hover,
+.wm-accordion-summary:focus-visible {
+  color: var(--wm-footer-teal-hover);
+  outline: none;
+}
+
+.wm-accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.wm-accordion-item .chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--wm-footer-ink-dim);
+  transition: transform 0.2s ease;
+}
+
+.wm-accordion-item[open] .chevron,
+.wm-accordion-item.is-open .chevron {
+  transform: rotate(180deg);
+}
+
+.wm-accordion-content {
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wm-accordion-item ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 2px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wm-accordion-item a {
+  color: var(--wm-footer-ink-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+  display: block;
+}
+
+.wm-accordion-item a:hover,
+.wm-accordion-item a:focus-visible {
+  color: var(--wm-footer-teal-hover);
+  outline: none;
+}
+
+.wm-accordion-contact {
+  padding: 26px 2px 4px;
+}
+
+.wm-accordion-contact h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--wm-footer-ink);
+  margin: 0 0 12px;
+}
+
+.wm-accordion-contact p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--wm-footer-ink-dim);
+  margin: 0 0 14px;
+  max-width: 46ch;
+}
+
+.wm-accordion-contact a {
+  display: block;
+  color: var(--wm-footer-teal-hover);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.wm-accordion-contact a:hover,
+.wm-accordion-contact a:focus-visible {
+  opacity: 0.8;
+  outline: none;
+}
+
+/* Payment Partners Section */
+.wm-payment-row {
+  max-width: 1280px;
+  margin: 44px auto 0;
+  padding-top: 28px;
+  border-top: 1px solid var(--wm-footer-hairline);
+  text-align: center;
+}
+
+.wm-payment-row h5 {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--wm-footer-ink);
+  letter-spacing: 0.01em;
+  margin: 0 0 16px;
+  text-transform: none;
+}
+
+.wm-payment-badges {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wm-payment-cards-img {
+  max-width: min(100%, 820px);
+  height: auto;
+  max-height: 92px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+/* Bottom Legal & Medical Disclaimer Section */
+.wm-footer-bottom {
+  max-width: 1280px;
+  margin: 36px auto 0;
+}
+
+.wm-disclaimer {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--wm-footer-ink-faint);
+  max-width: 92ch;
+  margin: 0 0 28px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.wm-bottom-bar {
+  padding-top: 24px;
+  border-top: 1px solid var(--wm-footer-hairline);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--wm-footer-ink-faint);
+}
+
+.wm-bottom-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.wm-bottom-links a {
+  color: var(--wm-footer-ink-faint);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.wm-bottom-links a:hover,
+.wm-bottom-links a:focus-visible {
+  color: var(--wm-footer-teal-hover);
+  outline: none;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .wm-footer {
+    padding: 64px 32px 32px;
+  }
+  .wm-footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 32px;
+  }
+}
+
+@media (max-width: 700px) {
+  .wm-footer {
+    padding: 56px 24px 28px;
+  }
+  .wm-footer-top {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+  }
+  .wm-footer-links {
+    display: none;
+  }
+  .wm-footer-accordion {
+    display: block;
+  }
+  .wm-bottom-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

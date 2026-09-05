@@ -132,13 +132,8 @@ const TestimonialCard = ({ item }) => {
           <Quote className="w-14 h-14 transform rotate-180 text-slate-300 dark:text-zinc-800" />
         </div>
 
-        {/* Google Floating Badge at Top Right */}
-        <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white dark:bg-zinc-950 flex items-center justify-center border border-slate-150 dark:border-zinc-850 shadow-xs select-none z-10">
-          <GoogleIcon />
-        </div>
-
         {/* Review Content */}
-        <div className="relative z-15 pt-8 text-left">
+        <div className="relative z-15 pt-2 text-left">
           <p className="text-[13px] leading-relaxed text-slate-655 dark:text-zinc-300 font-medium font-poppins">
             "{textToShow}"
           </p>

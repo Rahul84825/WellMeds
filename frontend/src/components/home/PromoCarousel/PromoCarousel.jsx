@@ -208,7 +208,7 @@ const PromoCarousel = () => {
           <button
             type="button"
             onClick={onManualPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg hidden md:flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
             aria-label="Previous Banner"
           >
             <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -220,7 +220,7 @@ const PromoCarousel = () => {
           <button
             type="button"
             onClick={onManualNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 text-white shadow-lg hidden md:flex items-center justify-center transition-all duration-200 z-20 cursor-pointer active:scale-95"
             aria-label="Next Banner"
           >
             <ChevronRight size={20} className="sm:w-6 sm:h-6" />
