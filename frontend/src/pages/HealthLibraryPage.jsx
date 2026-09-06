@@ -15,6 +15,7 @@ import {
   Apple,
   Stethoscope,
   Clock,
+  ShieldCheck,
 } from "lucide-react";
 
 // Fallback curated articles to ensure instant zero-latency visual pop
@@ -108,7 +109,6 @@ const HealthLibraryPage = () => {
   const activeTopic = searchParams.get("topic") || "All Topics";
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
 
@@ -156,7 +156,7 @@ const HealthLibraryPage = () => {
           category: categoryParam,
           topic: topicParam,
           search: searchQuery,
-          sort: sortBy,
+          sort: "newest",
           page: 1,
           limit: 100, // Load rich pool for interactive filtering
         });
@@ -176,7 +176,7 @@ const HealthLibraryPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [activeCategory, activeTopic, searchQuery, sortBy]);
+  }, [activeCategory, activeTopic, searchQuery]);
 
   // Carousel auto-advance
   useEffect(() => {
@@ -254,6 +254,21 @@ const HealthLibraryPage = () => {
     }
   };
 
+  // Date formatter for article cards
+  const formatArticleDate = (dateStr) => {
+    if (!dateStr) return "05/09/2026";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "05/09/2026";
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return "05/09/2026";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1411] text-[#172B26] dark:text-zinc-100 font-sans transition-colors duration-300">
       {/* 1. HERO FEATURED CAROUSEL */}
@@ -321,22 +336,6 @@ const HealthLibraryPage = () => {
                 </div>
               );
             })}
-
-            {/* Carousel Navigation Arrows */}
-            <button
-              onClick={() => setCurrentSlide((prev) => (prev - 1 + featuredArticles.length) % featuredArticles.length)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white backdrop-blur-md flex items-center justify-center transition-all opacity-80 hover:opacity-100"
-              aria-label="Previous Slide"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setCurrentSlide((prev) => (prev + 1) % featuredArticles.length)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white backdrop-blur-md flex items-center justify-center transition-all opacity-80 hover:opacity-100"
-              aria-label="Next Slide"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
 
           {/* Carousel Dots */}
@@ -348,7 +347,7 @@ const HealthLibraryPage = () => {
                 className={`h-2 rounded-full transition-all duration-300 ${
                   dotIdx === currentSlide
                     ? "w-7 bg-[#0F3B34] dark:bg-emerald-400"
-                    : "w-2 bg-[#E4DFCF] dark:bg-zinc-700 hover:bg-[#157A6D]"
+                    : "w-2 bg-slate-200 dark:bg-zinc-700 hover:bg-[#157A6D]"
                 }`}
                 aria-label={`Go to slide ${dotIdx + 1}`}
               />
@@ -371,7 +370,7 @@ const HealthLibraryPage = () => {
                 className={`text-xs sm:text-sm font-semibold px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer ${
                   isActive
                     ? "bg-[#0F3B34] dark:bg-emerald-600 border-[#0F3B34] dark:border-emerald-600 text-[#F3EEE0] shadow-sm"
-                    : "bg-white dark:bg-zinc-900 border-[#E4DFCF] dark:border-zinc-800 text-[#172B26] dark:text-zinc-200 hover:border-[#157A6D] dark:hover:border-emerald-500"
+                    : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-[#172B26] dark:text-zinc-200 hover:border-[#157A6D] dark:hover:border-emerald-500 shadow-2xs"
                 }`}
               >
                 {cat.label}
@@ -381,7 +380,7 @@ const HealthLibraryPage = () => {
         </div>
 
         {/* Scrollable Topics Row */}
-        <div className="mt-3.5 pt-3.5 border-t border-[#E4DFCF] dark:border-zinc-800 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <div className="mt-3.5 pt-3.5 border-t border-slate-200/90 dark:border-zinc-800 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {TOPICS.map((top) => {
             const isActive = activeTopic === top;
             return (
@@ -391,7 +390,7 @@ const HealthLibraryPage = () => {
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border whitespace-nowrap transition-all duration-200 flex-shrink-0 cursor-pointer ${
                   isActive
                     ? "bg-[#157A6D] dark:bg-teal-600 border-[#157A6D] dark:border-teal-600 text-white shadow-sm"
-                    : "bg-[#F3EEE0]/40 dark:bg-zinc-900/60 border-[#E4DFCF] dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-[#157A6D]"
+                    : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-[#157A6D] shadow-2xs"
                 }`}
               >
                 {top}
@@ -401,7 +400,7 @@ const HealthLibraryPage = () => {
         </div>
 
         {/* Heading + Search & Sort Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mt-8 pt-4 border-t border-[#E4DFCF] dark:border-zinc-800">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mt-8 pt-4 border-t border-slate-200/90 dark:border-zinc-800">
           <div>
             <h2 className="text-2xl font-extrabold text-[#0F3B34] dark:text-emerald-400">
               Articles For You
@@ -420,7 +419,7 @@ const HealthLibraryPage = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search articles by name..."
-                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl bg-[#F3EEE0]/60 dark:bg-zinc-900 border border-[#E4DFCF] dark:border-zinc-700 text-[#172B26] dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:border-[#157A6D] dark:focus:border-emerald-500"
+                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-[#172B26] dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:border-[#157A6D] dark:focus:border-emerald-500 shadow-2xs"
               />
               {searchQuery && (
                 <button
@@ -436,20 +435,6 @@ const HealthLibraryPage = () => {
                 </button>
               )}
             </div>
-
-            {/* Sort Selector */}
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-              <span>Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="text-xs font-bold text-[#0F3B34] dark:text-emerald-400 bg-white dark:bg-zinc-900 border border-[#E4DFCF] dark:border-zinc-700 rounded-lg px-2.5 py-1.5 cursor-pointer focus:outline-none focus:border-[#157A6D]"
-              >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-                <option value="az">A – Z</option>
-              </select>
-            </div>
           </div>
         </div>
       </section>
@@ -462,7 +447,7 @@ const HealthLibraryPage = () => {
             <p className="text-xs text-slate-500 mt-4">Loading curated articles...</p>
           </div>
         ) : paginatedArticles.length === 0 ? (
-          <div className="text-center py-20 bg-[#F3EEE0]/30 dark:bg-zinc-900/30 rounded-3xl border border-[#E4DFCF] dark:border-zinc-800 p-8 my-6">
+          <div className="text-center py-20 bg-slate-50 dark:bg-zinc-900/30 rounded-3xl border border-slate-200 dark:border-zinc-800 p-8 my-6">
             <BookOpen className="w-12 h-12 text-[#157A6D] dark:text-emerald-400 mx-auto mb-3 opacity-80" />
             <h3 className="text-lg font-bold text-[#0F3B34] dark:text-emerald-400 mb-1">
               No articles found
@@ -482,80 +467,96 @@ const HealthLibraryPage = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-            {paginatedArticles.map((article) => (
-              <article
-                key={article._id || article.slug}
-                className="group flex flex-col bg-white dark:bg-zinc-900/90 border border-[#E4DFCF] dark:border-zinc-800/80 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-[#0F3B34]/10 transition-all duration-300"
-              >
-                {/* Card Thumbnail Gradient / Visual Header */}
-                <div className="h-36 bg-gradient-to-br from-[#0F3B34] to-[#157A6D] dark:from-[#08201c] dark:to-[#0f4e45] relative flex items-center justify-center overflow-hidden">
-                  {/* Category Tag Badge */}
-                  <span className="absolute top-3 left-3 bg-[#F3EEE0]/95 dark:bg-zinc-900/95 text-[#0F3B34] dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
-                    {article.category || "Health Guide"}
-                  </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 sm:gap-8 lg:gap-[30px]">
+            {paginatedArticles.map((article) => {
+              const heroImg = article.heroImage || article.coverImage;
+              const authorName = article.author?.name || (article.reviewer?.name ? `Dr. ${article.reviewer.name}` : "Wellmeds Health Team");
+              const authorAvatar = article.author?.avatar;
+              const dateFormatted = formatArticleDate(article.publishedAt || article.createdAt);
+              const badgeText = article.categoryBadge || (article.topic && article.topic !== "All Topics" && article.topic !== "General" ? article.topic : (article.category || "Health Guide"));
 
-                  {article.topic && article.topic !== "General" && (
-                    <span className="absolute top-3 right-3 bg-black/25 text-white/90 text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
-                      {article.topic}
-                    </span>
-                  )}
-
-                  {/* Icon */}
-                  <div className="group-hover:scale-110 transition-transform duration-300">
-                    {getCategoryIcon(article.category)}
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-5 flex flex-col flex-1 gap-2.5 justify-between">
-                  <div>
-                    <h3 className="text-base sm:text-[17px] font-bold text-[#0F3B34] dark:text-emerald-300 leading-snug group-hover:text-[#157A6D] dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                      <Link to={`/health-library/${article.slug}`}>
-                        {article.title}
-                      </Link>
-                    </h3>
-
-                    <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed mt-2 line-clamp-3">
-                      {article.excerpt || "Comprehensive medical guide detailing symptoms, clinical causes, preventive steps, and personalized health strategies."}
-                    </p>
-                  </div>
-
-                  <div>
-                    {/* Read time & Link */}
-                    <div className="flex items-center justify-between text-xs text-slate-400 dark:text-zinc-500 pt-3 border-t border-[#E4DFCF] dark:border-zinc-800">
-                      <span className="flex items-center gap-1 font-medium">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {article.readTime || "5 min read"}
-                      </span>
-                      <Link
-                        to={`/health-library/${article.slug}`}
-                        className="text-xs font-bold text-[#157A6D] dark:text-emerald-400 hover:text-[#0F3B34] dark:hover:text-emerald-300 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
-                      >
-                        <span>Read article</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-
-                    {/* Verified Reviewer Line */}
-                    {article.reviewer?.name && (
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400 pt-2.5 mt-2 border-t border-dashed border-[#E4DFCF]/60 dark:border-zinc-800/60">
-                        <div className="w-5 h-5 rounded-full bg-[#F3EEE0] dark:bg-zinc-800 text-[#0F3B34] dark:text-emerald-400 font-extrabold text-[9px] flex items-center justify-center flex-shrink-0">
-                          {article.reviewer.avatarText || "MD"}
+              return (
+                <Link
+                  key={article._id || article.slug}
+                  to={`/health-library/${article.slug}`}
+                  className="group flex flex-col bg-transparent cursor-pointer text-inherit no-underline transition-all duration-300"
+                >
+                  {/* Card Image / Banner Frame */}
+                  <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden border border-[#157A6D]/20 dark:border-zinc-700/80 bg-slate-100 dark:bg-zinc-800 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-[#157A6D]">
+                    {heroImg ? (
+                      <img
+                        src={heroImg}
+                        alt={article.title}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[#0F3B34] via-[#157A6D] to-[#0A2621] relative flex items-center justify-center p-4">
+                        <div className="opacity-80 group-hover:scale-110 transition-transform duration-300">
+                          {getCategoryIcon(article.category)}
                         </div>
-                        <span className="truncate">
-                          Reviewed by{" "}
-                          <strong className="text-[#0F3B34] dark:text-emerald-400 font-semibold">
-                            {article.reviewer.name}
-                          </strong>
-                          {article.reviewer.qualifications ? `, ${article.reviewer.qualifications}` : ""}
-                        </span>
                       </div>
                     )}
+
+                    {/* Top-Left Category/Topic Pill */}
+                    <span className="absolute top-2.5 left-2.5 bg-slate-950/75 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full z-10 border border-white/10 shadow-sm">
+                      {badgeText}
+                    </span>
+
+                    {/* Top-Right Verified Medical Icon */}
+                    <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-sm border border-slate-100 dark:border-zinc-700 flex items-center justify-center text-[#157A6D] dark:text-emerald-400 z-10">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+
+                  {/* Card Body Content */}
+                  <div className="pt-3 pb-1 flex flex-col flex-1 justify-between gap-3">
+                    <div>
+                      <h3 className="text-[13.5px] sm:text-[14px] font-bold text-slate-900 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-[#157A6D] dark:group-hover:text-emerald-400 transition-colors">
+                        {article.title}
+                      </h3>
+
+                      <p className="text-[11.5px] sm:text-[12px] text-slate-500 dark:text-zinc-400 leading-relaxed line-clamp-2 mt-1.5 font-normal">
+                        {article.excerpt || "Comprehensive medical guide detailing symptoms, clinical causes, preventive steps, and personalized health strategies."}
+                      </p>
+                    </div>
+
+                    {/* Footer: Author & Read Time */}
+                    <div className="flex items-center justify-between pt-2.5 mt-auto border-t border-slate-100 dark:border-zinc-800/80">
+                      {/* Left: Author Avatar + Name + Date */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        {authorAvatar && (authorAvatar.startsWith("http") || authorAvatar.startsWith("/") || authorAvatar.startsWith("data:")) ? (
+                          <img
+                            src={authorAvatar}
+                            alt={authorName}
+                            className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-zinc-700 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-[#157A6D]/10 dark:bg-emerald-950/50 text-[#157A6D] dark:text-emerald-400 font-bold text-[10px] flex items-center justify-center flex-shrink-0 border border-[#157A6D]/20">
+                            {authorName.charAt(0) || "D"}
+                          </div>
+                        )}
+
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200 truncate max-w-[110px] sm:max-w-[130px] leading-tight">
+                            {authorName}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 dark:text-zinc-500 leading-tight">
+                            {dateFormatted}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Read Time */}
+                      <div className="flex items-center gap-1 text-[10.5px] font-medium text-slate-500 dark:text-zinc-400 shrink-0">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        <span>{article.readTime || "5 Min Read"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
 
@@ -565,7 +566,7 @@ const HealthLibraryPage = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E4DFCF] dark:border-zinc-700 bg-white dark:bg-zinc-900 disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#157A6D] flex items-center gap-1"
+              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#157A6D] flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" />
               Prev
@@ -578,7 +579,7 @@ const HealthLibraryPage = () => {
                 className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                   currentPage === pageNum
                     ? "bg-[#0F3B34] dark:bg-emerald-600 text-[#F3EEE0] border border-[#0F3B34]"
-                    : "bg-white dark:bg-zinc-900 border border-[#E4DFCF] dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:border-[#157A6D]"
+                    : "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:border-[#157A6D]"
                 }`}
               >
                 {pageNum}
@@ -588,7 +589,7 @@ const HealthLibraryPage = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E4DFCF] dark:border-zinc-700 bg-white dark:bg-zinc-900 disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#157A6D] flex items-center gap-1"
+              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#157A6D] flex items-center gap-1"
             >
               Next
               <ChevronRight className="w-4 h-4" />

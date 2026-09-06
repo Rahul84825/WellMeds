@@ -997,6 +997,19 @@ const AdminAddNewArticle = () => {
                   />
                 </div>
 
+                {/* Recommended Image Size Specs */}
+                <div className="p-3.5 bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-200/90 dark:border-emerald-800/60 rounded-2xl text-xs space-y-1.5">
+                  <div className="font-bold text-[#0F3B34] dark:text-emerald-300 flex items-center gap-1.5 text-[11.5px]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#157A6D] dark:text-emerald-400 shrink-0" />
+                    <span>Recommended Image Specifications</span>
+                  </div>
+                  <ul className="text-[11px] text-emerald-900/90 dark:text-emerald-300/90 space-y-1 pl-1 leading-relaxed">
+                    <li>• <strong>Optimal Dimensions:</strong> <strong>1200 × 675 px</strong> (or 1280 × 720 px — 16:9 widescreen ratio)</li>
+                    <li>• <strong>Supported Formats:</strong> WebP, JPG, or PNG (under 2MB recommended)</li>
+                    <li>• <strong>Best Practice:</strong> Keep key subjects and text centered so it crops seamlessly on both the article detail banner and compact library cards.</li>
+                  </ul>
+                </div>
+
                 <div>
                   <input
                     type="file"
@@ -1539,71 +1552,31 @@ const AdminAddNewArticle = () => {
                 Frequently Asked Questions (FAQs)
               </h2>
               <p className="text-xs text-slate-500 dark:text-zinc-400">
-                Paste Q&A pairs directly into the box below or edit them individually.
+                Paste Q&A pairs directly into the box below. It will automatically parse and display them on the article page.
               </p>
             </div>
+            {faqs.length > 0 && (
+              <span className="text-xs font-bold text-[#157A6D] dark:text-emerald-400 bg-[#157A6D]/10 px-3 py-1 rounded-full">
+                {faqs.length} FAQ{faqs.length > 1 ? "s" : ""} detected
+              </span>
+            )}
           </div>
 
           {/* Rapid Copy-Paste Textarea */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-              Paste FAQs Raw Text (Format: Q: Question \n A: Answer)
+              Paste FAQs (Format: Q: Question \n A: Answer)
             </label>
             <textarea
-              rows={6}
+              rows={12}
               value={faqsRawText}
               onChange={(e) => handleFaqsRawChange(e.target.value)}
               placeholder={`Q: Are black spots on tongue dangerous?\nA: In most cases they are harmless and temporary.\n\nQ: When should I see a doctor?\nA: If the spot lasts more than 2 weeks.`}
-              className="w-full p-3.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-mono text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
+              className="w-full p-4 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-mono text-slate-800 dark:text-zinc-100 leading-relaxed focus:ring-2 focus:ring-[#157A6D]"
             />
-          </div>
-
-          {/* Parsed FAQ Cards */}
-          <div className="space-y-3 pt-2">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 space-y-2"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <input
-                    type="text"
-                    value={faq.question}
-                    onChange={(e) => {
-                      const updated = [...faqs];
-                      updated[idx].question = e.target.value;
-                      setFaqs(updated);
-                      setFaqsRawText(serializeFaqsText(updated));
-                    }}
-                    placeholder="Question"
-                    className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-[#0F3B34] dark:text-zinc-100"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = faqs.filter((_, i) => i !== idx);
-                      setFaqs(updated);
-                      setFaqsRawText(serializeFaqsText(updated));
-                    }}
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-                <textarea
-                  rows={2}
-                  value={faq.answer}
-                  onChange={(e) => {
-                    const updated = [...faqs];
-                    updated[idx].answer = e.target.value;
-                    setFaqs(updated);
-                    setFaqsRawText(serializeFaqsText(updated));
-                  }}
-                  placeholder="Answer"
-                  className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-700 dark:text-zinc-300"
-                />
-              </div>
-            ))}
+            <p className="text-[11px] text-slate-400">
+              Tip: Separate each Q&A block with a blank line. You can prefix questions with "Q:" or numbers (e.g. "1.", "2.").
+            </p>
           </div>
         </div>
       )}
@@ -1611,72 +1584,36 @@ const AdminAddNewArticle = () => {
       {/* ── TAB 7: REFERENCES ── */}
       {activeTab === "references" && (
         <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-zinc-800 shadow-sm space-y-6">
-          <div className="border-b border-slate-100 dark:border-zinc-800 pb-3">
-            <h2 className="text-base font-extrabold text-[#0F3B34] dark:text-zinc-100">
-              Study Citations & References
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Paste references (one per line, with or without external URLs) for fast batch import.
-            </p>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+            <div>
+              <h2 className="text-base font-extrabold text-[#0F3B34] dark:text-zinc-100">
+                Study Citations & References
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Paste study citations directly into the box below (one per line).
+              </p>
+            </div>
+            {references.length > 0 && (
+              <span className="text-xs font-bold text-[#157A6D] dark:text-emerald-400 bg-[#157A6D]/10 px-3 py-1 rounded-full">
+                {references.length} Reference{references.length > 1 ? "s" : ""} detected
+              </span>
+            )}
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
               Paste References (One per line: "Title - https://url...")
             </label>
             <textarea
-              rows={6}
+              rows={10}
               value={referencesRawText}
               onChange={(e) => handleReferencesRawChange(e.target.value)}
               placeholder={`1. National Center for Biotechnology Information. Black hairy tongue. - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4138463/\n2. American Journal of Clinical Dermatology. Oral Pigmentation. - https://pubmed.ncbi.nlm.nih.gov/20027942/`}
-              className="w-full p-3.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-mono text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
+              className="w-full p-4 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs font-mono text-slate-800 dark:text-zinc-100 leading-relaxed focus:ring-2 focus:ring-[#157A6D]"
             />
-          </div>
-
-          <div className="space-y-2 pt-2">
-            {references.map((ref, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border border-slate-200 dark:border-zinc-700"
-              >
-                <span className="text-xs font-bold text-slate-400">{idx + 1}.</span>
-                <input
-                  type="text"
-                  value={ref.title}
-                  onChange={(e) => {
-                    const updated = [...references];
-                    updated[idx].title = e.target.value;
-                    setReferences(updated);
-                    setReferencesRawText(serializeReferencesText(updated));
-                  }}
-                  placeholder="Citation Title / Journal"
-                  className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs font-medium"
-                />
-                <input
-                  type="text"
-                  value={ref.url || ""}
-                  onChange={(e) => {
-                    const updated = [...references];
-                    updated[idx].url = e.target.value;
-                    setReferences(updated);
-                    setReferencesRawText(serializeReferencesText(updated));
-                  }}
-                  placeholder="https://..."
-                  className="w-56 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs font-mono text-blue-600 dark:text-blue-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const updated = references.filter((_, i) => i !== idx);
-                    setReferences(updated);
-                    setReferencesRawText(serializeReferencesText(updated));
-                  }}
-                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+            <p className="text-[11px] text-slate-400">
+              Tip: Paste one citation per line. If a URL is included (separated by " - " or space), it will be automatically converted to a clickable external link.
+            </p>
           </div>
         </div>
       )}

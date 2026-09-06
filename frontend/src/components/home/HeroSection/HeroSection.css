@@ -87,20 +87,6 @@
   max-width: 920px;
 }
 
-.wellmeds-hero-section .search-tape {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 90px;
-  height: 22px;
-  background: repeating-linear-gradient(45deg, #038076, #038076 8px, #02635c 8px, #02635c 16px);
-  border-radius: 2px;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.85;
-}
-
 .wellmeds-hero-section .search-card {
   background: var(--card);
   border: 1px solid var(--card-edge);
@@ -500,10 +486,6 @@
     max-width: 100%;
     margin: 0 auto;
     position: relative;
-  }
-
-  .wellmeds-hero-section .search-tape {
-    display: none !important;
   }
 
   .wellmeds-hero-section .search-card {

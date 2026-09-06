@@ -22,7 +22,6 @@ const HeroSection = () => {
 
       {/* Prescription Pad Search Card */}
       <div id="hero-search-anchor" className="search-wrap hero-anim-card font-sans">
-        <div className="search-tape hidden md:block" aria-hidden="true" />
         <div className="search-card font-sans">
           <UniversalSearch variant="prescription" />
         </div>
