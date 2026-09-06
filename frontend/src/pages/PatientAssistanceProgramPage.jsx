@@ -156,7 +156,7 @@ const PatientAssistanceProgramPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Patient Assistance Program (PAP) | WellMeds Subsidized Healthcare"
         description="Access manufacturer-backed subsidies, co-pay support, and dedicated case manager assistance for high-cost specialty therapies through WellMeds."

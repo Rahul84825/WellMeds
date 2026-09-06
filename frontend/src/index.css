@@ -672,5 +672,14 @@ textarea:-webkit-autofill:active {
   transition: background-color 5000000s ease-in-out 0s, color 5000000s ease-in-out 0s;
   caret-color: #172b26 !important;
 }
-
-
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

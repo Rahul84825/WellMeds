@@ -61,7 +61,7 @@ const GLP1MedicinesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="GLP-1 Receptor Agonist Medicines & Formulations | WellMeds"
         description="Browse certified GLP-1 receptor agonist formulations, Semaglutide, Tirzepatide, and metabolic therapy medicines online at WellMeds."

@@ -758,7 +758,7 @@ const ProductDetails = () => {
 
   // Desktop View
   return (
-    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black animate-[fade-in_0.3s_ease-out] text-left font-sans">
+    <div className="pdp-theme-container pdp-grid-bg min-h-screen py-8 text-black text-left font-sans">
       <SEO
         title={product.seo?.metaTitle || `${product.name} - Buy Online | WellMeds`}
         description={product.seo?.metaDescription || product.description || `Order ${product.name} online from WellMeds. Licensed pharmacist verification, 100% genuine medicines, and fast delivery.`}

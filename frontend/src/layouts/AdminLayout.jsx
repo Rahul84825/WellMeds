@@ -535,7 +535,7 @@ const AdminLayout = () => {
         {/* ──────────────────────────────────────────────────────── */}
         {/* MAIN DISPLAY CANVAS */}
         {/* ──────────────────────────────────────────────────────── */}
-        <main className="flex-grow p-md md:p-lg lg:p-xl max-w-7-xl w-full mx-auto animate-[fade-in_0.3s_ease-out]">
+        <main className="flex-grow p-md md:p-lg lg:p-xl max-w-7-xl w-full mx-auto">
           <Outlet />
         </main>
       </div>

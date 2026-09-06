@@ -208,7 +208,7 @@ const AdminCoupons = () => {
   const totalRevenue = coupons.reduce((sum, c) => sum + (c.analytics?.revenueGenerated || 0), 0);
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-xl text-left">
       
       {/* Top Banner Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">

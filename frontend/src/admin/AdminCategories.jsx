@@ -153,7 +153,7 @@ const ProductCategories = () => {
   }
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-xl text-left">
 
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">

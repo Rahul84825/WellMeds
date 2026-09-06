@@ -80,7 +80,7 @@ const BrandsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Pharmaceutical Manufacturers & Brands | WellMeds"
         description="Browse authentic prescription formulations by top pharmaceutical manufacturers including Cipla, Sun Pharma, Dr. Reddy's, Abbott, and Pfizer at WellMeds."

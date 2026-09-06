@@ -117,7 +117,7 @@ const SurgicalCategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title={category.seoTitle || `${category.name} Surgical Supplies | WellMeds`}
         description={category.seoDescription || category.description || `Browse quality clinical ${category.name} products at WellMeds.`}

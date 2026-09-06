@@ -595,7 +595,7 @@ const Checkout = () => {
   // ── Empty State ──
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-24 sm:py-32 animate-[fade-in_0.3s_ease-out] flex flex-col items-center text-center">
+      <div className="max-w-4xl mx-auto px-4 py-24 sm:py-32 flex flex-col items-center text-center">
         <SEO title="Secure Checkout — WellMeds" noindex={true} />
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">No items to checkout</h2>
         <Link
@@ -620,7 +620,7 @@ const Checkout = () => {
 
   // ── Main Checkout UI ──
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12">
       <SEO title="Secure Checkout — WellMeds" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-8">

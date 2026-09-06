@@ -61,7 +61,7 @@ const HealthSupplementsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Nutritional & Health Supplements | WellMeds"
         description="Shop clinical-grade vitamins, minerals, protein supplements, and daily wellness formulations at WellMeds."

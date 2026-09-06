@@ -137,7 +137,7 @@ const WellnessPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Premium Wellness Storefront | WellMeds Healthcare"
         description="Explore WellMeds dedicated wellness storefront. Shop authentic vitamins, natural supplements, premium personal care, and certified health devices online."

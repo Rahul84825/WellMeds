@@ -85,7 +85,7 @@ const HomePage = () => {
   const [consultModalOpen, setConsultModalOpen] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-zinc-950 min-h-screen animate-[fade-in_0.3s_ease-out]">
+    <div className="bg-white dark:bg-zinc-950 min-h-screen">
       <SEO
         title="WellMeds Specialty Pharmacy | Authentic Medicines & Medical Supplies"
         description="WellMeds is India's trusted online pharmacy delivering authentic prescription medicines, wellness products, surgical devices, and specialty healthcare directly to your doorstep."

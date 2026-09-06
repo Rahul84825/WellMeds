@@ -437,7 +437,7 @@ const AdminAddNewSurgicalProduct = () => {
   const selectedCatObj = categoriesList.find(c => (c._id || c.id) === formData.surgicalCategory);
 
   return (
-    <div className="space-y-6 animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-8">
+    <div className="space-y-6 text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-8">
       {/* ── DESKTOP BACK LINK & HEADER ── */}
       <div className="flex items-center justify-between">
         <Link

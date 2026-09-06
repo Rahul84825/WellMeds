@@ -76,7 +76,7 @@ const OffersPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Pharmacy Coupons, Offers & Promo Codes | WellMeds"
         description="Save on healthcare and prescription medicines with exclusive coupon codes, bank discounts, and promotional offers at WellMeds."

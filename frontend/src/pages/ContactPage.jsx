@@ -53,7 +53,7 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Contact WellMeds | Licensed Pharmacy Support & Helpdesk"
         description="Get in touch with WellMeds licensed pharmacists. 24/7 patient support, prescription consultation, cold-chain delivery inquiries, and pharmacy desk."

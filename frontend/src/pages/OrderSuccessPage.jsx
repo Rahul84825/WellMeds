@@ -83,7 +83,7 @@ const OrderSuccess = () => {
   // Fallback if accessed directly without location state or valid orderId
   if (!order) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center animate-[fade-in_0.3s_ease-out]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <SEO title="Order Success" noindex={true} />
         <div className="max-w-md mx-auto bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-200 dark:border-zinc-800 p-8 shadow-sm text-center space-y-6">
           <div className="w-20 h-20 bg-[#f4f9f7] dark:bg-zinc-950 text-[#157a6d] rounded-full flex items-center justify-center mx-auto border border-[#157a6d]/20">
@@ -131,7 +131,7 @@ const OrderSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-clinical-grid py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-clinical-grid py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SEO title={`Order Confirmed ${orderId}`} noindex={true} />
 

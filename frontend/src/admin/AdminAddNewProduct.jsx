@@ -801,7 +801,7 @@ const AddNewProduct = () => {
   }
 
   return (
-    <div className="space-y-md sm:space-y-xl animate-[fade-in_0.3s_ease-out] text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-6">
+    <div className="space-y-md sm:space-y-xl text-left w-full max-w-full overflow-x-hidden pb-24 lg:pb-6">
       
       {/* Mobile Compact Sticky Top Header (Positioned below 64px Admin Navbar) */}
       <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-xs">

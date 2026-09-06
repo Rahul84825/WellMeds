@@ -67,7 +67,7 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-xl text-left">
 
       {/* Title */}
       <div className="border-b border-slate-100 dark:border-zinc-800 pb-sm">

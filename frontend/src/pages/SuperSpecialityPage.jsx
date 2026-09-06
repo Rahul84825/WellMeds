@@ -32,7 +32,7 @@ const SuperSpecialityPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Browse By Super Speciality | WellMeds Specialty Therapeutics"
         description="Explore WellMeds extensive medical specialities index and buy prescription medicines categorized by clinical treatment areas."

@@ -149,7 +149,7 @@ const CategoryDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title={`${category?.name || "Category"} Medicines & Formulations | WellMeds`}
         description={category?.description || `Browse authentic clinical ${category?.name} prescription medicines and therapeutic treatments at WellMeds.`}

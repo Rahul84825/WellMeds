@@ -151,7 +151,7 @@ const ProductsPage = () => {
   if (categoryParam) breadcrumbs.push({ name: categoryParam, url: `/products?category=${encodeURIComponent(categoryParam)}` });
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title={pageTitle}
         description="Browse authentic prescription medicines, chronic disease care, vitamins, and healthcare products online at WellMeds. Licensed pharmacy fulfillment and express delivery across India."

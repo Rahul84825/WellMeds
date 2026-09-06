@@ -314,7 +314,7 @@ const AdminPrescriptions = () => {
   const isPDFSelected = activeFileUrl?.toLowerCase().endsWith(".pdf") || selectedRx?.fileNames?.[activeFileIndex]?.toLowerCase().endsWith(".pdf");
 
   return (
-    <div className="space-y-xl animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-xl text-left">
       
       {/* Title */}
       <div className="flex items-center gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">

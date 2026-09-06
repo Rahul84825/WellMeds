@@ -72,7 +72,7 @@ const AllSurgicalProductsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="All Surgical Products & Medical Equipment | WellMeds"
         description="Shop clinical-grade surgical instruments, diagnostic equipment, sterile dressings, and hospital supplies online at WellMeds."

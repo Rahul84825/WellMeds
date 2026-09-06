@@ -392,9 +392,11 @@ const Navbar = () => {
     }
   }, [focusedProfileIndex]);
 
+  const isSearchPage = location.pathname === "/search";
+
   return (
     <nav
-      className={`w-full sticky top-0 flex flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-shadow duration-200 ${isScrolled
+      className={`${isSearchPage ? "hidden lg:flex" : "flex"} w-full sticky top-0 flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-shadow duration-200 ${isScrolled
           ? "shadow-md bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
           : "shadow-xs"
         } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
@@ -684,9 +686,9 @@ const Navbar = () => {
             <Search className="text-[#038076] w-4 h-4 shrink-0" />
             <input
               type="text"
-              placeholder="Search 3,000+ medicines, molecules..."
+              placeholder="Search for medicine..."
               readOnly
-              onClick={() => setMobileSearchExpanded(true)}
+              onClick={() => navigate("/search")}
               className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-2 py-1.5 flex-grow cursor-pointer placeholder-slate-400"
             />
             <button

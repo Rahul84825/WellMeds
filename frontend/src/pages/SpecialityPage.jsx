@@ -90,7 +90,7 @@ const SpecialityPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title={`${speciality?.name || "Speciality"} Formulations | WellMeds`}
         description={speciality?.description || `Explore ${speciality?.name} prescription medications and clinical care at WellMeds.`}

@@ -82,7 +82,7 @@ const PrescriptionTrackerPage = () => {
 
   if (error || !prescription) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center animate-[fade-in_0.3s_ease-out]">
+      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
         <AlertCircle size={48} className="mx-auto text-rose-500 mb-4" />
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Prescription Not Found</h1>
         <p className="text-slate-500 text-sm mb-6">{error || "Could not locate requested prescription."}</p>
@@ -136,7 +136,7 @@ const PrescriptionTrackerPage = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-[fade-in_0.3s_ease-out]">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <SEO title={`Prescription Verification #${prescription._id.slice(-6).toUpperCase()}`} noindex={true} />
 
       {/* Breadcrumb / Top Bar */}

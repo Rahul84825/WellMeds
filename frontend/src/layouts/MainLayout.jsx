@@ -50,6 +50,8 @@ const MainLayout = () => {
     location.pathname === "/reset-password" ||
     location.pathname === "/sign-in";
 
+  const isSearchPage = location.pathname === "/search";
+
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
       {!isAuthPage && <Navbar />}
@@ -61,11 +63,19 @@ const MainLayout = () => {
           <HealthcareInformation />
         </>
       )}
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && (
+        <div className={isSearchPage ? "hidden lg:block" : "block"}>
+          <Footer />
+        </div>
+      )}
       {/* Global floating Auth Modal */}
       <AuthModal />
       {/* Global floating WhatsApp support button — customer pages only */}
-      {!isAuthPage && <FloatingWhatsApp />}
+      {!isAuthPage && (
+        <div className={isSearchPage ? "hidden lg:block" : "block"}>
+          <FloatingWhatsApp />
+        </div>
+      )}
       {/* Global App Drawer */}
       <GlobalDrawer />
       {/* Smart WhatsApp Medicine Assistance Popup */}

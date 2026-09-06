@@ -775,7 +775,15 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     const estDelivery = globalLocation?.estimatedDelivery || (isPune ? "⚡ 1 Day (Express in Pune)" : "🚚 2–4 Days (Pan-India)");
 
     return (
-      <div ref={containerRef} className="relative w-full font-sans">
+      <div
+        ref={containerRef}
+        className="relative w-full font-sans cursor-pointer md:cursor-default"
+        onClick={() => {
+          if (window.innerWidth <= 768) {
+            navigate("/search");
+          }
+        }}
+      >
         <div className="search-row flex items-center">
           {/* Location Delivery Selector (Triggers LocationSelectorModal with GPS & Pincode check) */}
           <div className="relative hidden sm:block shrink-0 font-sans">
@@ -813,8 +821,21 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setFocused(true)}
-              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent font-sans"
+              onFocus={(e) => {
+                if (window.innerWidth <= 768) {
+                  e.target.blur();
+                  navigate("/search");
+                } else {
+                  setFocused(true);
+                }
+              }}
+              onClick={(e) => {
+                if (window.innerWidth <= 768) {
+                  e.preventDefault();
+                  navigate("/search");
+                }
+              }}
+              className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent font-sans cursor-pointer md:cursor-text"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
             />
             <SearchPlaceholderCarousel
@@ -843,7 +864,7 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
           <button
             type="button"
             onClick={handleSearchSubmit}
-            className="search-btn font-sans"
+            className="search-btn font-sans hidden md:block"
           >
             SEARCH
           </button>
@@ -991,8 +1012,20 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => setFocused(true)}
-            className="w-full bg-transparent border-none text-xs outline-none text-slate-800 focus:ring-0 focus:outline-none p-0 font-sans font-semibold relative z-10"
+            onFocus={(e) => {
+              if (window.innerWidth <= 768 && variant !== "mobile") {
+                e.target.blur();
+                navigate("/search");
+              } else {
+                setFocused(true);
+              }
+            }}
+            onClick={() => {
+              if (window.innerWidth <= 768 && variant !== "mobile") {
+                navigate("/search");
+              }
+            }}
+            className="w-full bg-transparent border-none text-xs outline-none text-slate-800 focus:ring-0 focus:outline-none p-0 font-sans font-semibold relative z-10 cursor-pointer sm:cursor-text"
             style={{ outline: "none", border: "none", boxShadow: "none" }}
           />
           <SearchPlaceholderCarousel
@@ -1019,11 +1052,11 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
           )}
         </div>
 
-        {/* Right: Search button */}
+        {/* Right: Search button (Desktop only) */}
         <button
           type="button"
           onClick={handleSearchSubmit}
-          className="bg-[#038076] hover:bg-[#02635c] text-white font-sans font-bold text-[11px] h-[28px] px-3.5 rounded-lg uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer flex items-center justify-center tracking-wider"
+          className="hidden md:flex bg-[#038076] hover:bg-[#02635c] text-white font-sans font-bold text-[11px] h-[28px] px-3.5 rounded-lg uppercase active:scale-[0.97] transition-all shrink-0 shadow-xs cursor-pointer items-center justify-center tracking-wider"
         >
           SEARCH
         </button>

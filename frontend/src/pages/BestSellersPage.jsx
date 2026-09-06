@@ -61,7 +61,7 @@ const BestSellersPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Best Selling Prescription Medicines & Healthcare Products | WellMeds"
         description="Shop top-rated, most prescribed medicines and healthcare essentials delivered nationwide by WellMeds licensed pharmacy."

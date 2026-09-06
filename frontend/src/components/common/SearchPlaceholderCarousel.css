@@ -88,3 +88,20 @@
     opacity: 1 !important;
   }
 }
+
+/* Mobile View Styling (Matching reference image) */
+@media (max-width: 768px) {
+  .search-placeholder-overlay {
+    font-size: 15px !important;
+    color: #64748b !important;
+  }
+  .search-prefix {
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    color: #64748b !important;
+  }
+  .search-placeholder-item {
+    font-weight: 400 !important;
+    color: #64748b !important;
+  }
+}

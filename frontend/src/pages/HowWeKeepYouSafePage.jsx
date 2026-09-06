@@ -115,7 +115,7 @@ const HowWeKeepYouSafePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="How We Keep You Safe | WellMeds Safety Standards"
         description="Discover WellMeds clinical safety standards: 2–8°C cold-chain shipping, CDSCO compliance, manufacturer QR tracking, and licensed pharmacist prescription verification."

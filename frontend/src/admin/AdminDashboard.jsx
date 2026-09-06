@@ -415,7 +415,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-lg animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-lg text-left">
 
       {/* Title Block with Redesigned Excel Download Buttons */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-md border-b border-slate-100 dark:border-zinc-800 pb-sm">

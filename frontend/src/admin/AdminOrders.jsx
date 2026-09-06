@@ -196,7 +196,7 @@ const ManageOrders = () => {
   }
 
   return (
-    <div className="space-y-6 animate-[fade-in_0.3s_ease-out] text-left">
+    <div className="space-y-6 text-left">
       {/* ── HEADER TITLE & VIEW TOGGLE ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-zinc-800">
         <div>

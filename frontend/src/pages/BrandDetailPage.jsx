@@ -62,7 +62,7 @@ const BrandDetailPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title={`${brandName} Medicines & Formulations | WellMeds`}
         description={`Buy authentic ${brandName} prescription formulations and healthcare products online at WellMeds. Verified licensed pharmacy.`}

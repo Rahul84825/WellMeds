@@ -43,7 +43,7 @@ const AllCategoriesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="All Categories & Therapeutic Specialities | WellMeds"
         description="Browse all medical conditions, therapeutic categories, and healthcare specialities at WellMeds. Licensed pharmacy delivery across India."

@@ -209,9 +209,7 @@ const PromoSlide = ({ slide, isActive }) => {
 
       <div className="max-w-[1440px] mx-auto w-full flex flex-col lg:flex-row gap-xl items-center justify-between z-10 text-white">
         {/* Left Column: Text & CTAs */}
-        <div className={`w-full lg:w-[48%] space-y-md text-left ${
-          isActive ? "animate-slide-in-left" : ""
-        }`}>
+        <div className="w-full lg:w-[48%] space-y-md text-left">
           <h2 className="font-editorial text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-white drop-shadow-xs">
             {slide.title}
           </h2>
@@ -260,9 +258,7 @@ const PromoSlide = ({ slide, isActive }) => {
         </div>
 
         {/* Right Column: Unique layouts */}
-        <div className={`w-full lg:w-[48%] mt-lg lg:mt-0 ${
-          isActive ? "animate-slide-in-right" : ""
-        }`}>
+        <div className="w-full lg:w-[48%] mt-lg lg:mt-0">
           {renderRightContent()}
         </div>
       </div>

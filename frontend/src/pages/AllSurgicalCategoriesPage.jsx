@@ -51,7 +51,7 @@ const AllSurgicalCategoriesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left animate-[fade-in_0.3s_ease-out]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO
         title="Surgical & Medical Supply Categories | WellMeds"
         description="Browse clinical-grade surgical instruments, diagnostic equipment, sterile dressings, and medical supplies by category at WellMeds."
