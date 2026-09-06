@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
 import wellmedsLogo from "../assets/Footer/wellmeds-lowercase-monochrome-black.png";
 import facebookIcon from "../assets/Footer/facebook.svg";
+import youtubeIcon from "../assets/Footer/youtube.svg";
 import instagramIcon from "../assets/Footer/instagram.svg";
 import linkedinIcon from "../assets/Footer/linkedin.svg";
-import youtubeIcon from "../assets/Footer/youtube.svg";
 import masterCardsImg from "../assets/Footer/master_cards.png";
 import "./Footer.css";
 
@@ -77,24 +77,24 @@ const BOTTOM_LINKS = [
 
 const SOCIAL_LINKS = [
   {
-    name: "Instagram",
-    href: "https://www.instagram.com/wellmeds.co?igsi=czV1MHZ5ZHBvYnZz",
-    icon: instagramIcon,
-  },
-  {
     name: "Facebook",
     href: "https://www.facebook.com/share/19N3wTFhe6/",
     icon: facebookIcon,
   },
   {
-    name: "LinkedIn",
-    href: "https://www.linkedin.com/in/wellmeds/",
-    icon: linkedinIcon,
-  },
-  {
     name: "YouTube",
     href: "https://www.youtube.com/channel/UCNZLS2p5bI67d03aPmSnHFQ",
     icon: youtubeIcon,
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/wellmeds.co?igsi=czV1MHZ5ZHBvYnZz",
+    icon: instagramIcon,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/wellmeds/",
+    icon: linkedinIcon,
   },
 ];
 
@@ -103,9 +103,9 @@ const Footer = () => {
 
   return (
     <footer className="wm-footer" role="contentinfo">
-      {/* Top Brand & Navigation Grid */}
+      {/* Top Brand & Navigation Section */}
       <div className="wm-footer-top">
-        {/* Left Brand Area */}
+        {/* Top Logo and Legal Subtitle */}
         <div className="wm-footer-brand">
           <Link to="/" className="wm-logo-link" aria-label="WellMeds Home">
             <img
@@ -115,25 +115,9 @@ const Footer = () => {
               loading="lazy"
             />
           </Link>
-          <div className="wm-socials">
-            {SOCIAL_LINKS.map((social) => (
-              <a
-                key={social.name}
-                href={social.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.name}
-                title={social.name}
-              >
-                <img
-                  src={social.icon}
-                  alt={social.name}
-                  className="wm-social-icon"
-                  loading="lazy"
-                />
-              </a>
-            ))}
-          </div>
+          <span className="wm-brand-subtitle">
+            {BUSINESS_INFO.legalName ? `${BUSINESS_INFO.legalName.toUpperCase()} PRIVATE LIMITED` : "WELLMEDS PHARMACY PRIVATE LIMITED"}
+          </span>
         </div>
 
         {/* Desktop 4-Column Navigation */}
@@ -162,58 +146,83 @@ const Footer = () => {
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Mobile Accordion Navigation */}
-      <div className="wm-footer-accordion">
-        {MOBILE_SECTIONS.map((section) => (
-          <details className="wm-accordion-item" key={section.title}>
-            <summary className="wm-accordion-summary">
-              <span>{section.title}</span>
-              <svg
-                className="chevron"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
+        {/* Mobile Accordion Navigation */}
+        <div className="wm-footer-accordion">
+          {MOBILE_SECTIONS.map((section) => (
+            <details className="wm-accordion-item" key={section.title}>
+              <summary className="wm-accordion-summary">
+                <span>{section.title}</span>
+                <svg
+                  className="chevron"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <ul>
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    {link.to ? (
+                      <Link to={link.to}>{link.label}</Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className={link.isHighlight ? "wm-contact-highlight" : undefined}
+                        target={link.isExternal ? "_blank" : undefined}
+                        rel={link.isExternal ? "noopener noreferrer" : undefined}
+                      >
+                        {link.label}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))}
+
+          {/* Mobile Contact Information */}
+          <div className="wm-accordion-contact">
+            <h4>Contacts</h4>
+            <p>
+              Need help? Our customer care is just a message away — available daily from 8:00 AM – 11:00 PM.
+            </p>
+            <a href={`tel:${BUSINESS_INFO.phoneRaw || "+917798795353"}`}>
+              {BUSINESS_INFO.phoneDisplay || "+91 77987 95353"}
+            </a>
+            <a href={`mailto:${BUSINESS_INFO.email || "info@wellmeds.in"}`}>
+              {BUSINESS_INFO.email || "info@wellmeds.in"}
+            </a>
+          </div>
+        </div>
+
+        {/* Social Follow Section */}
+        <div className="wm-footer-social-block">
+          <h4 className="wm-social-title">Follow Us On</h4>
+          <div className="wm-social-icons">
+            {SOCIAL_LINKS.map((social) => (
+              <a
+                key={social.name}
+                href={social.href || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name}
+                title={social.name}
+                className="wm-social-btn"
               >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </summary>
-            <ul>
-              {section.links.map((link) => (
-                <li key={link.label}>
-                  {link.to ? (
-                    <Link to={link.to}>{link.label}</Link>
-                  ) : (
-                    <a
-                      href={link.href}
-                      className={link.isHighlight ? "wm-contact-highlight" : undefined}
-                      target={link.isExternal ? "_blank" : undefined}
-                      rel={link.isExternal ? "noopener noreferrer" : undefined}
-                    >
-                      {link.label}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </details>
-        ))}
-
-        {/* Mobile Contact Information */}
-        <div className="wm-accordion-contact">
-          <h4>Contacts</h4>
-          <p>
-            Need help? Our customer care is just a message away — available daily from 8:00 AM – 11:00 PM.
-          </p>
-          <a href={`tel:${BUSINESS_INFO.phoneRaw || "+917798795353"}`}>
-            {BUSINESS_INFO.phoneDisplay || "+91 77987 95353"}
-          </a>
-          <a href={`mailto:${BUSINESS_INFO.email || "info@wellmeds.in"}`}>
-            {BUSINESS_INFO.email || "info@wellmeds.in"}
-          </a>
+                <img
+                  src={social.icon}
+                  alt={social.name}
+                  className="wm-social-icon"
+                  loading="lazy"
+                />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
 
