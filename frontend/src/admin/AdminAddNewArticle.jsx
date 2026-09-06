@@ -146,7 +146,6 @@ const AdminAddNewArticle = () => {
 
   const [loading, setLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingHero, setUploadingHero] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -161,6 +160,7 @@ const AdminAddNewArticle = () => {
   const [status, setStatus] = useState("published");
   const [isFeatured, setIsFeatured] = useState(false);
   const [heroImage, setHeroImage] = useState("");
+  const [uploadingHero, setUploadingHero] = useState(false);
   const [secondaryImage, setSecondaryImage] = useState("");
   const [secondaryImageCaption, setSecondaryImageCaption] = useState("");
   const [uploadingSecondary, setUploadingSecondary] = useState(false);
@@ -173,6 +173,7 @@ const AdminAddNewArticle = () => {
   const [authorTitle, setAuthorTitle] = useState("Dental Surgeon");
   const [authorCredentials, setAuthorCredentials] = useState("BDS, PGCAD, GMHE (IIM-B)");
   const [authorAvatar, setAuthorAvatar] = useState("");
+  const [uploadingAuthor, setUploadingAuthor] = useState(false);
 
   const [reviewerName, setReviewerName] = useState("Dr. Betina Chandolia");
   const [reviewerQualifications, setReviewerQualifications] = useState("BDS, MDS, PGCCL, PGDMH");
@@ -225,6 +226,7 @@ const AdminAddNewArticle = () => {
 
   const fileInputRef = useRef(null);
   const secondaryFileInputRef = useRef(null);
+  const authorFileInputRef = useRef(null);
 
   const showToast = (msg, type = "success") => {
     setToastMessage({ msg, type });
@@ -362,6 +364,26 @@ const AdminAddNewArticle = () => {
       showToast("Failed to upload image. Please check file format.", "error");
     } finally {
       setUploadingSecondary(false);
+    }
+  };
+
+  // Author Photo Upload handler
+  const handleAuthorAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAuthor(true);
+    try {
+      const res = await api.uploadImage(file);
+      if (res && res.url) {
+        setAuthorAvatar(res.url);
+        showToast("Author photo uploaded successfully!");
+      }
+    } catch (err) {
+      console.error("Author photo upload failed", err);
+      showToast("Failed to upload author photo. Please check file format.", "error");
+    } finally {
+      setUploadingAuthor(false);
     }
   };
 
@@ -542,14 +564,14 @@ const AdminAddNewArticle = () => {
   };
 
   // Submit Save
-  const handleSave = async (overrideStatus) => {
+  const handleSave = async () => {
     if (!title.trim()) {
       showToast("Please enter an article title.", "error");
       setActiveTab("basic");
       return;
     }
 
-    const finalStatus = overrideStatus || status;
+    const finalStatus = status || "published";
 
     const validToc = (tableOfContents || [])
       .filter((t) => t && t.label && t.label.trim())
@@ -643,17 +665,11 @@ const AdminAddNewArticle = () => {
       if (isEditMode) {
         await api.updateArticle(id, payload);
         showToast("Article saved successfully!");
-        if (finalStatus === "published") {
-          setTimeout(() => navigate("/admin/articles"), 600);
-        }
+        setTimeout(() => navigate("/admin/articles"), 500);
       } else {
-        const created = await api.createArticle(payload);
+        await api.createArticle(payload);
         showToast("Article published successfully!");
-        if (finalStatus === "published") {
-          setTimeout(() => navigate("/admin/articles"), 600);
-        } else {
-          navigate(`/admin/articles/${created._id}/edit`, { replace: true });
-        }
+        setTimeout(() => navigate("/admin/articles"), 500);
       }
     } catch (err) {
       console.error("Save article error", err);
@@ -720,36 +736,14 @@ const AdminAddNewArticle = () => {
             Quick Paste Full Article
           </button>
 
-          {slug && (
-            <a
-              href={`/articles/${slug}?preview=true`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 transition shadow-2xs"
-            >
-              <Eye size={14} />
-              Preview
-            </a>
-          )}
-
           <button
             type="button"
-            onClick={() => handleSave("draft")}
+            onClick={handleSave}
             disabled={isSaving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-100 transition cursor-pointer"
-          >
-            <Save size={14} />
-            Save Draft
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSave("published")}
-            disabled={isSaving}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#0F3B34] hover:bg-[#157A6D] text-white text-xs font-extrabold transition shadow-sm active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#0F3B34] hover:bg-[#157A6D] text-white text-xs font-extrabold transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
           >
             <CheckCircle size={15} />
-            {isSaving ? "Saving..." : "Publish Article"}
+            {isSaving ? "Saving..." : (isEditMode ? "Save Changes" : "Publish Article")}
           </button>
         </div>
       </div>
@@ -958,7 +952,7 @@ const AdminAddNewArticle = () => {
               Article Images & Media Options
             </h2>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
-              Provide up to 2 images: a primary hero banner for the top, and a secondary illustration for the middle of the article content.
+              Upload up to 2 images: a primary hero banner for the top, and a secondary illustration for the middle of the article content.
             </p>
           </div>
 
@@ -984,19 +978,6 @@ const AdminAddNewArticle = () => {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                    Hero Image URL or Direct Link
-                  </label>
-                  <input
-                    type="text"
-                    value={heroImage}
-                    onChange={(e) => setHeroImage(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#157A6D]"
-                  />
-                </div>
-
                 {/* Recommended Image Size Specs */}
                 <div className="p-3.5 bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-200/90 dark:border-emerald-800/60 rounded-2xl text-xs space-y-1.5">
                   <div className="font-bold text-[#0F3B34] dark:text-emerald-300 flex items-center gap-1.5 text-[11.5px]">
@@ -1004,7 +985,7 @@ const AdminAddNewArticle = () => {
                     <span>Recommended Image Specifications</span>
                   </div>
                   <ul className="text-[11px] text-emerald-900/90 dark:text-emerald-300/90 space-y-1 pl-1 leading-relaxed">
-                    <li>• <strong>Optimal Dimensions:</strong> <strong>1200 × 675 px</strong> (or 1280 × 720 px — 16:9 widescreen ratio)</li>
+                    <li>• <strong>Optimal Dimensions:</strong> <strong>1200 × 675 px</strong> (16:9 widescreen ratio)</li>
                     <li>• <strong>Supported Formats:</strong> WebP, JPG, or PNG (under 2MB recommended)</li>
                     <li>• <strong>Best Practice:</strong> Keep key subjects and text centered so it crops seamlessly on both the article detail banner and compact library cards.</li>
                   </ul>
@@ -1022,10 +1003,10 @@ const AdminAddNewArticle = () => {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingHero}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#157A6D]/10 hover:bg-[#157A6D]/20 text-[#157A6D] dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#157A6D] hover:bg-[#116257] text-white text-xs font-bold transition shadow-sm cursor-pointer disabled:opacity-50"
                   >
                     <UploadCloud size={16} />
-                    <span>{uploadingHero ? "Uploading Hero..." : "Upload Hero Image"}</span>
+                    <span>{uploadingHero ? "Uploading Hero..." : (heroImage ? "Replace Hero Image" : "Upload Hero Image")}</span>
                   </button>
                 </div>
               </div>
@@ -1047,7 +1028,8 @@ const AdminAddNewArticle = () => {
                       <button
                         type="button"
                         onClick={() => setHeroImage("")}
-                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition cursor-pointer"
+                        title="Remove hero image"
                       >
                         <X size={14} />
                       </button>
@@ -1074,19 +1056,6 @@ const AdminAddNewArticle = () => {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
-                    Secondary Image URL or Direct Link
-                  </label>
-                  <input
-                    type="text"
-                    value={secondaryImage}
-                    onChange={(e) => setSecondaryImage(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-xs text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-[#0066FF]"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
                     Figure Caption / Description (Optional)
                   </label>
                   <input
@@ -1110,10 +1079,10 @@ const AdminAddNewArticle = () => {
                     type="button"
                     onClick={() => secondaryFileInputRef.current?.click()}
                     disabled={uploadingSecondary}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0066FF]/10 hover:bg-[#0066FF]/20 text-[#0066FF] dark:text-blue-400 text-xs font-bold transition cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0066FF] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-sm cursor-pointer disabled:opacity-50"
                   >
                     <UploadCloud size={16} />
-                    <span>{uploadingSecondary ? "Uploading Mid Image..." : "Upload Mid-Content Image"}</span>
+                    <span>{uploadingSecondary ? "Uploading Mid Image..." : (secondaryImage ? "Replace Mid-Content Image" : "Upload Mid-Content Image")}</span>
                   </button>
                 </div>
               </div>
@@ -1135,7 +1104,8 @@ const AdminAddNewArticle = () => {
                       <button
                         type="button"
                         onClick={() => setSecondaryImage("")}
-                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition cursor-pointer"
+                        title="Remove secondary image"
                       >
                         <X size={14} />
                       </button>
@@ -1166,6 +1136,68 @@ const AdminAddNewArticle = () => {
               <h3 className="text-xs font-bold text-[#0F3B34] dark:text-zinc-200 uppercase tracking-wider">
                 ✍️ Written By (Author)
               </h3>
+
+              {/* Author Photo Upload Box */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Doctor / Author Photo
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-full bg-white dark:bg-zinc-900 border-2 border-[#157A6D]/30 shadow-xs flex items-center justify-center overflow-hidden shrink-0">
+                    {authorAvatar ? (
+                      <>
+                        <img src={authorAvatar} alt={authorName || "Author"} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setAuthorAvatar("")}
+                          className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition flex items-center justify-center text-white cursor-pointer"
+                          title="Remove author photo"
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-base font-extrabold text-[#157A6D]">
+                        {authorName ? authorName.charAt(0).toUpperCase() : "Dr"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <input
+                      type="file"
+                      ref={authorFileInputRef}
+                      onChange={handleAuthorAvatarUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => authorFileInputRef.current?.click()}
+                        disabled={uploadingAuthor}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#157A6D] hover:bg-[#116257] text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
+                      >
+                        <UploadCloud size={14} />
+                        <span>{uploadingAuthor ? "Uploading..." : (authorAvatar ? "Change Photo" : "Upload Photo")}</span>
+                      </button>
+                      {authorAvatar && (
+                        <button
+                          type="button"
+                          onClick={() => setAuthorAvatar("")}
+                          className="px-3 py-2 rounded-xl bg-slate-200/80 dark:bg-zinc-700 hover:bg-rose-100 hover:text-rose-700 dark:hover:bg-rose-950 dark:hover:text-rose-300 text-xs font-semibold text-slate-700 dark:text-zinc-200 transition cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                      Square headshot recommended (e.g. 400 × 400 px, WebP/JPG/PNG)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300">
                   Doctor / Author Name
