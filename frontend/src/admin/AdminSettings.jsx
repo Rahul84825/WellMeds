@@ -20,12 +20,10 @@ const AdminSettings = () => {
   const { user } = useAuth();
 
   const [savingSection, setSavingSection] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   // Form states
-  const [name, setName] = useState(user?.name || "Dr. Claire Wilson");
-  const [email, setEmail] = useState(user?.email || "admin@wellmeds.in");
-  const [avatar, setAvatar] = useState(user?.avatar || "");
+  const [name, setName] = useState(user?.name || "Rahul Choudhary");
+  const [email, setEmail] = useState(user?.email || "activegamer789@gmail.com");
   const [phone, setPhone] = useState(user?.phone || "+91 7798795353");
 
   // Shop Settings
@@ -39,26 +37,11 @@ const AdminSettings = () => {
   const [smsPrescriptionAlerts, setSmsPrescriptionAlerts] = useState(true);
   const [lowStockWarning, setLowStockWarning] = useState(true);
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      const uploadedUrl = await api.uploadImage(file);
-      setAvatar(uploadedUrl);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setSavingSection("profile");
     try {
-      await api.updateProfile({ name, email, avatar });
+      await api.updateProfile({ name, email, phone });
     } catch (err) {
       console.error(err);
     } finally {
@@ -104,31 +87,7 @@ const AdminSettings = () => {
               <User size={18} className="text-[#157A6D]" />
               <h2 className="font-bold text-sm text-slate-800 dark:text-zinc-200">Admin Staff Profile</h2>
             </div>
-
-            {/* Avatar Upload */}
-            <div className="flex items-center gap-md">
-              <div className="relative w-16 h-16 rounded-full border border-slate-200 dark:border-zinc-700 overflow-hidden bg-slate-50 dark:bg-zinc-800 shrink-0">
-                {avatar ? (
-                  <img src={avatar} alt="Admin Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center font-bold text-lg text-slate-400">
-                    {name?.charAt(0) || "A"}
-                  </div>
-                )}
-                {uploading && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <Loader size="sm" />
-                  </div>
-                )}
-              </div>
-              <label className="cursor-pointer bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 px-md py-xs rounded-xl font-bold text-xs flex items-center gap-xs transition-colors">
-                <Upload size={14} />
-                Change Picture
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-md pt-xs">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-xs">Full Name</label>
                 <input

@@ -496,18 +496,8 @@ const AdminLayout = () => {
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-sm p-xs hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
               >
-                <div className="h-8 w-8 rounded-full bg-[#004782]/10 border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
-                  {user?.avatar ? (
-                    <img
-                      alt="Admin Avatar"
-                      className="w-full h-full object-cover"
-                      src={user.avatar}
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-[#004782] text-white flex items-center justify-center font-bold text-sm">
-                      {user?.name?.slice(0, 2).toUpperCase() || "AD"}
-                    </div>
-                  )}
+                <div className="h-8 w-8 rounded-full bg-[#157A6D] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                  {user?.name ? user.name.slice(0, 2).toUpperCase() : "AD"}
                 </div>
                 <div className="hidden sm:block text-left truncate max-w-[80px]">
                   <p className="text-xs font-semibold text-slate-800 dark:text-zinc-200 leading-none truncate">{user?.name || "Admin"}</p>
