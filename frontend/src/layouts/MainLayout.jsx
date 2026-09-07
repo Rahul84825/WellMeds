@@ -51,10 +51,15 @@ const MainLayout = () => {
     location.pathname === "/sign-in";
 
   const isSearchPage = location.pathname === "/search";
+  const isUploadRxPage = location.pathname === "/upload-prescription";
 
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
-      {!isAuthPage && <Navbar />}
+      {!isAuthPage && (
+        <div className={isUploadRxPage ? "hidden md:block" : "block"}>
+          <Navbar />
+        </div>
+      )}
       <main className="flex-grow">
         <Outlet />
       </main>
@@ -64,14 +69,14 @@ const MainLayout = () => {
         </>
       )}
       {!isAuthPage && (
-        <div className={isSearchPage ? "hidden lg:block" : "block"}>
+        <div className={isSearchPage || isUploadRxPage ? "hidden md:block" : "block"}>
           <Footer />
         </div>
       )}
       {/* Global floating Auth Modal */}
       <AuthModal />
       {/* Global floating WhatsApp support button — customer pages only */}
-      {!isAuthPage && (
+      {!isAuthPage && !isUploadRxPage && (
         <div className={isSearchPage ? "hidden lg:block" : "block"}>
           <FloatingWhatsApp />
         </div>
