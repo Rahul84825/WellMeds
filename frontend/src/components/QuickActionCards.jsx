@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FileText, Stethoscope, ShieldCheck, FlaskConical, ChevronRight } from "lucide-react";
 
-import surgicalImg from "../assets/QuickActionCards/surgical.png";
-import uploadImg from "../assets/QuickActionCards/upload.png";
-import keepSafeImg from "../assets/QuickActionCards/howwekeepsafe.png";
-import wellnessImg from "../assets/QuickActionCards/wellness.png";
+import surgicalImg from "../assets/QuickActionCards/surgical.webp";
+import uploadImg from "../assets/QuickActionCards/upload.webp";
+import keepSafeImg from "../assets/QuickActionCards/howwekeepsafe.webp";
+import wellnessImg from "../assets/QuickActionCards/wellness.webp";
 
 const QuickActionCards = () => {
   const cards = [
@@ -95,7 +95,15 @@ const QuickActionCards = () => {
                   </span>
                 )}
                 {card.img ? (
-                  <img src={card.img} alt={card.title} className="w-full h-full object-cover rounded-2xl scale-120 transition-transform duration-300 group-hover:scale-125" />
+                  <img
+                    src={card.img}
+                    alt={card.title}
+                    loading="eager"
+                    decoding="async"
+                    width={56}
+                    height={56}
+                    className="w-full h-full object-cover rounded-2xl scale-120 transition-transform duration-300 group-hover:scale-125"
+                  />
                 ) : (
                   <IconComponent className={`w-6 h-6 sm:w-8 sm:h-8 ${card.colors.iconColor}`} />
                 )}

@@ -53,22 +53,17 @@ const ProductGallery = ({
           </span>
         )}
 
-        {isImageLoading && (
-          <div className="absolute inset-0 bg-[#f4f8f6] animate-pulse flex items-center justify-center rounded-xl z-10">
-            <Loader size="sm" />
-          </div>
-        )}
-        
         {/* Main Product Image */}
         <img 
           src={getCardImageUrl(imagesList[activeImageIdx], { width: 1000 }) || DEFAULT_PRODUCT_IMAGE} 
           alt={productName} 
           loading="eager"
           fetchpriority="high"
+          decoding="async"
           className="w-full h-full max-w-full max-h-full object-contain select-none transition-transform duration-[250ms] ease-in-out hover:scale-105" 
-          onLoad={() => setIsImageLoading(false)}
+          onLoad={() => setIsImageLoading && setIsImageLoading(false)}
           onError={(e) => {
-            setIsImageLoading(false);
+            if (setIsImageLoading) setIsImageLoading(false);
             e.target.onerror = null;
             e.target.src = DEFAULT_PRODUCT_IMAGE;
           }}

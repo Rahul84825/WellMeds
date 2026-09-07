@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import uploadDesktop from "../assets/upload/upload_desktop.png";
-import uploadMobile from "../assets/upload/upload_mobile.png";
+import uploadDesktop from "../assets/upload/upload_desktop.webp";
+import uploadMobile from "../assets/upload/upload_mobile.webp";
 
 /**
  * UploadPrescriptionBanner

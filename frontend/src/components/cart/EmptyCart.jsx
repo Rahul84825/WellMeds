@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import emptyCartBasket from "../../assets/cart/empty-cart-basket.png";
+import emptyCartBasket from "../../assets/cart/empty-cart-basket.webp";
 
 /**
  * EmptyCart Component
@@ -16,6 +16,10 @@ const EmptyCart = () => {
             alt="Empty shopping basket"
             className="w-full h-full object-contain select-none"
             loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width={220}
+            height={220}
           />
         </div>
 

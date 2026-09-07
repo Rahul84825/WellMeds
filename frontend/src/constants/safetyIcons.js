@@ -1,9 +1,9 @@
-import pregnancyImg from '../assets/safetyadvice/PREGNANCY.png';
-import breastfeedingImg from '../assets/safetyadvice/BREASTFEEDING.png';
-import alcoholImg from '../assets/safetyadvice/ALCOHOL.png';
-import drivingImg from '../assets/safetyadvice/DRIVING FRONT.png';
-import liverImg from '../assets/safetyadvice/LIVER.png';
-import kidneyImg from '../assets/safetyadvice/KIDNEY.png';
+import pregnancyImg from '../assets/safetyadvice/PREGNANCY.webp';
+import breastfeedingImg from '../assets/safetyadvice/BREASTFEEDING.webp';
+import alcoholImg from '../assets/safetyadvice/ALCOHOL.webp';
+import drivingImg from '../assets/safetyadvice/DRIVING FRONT.webp';
+import liverImg from '../assets/safetyadvice/LIVER.webp';
+import kidneyImg from '../assets/safetyadvice/KIDNEY.webp';
 
 /**
  * Predefined list of Safety Categories for WellMeds.

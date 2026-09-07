@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import papHeroBg from "../assets/PAP/PAP_.png";
 import SEO from "../components/common/SEO";
 import WhyWellMedsBar from "../components/common/WhyWellMedsBar";
 import { BUSINESS_INFO } from "../config/businessInfo";

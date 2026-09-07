@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Import local promotional banner assets
-import deliveryImg from "../../../assets/PromoCarousel/delivery.png";
-import savingImg from "../../../assets/PromoCarousel/saving.png";
-import cancerImg from "../../../assets/PromoCarousel/cancer.png";
-import glp1Img from "../../../assets/PromoCarousel/GlP-1.png";
-import moveFreelyImg from "../../../assets/PromoCarousel/Move_Freely.png";
-import physiotherapyImg from "../../../assets/PromoCarousel/Physiotherapy.png";
-import saveImg from "../../../assets/PromoCarousel/save.png";
+import deliveryImg from "../../../assets/PromoCarousel/delivery.webp";
+import savingImg from "../../../assets/PromoCarousel/saving.webp";
+import cancerImg from "../../../assets/PromoCarousel/cancer.webp";
+import glp1Img from "../../../assets/PromoCarousel/GlP-1.webp";
+import moveFreelyImg from "../../../assets/PromoCarousel/Move_Freely.webp";
+import physiotherapyImg from "../../../assets/PromoCarousel/Physiotherapy.webp";
+import saveImg from "../../../assets/PromoCarousel/save.webp";
 
 const promoBanners = [
   {
@@ -195,6 +195,7 @@ const PromoCarousel = () => {
                 src={banner.img}
                 alt={banner.alt}
                 loading={idx === 0 ? "eager" : "lazy"}
+                fetchpriority={idx === 0 ? "high" : "auto"}
                 decoding="async"
                 draggable={false}
                 className="w-full h-full object-cover object-center"

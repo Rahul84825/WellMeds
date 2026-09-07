@@ -1,7 +1,7 @@
 import React from "react";
 import SEO from "../components/common/SEO";
-import heroBannerImg from "../assets/about/wellmeds-hero-banner.jpg";
-import ownerImg from "../assets/about/owner.png";
+import heroBannerImg from "../assets/about/wellmeds-hero-banner.webp";
+import ownerImg from "../assets/about/owner.webp";
 
 const AboutPage = () => {
   const breadcrumbs = [

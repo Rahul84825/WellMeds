@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import orderDesktop from "../assets/promo/order_desktop.png";
-import orderMobile from "../assets/promo/order_mobile.png";
+import orderDesktop from "../assets/promo/order_desktop.webp";
+import orderMobile from "../assets/promo/order_mobile.webp";
 
 /**
  * OrderPromoBanner

@@ -4,15 +4,15 @@
  */
 
 /**
- * Returns an optimized delivery URL for product cards.
- * If the URL is from Cloudinary, inserts e_trim, f_auto, q_auto, w_600, c_limit
- * to remove empty canvas borders on the CDN side while preserving 100% packaging detail.
+ * Returns an optimized delivery URL for product cards, banners, and categories.
+ * If the URL is from Cloudinary, inserts e_trim, f_auto, q_auto, w_width, c_limit
+ * to remove empty canvas borders on the CDN side while preserving 100% detail.
  *
  * @param {string} url - Original image URL
- * @param {object} options - Optional config { width: 600, trim: true }
+ * @param {object} options - Optional config { width: 600, trim: true, quality: "auto" }
  * @returns {string} Optimized image URL
  */
-export const getCardImageUrl = (url, options = {}) => {
+export const getOptimizedImageUrl = (url, options = {}) => {
   if (!url || typeof url !== "string") return url;
 
   // Do not modify data URIs, SVGs, or blob URLs
@@ -22,16 +22,17 @@ export const getCardImageUrl = (url, options = {}) => {
 
   // Cloudinary URL processing
   if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    const { width = 600, trim = true } = options;
+    const { width = 600, trim = true, quality = "auto" } = options;
 
-    // Check if URL already has e_trim
-    if (url.includes("e_trim")) {
+    // Check if URL already has f_auto or e_trim to avoid duplication
+    if (url.includes("f_auto") || url.includes("e_trim")) {
       return url;
     }
 
     const transformParts = [];
     if (trim) transformParts.push("e_trim");
-    transformParts.push("f_auto", "q_auto");
+    transformParts.push("f_auto");
+    transformParts.push(quality === "auto" ? "q_auto" : `q_${quality}`);
     if (width) transformParts.push(`w_${width}`, "c_limit");
 
     const transformStr = transformParts.join(",");
@@ -42,6 +43,8 @@ export const getCardImageUrl = (url, options = {}) => {
 
   return url;
 };
+
+export const getCardImageUrl = getOptimizedImageUrl;
 
 /**
  * Compresses an image client-side to ensure fast uploads and prevent payload size limits (e.g. 413 Payload Too Large).

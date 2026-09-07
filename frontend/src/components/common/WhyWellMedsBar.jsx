@@ -1,6 +1,6 @@
 import React from "react";
-import chooseDesktop from "../../assets/why_wellmeds/choose_desktop.png";
-import chooseMobile from "../../assets/why_wellmeds/choose_mobile.png";
+import chooseDesktop from "../../assets/why_wellmeds/choose_desktop.webp";
+import chooseMobile from "../../assets/why_wellmeds/choose_mobile.webp";
 
 /**
  * WhyWellMedsBar

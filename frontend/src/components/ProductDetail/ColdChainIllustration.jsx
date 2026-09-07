@@ -1,6 +1,6 @@
 import React from "react";
-import desktopImg from "../../assets/cold-chains/desktop.png";
-import mobileImg from "../../assets/cold-chains/mobile.png";
+import desktopImg from "../../assets/cold-chains/desktop.webp";
+import mobileImg from "../../assets/cold-chains/mobile.webp";
 
 const ColdChainIllustration = ({ isMobile = false }) => {
   return (

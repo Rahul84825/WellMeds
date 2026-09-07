@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BUSINESS_INFO, getWhatsAppLink } from "../config/businessInfo";
-import wellmedsLogo from "../assets/Footer/wellmeds-lowercase-monochrome-black.png";
+import wellmedsLogo from "../assets/Footer/wellmeds-lowercase-monochrome-black.webp";
 import facebookIcon from "../assets/Footer/facebook.svg";
 import youtubeIcon from "../assets/Footer/youtube.svg";
 import instagramIcon from "../assets/Footer/instagram.svg";
 import linkedinIcon from "../assets/Footer/linkedin.svg";
-import masterCardsImg from "../assets/Footer/master_cards.png";
+import masterCardsImg from "../assets/Footer/master_cards.webp";
 import "./Footer.css";
 
 // Centralized Navigation Columns & Route Definitions

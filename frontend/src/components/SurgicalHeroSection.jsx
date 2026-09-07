@@ -2,27 +2,27 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Import surgical promotional banners
-import orthoBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_48_36 AM.png";
-import adultDiapersBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_48_41 AM.png";
-import hospitalBedBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_49_04 AM.png";
-import glucometerBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_49_09 AM.png";
-import fridoBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 12_10_00 PM.png";
+import orthoBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_48_36 AM.webp";
+import adultDiapersBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_48_41 AM.webp";
+import hospitalBedBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_49_04 AM.webp";
+import glucometerBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 11_49_09 AM.webp";
+import fridoBanner from "../assets/srugical/promo/ChatGPT Image Aug 10, 2026, 12_10_00 PM.webp";
 
 // Import surgical brand logos
-import romsonsLogo from "../assets/srugical/brands/brand-romsons.png";
+import romsonsLogo from "../assets/srugical/brands/brand-romsons.webp";
 import flamingoLogo from "../assets/srugical/brands/flamingo_health-Logo-02 (1).webp";
-import friendsLogo from "../assets/srugical/brands/friends.png";
-import threeMLogo from "../assets/srugical/brands/kisspng-3m-singapore-adhesive-tape-logo-brand-1713943911080.png";
-import omronLogo from "../assets/srugical/brands/omron-vector-logo-free-11574207108nfoalflthr.png";
-import beurerLogo from "../assets/srugical/brands/png-transparent-beurer-hd-logo.png";
-import fridoLogo from "../assets/srugical/brands/35201_Logo.jfif";
-import visscoLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_23_50 PM.png";
-import accuChekLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_28_52 PM.png";
-import tynorLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_31_40 PM.png";
-import rgbLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_37_14 PM.png";
-import drMorepenLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_43_20 PM.png";
-import medtechLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_46_05 PM.png";
-import accuSureLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 01_01_36 PM.png";
+import friendsLogo from "../assets/srugical/brands/friends.webp";
+import threeMLogo from "../assets/srugical/brands/kisspng-3m-singapore-adhesive-tape-logo-brand-1713943911080.webp";
+import omronLogo from "../assets/srugical/brands/omron-vector-logo-free-11574207108nfoalflthr.webp";
+import beurerLogo from "../assets/srugical/brands/png-transparent-beurer-hd-logo.webp";
+import fridoLogo from "../assets/srugical/brands/35201_Logo.webp";
+import visscoLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_23_50 PM.webp";
+import accuChekLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_28_52 PM.webp";
+import tynorLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_31_40 PM.webp";
+import rgbLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_37_14 PM.webp";
+import drMorepenLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_43_20 PM.webp";
+import medtechLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 12_46_05 PM.webp";
+import accuSureLogo from "../assets/srugical/brands/ChatGPT Image Aug 10, 2026, 01_01_36 PM.webp";
 
 const HERO_SLIDES = [
   {
@@ -173,6 +173,7 @@ const SurgicalHeroSection = ({ brands = SURGICAL_BRAND_LOGOS }) => {
                     alt={slide.alt}
                     className="w-full h-full object-contain sm:object-cover object-center select-none"
                     loading={index === 0 ? "eager" : "lazy"}
+                    fetchpriority={index === 0 ? "high" : "auto"}
                     decoding="async"
                     draggable={false}
                   />
