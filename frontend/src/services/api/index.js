@@ -18,6 +18,8 @@ import { articleService } from "./articleService";
 
 import apiInstance from "./api";
 
+import { compressImage } from "../../utils/image";
+
 // Public Contact Service
 const contactService = {
   async submitContactForm({ name, email, subject, message }) {
@@ -65,13 +67,10 @@ const adminService = {
     return data.user;
   },
   async uploadImage(file) {
+    const processedFile = await compressImage(file);
     const formData = new FormData();
-    formData.append("image", file);
-    const data = await apiInstance.post("/admin/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    });
+    formData.append("image", processedFile);
+    const data = await apiInstance.post("/admin/upload", formData);
     return data.url;
   },
 

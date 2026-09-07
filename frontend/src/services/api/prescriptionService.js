@@ -20,9 +20,7 @@ export const prescriptionService = {
       formData.append("cartSnapshot", JSON.stringify(cartSnapshot));
     }
 
-    const data = await apiInstance.post("/prescriptions/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const data = await apiInstance.post("/prescriptions/upload", formData);
     return data;
   },
 

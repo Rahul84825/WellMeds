@@ -161,13 +161,14 @@ app.options("*", cors(corsOptions));
 
 app.use(globalLimiter);
 app.use(express.json({
+  limit: "50mb",
   verify: (req, res, buf) => {
     if (req.originalUrl && req.originalUrl.includes("/webhook")) {
       req.rawBody = buf.toString();
     }
   }
 }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser(process.env.COOKIE_SECRET || "default_cookie_secret_wellmeds_123"));
 
 // Input Validation & Sanitization Middlewares (Runs after body parsers)

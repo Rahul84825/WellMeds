@@ -42,3 +42,92 @@ export const getCardImageUrl = (url, options = {}) => {
 
   return url;
 };
+
+/**
+ * Compresses an image client-side to ensure fast uploads and prevent payload size limits (e.g. 413 Payload Too Large).
+ * @param {File} file - Original File object from file input
+ * @param {Object} options - Configuration options { maxWidth, maxHeight, quality, maxSizeBytes }
+ * @returns {Promise<File>} Compressed File object (or original file if compression not applicable)
+ */
+export const compressImage = async (file, options = {}) => {
+  if (!file || !(file instanceof File)) return file;
+
+  // Only compress raster images (jpeg, png, webp)
+  const compressibleTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+  if (!compressibleTypes.includes(file.type)) {
+    return file;
+  }
+
+  const {
+    maxWidth = 1600,
+    maxHeight = 1600,
+    quality = 0.85
+  } = options;
+
+  // If file is already small (under 300KB), return as is
+  if (file.size < 300 * 1024) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+
+      img.onload = () => {
+        let { width, height } = img;
+
+        // Calculate new dimensions maintaining aspect ratio
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        // Draw image onto canvas
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to blob (preserve webp/jpeg/png format)
+        const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || (blob.size >= file.size && width === img.width)) {
+              resolve(file);
+              return;
+            }
+
+            const compressedFile = new File([blob], file.name, {
+              type: blob.type,
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          outputType,
+          quality
+        );
+      };
+
+      img.onerror = () => resolve(file);
+    };
+
+    reader.onerror = () => resolve(file);
+  });
+};
+

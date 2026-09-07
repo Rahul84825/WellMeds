@@ -22,6 +22,7 @@ const AdminSurgicalCategories = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   // Editor State
   const [editorOpen, setEditorOpen] = useState(false);
@@ -62,6 +63,7 @@ const AdminSurgicalCategories = () => {
     setEditingCategory(null);
     setName("");
     setImage("");
+    setUploadError(null);
     setEditorOpen(true);
   };
 
@@ -69,25 +71,45 @@ const AdminSurgicalCategories = () => {
     setEditingCategory(cat);
     setName(cat.name || "");
     setImage(cat.image || "");
+    setUploadError(null);
     setEditorOpen(true);
   };
 
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    setUploadError(null);
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      setUploadError("Invalid image format. Please select a JPG, PNG, or WEBP file.");
+      e.target.value = "";
+      return;
+    }
+
     if (file.size > MAX_FILE_SIZE) {
+      setUploadError(`Image size too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max size is ${MAX_FILE_SIZE_MB}MB.`);
+      e.target.value = "";
       return;
     }
 
     setUploadingImage(true);
     try {
       const secureUrl = await api.uploadImage(file);
-      setImage(secureUrl);
+      if (secureUrl) {
+        setImage(secureUrl);
+        setUploadError(null);
+      } else {
+        throw new Error("No image URL returned");
+      }
     } catch (err) {
       console.error("Upload failed", err);
+      const errMsg = err?.response?.data?.message || err?.message || "Upload failed. Please try again.";
+      setUploadError(errMsg);
     } finally {
       setUploadingImage(false);
+      e.target.value = "";
     }
   };
 
@@ -260,7 +282,10 @@ const AdminSurgicalCategories = () => {
                     <img src={image} className="w-full h-full object-cover" alt="" />
                     <button
                       type="button"
-                      onClick={() => setImage("")}
+                      onClick={() => {
+                        setImage("");
+                        setUploadError(null);
+                      }}
                       className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                     >
                       <Trash2 size={16} />
@@ -273,9 +298,9 @@ const AdminSurgicalCategories = () => {
 
               <div className="flex-grow flex flex-col gap-xs">
                 {uploadingImage ? (
-                  <div className="flex items-center gap-xs text-[10px] text-slate-400 animate-pulse font-bold">
-                    <RefreshCw size={12} className="animate-spin" />
-                    Uploading Image...
+                  <div className="flex items-center gap-xs text-[11px] text-teal-600 dark:text-teal-400 animate-pulse font-bold">
+                    <RefreshCw size={13} className="animate-spin" />
+                    Optimizing & Uploading Image...
                   </div>
                 ) : (
                   <>
@@ -288,11 +313,16 @@ const AdminSurgicalCategories = () => {
                         className="hidden"
                       />
                     </label>
-                    <p className="text-[9px] text-slate-400">PNG, JPG, WEBP. Max 10MB.</p>
+                    <p className="text-[9px] text-slate-400">PNG, JPG, WEBP. Max 10MB (Auto-compressed).</p>
                   </>
                 )}
               </div>
             </div>
+            {uploadError && (
+              <div className="p-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-[10px] font-medium mt-1">
+                {uploadError}
+              </div>
+            )}
           </div>
 
           {/* Form Actions */}
