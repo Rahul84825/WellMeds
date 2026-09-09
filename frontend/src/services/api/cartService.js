@@ -6,6 +6,11 @@ export const cartService = {
     return data.items || [];
   },
 
+  async getFullCart() {
+    const data = await apiInstance.get("/cart");
+    return data;
+  },
+
   async addToCart(productId, quantity, variantData = {}) {
     const payload = {
       productId,

@@ -4,6 +4,7 @@ import {
   renderWelcomeEmail,
   renderPrescriptionReceivedCustomer,
   renderPrescriptionReceivedAdmin,
+  renderPrescriptionCartReady,
   renderPrescriptionApproved,
   renderPrescriptionRejected,
   renderOrderConfirmation,
@@ -61,17 +62,23 @@ export const sendPrescriptionReceivedAdmin = (customerName, rxId, rxFileName) =>
   safeDispatch({ to: adminEmail, subject: `[Admin Alert] New Rx Upload: ${rxId}`, html });
 };
 
-// ─── 4. Prescription Review (Approved / Rejected) ────────────────────────────
+// ─── 4. Prescription Review (Cart Ready / Approved / Rejected) ───────────────
+export const sendPrescriptionCartReady = (email, customerName, rxId, prescribedItems, adminNotes) => {
+  if (!email) return;
+  const html = renderPrescriptionCartReady({ customerName, rxId, prescribedItems, adminNotes });
+  safeDispatch({ to: email, subject: "Your WellMeds prescription order is ready", html });
+};
+
 export const sendPrescriptionApproved = (email, customerName, rxId, prescribedItems, adminNotes) => {
   if (!email) return;
   const html = renderPrescriptionApproved({ customerName, rxId, prescribedItems, adminNotes });
-  safeDispatch({ to: email, subject: `Prescription Approved — ${rxId}`, html });
+  safeDispatch({ to: email, subject: "Prescription Verified — Complete Your WellMeds Order", html });
 };
 
-export const sendPrescriptionRejected = (email, customerName, rxId, adminNotes) => {
+export const sendPrescriptionRejected = (email, customerName, rxId, adminNotes, source = "CHECKOUT_UPLOAD") => {
   if (!email) return;
-  const html = renderPrescriptionRejected({ customerName, rxId, adminNotes });
-  safeDispatch({ to: email, subject: `Prescription Requires Attention — ${rxId}`, html });
+  const html = renderPrescriptionRejected({ customerName, rxId, adminNotes, source });
+  safeDispatch({ to: email, subject: "Prescription Verification Update", html });
 };
 
 // Legacy wrapper for backwards compatibility

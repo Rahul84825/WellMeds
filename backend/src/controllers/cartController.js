@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Cart } from "../models/Cart.js";
 import { Product } from "../models/Product.js";
 
@@ -26,6 +27,11 @@ const isSnapshotMatchingCart = (snapshot, cartItems) => {
 // Helper to clean/validate prescription link in cart
 const cleanCartPrescription = async (cart) => {
   if (!cart) return;
+
+  // If cart is locked or prepared by pharmacy (DIRECT_UPLOAD / locked), do not auto-clean
+  if (cart.isLocked || cart.cartSource === "DIRECT_UPLOAD") {
+    return;
+  }
   
   // Check if cart contains RX items
   const hasRx = cart.items.some(
@@ -69,7 +75,6 @@ const cleanCartPrescription = async (cart) => {
   }
 };
 
-
 export const getCart = async (req, res, next) => {
   try {
     let cart = await Cart.findOne({ user: req.user._id })
@@ -93,6 +98,9 @@ export const getCart = async (req, res, next) => {
     res.status(200).json({ 
       success: true, 
       items: cart.items,
+      isLocked: !!cart.isLocked,
+      cartSource: cart.cartSource || "NORMAL",
+      lockReason: cart.lockReason || "",
       prescriptionStatus: cart.prescriptionStatus,
       prescription: cart.prescription
     });
@@ -102,19 +110,37 @@ export const getCart = async (req, res, next) => {
 };
 
 export const addToCart = async (req, res, next) => {
-  const { productId, quantity, variantName, variantId, price } = req.body;
+  const { productId, quantity, variantName, variantId } = req.body;
 
   try {
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: "Invalid product identifier" });
+    }
+
+    let cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+    if (!cart) {
+      cart = await Cart.create({ user: req.user._id, items: [] });
+    }
+
+    // Strict Lock Guard
+    if (cart.isLocked) {
+      return res.status(409).json({
+        success: false,
+        code: "CART_LOCKED",
+        message: cart.lockReason || "This cart is locked and items cannot be modified.",
+      });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    const requestedQuantity = quantity || 1;
+    const requestedQuantity = Math.max(1, parseInt(quantity) || 1);
     const targetVariant = variantName ? String(variantName).trim() : "";
     const targetVariantId = variantId ? String(variantId).trim() : "";
 
-    // Determine variant stock & price
+    // Authoritative pricing & stock determination from Product model
     let effectiveStock = product.stock;
     let effectivePrice = product.price;
 
@@ -124,7 +150,7 @@ export const addToCart = async (req, res, next) => {
       );
       if (foundVariant) {
         effectiveStock = foundVariant.stock !== undefined ? foundVariant.stock : product.stock;
-        effectivePrice = foundVariant.sellingPrice !== undefined ? foundVariant.sellingPrice : foundVariant.price;
+        effectivePrice = foundVariant.sellingPrice !== undefined ? foundVariant.sellingPrice : (foundVariant.price !== undefined ? foundVariant.price : product.price);
       }
     }
 
@@ -133,11 +159,6 @@ export const addToCart = async (req, res, next) => {
         success: false, 
         message: `Insufficient stock. Only ${effectiveStock} item(s) available.` 
       });
-    }
-
-    let cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
-    if (!cart) {
-      cart = await Cart.create({ user: req.user._id, items: [] });
     }
 
     const itemIndex = cart.items.findIndex((item) => {
@@ -156,10 +177,10 @@ export const addToCart = async (req, res, next) => {
         });
       }
       cart.items[itemIndex].quantity = newQuantity;
+      cart.items[itemIndex].price = effectivePrice;
       if (targetVariant) {
         cart.items[itemIndex].variantName = targetVariant;
         cart.items[itemIndex].variantId = targetVariantId;
-        cart.items[itemIndex].price = effectivePrice;
       }
     } else {
       cart.items.push({
@@ -184,6 +205,9 @@ export const addToCart = async (req, res, next) => {
     res.status(200).json({ 
       success: true, 
       items: updatedCart ? updatedCart.items : [],
+      isLocked: !!(updatedCart && updatedCart.isLocked),
+      cartSource: (updatedCart && updatedCart.cartSource) || "NORMAL",
+      lockReason: (updatedCart && updatedCart.lockReason) || "",
       prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
       prescription: updatedCart ? updatedCart.prescription : null
     });
@@ -196,9 +220,8 @@ export const updateQuantity = async (req, res, next) => {
   const { productId, quantity, variantName, variantId } = req.body;
 
   try {
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: "Invalid product identifier" });
     }
 
     let cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
@@ -206,7 +229,21 @@ export const updateQuantity = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Cart not found" });
     }
 
+    if (cart.isLocked) {
+      return res.status(409).json({
+        success: false,
+        code: "CART_LOCKED",
+        message: cart.lockReason || "This prescription cart is locked and cannot be modified.",
+      });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
     const targetVariant = variantName ? String(variantName).trim().toLowerCase() : "";
+    const parsedQty = parseInt(quantity);
 
     const itemIndex = cart.items.findIndex((item) => {
       if (!item || !item.product) return false;
@@ -219,21 +256,27 @@ export const updateQuantity = async (req, res, next) => {
     });
 
     if (itemIndex > -1) {
-      if (quantity <= 0) {
+      if (isNaN(parsedQty) || parsedQty <= 0) {
         cart.items.splice(itemIndex, 1);
       } else {
         let maxStock = product.stock;
+        let effectivePrice = product.price;
+
         if (targetVariant && Array.isArray(product.variants)) {
           const found = product.variants.find((v) => v.name?.toLowerCase() === targetVariant);
-          if (found && found.stock !== undefined) maxStock = found.stock;
+          if (found) {
+            if (found.stock !== undefined) maxStock = found.stock;
+            effectivePrice = found.sellingPrice !== undefined ? found.sellingPrice : (found.price !== undefined ? found.price : product.price);
+          }
         }
-        if (quantity > maxStock) {
+        if (parsedQty > maxStock) {
           return res.status(400).json({ 
             success: false, 
-            message: `Cannot set quantity to ${quantity}. Only ${maxStock} item(s) available.` 
+            message: `Cannot set quantity to ${parsedQty}. Only ${maxStock} item(s) available.` 
           });
         }
-        cart.items[itemIndex].quantity = quantity;
+        cart.items[itemIndex].quantity = parsedQty;
+        cart.items[itemIndex].price = effectivePrice;
       }
     }
 
@@ -248,6 +291,9 @@ export const updateQuantity = async (req, res, next) => {
     res.status(200).json({ 
       success: true, 
       items: updatedCart ? updatedCart.items : [],
+      isLocked: !!(updatedCart && updatedCart.isLocked),
+      cartSource: (updatedCart && updatedCart.cartSource) || "NORMAL",
+      lockReason: (updatedCart && updatedCart.lockReason) || "",
       prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
       prescription: updatedCart ? updatedCart.prescription : null
     });
@@ -261,8 +307,20 @@ export const removeFromCart = async (req, res, next) => {
   const variantName = req.query.variantName ? String(req.query.variantName).trim().toLowerCase() : "";
 
   try {
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: "Invalid product identifier" });
+    }
+
     const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
     if (cart) {
+      if (cart.isLocked) {
+        return res.status(409).json({
+          success: false,
+          code: "CART_LOCKED",
+          message: cart.lockReason || "This prescription cart is locked and cannot be modified.",
+        });
+      }
+
       cart.items = cart.items.filter((item) => {
         if (!item || !item.product) return false;
         const pId = item.product._id ? item.product._id.toString() : item.product.toString();
@@ -283,6 +341,9 @@ export const removeFromCart = async (req, res, next) => {
     res.status(200).json({ 
       success: true, 
       items: updatedCart ? updatedCart.items : [],
+      isLocked: !!(updatedCart && updatedCart.isLocked),
+      cartSource: (updatedCart && updatedCart.cartSource) || "NORMAL",
+      lockReason: (updatedCart && updatedCart.lockReason) || "",
       prescriptionStatus: updatedCart ? updatedCart.prescriptionStatus : "Pending",
       prescription: updatedCart ? updatedCart.prescription : null
     });
@@ -295,12 +356,22 @@ export const clearCart = async (req, res, next) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id });
     if (cart) {
+      if (cart.isLocked) {
+        return res.status(409).json({
+          success: false,
+          code: "CART_LOCKED",
+          message: cart.lockReason || "This prescription cart is locked and cannot be modified.",
+        });
+      }
+
       cart.items = [];
       cart.prescription = null;
       cart.prescriptionStatus = "Pending";
+      cart.isLocked = false;
+      cart.cartSource = "NORMAL";
       await cart.save();
     }
-    res.status(200).json({ success: true, items: [], prescriptionStatus: "Pending", prescription: null });
+    res.status(200).json({ success: true, items: [], isLocked: false, cartSource: "NORMAL", prescriptionStatus: "Pending", prescription: null });
   } catch (error) {
     next(error);
   }

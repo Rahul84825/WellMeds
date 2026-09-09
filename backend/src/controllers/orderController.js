@@ -572,6 +572,11 @@ export const placeOrder = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Draft order record not found." });
     }
 
+    // IDOR Authorization Guard: Authenticated customer must own this draft order
+    if (req.user && existingOrder.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Forbidden: You do not have permission to access this order." });
+    }
+
     if (existingOrder.paymentStatus === "Paid") {
       return res.status(200).json({ success: true, order: existingOrder });
     }
@@ -769,7 +774,9 @@ export const getOrderStatus = async (req, res, next) => {
   const { razorpayOrderId } = req.params;
 
   try {
-    const order = await Order.findOne({ razorpayOrderId }).populate("user", "name email");
+    const isUserAdmin = req.user && req.user.role === "admin";
+    const query = isUserAdmin ? { razorpayOrderId } : { razorpayOrderId, user: req.user._id };
+    const order = await Order.findOne(query).populate("user", "name email");
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }

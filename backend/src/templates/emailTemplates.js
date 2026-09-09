@@ -248,7 +248,51 @@ export const renderPrescriptionReceivedAdmin = ({ customerName, rxId, rxFileName
   return wrapBaseTemplate({ title: `[Admin Alert] New Rx Upload: ${rxId}`, bodyContent });
 };
 
-// ─── 5. Prescription Approved (Customer) ─────────────────────────────────────
+// ─── 5. Prescription Cart Prepared (Direct RX Customer) ───────────────────────
+export const renderPrescriptionCartReady = ({ customerName, rxId, prescribedItems = [], adminNotes = "" }) => {
+  let itemsHtml = "";
+  if (prescribedItems && prescribedItems.length > 0) {
+    itemsHtml = `
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Medicine</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${prescribedItems.map(item => `
+            <tr>
+              <td><strong>${item.name || item.product?.name || "Medicine"}</strong></td>
+              <td style="text-align:center;">${item.quantity || 1}</td>
+              <td style="text-align:right;">₹${item.price || 0}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  const bodyContent = `
+    <h1 class="h1" style="color:#038076;">Your WellMeds Prescription Order is Ready 🛒</h1>
+    <p class="text">Dear ${customerName},</p>
+    <p class="text">Your prescription has been reviewed by our pharmacy team and your medicines have been prepared in your cart.</p>
+
+    ${adminNotes ? `<div class="highlight-box"><p style="margin:0; font-weight:600; color:#038076;">Pharmacist Notes:</p><p style="margin:4px 0 0 0; font-size:14px;">${adminNotes}</p></div>` : ""}
+
+    ${itemsHtml}
+
+    <p class="text">Please open your prepared cart to select your delivery address and complete checkout.</p>
+
+    <div style="text-align: center;">
+      <a href="https://wellmeds.in/cart" class="btn">View Prepared Cart</a>
+    </div>
+  `;
+  return wrapBaseTemplate({ title: "Your WellMeds prescription order is ready", bodyContent });
+};
+
+// ─── 6. Prescription Approved (Checkout RX Customer) ─────────────────────────
 export const renderPrescriptionApproved = ({ customerName, rxId, prescribedItems, adminNotes }) => {
   let itemsHtml = "";
   if (prescribedItems && prescribedItems.length > 0) {
@@ -265,8 +309,8 @@ export const renderPrescriptionApproved = ({ customerName, rxId, prescribedItems
           ${prescribedItems.map(item => `
             <tr>
               <td><strong>${item.name || item.product?.name || "Medicine"}</strong></td>
-              <td>${item.quantity || 1}</td>
-              <td>₹${item.price || 0}</td>
+              <td style="text-align:center;">${item.quantity || 1}</td>
+              <td style="text-align:right;">₹${item.price || 0}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -275,42 +319,41 @@ export const renderPrescriptionApproved = ({ customerName, rxId, prescribedItems
   }
 
   const bodyContent = `
-    <h1 class="h1" style="color:#15803d;">Prescription Verification Approved ✅</h1>
+    <h1 class="h1" style="color:#15803d;">Prescription Verified — Complete Your WellMeds Order ✅</h1>
     <p class="text">Dear ${customerName},</p>
-    <p class="text">Great news! Your prescription (ID: <strong>${rxId}</strong>) has been verified and approved by our licensed pharmacist.</p>
+    <p class="text">Your prescription has been verified. Your cart is ready. Please add/select your delivery address and complete checkout.</p>
 
     ${adminNotes ? `<div class="highlight-box"><p style="margin:0; font-weight:600; color:#038076;">Pharmacist Notes:</p><p style="margin:4px 0 0 0; font-size:14px;">${adminNotes}</p></div>` : ""}
 
     ${itemsHtml}
 
-    <p class="text">Your approved items are ready in your cart. Proceed to checkout to place your order.</p>
-
     <div style="text-align: center;">
-      <a href="https://wellmeds.in/cart" class="btn">Complete Checkout Now</a>
+      <a href="https://wellmeds.in/checkout" class="btn">Proceed to Checkout</a>
     </div>
   `;
-  return wrapBaseTemplate({ title: `Prescription Approved — ${rxId}`, bodyContent });
+  return wrapBaseTemplate({ title: "Prescription Verified — Complete Your WellMeds Order", bodyContent });
 };
 
-// ─── 6. Prescription Rejected (Customer) ─────────────────────────────────────
-export const renderPrescriptionRejected = ({ customerName, rxId, adminNotes }) => {
+// ─── 7. Prescription Rejected (Checkout & Direct RX Customer) ────────────────
+export const renderPrescriptionRejected = ({ customerName, rxId, adminNotes, source = "CHECKOUT_UPLOAD" }) => {
+  const isCheckout = source === "CHECKOUT_UPLOAD";
   const bodyContent = `
-    <h1 class="h1" style="color:#b91c1c;">Prescription Verification Notice ⚠️</h1>
+    <h1 class="h1" style="color:#b91c1c;">Prescription Verification Update ⚠️</h1>
     <p class="text">Dear ${customerName},</p>
-    <p class="text">Our pharmacists reviewed your uploaded prescription (ID: <strong>${rxId}</strong>) but require further clarification before approving the order.</p>
+    <p class="text">Our pharmacists reviewed your uploaded prescription (Ref ID: <strong>${rxId}</strong>). Unfortunately, it could not be verified.</p>
 
     <div class="highlight-box" style="background-color:#fff1f2; border-left-color:#f43f5e;">
-      <p style="margin:0; font-weight:600; color:#9f1239;">Reason / Pharmacist Notes:</p>
-      <p style="margin:6px 0 0 0; font-size:14px; color:#475569;">${adminNotes || "The prescription document uploaded was unclear, expired, or missing doctor credentials."}</p>
+      <p style="margin:0; font-weight:600; color:#9f1239;">Pharmacist Remarks:</p>
+      <p style="margin:6px 0 0 0; font-size:14px; color:#475569;">${adminNotes || "The prescription document uploaded was unclear, expired, or did not match the requested medicines."}</p>
     </div>
 
-    <p class="text">Please re-upload a clear prescription sheet with valid doctor stamp and signature.</p>
+    ${isCheckout ? `<p class="text">Your associated locked cart has been cleared. You can start a new cart or submit a new prescription through our Upload Prescription page.</p>` : `<p class="text">You can upload a clear prescription document anytime through our Upload Prescription page.</p>`}
 
     <div style="text-align: center;">
-      <a href="https://wellmeds.in/upload-prescription" class="btn" style="background-color:#e11d48;">Re-upload Prescription</a>
+      <a href="https://wellmeds.in/upload-prescription" class="btn" style="background-color:#e11d48;">Upload New Prescription</a>
     </div>
   `;
-  return wrapBaseTemplate({ title: `Prescription Requires Attention — ${rxId}`, bodyContent });
+  return wrapBaseTemplate({ title: "Prescription Verification Update", bodyContent });
 };
 
 // ─── 7. Order Confirmation Template ─────────────────────────────────────────

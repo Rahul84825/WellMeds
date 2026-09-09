@@ -36,6 +36,7 @@ export const CartProvider = ({ children }) => {
 
   // Cart Lock & Session states
   const [isCartLocked, setIsCartLocked] = useState(false);
+  const [cartSource, setCartSource] = useState("NORMAL"); // NORMAL | DIRECT_UPLOAD | CHECKOUT_UPLOAD
   const [checkoutSessionStatus, setCheckoutSessionStatus] = useState("ACTIVE"); // ACTIVE | LOCKED | PENDING_VERIFICATION | VERIFIED | PAYMENT_PENDING | PAYMENT_SUCCESS | EXPIRED | CANCELLED
   const [lockReason, setLockReason] = useState("");
 
@@ -53,17 +54,27 @@ export const CartProvider = ({ children }) => {
   const refreshCartLockStatus = useCallback(async () => {
     if (!hasToken()) {
       setIsCartLocked(false);
+      setCartSource("NORMAL");
       setCheckoutSessionStatus("ACTIVE");
       setLockReason("");
       return;
     }
 
     try {
+      // 1. Check Cart model lock & source
+      const cartData = await cartService.getFullCart();
+      if (cartData && cartData.success) {
+        setIsCartLocked(!!cartData.isLocked);
+        setCartSource(cartData.cartSource || "NORMAL");
+        if (cartData.lockReason) setLockReason(cartData.lockReason);
+      }
+
+      // 2. Check active CheckoutSession
       const res = await checkoutSessionService.getSessionStatus();
       if (res && res.success) {
-        setIsCartLocked(!!res.isLocked);
+        if (res.isLocked) setIsCartLocked(true);
         setCheckoutSessionStatus(res.status || "ACTIVE");
-        setLockReason(res.session?.lockReason || "");
+        if (res.session?.lockReason) setLockReason(res.session.lockReason);
       }
     } catch (err) {
       console.warn("Failed to fetch checkout session status:", err.message);
@@ -75,6 +86,7 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
     setPackagingType("regular");
     setIsCartLocked(false);
+    setCartSource("NORMAL");
     setCheckoutSessionStatus("ACTIVE");
     setLockReason("");
     setPendingRxFile(null);
@@ -94,11 +106,13 @@ export const CartProvider = ({ children }) => {
       }
       if (e.key === "wellmeds_cart_lock_sync") {
         refreshCartLockStatus();
+        syncCartForUser();
       }
     };
 
     const handleFocus = () => {
       refreshCartLockStatus();
+      syncCartForUser();
     };
 
     window.addEventListener("storage", handleStorageChange);
@@ -417,6 +431,9 @@ export const CartProvider = ({ children }) => {
     setPendingRxFile(null);
     localStorage.removeItem("medishop_cart");
     localStorage.removeItem("medishop_guest_cart");
+    localStorage.removeItem("wellmeds_active_rx_cache");
+    localStorage.removeItem("wellmeds_active_rx_id");
+    localStorage.setItem("wellmeds_rx_reset_timestamp", Date.now().toString());
     localStorage.setItem("wellmeds_cart_cleared", Date.now().toString());
     broadcastLockSync();
   }, []);
@@ -428,8 +445,16 @@ export const CartProvider = ({ children }) => {
       const res = await checkoutSessionService.modifyCart();
       if (res && res.success) {
         setIsCartLocked(false);
+        setCartSource("NORMAL");
         setCheckoutSessionStatus("CANCELLED");
         setLockReason("");
+        if (res.items) {
+          setCartItems(normalizeBackendItems(res.items));
+        }
+        // Immediately reset active prescription cache so upload page goes back to normal
+        localStorage.removeItem("wellmeds_active_rx_cache");
+        localStorage.removeItem("wellmeds_active_rx_id");
+        localStorage.setItem("wellmeds_rx_reset_timestamp", Date.now().toString());
         broadcastLockSync();
         await syncCartForUser();
       }
@@ -485,6 +510,7 @@ export const CartProvider = ({ children }) => {
         requiresRx,
         isSyncing,
         isCartLocked,
+        cartSource,
         checkoutSessionStatus,
         lockReason,
         modifyCart,
@@ -496,6 +522,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         resetCartPostOrder,
         syncCartForUser,
+        fetchCart: syncCartForUser,
         saveCartToLocalOnLogout,
         pendingRxFile,
         setPendingRxFile,

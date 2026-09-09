@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { api } from "../services/api";
 
-const PrescriptionUpload = ({ onUploadSuccess, onClose, cartSnapshot }) => {
+const PrescriptionUpload = ({ onUploadSuccess, onClose, cartSnapshot, source = "DIRECT_UPLOAD" }) => {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -86,9 +86,19 @@ const PrescriptionUpload = ({ onUploadSuccess, onClose, cartSnapshot }) => {
     }, 150);
 
     try {
-      const data = await api.uploadPrescription(file, cartSnapshot);
+      const uploadSource = cartSnapshot ? "CHECKOUT_UPLOAD" : (source || "DIRECT_UPLOAD");
+      const data = await api.uploadPrescription(file, "", cartSnapshot, uploadSource);
       clearInterval(progressInterval);
       setUploadProgress(100);
+
+      const rxDoc = data.prescription || data;
+      const rxId = rxDoc?._id || rxDoc?.id;
+      if (rxId) {
+        localStorage.setItem("wellmeds_active_rx_id", rxId);
+        try {
+          localStorage.setItem("wellmeds_active_rx_cache", JSON.stringify(rxDoc));
+        } catch (e) {}
+      }
 
       setTimeout(() => {
         setIsUploading(false);

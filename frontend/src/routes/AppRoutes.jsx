@@ -277,6 +277,7 @@ const AppRoutes = () => {
             element={<Navigate to="/profile?tab=orders" replace />}
           />
           <Route path="upload-prescription" element={<UploadPrescriptionPage />} />
+          <Route path="upload" element={<Navigate to="/upload-prescription" replace />} />
           <Route
             path="prescriptions/:id"
             element={

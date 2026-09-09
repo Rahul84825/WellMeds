@@ -95,6 +95,16 @@ const prescriptionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: null,
     },
+    source: {
+      type: String,
+      enum: ["DIRECT_UPLOAD", "CHECKOUT_UPLOAD"],
+      default: "DIRECT_UPLOAD",
+    },
+    cart: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+      default: null,
+    },
   },
   {
     timestamps: true,

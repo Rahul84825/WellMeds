@@ -3,8 +3,12 @@ import apiInstance from "./api";
 export const prescriptionService = {
   /**
    * Upload a new prescription file (supports single File or array of Files).
+   * @param {File|File[]} files
+   * @param {string} patientNotes
+   * @param {object|null} cartSnapshot
+   * @param {string} source "DIRECT_UPLOAD" | "CHECKOUT_UPLOAD"
    */
-  async uploadPrescription(files, patientNotes = "", cartSnapshot = null) {
+  async uploadPrescription(files, patientNotes = "", cartSnapshot = null, source = "DIRECT_UPLOAD") {
     const formData = new FormData();
     const fileList = Array.isArray(files) ? files : [files];
     
@@ -18,6 +22,10 @@ export const prescriptionService = {
 
     if (cartSnapshot) {
       formData.append("cartSnapshot", JSON.stringify(cartSnapshot));
+    }
+
+    if (source) {
+      formData.append("source", source);
     }
 
     const data = await apiInstance.post("/prescriptions/upload", formData);
@@ -67,11 +75,19 @@ export const prescriptionService = {
   // ── Admin ────────────────────────────────────────────
 
   /**
-   * Get all prescriptions (admin). Optional filters: status, search.
+   * Get all prescriptions (admin). Optional filters: status, search, source.
    */
   async getAllPrescriptions(params = {}) {
     const data = await apiInstance.get("/prescriptions/all", { params });
     return data.prescriptions || [];
+  },
+
+  /**
+   * Create a locked prescription cart for Direct Upload RX (admin pharmacist Workflow A).
+   */
+  async createCartForPrescription(id, payload = {}) {
+    const data = await apiInstance.post(`/prescriptions/${id}/create-cart`, payload);
+    return data;
   },
 
   /**

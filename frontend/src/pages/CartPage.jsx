@@ -68,12 +68,15 @@ const Cart = () => {
     packagingOption,
     hasColdChain,
     isCartLocked,
+    cartSource,
     checkoutSessionStatus,
     lockReason,
     modifyCart,
     updateQuantity,
     removeFromCart,
-    clearCart
+    clearCart,
+    syncCartForUser,
+    refreshCartLockStatus
   } = useCart();
 
   const { user, openLoginModal } = useAuth();
@@ -85,6 +88,12 @@ const Cart = () => {
   const [showModifyConfirmModal, setShowModifyConfirmModal] = useState(false);
   const [showDeliveryTooltip, setShowDeliveryTooltip] = useState(false);
   const [showPackagingTooltip, setShowPackagingTooltip] = useState(false);
+
+  // Sync latest cart data on mount
+  useEffect(() => {
+    syncCartForUser();
+    refreshCartLockStatus();
+  }, [syncCartForUser, refreshCartLockStatus]);
 
   // Auto-apply coupon from query parameter
   useEffect(() => {
@@ -178,34 +187,62 @@ const Cart = () => {
 
       {/* Cart Locked Alert Banner */}
       {isCartLocked && (
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-[24px] p-6 text-amber-900 dark:text-amber-200 shadow-sm space-y-4 mb-8 animate-[fade-in_0.3s_ease-out]">
+        <div className={`border rounded-[24px] p-6 shadow-sm space-y-4 mb-8 animate-[fade-in_0.3s_ease-out] ${
+          cartSource === "DIRECT_UPLOAD"
+            ? "bg-teal-50/70 dark:bg-teal-950/20 border-teal-200 dark:border-teal-900/50 text-teal-900 dark:text-teal-200"
+            : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200"
+        }`}>
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+              cartSource === "DIRECT_UPLOAD"
+                ? "bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300"
+                : "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
+            }`}>
               <Lock size={22} />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <span className="font-bold text-base">Prescription Verification Pending</span>
-                <span className="bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-300">
-                  CART LOCKED
+                <span className="font-bold text-base">
+                  {cartSource === "DIRECT_UPLOAD"
+                    ? "Prescription Order Prepared by Pharmacist"
+                    : "Prescription Verification Pending"}
+                </span>
+                <span className={`font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  cartSource === "DIRECT_UPLOAD"
+                    ? "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300 border-teal-300"
+                    : "bg-amber-200/80 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border-amber-300"
+                }`}>
+                  {cartSource === "DIRECT_UPLOAD" ? "PRESCRIPTION ORDER READY" : "CART LOCKED"}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm leading-relaxed text-amber-800/90 dark:text-amber-300/90">
-                Your prescription is currently under pharmacist verification. Your cart has been temporarily locked to ensure the medicines being verified remain unchanged. You will be able to continue after verification.
+              <p className="text-xs sm:text-sm leading-relaxed opacity-90">
+                {cartSource === "DIRECT_UPLOAD"
+                  ? "Our licensed pharmacist has prepared these medicines in your cart based on your prescription. The medicines and quantities are locked as prescribed. Review your items below and proceed to checkout to complete your order."
+                  : "Your prescription is currently under pharmacist verification. Your cart has been temporarily locked to ensure the medicines being verified remain unchanged. You will be able to complete payment once approved."}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-amber-200/70 dark:border-amber-900/40">
-            <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-              Need to change medicines, quantities, or coupons?
+          <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t ${
+            cartSource === "DIRECT_UPLOAD"
+              ? "border-teal-200/70 dark:border-teal-900/40"
+              : "border-amber-200/70 dark:border-amber-900/40"
+          }`}>
+            <span className="text-xs font-semibold">
+              {cartSource === "DIRECT_UPLOAD"
+                ? "Want to cancel this prepared order?"
+                : "Need to change medicines, quantities, or coupons?"}
             </span>
             <button
               type="button"
               onClick={() => setShowModifyConfirmModal(true)}
-              className="bg-amber-700 hover:bg-amber-800 text-white px-5 py-2 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+              className={`text-white px-5 py-2 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0 ${
+                cartSource === "DIRECT_UPLOAD"
+                  ? "bg-[#136258] hover:bg-[#0e4e46]"
+                  : "bg-amber-700 hover:bg-amber-800"
+              }`}
             >
-              Modify Cart
+              {cartSource === "DIRECT_UPLOAD" ? "Clear & Unlock Cart" : "Modify Cart"}
             </button>
           </div>
         </div>

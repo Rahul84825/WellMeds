@@ -5,6 +5,7 @@ import { useCart } from "../hooks/useCart";
 import { api } from "../services/api";
 import SEO from "../components/common/SEO";
 import Modal from "../components/Modal";
+import { formatCurrency } from "../utils/currency";
 import {
   UploadCloud,
   FileText,
@@ -25,14 +26,59 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+// Maximum time (24 hours) for a prescription to be considered active on the upload page
+const RX_ACTIVE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+export const isRxWithin24Hours = (rx) => {
+  if (!rx) return false;
+  const timestamp = rx.createdAt ? new Date(rx.createdAt).getTime() : 0;
+  if (!timestamp || isNaN(timestamp)) return false;
+
+  // Must be within 24 hours
+  if (Date.now() - timestamp > RX_ACTIVE_MAX_AGE_MS) return false;
+
+  // If user modified cart or cancelled prescription verification, invalidate any older Rx
+  try {
+    const resetTsStr = localStorage.getItem("wellmeds_rx_reset_timestamp");
+    if (resetTsStr) {
+      const resetTs = parseInt(resetTsStr, 10);
+      if (!isNaN(resetTs) && timestamp <= resetTs) {
+        return false;
+      }
+    }
+  } catch (e) {}
+
+  return true;
+};
+
+const getInitialCachedRx = () => {
+  try {
+    const raw = localStorage.getItem("wellmeds_active_rx_cache");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && isRxWithin24Hours(parsed)) {
+      return parsed;
+    } else {
+      localStorage.removeItem("wellmeds_active_rx_cache");
+      localStorage.removeItem("wellmeds_active_rx_id");
+      return null;
+    }
+  } catch {
+    return null;
+  }
+};
+
 const UploadPrescriptionPage = () => {
   const { user, openLoginModal } = useAuth();
-  const { pendingRxFile, setPendingRxFile } = useCart();
+  const { pendingRxFile, setPendingRxFile, syncCartForUser, refreshCartLockStatus } = useCart();
   const navigate = useNavigate();
 
   // Hidden File Inputs Refs
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+
+  // Synchronously initialize from 24h cache so the page loads instantly without flickering or lag
+  const initialCachedRx = getInitialCachedRx();
 
   // Upload States
   const [selectedFile, setSelectedFile] = useState(null);
@@ -40,8 +86,11 @@ const UploadPrescriptionPage = () => {
   const [uploading, setUploading] = useState(false);
   const [patientNotes, setPatientNotes] = useState("");
   const [showNotesInput, setShowNotesInput] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [latestUploadedRx, setLatestUploadedRx] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(Boolean(initialCachedRx));
+  const [latestUploadedRx, setLatestUploadedRx] = useState(initialCachedRx);
+  const [isUploadingNew, setIsUploadingNew] = useState(false);
+  const [refreshingStatus, setRefreshingStatus] = useState(false);
+  const [copiedRxId, setCopiedRxId] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const toastTimeoutRef = useRef(null);
@@ -60,6 +109,20 @@ const UploadPrescriptionPage = () => {
     };
   }, []);
 
+  // Listen for cart modifications / unlocks from other tabs or pages
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "wellmeds_rx_reset_timestamp" || e.key === "wellmeds_active_rx_cache") {
+        const freshCache = getInitialCachedRx();
+        if (!freshCache) {
+          syncActiveRx(null);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   // Saved Prescriptions States
   const [savedPrescriptions, setSavedPrescriptions] = useState([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -74,14 +137,69 @@ const UploadPrescriptionPage = () => {
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewRx, setPreviewRx] = useState(null);
 
+  // Helper to synchronize active prescription state and localStorage cache
+  const syncActiveRx = (rx) => {
+    if (rx && isRxWithin24Hours(rx)) {
+      setLatestUploadedRx(rx);
+      try {
+        localStorage.setItem("wellmeds_active_rx_cache", JSON.stringify(rx));
+        localStorage.setItem("wellmeds_active_rx_id", rx._id || rx.id);
+      } catch (e) {}
+      return true;
+    } else {
+      setLatestUploadedRx(null);
+      setUploadSuccess(false);
+      try {
+        localStorage.removeItem("wellmeds_active_rx_cache");
+        localStorage.removeItem("wellmeds_active_rx_id");
+      } catch (e) {}
+      return false;
+    }
+  };
+
   // Load saved prescriptions if user is logged in
   useEffect(() => {
     if (user) {
       fetchSavedPrescriptions();
     } else {
       setSavedPrescriptions([]);
+      syncActiveRx(null);
     }
   }, [user]);
+
+  // Periodic polling for active pending prescription status updates
+  useEffect(() => {
+    if (!user) return;
+    if (!latestUploadedRx || !isRxWithin24Hours(latestUploadedRx)) return;
+
+    const isPending =
+      latestUploadedRx.status === "Pending Review" ||
+      latestUploadedRx.status === "Under Verification";
+    if (!isPending) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const list = await api.getMyPrescriptions();
+        if (list && list.length > 0) {
+          setSavedPrescriptions(list);
+          const latestRx = list[0];
+          if (isRxWithin24Hours(latestRx)) {
+            syncActiveRx(latestRx);
+            if (latestRx.status === "Approved") {
+              syncCartForUser();
+              refreshCartLockStatus();
+            }
+          } else {
+            syncActiveRx(null);
+          }
+        }
+      } catch (e) {
+        // silent polling error
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [user, latestUploadedRx, syncCartForUser, refreshCartLockStatus]);
 
   // Handle pending file passed from header or homepage
   useEffect(() => {
@@ -111,10 +229,66 @@ const UploadPrescriptionPage = () => {
     try {
       const list = await api.getMyPrescriptions();
       setSavedPrescriptions(list || []);
+
+      if (list && list.length > 0) {
+        const latestRx = list[0];
+        // Only set as active status card if uploaded within last 24 hours (1 day)
+        if (isRxWithin24Hours(latestRx)) {
+          syncActiveRx(latestRx);
+          if (!isUploadingNew) {
+            setUploadSuccess(true);
+          }
+          if (latestRx.status === "Approved") {
+            syncCartForUser();
+            refreshCartLockStatus();
+          }
+        } else {
+          // Prescription is older than 24 hours -> load clean normal upload page
+          if (!isUploadingNew) {
+            syncActiveRx(null);
+          }
+        }
+      } else {
+        syncActiveRx(null);
+      }
     } catch (err) {
       console.error("Failed to load saved prescriptions", err);
     } finally {
       setLoadingSaved(false);
+    }
+  };
+
+  const handleManualRefreshStatus = async () => {
+    setRefreshingStatus(true);
+    try {
+      const list = await api.getMyPrescriptions();
+      if (list && list.length > 0) {
+        setSavedPrescriptions(list);
+        const latestRx = list[0];
+        if (isRxWithin24Hours(latestRx)) {
+          syncActiveRx(latestRx);
+          if (latestRx.status === "Approved") {
+            syncCartForUser();
+            refreshCartLockStatus();
+          }
+          showToastMessage("Status updated successfully!");
+        } else {
+          syncActiveRx(null);
+          showToastMessage("No active prescription in the last 24 hours.");
+        }
+      }
+    } catch (err) {
+      console.error("Failed to refresh status", err);
+    } finally {
+      setRefreshingStatus(false);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedRxId(true);
+      setTimeout(() => setCopiedRxId(false), 2000);
     }
   };
 
@@ -209,6 +383,12 @@ const UploadPrescriptionPage = () => {
       return;
     }
 
+    // If active latestUploadedRx is approved and ready, proceed to cart
+    if (latestUploadedRx && latestUploadedRx.status === "Approved" && !isUploadingNew && !selectedFile) {
+      navigate("/cart");
+      return;
+    }
+
     // If an upload was already completed
     if (uploadSuccess && latestUploadedRx) {
       handleUseForCheckout(latestUploadedRx);
@@ -221,27 +401,20 @@ const UploadPrescriptionPage = () => {
       return;
     }
 
-    // Upload selected file
+    // Upload selected file (Workflow A: Direct Upload RX)
     setUploading(true);
     setErrorMsg("");
 
     try {
-      const response = await api.uploadPrescription([selectedFile], patientNotes);
+      const response = await api.uploadPrescription([selectedFile], patientNotes, null, "DIRECT_UPLOAD");
       const rxDoc = response.prescription || response;
-      setLatestUploadedRx(rxDoc);
+      syncActiveRx(rxDoc);
       setUploadSuccess(true);
+      setIsUploadingNew(false);
+      setSelectedFile(null);
+      setPatientNotes("");
+      setShowNotesInput(false);
       fetchSavedPrescriptions();
-
-      // Proceed directly to checkout
-      const rxId = rxDoc._id || rxDoc.id;
-      if (rxId) {
-        try {
-          await api.checkoutPrescription(rxId);
-        } catch {
-          // ignore error and navigate
-        }
-      }
-      navigate("/checkout");
     } catch (err) {
       console.error("Upload failed", err);
       setErrorMsg(
@@ -272,8 +445,7 @@ const UploadPrescriptionPage = () => {
         setSelectedSavedRx(null);
       }
       if (latestUploadedRx && (latestUploadedRx._id || latestUploadedRx.id) === rxId) {
-        setUploadSuccess(false);
-        setLatestUploadedRx(null);
+        syncActiveRx(null);
       }
       setDeleteModalOpen(false);
       setRxToDelete(null);
@@ -389,77 +561,274 @@ const UploadPrescriptionPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Title & Subtitle */}
-            <div className="space-y-1.5">
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Upload your prescription to start ordering
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
-                Please ensure that the prescription is valid and contains doctor, patient and
-                medicine details.
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {errorMsg && (
-              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-[fade-in_0.2s_ease-out]">
-                <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
-                <span>{errorMsg}</span>
+            {/* If user is uploading a new prescription while an active pending Rx exists, show top notification banner */}
+            {isUploadingNew && latestUploadedRx && (
+              <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs animate-[fade-in_0.2s_ease-out]">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Clock size={16} className="text-sky-600 dark:text-sky-400 shrink-0" />
+                  <p className="text-sky-900 dark:text-sky-200 font-medium truncate">
+                    Active Rx in progress: <strong className="font-bold">#{(latestUploadedRx._id || latestUploadedRx.id || "").slice(-8).toUpperCase()}</strong> ({latestUploadedRx.status})
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUploadingNew(false);
+                    setUploadSuccess(true);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-[#136258] hover:bg-[#0e4e46] text-white font-bold shrink-0 transition-colors cursor-pointer text-xs"
+                >
+                  View Active Status
+                </button>
               </div>
             )}
 
-            {/* ── ACTION BUTTONS: CHOOSE FROM GALLERY & SELECT FROM E-PRESCRIPTION ── */}
-            <div className="space-y-3 pt-2">
-              <div className="border-t border-dashed border-slate-200 dark:border-zinc-800 mb-3" />
+            {/* Title & Subtitle or Active Prescription Status Card */}
+            {uploadSuccess && latestUploadedRx ? (
+              <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 text-left space-y-6 shadow-sm animate-[fade-in_0.3s_ease-out]">
+                {/* Header Strip */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-zinc-800">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                      latestUploadedRx.status === "Approved"
+                        ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400"
+                        : latestUploadedRx.status === "Rejected"
+                        ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400"
+                        : "bg-[#136258]/10 text-[#136258] dark:text-teal-400"
+                    }`}>
+                      {latestUploadedRx.status === "Approved" ? (
+                        <CheckCircle2 size={26} />
+                      ) : latestUploadedRx.status === "Rejected" ? (
+                        <AlertCircle size={26} />
+                      ) : (
+                        <Clock size={26} className="animate-pulse" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                          {latestUploadedRx.status === "Approved"
+                            ? "Prescription Verified & Cart Ready!"
+                            : latestUploadedRx.status === "Rejected"
+                            ? "Prescription Verification Declined"
+                            : "Prescription Under Pharmacist Review"}
+                        </h2>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-zinc-400">
+                        <span>Rx ID:</span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+                          #{(latestUploadedRx._id || latestUploadedRx.id || "").slice(-8).toUpperCase()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(latestUploadedRx._id || latestUploadedRx.id)}
+                          className="text-[#136258] dark:text-teal-400 hover:underline font-semibold text-[11px] cursor-pointer"
+                        >
+                          {copiedRxId ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
-              <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200">
-                Add Photos / PDF using:
-              </p>
+                  {/* Status Badge & Refresh */}
+                  <div className="flex items-center gap-2">
+                    {renderStatusChip(latestUploadedRx.status)}
+                    <button
+                      type="button"
+                      onClick={handleManualRefreshStatus}
+                      disabled={refreshingStatus}
+                      className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
+                      title="Refresh Status"
+                    >
+                      <RefreshCw size={15} className={refreshingStatus ? "animate-spin text-[#136258]" : ""} />
+                    </button>
+                  </div>
+                </div>
 
-              {/* CHOOSE FROM GALLERY BUTTON */}
-              <button
-                type="button"
-                onClick={triggerUploadInput}
-                className="w-full bg-[#136258] hover:bg-[#0e4e46] active:scale-[0.99] text-white font-bold h-12 sm:h-13 rounded-xl shadow-xs flex items-center justify-center gap-3 uppercase tracking-wider text-xs sm:text-sm cursor-pointer transition-all"
-              >
-                {/* Gallery / Photos Icon */}
-                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white shrink-0">
-                  <path d="M6 4h14v2H6v14H4V6c0-1.1.9-2 2-2z" fill="white" />
-                  <rect x="7" y="6" width="17" height="15" rx="2" stroke="white" strokeWidth="2" />
-                  <path d="M10 17l3.5-4 2.5 3 2.5-3 3.5 4H10z" fill="white" />
-                  <circle cx="12" cy="10" r="1.5" fill="white" />
-                </svg>
-                <span>CHOOSE FROM GALLERY</span>
-              </button>
+                {/* Progress / Step Tracker */}
+                <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-semibold">
+                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                    <span className="block font-bold">1. Uploaded</span>
+                    <span className="text-[10px] opacity-75">Document Queued</span>
+                  </div>
+                  <div className={`p-2.5 rounded-xl border ${
+                    latestUploadedRx.status === "Approved"
+                      ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                      : latestUploadedRx.status === "Rejected"
+                      ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 font-bold"
+                      : "bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900/60 text-sky-800 dark:text-sky-300 animate-pulse font-bold"
+                  }`}>
+                    <span className="block">2. Verification</span>
+                    <span className="text-[10px] opacity-75">
+                      {latestUploadedRx.status === "Approved" ? "Verified by Pharmacist" : "Pharmacist Reviewing"}
+                    </span>
+                  </div>
+                  <div className={`p-2.5 rounded-xl border ${
+                    latestUploadedRx.status === "Approved"
+                      ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold ring-2 ring-emerald-500/20"
+                      : "bg-slate-50 dark:bg-zinc-800/40 border-slate-200 dark:border-zinc-800 text-slate-400 dark:text-zinc-500"
+                  }`}>
+                    <span className="block">3. Cart Prepared</span>
+                    <span className="text-[10px] opacity-75">
+                      {latestUploadedRx.status === "Approved" ? "Ready for Checkout" : "Awaiting Review"}
+                    </span>
+                  </div>
+                </div>
 
-              {/* OR DIVIDER */}
-              <div className="text-center py-0.5">
-                <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">
-                  OR
-                </span>
+                {/* Prescribed Medicines (If Cart Created / Approved by Pharmacist) */}
+                {latestUploadedRx.status === "Approved" && latestUploadedRx.prescribedItems && latestUploadedRx.prescribedItems.length > 0 ? (
+                  <div className="space-y-3 bg-[#eef7f5] dark:bg-teal-950/20 border border-[#136258]/20 dark:border-teal-900/50 rounded-2xl p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <ShoppingBag size={14} className="text-[#136258] dark:text-teal-400" />
+                        Medicines Prepared in Your Cart ({latestUploadedRx.prescribedItems.length})
+                      </p>
+                      <span className="text-[11px] font-bold text-[#136258] dark:text-teal-400">
+                        Locked for Safety
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {latestUploadedRx.prescribedItems.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 dark:text-white truncate">
+                              {item.name}
+                            </p>
+                            <p className="text-[11px] text-slate-500">
+                              Qty: {item.quantity} • {item.dosage || "As directed"}
+                            </p>
+                          </div>
+                          <span className="font-bold text-slate-900 dark:text-white shrink-0">
+                            {formatCurrency((item.price || 0) * (item.quantity || 1))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {latestUploadedRx.pharmacistNotes && (
+                      <p className="text-xs text-slate-600 dark:text-zinc-300 italic pt-1">
+                        <strong>Pharmacist Note:</strong> "{latestUploadedRx.pharmacistNotes}"
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  /* Informational Guide for Pending Reviews */
+                  <div className="bg-slate-50 dark:bg-zinc-950 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-zinc-800 space-y-2 text-xs sm:text-sm text-slate-600 dark:text-zinc-300">
+                    <p className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5">
+                      <Info size={15} className="text-[#136258] dark:text-teal-400" />
+                      What is happening right now?
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+                      Our licensed pharmacists are validating the dosage, doctor details, and availability of medicines from your prescription document. Once verified, your personalized cart will be prepared automatically and you will receive an instant notification.
+                    </p>
+                    <p className="text-[11px] text-slate-400 dark:text-zinc-500 pt-1">
+                      Uploaded on {formatDate(latestUploadedRx.createdAt)} • Document: {latestUploadedRx.name || "Prescription file"}
+                    </p>
+                  </div>
+                )}
+
+                {/* Bottom Actions */}
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUploadingNew(true);
+                      setUploadSuccess(false);
+                      setSelectedFile(null);
+                    }}
+                    className="flex-1 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 font-semibold h-11 px-4 rounded-xl text-xs sm:text-[13px] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Plus size={15} />
+                    <span>Upload Another Prescription</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="px-6 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-zinc-700 font-semibold h-11 rounded-xl text-xs sm:text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Home
+                  </button>
+                </div>
               </div>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <h1 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    Upload your prescription to start ordering
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+                    Please ensure that the prescription is valid and contains doctor, patient and
+                    medicine details.
+                  </p>
+                </div>
 
-              {/* SELECT FROM E-PRESCRIPTION BUTTON */}
-              <button
-                type="button"
-                onClick={handlePastPrescriptionClick}
-                className="w-full bg-[#136258] hover:bg-[#0e4e46] active:scale-[0.99] text-white font-bold h-12 sm:h-13 rounded-xl shadow-xs flex items-center justify-center gap-3 uppercase tracking-wider text-xs sm:text-sm cursor-pointer transition-all"
-              >
-                {/* Rx Document Icon */}
-                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 shrink-0">
-                  <path d="M6 3C6 1.9 6.9 1 8 1H17L22 6V25C22 26.1 21.1 27 20 27H8C6.9 27 6 26.1 6 25V3Z" fill="white" />
-                  <text x="14" y="18" fill="#136258" fontSize="11" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">
-                    ℞
-                  </text>
-                </svg>
-                <span>SELECT FROM E-PRESCRIPTION</span>
-              </button>
+                {/* Error Message */}
+                {errorMsg && (
+                  <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-[fade-in_0.2s_ease-out]">
+                    <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
 
-              {/* Disclaimer note */}
-              <p className="text-[11px] text-slate-400 dark:text-zinc-500 text-center pt-2 font-medium">
-                *As Per Govt. Regulations We Dispense Full Strips of Medicines
-              </p>
-            </div>
+                {/* ── ACTION BUTTONS: CHOOSE FROM GALLERY & SELECT FROM E-PRESCRIPTION ── */}
+                <div className="space-y-3 pt-2">
+                  <div className="border-t border-dashed border-slate-200 dark:border-zinc-800 mb-3" />
+
+                  <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200">
+                    Add Photos / PDF using:
+                  </p>
+
+                  {/* CHOOSE FROM GALLERY BUTTON */}
+                  <button
+                    type="button"
+                    onClick={triggerUploadInput}
+                    className="w-full bg-[#136258] hover:bg-[#0e4e46] active:scale-[0.99] text-white font-bold h-12 sm:h-13 rounded-xl shadow-xs flex items-center justify-center gap-3 uppercase tracking-wider text-xs sm:text-sm cursor-pointer transition-all"
+                  >
+                    {/* Gallery / Photos Icon */}
+                    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white shrink-0">
+                      <path d="M6 4h14v2H6v14H4V6c0-1.1.9-2 2-2z" fill="white" />
+                      <rect x="7" y="6" width="17" height="15" rx="2" stroke="white" strokeWidth="2" />
+                      <path d="M10 17l3.5-4 2.5 3 2.5-3 3.5 4H10z" fill="white" />
+                      <circle cx="12" cy="10" r="1.5" fill="white" />
+                    </svg>
+                    <span>CHOOSE FROM GALLERY</span>
+                  </button>
+
+                  {/* OR DIVIDER */}
+                  <div className="text-center py-0.5">
+                    <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">
+                      OR
+                    </span>
+                  </div>
+
+                  {/* SELECT FROM E-PRESCRIPTION BUTTON */}
+                  <button
+                    type="button"
+                    onClick={handlePastPrescriptionClick}
+                    className="w-full bg-[#136258] hover:bg-[#0e4e46] active:scale-[0.99] text-white font-bold h-12 sm:h-13 rounded-xl shadow-xs flex items-center justify-center gap-3 uppercase tracking-wider text-xs sm:text-sm cursor-pointer transition-all"
+                  >
+                    {/* Rx Document Icon */}
+                    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 shrink-0">
+                      <path d="M6 3C6 1.9 6.9 1 8 1H17L22 6V25C22 26.1 21.1 27 20 27H8C6.9 27 6 26.1 6 25V3Z" fill="white" />
+                      <text x="14" y="18" fill="#136258" fontSize="11" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">
+                        ℞
+                      </text>
+                    </svg>
+                    <span>SELECT FROM E-PRESCRIPTION</span>
+                  </button>
+
+                  {/* Disclaimer note */}
+                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 text-center pt-2 font-medium">
+                    *As Per Govt. Regulations We Dispense Full Strips of Medicines
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* ── INFO BOX ("Please keep in mind:") ── */}
             <div className="bg-[#F1F8FD] dark:bg-[#091b26] border border-[#DCF0FC] dark:border-[#133c54] rounded-2xl p-5 sm:p-6 text-left space-y-3">
@@ -798,6 +1167,8 @@ const UploadPrescriptionPage = () => {
                     ? "Upload & Proceed"
                     : selectedSavedRx
                     ? "Proceed with Selected"
+                    : latestUploadedRx?.status === "Approved" && !isUploadingNew
+                    ? "Proceed to Cart"
                     : "Proceed"}
                 </span>
                 {!uploading && <ArrowRight size={16} />}
@@ -856,6 +1227,8 @@ const UploadPrescriptionPage = () => {
               ? "Upload & Proceed"
               : selectedSavedRx
               ? "Proceed with Selected"
+              : latestUploadedRx?.status === "Approved" && !isUploadingNew
+              ? "Proceed to Cart"
               : "Proceed"}
           </span>
           {!uploading && <ArrowRight size={16} />}

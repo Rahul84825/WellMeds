@@ -45,6 +45,19 @@ const cartSchema = new mongoose.Schema(
       ref: "Prescription",
       default: null,
     },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
+    cartSource: {
+      type: String,
+      enum: ["NORMAL", "DIRECT_UPLOAD", "CHECKOUT_UPLOAD"],
+      default: "NORMAL",
+    },
+    lockReason: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

@@ -287,29 +287,35 @@ export const modifyCart = async (req, res, next) => {
       });
     }
 
-    // Only an in-progress prescription review can be cancelled to modify a
-    // cart. A payment lock must be released by the payment lifecycle, not by
-    // a generic cart endpoint.
-    const session = await CheckoutSession.findOne({
-      user: userId,
-      status: { $in: CART_LOCKED_STATUSES },
-      isLocked: true,
-      expiresAt: { $gt: new Date() },
-    }).sort({ updatedAt: -1 });
+    // Cancel all active/locked/verified sessions for this user so it cannot resurrect
+    await CheckoutSession.updateMany(
+      {
+        user: userId,
+        status: { $in: ["LOCKED", "PENDING_VERIFICATION", "VERIFIED", "ACTIVE"] },
+      },
+      {
+        $set: {
+          status: "CANCELLED",
+          isLocked: false,
+          lockReason: "Cancelled by user to modify cart.",
+        },
+      }
+    );
 
-    if (session) {
-      session.status = "CANCELLED";
-      session.isLocked = false;
-      session.lockReason = "Cancelled by user to modify cart.";
-      await session.save();
-    }
-
-    // Reset prescription link only when a verification lock was actually
-    // cancelled. Calling this endpoint against an unlocked cart is a no-op.
+    // Reset customer's Cart model in MongoDB
     const cart = await Cart.findOne({ user: userId });
-    if (cart && session) {
+    if (cart) {
+      const wasDirectUpload = cart.cartSource === "DIRECT_UPLOAD";
+      cart.isLocked = false;
+      cart.cartSource = "NORMAL";
+      cart.lockReason = "";
       cart.prescription = null;
       cart.prescriptionStatus = "Pending";
+      // If the cart was prepared by the pharmacist (DIRECT_UPLOAD), clear items on abandonment
+      // so user cannot convert a prepared prescription order into an unverified editable cart
+      if (wasDirectUpload) {
+        cart.items = [];
+      }
       await cart.save();
     }
 
@@ -317,6 +323,8 @@ export const modifyCart = async (req, res, next) => {
       success: true,
       message: "Cart unlocked. Current prescription verification has been cancelled. Please upload a new prescription for your updated medicines.",
       isLocked: false,
+      cartSource: "NORMAL",
+      items: cart ? cart.items : [],
     });
   } catch (error) {
     next(error);

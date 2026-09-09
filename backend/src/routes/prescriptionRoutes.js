@@ -9,6 +9,7 @@ import {
   approvePrescription,
   rejectPrescription,
   updatePrescriptionItems,
+  createCartForPrescription,
   checkoutPrescription,
   selectPrescriptionForCart,
 } from "../controllers/prescriptionController.js";
@@ -28,7 +29,8 @@ router.get("/my", protect, requireProfileComplete, getMyPrescriptions);
 // ── Admin: Get ALL prescriptions ─────────────────────────
 router.get("/all", protect, admin, getPrescriptions);
 
-// ── Admin: Medicine Assignment, Status, Approve, Reject ───
+// ── Admin: Medicine Assignment, Status, Approve, Reject, Create Cart ───
+router.post("/:id/create-cart", protect, admin, createCartForPrescription);
 router.put("/:id/items", protect, admin, updatePrescriptionItems);
 router.put("/:id/status", protect, admin, updatePrescriptionStatus);
 router.put("/:id/approve", protect, admin, approvePrescription);
