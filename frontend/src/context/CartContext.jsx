@@ -61,21 +61,26 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
+      let isModelLocked = false;
       // 1. Check Cart model lock & source
       const cartData = await cartService.getFullCart();
       if (cartData && cartData.success) {
-        setIsCartLocked(!!cartData.isLocked);
+        const hasItems = Array.isArray(cartData.items) && cartData.items.length > 0;
+        isModelLocked = hasItems && !!cartData.isLocked;
         setCartSource(cartData.cartSource || "NORMAL");
         if (cartData.lockReason) setLockReason(cartData.lockReason);
       }
 
       // 2. Check active CheckoutSession
+      let isSessionLocked = false;
       const res = await checkoutSessionService.getSessionStatus();
       if (res && res.success) {
-        if (res.isLocked) setIsCartLocked(true);
+        isSessionLocked = !!res.isLocked;
         setCheckoutSessionStatus(res.status || "ACTIVE");
         if (res.session?.lockReason) setLockReason(res.session.lockReason);
       }
+
+      setIsCartLocked(isModelLocked || isSessionLocked);
     } catch (err) {
       console.warn("Failed to fetch checkout session status:", err.message);
     }
@@ -95,34 +100,6 @@ export const CartProvider = ({ children }) => {
     localStorage.removeItem("wellmeds_cart_lock_sync");
     localStorage.removeItem("wellmeds_cart_cleared");
   }, []);
-
-  // Multi-tab sync & tab focus refresh
-  useEffect(() => {
-    refreshCartLockStatus();
-
-    const handleStorageChange = (e) => {
-      if (e.key === "wellmeds_auth_logout" || e.key === "wellmeds_cart_cleared") {
-        purgeCartOnLogout();
-      }
-      if (e.key === "wellmeds_cart_lock_sync") {
-        refreshCartLockStatus();
-        syncCartForUser();
-      }
-    };
-
-    const handleFocus = () => {
-      refreshCartLockStatus();
-      syncCartForUser();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [refreshCartLockStatus, purgeCartOnLogout]);
 
   // Broadcast lock state change to other tabs
   const broadcastLockSync = () => {
@@ -152,6 +129,7 @@ export const CartProvider = ({ children }) => {
         return {
           id: itemKey,
           _id: itemKey,
+          product: product,
           productId,
           variantName,
           variantId,
@@ -179,6 +157,18 @@ export const CartProvider = ({ children }) => {
   // Merges genuine guest cart ONLY if guest items were added while logged out.
   // ─────────────────────────────────────────────────────
   const syncCartForUser = useCallback(async (isInitialLogin = false) => {
+    if (!hasToken()) {
+      try {
+        const savedGuest = localStorage.getItem("medishop_guest_cart");
+        if (savedGuest) {
+          setCartItems(JSON.parse(savedGuest));
+        }
+      } catch {
+        // ignore json parse error
+      }
+      return;
+    }
+
     setIsSyncing(true);
     try {
       if (isInitialLogin) {
@@ -229,6 +219,37 @@ export const CartProvider = ({ children }) => {
     purgeCartOnLogout();
   }, [purgeCartOnLogout]);
 
+  // Multi-tab sync, initial mount hydration, & tab focus refresh
+  useEffect(() => {
+    refreshCartLockStatus();
+    if (hasToken()) {
+      syncCartForUser();
+    }
+
+    const handleStorageChange = (e) => {
+      if (e.key === "wellmeds_auth_logout" || e.key === "wellmeds_cart_cleared") {
+        purgeCartOnLogout();
+      }
+      if (e.key === "wellmeds_cart_lock_sync") {
+        refreshCartLockStatus();
+        syncCartForUser();
+      }
+    };
+
+    const handleFocus = () => {
+      refreshCartLockStatus();
+      syncCartForUser();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refreshCartLockStatus, purgeCartOnLogout, syncCartForUser]);
+
   // ─────────────────────────────────────────────────────
   // Cart operations — optimistic update + server sync
   // ─────────────────────────────────────────────────────
@@ -246,14 +267,14 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = useCallback(async (product, quantity = 1, selectedVariant = null) => {
     if (!product) return;
-    if (isCartLocked) {
+    if (isCartLocked && cartItems.length > 0) {
       return;
     }
 
     const productId = (product.productId || product._id || product.id)?.toString();
     const variantObj = selectedVariant || product.selectedVariant || null;
-    const variantName = variantObj?.name || product.variantName || "";
-    const variantId = variantObj?._id || product.variantId || "";
+    const variantName = variantObj?.name || variantObj?.option || variantObj?.title || product.variantName || "";
+    const variantId = variantObj?._id || variantObj?.id || product.variantId || "";
     const effectivePrice = variantObj?.sellingPrice !== undefined
       ? variantObj.sellingPrice
       : variantObj?.price !== undefined
@@ -274,6 +295,7 @@ export const CartProvider = ({ children }) => {
           ...product,
           id: itemKey,
           _id: itemKey,
+          product: product,
           productId,
           variantName,
           variantId,

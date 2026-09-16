@@ -10,6 +10,10 @@ import {
   sendPrescriptionReviewEmail,
 } from "../services/emailService.js";
 import { Notification } from "../models/Notification.js";
+import {
+  sendPrescriptionPushNotification,
+  sendAdminOperationalPush,
+} from "../services/pushNotificationService.js";
 import { Cart } from "../models/Cart.js";
 import { Product } from "../models/Product.js";
 import { CheckoutSession } from "../models/CheckoutSession.js";
@@ -177,6 +181,10 @@ export const uploadPrescription = async (req, res, next) => {
     } catch (err) {
       console.warn("Prescription received email dispatch failed:", err.message);
     }
+
+    // Web Push: Customer submission confirmation + Admin review alert
+    sendPrescriptionPushNotification(userId, "SUBMITTED", { rxId: prescription._id });
+    sendAdminOperationalPush("NEW_PRESCRIPTION", { rxId: prescription._id });
 
     res.status(201).json({
       success: true,
@@ -616,6 +624,9 @@ export const createCartForPrescription = async (req, res, next) => {
       console.warn("Prescription cart ready email dispatch failed:", err.message);
     }
 
+    // Web Push: Customer cart ready alert
+    sendPrescriptionPushNotification(prescription.user._id, "CART_READY", { rxId: prescription._id });
+
     const populatedPrescription = await Prescription.findById(id)
       .populate("user", "name email mobile phone")
       .populate("prescribedItems.product")
@@ -889,6 +900,9 @@ export const approvePrescription = async (req, res, next) => {
       console.warn("Prescription approval email dispatch failed:", err.message);
     }
 
+    // Web Push: Customer prescription approved alert
+    sendPrescriptionPushNotification(prescription.user._id, "APPROVED", { rxId: prescription._id });
+
     const populatedPrescription = await Prescription.findById(id)
       .populate("user", "name email mobile phone")
       .populate("prescribedItems.product")
@@ -988,6 +1002,9 @@ export const rejectPrescription = async (req, res, next) => {
     } catch (err) {
       console.warn("Prescription rejection email dispatch failed:", err.message);
     }
+
+    // Web Push: Customer prescription rejected alert
+    sendPrescriptionPushNotification(prescription.user._id, "REJECTED", { rxId: prescription._id });
 
     const populatedPrescription = await Prescription.findById(id)
       .populate("user", "name email mobile phone")

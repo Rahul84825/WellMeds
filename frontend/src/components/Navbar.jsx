@@ -174,14 +174,14 @@ const Navbar = () => {
 
           // 3. Unified Header State Machine Thresholds:
           // Near top (<= 80px): Strictly visible in initial position
-          // Scroll DOWN (delta > 40px & scrollY > 200px): Hide lower navbar
-          // Scroll UP (delta < -50px): Reveal lower navbar (requires intentional scroll up)
+          // Scroll DOWN (delta > 5px & scrollY > 80px): Hide lower navbar
+          // Scroll UP (delta < -5px): Reveal lower navbar
           let nextNavVisible = isNavVisibleRef.current;
           if (currentScrollY <= 80) {
             nextNavVisible = true;
-          } else if (delta < -50) {
+          } else if (delta < -5) {
             nextNavVisible = true;
-          } else if (delta > 40 && currentScrollY > 200) {
+          } else if (delta > 5 && currentScrollY > 80) {
             nextNavVisible = false;
           }
 
@@ -654,7 +654,9 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Location Sub-Bar */}
-      <div className="w-full bg-slate-50/90 dark:bg-zinc-900/90 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-1.5 lg:hidden flex items-center justify-between font-sans">
+      <div className={`w-full bg-slate-50/90 dark:bg-zinc-900/90 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-1.5 lg:hidden flex items-center justify-between font-sans transition-all duration-200 ${
+        isNavVisible ? "opacity-100 max-h-[40px] pointer-events-auto" : "opacity-0 max-h-0 py-0 border-t-0 border-b-0 pointer-events-none overflow-hidden"
+      }`}>
         <button
           type="button"
           onClick={openLocationModal}

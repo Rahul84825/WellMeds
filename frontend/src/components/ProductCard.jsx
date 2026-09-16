@@ -35,8 +35,8 @@ const ProductCard = ({ product }) => {
   const categoryName = typeof rawCategory === "object" ? (rawCategory?.name || rawCategory?.title || (product.isSurgical ? "Surgical Supplies" : "Specialty Healthcare")) : (rawCategory || (product.isSurgical ? "Surgical Supplies" : "Specialty Healthcare"));
 
   const cartItem = cartItems?.find((item) => {
-    const itemPId = (item.product?._id || item.product?.id || item._id || item.id)?.toString();
-    return itemPId === productId;
+    const itemPId = (item.productId || item.product?._id || item.product?.id || item._id || item.id)?.toString();
+    return itemPId === productId || (typeof item.id === "string" && item.id.startsWith(`${productId}-`));
   });
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 

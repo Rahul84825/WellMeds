@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import Loader from "../components/Loader";
+import NotificationSettingsCard from "../components/notifications/NotificationSettingsCard";
 import {
   Settings,
   User,
@@ -186,6 +187,13 @@ const AdminSettings = () => {
 
         {/* Right Side: Security & Notifications */}
         <div className="space-y-lg">
+
+          {/* Web Push Notifications Card */}
+          <NotificationSettingsCard
+            isAdmin={true}
+            title="Admin Operational Web Push"
+            description="Receive real-time browser alerts on this device for new customer orders and prescription uploads."
+          />
 
           {/* Notifications Card */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-xl rounded-2xl space-y-md shadow-xs">

@@ -15,7 +15,7 @@ const PurchaseCard = ({
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
   const productId = (product._id || product.id)?.toString();
-  const cartItem = cartItems?.find((item) => item.id === productId);
+  const cartItem = cartItems?.find((item) => (item.productId || item.product?._id || item.id) === productId || (typeof item.id === "string" && item.id.startsWith(`${productId}-`)));
   const isInCart = !!cartItem;
 
   const getVariants = (prod) => {
@@ -165,7 +165,7 @@ const PurchaseCard = ({
             <>
               {/* Buy Now */}
               <button
-                onClick={handleBuyNow}
+                onClick={() => handleBuyNow && handleBuyNow(selectedVariant)}
                 disabled={product.inStock === false || product.stock === 0}
                 className="pdp-btn-primary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -174,7 +174,7 @@ const PurchaseCard = ({
 
               {/* Add to Cart Outline */}
               <button
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart && handleAddToCart(selectedVariant)}
                 disabled={product.inStock === false || product.stock === 0}
                 className="pdp-btn-secondary w-full h-11 disabled:opacity-50 disabled:cursor-not-allowed"
               >

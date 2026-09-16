@@ -44,7 +44,7 @@ const ProductDetails = () => {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   const productId = (product?._id || product?.id)?.toString();
-  const cartItem = cartItems?.find((item) => item.id === productId);
+  const cartItem = cartItems?.find((item) => (item.productId || item.product?._id || item.id) === productId || (typeof item.id === "string" && item.id.startsWith(`${productId}-`)));
   const isInCart = !!cartItem;
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
@@ -525,14 +525,14 @@ const ProductDetails = () => {
     setQuantity(prev => (prev > 1 ? prev - 1 : prev));
   }, []);
 
-  const handleAddToCart = useCallback(() => {
+  const handleAddToCart = useCallback((selectedVariant = null) => {
     if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
+    addToCart(product, quantity, selectedVariant);
   }, [product, quantity, addToCart]);
 
-  const handleBuyNow = useCallback(() => {
+  const handleBuyNow = useCallback((selectedVariant = null) => {
     if (!product || product.inStock === false || product.stock === 0) return;
-    addToCart(product, quantity);
+    addToCart(product, quantity, selectedVariant);
     navigate("/cart");
   }, [product, quantity, addToCart, navigate]);
 

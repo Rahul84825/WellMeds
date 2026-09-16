@@ -12,9 +12,12 @@ import { LocationProvider } from "./context/LocationContext";
 import AppRoutes from "./routes/AppRoutes";
 import ScrollToTop from "./components/ScrollToTop";
 
+import { isPushNotificationSupported, getExistingPushSubscription } from "./utils/pushNotification";
+import { api } from "./services/api";
+
 /**
- * SyncBridge — registers cart sync callbacks with AuthContext
- * so they fire automatically after login/logout.
+ * SyncBridge — registers cart and push notification sync callbacks with AuthContext
+ * so they fire automatically after login/logout for account-switching safety.
  * Must be rendered inside both providers.
  */
 const SyncBridge = () => {
@@ -25,9 +28,49 @@ const SyncBridge = () => {
     const unsubCart = registerLoginCallback(syncCartForUser);
     const unsubCartLogout = registerLogoutCallback(saveCartToLocalOnLogout);
 
+    // Reassign browser push subscription to the newly logged-in account
+    const syncPushOnLogin = async () => {
+      try {
+        if (isPushNotificationSupported() && Notification.permission === "granted") {
+          const sub = await getExistingPushSubscription();
+          if (sub) {
+            const rawJson = sub.toJSON();
+            await api.registerPushSubscription({
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: rawJson.keys?.p256dh || "",
+                auth: rawJson.keys?.auth || "",
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("[PUSH] Post-login sync notice:", err.message);
+      }
+    };
+
+    // Remove subscription from logged-out user to prevent cross-account notification leaks
+    const cleanupPushOnLogout = async () => {
+      try {
+        if (isPushNotificationSupported()) {
+          const sub = await getExistingPushSubscription();
+          if (sub) {
+            await api.deletePushSubscription(sub.endpoint);
+          }
+        }
+      } catch (err) {
+        console.warn("[PUSH] Logout cleanup notice:", err.message);
+      }
+    };
+
+    const unsubPushLogin = registerLoginCallback(syncPushOnLogin);
+    const unsubPushLogout = registerLogoutCallback(cleanupPushOnLogout);
+
     return () => {
       unsubCart();
       unsubCartLogout();
+      unsubPushLogin();
+      unsubPushLogout();
     };
   }, [
     registerLoginCallback,

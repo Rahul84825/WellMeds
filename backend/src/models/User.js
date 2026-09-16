@@ -88,6 +88,12 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    notificationPreferences: {
+      orderPush: {
+        type: Boolean,
+        default: true,
+      },
+    },
   },
   {
     timestamps: true,

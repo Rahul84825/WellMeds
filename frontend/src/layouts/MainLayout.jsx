@@ -56,7 +56,7 @@ const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
       {!isAuthPage && (
-        <div className={isUploadRxPage ? "hidden md:block" : "block"}>
+        <div className={`sticky top-0 z-[100] ${isUploadRxPage ? "hidden md:block" : "block"}`}>
           <Navbar />
         </div>
       )}

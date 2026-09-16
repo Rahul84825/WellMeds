@@ -14,19 +14,28 @@ export const checkCartLock = async (req, res, next) => {
     // 1. Check Cart model lock state
     const cart = await Cart.findOne({ user: req.user._id });
     if (cart && cart.isLocked) {
-      const isDirect = cart.cartSource === "DIRECT_UPLOAD";
-      const msg = isDirect
-        ? "Items in this cart were prepared by our pharmacy team and cannot be modified."
-        : "Your cart is currently locked under prescription verification.";
+      // If cart has NO items and NO prescription, it was left locked from an empty/cleared state — auto-unlock
+      if ((!cart.items || cart.items.length === 0) && !cart.prescription) {
+        cart.isLocked = false;
+        cart.cartSource = "NORMAL";
+        cart.lockReason = "";
+        cart.prescriptionStatus = "Pending";
+        await cart.save();
+      } else {
+        const isDirect = cart.cartSource === "DIRECT_UPLOAD";
+        const msg = isDirect
+          ? "Items in this cart were prepared by our pharmacy team and cannot be modified."
+          : "Your cart is currently locked under prescription verification.";
 
-      return res.status(409).json({
-        success: false,
-        code: "CART_LOCKED",
-        message: cart.lockReason || msg,
-        status: cart.prescriptionStatus || "Locked",
-        cartSource: cart.cartSource || "NORMAL",
-        isPrescriptionCart: true,
-      });
+        return res.status(409).json({
+          success: false,
+          code: "CART_LOCKED",
+          message: cart.lockReason || msg,
+          status: cart.prescriptionStatus || "Locked",
+          cartSource: cart.cartSource || "NORMAL",
+          isPrescriptionCart: true,
+        });
+      }
     }
 
     // 2. Check active CheckoutSession lock state (LOCKED, PENDING_VERIFICATION, VERIFIED, PAYMENT_PENDING)

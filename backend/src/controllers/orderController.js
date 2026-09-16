@@ -15,6 +15,10 @@ import {
   sendOrderStatusEmail,
 } from "../services/emailService.js";
 import {
+  sendOrderPushNotification,
+  sendAdminOperationalPush,
+} from "../services/pushNotificationService.js";
+import {
   PRICING_CONFIG,
   calculateDeliveryFee,
   resolvePackaging,
@@ -308,6 +312,9 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
     cart.items = [];
     cart.prescription = null;
     cart.prescriptionStatus = "Pending";
+    cart.isLocked = false;
+    cart.cartSource = "NORMAL";
+    cart.lockReason = "";
     await cart.save();
   }
 
@@ -331,6 +338,10 @@ export const finalizeOrderPayment = async (order, razorpayPaymentId, razorpaySig
 
   // 6. Trigger Itemized Order Confirmation Email
   sendOrderConfirmation(order);
+
+  // 7. Web Push Notification: Customer Confirmed + Admin New Order Alert
+  sendOrderPushNotification(order, "CONFIRMED");
+  sendAdminOperationalPush("NEW_ORDER", { orderId: order.orderId });
 
   return { success: true, order, duplicate: false };
 };
@@ -832,6 +843,9 @@ export const updateOrderStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
+    const previousStatus = order.status;
+    const isStatusChanged = previousStatus !== status;
+
     order.status = status;
     order.timeline.push({
       status,
@@ -841,15 +855,24 @@ export const updateOrderStatus = async (req, res, next) => {
 
     await order.save();
 
-    await Notification.create({
-      user: order.user,
-      title: `Order Status: ${status}`,
-      message: `Your order "${order.orderId}" has been updated to "${status}".`,
-      type: "order",
-      link: "/orders",
-    });
+    // Idempotency check: only notify if status actually transitioned
+    if (isStatusChanged) {
+      await Notification.create({
+        user: order.user,
+        title: `Order Status: ${status}`,
+        message: `Your order "${order.orderId}" has been updated to "${status}".`,
+        type: "order",
+        link: "/orders",
+      });
 
-    sendOrderStatusUpdate(order, status);
+      sendOrderStatusUpdate(order, status);
+
+      // Web Push notification for meaningful customer order transitions
+      const upperStatus = String(status).toUpperCase();
+      if (["PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"].includes(upperStatus)) {
+        sendOrderPushNotification(order, upperStatus);
+      }
+    }
 
     res.status(200).json({ success: true, order });
   } catch (error) {
@@ -891,6 +914,10 @@ export const cancelOrder = async (req, res, next) => {
     await order.save();
 
     sendOrderCancelled(order);
+
+    // Web Push notification: Customer Cancelled push + Admin alert
+    sendOrderPushNotification(order, "CANCELLED");
+    sendAdminOperationalPush("ORDER_CANCELLED", { orderId: order.orderId });
 
     res.status(200).json({ success: true, order });
   } catch (error) {

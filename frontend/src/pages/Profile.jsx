@@ -11,6 +11,7 @@ import Loader from "../components/Loader";
 import { formatDate } from "../utils/date";
 import SEO from "../components/common/SEO";
 import ProfileInfoCard from "../components/profile/ProfileInfoCard";
+import NotificationSettingsCard from "../components/notifications/NotificationSettingsCard";
 import { 
   User, 
   MapPin, 
@@ -843,6 +844,10 @@ const Profile = () => {
                 </button>
               </div>
             </form>
+
+            <div className="pt-2">
+              <NotificationSettingsCard />
+            </div>
           </div>
         )}
       </div>

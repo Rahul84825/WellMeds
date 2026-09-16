@@ -28,7 +28,16 @@ const isSnapshotMatchingCart = (snapshot, cartItems) => {
 const cleanCartPrescription = async (cart) => {
   if (!cart) return;
 
-  // If cart is locked or prepared by pharmacy (DIRECT_UPLOAD / locked), do not auto-clean
+  // An empty cart without a prescription cannot be locked; reset it to a clean NORMAL state
+  if ((!cart.items || cart.items.length === 0) && !cart.prescription) {
+    cart.isLocked = false;
+    cart.cartSource = "NORMAL";
+    cart.lockReason = "";
+    cart.prescriptionStatus = "Pending";
+    return;
+  }
+
+  // If cart is locked or prepared by pharmacy (DIRECT_UPLOAD / locked) with items, do not auto-clean
   if (cart.isLocked || cart.cartSource === "DIRECT_UPLOAD") {
     return;
   }
@@ -122,8 +131,15 @@ export const addToCart = async (req, res, next) => {
       cart = await Cart.create({ user: req.user._id, items: [] });
     }
 
-    // Strict Lock Guard
-    if (cart.isLocked) {
+    // If cart is marked locked but has NO items and NO prescription, auto-unlock it
+    if (cart.isLocked && (!cart.items || cart.items.length === 0) && !cart.prescription) {
+      cart.isLocked = false;
+      cart.cartSource = "NORMAL";
+      cart.lockReason = "";
+    }
+
+    // Strict Lock Guard: a prescription cart with items cannot be modified
+    if (cart.isLocked && cart.items && cart.items.length > 0) {
       return res.status(409).json({
         success: false,
         code: "CART_LOCKED",
@@ -146,7 +162,10 @@ export const addToCart = async (req, res, next) => {
 
     if (targetVariant && Array.isArray(product.variants) && product.variants.length > 0) {
       const foundVariant = product.variants.find(
-        (v) => (targetVariantId && v._id?.toString() === targetVariantId) || v.name?.toLowerCase() === targetVariant.toLowerCase()
+        (v) =>
+          (targetVariantId && v._id?.toString() === targetVariantId) ||
+          (v.name && v.name.toLowerCase() === targetVariant.toLowerCase()) ||
+          (v.option && v.option.toLowerCase() === targetVariant.toLowerCase())
       );
       if (foundVariant) {
         effectiveStock = foundVariant.stock !== undefined ? foundVariant.stock : product.stock;
@@ -263,7 +282,11 @@ export const updateQuantity = async (req, res, next) => {
         let effectivePrice = product.price;
 
         if (targetVariant && Array.isArray(product.variants)) {
-          const found = product.variants.find((v) => v.name?.toLowerCase() === targetVariant);
+          const found = product.variants.find(
+            (v) =>
+              (v.name && v.name.toLowerCase() === targetVariant) ||
+              (v.option && v.option.toLowerCase() === targetVariant)
+          );
           if (found) {
             if (found.stock !== undefined) maxStock = found.stock;
             effectivePrice = found.sellingPrice !== undefined ? found.sellingPrice : (found.price !== undefined ? found.price : product.price);

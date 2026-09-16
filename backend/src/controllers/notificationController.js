@@ -1,6 +1,8 @@
 import { Notification } from "../models/Notification.js";
 import { Subscriber } from "../models/Subscriber.js";
+import { User } from "../models/User.js";
 import { sendWaitlistConfirmation } from "../services/emailService.js";
+import { subscribeUser, unsubscribeSubscription } from "../services/pushNotificationService.js";
 
 // Fetch notifications for logged in user
 export const getNotifications = async (req, res, next) => {
@@ -101,6 +103,96 @@ export const subscribeEmail = async (req, res, next) => {
         duplicate: true,
       });
     }
+    next(error);
+  }
+};
+
+// Return public VAPID key to client (Private key is NEVER returned)
+export const getVapidPublicKey = (req, res) => {
+  const publicKey = process.env.VAPID_PUBLIC_KEY || "";
+  res.status(200).json({ success: true, publicKey });
+};
+
+// Register or reassign browser Web Push subscription
+export const subscribePush = async (req, res, next) => {
+  try {
+    const { endpoint, keys } = req.body;
+    if (!endpoint || typeof endpoint !== "string" || !keys || typeof keys !== "object") {
+      return res.status(400).json({ success: false, message: "Invalid push subscription payload." });
+    }
+
+    if (!keys.p256dh || !keys.auth) {
+      return res.status(400).json({ success: false, message: "Subscription keys (p256dh, auth) are required." });
+    }
+
+    const userAgent = req.headers["user-agent"] || "";
+    const subscription = await subscribeUser(req.user._id, { endpoint, keys }, userAgent);
+
+    return res.status(201).json({
+      success: true,
+      message: "Push subscription registered successfully.",
+      subscriptionId: subscription._id,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Unsubscribe a specific browser endpoint for authenticated user
+export const unsubscribePush = async (req, res, next) => {
+  try {
+    const endpoint = req.body?.endpoint || req.query?.endpoint;
+    if (!endpoint || typeof endpoint !== "string") {
+      return res.status(400).json({ success: false, message: "Subscription endpoint is required." });
+    }
+
+    const removed = await unsubscribeSubscription(req.user._id, endpoint);
+    return res.status(200).json({
+      success: true,
+      message: removed ? "Push subscription removed." : "Subscription was not active for this account.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get notification preferences for authenticated user
+export const getNotificationPreferences = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("notificationPreferences");
+    res.status(200).json({
+      success: true,
+      preferences: {
+        orderPush: user?.notificationPreferences?.orderPush !== false,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update notification preferences for authenticated user
+export const updateNotificationPreferences = async (req, res, next) => {
+  try {
+    const { orderPush } = req.body;
+    const update = {};
+    if (typeof orderPush === "boolean") {
+      update["notificationPreferences.orderPush"] = orderPush;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: update },
+      { new: true, select: "notificationPreferences" }
+    );
+
+    res.status(200).json({
+      success: true,
+      preferences: {
+        orderPush: user?.notificationPreferences?.orderPush !== false,
+      },
+    });
+  } catch (error) {
     next(error);
   }
 };
