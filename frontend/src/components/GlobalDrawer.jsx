@@ -193,7 +193,7 @@ const GlobalDrawer = () => {
         }`}
       >
         {/* Drawer Header */}
-        <div className="h-[64px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none bg-white">
+        <div className="h-[68px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none bg-white">
           <button
             onClick={() => setIsDrawerOpen(false)}
             className="text-slate-700 hover:text-slate-900 focus:outline-none flex items-center justify-center w-10 h-10 cursor-pointer"
@@ -201,8 +201,8 @@ const GlobalDrawer = () => {
           >
             <X className="w-5 h-5 stroke-[2.2]" />
           </button>
-          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[170px]">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[50px] w-auto" />
+          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-full max-w-[250px]">
+            <img src={logoImg} alt="WellMeds Logo" className="object-contain h-[46px] sm:h-[50px] max-h-[50px] w-auto" />
           </Link>
           <Link
             to="/cart"
@@ -279,7 +279,7 @@ const GlobalDrawer = () => {
           <div
             onClick={() => {
               setIsDrawerOpen(false);
-              navigate("/search");
+              navigate("/search", { state: { from: location.pathname } });
             }}
             className="w-full flex items-center bg-white border border-[#c3e6d6] hover:border-[#038076] rounded-2xl h-[48px] px-3.5 shadow-2xs cursor-pointer active:scale-[0.99] transition-all relative overflow-hidden select-none"
             role="search"

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, Check, Clock, Sparkles
+  Search, MapPin, ChevronDown, Loader2, X, ShoppingBag, Check, Sparkles
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useLocationContext } from "../../context/LocationContext";
@@ -700,38 +700,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               </div>
             </div>
 
-            {/* Quick Categories */}
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider mb-2.5">
-                <Clock className="w-3.5 h-3.5 text-[#038076]" />
-                <span>Popular Specialities</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { name: "Oncology Care", icon: "🎗️", link: "/specialities/oncology" },
-                  { name: "Cardiology", icon: "🫀", link: "/specialities/cardiology" },
-                  { name: "Organ Transplant", icon: "🧬", link: "/specialities/transplant" },
-                  { name: "Surgical Supplies", icon: "🩺", link: "/surgicals" },
-                  { name: "Nephrology / Renal", icon: "🩸", link: "/specialities/nephrology" },
-                  { name: "Cold-Chain Care", icon: "❄️", link: "/specialities/cold-chain" }
-                ].map((cat) => (
-                  <button
-                    key={cat.name}
-                    type="button"
-                    onClick={() => {
-                      if (onCloseMobile) onCloseMobile();
-                      navigate(cat.link);
-                    }}
-                    className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-zinc-900/60 hover:bg-teal-50/50 dark:hover:bg-zinc-800 rounded-xl border border-slate-100 dark:border-zinc-800 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="text-base">{cat.icon}</span>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                      {cat.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Upload Prescription Promo Card */}
             <div
@@ -778,11 +746,6 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
       <div
         ref={containerRef}
         className="relative w-full font-sans cursor-pointer md:cursor-default"
-        onClick={() => {
-          if (window.innerWidth <= 768) {
-            navigate("/search");
-          }
-        }}
       >
         <div className="search-row flex items-center">
           {/* Location Delivery Selector (Triggers LocationSelectorModal with GPS & Pincode check) */}
@@ -821,20 +784,12 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              onFocus={(e) => {
-                if (window.innerWidth <= 768) {
-                  e.target.blur();
-                  navigate("/search");
-                } else {
+              onFocus={() => {
+                if (window.innerWidth > 768) {
                   setFocused(true);
                 }
               }}
-              onClick={(e) => {
-                if (window.innerWidth <= 768) {
-                  e.preventDefault();
-                  navigate("/search");
-                }
-              }}
+              readOnly={typeof window !== "undefined" && window.innerWidth <= 768}
               className="search-input-field focus:outline-none focus:ring-0 outline-none border-none shadow-none relative z-10 bg-transparent font-sans cursor-pointer md:cursor-text"
               style={{ outline: "none", border: "none", boxShadow: "none" }}
             />
@@ -1012,19 +967,19 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={(e) => {
-              if (window.innerWidth <= 768 && variant !== "mobile") {
-                e.target.blur();
-                navigate("/search");
-              } else {
+            onFocus={() => {
+              if (window.innerWidth > 768 || variant === "mobile") {
                 setFocused(true);
               }
             }}
-            onClick={() => {
+            onClick={(e) => {
               if (window.innerWidth <= 768 && variant !== "mobile") {
-                navigate("/search");
+                e.preventDefault();
+                e.stopPropagation();
+                navigate("/search", { state: { from: location.pathname } });
               }
             }}
+            readOnly={typeof window !== "undefined" && window.innerWidth <= 768 && variant !== "mobile"}
             className="w-full bg-transparent border-none text-xs outline-none text-slate-800 focus:ring-0 focus:outline-none p-0 font-sans font-semibold relative z-10 cursor-pointer sm:cursor-text"
             style={{ outline: "none", border: "none", boxShadow: "none" }}
           />

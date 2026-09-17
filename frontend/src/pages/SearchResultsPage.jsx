@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../services/api";
 import ProductCard from "../components/ProductCard";
 import MedicineNotFound from "../components/MedicineNotFound";
@@ -36,8 +36,20 @@ const QUICK_SPECIALITIES = [
 
 const SearchResultsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentPage, setPage, searchParams } = usePaginationUrl();
   const query = searchParams.get("q") || "";
+
+  const handleBack = () => {
+    const fromPath = location.state?.from;
+    if (fromPath && fromPath !== "/search") {
+      navigate(fromPath);
+    } else if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
+  };
 
   const [inputVal, setInputVal] = useState(query);
   const [products, setProducts] = useState([]);
@@ -119,7 +131,7 @@ const SearchResultsPage = () => {
         <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100 dark:border-zinc-800 shrink-0">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             aria-label="Back"
           >

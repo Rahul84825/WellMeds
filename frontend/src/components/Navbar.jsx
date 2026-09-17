@@ -443,7 +443,7 @@ const Navbar = () => {
         <div className={`flex items-center justify-between gap-4 lg:gap-6 relative z-30 w-full transition-all duration-200 ${
           hideMobileTopNav
             ? "h-0 overflow-hidden opacity-0 pointer-events-none lg:h-[64px] lg:overflow-visible lg:opacity-100 lg:pointer-events-auto"
-            : "h-[64px] sm:h-[68px] lg:h-[64px] pt-2.5 sm:pt-3 lg:pt-0 opacity-100 pointer-events-auto overflow-visible"
+            : "h-[68px] sm:h-[72px] lg:h-[64px] pt-2 sm:pt-2.5 lg:pt-0 opacity-100 pointer-events-auto overflow-visible"
         }`}>
 
           {/* Desktop Only Header (Visible on desktop only) */}
@@ -643,7 +643,7 @@ const Navbar = () => {
             </div>
 
             {/* Center: WellMeds Logo (Mathematically centered to the viewport) */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 flex items-center justify-center">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 flex items-center justify-center w-full max-w-[calc(100%-120px)] sm:max-w-[calc(100%-160px)]">
               <NavLink
                 to="/"
                 onClick={() => setIsDrawerOpen(false)}
@@ -652,7 +652,7 @@ const Navbar = () => {
                 <img
                   src={logoImg}
                   alt="WellMeds Logo"
-                  className="h-[40px] sm:h-[45px] max-w-[195px] min-[390px]:max-w-[240px] sm:max-w-[275px] w-auto object-contain"
+                  className="h-[46px] min-[375px]:h-[48px] sm:h-[54px] max-w-[220px] min-[390px]:max-w-[255px] sm:max-w-[300px] w-auto object-contain"
                 />
               </NavLink>
             </div>
@@ -761,7 +761,7 @@ const Navbar = () => {
           <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2.5 sm:gap-3 w-full">
             {/* Scrolled Search Bar (Increased height & size) */}
             <div
-              onClick={() => navigate("/search")}
+              onClick={() => navigate("/search", { state: { from: location.pathname } })}
               className="flex-1 flex items-center bg-white dark:bg-zinc-900 rounded-full h-[58px] sm:h-[60px] pl-[22px] pr-4 sm:pl-6 sm:pr-5 shadow-xs border border-[#c5e1d5] dark:border-zinc-800 cursor-pointer active:scale-[0.99] transition-transform"
             >
               <Search className="text-[#038076] w-[18px] h-[18px] mr-3 shrink-0" />
