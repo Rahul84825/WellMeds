@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
  * CategoryCard — WellMeds Design System V2
  * Reusable white card component used across Medicine Categories & Surgical Categories.
  */
-const CategoryCard = ({ category, isSurgical = false, basePath }) => {
+const CategoryCard = ({ category, isSurgical = false, basePath, showTitle = true }) => {
   if (!category) return null;
 
   const hasImage = Boolean(category.image?.trim());
@@ -58,9 +58,11 @@ const CategoryCard = ({ category, isSurgical = false, basePath }) => {
       </div>
 
       {/* Category Name */}
-      <h3 className="mt-2.5 font-editorial text-xs sm:text-sm font-medium text-[#172b26] dark:text-zinc-200 text-center leading-tight line-clamp-2">
-        {category.name}
-      </h3>
+      {showTitle && (
+        <h3 className="mt-2.5 font-editorial text-xs sm:text-sm font-medium text-[#172b26] dark:text-zinc-200 text-center leading-tight line-clamp-2">
+          {category.name}
+        </h3>
+      )}
     </Link>
   );
 };

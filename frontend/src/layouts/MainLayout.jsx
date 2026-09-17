@@ -52,11 +52,12 @@ const MainLayout = () => {
 
   const isSearchPage = location.pathname === "/search";
   const isUploadRxPage = location.pathname === "/upload-prescription";
+  const isCartPage = location.pathname === "/cart" || location.pathname === "/cart/";
 
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
       {!isAuthPage && (
-        <div className={`sticky top-0 z-[100] ${isUploadRxPage ? "hidden md:block" : "block"}`}>
+        <div className={`sticky top-0 z-[100] ${isUploadRxPage || isCartPage ? "hidden md:block" : "block"}`}>
           <Navbar />
         </div>
       )}
@@ -69,7 +70,7 @@ const MainLayout = () => {
         </>
       )}
       {!isAuthPage && (
-        <div className={isSearchPage || isUploadRxPage ? "hidden md:block" : "block"}>
+        <div className={isSearchPage || isUploadRxPage || isCartPage ? "hidden md:block" : "block"}>
           <Footer />
         </div>
       )}

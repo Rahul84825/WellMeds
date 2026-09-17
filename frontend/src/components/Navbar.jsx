@@ -64,7 +64,8 @@ const Navbar = () => {
   // Navigation states
   const [activeDropdown, setActiveDropdown] = useState(null); // 'medicines' | 'surgical' | 'wellness' | 'library' | 'pap'
   const [showLowerNavbar, setShowLowerNavbar] = useState(true);
-  const lastScrollY = useRef(0);
+  const lastScrollY = useRef(typeof window !== "undefined" ? Math.max(0, window.scrollY) : 0);
+  const accumulatedDeltaRef = useRef(0);
 
   // Hover timer state for desktop mega menus and dropdowns
   const timeoutRef = useRef(null);
@@ -94,7 +95,7 @@ const Navbar = () => {
   }, []);
 
   // Location from centralized LocationContext
-  const { selectedLocation, openLocationModal } = useLocationContext();
+  const { selectedLocation, openLocationModal, isLocationAdded } = useLocationContext();
 
   // Mobile search drawer expansion state
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
@@ -122,6 +123,8 @@ const Navbar = () => {
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const hideMobileTopNav = Boolean(showNavbarSearch && isScrolled);
+
   // Synchronize search visibility on route transition
   useEffect(() => {
     const isHero = location.pathname === "/" || location.pathname === "/delivery";
@@ -130,7 +133,7 @@ const Navbar = () => {
       setShowNavbarSearch(true);
     } else {
       const heroAnchor = document.getElementById("hero-search-anchor");
-      const isPast = heroAnchor ? heroAnchor.getBoundingClientRect().bottom <= 75 : window.scrollY > 400;
+      const isPast = heroAnchor ? heroAnchor.getBoundingClientRect().bottom <= 5 : (typeof window !== "undefined" && window.scrollY > 280);
       showSearchRef.current = isPast;
       setShowNavbarSearch(isPast);
     }
@@ -143,7 +146,7 @@ const Navbar = () => {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
+          const currentScrollY = Math.max(0, window.scrollY);
           const prevScrollY = lastScrollY.current;
           const delta = currentScrollY - prevScrollY;
 
@@ -154,17 +157,32 @@ const Navbar = () => {
             setIsScrolled(nextIsScrolled);
           }
 
-          // 2. Search Bar Visibility State (Zero-Collision with Hero Search)
-          let nextShowSearch = true;
+          // 2. Search Bar Visibility State (Zero-Collision: Never show both navbar & hero search bars)
+          let nextShowSearch = showSearchRef.current;
           if (isHeroSearchPage) {
             const heroAnchor = document.getElementById("hero-search-anchor");
             if (heroAnchor) {
               const rect = heroAnchor.getBoundingClientRect();
-              // Only reveal navbar search once hero search card has scrolled completely past the top navbar
-              nextShowSearch = rect.bottom <= 75;
+              if (!showSearchRef.current) {
+                // Reveal navbar search ONLY when hero search card has scrolled completely off-screen above the top
+                if (rect.bottom <= 5) {
+                  nextShowSearch = true;
+                }
+              } else {
+                // Hide navbar search before the hero search card can re-enter the viewport
+                if (rect.bottom >= 18 || currentScrollY <= 70) {
+                  nextShowSearch = false;
+                }
+              }
             } else {
-              nextShowSearch = currentScrollY > 400;
+              if (!showSearchRef.current) {
+                if (currentScrollY > 280) nextShowSearch = true;
+              } else {
+                if (currentScrollY < 160) nextShowSearch = false;
+              }
             }
+          } else {
+            nextShowSearch = true;
           }
 
           if (nextShowSearch !== showSearchRef.current) {
@@ -174,15 +192,32 @@ const Navbar = () => {
 
           // 3. Unified Header State Machine Thresholds:
           // Near top (<= 80px): Strictly visible in initial position
-          // Scroll DOWN (delta > 5px & scrollY > 80px): Hide lower navbar
-          // Scroll UP (delta < -5px): Reveal lower navbar
+          // Scroll DOWN: Hide lower navbar (requires intentional 25px scroll to avoid touch jitter)
+          // Scroll UP: Reveal lower navbar (requires intentional 25px scroll)
           let nextNavVisible = isNavVisibleRef.current;
           if (currentScrollY <= 80) {
             nextNavVisible = true;
-          } else if (delta < -5) {
-            nextNavVisible = true;
-          } else if (delta > 5 && currentScrollY > 80) {
-            nextNavVisible = false;
+            accumulatedDeltaRef.current = 0;
+          } else {
+            if (delta > 0) {
+              // Scrolling down: reset upward accumulation and accumulate downward
+              if (accumulatedDeltaRef.current < 0) {
+                accumulatedDeltaRef.current = 0;
+              }
+              accumulatedDeltaRef.current += delta;
+              if (accumulatedDeltaRef.current > 25 && currentScrollY > 100) {
+                nextNavVisible = false;
+              }
+            } else if (delta < 0) {
+              // Scrolling up: reset downward accumulation and accumulate upward
+              if (accumulatedDeltaRef.current > 0) {
+                accumulatedDeltaRef.current = 0;
+              }
+              accumulatedDeltaRef.current += delta;
+              if (accumulatedDeltaRef.current < -25) {
+                nextNavVisible = true;
+              }
+            }
           }
 
           if (nextNavVisible !== isNavVisibleRef.current) {
@@ -396,15 +431,20 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`${isSearchPage ? "hidden lg:flex" : "flex"} w-full sticky top-0 flex-col border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 transform-gpu transition-shadow duration-200 ${isScrolled
-          ? "shadow-md bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
-          : "shadow-xs"
-        } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
+      className={`${isSearchPage ? "hidden lg:flex" : "flex"} w-full sticky top-0 flex-col bg-[#edf7f2] lg:bg-white dark:bg-zinc-950 transform-gpu transition-shadow duration-200 ${
+        isScrolled
+          ? "shadow-sm lg:shadow-md border-b border-[#cde4d8] lg:border-slate-200 dark:border-zinc-800"
+          : "border-b-0 lg:border-b lg:border-slate-200/80"
+      } ${isDrawerOpen || mobileSearchExpanded ? "z-[999]" : "z-[100]"}`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 flex flex-col w-full py-0 lg:py-1 overflow-visible">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-10 flex flex-col w-full py-0 lg:py-1 overflow-visible">
 
         {/* ROW 1: Logo, Location Selector, Search, & Top Actions */}
-        <div className="flex items-center justify-between gap-6 relative z-30 w-full h-[76px] lg:h-[64px]">
+        <div className={`flex items-center justify-between gap-4 lg:gap-6 relative z-30 w-full transition-all duration-200 ${
+          hideMobileTopNav
+            ? "h-0 overflow-hidden opacity-0 pointer-events-none lg:h-[64px] lg:overflow-visible lg:opacity-100 lg:pointer-events-auto"
+            : "h-[64px] sm:h-[68px] lg:h-[64px] pt-2.5 sm:pt-3 lg:pt-0 opacity-100 pointer-events-auto overflow-visible"
+        }`}>
 
           {/* Desktop Only Header (Visible on desktop only) */}
           <div className="hidden lg:flex items-center justify-between w-full h-full">
@@ -586,46 +626,74 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Header (Visible on mobile/tablet only, centers logo) */}
-          <div className="flex lg:hidden items-center justify-between w-full h-full relative">
-            {/* Left: Hamburger menu */}
-            <button
-              type="button"
-              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              className="w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 cursor-pointer shrink-0 z-10"
-              aria-label="Toggle Navigation Drawer"
-            >
-              {isDrawerOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
+          {/* Mobile Header (Visible on mobile/tablet only - centered logo relative to viewport) */}
+          <div className={`relative flex lg:hidden items-center justify-between w-full h-full transition-opacity duration-150 ${
+            hideMobileTopNav ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}>
+            {/* Left: Hamburger Menu (clean icon without white background) */}
+            <div className="flex items-center z-10 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+                className="w-[38px] h-[38px] flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:text-[#038076] transition-colors cursor-pointer shrink-0"
+                aria-label="Toggle Navigation Drawer"
+              >
+                {isDrawerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5 stroke-[2.2]" />}
+              </button>
+            </div>
 
-            {/* Center: Centered Logo */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shrink-0">
+            {/* Center: WellMeds Logo (Mathematically centered to the viewport) */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 flex items-center justify-center">
               <NavLink
                 to="/"
                 onClick={() => setIsDrawerOpen(false)}
-                className="flex items-center cursor-pointer"
+                className="pointer-events-auto flex items-center cursor-pointer select-none"
               >
                 <img
                   src={logoImg}
                   alt="WellMeds Logo"
-                  className="h-[72px] object-contain"
+                  className="h-[40px] sm:h-[45px] max-w-[195px] min-[390px]:max-w-[240px] sm:max-w-[275px] w-auto object-contain"
                 />
               </NavLink>
             </div>
 
-            {/* Right: Cart */}
-            <Link
-              to="/cart"
-              className="relative w-[36px] h-[36px] rounded-full border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-slate-55 transition-colors shrink-0 z-10"
-              aria-label={`Cart with ${cartCount} items`}
-            >
-              <ShoppingCart className="w-[15px] h-[15px]" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center border border-white">
-                  {cartCount}
-                </span>
+            {/* Right: User/Profile + Cart Action Buttons (transparent background with soft outline) */}
+            <div className="flex items-center gap-2 sm:gap-2.5 z-10 shrink-0">
+              {user ? (
+                <Link
+                  to="/profile"
+                  className="relative w-[38px] h-[38px] rounded-full border border-[#b8ded0] dark:border-zinc-800 bg-transparent flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+                  aria-label="View Profile"
+                >
+                  <User className="w-[18px] h-[18px]" />
+                  {!isAdmin && !profileComplete && (
+                    <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-500 animate-pulse border border-[#edf7f2] dark:border-zinc-900" />
+                  )}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => (openLoginModal ? openLoginModal() : navigate("/login"))}
+                  className="relative w-[38px] h-[38px] rounded-full border border-[#b8ded0] dark:border-zinc-800 bg-transparent flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0 cursor-pointer"
+                  aria-label="Sign In"
+                >
+                  <User className="w-[18px] h-[18px]" />
+                </button>
               )}
-            </Link>
+
+              <Link
+                to="/cart"
+                className="relative w-[38px] h-[38px] rounded-full border border-[#b8ded0] dark:border-zinc-800 bg-transparent flex items-center justify-center text-slate-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+                aria-label={`Cart with ${cartCount} items`}
+              >
+                <ShoppingCart className="w-[18px] h-[18px]" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#038076] text-white text-[9px] font-bold w-[17px] h-[17px] rounded-full flex items-center justify-center border-2 border-[#edf7f2] dark:border-zinc-900 shadow-xs">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Fullscreen Search Expansion via Portal */}
@@ -653,53 +721,68 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Location Sub-Bar */}
-      <div className={`w-full bg-slate-50/90 dark:bg-zinc-900/90 border-t border-b border-slate-100 dark:border-zinc-800/80 px-4 py-1.5 lg:hidden flex items-center justify-between font-sans transition-all duration-200 ${
-        isNavVisible ? "opacity-100 max-h-[40px] pointer-events-auto" : "opacity-0 max-h-0 py-0 border-t-0 border-b-0 pointer-events-none overflow-hidden"
-      }`}>
+      {/* Mobile Location Sub-Bar (Address information only, no badges, borderless) */}
+      <div
+        className={`w-full bg-[#edf7f2] dark:bg-zinc-950 px-4 pb-1.5 pt-0 lg:hidden flex items-center font-sans transition-all duration-200 border-none ${
+          isNavVisible && !hideMobileTopNav
+            ? "opacity-100 max-h-[38px] pointer-events-auto"
+            : "opacity-0 max-h-0 py-0 pointer-events-none overflow-hidden"
+        }`}
+      >
         <button
           type="button"
           onClick={openLocationModal}
-          className="flex items-center gap-1.5 min-w-0 text-left text-slate-700 dark:text-slate-200 hover:text-[#038076] transition-colors cursor-pointer"
-          aria-label="Select delivery location"
+          className="flex items-center gap-1.5 min-w-0 text-left text-slate-700 dark:text-slate-200 hover:text-[#038076] transition-colors cursor-pointer group"
+          aria-label={isLocationAdded ? "Change delivery location" : "Select delivery location"}
         >
-          <MapPin className="w-3.5 h-3.5 text-[#038076] shrink-0" />
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0">Deliver to:</span>
-          <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-[260px]">
-            {selectedLocation?.displayText || "411021, Pune"}
-          </span>
-          <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+          <MapPin className="w-3.5 h-3.5 text-[#038076] shrink-0 group-hover:scale-110 transition-transform" />
+          {isLocationAdded ? (
+            <span className="text-[12px] font-bold text-slate-900 dark:text-white truncate max-w-[240px] sm:max-w-[300px]">
+              {selectedLocation?.displayText || `${selectedLocation?.pincode}, ${selectedLocation?.district || selectedLocation?.city || "Pune"}`}
+            </span>
+          ) : (
+            <span className="text-[12px] text-slate-800 dark:text-slate-200 font-semibold shrink-0">
+              Deliver to
+            </span>
+          )}
+          <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-0.5 group-hover:text-[#038076] transition-colors" />
         </button>
-
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">
-          {selectedLocation?.isPune ? "⚡ 1 Day" : "🚚 2–4 Days"}
-        </span>
       </div>
 
-      {/* Mobile Sub-Navbar: Search bar (Visible on scroll in mobile/tablet) */}
+      {/* Mobile Sub-Navbar: Compact Search Bar + Cart Button (Visible on scroll in mobile/tablet - matching Reference 2) */}
       <div
-        className={`w-full bg-white dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-300 ease-in-out border-slate-200 ${showNavbarSearch
-            ? "grid-rows-[1fr] opacity-100 px-4 py-2 border-t pointer-events-auto shadow-sm"
-            : "grid-rows-[0fr] opacity-0 px-4 py-0 border-t-0 pointer-events-none"
-          }`}
+        className={`w-full bg-[#edf7f2] dark:bg-zinc-950 text-slate-800 lg:hidden grid transition-all duration-200 ease-out ${
+          showNavbarSearch
+            ? "grid-rows-[1fr] opacity-100 pointer-events-auto"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
+        }`}
       >
         <div className="overflow-hidden">
-          <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 rounded-full pl-3 pr-1 py-1 shadow-xs border border-slate-200 dark:border-zinc-800 w-full">
-            <Search className="text-[#038076] w-4 h-4 shrink-0" />
-            <input
-              type="text"
-              placeholder="Search for medicine..."
-              readOnly
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2.5 sm:gap-3 w-full">
+            {/* Scrolled Search Bar (Increased height & size) */}
+            <div
               onClick={() => navigate("/search")}
-              className="bg-transparent border-none outline-none text-slate-800 dark:text-zinc-200 text-xs pl-2 pr-2 py-1.5 flex-grow cursor-pointer placeholder-slate-400"
-            />
-            <button
-              onClick={() => navigate("/upload-prescription")}
-              className="bg-[#038076] hover:bg-[#02635c] text-white px-3 py-1.5 rounded-full font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 text-[10px]"
+              className="flex-1 flex items-center bg-white dark:bg-zinc-900 rounded-full h-[58px] sm:h-[60px] pl-[22px] pr-4 sm:pl-6 sm:pr-5 shadow-xs border border-[#c5e1d5] dark:border-zinc-800 cursor-pointer active:scale-[0.99] transition-transform"
             >
-              <span>Upload</span>
-              <FileText className="w-[11px] h-[11px]" />
-            </button>
+              <Search className="text-[#038076] w-[18px] h-[18px] mr-3 shrink-0" />
+              <span className="text-[15.5px] sm:text-[16px] text-slate-500 dark:text-zinc-400 font-normal truncate select-none">
+                Search for medicine...
+              </span>
+            </div>
+
+            {/* Scrolled Cart Button (matches height of search bar) */}
+            <Link
+              to="/cart"
+              className="relative w-[58px] h-[58px] sm:w-[60px] sm:h-[60px] rounded-full border border-[#b8ded0] dark:border-zinc-800 bg-transparent flex items-center justify-center text-slate-700 dark:text-zinc-200 shrink-0 active:scale-95 transition-transform"
+              aria-label={`Cart with ${cartCount} items`}
+            >
+              <ShoppingCart className="w-[19px] h-[19px]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#038076] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#edf7f2] dark:border-zinc-900 shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </div>

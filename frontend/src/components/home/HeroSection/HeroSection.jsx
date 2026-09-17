@@ -19,31 +19,29 @@ const HeroSection = () => {
 
   return (
     <section className="wellmeds-hero-section" aria-label="Hero Section">
+      <div className="w-full max-w-[920px] mx-auto flex flex-col items-center justify-center text-center">
+        {/* Main Headline */}
+        <h1 className="headline font-sans">
+          <span className="headline-upper">Find Medicines &amp; Surgical</span>
+          <span className="headline-space"> </span>
+          <span className="headline-lower">Products at Better Prices</span>
+        </h1>
 
-      {/* Main Headline (Hidden on mobile) */}
-      <h1 className="headline font-sans hidden md:block">
-        Find Medicines & Surgical Products at Better Prices
-      </h1>
-      
-      {/* Subtitle / 70% line (Kept on mobile & desktop) */}
-      <p className="subtitle-line font-sans">
-        Save up to 70% on selected products
-      </p>
-
-      {/* Prescription Pad Search Card */}
-      <div 
-        id="hero-search-anchor" 
-        className="search-wrap font-sans cursor-pointer md:cursor-default"
-        onClick={handleMobileSearchClick}
-      >
-        <div className="search-card font-sans">
-          <UniversalSearch variant="prescription" />
+        {/* Prescription Pad Search Card */}
+        <div 
+          id="hero-search-anchor" 
+          className="search-wrap font-sans cursor-pointer md:cursor-default w-full"
+          onClick={handleMobileSearchClick}
+        >
+          <div className="search-card font-sans">
+            <UniversalSearch variant="prescription" />
+          </div>
         </div>
-      </div>
 
-      {/* Trust & Guarantees Line (Hidden on mobile) */}
-      <div className="trust-line font-sans hidden md:block">
-        100% Genuine medicines &nbsp;·&nbsp; Fast delivery &nbsp;·&nbsp; Easy repeat orders
+        {/* Trust & Guarantees Line (Hidden on mobile) */}
+        <div className="trust-line font-sans hidden md:block">
+          100% Genuine medicines &nbsp;·&nbsp; Fast delivery &nbsp;·&nbsp; Easy repeat orders
+        </div>
       </div>
     </section>
   );

@@ -27,6 +27,7 @@ import { useCart } from "../hooks/useCart";
 import { useLocationContext } from "../context/LocationContext";
 import { api } from "../services/api";
 import logoImg from "../assets/logos/logo.png";
+import SearchPlaceholderCarousel from "./common/SearchPlaceholderCarousel";
 
 const iconMap = {
   Globe,
@@ -57,7 +58,6 @@ const GlobalDrawer = () => {
   // Navigation states
   const [activeMobileAccordion, setActiveMobileAccordion] = useState(null); // Accordions on mobile
   const [activeMobileSubAccordion, setActiveMobileSubAccordion] = useState(null); // Nested accordion for Medicines
-  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
 
   // Dynamic categories
   const [surgicalCategories, setSurgicalCategories] = useState([]);
@@ -182,37 +182,37 @@ const GlobalDrawer = () => {
         onClick={() => setIsDrawerOpen(false)}
       />
 
-      {/* MOBILE DRAWER CONTAINER */}
+      {/* MOBILE DRAWER CONTAINER (Full-page modal experience on mobile) */}
       <div
         ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Mobile Navigation Menu"
-        className={`fixed top-0 bottom-0 left-0 w-[90vw] sm:w-[80vw] max-w-[340px] bg-white z-[1001] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
+        className={`fixed inset-0 w-full h-[100dvh] bg-white z-[1001] transition-transform duration-300 ease-in-out lg:hidden shadow-2xl flex flex-col ${
           isDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Drawer Header */}
-        <div className="h-[80px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none">
+        <div className="h-[64px] flex items-center justify-between px-4 border-b border-slate-100 shrink-0 select-none bg-white">
           <button
             onClick={() => setIsDrawerOpen(false)}
             className="text-slate-700 hover:text-slate-900 focus:outline-none flex items-center justify-center w-10 h-10 cursor-pointer"
             aria-label="Close Mobile Menu"
           >
-            <X className="w-5 h-5 stroke-[2.5]" />
+            <X className="w-5 h-5 stroke-[2.2]" />
           </button>
-          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[150px]">
-            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[66px] w-auto" />
+          <Link to="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center justify-center h-10 max-w-[170px]">
+            <img src={logoImg} alt="WellMeds Logo" className="object-contain max-h-[50px] w-auto" />
           </Link>
           <Link
             to="/cart"
             onClick={() => setIsDrawerOpen(false)}
-            className="relative w-10 h-10 rounded-full border border-slate-150 flex items-center justify-center text-slate-750 hover:bg-slate-55 cursor-pointer"
+            className="relative w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 cursor-pointer"
             aria-label={`Cart with ${cartCount} items`}
           >
             <ShoppingCart className="w-[18px] h-[18px]" />
             {cartCount > 0 && (
-              <span className="absolute top-[-2px] right-[-2px] bg-red-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+              <span className="absolute -top-1 -right-1 bg-[#038076] text-white text-[9px] font-bold w-[17px] h-[17px] rounded-full flex items-center justify-center border-2 border-white shadow-xs">
                 {cartCount}
               </span>
             )}
@@ -240,10 +240,10 @@ const GlobalDrawer = () => {
               </div>
             </div>
             <div className="text-left space-y-0.5">
-              <p className="text-[10px] text-[#5f776e] font-bold flex items-center gap-1 uppercase tracking-wider">
+              <p className="text-[11px] text-[#5f776e] font-semibold flex items-center gap-1 uppercase tracking-wider">
                 👋 Hello
               </p>
-              <p className="text-sm font-bold text-[#172b26]">
+              <p className="text-[15px] font-semibold text-[#172b26]">
                 {user ? user.name : "Login"}
               </p>
             </div>
@@ -262,35 +262,33 @@ const GlobalDrawer = () => {
                 <MapPin className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block leading-none">Deliver to</span>
-                <p className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block leading-none">Deliver to</span>
+                <p className="text-[14px] font-semibold text-slate-900 truncate mt-0.5">
                   {selectedLocation?.displayText || "411021, Pune"}
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-700 text-white shrink-0">
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-700 text-white shrink-0">
               Change
             </span>
           </div>
 
           <div className="px-4 space-y-4">
           
-          {/* Mobile Search input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input
-              type="text"
-              placeholder="Search medicines..."
-              value={mobileSearchQuery}
-              onChange={(e) => setMobileSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && mobileSearchQuery.trim()) {
-                  setIsDrawerOpen(false);
-                  navigate(`/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`);
-                }
-              }}
-              className="w-full pl-9 pr-4 py-2 bg-[#f0f8f5] border border-[#c3d4cc] rounded-xl text-xs outline-none focus:ring-1 focus:ring-[#157a6d] focus:border-[#157a6d] font-mono font-semibold"
-            />
+          {/* WellMeds Original Search Bar */}
+          <div
+            onClick={() => {
+              setIsDrawerOpen(false);
+              navigate("/search");
+            }}
+            className="w-full flex items-center bg-white border border-[#c3e6d6] hover:border-[#038076] rounded-2xl h-[48px] px-3.5 shadow-2xs cursor-pointer active:scale-[0.99] transition-all relative overflow-hidden select-none"
+            role="search"
+            aria-label="Search medicines and products"
+          >
+            <Search className="text-[#038076] w-[18px] h-[18px] mr-2.5 shrink-0" />
+            <div className="relative flex-1 h-full flex items-center overflow-hidden">
+              <SearchPlaceholderCarousel className="text-slate-500 font-sans text-[14px] font-medium" />
+            </div>
           </div>
 
           {/* Quick Upload Rx Button */}
@@ -299,7 +297,7 @@ const GlobalDrawer = () => {
               setIsDrawerOpen(false);
               navigate("/upload-prescription");
             }}
-            className="w-full bg-[#157a6d] hover:bg-[#0f6157] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm min-h-[48px] cursor-pointer font-mono uppercase tracking-wider"
+            className="w-full bg-[#157a6d] hover:bg-[#0f6157] text-white py-3 rounded-xl font-semibold text-[14px] flex items-center justify-center gap-2 shadow-sm min-h-[48px] cursor-pointer tracking-wide uppercase"
           >
             <FileText className="w-4 h-4" />
             <span>Upload Doctor Rx</span>
@@ -307,17 +305,17 @@ const GlobalDrawer = () => {
 
           {/* ACCORDION MENU ITEMS */}
           <div className="flex flex-col gap-1 border-t border-slate-100 pt-3">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2 px-1">Navigation Menu</span>
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">Navigation Menu</span>
 
             {/* 1. Medicines Accordion */}
             <div className="border-b border-slate-50 pb-1">
               <button
                 type="button"
                 onClick={() => setActiveMobileAccordion(activeMobileAccordion === "meds" ? null : "meds")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer"
+                className="w-full flex items-center justify-between py-3 text-[15.5px] font-semibold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
                 <span>Medicines</span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "meds" ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-[18px] h-[18px] text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "meds" ? "rotate-180" : ""}`} />
               </button>
 
               {activeMobileAccordion === "meds" && (
@@ -328,10 +326,10 @@ const GlobalDrawer = () => {
                       <button
                         type="button"
                         onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "cond" ? null : "cond")}
-                        className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px] cursor-pointer"
+                        className="w-full flex items-center justify-between text-[13.5px] font-semibold text-slate-600 min-h-[44px] cursor-pointer hover:text-[#038076]"
                       >
                         <span>By Condition</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "cond" ? "rotate-180" : ""}`} />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "cond" ? "rotate-180" : ""}`} />
                       </button>
                       {activeMobileSubAccordion === "cond" && (
                         <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
@@ -340,7 +338,7 @@ const GlobalDrawer = () => {
                               key={cond._id || cond.id}
                               to={`/products?category=${encodeURIComponent(cond.linkedCategory || cond.name)}`}
                               onClick={() => setIsDrawerOpen(false)}
-                              className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
+                              className="py-2 text-[13px] font-medium text-slate-600 hover:text-[#038076] block min-h-[44px] flex items-center"
                             >
                               {cond.name}
                             </Link>
@@ -356,10 +354,10 @@ const GlobalDrawer = () => {
                       <button
                         type="button"
                         onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "spec" ? null : "spec")}
-                        className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px] cursor-pointer"
+                        className="w-full flex items-center justify-between text-[13.5px] font-semibold text-slate-600 min-h-[44px] cursor-pointer hover:text-[#038076]"
                       >
                         <span>Super Speciality</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "spec" ? "rotate-180" : ""}`} />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "spec" ? "rotate-180" : ""}`} />
                       </button>
                       {activeMobileSubAccordion === "spec" && (
                         <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
@@ -368,7 +366,7 @@ const GlobalDrawer = () => {
                               key={spec._id || spec.id}
                               to={`/products?speciality=${spec.linkedSpeciality || spec.slug}`}
                               onClick={() => setIsDrawerOpen(false)}
-                              className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
+                              className="py-2 text-[13px] font-medium text-slate-600 hover:text-[#038076] block min-h-[44px] flex items-center"
                             >
                               {spec.name}
                             </Link>
@@ -384,10 +382,10 @@ const GlobalDrawer = () => {
                       <button
                         type="button"
                         onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "source" ? null : "source")}
-                        className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px] cursor-pointer"
+                        className="w-full flex items-center justify-between text-[13.5px] font-semibold text-slate-600 min-h-[44px] cursor-pointer hover:text-[#038076]"
                       >
                         <span>Source</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "source" ? "rotate-180" : ""}`} />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "source" ? "rotate-180" : ""}`} />
                       </button>
                       {activeMobileSubAccordion === "source" && (
                         <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
@@ -396,9 +394,9 @@ const GlobalDrawer = () => {
                               key={source._id || source.id}
                               to={`/products?${source.queryParam}`}
                               onClick={() => setIsDrawerOpen(false)}
-                              className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center gap-1.5"
+                              className="py-2 text-[13px] font-medium text-slate-600 hover:text-[#038076] block min-h-[44px] flex items-center gap-2"
                             >
-                              {renderIcon(source.icon || "Globe", "w-3.5 h-3.5 text-slate-400")}
+                              {renderIcon(source.icon || "Globe", "w-4 h-4 text-slate-400")}
                               <span>{source.name}</span>
                             </Link>
                           ))}
@@ -413,10 +411,10 @@ const GlobalDrawer = () => {
                       <button
                         type="button"
                         onClick={() => setActiveMobileSubAccordion(activeMobileSubAccordion === "quick" ? null : "quick")}
-                        className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 min-h-[44px] cursor-pointer"
+                        className="w-full flex items-center justify-between text-[13.5px] font-semibold text-slate-600 min-h-[44px] cursor-pointer hover:text-[#038076]"
                       >
                         <span>Quick Links</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "quick" ? "rotate-180" : ""}`} />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileSubAccordion === "quick" ? "rotate-180" : ""}`} />
                       </button>
                       {activeMobileSubAccordion === "quick" && (
                         <div className="pl-3 py-1 flex flex-col gap-1 border-l border-slate-100 mt-1">
@@ -447,9 +445,9 @@ const GlobalDrawer = () => {
                                   key={link._id || link.id}
                                   {...props}
                                   onClick={() => setIsDrawerOpen(false)}
-                                  className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center gap-1.5"
+                                  className="py-2 text-[13px] font-medium text-slate-600 hover:text-[#038076] block min-h-[44px] flex items-center gap-2"
                                 >
-                                  {renderIcon(link.icon || "Link", "w-3.5 h-3.5 text-slate-400")}
+                                  {renderIcon(link.icon || "Link", "w-4 h-4 text-slate-400")}
                                   <span>{link.name}</span>
                                 </Comp>
                               );
@@ -469,15 +467,15 @@ const GlobalDrawer = () => {
               <button
                 type="button"
                 onClick={() => setActiveMobileAccordion(activeMobileAccordion === "surg" ? null : "surg")}
-                className="w-full flex items-center justify-between py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer"
+                className="w-full flex items-center justify-between py-3 text-[15.5px] font-semibold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <span>Surgical</span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-[#038076]/10 text-[#038076] border border-[#038076]/20 tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-[#038076]/10 text-[#038076] border border-[#038076]/20 tracking-wider leading-none select-none shrink-0 whitespace-nowrap">
                     NEW
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "surg" ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-[18px] h-[18px] text-slate-400 transition-transform duration-200 ${activeMobileAccordion === "surg" ? "rotate-180" : ""}`} />
               </button>
               {activeMobileAccordion === "surg" && (
                 <div className="pl-3 py-1.5 space-y-1 border-l-2 border-slate-100 mt-1 animate-in fade-in duration-200 flex flex-col">
@@ -486,7 +484,7 @@ const GlobalDrawer = () => {
                       key={cat.id || cat._id}
                       to={`/surgical/${cat.slug}`}
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 text-[11px] font-bold text-slate-600 hover:text-[#038076] block min-h-[48px] flex items-center"
+                      className="py-2 text-[13px] font-medium text-slate-600 hover:text-[#038076] block min-h-[44px] flex items-center"
                     >
                       {cat.name}
                     </Link>
@@ -495,7 +493,7 @@ const GlobalDrawer = () => {
                   <Link
                     to="/surgical/categories"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="py-2.5 text-[11px] font-bold text-[#004782] block min-h-[44px] flex items-center justify-between"
+                    className="py-2 text-[13px] font-semibold text-[#004782] block min-h-[44px] flex items-center justify-between hover:underline"
                   >
                     <span>View All Surgical Categories</span>
                     <span>&rarr;</span>
@@ -503,7 +501,7 @@ const GlobalDrawer = () => {
                   <Link
                     to="/surgical/all"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="py-2.5 text-[11px] font-extrabold text-slate-700 block min-h-[44px] flex items-center justify-between"
+                    className="py-2 text-[13px] font-semibold text-slate-700 block min-h-[44px] flex items-center justify-between hover:text-[#038076]"
                   >
                     <span>View All Surgical Products</span>
                     <span>&rarr;</span>
@@ -517,7 +515,7 @@ const GlobalDrawer = () => {
               <Link
                 to="/wellness"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
+                className="w-full flex items-center py-3 text-[15.5px] font-semibold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
                 Wellness
               </Link>
@@ -528,7 +526,7 @@ const GlobalDrawer = () => {
               <Link
                 to="/health-library"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
+                className="w-full flex items-center py-3 text-[15.5px] font-semibold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
                 Health Library
               </Link>
@@ -539,7 +537,7 @@ const GlobalDrawer = () => {
               <Link
                 to="/patient-assistance-program"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-full flex items-center py-3 text-xs font-bold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
+                className="w-full flex items-center py-3 text-[15.5px] font-semibold text-slate-800 min-h-[48px] px-1 cursor-pointer hover:text-[#038076] transition-colors"
               >
                 Patient Assistance Program (PAP)
               </Link>
@@ -551,13 +549,13 @@ const GlobalDrawer = () => {
           <div className="flex flex-col gap-1 pt-4 border-t border-slate-100 select-none">
             {user ? (
               <>
-                <div className="flex items-center gap-2.5 px-1 py-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-extrabold text-sm shrink-0">
+                <div className="flex items-center gap-3 px-1 py-2 mb-2">
+                  <div className="w-9 h-9 rounded-full bg-[#038076]/10 text-[#038076] flex items-center justify-center font-bold text-sm shrink-0">
                     {user.name ? user.name[0].toUpperCase() : "U"}
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <p className="text-xs font-bold text-gray-800 truncate">{user.name}</p>
-                    <p className="text-[9px] text-gray-400 truncate mt-[1px]">{user.email || user.phone || ""}</p>
+                    <p className="text-[14.5px] font-semibold text-slate-900 truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate mt-[1px]">{user.email || user.phone || ""}</p>
                   </div>
                 </div>
 
@@ -566,17 +564,17 @@ const GlobalDrawer = () => {
                     <Link
                       to="/admin"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <LayoutDashboard className="w-4 h-4 text-slate-400" />
+                      <LayoutDashboard className="w-[18px] h-[18px] text-slate-400" />
                       <span>Admin Dashboard</span>
                     </Link>
                     <Link
                       to="/profile"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <User className="w-4 h-4 text-slate-400" />
+                      <User className="w-[18px] h-[18px] text-slate-400" />
                       <span>Profile</span>
                     </Link>
                   </>
@@ -584,12 +582,12 @@ const GlobalDrawer = () => {
                   <Link
                     to="/complete-profile"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="py-2.5 px-3 text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                    className="py-2.5 px-3 text-[14px] font-semibold text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 flex items-center gap-3 rounded-xl min-h-[48px]"
                   >
-                    <Phone className="w-4 h-4 text-amber-600 shrink-0" />
+                    <Phone className="w-[18px] h-[18px] text-amber-600 shrink-0" />
                     <div className="flex flex-col text-left">
-                      <span className="font-bold">Complete Profile</span>
-                      <span className="text-[10.5px] text-amber-700 font-normal">Add mobile number to activate account</span>
+                      <span className="font-semibold">Complete Profile</span>
+                      <span className="text-[11px] text-amber-700 font-normal">Add mobile number to activate account</span>
                     </div>
                   </Link>
                 ) : (
@@ -597,33 +595,33 @@ const GlobalDrawer = () => {
                     <Link
                       to="/profile?tab=settings"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <User className="w-4 h-4 text-slate-400" />
+                      <User className="w-[18px] h-[18px] text-slate-400" />
                       <span>My Profile</span>
                     </Link>
                     <Link
                       to="/profile?tab=orders"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <History className="w-4 h-4 text-slate-400" />
+                      <History className="w-[18px] h-[18px] text-slate-400" />
                       <span>Orders</span>
                     </Link>
                     <Link
                       to="/profile?tab=prescriptions"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <FileText className="w-4 h-4 text-slate-400" />
+                      <FileText className="w-[18px] h-[18px] text-slate-400" />
                       <span>Prescriptions</span>
                     </Link>
                     <Link
                       to="/profile?tab=addresses"
                       onClick={() => setIsDrawerOpen(false)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 rounded-xl min-h-[48px]"
+                      className="py-2.5 px-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#038076] flex items-center gap-3 rounded-xl min-h-[48px]"
                     >
-                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <MapPin className="w-[18px] h-[18px] text-slate-400" />
                       <span>Addresses</span>
                     </Link>
                   </>
@@ -632,9 +630,9 @@ const GlobalDrawer = () => {
                 <hr className="border-slate-100 my-2" />
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left py-2.5 px-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 rounded-xl min-h-[48px] cursor-pointer"
+                  className="w-full text-left py-2.5 px-2 text-[15px] font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 rounded-xl min-h-[48px] cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4 text-red-500" />
+                  <LogOut className="w-[18px] h-[18px] text-red-500" />
                   <span>Logout</span>
                 </button>
               </>
@@ -644,9 +642,9 @@ const GlobalDrawer = () => {
                   setIsDrawerOpen(false);
                   navigate("/login");
                 }}
-                className="w-full py-3 px-4 border border-slate-200 bg-white rounded-xl flex items-center justify-center gap-2 text-slate-700 hover:bg-slate-50 transition-colors font-bold text-xs min-h-[48px] cursor-pointer"
+                className="w-full py-3 px-4 border border-slate-200 bg-white rounded-xl flex items-center justify-center gap-2 text-slate-700 hover:bg-slate-50 transition-colors font-semibold text-[15px] min-h-[48px] cursor-pointer"
               >
-                <User className="w-4 h-4 text-slate-400" />
+                <User className="w-[18px] h-[18px] text-slate-400" />
                 <span>Login / Register</span>
               </button>
             )}

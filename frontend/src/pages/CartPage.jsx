@@ -7,6 +7,7 @@ import { DEFAULT_PRODUCT_IMAGE } from "../utils/placeholder";
 import { api } from "../services/api";
 import Modal from "../components/Modal";
 import EmptyCart from "../components/cart/EmptyCart";
+import CartMobileHeader from "../components/cart/CartMobileHeader";
 import { 
   Trash2, Phone, Mail, ChevronRight, ChevronDown, 
   Home, Plus, Minus, ArrowRight, ShieldCheck, Tag, Info, Lock, AlertTriangle
@@ -160,8 +161,11 @@ const Cart = () => {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-left">
       <SEO title="Shopping Cart" noindex={true} />
 
-      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT ── */}
-      <div className="relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
+      {/* ── DEDICATED MOBILE HEADER (< 768px) ── */}
+      <CartMobileHeader showAddItem={!isCartLocked} />
+
+      {/* ── HERO TITLE HEADER WITH LIGHT GREEN GRADIENT (≥ 768px, UNTOUCHED ON DESKTOP) ── */}
+      <div className="hidden md:block relative bg-gradient-to-b from-[#8ad8b7] via-[#caf0e2] to-white dark:from-[#0d3328] dark:via-[#091a14] dark:to-zinc-950 pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h1 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#11221e] dark:text-white tracking-tight">
@@ -182,7 +186,7 @@ const Cart = () => {
       </div>
 
       {/* ── MAIN CONTENT (WHITE BACKGROUND) ── */}
-      <div className="bg-white dark:bg-zinc-950 py-8 md:py-10">
+      <div className="bg-white dark:bg-zinc-950 py-4 md:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       {/* Cart Locked Alert Banner */}

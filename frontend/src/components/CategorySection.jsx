@@ -210,7 +210,7 @@ const CategorySection = () => {
               className="category-card-wrapper"
               style={{ scrollSnapAlign: "start", flexShrink: 0 }}
             >
-              <CategoryCard category={cat} index={idx} />
+              <CategoryCard category={cat} index={idx} showTitle={false} />
             </div>
           ))}
         </div>
