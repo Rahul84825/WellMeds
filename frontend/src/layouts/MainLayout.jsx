@@ -8,6 +8,7 @@ import AuthModal from "../components/auth/AuthModal";
 import GlobalDrawer from "../components/GlobalDrawer";
 import { useMedicineHelp } from "../hooks/useMedicineHelp";
 import MedicineHelpPopup from "../components/MedicineHelpPopup";
+import ProductDetailMobileHeader from "../components/ProductDetail/ProductDetailMobileHeader";
 
 const MainLayout = () => {
   const { isOpen, handleClose, lastSearchQuery } = useMedicineHelp();
@@ -54,12 +55,22 @@ const MainLayout = () => {
   const isUploadRxPage = location.pathname === "/upload-prescription";
   const isCartPage = location.pathname === "/cart" || location.pathname === "/cart/";
 
+  const isProductDetailPage =
+    (location.pathname.startsWith("/products/") && location.pathname !== "/products") ||
+    location.pathname.startsWith("/surgical/products/") ||
+    location.pathname.startsWith("/surgical/product/");
+
+  const isHideMobileNavbar = isUploadRxPage || isCartPage || isProductDetailPage;
+
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-background text-on-surface transition-colors duration-300">
       {!isAuthPage && (
-        <div className={`sticky top-0 z-[100] ${isUploadRxPage || isCartPage ? "hidden md:block" : "block"}`}>
+        <div className={`sticky top-0 z-[100] ${isHideMobileNavbar ? "hidden md:block" : "block"}`}>
           <Navbar />
         </div>
+      )}
+      {isProductDetailPage && !isAuthPage && (
+        <ProductDetailMobileHeader />
       )}
       <main className="flex-grow">
         <Outlet />
