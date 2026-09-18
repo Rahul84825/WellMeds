@@ -41,13 +41,15 @@ const SearchResultsPage = () => {
   const query = searchParams.get("q") || "";
 
   const handleBack = () => {
-    const fromPath = location.state?.from;
-    if (fromPath && fromPath !== "/search") {
-      navigate(fromPath);
-    } else if (window.history.state && window.history.state.idx > 0) {
+    if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate("/");
+      const fromPath = location.state?.from;
+      if (fromPath && fromPath !== "/search") {
+        navigate(fromPath, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     }
   };
 
@@ -101,13 +103,13 @@ const SearchResultsPage = () => {
   const handleSearchSubmit = (e) => {
     if (e) e.preventDefault();
     if (inputVal.trim()) {
-      navigate(`/search?q=${encodeURIComponent(inputVal.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(inputVal.trim())}`, { replace: true });
     }
   };
 
   const handleTagClick = (tag) => {
     setInputVal(tag);
-    navigate(`/search?q=${encodeURIComponent(tag)}`);
+    navigate(`/search?q=${encodeURIComponent(tag)}`, { replace: true });
   };
 
   const breadcrumbs = [

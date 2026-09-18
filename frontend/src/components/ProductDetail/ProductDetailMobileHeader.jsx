@@ -15,10 +15,10 @@ const ProductDetailMobileHeader = () => {
   const { cartCount } = useCart();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate("/products");
+      navigate("/products", { replace: true });
     }
   };
 

@@ -11,10 +11,10 @@ const CartMobileHeader = ({ title = "Your Cart", showAddItem = true }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 

@@ -449,7 +449,9 @@ export const UniversalSearch = ({ variant = "default", onCloseMobile }) => {
     if (query.trim()) {
       setFocused(false);
       if (onCloseMobile) onCloseMobile();
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`, {
+        replace: location.pathname === "/search",
+      });
     }
   };
 
